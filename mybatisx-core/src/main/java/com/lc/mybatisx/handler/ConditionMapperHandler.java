@@ -128,18 +128,27 @@ public class ConditionMapperHandler {
      */
     private WhereWrapper buildWrapper(Method method, List<String> conditionGroup) {
         Parameter[] parameters = method.getParameters();
+        Operation[] operations = Operation.values();
+
+        int conditionGroupLength = conditionGroup.size();
+        int parameterLength = parameters.length;
+        int operationLength = operations.length;
 
         WhereWrapper whereWrapper = new WhereWrapper();
-        for (int i = conditionGroup.size(), k = parameters.length - 1; i > 0; i = i - 2, k--) {
+        for (int i = conditionGroupLength, k = parameterLength - 1; i > 0; i = i - 2, k--) {
             String condition = conditionGroup.get(i - 1);
 
             // 分离字段和操作符
-            Operation[] operations = Operation.values();
-            for (int j = 0; j < operations.length; j++) {
+            for (int j = 0; j < operationLength; j++) {
                 Operation operation = operations[j];
-                Parameter parameter = k >= 0 && parameters.length >= k ? parameters[k] : null;
+                boolean isMatcher;
+                if (parameterLength == 1) {
+                    isMatcher = this.setWhereWrapper(whereWrapper, parameters[0], operation, condition);
+                } else {
+                    Parameter parameter = k >= 0 && parameterLength >= k ? parameters[k] : null;
+                    isMatcher = this.setWhereWrapper(whereWrapper, parameter, operation, condition);
+                }
 
-                boolean isMatcher = this.setWhereWrapper(whereWrapper, parameter, operation, condition);
                 if (isMatcher) {
                     break;
                 }

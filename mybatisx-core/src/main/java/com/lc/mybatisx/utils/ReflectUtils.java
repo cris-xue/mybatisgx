@@ -31,8 +31,26 @@ public class ReflectUtils {
         return null;
     }
 
+    private static Field[] getAllField(Class<?> clazz) {
+        Class<?> superClass = clazz.getSuperclass();
+        if (superClass == Object.class) {
+            return clazz.getDeclaredFields();
+        } else {
+            Field[] classFields = clazz.getDeclaredFields();
+            Field[] superClassFields = getAllField(superClass);
+
+            int classFieldLength = classFields.length;
+            int superClassFieldLength = superClassFields.length;
+
+            Field[] fields = new Field[classFieldLength + superClassFieldLength];
+            System.arraycopy(superClassFields, 0, fields, 0, superClassFieldLength);
+            System.arraycopy(classFields, 0, fields, superClassFieldLength, classFieldLength);
+            return fields;
+        }
+    }
+
     public static Field getField(Class<?> clazz, String fieldName) {
-        Field[] fields = clazz.getDeclaredFields();
+        Field[] fields = getAllField(clazz);
         for (Field field : fields) {
             if (fieldName.equals(field.getName())) {
                 return field;

@@ -61,14 +61,15 @@ public class DeleteMapperHandler extends AbstractMapperHandler {
                 continue;
             }
 
-            VersionWrapper versionWrapper = deleteSqlWrapper.getVersionWrapper();
+            // 自动加入乐观锁查询
+            /*VersionWrapper versionWrapper = deleteSqlWrapper.getVersionWrapper();
             if (versionWrapper != null && versionWrapper.getVersion()) {
                 DeleteSqlWrapper dw = new DeleteSqlWrapper();
                 BeanUtils.copyProperties(deleteSqlWrapper, dw);
                 dw.setMethodName("find_" + deleteSqlWrapper.getMethodName() + "_version");
                 dw.setVersionQuery(true);
                 deleteSqlWrapperList.add(dw);
-            }
+            }*/
 
             deleteSqlWrapperList.add(deleteSqlWrapper);
         }

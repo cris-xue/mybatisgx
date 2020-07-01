@@ -23,6 +23,8 @@ public abstract class AbstractMapperHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractMapperHandler.class);
 
+    protected SqlWrapper sqlWrapper;
+
     protected Class<?> getDaoInterface(String namespace) {
         try {
             return Class.forName(namespace);
@@ -125,4 +127,7 @@ public abstract class AbstractMapperHandler {
 
     abstract protected SqlWrapper instanceSqlWrapper();
 
+    public SqlWrapper getSqlWrapper() {
+        return sqlWrapper;
+    }
 }

@@ -16,10 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.persistence.Version;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,7 +29,9 @@ import java.util.Map;
  */
 public class UpdateMapperHandler extends AbstractMapperHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(UpdateMapperHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(UpdateMapperHandler.class);
+
+    private UpdateMapperHandler updateMapperHandler = this;
 
     private ModelMapperHandler modelMapperHandler = new ModelMapperHandler() {
         @Override
@@ -48,8 +47,25 @@ public class UpdateMapperHandler extends AbstractMapperHandler {
                 return null;
             }
 
+            Class<?> parameterClass = null;
+
+            SqlWrapper sqlWrapper = updateMapperHandler.sqlWrapper;
+            Type type = parameter.getParameterizedType();
+            if (type instanceof TypeVariable<?>) {
+                TypeVariable typeVariable = (TypeVariable) type;
+                String name = typeVariable.getName();
+                if ("ENTITY".equals(name)) {
+                    try {
+                        parameterClass = Class.forName(sqlWrapper.getParameterType());
+                    } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                }
+            } else {
+                parameterClass = parameter.getType();
+            }
+
             methodField = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, methodField);
-            Class<?> parameterClass = parameter.getType();
             Field classField = ReflectUtils.getField(parameterClass, methodField);
 
             return classField.getName();
@@ -137,6 +153,7 @@ public class UpdateMapperHandler extends AbstractMapperHandler {
 
     @Override
     protected SqlWrapper instanceSqlWrapper() {
-        return new UpdateSqlWrapper();
+        return this.sqlWrapper = new UpdateSqlWrapper();
     }
+
 }

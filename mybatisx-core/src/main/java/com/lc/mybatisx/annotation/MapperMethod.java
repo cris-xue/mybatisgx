@@ -15,4 +15,6 @@ public @interface MapperMethod {
 
     MethodType type();
 
+    boolean dynamic() default false;
+
 }

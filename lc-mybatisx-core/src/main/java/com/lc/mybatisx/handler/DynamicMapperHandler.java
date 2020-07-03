@@ -81,7 +81,7 @@ public class DynamicMapperHandler {
         StringWriter stringWriter = null;
         InputStream inputStream = null;
         try {
-            ClassPathResource classPathResource = new ClassPathResource("test/mapper.ftl");
+            ClassPathResource classPathResource = new ClassPathResource("mapper/mysql/basic.ftl");
             reader = new InputStreamReader(classPathResource.getInputStream());
             Template template = new Template("mapper", reader, null, "utf-8");
 

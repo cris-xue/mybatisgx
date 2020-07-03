@@ -1,0 +1,21 @@
+# eclipse
+*.log
+*.temp
+.project
+*.prefs
+.classpath
+h2/*
+h2
+generated_code/*
+generated_code
+.settings
+.settings/*
+target/*
+target
+.factorypath
+.idea
+*.iml
+
+# maven
+*.releaseBackup
+release.properties

@@ -89,19 +89,6 @@ public class MybatisxSqlSessionFactoryBean extends SqlSessionFactoryBean {
             Class<?> clazz = Resources.classForName(classMetadata.getClassName());
 
             boolean isExistInterface = isExistInterface(clazz, BaseDao.class);
-            /*boolean isAdd = true;
-            if (isExistInterface) {
-                for (Resource mapperResource : mapperLocations) {
-                    DocumentBuilderFactory xmlFactory = DocumentBuilderFactory.newInstance();
-                    DocumentBuilder builder = xmlFactory.newDocumentBuilder();
-                    Document doc = builder.parse(mapperResource.getFile());
-                    String namespace = doc.getDocumentElement().getAttribute("namespace");
-                    if (clazz.getName().equals(namespace)) {
-                        isAdd = false;
-                        mapperResourceList.add(mapperResource);
-                    }
-                }
-            }*/
 
             if (isExistInterface) {
                 String namespace = clazz.getName();

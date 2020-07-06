@@ -6,6 +6,7 @@ import com.lc.mybatisx.annotation.MethodType;
 import com.lc.mybatisx.dao.InsertDao;
 import com.lc.mybatisx.wrapper.ModelWrapper;
 import com.lc.mybatisx.wrapper.QuerySqlWrapper;
+import com.lc.mybatisx.wrapper.WhereWrapper;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
@@ -120,6 +121,14 @@ public class QueryMapperHandler {
             modelWrapperList.add(modelWrapper);
         }
         querySqlWrapper.setModelWrapperList(modelWrapperList);
+
+        List<WhereWrapper> whereWrapperList = new ArrayList<>();
+        WhereWrapper whereWrapper = new WhereWrapper();
+        whereWrapper.setField("id");
+        whereWrapper.setOp("=");
+        whereWrapper.setValue("1");
+        whereWrapperList.add(whereWrapper);
+        querySqlWrapper.setWhereWrapperList(whereWrapperList);
 
         return querySqlWrapper;
     }

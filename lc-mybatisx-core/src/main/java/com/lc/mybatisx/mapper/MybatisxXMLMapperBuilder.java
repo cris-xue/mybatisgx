@@ -1,6 +1,7 @@
 package com.lc.mybatisx.mapper;
 
 import com.lc.mybatisx.handler.InsertMapperHandler;
+import com.lc.mybatisx.handler.QueryMapperHandler;
 import org.apache.ibatis.builder.*;
 import org.apache.ibatis.builder.xml.XMLMapperEntityResolver;
 import org.apache.ibatis.builder.xml.XMLStatementBuilder;
@@ -84,9 +85,12 @@ public class MybatisxXMLMapperBuilder extends BaseBuilder {
             // List<XNode> newXNode = BasicMapperHandler.getCurrentNodeData(builderAssistant, namespace);
             InsertMapperHandler insertMapperHandler = new InsertMapperHandler(builderAssistant, namespace);
             List<XNode> insertXNode = insertMapperHandler.readTemplate();
+            QueryMapperHandler queryMapperHandler = new QueryMapperHandler(builderAssistant, namespace);
+            List<XNode> queryXNode = queryMapperHandler.readTemplate();
             // List<XNode> insertXNode = InsertMapperHandler.getCurrentNodeData(builderAssistant, namespace);
             // oldXNode.addAll(newXNode);
             oldXNode.addAll(insertXNode);
+            oldXNode.addAll(queryXNode);
             buildStatementFromContext(oldXNode);
         } catch (Exception e) {
             e.printStackTrace();

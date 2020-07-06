@@ -1,6 +1,7 @@
 package com.lc.mybatisx.spring;
 
 import com.lc.mybatisx.dao.BaseDao;
+import com.lc.mybatisx.dao.InsertDao;
 import com.lc.mybatisx.mapper.MybatisxXMLMapperBuilder;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.Configuration;
@@ -111,7 +112,7 @@ public class MybatisxSqlSessionFactoryBean extends SqlSessionFactoryBean {
     private boolean isExistInterface(Class targetClass, Class interfaceClass) {
         Class<?>[] daoInterfaces = targetClass.getInterfaces();
         for (Class daoInterface : daoInterfaces) {
-            if (daoInterface == interfaceClass) {
+            if (daoInterface == InsertDao.class) {
                 return true;
             }
         }

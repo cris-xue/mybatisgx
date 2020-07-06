@@ -46,7 +46,7 @@ public @interface Mybatisx {
     @AliasFor(annotation = MapperScan.class, attribute = "factoryBean")
     Class<? extends MapperFactoryBean> factoryBean() default MapperFactoryBean.class;
 
-    @AliasFor(annotation = MapperScan.class, attribute = "lazyInitialization")
-    String lazyInitialization() default "";
+    // @AliasFor(annotation = MapperScan.class, attribute = "lazyInitialization")
+    // String lazyInitialization() default "";
 
 }

@@ -1,6 +1,7 @@
 package com.lc.mybatisx.handler;
 
 import com.google.common.base.CaseFormat;
+import com.lc.mybatisx.wrapper.InsertSqlWrapper;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import org.apache.ibatis.binding.BindingException;
@@ -19,7 +20,10 @@ import java.beans.PropertyDescriptor;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -109,13 +113,14 @@ public class InsertMapperHandler {
             reader = new InputStreamReader(classPathResource.getInputStream());
             Template template = new Template("mapper", reader, null, "utf-8");
 
-            Map<String, Object> data = new HashMap<>();
-            data.put("namespace", namespace);
-            data.put("parameterType", clazz.getName());
-            data.put("resultType", clazz.getName());
-            data.put("tableName", clazz.getAnnotation(Table.class).name());
+            InsertSqlWrapper insertSqlWrapper = new InsertSqlWrapper();
+            insertSqlWrapper.setNamespace(namespace);
+            insertSqlWrapper.setParameterType(clazz.getName());
+            insertSqlWrapper.setTableName(clazz.getAnnotation(Table.class).name());
+            insertSqlWrapper.setResultType(clazz.getName());
 
-            Map<String, Object> columnMap = new LinkedHashMap<>();
+            List<String> dbColumn = new ArrayList<>();
+            List<String> entityColumn = new ArrayList<>();
             PropertyDescriptor[] propertyDescriptors = getBeanPropertyList(clazz);
             for (int i = 0; i < propertyDescriptors.length; i++) {
                 PropertyDescriptor propertyDescriptor = propertyDescriptors[i];
@@ -123,12 +128,17 @@ public class InsertMapperHandler {
                 if ("class".equals(fieldName)) {
                     continue;
                 }
-                columnMap.put(fieldName, CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, fieldName));
+                dbColumn.add(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, fieldName));
+                entityColumn.add(fieldName);
             }
-            data.put("columnMap", columnMap);
+            insertSqlWrapper.setDbColumn(dbColumn);
+            insertSqlWrapper.setEntityColumn(entityColumn);
+
+            Map<String, Object> templateData = new HashMap<>();
+            templateData.put("insertSqlWrapper", insertSqlWrapper);
 
             stringWriter = new StringWriter();
-            template.process(data, stringWriter);
+            template.process(templateData, stringWriter);
             String basicMethodXml = stringWriter.toString();
             log.debug(basicMethodXml);
             return new ByteArrayInputStream(basicMethodXml.getBytes());

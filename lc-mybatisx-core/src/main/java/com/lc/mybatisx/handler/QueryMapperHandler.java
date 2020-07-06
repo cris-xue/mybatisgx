@@ -3,7 +3,7 @@ package com.lc.mybatisx.handler;
 import com.google.common.base.CaseFormat;
 import com.lc.mybatisx.annotation.MapperMethod;
 import com.lc.mybatisx.annotation.MethodType;
-import com.lc.mybatisx.dao.InsertDao;
+import com.lc.mybatisx.dao.QueryDao;
 import com.lc.mybatisx.utils.FreeMarkerUtils;
 import com.lc.mybatisx.wrapper.ModelWrapper;
 import com.lc.mybatisx.wrapper.QuerySqlWrapper;
@@ -16,7 +16,6 @@ import org.apache.ibatis.session.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
-import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
 
 import javax.persistence.Table;
 import java.beans.PropertyDescriptor;
@@ -32,7 +31,7 @@ import java.util.Map;
  * @description：一句话描述
  * @date ：2020/7/6 12:56
  */
-public class QueryMapperHandler {
+public class QueryMapperHandler extends AbstractMapperHandler {
 
     private static final Logger log = LoggerFactory.getLogger(QueryMapperHandler.class);
 
@@ -40,7 +39,7 @@ public class QueryMapperHandler {
 
     public QueryMapperHandler(MapperBuilderAssistant builderAssistant, String namespace) {
         Class<?> daoInterface = getDaoInterface(namespace);
-        Type[] daoInterfaceParams = getDaoInterfaceParams(daoInterface);
+        Type[] daoInterfaceParams = getDaoInterfaceParams(daoInterface, QueryDao.class);
 
         List<QuerySqlWrapper> querySqlWrapperList = new ArrayList<>();
         Method[] methods = daoInterface.getMethods();
@@ -59,31 +58,6 @@ public class QueryMapperHandler {
         }
 
         this.querySqlWrapperList = querySqlWrapperList;
-    }
-
-    private Class<?> getDaoInterface(String namespace) {
-        Class<?> daoInterface = null;
-        try {
-            daoInterface = Class.forName(namespace);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        return daoInterface;
-    }
-
-    private Type[] getDaoInterfaceParams(Class<?> daoInterface) {
-        Type[] daoSuperInterfaces = daoInterface.getGenericInterfaces();
-        for (int i = 0; i < daoSuperInterfaces.length; i++) {
-            Type daoSuperInterfaceType = daoSuperInterfaces[i];
-            ParameterizedTypeImpl daoSuperInterfaceClass = (ParameterizedTypeImpl) daoSuperInterfaceType;
-            Class<?> daoSuperInterface = daoSuperInterfaceClass.getRawType();
-            Type[] daoInterfaceParams = daoSuperInterfaceClass.getActualTypeArguments();
-            if (daoSuperInterface == InsertDao.class) {
-                return daoInterfaceParams;
-            }
-        }
-
-        return null;
     }
 
     private QuerySqlWrapper buildInsertSqlWrapper(String namespace, Method method, Type[] daoInterfaceParams) {

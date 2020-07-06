@@ -15,7 +15,6 @@ import org.apache.ibatis.session.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
-import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
 
 import javax.persistence.Table;
 import java.beans.PropertyDescriptor;
@@ -31,7 +30,7 @@ import java.util.Map;
  * @description：一句话描述
  * @date ：2020/7/6 12:56
  */
-public class InsertMapperHandler {
+public class InsertMapperHandler extends AbstractMapperHandler {
 
     private static final Logger log = LoggerFactory.getLogger(InsertMapperHandler.class);
 
@@ -39,7 +38,7 @@ public class InsertMapperHandler {
 
     public InsertMapperHandler(MapperBuilderAssistant builderAssistant, String namespace) {
         Class<?> daoInterface = getDaoInterface(namespace);
-        Type[] daoInterfaceParams = getDaoInterfaceParams(daoInterface);
+        Type[] daoInterfaceParams = getDaoInterfaceParams(daoInterface, InsertDao.class);
 
         List<InsertSqlWrapper> insertSqlWrapperList = new ArrayList<>();
         Method[] methods = daoInterface.getMethods();
@@ -58,31 +57,6 @@ public class InsertMapperHandler {
         }
 
         this.insertSqlWrapperList = insertSqlWrapperList;
-    }
-
-    private Class<?> getDaoInterface(String namespace) {
-        Class<?> daoInterface = null;
-        try {
-            daoInterface = Class.forName(namespace);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        return daoInterface;
-    }
-
-    private Type[] getDaoInterfaceParams(Class<?> daoInterface) {
-        Type[] daoSuperInterfaces = daoInterface.getGenericInterfaces();
-        for (int i = 0; i < daoSuperInterfaces.length; i++) {
-            Type daoSuperInterfaceType = daoSuperInterfaces[i];
-            ParameterizedTypeImpl daoSuperInterfaceClass = (ParameterizedTypeImpl) daoSuperInterfaceType;
-            Class<?> daoSuperInterface = daoSuperInterfaceClass.getRawType();
-            Type[] daoInterfaceParams = daoSuperInterfaceClass.getActualTypeArguments();
-            if (daoSuperInterface == InsertDao.class) {
-                return daoInterfaceParams;
-            }
-        }
-
-        return null;
     }
 
     private InsertSqlWrapper buildInsertSqlWrapper(String namespace, Method method, Type[] daoInterfaceParams) {

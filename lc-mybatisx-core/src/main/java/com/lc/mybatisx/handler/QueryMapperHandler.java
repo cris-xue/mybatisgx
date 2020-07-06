@@ -107,7 +107,15 @@ public class QueryMapperHandler {
         querySqlWrapper.setResultType(entityClass.getName());
 
         List<ModelWrapper> modelWrapperList = new ArrayList<>();
-        PropertyDescriptor[] propertyDescriptors = getBeanPropertyList(entityClass);
+        Class<?> modelClass = null;
+        if ("findById".equals(methodName)) {
+            modelClass = entityClass;
+        } else if ("findAll".equals(methodName)) {
+            modelClass = entityClass;
+        } else {
+            modelClass = method.getReturnType();
+        }
+        PropertyDescriptor[] propertyDescriptors = getBeanPropertyList(modelClass);
         for (int i = 0; i < propertyDescriptors.length; i++) {
             ModelWrapper modelWrapper = new ModelWrapper();
 
@@ -123,11 +131,17 @@ public class QueryMapperHandler {
         querySqlWrapper.setModelWrapperList(modelWrapperList);
 
         List<WhereWrapper> whereWrapperList = new ArrayList<>();
-        WhereWrapper whereWrapper = new WhereWrapper();
-        whereWrapper.setField("id");
-        whereWrapper.setOp("=");
-        whereWrapper.setValue("1");
-        whereWrapperList.add(whereWrapper);
+        if (!"findAll".equals(methodName)) {
+            String[] methodNames = methodName.split("By");
+            String[] wheres = methodNames[1].split("And|Or");
+            for (int i = 0; i < wheres.length; i++) {
+                WhereWrapper whereWrapper = new WhereWrapper();
+                whereWrapper.setField(wheres[i]);
+                whereWrapper.setOp("=");
+                whereWrapper.setValue("${" + wheres[i] + "}");
+                whereWrapperList.add(whereWrapper);
+            }
+        }
         querySqlWrapper.setWhereWrapperList(whereWrapperList);
 
         return querySqlWrapper;

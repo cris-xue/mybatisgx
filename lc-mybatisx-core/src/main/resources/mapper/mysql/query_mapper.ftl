@@ -26,11 +26,13 @@
             </#list>
         </trim>
         from ${querySqlWrapper.tableName}
-        <where>
-            <#list querySqlWrapper.whereWrapperList as ww>
-                ${ww.field} ${ww.op} ${ww.value}
-            </#list>
-        </where>
+        <#if (querySqlWrapper.whereWrapperList?size > 0)>
+            <where>
+                <#list querySqlWrapper.whereWrapperList as ww>
+                    ${ww.field} ${ww.op} ${ww.value}
+                </#list>
+            </where>
+        </#if>
     </select>
 
 </mapper>

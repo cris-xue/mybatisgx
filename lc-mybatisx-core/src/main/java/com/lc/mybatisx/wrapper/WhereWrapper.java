@@ -13,6 +13,10 @@ public class WhereWrapper {
 
     private String value;
 
+    private String linkOp;
+
+    private WhereWrapper whereWrapper;
+
     public String getField() {
         return field;
     }
@@ -36,4 +40,21 @@ public class WhereWrapper {
     public void setValue(String value) {
         this.value = value;
     }
+
+    public String getLinkOp() {
+        return linkOp;
+    }
+
+    public void setLinkOp(String linkOp) {
+        this.linkOp = linkOp;
+    }
+
+    public WhereWrapper getWhereWrapper() {
+        return whereWrapper;
+    }
+
+    public void setWhereWrapper(WhereWrapper whereWrapper) {
+        this.whereWrapper = whereWrapper;
+    }
+
 }

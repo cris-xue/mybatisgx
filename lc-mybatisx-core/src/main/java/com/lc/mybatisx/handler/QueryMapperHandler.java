@@ -1,12 +1,12 @@
 package com.lc.mybatisx.handler;
 
-import com.google.common.base.CaseFormat;
 import com.lc.mybatisx.annotation.MapperMethod;
 import com.lc.mybatisx.annotation.MethodType;
 import com.lc.mybatisx.dao.QueryDao;
 import com.lc.mybatisx.utils.FreeMarkerUtils;
 import com.lc.mybatisx.wrapper.ModelWrapper;
 import com.lc.mybatisx.wrapper.QuerySqlWrapper;
+import com.lc.mybatisx.wrapper.SqlWrapper;
 import com.lc.mybatisx.wrapper.WhereWrapper;
 import freemarker.template.Template;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
@@ -17,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 
-import javax.persistence.Table;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -66,20 +65,11 @@ public class QueryMapperHandler extends AbstractMapperHandler {
             return null;
         }
 
+        QuerySqlWrapper querySqlWrapper = (QuerySqlWrapper) this.buildSqlWrapper(namespace, method, daoInterfaceParams);
+
         String methodName = method.getName();
         Class<?> entityClass = (Class<?>) daoInterfaceParams[0];
-        String tableName = entityClass.getAnnotation(Table.class).name();
-        Class<?> idClass = (Class<?>) daoInterfaceParams[1];
-
-        QuerySqlWrapper querySqlWrapper = new QuerySqlWrapper();
-        querySqlWrapper.setNamespace(namespace);
-        querySqlWrapper.setMethodName(methodName);
-        querySqlWrapper.setParameterType(entityClass.getName());
-        querySqlWrapper.setTableName(tableName);
-        querySqlWrapper.setResultType(entityClass.getName());
-
-        List<ModelWrapper> modelWrapperList = new ArrayList<>();
-        Class<?> modelClass = null;
+        Class<?> modelClass;
         if ("findById".equals(methodName)) {
             modelClass = entityClass;
         } else if ("findAll".equals(methodName)) {
@@ -87,19 +77,9 @@ public class QueryMapperHandler extends AbstractMapperHandler {
         } else {
             modelClass = method.getReturnType();
         }
-        PropertyDescriptor[] propertyDescriptors = getBeanPropertyList(modelClass);
-        for (int i = 0; i < propertyDescriptors.length; i++) {
-            ModelWrapper modelWrapper = new ModelWrapper();
 
-            PropertyDescriptor propertyDescriptor = propertyDescriptors[i];
-            String fieldName = propertyDescriptor.getName();
-            if ("class".equals(fieldName)) {
-                continue;
-            }
-            modelWrapper.setDbColumn(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, fieldName));
-            modelWrapper.setEntityColumn(fieldName);
-            modelWrapperList.add(modelWrapper);
-        }
+        PropertyDescriptor[] propertyDescriptors = getBeanPropertyList(modelClass);
+        List<ModelWrapper> modelWrapperList = this.buildModelWrapper(propertyDescriptors);
         querySqlWrapper.setModelWrapperList(modelWrapperList);
 
         List<WhereWrapper> whereWrapperList = new ArrayList<>();
@@ -150,4 +130,8 @@ public class QueryMapperHandler extends AbstractMapperHandler {
         return BeanUtils.getPropertyDescriptors(clazz);
     }
 
+    @Override
+    protected SqlWrapper instanceSqlWrapper() {
+        return new QuerySqlWrapper();
+    }
 }

@@ -1,12 +1,12 @@
 package com.lc.mybatisx.handler;
 
-import com.google.common.base.CaseFormat;
 import com.lc.mybatisx.annotation.MapperMethod;
 import com.lc.mybatisx.annotation.MethodType;
 import com.lc.mybatisx.dao.InsertDao;
 import com.lc.mybatisx.utils.FreeMarkerUtils;
 import com.lc.mybatisx.wrapper.InsertSqlWrapper;
 import com.lc.mybatisx.wrapper.ModelWrapper;
+import com.lc.mybatisx.wrapper.SqlWrapper;
 import freemarker.template.Template;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.apache.ibatis.parsing.XNode;
@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 
-import javax.persistence.Table;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -65,32 +64,11 @@ public class InsertMapperHandler extends AbstractMapperHandler {
             return null;
         }
 
-        String methodName = method.getName();
+        InsertSqlWrapper insertSqlWrapper = (InsertSqlWrapper) this.buildSqlWrapper(namespace, method, daoInterfaceParams);
+
         Class<?> entityClass = (Class<?>) daoInterfaceParams[0];
-        String tableName = entityClass.getAnnotation(Table.class).name();
-        Class<?> idClass = (Class<?>) daoInterfaceParams[1];
-
-        InsertSqlWrapper insertSqlWrapper = new InsertSqlWrapper();
-        insertSqlWrapper.setNamespace(namespace);
-        insertSqlWrapper.setMethodName(methodName);
-        insertSqlWrapper.setParameterType(entityClass.getName());
-        insertSqlWrapper.setTableName(tableName);
-        insertSqlWrapper.setResultType(entityClass.getName());
-
-        List<ModelWrapper> modelWrapperList = new ArrayList<>();
         PropertyDescriptor[] propertyDescriptors = getBeanPropertyList(entityClass);
-        for (int i = 0; i < propertyDescriptors.length; i++) {
-            ModelWrapper modelWrapper = new ModelWrapper();
-
-            PropertyDescriptor propertyDescriptor = propertyDescriptors[i];
-            String fieldName = propertyDescriptor.getName();
-            if ("class".equals(fieldName)) {
-                continue;
-            }
-            modelWrapper.setDbColumn(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, fieldName));
-            modelWrapper.setEntityColumn(fieldName);
-            modelWrapperList.add(modelWrapper);
-        }
+        List<ModelWrapper> modelWrapperList = this.buildModelWrapper(propertyDescriptors);
         insertSqlWrapper.setModelWrapperList(modelWrapperList);
 
         return insertSqlWrapper;
@@ -127,4 +105,8 @@ public class InsertMapperHandler extends AbstractMapperHandler {
         return BeanUtils.getPropertyDescriptors(clazz);
     }
 
+    @Override
+    protected SqlWrapper instanceSqlWrapper() {
+        return new InsertSqlWrapper();
+    }
 }

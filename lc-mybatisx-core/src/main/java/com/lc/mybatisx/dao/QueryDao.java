@@ -2,6 +2,7 @@ package com.lc.mybatisx.dao;
 
 import com.lc.mybatisx.annotation.MapperMethod;
 import com.lc.mybatisx.annotation.MethodType;
+import org.apache.ibatis.annotations.Param;
 
 import java.io.Serializable;
 
@@ -10,9 +11,9 @@ import java.io.Serializable;
  * @description：一句话描述
  * @date ：2019/12/5 14:46
  */
-public interface InsertDao<T, ID extends Serializable> {
+public interface QueryDao<T, ID extends Serializable> {
 
-    @MapperMethod(type = MethodType.INSERT)
-    int insertSelective(T t);
+    @MapperMethod(type = MethodType.QUERY)
+    T findById(@Param("id") ID id);
 
 }

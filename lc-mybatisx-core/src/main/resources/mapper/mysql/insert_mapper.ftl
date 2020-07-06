@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="${insertSqlWrapper.namespace}">
 
-    <insert id="insert" keyProperty="id" useGeneratedKeys="true" parameterType="${insertSqlWrapper.parameterType}">
+    <insert id="${insertSqlWrapper.methodName}" keyProperty="id" useGeneratedKeys="true" parameterType="${insertSqlWrapper.parameterType}">
         insert into ${insertSqlWrapper.tableName}
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <#list insertSqlWrapper.dbColumn as dbc>

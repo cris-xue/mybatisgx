@@ -52,6 +52,9 @@ public class InsertMapperHandler {
             }
 
             InsertSqlWrapper insertSqlWrapper = this.buildInsertSqlWrapper(namespace, method, daoInterfaceParams);
+            if (insertSqlWrapper == null) {
+                continue;
+            }
             insertSqlWrapperList.add(insertSqlWrapper);
         }
 
@@ -85,7 +88,7 @@ public class InsertMapperHandler {
 
     private InsertSqlWrapper buildInsertSqlWrapper(String namespace, Method method, Type[] daoInterfaceParams) {
         MapperMethod mapperMethod = method.getAnnotation(MapperMethod.class);
-        if (mapperMethod == null && mapperMethod.type() != MethodType.INSERT) {
+        if (mapperMethod == null || mapperMethod.type() != MethodType.INSERT) {
             return null;
         }
 

@@ -5,6 +5,7 @@ import com.lc.mybatisx.annotation.MethodType;
 import org.apache.ibatis.annotations.Param;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author ：薛承城
@@ -15,5 +16,8 @@ public interface QueryDao<T, ID extends Serializable> {
 
     @MapperMethod(type = MethodType.QUERY)
     T findById(@Param("id") ID id);
+
+    @MapperMethod(type = MethodType.QUERY)
+    List<T> findAll();
 
 }

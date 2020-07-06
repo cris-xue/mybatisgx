@@ -3,7 +3,7 @@
 <mapper namespace="${namespace}">
 
     <#--扩展方法-->
-    <#list sqlWrapperList as sqlWrapper>
+    <#--<#list sqlWrapperList as sqlWrapper>
         <${sqlWrapper.tagName} id="${sqlWrapper.idName}" resultType="${sqlWrapper.returnType}">
             select
                 <#list sqlWrapper.returnColumn?keys as key>
@@ -16,6 +16,19 @@
                 </#list>
             </where>
         </${sqlWrapper.tagName}>
-    </#list>
+    </#list>-->
+
+    <select id="${querySqlWrapper.methodName}" resultType="${querySqlWrapper.resultType}">
+        select
+        <#list querySqlWrapper.modelWrapperList as mw>
+            ${mw.dbColumn} as ${mw.entityColumn},
+        </#list>
+        from ${querySqlWrapper.tableName}
+        <where>
+            <#list querySqlWrapper.whereWrapperList as ww>
+                ${mw.field} ${mw.op} ${mw.value}
+            </#list>
+        </where>
+    </select>
 
 </mapper>

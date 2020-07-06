@@ -7,7 +7,6 @@ import com.lc.mybatisx.dao.InsertDao;
 import com.lc.mybatisx.wrapper.InsertSqlWrapper;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
-import org.apache.ibatis.binding.BindingException;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.parsing.XPathParser;
@@ -21,14 +20,12 @@ import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
 import javax.persistence.Table;
 import java.beans.PropertyDescriptor;
 import java.io.*;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * @author ：薛承城
@@ -59,8 +56,6 @@ public class InsertMapperHandler {
         }
 
         this.insertSqlWrapperList = insertSqlWrapperList;
-        // Map<String, Object> templateData = new HashMap<>();
-        // templateData.put("insertSqlWrapperList", insertSqlWrapperList);
     }
 
     private Class<?> getDaoInterface(String namespace) {
@@ -83,17 +78,9 @@ public class InsertMapperHandler {
             if (daoSuperInterface == InsertDao.class) {
                 return daoInterfaceParams;
             }
-
-            // String entity = actualTypeArguments[0].getTypeName();
-            // String id = actualTypeArguments[1].getTypeName();
         }
 
         return null;
-    }
-
-    private Class<?> getTypeClass(Type type) {
-        ParameterizedTypeImpl parameterizedType = (ParameterizedTypeImpl) type;
-        return parameterizedType.getRawType();
     }
 
     private InsertSqlWrapper buildInsertSqlWrapper(String namespace, Method method, Type[] daoInterfaceParams) {
@@ -130,70 +117,6 @@ public class InsertMapperHandler {
         insertSqlWrapper.setEntityColumn(entityColumn);
 
         return insertSqlWrapper;
-    }
-
-    /**
-     * 自定义方法，主要生成基本sql的XNode节点
-     *
-     * @param namespace
-     * @return
-     */
-    public static List<XNode> getCurrentNodeData(MapperBuilderAssistant builderAssistant, String namespace) {
-        Class<?> daoClass = null;
-        try {
-            daoClass = Class.forName(namespace);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        Type[] genericInterfaces = daoClass.getGenericInterfaces();
-        if (genericInterfaces.length != 1) {
-            // throw new BindingException("绑定异常!");
-            return new ArrayList<XNode>();
-        }
-        Type[] actualTypeArguments = ((ParameterizedTypeImpl) genericInterfaces[0]).getActualTypeArguments();
-        String entity = actualTypeArguments[0].getTypeName();
-        String id = actualTypeArguments[1].getTypeName();
-
-        Class<?> entityClass = null;
-        try {
-            entityClass = Class.forName(entity);
-        } catch (ClassNotFoundException e) {
-            throw new BindingException("绑定异常!", e);
-        }
-        XNode xmlNode = generateBasicXNode(entityClass, namespace);
-        List<XNode> xNodelist = xmlNode.evalNodes("select|insert|update|delete");
-
-        // 如果已经绑定，就不用再次绑定
-        Configuration configuration = builderAssistant.getConfiguration();
-        xNodelist = xNodelist.stream()
-                .filter(i -> !configuration.hasStatement(namespace + "." + i.getStringAttribute("id")))
-                .collect(Collectors.toList());
-        return xNodelist;
-    }
-
-    /**
-     * 生成基本的增删改查
-     *
-     * @param clazz
-     * @return
-     */
-    public static XNode generateBasicXNode(Class<?> clazz, String namespace) {
-        InputStream is = null;
-        try {
-            is = null;// generateBasicMethod(clazz, namespace);
-
-            // 把xml字符串转换成Document
-            XPathParser xPathParser = new XPathParser(is);
-            return xPathParser.evalNode("/mapper");
-        } finally {
-            try {
-                if (is != null) {
-                    is.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
     }
 
     public List<XNode> readTemplate() {
@@ -272,30 +195,6 @@ public class InsertMapperHandler {
         });
 
         return insertXNodeList;
-    }
-
-    /**
-     * 获取指定字段
-     *
-     * @param clazz
-     * @param fieldName
-     * @return
-     * @throws NoSuchFieldException
-     */
-    private Field getField(Class<?> clazz, String fieldName) throws NoSuchFieldException {
-        Class<?> superclass = clazz.getSuperclass();
-        Field field = null;
-        try {
-            field = clazz.getDeclaredField(fieldName);
-        } catch (NoSuchFieldException e) {
-
-        }
-        try {
-            field = superclass.getDeclaredField(fieldName);
-        } catch (NoSuchFieldException e1) {
-            throw e1;
-        }
-        return field;
     }
 
     private static PropertyDescriptor[] getBeanPropertyList(Class<?> clazz) {

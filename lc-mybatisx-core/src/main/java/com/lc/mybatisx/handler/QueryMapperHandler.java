@@ -67,8 +67,20 @@ public class QueryMapperHandler extends AbstractMapperHandler {
 
         QuerySqlWrapper querySqlWrapper = (QuerySqlWrapper) this.buildSqlWrapper(namespace, method, daoInterfaceParams);
 
-        String methodName = method.getName();
         Class<?> entityClass = (Class<?>) daoInterfaceParams[0];
+        Class<?> modelClass = this.getModelClass(method, entityClass);
+        PropertyDescriptor[] propertyDescriptors = getBeanPropertyList(modelClass);
+        List<ModelWrapper> modelWrapperList = this.buildModelWrapper(propertyDescriptors);
+        querySqlWrapper.setModelWrapperList(modelWrapperList);
+
+        List<WhereWrapper> whereWrapperList = this.buildWhereWrapper(method);
+        querySqlWrapper.setWhereWrapperList(whereWrapperList);
+
+        return querySqlWrapper;
+    }
+
+    private Class<?> getModelClass(Method method, Class<?> entityClass) {
+        String methodName = method.getName();
         Class<?> modelClass;
         if ("findById".equals(methodName)) {
             modelClass = entityClass;
@@ -78,9 +90,11 @@ public class QueryMapperHandler extends AbstractMapperHandler {
             modelClass = method.getReturnType();
         }
 
-        PropertyDescriptor[] propertyDescriptors = getBeanPropertyList(modelClass);
-        List<ModelWrapper> modelWrapperList = this.buildModelWrapper(propertyDescriptors);
-        querySqlWrapper.setModelWrapperList(modelWrapperList);
+        return modelClass;
+    }
+
+    private List<WhereWrapper> buildWhereWrapper(Method method) {
+        String methodName = method.getName();
 
         List<WhereWrapper> whereWrapperList = new ArrayList<>();
         if (!"findAll".equals(methodName)) {
@@ -94,9 +108,8 @@ public class QueryMapperHandler extends AbstractMapperHandler {
                 whereWrapperList.add(whereWrapper);
             }
         }
-        querySqlWrapper.setWhereWrapperList(whereWrapperList);
 
-        return querySqlWrapper;
+        return whereWrapperList;
     }
 
     public List<XNode> readTemplate() {

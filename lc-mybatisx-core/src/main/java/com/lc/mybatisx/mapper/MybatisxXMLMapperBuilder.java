@@ -1,6 +1,5 @@
 package com.lc.mybatisx.mapper;
 
-import com.lc.mybatisx.handler.BasicMapperHandler;
 import com.lc.mybatisx.handler.InsertMapperHandler;
 import org.apache.ibatis.builder.*;
 import org.apache.ibatis.builder.xml.XMLMapperEntityResolver;
@@ -83,7 +82,9 @@ public class MybatisxXMLMapperBuilder extends BaseBuilder {
             // 对mybatis改造的源码
             List<XNode> oldXNode = context.evalNodes("select|insert|update|delete");
             // List<XNode> newXNode = BasicMapperHandler.getCurrentNodeData(builderAssistant, namespace);
-            List<XNode> insertXNode = InsertMapperHandler.getCurrentNodeData(builderAssistant, namespace);
+            InsertMapperHandler insertMapperHandler = new InsertMapperHandler(builderAssistant, namespace);
+            List<XNode> insertXNode = insertMapperHandler.readTemplate();
+            // List<XNode> insertXNode = InsertMapperHandler.getCurrentNodeData(builderAssistant, namespace);
             // oldXNode.addAll(newXNode);
             oldXNode.addAll(insertXNode);
             buildStatementFromContext(oldXNode);

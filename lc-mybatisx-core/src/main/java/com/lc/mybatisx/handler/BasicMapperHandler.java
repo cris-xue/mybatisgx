@@ -27,9 +27,9 @@ import java.util.stream.Collectors;
  * description: 动态Mapper处理器，CustomXMLMapperBuilder中会调用该方法
  * create time: 2019/5/9 11:05
  */
-public class DynamicMapperHandler {
+public class BasicMapperHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(DynamicMapperHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(BasicMapperHandler.class);
 
     /**
      * 自定义方法，主要生成基本sql的XNode节点
@@ -59,7 +59,7 @@ public class DynamicMapperHandler {
         } catch (ClassNotFoundException e) {
             throw new BindingException("绑定异常!", e);
         }
-        XNode xmlNode = generateBasicMethod(entityClass, namespace);
+        XNode xmlNode = generateBasicXNode(entityClass, namespace);
         List<XNode> xNodelist = xmlNode.evalNodes("select|insert|update|delete");
 
         // 如果已经绑定，就不用再次绑定
@@ -76,7 +76,31 @@ public class DynamicMapperHandler {
      * @param clazz
      * @return
      */
-    public static XNode generateBasicMethod(Class<?> clazz, String namespace) {
+    public static XNode generateBasicXNode(Class<?> clazz, String namespace) {
+        InputStream is = null;
+        try {
+            is = generateBasicMethod(clazz, namespace);
+            // 把xml字符串转换成Document
+            XPathParser xPathParser = new XPathParser(is);
+            return xPathParser.evalNode("/mapper");
+        } finally {
+            try {
+                if (is != null) {
+                    is.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * 生成基本的增删改查
+     *
+     * @param clazz
+     * @return
+     */
+    public static InputStream generateBasicMethod(Class<?> clazz, String namespace) {
         Reader reader = null;
         StringWriter stringWriter = null;
         InputStream inputStream = null;
@@ -107,11 +131,7 @@ public class DynamicMapperHandler {
             template.process(data, stringWriter);
             String basicMethodXml = stringWriter.toString();
             log.debug(basicMethodXml);
-            inputStream = new ByteArrayInputStream(basicMethodXml.getBytes());
-
-            // 把xml字符串转换成Document
-            XPathParser xPathParser = new XPathParser(inputStream);
-            return xPathParser.evalNode("/mapper");
+            return new ByteArrayInputStream(basicMethodXml.getBytes());
         } catch (IOException | TemplateException e) {
             e.printStackTrace();
         } finally {

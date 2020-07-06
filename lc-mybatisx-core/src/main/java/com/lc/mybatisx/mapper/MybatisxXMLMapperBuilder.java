@@ -1,6 +1,6 @@
 package com.lc.mybatisx.mapper;
 
-import com.lc.mybatisx.handler.DynamicMapperHandler;
+import com.lc.mybatisx.handler.BasicMapperHandler;
 import org.apache.ibatis.builder.*;
 import org.apache.ibatis.builder.xml.XMLMapperEntityResolver;
 import org.apache.ibatis.builder.xml.XMLStatementBuilder;
@@ -16,7 +16,6 @@ import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
 
 import java.io.InputStream;
-import java.io.Reader;
 import java.util.*;
 
 /**
@@ -32,18 +31,6 @@ public class MybatisxXMLMapperBuilder extends BaseBuilder {
     private final MapperBuilderAssistant builderAssistant;
     private final Map<String, XNode> sqlFragments;
     private final String resource;
-
-    @Deprecated
-    public MybatisxXMLMapperBuilder(Reader reader, Configuration configuration, String resource, Map<String, XNode> sqlFragments, String namespace) {
-        this(reader, configuration, resource, sqlFragments);
-        this.builderAssistant.setCurrentNamespace(namespace);
-    }
-
-    @Deprecated
-    public MybatisxXMLMapperBuilder(Reader reader, Configuration configuration, String resource, Map<String, XNode> sqlFragments) {
-        this(new XPathParser(reader, true, configuration.getVariables(), new XMLMapperEntityResolver()),
-                configuration, resource, sqlFragments);
-    }
 
     public MybatisxXMLMapperBuilder(InputStream inputStream, Configuration configuration, String resource, Map<String, XNode> sqlFragments, String namespace) {
         this(inputStream, configuration, resource, sqlFragments);
@@ -94,7 +81,7 @@ public class MybatisxXMLMapperBuilder extends BaseBuilder {
 
             // 对mybatis改造的源码
             List<XNode> oldXNode = context.evalNodes("select|insert|update|delete");
-            List<XNode> newXNode = DynamicMapperHandler.getCurrentNodeData(builderAssistant, namespace);
+            List<XNode> newXNode = BasicMapperHandler.getCurrentNodeData(builderAssistant, namespace);
             oldXNode.addAll(newXNode);
             buildStatementFromContext(oldXNode);
         } catch (Exception e) {

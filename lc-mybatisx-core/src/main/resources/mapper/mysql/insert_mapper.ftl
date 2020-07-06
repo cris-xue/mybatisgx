@@ -5,16 +5,16 @@
     <insert id="${insertSqlWrapper.methodName}" keyProperty="id" useGeneratedKeys="true" parameterType="${insertSqlWrapper.parameterType}">
         insert into ${insertSqlWrapper.tableName}
         <trim prefix="(" suffix=")" suffixOverrides=",">
-            <#list insertSqlWrapper.dbColumn as dbc>
-                <if test="${dbc} != null">
-                    ${dbc},
+            <#list insertSqlWrapper.modelWrapperList as mw>
+                <if test="${mw.entityColumn} != null">
+                    ${mw.dbColumn},
                 </if>
             </#list>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <#list insertSqlWrapper.entityColumn as enc>
-                <if test="${enc} != null">
-                    ${r'#{'} ${enc} ${r'}'},
+            <#list insertSqlWrapper.modelWrapperList as mw>
+                <if test="${mw.entityColumn} != null">
+                    ${r'#{'} ${mw.dbColumn} ${r'}'},
                 </if>
             </#list>
         </trim>

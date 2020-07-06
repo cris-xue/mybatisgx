@@ -5,6 +5,7 @@ import com.lc.mybatisx.annotation.MapperMethod;
 import com.lc.mybatisx.annotation.MethodType;
 import com.lc.mybatisx.dao.InsertDao;
 import com.lc.mybatisx.wrapper.InsertSqlWrapper;
+import com.lc.mybatisx.wrapper.ModelWrapper;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
@@ -104,20 +105,21 @@ public class InsertMapperHandler {
         insertSqlWrapper.setTableName(tableName);
         insertSqlWrapper.setResultType(entityClass.getName());
 
-        List<String> dbColumn = new ArrayList<>();
-        List<String> entityColumn = new ArrayList<>();
+        List<ModelWrapper> modelWrapperList = new ArrayList<>();
         PropertyDescriptor[] propertyDescriptors = getBeanPropertyList(entityClass);
         for (int i = 0; i < propertyDescriptors.length; i++) {
+            ModelWrapper modelWrapper = new ModelWrapper();
+
             PropertyDescriptor propertyDescriptor = propertyDescriptors[i];
             String fieldName = propertyDescriptor.getName();
             if ("class".equals(fieldName)) {
                 continue;
             }
-            dbColumn.add(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, fieldName));
-            entityColumn.add(fieldName);
+            modelWrapper.setDbColumn(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, fieldName));
+            modelWrapper.setEntityColumn(fieldName);
+            modelWrapperList.add(modelWrapper);
         }
-        insertSqlWrapper.setDbColumn(dbColumn);
-        insertSqlWrapper.setEntityColumn(entityColumn);
+        insertSqlWrapper.setModelWrapperList(modelWrapperList);
 
         return insertSqlWrapper;
     }

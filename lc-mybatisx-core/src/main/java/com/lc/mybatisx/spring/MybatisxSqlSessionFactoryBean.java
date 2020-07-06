@@ -17,9 +17,7 @@ import org.springframework.core.type.ClassMetadata;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.util.ClassUtils;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -58,10 +56,6 @@ public class MybatisxSqlSessionFactoryBean extends SqlSessionFactoryBean {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
-        } catch (ParserConfigurationException e) {
-            e.printStackTrace();
-        } catch (SAXException e) {
-            e.printStackTrace();
         }
 
         try {
@@ -78,7 +72,7 @@ public class MybatisxSqlSessionFactoryBean extends SqlSessionFactoryBean {
 
     }
 
-    private List<Resource> getUnMapperMethod() throws IOException, ClassNotFoundException, ParserConfigurationException, SAXException {
+    private List<Resource> getUnMapperMethod() throws IOException, ClassNotFoundException {
         List<Resource> mapperResourceList = new ArrayList<>();
 
         // 开始扫描dao
@@ -96,18 +90,25 @@ public class MybatisxSqlSessionFactoryBean extends SqlSessionFactoryBean {
                 xml = xml.concat("<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">\n");
                 xml = xml.concat("<mapper namespace=\"" + namespace + "\">\n");
                 xml = xml.concat("</mapper>");
-                ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes());
-                Resource resource = new InputStreamResource(bais, namespace);
-                mapperResourceList.add(resource);
-
-                bais.close();
+                ByteArrayInputStream bais = null;
+                try {
+                    bais = new ByteArrayInputStream(xml.getBytes());
+                    Resource resource = new InputStreamResource(bais, namespace);
+                    mapperResourceList.add(resource);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    if (bais != null) {
+                        bais.close();
+                    }
+                }
             }
         }
 
         return mapperResourceList;
     }
 
-    private boolean isExistInterface(Class targetClass, Class interfaceClass) throws IOException, ClassNotFoundException {
+    private boolean isExistInterface(Class targetClass, Class interfaceClass) {
         Class<?>[] daoInterfaces = targetClass.getInterfaces();
         for (Class daoInterface : daoInterfaces) {
             if (daoInterface == interfaceClass) {

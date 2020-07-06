@@ -4,11 +4,11 @@ import com.google.common.base.CaseFormat;
 import com.lc.mybatisx.annotation.MapperMethod;
 import com.lc.mybatisx.annotation.MethodType;
 import com.lc.mybatisx.dao.InsertDao;
+import com.lc.mybatisx.utils.FreeMarkerUtils;
 import com.lc.mybatisx.wrapper.ModelWrapper;
 import com.lc.mybatisx.wrapper.QuerySqlWrapper;
 import com.lc.mybatisx.wrapper.WhereWrapper;
 import freemarker.template.Template;
-import freemarker.template.TemplateException;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.parsing.XPathParser;
@@ -16,12 +16,10 @@ import org.apache.ibatis.session.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
-import org.springframework.core.io.ClassPathResource;
 import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
 
 import javax.persistence.Table;
 import java.beans.PropertyDescriptor;
-import java.io.*;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -148,32 +146,9 @@ public class QueryMapperHandler {
     }
 
     public List<XNode> readTemplate() {
-        Reader reader = null;
-        InputStream inputStream = null;
-        try {
-            ClassPathResource classPathResource = new ClassPathResource("mapper/mysql/query_mapper.ftl");
-            reader = new InputStreamReader(classPathResource.getInputStream());
-            Template template = new Template("mapper", reader, null, "utf-8");
-
-            List<XNode> xNodeList = generateBasicMethod(template);
-
-            return xNodeList;
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (inputStream != null) {
-                    inputStream.close();
-                }
-                if (reader != null) {
-                    reader.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        return null;
+        Template template = FreeMarkerUtils.getTemplate("mapper/mysql/query_mapper.ftl");
+        List<XNode> xNodeList = generateBasicMethod(template);
+        return xNodeList;
     }
 
     /**
@@ -184,42 +159,14 @@ public class QueryMapperHandler {
     public List<XNode> generateBasicMethod(Template template) {
         List<XNode> queryXNodeList = new ArrayList<>();
         querySqlWrapperList.forEach(querySqlWrapper -> {
-            StringWriter stringWriter = null;
-            InputStream is = null;
-            try {
-                Map<String, Object> templateData = new HashMap<>();
-                templateData.put("querySqlWrapper", querySqlWrapper);
+            Map<String, Object> templateData = new HashMap<>();
+            templateData.put("querySqlWrapper", querySqlWrapper);
 
-                stringWriter = new StringWriter();
-                template.process(templateData, stringWriter);
-                String basicMethodXml = stringWriter.toString();
-                log.debug(basicMethodXml);
+            XPathParser xPathParser = FreeMarkerUtils.processTemplate(templateData, template);
+            XNode mapperXNode = xPathParser.evalNode("/mapper");
 
-                // 把xml字符串转换成Document
-                is = new ByteArrayInputStream(basicMethodXml.getBytes());
-                XPathParser xPathParser = new XPathParser(is);
-                XNode mapperXNode = xPathParser.evalNode("/mapper");
-
-                List<XNode> queryXNode = mapperXNode.evalNodes("select");
-                queryXNodeList.addAll(queryXNode);
-            } catch (IOException | TemplateException e) {
-                e.printStackTrace();
-            } finally {
-                try {
-                    if (stringWriter != null) {
-                        stringWriter.flush();
-                    }
-                    if (stringWriter != null) {
-                        stringWriter.close();
-                    }
-                    if (is != null) {
-                        is.close();
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
+            List<XNode> queryXNode = mapperXNode.evalNodes("select");
+            queryXNodeList.addAll(queryXNode);
         });
 
         return queryXNodeList;

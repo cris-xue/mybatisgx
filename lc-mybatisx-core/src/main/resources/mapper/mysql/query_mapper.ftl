@@ -20,9 +20,11 @@
 
     <select id="${querySqlWrapper.methodName}" resultType="${querySqlWrapper.resultType}">
         select
-        <#list querySqlWrapper.modelWrapperList as mw>
-            ${mw.dbColumn} as ${mw.entityColumn},
-        </#list>
+        <trim prefix="" suffix="" suffixOverrides=",">
+            <#list querySqlWrapper.modelWrapperList as mw>
+                ${mw.dbColumn} as ${mw.entityColumn},
+            </#list>
+        </trim>
         from ${querySqlWrapper.tableName}
         <where>
             <#list querySqlWrapper.whereWrapperList as ww>

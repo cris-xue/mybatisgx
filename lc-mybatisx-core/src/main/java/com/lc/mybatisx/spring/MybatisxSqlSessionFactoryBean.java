@@ -8,7 +8,6 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.logging.Logger;
 import org.mybatis.logging.LoggerFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -21,9 +20,10 @@ import org.springframework.util.ClassUtils;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
-
-import static org.springframework.util.StringUtils.tokenizeToStringArray;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * create by: 薛承城
@@ -37,30 +37,23 @@ public class MybatisxSqlSessionFactoryBean extends SqlSessionFactoryBean {
     private static final ResourcePatternResolver RESOURCE_PATTERN_RESOLVER = new PathMatchingResourcePatternResolver();
     private static final MetadataReaderFactory METADATA_READER_FACTORY = new CachingMetadataReaderFactory();
 
-    private Resource[] mapperLocations;
+    // private Resource[] mapperLocations;
     private static String[] daoPackages;
 
-    @Override
+    /*@Override
     public void setMapperLocations(Resource[] mapperLocations) {
         super.setMapperLocations(mapperLocations);
         this.mapperLocations = mapperLocations;
-    }
+    }*/
 
     public static void setDaoPackages(String[] daoPackages) {
         MybatisxSqlSessionFactoryBean.daoPackages = daoPackages;
     }
 
     private void curdMethod(Configuration configuration) {
-        List<Resource> mapperResourceList = null;
+        List<Resource> mapperResourceList;
         try {
-            mapperResourceList = getUnMapperMethod();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        try {
+            mapperResourceList = getMapper();
             for (Resource mapperResource : mapperResourceList) {
                 InputStream is = mapperResource.getInputStream();
 
@@ -74,42 +67,26 @@ public class MybatisxSqlSessionFactoryBean extends SqlSessionFactoryBean {
 
     }
 
-    private List<Resource> getUnMapperMethod() throws IOException, ClassNotFoundException {
+    private List<Resource> getMapper() throws IOException {
         List<Resource> mapperResourceList = new ArrayList<>();
 
         // 开始扫描dao
-        Set<Resource> classResourceList = new HashSet<>();
-        String[] daoPackages = MybatisxSqlSessionFactoryBean.daoPackages;
-        for (String daoPackage : daoPackages) {
-            daoPackage = ClassUtils.convertClassNameToResourcePath(daoPackage).concat("/**.class");
-            Resource[] classResources = RESOURCE_PATTERN_RESOLVER.getResources(daoPackage);
+        Set<Resource> daoResourceSet = scanClasses(daoPackages, Dao.class);
+        for (Resource daoResource : daoResourceSet) {
+            ByteArrayInputStream bais = null;
+            try {
+                ClassMetadata classMetadata = METADATA_READER_FACTORY.getMetadataReader(daoResource).getClassMetadata();
+                String namespace = classMetadata.getClassName();
+                String mapperXml = createMapperXml(namespace);
 
-            classResourceList.addAll(Arrays.asList(classResources));
-        }
-
-        for (Resource classResource : classResourceList) {
-            ClassMetadata classMetadata = METADATA_READER_FACTORY.getMetadataReader(classResource).getClassMetadata();
-            Class<?> clazz = Resources.classForName(classMetadata.getClassName());
-
-            boolean isExistInterface = isExistInterface(clazz);
-
-            if (isExistInterface) {
-                String namespace = clazz.getName();
-                String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-                xml = xml.concat("<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">\n");
-                xml = xml.concat("<mapper namespace=\"" + namespace + "\">\n");
-                xml = xml.concat("</mapper>");
-                ByteArrayInputStream bais = null;
-                try {
-                    bais = new ByteArrayInputStream(xml.getBytes());
-                    Resource resource = new InputStreamResource(bais, namespace);
-                    mapperResourceList.add(resource);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                } finally {
-                    if (bais != null) {
-                        bais.close();
-                    }
+                bais = new ByteArrayInputStream(mapperXml.getBytes());
+                Resource resource = new InputStreamResource(bais, namespace);
+                mapperResourceList.add(resource);
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                if (bais != null) {
+                    bais.close();
                 }
             }
         }
@@ -117,41 +94,27 @@ public class MybatisxSqlSessionFactoryBean extends SqlSessionFactoryBean {
         return mapperResourceList;
     }
 
-    /**
-     * 判断顶层接口是否是Dao
-     *
-     * @param targetClass
-     * @return
-     */
-    private boolean isExistInterface(Class targetClass) {
-        return Dao.class.isAssignableFrom(targetClass);
-        /*Class<?>[] daoInterfaces = targetClass.getInterfaces();
-        for (Class daoInterface : daoInterfaces) {
-            if (daoInterface == Dao.class) {
-                return true;
-            } else {
-                return isExistInterface(daoInterface);
-            }
-        }
-        return false;*/
+    private String createMapperXml(String namespace) {
+        String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+        xml = xml.concat("<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">\n");
+        xml = xml.concat("<mapper namespace=\"" + namespace + "\">\n");
+        xml = xml.concat("</mapper>");
+
+        return xml;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public SqlSessionFactory getObject() throws Exception {
         SqlSessionFactory sqlSessionFactory = super.getObject();
+
         Configuration configuration = sqlSessionFactory.getConfiguration();
         curdMethod(configuration);
 
         return sqlSessionFactory;
     }
 
-    private Set<Class<?>> scanClasses(String packagePatterns, Class<?> assignableType) throws IOException {
-        Set<Class<?>> classes = new HashSet<>();
-        String[] packagePatternArray = tokenizeToStringArray(packagePatterns,
-                ConfigurableApplicationContext.CONFIG_LOCATION_DELIMITERS);
+    private Set<Resource> scanClasses(String[] packagePatternArray, Class<?> assignableType) throws IOException {
+        Set<Resource> classes = new HashSet<>();
         for (String packagePattern : packagePatternArray) {
             Resource[] resources = RESOURCE_PATTERN_RESOLVER.getResources(ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX
                     + ClassUtils.convertClassNameToResourcePath(packagePattern) + "/**/*.class");
@@ -160,7 +123,7 @@ public class MybatisxSqlSessionFactoryBean extends SqlSessionFactoryBean {
                     ClassMetadata classMetadata = METADATA_READER_FACTORY.getMetadataReader(resource).getClassMetadata();
                     Class<?> clazz = Resources.classForName(classMetadata.getClassName());
                     if (assignableType == null || assignableType.isAssignableFrom(clazz)) {
-                        classes.add(clazz);
+                        classes.add(resource);
                     }
                 } catch (Throwable e) {
                     LOGGER.warn(() -> "Cannot load the '" + resource + "'. Cause by " + e.toString());

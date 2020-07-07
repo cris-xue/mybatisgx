@@ -1,7 +1,6 @@
 package com.lc.mybatisx.spring;
 
-import com.lc.mybatisx.dao.BaseDao;
-import com.lc.mybatisx.dao.InsertDao;
+import com.lc.mybatisx.dao.Dao;
 import com.lc.mybatisx.mapper.MybatisxXMLMapperBuilder;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.Configuration;
@@ -22,10 +21,7 @@ import org.springframework.util.ClassUtils;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.springframework.util.StringUtils.tokenizeToStringArray;
 
@@ -42,7 +38,7 @@ public class MybatisxSqlSessionFactoryBean extends SqlSessionFactoryBean {
     private static final MetadataReaderFactory METADATA_READER_FACTORY = new CachingMetadataReaderFactory();
 
     private Resource[] mapperLocations;
-    private String[] daoPackages;
+    private static String[] daoPackages;
 
     @Override
     public void setMapperLocations(Resource[] mapperLocations) {
@@ -50,8 +46,8 @@ public class MybatisxSqlSessionFactoryBean extends SqlSessionFactoryBean {
         this.mapperLocations = mapperLocations;
     }
 
-    public void setDaoPackages(String[] daoPackages) {
-        this.daoPackages = daoPackages;
+    public static void setDaoPackages(String[] daoPackages) {
+        MybatisxSqlSessionFactoryBean.daoPackages = daoPackages;
     }
 
     private void curdMethod(Configuration configuration) {
@@ -82,13 +78,20 @@ public class MybatisxSqlSessionFactoryBean extends SqlSessionFactoryBean {
         List<Resource> mapperResourceList = new ArrayList<>();
 
         // 开始扫描dao
-        ClassUtils.convertClassNameToResourcePath("").concat("/**.class");
-        Resource[] classResources = RESOURCE_PATTERN_RESOLVER.getResources("classpath*:/com/es/wms/test/dao/**/**.class");
-        for (Resource classResource : classResources) {
+        Set<Resource> classResourceList = new HashSet<>();
+        String[] daoPackages = MybatisxSqlSessionFactoryBean.daoPackages;
+        for (String daoPackage : daoPackages) {
+            daoPackage = ClassUtils.convertClassNameToResourcePath(daoPackage).concat("/**.class");
+            Resource[] classResources = RESOURCE_PATTERN_RESOLVER.getResources(daoPackage);
+
+            classResourceList.addAll(Arrays.asList(classResources));
+        }
+
+        for (Resource classResource : classResourceList) {
             ClassMetadata classMetadata = METADATA_READER_FACTORY.getMetadataReader(classResource).getClassMetadata();
             Class<?> clazz = Resources.classForName(classMetadata.getClassName());
 
-            boolean isExistInterface = isExistInterface(clazz, BaseDao.class);
+            boolean isExistInterface = isExistInterface(clazz);
 
             if (isExistInterface) {
                 String namespace = clazz.getName();
@@ -114,14 +117,23 @@ public class MybatisxSqlSessionFactoryBean extends SqlSessionFactoryBean {
         return mapperResourceList;
     }
 
-    private boolean isExistInterface(Class targetClass, Class interfaceClass) {
-        Class<?>[] daoInterfaces = targetClass.getInterfaces();
+    /**
+     * 判断顶层接口是否是Dao
+     *
+     * @param targetClass
+     * @return
+     */
+    private boolean isExistInterface(Class targetClass) {
+        return Dao.class.isAssignableFrom(targetClass);
+        /*Class<?>[] daoInterfaces = targetClass.getInterfaces();
         for (Class daoInterface : daoInterfaces) {
-            if (daoInterface == InsertDao.class) {
+            if (daoInterface == Dao.class) {
                 return true;
+            } else {
+                return isExistInterface(daoInterface);
             }
         }
-        return false;
+        return false;*/
     }
 
     /**

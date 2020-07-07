@@ -1,5 +1,6 @@
 package com.lc.mybatisx;
 
+import com.lc.mybatisx.spring.MybatisxSqlSessionFactoryBean;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.annotation.AnnotationAttributes;
@@ -18,7 +19,8 @@ public class MybatisxRegistrar implements ImportBeanDefinitionRegistrar {
                 .fromMap(importingClassMetadata.getAnnotationAttributes(Mybatisx.class.getName()));
 
         if (attrs != null) {
-            attrs.get("basePackages");
+            String[] basePackages = (String[]) attrs.get("basePackages");
+            MybatisxSqlSessionFactoryBean.setDaoPackages(basePackages);
         }
     }
 

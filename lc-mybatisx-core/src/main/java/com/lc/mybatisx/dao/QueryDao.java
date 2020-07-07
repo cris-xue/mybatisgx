@@ -12,7 +12,7 @@ import java.util.List;
  * @description：一句话描述
  * @date ：2019/12/5 14:46
  */
-public interface QueryDao<ENTITY, ID extends Serializable> {
+public interface QueryDao<ENTITY, ID extends Serializable> extends Dao {
 
     @MapperMethod(type = MethodType.QUERY)
     ENTITY findById(@Param("id") ID id);

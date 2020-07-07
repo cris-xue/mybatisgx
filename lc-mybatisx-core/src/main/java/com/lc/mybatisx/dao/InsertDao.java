@@ -10,7 +10,7 @@ import java.io.Serializable;
  * @description：一句话描述
  * @date ：2019/12/5 14:46
  */
-public interface InsertDao<ENTITY, ID extends Serializable> {
+public interface InsertDao<ENTITY, ID extends Serializable> extends Dao {
 
     @MapperMethod(type = MethodType.INSERT)
     int insertSelective(ENTITY entity);

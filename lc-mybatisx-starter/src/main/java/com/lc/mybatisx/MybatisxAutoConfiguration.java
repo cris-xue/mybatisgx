@@ -23,6 +23,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.boot.autoconfigure.AutoConfigurationPackages;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnSingleCandidate;
@@ -50,7 +51,8 @@ import java.util.List;
  */
 @ConditionalOnClass({SqlSessionFactory.class, MybatisxSqlSessionFactoryBean.class})
 @ConditionalOnSingleCandidate(DataSource.class)
-@EnableConfigurationProperties(MybatisProperties.class)
+@EnableConfigurationProperties(MybatisxProperties.class)
+@AutoConfigureBefore(MybatisAutoConfiguration.class)
 @AutoConfigureAfter(DataSourceAutoConfiguration.class)
 public class MybatisxAutoConfiguration implements InitializingBean {
 

@@ -42,11 +42,16 @@ public class MybatisxSqlSessionFactoryBean extends SqlSessionFactoryBean {
     private static final MetadataReaderFactory METADATA_READER_FACTORY = new CachingMetadataReaderFactory();
 
     private Resource[] mapperLocations;
+    private String[] daoPackages;
 
     @Override
     public void setMapperLocations(Resource[] mapperLocations) {
         super.setMapperLocations(mapperLocations);
         this.mapperLocations = mapperLocations;
+    }
+
+    public void setDaoPackages(String[] daoPackages) {
+        this.daoPackages = daoPackages;
     }
 
     private void curdMethod(Configuration configuration) {
@@ -78,7 +83,7 @@ public class MybatisxSqlSessionFactoryBean extends SqlSessionFactoryBean {
 
         // 开始扫描dao
         ClassUtils.convertClassNameToResourcePath("").concat("/**.class");
-        Resource[] classResources = RESOURCE_PATTERN_RESOLVER.getResources("classpath*:/com/es/wms/tenant/dao/**/**.class");
+        Resource[] classResources = RESOURCE_PATTERN_RESOLVER.getResources("classpath*:/com/es/wms/test/dao/**/**.class");
         for (Resource classResource : classResources) {
             ClassMetadata classMetadata = METADATA_READER_FACTORY.getMetadataReader(classResource).getClassMetadata();
             Class<?> clazz = Resources.classForName(classMetadata.getClassName());

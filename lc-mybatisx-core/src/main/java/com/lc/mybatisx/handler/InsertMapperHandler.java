@@ -14,9 +14,7 @@ import org.apache.ibatis.parsing.XPathParser;
 import org.apache.ibatis.session.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 
-import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -33,7 +31,12 @@ public class InsertMapperHandler extends AbstractMapperHandler {
 
     private static final Logger log = LoggerFactory.getLogger(InsertMapperHandler.class);
 
-    private ModelMapperHandler modelMapperHandler = new ModelMapperHandler();
+    private ModelMapperHandler modelMapperHandler = new ModelMapperHandler() {
+        @Override
+        public Class<?> getModelClass(Method method, Class<?> entityClass) {
+            return null;
+        }
+    };
     private List<InsertSqlWrapper> insertSqlWrapperList;
 
     public InsertMapperHandler(MapperBuilderAssistant builderAssistant, String namespace) {
@@ -68,8 +71,7 @@ public class InsertMapperHandler extends AbstractMapperHandler {
         InsertSqlWrapper insertSqlWrapper = (InsertSqlWrapper) this.buildSqlWrapper(namespace, method, daoInterfaceParams);
 
         Class<?> entityClass = (Class<?>) daoInterfaceParams[0];
-        PropertyDescriptor[] propertyDescriptors = getBeanPropertyList(entityClass);
-        List<ModelWrapper> modelWrapperList = modelMapperHandler.buildModelWrapper(propertyDescriptors);
+        List<ModelWrapper> modelWrapperList = modelMapperHandler.buildModelWrapper(entityClass);
         insertSqlWrapper.setModelWrapperList(modelWrapperList);
 
         return insertSqlWrapper;
@@ -77,16 +79,11 @@ public class InsertMapperHandler extends AbstractMapperHandler {
 
     public List<XNode> readTemplate() {
         Template template = FreeMarkerUtils.getTemplate("mapper/mysql/insert_mapper.ftl");
-        List<XNode> xNodeList = generateBasicMethod(template);
+        List<XNode> xNodeList = generateInsertMethod(template);
         return xNodeList;
     }
-
-    /**
-     * 生成基本的增删改查
-     *
-     * @return
-     */
-    public List<XNode> generateBasicMethod(Template template) {
+    
+    public List<XNode> generateInsertMethod(Template template) {
         List<XNode> insertXNodeList = new ArrayList<>();
         insertSqlWrapperList.forEach(insertSqlWrapper -> {
             Map<String, Object> templateData = new HashMap<>();
@@ -100,10 +97,6 @@ public class InsertMapperHandler extends AbstractMapperHandler {
         });
 
         return insertXNodeList;
-    }
-
-    private static PropertyDescriptor[] getBeanPropertyList(Class<?> clazz) {
-        return BeanUtils.getPropertyDescriptors(clazz);
     }
 
     @Override

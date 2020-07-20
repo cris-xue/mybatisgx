@@ -15,9 +15,7 @@ import org.apache.ibatis.parsing.XPathParser;
 import org.apache.ibatis.session.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 
-import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -34,8 +32,23 @@ public class QueryMapperHandler extends AbstractMapperHandler {
 
     private static final Logger log = LoggerFactory.getLogger(QueryMapperHandler.class);
 
-    private ModelMapperHandler modelMapperHandler;
-    private ConditionMapperHandler conditionMapperHandler;
+    private ModelMapperHandler modelMapperHandler = new ModelMapperHandler() {
+        @Override
+        public Class<?> getModelClass(Method method, Class<?> entityClass) {
+            String methodName = method.getName();
+            Class<?> modelClass;
+            if ("findById".equals(methodName)) {
+                modelClass = entityClass;
+            } else if ("findAll".equals(methodName)) {
+                modelClass = entityClass;
+            } else {
+                modelClass = method.getReturnType();
+            }
+
+            return modelClass;
+        }
+    };
+    private ConditionMapperHandler conditionMapperHandler = new ConditionMapperHandler();
 
     private List<QuerySqlWrapper> querySqlWrapperList;
 
@@ -52,7 +65,7 @@ public class QueryMapperHandler extends AbstractMapperHandler {
                 continue;
             }
 
-            QuerySqlWrapper querySqlWrapper = this.buildInsertSqlWrapper(namespace, method, daoInterfaceParams);
+            QuerySqlWrapper querySqlWrapper = this.buildQuerySqlWrapper(namespace, method, daoInterfaceParams);
             if (querySqlWrapper == null) {
                 continue;
             }
@@ -62,7 +75,7 @@ public class QueryMapperHandler extends AbstractMapperHandler {
         this.querySqlWrapperList = querySqlWrapperList;
     }
 
-    private QuerySqlWrapper buildInsertSqlWrapper(String namespace, Method method, Type[] daoInterfaceParams) {
+    private QuerySqlWrapper buildQuerySqlWrapper(String namespace, Method method, Type[] daoInterfaceParams) {
         MapperMethod mapperMethod = method.getAnnotation(MapperMethod.class);
         if (mapperMethod == null || mapperMethod.type() != MethodType.QUERY) {
             return null;
@@ -71,9 +84,8 @@ public class QueryMapperHandler extends AbstractMapperHandler {
         QuerySqlWrapper querySqlWrapper = (QuerySqlWrapper) this.buildSqlWrapper(namespace, method, daoInterfaceParams);
 
         Class<?> entityClass = (Class<?>) daoInterfaceParams[0];
-        Class<?> modelClass = this.getModelClass(method, entityClass);
-        PropertyDescriptor[] propertyDescriptors = getBeanPropertyList(modelClass);
-        List<ModelWrapper> modelWrapperList = modelMapperHandler.buildModelWrapper(propertyDescriptors);
+        Class<?> modelClass = modelMapperHandler.getModelClass(method, entityClass);
+        List<ModelWrapper> modelWrapperList = modelMapperHandler.buildModelWrapper(modelClass);
         querySqlWrapper.setModelWrapperList(modelWrapperList);
 
         List<WhereWrapper> whereWrapperList = conditionMapperHandler.buildWhereWrapper(method);
@@ -82,32 +94,13 @@ public class QueryMapperHandler extends AbstractMapperHandler {
         return querySqlWrapper;
     }
 
-    private Class<?> getModelClass(Method method, Class<?> entityClass) {
-        String methodName = method.getName();
-        Class<?> modelClass;
-        if ("findById".equals(methodName)) {
-            modelClass = entityClass;
-        } else if ("findAll".equals(methodName)) {
-            modelClass = entityClass;
-        } else {
-            modelClass = method.getReturnType();
-        }
-
-        return modelClass;
-    }
-
     public List<XNode> readTemplate() {
         Template template = FreeMarkerUtils.getTemplate("mapper/mysql/query_mapper.ftl");
-        List<XNode> xNodeList = generateBasicMethod(template);
+        List<XNode> xNodeList = generateQueryMethod(template);
         return xNodeList;
     }
 
-    /**
-     * 生成基本的增删改查
-     *
-     * @return
-     */
-    public List<XNode> generateBasicMethod(Template template) {
+    public List<XNode> generateQueryMethod(Template template) {
         List<XNode> queryXNodeList = new ArrayList<>();
         querySqlWrapperList.forEach(querySqlWrapper -> {
             Map<String, Object> templateData = new HashMap<>();
@@ -121,10 +114,6 @@ public class QueryMapperHandler extends AbstractMapperHandler {
         });
 
         return queryXNodeList;
-    }
-
-    private static PropertyDescriptor[] getBeanPropertyList(Class<?> clazz) {
-        return BeanUtils.getPropertyDescriptors(clazz);
     }
 
     @Override

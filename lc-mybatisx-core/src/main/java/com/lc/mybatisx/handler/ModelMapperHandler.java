@@ -2,8 +2,10 @@ package com.lc.mybatisx.handler;
 
 import com.google.common.base.CaseFormat;
 import com.lc.mybatisx.wrapper.ModelWrapper;
+import org.springframework.beans.BeanUtils;
 
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,9 +14,13 @@ import java.util.List;
  * @description：模型处理器
  * @date ：2020/7/20 12:24
  */
-public class ModelMapperHandler {
+public abstract class ModelMapperHandler {
 
-    public List<ModelWrapper> buildModelWrapper(PropertyDescriptor[] propertyDescriptors) {
+    public abstract Class<?> getModelClass(Method method, Class<?> entityClass);
+
+    public List<ModelWrapper> buildModelWrapper(Class<?> modelClass) {
+        PropertyDescriptor[] propertyDescriptors = getBeanPropertyList(modelClass);
+
         List<ModelWrapper> modelWrapperList = new ArrayList<>();
         for (int i = 0; i < propertyDescriptors.length; i++) {
             ModelWrapper modelWrapper = new ModelWrapper();
@@ -30,6 +36,10 @@ public class ModelMapperHandler {
         }
 
         return modelWrapperList;
+    }
+
+    private static PropertyDescriptor[] getBeanPropertyList(Class<?> clazz) {
+        return BeanUtils.getPropertyDescriptors(clazz);
     }
 
 }

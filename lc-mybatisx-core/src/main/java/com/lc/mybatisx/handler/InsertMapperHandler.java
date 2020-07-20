@@ -33,7 +33,7 @@ public class InsertMapperHandler extends AbstractMapperHandler {
 
     private static final Logger log = LoggerFactory.getLogger(InsertMapperHandler.class);
 
-    private ModelMapperHandler modelMapperHandler;
+    private ModelMapperHandler modelMapperHandler = new ModelMapperHandler();
     private List<InsertSqlWrapper> insertSqlWrapperList;
 
     public InsertMapperHandler(MapperBuilderAssistant builderAssistant, String namespace) {

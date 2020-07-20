@@ -27,12 +27,15 @@ import java.util.Map;
 
 /**
  * @author ：薛承城
- * @description：一句话描述
+ * @description：查询处理器
  * @date ：2020/7/6 12:56
  */
 public class QueryMapperHandler extends AbstractMapperHandler {
 
     private static final Logger log = LoggerFactory.getLogger(QueryMapperHandler.class);
+
+    private ModelMapperHandler modelMapperHandler;
+    private ConditionMapperHandler conditionMapperHandler;
 
     private List<QuerySqlWrapper> querySqlWrapperList;
 
@@ -70,10 +73,10 @@ public class QueryMapperHandler extends AbstractMapperHandler {
         Class<?> entityClass = (Class<?>) daoInterfaceParams[0];
         Class<?> modelClass = this.getModelClass(method, entityClass);
         PropertyDescriptor[] propertyDescriptors = getBeanPropertyList(modelClass);
-        List<ModelWrapper> modelWrapperList = this.buildModelWrapper(propertyDescriptors);
+        List<ModelWrapper> modelWrapperList = modelMapperHandler.buildModelWrapper(propertyDescriptors);
         querySqlWrapper.setModelWrapperList(modelWrapperList);
 
-        List<WhereWrapper> whereWrapperList = this.buildWhereWrapper(method);
+        List<WhereWrapper> whereWrapperList = conditionMapperHandler.buildWhereWrapper(method);
         querySqlWrapper.setWhereWrapperList(whereWrapperList);
 
         return querySqlWrapper;
@@ -91,25 +94,6 @@ public class QueryMapperHandler extends AbstractMapperHandler {
         }
 
         return modelClass;
-    }
-
-    private List<WhereWrapper> buildWhereWrapper(Method method) {
-        String methodName = method.getName();
-
-        List<WhereWrapper> whereWrapperList = new ArrayList<>();
-        if (!"findAll".equals(methodName)) {
-            String[] methodNames = methodName.split("By");
-            String[] wheres = methodNames[1].split("And|Or");
-            for (int i = 0; i < wheres.length; i++) {
-                WhereWrapper whereWrapper = new WhereWrapper();
-                whereWrapper.setField(wheres[i]);
-                whereWrapper.setOp("=");
-                whereWrapper.setValue("${" + wheres[i] + "}");
-                whereWrapperList.add(whereWrapper);
-            }
-        }
-
-        return whereWrapperList;
     }
 
     public List<XNode> readTemplate() {

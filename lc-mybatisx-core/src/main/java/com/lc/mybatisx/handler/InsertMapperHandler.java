@@ -33,6 +33,7 @@ public class InsertMapperHandler extends AbstractMapperHandler {
 
     private static final Logger log = LoggerFactory.getLogger(InsertMapperHandler.class);
 
+    private ModelMapperHandler modelMapperHandler;
     private List<InsertSqlWrapper> insertSqlWrapperList;
 
     public InsertMapperHandler(MapperBuilderAssistant builderAssistant, String namespace) {
@@ -68,7 +69,7 @@ public class InsertMapperHandler extends AbstractMapperHandler {
 
         Class<?> entityClass = (Class<?>) daoInterfaceParams[0];
         PropertyDescriptor[] propertyDescriptors = getBeanPropertyList(entityClass);
-        List<ModelWrapper> modelWrapperList = this.buildModelWrapper(propertyDescriptors);
+        List<ModelWrapper> modelWrapperList = modelMapperHandler.buildModelWrapper(propertyDescriptors);
         insertSqlWrapper.setModelWrapperList(modelWrapperList);
 
         return insertSqlWrapper;

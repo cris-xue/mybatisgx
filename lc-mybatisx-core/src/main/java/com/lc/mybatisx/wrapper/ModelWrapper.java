@@ -3,7 +3,7 @@ package com.lc.mybatisx.wrapper;
 /**
  * @author ：薛承城
  * @description：一句话描述
- * @date ：2020/7/6 15:24
+ * @date ：2020/7/5 15:24
  */
 public class ModelWrapper {
 

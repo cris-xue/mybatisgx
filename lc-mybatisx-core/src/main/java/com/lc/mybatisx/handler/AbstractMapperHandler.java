@@ -1,16 +1,11 @@
 package com.lc.mybatisx.handler;
 
-import com.google.common.base.CaseFormat;
-import com.lc.mybatisx.wrapper.ModelWrapper;
 import com.lc.mybatisx.wrapper.SqlWrapper;
 import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
 
 import javax.persistence.Table;
-import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author ：薛承城
@@ -61,23 +56,5 @@ public abstract class AbstractMapperHandler {
     }
 
     abstract protected SqlWrapper instanceSqlWrapper();
-
-    protected List<ModelWrapper> buildModelWrapper(PropertyDescriptor[] propertyDescriptors) {
-        List<ModelWrapper> modelWrapperList = new ArrayList<>();
-        for (int i = 0; i < propertyDescriptors.length; i++) {
-            ModelWrapper modelWrapper = new ModelWrapper();
-
-            PropertyDescriptor propertyDescriptor = propertyDescriptors[i];
-            String fieldName = propertyDescriptor.getName();
-            if ("class".equals(fieldName)) {
-                continue;
-            }
-            modelWrapper.setDbColumn(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, fieldName));
-            modelWrapper.setEntityColumn(fieldName);
-            modelWrapperList.add(modelWrapper);
-        }
-
-        return modelWrapperList;
-    }
 
 }

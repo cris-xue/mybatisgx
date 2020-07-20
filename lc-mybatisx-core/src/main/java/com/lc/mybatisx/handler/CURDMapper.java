@@ -20,9 +20,13 @@ public class CURDMapper {
         QueryMapperHandler queryMapperHandler = new QueryMapperHandler(builderAssistant, namespace);
         List<XNode> queryList = queryMapperHandler.readTemplate();
 
+        UpdateMapperHandler updateMapperHandler = new UpdateMapperHandler(builderAssistant, namespace);
+        List<XNode> updateList = updateMapperHandler.readTemplate();
+
         List<XNode> curdList = new ArrayList<>();
         curdList.addAll(insertList);
         curdList.addAll(queryList);
+        curdList.addAll(updateList);
         return curdList;
     }
 

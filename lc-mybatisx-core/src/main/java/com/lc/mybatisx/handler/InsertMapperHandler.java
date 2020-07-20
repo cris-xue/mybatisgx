@@ -25,7 +25,7 @@ import java.util.Map;
 /**
  * @author ：薛承城
  * @description：一句话描述
- * @date ：2020/7/6 12:56
+ * @date ：2020/7/5 12:56
  */
 public class InsertMapperHandler extends AbstractMapperHandler {
 
@@ -34,7 +34,7 @@ public class InsertMapperHandler extends AbstractMapperHandler {
     private ModelMapperHandler modelMapperHandler = new ModelMapperHandler() {
         @Override
         public Class<?> getModelClass(Method method, Class<?> entityClass) {
-            return null;
+            return entityClass;
         }
     };
     private List<InsertSqlWrapper> insertSqlWrapperList;
@@ -82,7 +82,7 @@ public class InsertMapperHandler extends AbstractMapperHandler {
         List<XNode> xNodeList = generateInsertMethod(template);
         return xNodeList;
     }
-    
+
     public List<XNode> generateInsertMethod(Template template) {
         List<XNode> insertXNodeList = new ArrayList<>();
         insertSqlWrapperList.forEach(insertSqlWrapper -> {

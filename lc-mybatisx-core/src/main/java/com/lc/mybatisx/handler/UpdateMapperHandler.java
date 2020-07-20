@@ -67,7 +67,7 @@ public class UpdateMapperHandler extends AbstractMapperHandler {
 
     private UpdateSqlWrapper buildUpdateSqlWrapper(String namespace, Method method, Type[] daoInterfaceParams) {
         MapperMethod mapperMethod = method.getAnnotation(MapperMethod.class);
-        if (mapperMethod == null || mapperMethod.type() != MethodType.QUERY) {
+        if (mapperMethod == null || mapperMethod.type() != MethodType.UPDATE) {
             return null;
         }
 

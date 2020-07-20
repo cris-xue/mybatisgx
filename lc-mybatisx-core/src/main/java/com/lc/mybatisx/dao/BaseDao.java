@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Param;
 import java.io.Serializable;
 import java.util.List;
 
+@Deprecated
 public interface BaseDao<T, ID extends Serializable> {
 
     int insertSelective(T t);

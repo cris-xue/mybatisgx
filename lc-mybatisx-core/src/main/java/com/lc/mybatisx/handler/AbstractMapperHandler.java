@@ -1,5 +1,7 @@
 package com.lc.mybatisx.handler;
 
+import com.lc.mybatisx.dao.SimpleDao;
+import com.lc.mybatisx.exception.NotFoundInterfaceParam;
 import com.lc.mybatisx.wrapper.SqlWrapper;
 import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
 
@@ -31,12 +33,12 @@ public abstract class AbstractMapperHandler {
             ParameterizedTypeImpl daoSuperInterfaceClass = (ParameterizedTypeImpl) daoSuperInterfaceType;
             Class<?> daoSuperInterface = daoSuperInterfaceClass.getRawType();
             Type[] daoInterfaceParams = daoSuperInterfaceClass.getActualTypeArguments();
-            if (daoSuperInterface == CURDInterface) {
+            if (daoSuperInterface == CURDInterface || daoSuperInterface == SimpleDao.class) {
                 return daoInterfaceParams;
             }
         }
 
-        return null;
+        throw new NotFoundInterfaceParam(daoInterface.getName() + " not found param");
     }
 
     protected SqlWrapper buildSqlWrapper(String namespace, Method method, Type[] daoInterfaceParams) {

@@ -1,5 +1,7 @@
 package com.lc.mybatisx.dao;
 
+import org.apache.ibatis.annotations.Param;
+
 import java.io.Serializable;
 
 /**
@@ -8,4 +10,7 @@ import java.io.Serializable;
  * @date ：2020/7/20 14:46
  */
 public interface DeleteDao<ENTITY, ID extends Serializable> extends Dao {
+
+    int deleteById(@Param("id") ID id);
+
 }

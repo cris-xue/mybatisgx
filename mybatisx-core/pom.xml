@@ -5,13 +5,13 @@
 	
 	<parent>
 		<groupId>com.lc</groupId>
-		<artifactId>lc-mybatisx</artifactId>
+		<artifactId>mybatisx</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	
-	<artifactId>lc-mybatisx-core</artifactId>
-	<name>lc-mybatisx-core</name>
+	<artifactId>mybatisx-core</artifactId>
+	<name>mybatisx-core</name>
 	<url>http://www.example.com</url>
 	
 	<properties>

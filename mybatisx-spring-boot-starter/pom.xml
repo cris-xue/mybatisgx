@@ -5,13 +5,13 @@
 	
 	<parent>
 		<groupId>com.lc</groupId>
-		<artifactId>lc-mybatisx</artifactId>
+		<artifactId>mybatisx</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	
-	<artifactId>lc-mybatisx-starter</artifactId>
-	<name>lc-mybatisx-starter</name>
+	<artifactId>mybatisx-spring-boot-starter</artifactId>
+	<name>mybatisx-spring-boot-starter</name>
 	<url>http://www.example.com</url>
 	
 	<properties>
@@ -27,7 +27,7 @@
 		
 		<dependency>
 			<groupId>com.lc</groupId>
-			<artifactId>lc-mybatisx-core</artifactId>
+			<artifactId>mybatisx-core</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>

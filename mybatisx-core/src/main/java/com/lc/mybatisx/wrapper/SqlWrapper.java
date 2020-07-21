@@ -9,11 +9,29 @@ import java.util.List;
  */
 public class SqlWrapper {
 
+    /**
+     * 命名空间
+     */
     private String namespace;
+    /**
+     * 方法名
+     */
     private String methodName;
+    /**
+     * 参数类型
+     */
     private String parameterType;
+    /**
+     * 数据库表名
+     */
     private String tableName;
+    /**
+     * 返回结果类型
+     */
     private String resultType;
+    /**
+     * 方法返回的模型映射器
+     */
     private List<ModelWrapper> modelWrapperList;
 
     public String getNamespace() {

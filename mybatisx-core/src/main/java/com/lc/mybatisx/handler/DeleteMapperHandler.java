@@ -2,11 +2,11 @@ package com.lc.mybatisx.handler;
 
 import com.lc.mybatisx.annotation.MapperMethod;
 import com.lc.mybatisx.annotation.MethodType;
-import com.lc.mybatisx.dao.UpdateDao;
+import com.lc.mybatisx.dao.DeleteDao;
 import com.lc.mybatisx.utils.FreeMarkerUtils;
+import com.lc.mybatisx.wrapper.DeleteSqlWrapper;
 import com.lc.mybatisx.wrapper.ModelWrapper;
 import com.lc.mybatisx.wrapper.SqlWrapper;
-import com.lc.mybatisx.wrapper.UpdateSqlWrapper;
 import com.lc.mybatisx.wrapper.WhereWrapper;
 import freemarker.template.Template;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
@@ -25,12 +25,12 @@ import java.util.Map;
 
 /**
  * @author ：薛承城
- * @description：更新处理器
+ * @description：删除处理器
  * @date ：2020/7/5 12:56
  */
-public class UpdateMapperHandler extends AbstractMapperHandler {
+public class DeleteMapperHandler extends AbstractMapperHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(UpdateMapperHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(DeleteMapperHandler.class);
 
     private ModelMapperHandler modelMapperHandler = new ModelMapperHandler() {
         @Override
@@ -40,13 +40,13 @@ public class UpdateMapperHandler extends AbstractMapperHandler {
     };
     private ConditionMapperHandler conditionMapperHandler = new ConditionMapperHandler();
 
-    private List<UpdateSqlWrapper> updateSqlWrapperList;
+    private List<DeleteSqlWrapper> deleteSqlWrapperList;
 
-    public UpdateMapperHandler(MapperBuilderAssistant builderAssistant, String namespace) {
+    public DeleteMapperHandler(MapperBuilderAssistant builderAssistant, String namespace) {
         Class<?> daoInterface = getDaoInterface(namespace);
-        Type[] daoInterfaceParams = getDaoInterfaceParams(daoInterface, UpdateDao.class);
+        Type[] daoInterfaceParams = getDaoInterfaceParams(daoInterface, DeleteDao.class);
 
-        List<UpdateSqlWrapper> updateSqlWrapperList = new ArrayList<>();
+        List<DeleteSqlWrapper> deleteSqlWrapperList = new ArrayList<>();
         Method[] methods = daoInterface.getMethods();
         for (int i = 0; i < methods.length; i++) {
             Method method = methods[i];
@@ -55,59 +55,59 @@ public class UpdateMapperHandler extends AbstractMapperHandler {
                 continue;
             }
 
-            UpdateSqlWrapper updateSqlWrapper = this.buildUpdateSqlWrapper(namespace, method, daoInterfaceParams);
-            if (updateSqlWrapper == null) {
+            DeleteSqlWrapper deleteSqlWrapper = this.buildDeleteSqlWrapper(namespace, method, daoInterfaceParams);
+            if (deleteSqlWrapper == null) {
                 continue;
             }
-            updateSqlWrapperList.add(updateSqlWrapper);
+            deleteSqlWrapperList.add(deleteSqlWrapper);
         }
 
-        this.updateSqlWrapperList = updateSqlWrapperList;
+        this.deleteSqlWrapperList = deleteSqlWrapperList;
     }
 
-    private UpdateSqlWrapper buildUpdateSqlWrapper(String namespace, Method method, Type[] daoInterfaceParams) {
+    private DeleteSqlWrapper buildDeleteSqlWrapper(String namespace, Method method, Type[] daoInterfaceParams) {
         MapperMethod mapperMethod = method.getAnnotation(MapperMethod.class);
-        if (mapperMethod == null || mapperMethod.type() != MethodType.UPDATE) {
+        if (mapperMethod == null || mapperMethod.type() != MethodType.DELETE) {
             return null;
         }
 
-        UpdateSqlWrapper updateSqlWrapper = (UpdateSqlWrapper) this.buildSqlWrapper(namespace, method, daoInterfaceParams);
+        DeleteSqlWrapper deleteSqlWrapper = (DeleteSqlWrapper) this.buildSqlWrapper(namespace, method, daoInterfaceParams);
 
         Class<?> entityClass = (Class<?>) daoInterfaceParams[0];
         Class<?> modelClass = modelMapperHandler.getModelClass(method, entityClass);
         List<ModelWrapper> modelWrapperList = modelMapperHandler.buildModelWrapper(modelClass);
-        updateSqlWrapper.setModelWrapperList(modelWrapperList);
+        deleteSqlWrapper.setModelWrapperList(modelWrapperList);
 
         List<WhereWrapper> whereWrapperList = conditionMapperHandler.buildWhereWrapper(method);
-        updateSqlWrapper.setWhereWrapperList(whereWrapperList);
+        deleteSqlWrapper.setWhereWrapperList(whereWrapperList);
 
-        return updateSqlWrapper;
+        return deleteSqlWrapper;
     }
 
     public List<XNode> readTemplate() {
-        Template template = FreeMarkerUtils.getTemplate("mapper/mysql/update_mapper.ftl");
-        List<XNode> xNodeList = generateUpdateMethod(template);
+        Template template = FreeMarkerUtils.getTemplate("mapper/mysql/delete_mapper.ftl");
+        List<XNode> xNodeList = generateDeleteMethod(template);
         return xNodeList;
     }
 
-    public List<XNode> generateUpdateMethod(Template template) {
-        List<XNode> updateXNodeList = new ArrayList<>();
-        updateSqlWrapperList.forEach(updateSqlWrapper -> {
+    public List<XNode> generateDeleteMethod(Template template) {
+        List<XNode> deleteXNodeList = new ArrayList<>();
+        deleteSqlWrapperList.forEach(deleteSqlWrapper -> {
             Map<String, Object> templateData = new HashMap<>();
-            templateData.put("updateSqlWrapper", updateSqlWrapper);
+            templateData.put("deleteSqlWrapper", deleteSqlWrapper);
 
             XPathParser xPathParser = FreeMarkerUtils.processTemplate(templateData, template);
             XNode mapperXNode = xPathParser.evalNode("/mapper");
 
-            List<XNode> updateXNode = mapperXNode.evalNodes("update");
-            updateXNodeList.addAll(updateXNode);
+            List<XNode> deleteXNode = mapperXNode.evalNodes("delete");
+            deleteXNodeList.addAll(deleteXNode);
         });
 
-        return updateXNodeList;
+        return deleteXNodeList;
     }
 
     @Override
     protected SqlWrapper instanceSqlWrapper() {
-        return new UpdateSqlWrapper();
+        return new DeleteSqlWrapper();
     }
 }

@@ -23,10 +23,14 @@ public class CURDMapper {
         UpdateMapperHandler updateMapperHandler = new UpdateMapperHandler(builderAssistant, namespace);
         List<XNode> updateList = updateMapperHandler.readTemplate();
 
+        DeleteMapperHandler deleteMapperHandler = new DeleteMapperHandler(builderAssistant, namespace);
+        List<XNode> deleteList = deleteMapperHandler.readTemplate();
+
         List<XNode> curdList = new ArrayList<>();
         curdList.addAll(insertList);
         curdList.addAll(queryList);
         curdList.addAll(updateList);
+        curdList.addAll(deleteList);
         return curdList;
     }
 

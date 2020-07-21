@@ -1,5 +1,7 @@
 package com.lc.mybatisx.dao;
 
+import com.lc.mybatisx.annotation.MapperMethod;
+import com.lc.mybatisx.annotation.MethodType;
 import org.apache.ibatis.annotations.Param;
 
 import java.io.Serializable;
@@ -11,6 +13,7 @@ import java.io.Serializable;
  */
 public interface DeleteDao<ENTITY, ID extends Serializable> extends Dao {
 
+    @MapperMethod(type = MethodType.DELETE)
     int deleteById(@Param("id") ID id);
 
 }

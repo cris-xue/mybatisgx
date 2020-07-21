@@ -1,8 +1,9 @@
 package com.lc.mybatisx.handler;
 
 import com.lc.mybatisx.dao.SimpleDao;
-import com.lc.mybatisx.exception.NotFoundInterfaceParam;
 import com.lc.mybatisx.wrapper.SqlWrapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
 
 import javax.persistence.Table;
@@ -15,6 +16,8 @@ import java.lang.reflect.Type;
  * @date ：2020/7/6 17:17
  */
 public abstract class AbstractMapperHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(AbstractMapperHandler.class);
 
     protected Class<?> getDaoInterface(String namespace) {
         Class<?> daoInterface = null;
@@ -38,7 +41,8 @@ public abstract class AbstractMapperHandler {
             }
         }
 
-        throw new NotFoundInterfaceParam(daoInterface.getName() + " not found param");
+        log.info("{} un extend {} or {}", daoInterface.getName(), CURDInterface.getName(), SimpleDao.class.getName());
+        return null;
     }
 
     protected SqlWrapper buildSqlWrapper(String namespace, Method method, Type[] daoInterfaceParams) {

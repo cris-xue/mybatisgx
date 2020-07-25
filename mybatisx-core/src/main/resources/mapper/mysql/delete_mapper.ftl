@@ -3,7 +3,15 @@
 <mapper namespace="${deleteSqlWrapper.namespace}">
 
     <delete id="${deleteSqlWrapper.methodName}" <#if deleteSqlWrapper.parameterType??>parameterType="${deleteSqlWrapper.parameterType}"</#if>>
-        delete from ${deleteSqlWrapper.tableName} where id = ${r'#{id}'}
+        delete from ${deleteSqlWrapper.tableName}
+        <#if (deleteSqlWrapper.whereWrapperList?size > 0)>
+            <where>
+                <#list deleteSqlWrapper.whereWrapperList as ww>
+                    ${ww.field} ${ww.op} ${ww.value}
+                </#list>
+            </where>
+        </#if>
+        <#--where id = ${r'#{id}'}-->
     </delete>
 
 </mapper>

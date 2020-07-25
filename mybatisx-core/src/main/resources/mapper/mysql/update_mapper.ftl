@@ -11,7 +11,14 @@
                 </if>
             </#list>
         </trim>
-        where id = ${r'#{id}'}
+        <#if (updateSqlWrapper.whereWrapperList?size > 0)>
+            <where>
+                <#list updateSqlWrapper.whereWrapperList as ww>
+                    ${ww.field} ${ww.op} ${ww.value}
+                </#list>
+            </where>
+        </#if>
+        <#--where id = ${r'#{id}'}-->
     </update>
 
 </mapper>

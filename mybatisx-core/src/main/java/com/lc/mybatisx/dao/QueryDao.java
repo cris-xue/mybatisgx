@@ -9,7 +9,7 @@ import java.util.List;
 
 /**
  * @author ：薛承城
- * @description：一句话描述
+ * @description：查询dao
  * @date ：2019/12/5 14:46
  */
 public interface QueryDao<ENTITY, ID extends Serializable> extends Dao {
@@ -19,5 +19,8 @@ public interface QueryDao<ENTITY, ID extends Serializable> extends Dao {
 
     @MapperMethod(type = MethodType.QUERY)
     List<ENTITY> findAll();
+
+    @MapperMethod(type = MethodType.QUERY)
+    List<ENTITY> find(ENTITY entity);
 
 }

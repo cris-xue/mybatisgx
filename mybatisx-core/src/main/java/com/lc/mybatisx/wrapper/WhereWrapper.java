@@ -1,5 +1,8 @@
 package com.lc.mybatisx.wrapper;
 
+import com.lc.mybatisx.wrapper.where.LinkOp;
+import com.lc.mybatisx.wrapper.where.Operation;
+
 /**
  * @author ：薛承城
  * @description：sql条件包装器
@@ -7,15 +10,40 @@ package com.lc.mybatisx.wrapper;
  */
 public class WhereWrapper {
 
+    /**
+     * 字段
+     */
     private String field;
 
-    private String op;
+    /**
+     * 操作符
+     */
+    private Operation operation;
 
+    /**
+     * 字段值
+     */
     private String value;
 
-    private String linkOp;
+    /**
+     * 两个条件间的连接符【and,or】
+     */
+    private LinkOp linkOp;
 
-    private WhereWrapper whereWrapper;
+    /**
+     * 左括号
+     */
+    private String leftBracket;
+
+    /**
+     * 右括号
+     */
+    private String rightBracket;
+
+    /**
+     * 连接条件
+     */
+    private WhereWrapper where;
 
     public String getField() {
         return field;
@@ -25,12 +53,12 @@ public class WhereWrapper {
         this.field = field;
     }
 
-    public String getOp() {
-        return op;
+    public Operation getOperation() {
+        return operation;
     }
 
-    public void setOp(String op) {
-        this.op = op;
+    public void setOperation(Operation operation) {
+        this.operation = operation;
     }
 
     public String getValue() {
@@ -41,20 +69,48 @@ public class WhereWrapper {
         this.value = value;
     }
 
-    public String getLinkOp() {
+    public LinkOp getLinkOp() {
         return linkOp;
     }
 
-    public void setLinkOp(String linkOp) {
+    public void setLinkOp(LinkOp linkOp) {
         this.linkOp = linkOp;
     }
 
-    public WhereWrapper getWhereWrapper() {
-        return whereWrapper;
+    public String getLeftBracket() {
+        return leftBracket;
     }
 
-    public void setWhereWrapper(WhereWrapper whereWrapper) {
-        this.whereWrapper = whereWrapper;
+    public void setLeftBracket(String leftBracket) {
+        this.leftBracket = leftBracket;
+    }
+
+    public String getRightBracket() {
+        return rightBracket;
+    }
+
+    public void setRightBracket(String rightBracket) {
+        this.rightBracket = rightBracket;
+    }
+
+    public WhereWrapper getWhere() {
+        return where;
+    }
+
+    public void setWhere(WhereWrapper where) {
+        this.where = where;
+    }
+
+    /**
+     * 连接基本表达式
+     *
+     * @param where
+     * @param linkOp
+     * @return
+     */
+    public void linkRule(WhereWrapper where, LinkOp linkOp) {
+        this.setWhere(where);
+        this.setLinkOp(linkOp);
     }
 
 }

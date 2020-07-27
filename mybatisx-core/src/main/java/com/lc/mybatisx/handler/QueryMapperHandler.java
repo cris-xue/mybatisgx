@@ -88,8 +88,8 @@ public class QueryMapperHandler extends AbstractMapperHandler {
         List<ModelWrapper> modelWrapperList = modelMapperHandler.buildModelWrapper(modelClass);
         querySqlWrapper.setModelWrapperList(modelWrapperList);
 
-        List<WhereWrapper> whereWrapperList = conditionMapperHandler.buildWhereWrapper(method);
-        querySqlWrapper.setWhereWrapperList(whereWrapperList);
+        WhereWrapper whereWrapper = conditionMapperHandler.buildWhereWrapper(method);
+        querySqlWrapper.setWhereWrapper(whereWrapper);
 
         return querySqlWrapper;
     }

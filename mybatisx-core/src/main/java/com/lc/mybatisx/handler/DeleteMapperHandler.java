@@ -78,8 +78,8 @@ public class DeleteMapperHandler extends AbstractMapperHandler {
         List<ModelWrapper> modelWrapperList = modelMapperHandler.buildModelWrapper(modelClass);
         deleteSqlWrapper.setModelWrapperList(modelWrapperList);
 
-        List<WhereWrapper> whereWrapperList = conditionMapperHandler.buildWhereWrapper(method);
-        deleteSqlWrapper.setWhereWrapperList(whereWrapperList);
+        WhereWrapper whereWrapper = conditionMapperHandler.buildWhereWrapper(method);
+        deleteSqlWrapper.setWhereWrapper(whereWrapper);
 
         return deleteSqlWrapper;
     }

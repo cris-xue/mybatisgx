@@ -78,8 +78,8 @@ public class UpdateMapperHandler extends AbstractMapperHandler {
         List<ModelWrapper> modelWrapperList = modelMapperHandler.buildModelWrapper(modelClass);
         updateSqlWrapper.setModelWrapperList(modelWrapperList);
 
-        List<WhereWrapper> whereWrapperList = conditionMapperHandler.buildWhereWrapper(method);
-        updateSqlWrapper.setWhereWrapperList(whereWrapperList);
+        WhereWrapper whereWrapper = conditionMapperHandler.buildWhereWrapper(method);
+        updateSqlWrapper.setWhereWrapper(whereWrapper);
 
         return updateSqlWrapper;
     }

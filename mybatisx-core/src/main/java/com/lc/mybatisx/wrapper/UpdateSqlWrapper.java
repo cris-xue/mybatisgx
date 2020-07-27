@@ -1,7 +1,5 @@
 package com.lc.mybatisx.wrapper;
 
-import java.util.List;
-
 /**
  * @author ：薛承城
  * @description：一句话描述
@@ -9,17 +7,19 @@ import java.util.List;
  */
 public class UpdateSqlWrapper extends SqlWrapper {
 
-    private List<WhereWrapper> whereWrapperList;
+    private WhereWrapper whereWrapper;
 
-    // 是否开启乐观锁
+    /**
+     * 是否开启乐观锁
+     */
     private boolean lock;
 
-    public List<WhereWrapper> getWhereWrapperList() {
-        return whereWrapperList;
+    public WhereWrapper getWhereWrapper() {
+        return whereWrapper;
     }
 
-    public void setWhereWrapperList(List<WhereWrapper> whereWrapperList) {
-        this.whereWrapperList = whereWrapperList;
+    public void setWhereWrapper(WhereWrapper whereWrapper) {
+        this.whereWrapper = whereWrapper;
     }
 
     public boolean isLock() {

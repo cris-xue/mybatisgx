@@ -1,7 +1,5 @@
 package com.lc.mybatisx.wrapper;
 
-import java.util.List;
-
 /**
  * @author ：薛承城
  * @description：一句话描述
@@ -9,13 +7,13 @@ import java.util.List;
  */
 public class QuerySqlWrapper extends SqlWrapper {
 
-    private List<WhereWrapper> whereWrapperList;
+    private WhereWrapper whereWrapper;
 
-    public List<WhereWrapper> getWhereWrapperList() {
-        return whereWrapperList;
+    public WhereWrapper getWhereWrapper() {
+        return whereWrapper;
     }
 
-    public void setWhereWrapperList(List<WhereWrapper> whereWrapperList) {
-        this.whereWrapperList = whereWrapperList;
+    public void setWhereWrapper(WhereWrapper whereWrapper) {
+        this.whereWrapper = whereWrapper;
     }
 }

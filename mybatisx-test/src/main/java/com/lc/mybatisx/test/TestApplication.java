@@ -1,13 +1,15 @@
 package com.lc.mybatisx.test;
 
+import com.lc.mybatisx.Mybatisx;
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@Enable
-@SpringBootApplication
+@Mybatisx(basePackages = {"com.lc.mybatisx.test.dao"})
+@SpringBootApplication(scanBasePackages = {"com.lc.mybatisx.test"})
 public class TestApplication {
 
     public static void main(String[] args) {
-        System.out.println("Hello World!");
+        SpringApplication.run(TestApplication.class, args);
     }
 
 }

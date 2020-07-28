@@ -12,18 +12,20 @@
             </#list>
         </trim>
         <where>
-            <#macro whereTree ww>
-                <#if (ww)??>
-                    ${ww.field} ${ww.operation} ${ww.value}
-                    <#if (ww.whereWrapper)??>
-                        ${ww.linkOp}
-                        <@whereTree ww=ww.whereWrapper/>
-                    </#if>
-                </#if>
-            </#macro>
-            <!-- 调用宏 生成递归树 -->
             <@whereTree ww=updateSqlWrapper.whereWrapper/>
         </where>
     </update>
 
 </mapper>
+
+<#macro whereTree ww>
+    <#if ww??>
+        ${ww.field} ${ww.operation} ${ww.value}
+        <#if ww.whereWrapper??>
+            ${ww.linkOp} <@whereTree ww=ww.whereWrapper/>
+        </#if>
+    </#if>
+</#macro>
+
+<#--<@whereFragment.whereTree ww=updateSqlWrapper.whereWrapper/>-->
+<#--<#import "where_fragment.ftl" as whereFragment>-->

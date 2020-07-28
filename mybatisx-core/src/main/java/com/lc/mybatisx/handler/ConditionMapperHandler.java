@@ -3,6 +3,7 @@ package com.lc.mybatisx.handler;
 import com.lc.mybatisx.wrapper.WhereWrapper;
 import com.lc.mybatisx.wrapper.where.LinkOp;
 import com.lc.mybatisx.wrapper.where.Operation;
+import org.apache.ibatis.annotations.Param;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -48,7 +49,7 @@ public class ConditionMapperHandler {
     }
 
     private List<String> parseConditionKeyword(String methodName) {
-        methodName = "findTop10ByIdAndNameIsOrAgeLessThanAndAgeLessThan";
+        // methodName = "findTop10ByIdAndNameIsOrAgeLessThanAndAgeLessThan";
 
         // findById、findByIs、findByNameIsAndAgeIs
         // 创建 Pattern 对象
@@ -98,24 +99,47 @@ public class ConditionMapperHandler {
         Parameter[] parameters = method.getParameters();
 
         WhereWrapper whereWrapper = new WhereWrapper();
-        for (int i = conditionGroup.size(); i > 0; i = i - 2) {
-            String c = conditionGroup.get(i - 1);
+        for (int i = conditionGroup.size(), k = parameters.length - 1; i > 0; i = i - 2, k--) {
+            String condition = conditionGroup.get(i - 1);
 
-            whereWrapper.setField(c);
-            whereWrapper.setOperation(Operation.EQ);
-            whereWrapper.setValue("test");
+            // 分离字段和操作符
+            Operation[] operations = Operation.values();
+            for (int j = 0; j < operations.length; j++) {
+                Operation operation = operations[j];
+                List<String> nameList = operation.getName();
+                for (String name : nameList) {
+                    if (condition.endsWith(name)) {
+                        String field = condition.replaceAll(name, "");
+                        String parameterName = null;
+                        Parameter parameter = parameters[k];
+                        Param param = parameter.getAnnotation(Param.class);
+                        if (param != null) {
+                            parameterName = param.value();
+                        } else {
+                            parameterName = parameter.getName();
+                        }
+                        if (!field.equalsIgnoreCase(parameterName)) {
+                            throw new RuntimeException("方法名条件和参数不匹配!");
+                        }
 
-            WhereWrapper ww = new WhereWrapper();
-            ww.linkRule(whereWrapper, LinkOp.AND);
-            whereWrapper = ww;
+                        whereWrapper.setField(field);
+                        whereWrapper.setOperation(operation);
+                        whereWrapper.setValue(field);
+                    }
+                }
+            }
 
-            String by = conditionGroup.get(i - 2);
-            if ("By".equals(by)) {
+            String linkOp = conditionGroup.get(i - 2);
+            if ("By".equals(linkOp)) {
                 break;
             }
+
+            WhereWrapper ww = new WhereWrapper();
+            ww.linkRule(whereWrapper, LinkOp.valueOf(linkOp.toUpperCase()));
+            whereWrapper = ww;
         }
 
-        return whereWrapper.getWhereWrapper();
+        return whereWrapper;
     }
 
 }

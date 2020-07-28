@@ -43,7 +43,7 @@ public class WhereWrapper {
     /**
      * 连接条件
      */
-    private WhereWrapper where;
+    private WhereWrapper whereWrapper;
 
     public String getField() {
         return field;
@@ -93,23 +93,23 @@ public class WhereWrapper {
         this.rightBracket = rightBracket;
     }
 
-    public WhereWrapper getWhere() {
-        return where;
+    public WhereWrapper getWhereWrapper() {
+        return whereWrapper;
     }
 
-    public void setWhere(WhereWrapper where) {
-        this.where = where;
+    public void setWhereWrapper(WhereWrapper whereWrapper) {
+        this.whereWrapper = whereWrapper;
     }
 
     /**
      * 连接基本表达式
      *
-     * @param where
+     * @param whereWrapper
      * @param linkOp
      * @return
      */
-    public void linkRule(WhereWrapper where, LinkOp linkOp) {
-        this.setWhere(where);
+    public void linkRule(WhereWrapper whereWrapper, LinkOp linkOp) {
+        this.setWhereWrapper(whereWrapper);
         this.setLinkOp(linkOp);
     }
 

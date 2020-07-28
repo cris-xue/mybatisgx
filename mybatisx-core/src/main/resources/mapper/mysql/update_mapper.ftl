@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="${updateSqlWrapper.namespace}">
 
-    <update id="${updateSqlWrapper.methodName}" <#if updateSqlWrapper.parameterType??>parameterType="${updateSqlWrapper.parameterType}"</#if>>
+    <update id="${updateSqlWrapper.methodName}" <#if (updateSqlWrapper.parameterType??)>parameterType="${updateSqlWrapper.parameterType}"</#if>>
         update ${updateSqlWrapper.tableName}
         <trim prefix="SET" suffixOverrides=",">
             <#list updateSqlWrapper.modelWrapperList as mw>
@@ -11,14 +11,19 @@
                 </if>
             </#list>
         </trim>
-        <#if (updateSqlWrapper.whereWrapperList?size > 0)>
-            <where>
-                <#list updateSqlWrapper.whereWrapperList as ww>
-                    ${ww.field} ${ww.op} ${ww.value}
-                </#list>
-            </where>
-        </#if>
-        <#--where id = ${r'#{id}'}-->
+        <where>
+            <#macro whereTree ww>
+                <#if ww??>
+                    ${ww.field} ${ww.operation} ${ww.value}
+                    <#if ww.whereWrapper??>
+                        ${ww.linkOp}
+                        <@whereTree ww = ww.whereTree/>
+                    </#if>
+                </#if>
+            </#macro>
+            <!-- 调用宏 生成递归树 -->
+            <@whereTree ww = updateSqlWrapper.whereWrapper/>
+        </where>
     </update>
 
 </mapper>

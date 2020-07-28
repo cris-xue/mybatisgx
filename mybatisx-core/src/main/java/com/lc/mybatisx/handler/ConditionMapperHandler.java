@@ -5,6 +5,7 @@ import com.lc.mybatisx.wrapper.where.LinkOp;
 import com.lc.mybatisx.wrapper.where.Operation;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,20 +21,11 @@ import java.util.regex.Pattern;
 public class ConditionMapperHandler {
 
     private static Map<String, Boolean> unParseMethodMap = new HashMap<>();
-    private static List<String> conditionKeywordList = new ArrayList<>();
 
     static {
         // 会内存泄漏
         unParseMethodMap.put("findAll", false);
         unParseMethodMap.put("find", false);
-    }
-
-    static {
-        conditionKeywordList.add("By");
-        conditionKeywordList.add("And");
-        conditionKeywordList.add("Or");
-        conditionKeywordList.add("Is");
-        conditionKeywordList.add("Equals");
     }
 
     public WhereWrapper buildWhereWrapper(Method method) {
@@ -46,9 +38,16 @@ public class ConditionMapperHandler {
 
     private WhereWrapper parseMethod(Method method) {
         String methodName = method.getName();
-        if (!methodName.startsWith("findBy")) {
+        if (methodName.startsWith("findBy") && !methodName.startsWith("updateBy")) {
             return null;
         }
+
+        List<String> conditionKeywordList = this.parseConditionKeyword(methodName);
+        List<String> conditionGroup = this.concatConditionKeyword(conditionKeywordList);
+        return this.buildWrapper(method, conditionGroup);
+    }
+
+    private List<String> parseConditionKeyword(String methodName) {
         methodName = "findTop10ByIdAndNameIsOrAgeLessThanAndAgeLessThan";
 
         // findById、findByIs、findByNameIsAndAgeIs
@@ -62,6 +61,10 @@ public class ConditionMapperHandler {
             conditionKeywordList.add(matcher.group());
         }
 
+        return conditionKeywordList;
+    }
+
+    private List<String> concatConditionKeyword(List<String> conditionKeywordList) {
         List<String> conditionGroup = new ArrayList<>();
         String condition = "";
         int conditionKeywordSize = conditionKeywordList.size();
@@ -83,8 +86,18 @@ public class ConditionMapperHandler {
             condition = condition + conditionKeyword;
         }
 
+        return conditionGroup;
+    }
+
+    /**
+     * @param method
+     * @param conditionGroup
+     * @return
+     */
+    private WhereWrapper buildWrapper(Method method, List<String> conditionGroup) {
+        Parameter[] parameters = method.getParameters();
+
         WhereWrapper whereWrapper = new WhereWrapper();
-        boolean flag = false;
         for (int i = conditionGroup.size(); i > 0; i = i - 2) {
             String c = conditionGroup.get(i - 1);
 
@@ -102,7 +115,7 @@ public class ConditionMapperHandler {
             }
         }
 
-        return whereWrapper;
+        return whereWrapper.getWhereWrapper();
     }
 
 }

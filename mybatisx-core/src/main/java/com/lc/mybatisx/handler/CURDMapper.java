@@ -17,20 +17,20 @@ public class CURDMapper {
         InsertMapperHandler insertMapperHandler = new InsertMapperHandler(builderAssistant, namespace);
         List<XNode> insertList = insertMapperHandler.readTemplate();
 
-        QueryMapperHandler queryMapperHandler = new QueryMapperHandler(builderAssistant, namespace);
-        List<XNode> queryList = queryMapperHandler.readTemplate();
+        // QueryMapperHandler queryMapperHandler = new QueryMapperHandler(builderAssistant, namespace);
+        // List<XNode> queryList = queryMapperHandler.readTemplate();
 
         UpdateMapperHandler updateMapperHandler = new UpdateMapperHandler(builderAssistant, namespace);
         List<XNode> updateList = updateMapperHandler.readTemplate();
 
-        DeleteMapperHandler deleteMapperHandler = new DeleteMapperHandler(builderAssistant, namespace);
-        List<XNode> deleteList = deleteMapperHandler.readTemplate();
+        // DeleteMapperHandler deleteMapperHandler = new DeleteMapperHandler(builderAssistant, namespace);
+        // List<XNode> deleteList = deleteMapperHandler.readTemplate();
 
         List<XNode> curdList = new ArrayList<>();
         curdList.addAll(insertList);
-        curdList.addAll(queryList);
+        // curdList.addAll(queryList);
         curdList.addAll(updateList);
-        curdList.addAll(deleteList);
+        // curdList.addAll(deleteList);
         return curdList;
     }
 

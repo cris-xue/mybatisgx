@@ -1,5 +1,7 @@
 package com.lc.mybatisx.handler;
 
+import com.google.common.base.CaseFormat;
+import com.google.common.base.Converter;
 import com.lc.mybatisx.wrapper.WhereWrapper;
 import com.lc.mybatisx.wrapper.where.LinkOp;
 import com.lc.mybatisx.wrapper.where.Operation;
@@ -22,6 +24,8 @@ import java.util.regex.Pattern;
 public class ConditionMapperHandler {
 
     private static Map<String, Boolean> unParseMethodMap = new HashMap<>();
+
+    Converter<String, String> converter = CaseFormat.LOWER_CAMEL.converterTo(CaseFormat.LOWER_UNDERSCORE);
 
     static {
         // 会内存泄漏
@@ -122,9 +126,10 @@ public class ConditionMapperHandler {
                             throw new RuntimeException("方法名条件和参数不匹配!");
                         }
 
+                        field = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, field);
                         whereWrapper.setField(field);
                         whereWrapper.setOperation(operation);
-                        whereWrapper.setValue(field);
+                        whereWrapper.setValue(parameterName);
                     }
                 }
             }

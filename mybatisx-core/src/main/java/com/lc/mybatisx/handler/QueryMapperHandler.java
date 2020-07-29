@@ -17,7 +17,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -42,7 +44,29 @@ public class QueryMapperHandler extends AbstractMapperHandler {
             } else if ("findAll".equals(methodName)) {
                 modelClass = entityClass;
             } else {
-                modelClass = method.getReturnType();
+                Type returnType = method.getGenericReturnType();
+                if (returnType instanceof ParameterizedType) {
+                    ParameterizedType parameterizedType = (ParameterizedType) returnType;
+                    Type[] actualTypes = parameterizedType.getActualTypeArguments();
+                    Class<?> rawType = (Class<?>) parameterizedType.getRawType();
+                    if (rawType == List.class) {
+                        Type actualType = actualTypes[0];
+                        if (actualType instanceof TypeVariable<?>) {
+                            TypeVariable typeVariable = (TypeVariable) actualType;
+                            if ("ENTITY".equals(typeVariable.getName())) {
+                                modelClass = entityClass;
+                            } else {
+                                modelClass = entityClass;
+                            }
+                        } else {
+                            modelClass = (Class<?>) actualTypes[0];
+                        }
+                    } else {
+                        modelClass = entityClass;
+                    }
+                } else {
+                    modelClass = entityClass;
+                }
             }
 
             return modelClass;

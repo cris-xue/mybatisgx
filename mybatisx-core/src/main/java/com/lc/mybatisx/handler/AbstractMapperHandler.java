@@ -18,7 +18,7 @@ import java.util.Map;
  */
 public abstract class AbstractMapperHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(AbstractMapperHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(AbstractMapperHandler.class);
 
     protected Class<?> getDaoInterface(String namespace) {
         try {
@@ -41,7 +41,7 @@ public abstract class AbstractMapperHandler {
             }
         }
 
-        log.info("{} un extend {} or {}", daoInterface.getName(), CURDInterface.getName(), SimpleDao.class.getName());
+        logger.info("{} un extend {} or {}", daoInterface.getName(), CURDInterface.getName(), SimpleDao.class.getName());
         return null;
     }
 
@@ -89,11 +89,11 @@ public abstract class AbstractMapperHandler {
     }
 
     private String getResultType(Method method, Class<?> entityClass) {
-        Type type = method.getGenericReturnType();
-        if (type instanceof Class<?>) {
-            Class<?> resultType = (Class<?>) type;
+        Type returntype = method.getGenericReturnType();
+        if (returntype instanceof Class<?>) {
+            Class<?> resultType = (Class<?>) returntype;
             return resultType.getName();
-        } else if (type instanceof ParameterizedType) {
+        } else if (returntype instanceof ParameterizedType) {
             ParameterizedType parameterizedType = (ParameterizedType) method.getGenericReturnType();
             Type rawType = parameterizedType.getRawType();
             Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
@@ -101,17 +101,21 @@ public abstract class AbstractMapperHandler {
                 Class<?> resultType = (Class<?>) rawType;
                 return resultType.getName();
             } else if (rawType instanceof Class<?> && rawType == List.class) {
-                TypeVariable typeVariable = (TypeVariable) actualTypeArguments[0];
-                if ("ENTITY".equals(typeVariable.getName())) {
-                    return entityClass.getName();
+                Type listActualType = actualTypeArguments[0];
+                if (listActualType instanceof TypeVariable) {
+                    TypeVariable typeVariable = (TypeVariable) actualTypeArguments[0];
+                    if ("ENTITY".equals(typeVariable.getName())) {
+                        return entityClass.getName();
+                    }
+                    return typeVariable.getName();
                 }
-                return typeVariable.getName();
+                return listActualType.getTypeName();
             } else {
                 // rawType
                 return null;
             }
-        } else if (type instanceof TypeVariable<?>) {
-            TypeVariable<?> typeVariable = (TypeVariable<?>) type;
+        } else if (returntype instanceof TypeVariable<?>) {
+            TypeVariable<?> typeVariable = (TypeVariable<?>) returntype;
             if ("ENTITY".equals(typeVariable.getName())) {
                 return entityClass.getName();
             }

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<#--<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">-->
 <mapper namespace="${querySqlWrapper.namespace}">
 
     <#--扩展方法-->
@@ -26,11 +26,16 @@
             </#list>
         </trim>
         from ${querySqlWrapper.tableName}
-        <#if (querySqlWrapper.whereWrapperList?size > 0)>
+        <#--<#if (querySqlWrapper.whereWrapperList?size > 0)>
             <where>
                 <#list querySqlWrapper.whereWrapperList as ww>
                     ${ww.field} ${ww.op} ${ww.value}
                 </#list>
+            </where>
+        </#if>-->
+        <#if (querySqlWrapper.whereWrapper)??>
+            <where>
+                <@whereTree ww=querySqlWrapper.whereWrapper/>
             </where>
         </#if>
     </select>
@@ -39,7 +44,7 @@
 
 <#macro whereTree ww>
     <#if ww??>
-        ${ww.field} ${ww.operation} ${ww.value}
+        ${ww.field} ${ww.operation.key} ${r'#{'} ${ww.value} ${r'}'},
         <#if ww.whereWrapper??>
             ${ww.linkOp} <@whereTree ww=ww.whereWrapper/>
         </#if>

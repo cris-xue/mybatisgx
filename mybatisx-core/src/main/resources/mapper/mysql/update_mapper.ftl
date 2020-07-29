@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<#--<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">-->
 <mapper namespace="${updateSqlWrapper.namespace}">
 
     <update id="${updateSqlWrapper.methodName}" <#if (updateSqlWrapper.parameterType??)>parameterType="${updateSqlWrapper.parameterType}"</#if>>
@@ -11,9 +11,11 @@
                 </if>
             </#list>
         </trim>
-        <where>
-            <@whereTree ww=updateSqlWrapper.whereWrapper/>
-        </where>
+        <#if (updateSqlWrapper.whereWrapper)??>
+            <where>
+                <@whereTree ww=updateSqlWrapper.whereWrapper/>
+            </where>
+        </#if>
     </update>
 
 </mapper>

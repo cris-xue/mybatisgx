@@ -1,11 +1,13 @@
 package com.lc.mybatisx.handler;
 
 import com.google.common.base.CaseFormat;
-import com.google.common.base.Converter;
+import com.lc.mybatisx.exception.ParamMethodUnMatcherException;
 import com.lc.mybatisx.wrapper.WhereWrapper;
 import com.lc.mybatisx.wrapper.where.LinkOp;
 import com.lc.mybatisx.wrapper.where.Operation;
 import org.apache.ibatis.annotations.Param;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -23,14 +25,21 @@ import java.util.regex.Pattern;
  */
 public class ConditionMapperHandler {
 
-    private static Map<String, Boolean> unParseMethodMap = new HashMap<>();
+    private static final Logger logger = LoggerFactory.getLogger(ConditionMapperHandler.class);
 
-    Converter<String, String> converter = CaseFormat.LOWER_CAMEL.converterTo(CaseFormat.LOWER_UNDERSCORE);
+    private static Map<String, Boolean> unParseMethodMap = new HashMap<>();
+    private static List<String> parseMethodList = new ArrayList<>();
 
     static {
         // 会内存泄漏
         unParseMethodMap.put("findAll", false);
         unParseMethodMap.put("find", false);
+    }
+
+    static {
+        parseMethodList.add("findBy");
+        parseMethodList.add("updateBy");
+        parseMethodList.add("deleteBy");
     }
 
     public WhereWrapper buildWhereWrapper(Method method) {
@@ -41,9 +50,26 @@ public class ConditionMapperHandler {
         return whereWrapper;
     }
 
+    /**
+     * 是否解析方法
+     *
+     * @param methodName 方法名
+     * @return true：解析
+     */
+    private boolean isParseMethod(String methodName) {
+        for (String parseMethod : parseMethodList) {
+            if (methodName.startsWith(parseMethod)) {
+                logger.info("parse method: {}", methodName);
+                return true;
+            }
+        }
+        return false;
+    }
+
     private WhereWrapper parseMethod(Method method) {
         String methodName = method.getName();
-        if (methodName.startsWith("findBy") && !methodName.startsWith("updateBy")) {
+
+        if (!isParseMethod(methodName)) {
             return null;
         }
 
@@ -59,7 +85,7 @@ public class ConditionMapperHandler {
         // 创建 Pattern 对象
         String regex = "[A-Z][a-z]+[0-9]*";
         Pattern pattern = Pattern.compile(regex);
-        // 现在创建 matcher 对象
+        // 创建 matcher 对象
         List<String> conditionKeywordList = new ArrayList<>();
         Matcher matcher = pattern.matcher(methodName);
         while (matcher.find()) {
@@ -114,22 +140,21 @@ public class ConditionMapperHandler {
                 for (String name : nameList) {
                     if (condition.endsWith(name)) {
                         String field = condition.replaceAll(name, "");
-                        String parameterName = null;
-                        Parameter parameter = parameters[k];
-                        Param param = parameter.getAnnotation(Param.class);
-                        if (param != null) {
-                            parameterName = param.value();
-                        } else {
-                            parameterName = parameter.getName();
-                        }
-                        if (!field.equalsIgnoreCase(parameterName)) {
-                            throw new RuntimeException("方法名条件和参数不匹配!");
+
+                        Parameter parameter = k >= 0 && parameters.length >= k ? parameters[k] : null;
+                        String paramName = this.getParamName(parameter);
+
+                        // 把方法中的Username转成username。判断方法参数和方法名字段是否对应
+                        field = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, field);
+                        if (!field.equals(paramName)) {
+                            logger.error("{} method name: {} param: {} un matcher", method.getName(), field, paramName);
+                            throw new ParamMethodUnMatcherException("方法名条件和参数不匹配!");
                         }
 
-                        field = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, field);
+                        field = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, field);
                         whereWrapper.setField(field);
                         whereWrapper.setOperation(operation);
-                        whereWrapper.setValue(parameterName);
+                        whereWrapper.setValue(paramName);
                     }
                 }
             }
@@ -145,6 +170,22 @@ public class ConditionMapperHandler {
         }
 
         return whereWrapper;
+    }
+
+    private String getParamName(Parameter parameter) {
+        if (parameter == null) {
+            return null;
+        }
+
+        String parameterName;
+        Param param = parameter.getAnnotation(Param.class);
+        if (param != null) {
+            parameterName = param.value();
+        } else {
+            parameterName = parameter.getName();
+        }
+
+        return parameterName;
     }
 
 }

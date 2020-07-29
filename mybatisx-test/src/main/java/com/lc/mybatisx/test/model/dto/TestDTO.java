@@ -1,11 +1,6 @@
-package com.lc.mybatisx.test.model.entity;
+package com.lc.mybatisx.test.model.dto;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
-
-@Entity
-@Table(name = "t_test")
-public class Test {
+public class TestDTO {
 
     private Long id;
 

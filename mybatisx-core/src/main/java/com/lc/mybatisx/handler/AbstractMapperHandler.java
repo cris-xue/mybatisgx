@@ -1,15 +1,17 @@
 package com.lc.mybatisx.handler;
 
 import com.lc.mybatisx.dao.SimpleDao;
+import com.lc.mybatisx.utils.GenericUtils;
 import com.lc.mybatisx.wrapper.SqlWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
 
 import javax.persistence.Table;
-import java.lang.reflect.*;
-import java.util.List;
-import java.util.Map;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 
 /**
  * @author ：薛承城
@@ -54,7 +56,7 @@ public abstract class AbstractMapperHandler {
         SqlWrapper sqlWrapper = instanceSqlWrapper();
         sqlWrapper.setNamespace(namespace);
         sqlWrapper.setMethodName(methodName);
-        String parameterType = this.getParameterType(method, entityClass);
+        String parameterType = this.getParameterType(method, idClass, entityClass);
         sqlWrapper.setParameterType(parameterType);
         sqlWrapper.setTableName(tableName);
         String resultType = this.getResultType(method, entityClass);
@@ -74,52 +76,53 @@ public abstract class AbstractMapperHandler {
         return table != null ? table.name() : entityClass.getSimpleName();
     }
 
-    private String getParameterType(Method method, Class<?> entityClass) {
+    /**
+     * @param method
+     * @param idClass
+     * @param entityClass
+     * @return
+     */
+    private String getParameterType(Method method, Class<?> idClass, Class<?> entityClass) {
         Parameter[] parameters = method.getParameters();
         if (parameters.length == 1) {
-            TypeVariable typeVariable = (TypeVariable) parameters[0].getParameterizedType();
-            String parameterName = typeVariable.getName();
-            if ("ENTITY".equals(parameterName)) {
-                return entityClass.getName();
-            } else {
+            Parameter parameter = parameters[0];
+            Type type = parameter.getParameterizedType();
+            Type paramType = GenericUtils.getGenericType(type);
 
+            if (paramType instanceof TypeVariable<?>) {
+                TypeVariable<?> typeVariable = (TypeVariable<?>) paramType;
+                if ("ENTITY".equals(typeVariable.getName())) {
+                    return entityClass.getName();
+                } else if ("ID".equals(typeVariable.getName())) {
+                    return idClass.getName();
+                }
+            } else if (paramType instanceof Class<?>) {
+                Class<?> clazz = (Class<?>) paramType;
+                return clazz.getName();
+            } else {
+                return null;
             }
         }
+
         return null;
     }
 
     private String getResultType(Method method, Class<?> entityClass) {
-        Type returntype = method.getGenericReturnType();
-        if (returntype instanceof Class<?>) {
-            Class<?> resultType = (Class<?>) returntype;
-            return resultType.getName();
-        } else if (returntype instanceof ParameterizedType) {
-            ParameterizedType parameterizedType = (ParameterizedType) method.getGenericReturnType();
-            Type rawType = parameterizedType.getRawType();
-            Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
-            if (rawType instanceof Map<?, ?>) {
-                Class<?> resultType = (Class<?>) rawType;
-                return resultType.getName();
-            } else if (rawType instanceof Class<?> && rawType == List.class) {
-                Type listActualType = actualTypeArguments[0];
-                if (listActualType instanceof TypeVariable) {
-                    TypeVariable typeVariable = (TypeVariable) actualTypeArguments[0];
-                    if ("ENTITY".equals(typeVariable.getName())) {
-                        return entityClass.getName();
-                    }
-                    return typeVariable.getName();
-                }
-                return listActualType.getTypeName();
-            } else {
-                // rawType
-                return null;
-            }
-        } else if (returntype instanceof TypeVariable<?>) {
-            TypeVariable<?> typeVariable = (TypeVariable<?>) returntype;
+        Type type = method.getGenericReturnType();
+
+        Type returnType = GenericUtils.getGenericType(type);
+        if (returnType instanceof TypeVariable<?>) {
+            TypeVariable<?> typeVariable = (TypeVariable<?>) returnType;
             if ("ENTITY".equals(typeVariable.getName())) {
                 return entityClass.getName();
             }
+        } else if (returnType instanceof Class<?>) {
+            Class<?> clazz = (Class<?>) returnType;
+            return clazz.getName();
+        } else {
+            return null;
         }
+
         return null;
     }
 

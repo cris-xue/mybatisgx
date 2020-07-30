@@ -4,6 +4,7 @@ import com.lc.mybatisx.annotation.MapperMethod;
 import com.lc.mybatisx.annotation.MethodType;
 import com.lc.mybatisx.dao.QueryDao;
 import com.lc.mybatisx.utils.FreeMarkerUtils;
+import com.lc.mybatisx.utils.GenericUtils;
 import com.lc.mybatisx.wrapper.ModelWrapper;
 import com.lc.mybatisx.wrapper.QuerySqlWrapper;
 import com.lc.mybatisx.wrapper.SqlWrapper;
@@ -17,7 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
@@ -38,38 +38,30 @@ public class QueryMapperHandler extends AbstractMapperHandler {
         @Override
         public Class<?> getModelClass(Method method, Class<?> entityClass) {
             String methodName = method.getName();
-            Class<?> modelClass;
+            Class<?> modelClass = null;
             if ("findById".equals(methodName)) {
-                modelClass = entityClass;
+                return entityClass;
             } else if ("findAll".equals(methodName)) {
-                modelClass = entityClass;
+                return entityClass;
             } else {
-                Type returnType = method.getGenericReturnType();
-                if (returnType instanceof ParameterizedType) {
-                    ParameterizedType parameterizedType = (ParameterizedType) returnType;
-                    Type[] actualTypes = parameterizedType.getActualTypeArguments();
-                    Class<?> rawType = (Class<?>) parameterizedType.getRawType();
-                    if (rawType == List.class) {
-                        Type actualType = actualTypes[0];
-                        if (actualType instanceof TypeVariable<?>) {
-                            TypeVariable typeVariable = (TypeVariable) actualType;
-                            if ("ENTITY".equals(typeVariable.getName())) {
-                                modelClass = entityClass;
-                            } else {
-                                modelClass = entityClass;
-                            }
-                        } else {
-                            modelClass = (Class<?>) actualTypes[0];
-                        }
-                    } else {
-                        modelClass = entityClass;
+                Type type = method.getGenericReturnType();
+                Type modelType = GenericUtils.getGenericType(type);
+
+                if (modelType instanceof TypeVariable<?>) {
+                    TypeVariable<?> typeVariable = (TypeVariable<?>) modelType;
+                    if ("ENTITY".equals(typeVariable.getName())) {
+                        return entityClass;
+                    } else if ("ID".equals(typeVariable.getName())) {
+                        return entityClass;
                     }
+                } else if (modelType instanceof Class<?>) {
+                    return (Class<?>) modelType;
                 } else {
-                    modelClass = entityClass;
+                    return null;
                 }
             }
 
-            return modelClass;
+            return null;
         }
     };
     private ConditionMapperHandler conditionMapperHandler = new ConditionMapperHandler();

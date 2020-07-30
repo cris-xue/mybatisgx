@@ -35,18 +35,20 @@
         </#if>-->
         <#if (querySqlWrapper.whereWrapper)??>
             <where>
-                <@whereTree ww=querySqlWrapper.whereWrapper/>
+                <@whereTree ww=querySqlWrapper.whereWrapper linkOp=""/>
             </where>
         </#if>
     </select>
 
 </mapper>
 
-<#macro whereTree ww>
+<#macro whereTree ww linkOp>
     <#if ww??>
-        ${ww.field} ${ww.operation.key} ${r'#{'} ${ww.value} ${r'}'},
+        <if test="${ww.value} != null">
+            ${linkOp} ${ww.field} ${ww.operation.key} ${r'#{'} ${ww.value} ${r'}'},
+        </if>
         <#if ww.whereWrapper??>
-            ${ww.linkOp} <@whereTree ww=ww.whereWrapper/>
+            <@whereTree ww=ww.whereWrapper linkOp=ww.linkOp/>
         </#if>
     </#if>
 </#macro>

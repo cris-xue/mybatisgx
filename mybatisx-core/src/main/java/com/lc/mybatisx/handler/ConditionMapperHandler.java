@@ -37,6 +37,7 @@ public class ConditionMapperHandler {
     }
 
     static {
+        parseMethodList.add("findTop10By");
         parseMethodList.add("findBy");
         parseMethodList.add("updateBy");
         parseMethodList.add("deleteBy");
@@ -136,26 +137,11 @@ public class ConditionMapperHandler {
             Operation[] operations = Operation.values();
             for (int j = 0; j < operations.length; j++) {
                 Operation operation = operations[j];
-                List<String> nameList = operation.getName();
-                for (String name : nameList) {
-                    if (condition.endsWith(name)) {
-                        String field = condition.replaceAll(name, "");
+                Parameter parameter = k >= 0 && parameters.length >= k ? parameters[k] : null;
 
-                        Parameter parameter = k >= 0 && parameters.length >= k ? parameters[k] : null;
-                        String paramName = this.getParamName(parameter);
-
-                        // 把方法中的Username转成username。判断方法参数和方法名字段是否对应
-                        field = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, field);
-                        if (!field.equals(paramName)) {
-                            logger.error("{} method name: {} param: {} un matcher", method.getName(), field, paramName);
-                            throw new ParamMethodUnMatcherException("方法名条件和参数不匹配!");
-                        }
-
-                        field = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, field);
-                        whereWrapper.setField(field);
-                        whereWrapper.setOperation(operation);
-                        whereWrapper.setValue(paramName);
-                    }
+                boolean isMatcher = this.setWhereWrapper(whereWrapper, parameter, operation, condition);
+                if (isMatcher) {
+                    break;
                 }
             }
 
@@ -172,20 +158,41 @@ public class ConditionMapperHandler {
         return whereWrapper;
     }
 
+    private boolean setWhereWrapper(WhereWrapper whereWrapper, Parameter parameter, Operation operation, String condition) {
+        List<String> operationNameList = operation.getName();
+
+        for (String operationName : operationNameList) {
+            if (condition.endsWith(operationName)) {
+                String field = condition.replaceAll(operationName, "");
+                String paramName = this.getParamName(parameter);
+
+                // 把方法中的Username转成username。判断方法参数和方法名字段是否对应
+                field = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, field);
+                if (!field.equals(paramName)) {
+                    String methodName = parameter.getDeclaringExecutable().getName();
+                    logger.error("{} method name: {} param: {} un matcher", methodName, field, paramName);
+                    throw new ParamMethodUnMatcherException("方法名条件和参数不匹配!");
+                }
+
+                field = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, field);
+                whereWrapper.setField(field);
+                whereWrapper.setOperation(operation);
+                whereWrapper.setValue(paramName);
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private String getParamName(Parameter parameter) {
         if (parameter == null) {
             return null;
         }
 
-        String parameterName;
         Param param = parameter.getAnnotation(Param.class);
-        if (param != null) {
-            parameterName = param.value();
-        } else {
-            parameterName = parameter.getName();
-        }
-
-        return parameterName;
+        return param != null ? param.value() : parameter.getName();
     }
 
 }

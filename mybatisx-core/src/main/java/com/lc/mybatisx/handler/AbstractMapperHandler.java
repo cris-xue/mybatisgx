@@ -12,6 +12,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.util.Map;
 
 /**
  * @author ：薛承城
@@ -102,17 +103,21 @@ public abstract class AbstractMapperHandler {
     }
 
     protected Class<?> getGenericType(Type type, Class<?> idClass, Class<?> entityClass) {
-        Type paramType = GenericUtils.getGenericType(type);
-        if (paramType instanceof TypeVariable<?>) {
-            TypeVariable<?> typeVariable = (TypeVariable<?>) paramType;
+        Type genericType = GenericUtils.getGenericType(type);
+        if (genericType instanceof TypeVariable<?>) {
+            TypeVariable<?> typeVariable = (TypeVariable<?>) genericType;
             if ("ENTITY".equals(typeVariable.getName())) {
                 return entityClass;
             } else if ("ID".equals(typeVariable.getName())) {
                 return idClass;
             }
-        } else if (paramType instanceof Class<?>) {
-            Class<?> clazz = (Class<?>) paramType;
-            return clazz;
+        } else if (genericType instanceof Class<?>) {
+            Class<?> clazz = (Class<?>) genericType;
+            if (clazz == Map.class) {
+                return entityClass;
+            } else {
+                return clazz;
+            }
         }
 
         return null;

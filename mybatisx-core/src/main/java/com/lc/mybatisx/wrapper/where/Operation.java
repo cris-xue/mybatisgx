@@ -10,11 +10,11 @@ import java.util.List;
  */
 public enum Operation {
 
-    LT("<", Arrays.asList("LessThan", "Lt"), "小于"),
-    LTEQ("<=", Arrays.asList("LessThanEquals", "Lteq"), "小于等于"),
-    GT(">", Arrays.asList("GreaterThan", "Gt"), "大于"),
-    GTEQ(">=", Arrays.asList("GreaterThanEquals", "Gteq"), "大于等于"),
-    NOTEQ("<>", Arrays.asList("Not"), "不等"),
+    LT("<![CDATA[ < ]]>", Arrays.asList("LessThan", "Lt"), "小于"),
+    LTEQ("<![CDATA[ <= ]]>", Arrays.asList("LessThanEquals", "Lteq"), "小于等于"),
+    GT("<![CDATA[ > ]]>", Arrays.asList("GreaterThan", "Gt"), "大于"),
+    GTEQ("<![CDATA[ >= ]]>", Arrays.asList("GreaterThanEquals", "Gteq"), "大于等于"),
+    NOTEQ("<![CDATA[ <> ]]>", Arrays.asList("Not"), "不等"),
     IN("in", Arrays.asList("In"), "包含"),
     IS("=", Arrays.asList("Is"), "等于"),
     EQ("=", Arrays.asList("Equals", "Eq", ""), "等于");

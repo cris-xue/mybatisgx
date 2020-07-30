@@ -14,7 +14,7 @@
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <#list insertSqlWrapper.modelWrapperList as mw>
                 <if test="${mw.entityColumn} != null">
-                    ${r'#{'} ${mw.dbColumn} ${r'}'},
+                    ${r'#{'} ${mw.entityColumn} ${r'}'},
                 </if>
             </#list>
         </trim>

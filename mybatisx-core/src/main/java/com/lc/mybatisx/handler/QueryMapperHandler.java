@@ -4,7 +4,6 @@ import com.lc.mybatisx.annotation.MapperMethod;
 import com.lc.mybatisx.annotation.MethodType;
 import com.lc.mybatisx.dao.QueryDao;
 import com.lc.mybatisx.utils.FreeMarkerUtils;
-import com.lc.mybatisx.utils.GenericUtils;
 import com.lc.mybatisx.wrapper.ModelWrapper;
 import com.lc.mybatisx.wrapper.QuerySqlWrapper;
 import com.lc.mybatisx.wrapper.SqlWrapper;
@@ -19,7 +18,6 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,36 +30,22 @@ import java.util.Map;
  */
 public class QueryMapperHandler extends AbstractMapperHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(QueryMapperHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(QueryMapperHandler.class);
 
     private ModelMapperHandler modelMapperHandler = new ModelMapperHandler() {
         @Override
         public Class<?> getModelClass(Method method, Class<?> entityClass) {
             String methodName = method.getName();
-            Class<?> modelClass = null;
             if ("findById".equals(methodName)) {
                 return entityClass;
             } else if ("findAll".equals(methodName)) {
                 return entityClass;
             } else {
                 Type type = method.getGenericReturnType();
-                Type modelType = GenericUtils.getGenericType(type);
 
-                if (modelType instanceof TypeVariable<?>) {
-                    TypeVariable<?> typeVariable = (TypeVariable<?>) modelType;
-                    if ("ENTITY".equals(typeVariable.getName())) {
-                        return entityClass;
-                    } else if ("ID".equals(typeVariable.getName())) {
-                        return entityClass;
-                    }
-                } else if (modelType instanceof Class<?>) {
-                    return (Class<?>) modelType;
-                } else {
-                    return null;
-                }
+                Class<?> clazz = getGenericType(type, null, entityClass);
+                return clazz;
             }
-
-            return null;
         }
     };
     private ConditionMapperHandler conditionMapperHandler = new ConditionMapperHandler();

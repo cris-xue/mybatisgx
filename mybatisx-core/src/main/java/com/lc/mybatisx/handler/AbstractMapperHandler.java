@@ -87,21 +87,9 @@ public abstract class AbstractMapperHandler {
         if (parameters.length == 1) {
             Parameter parameter = parameters[0];
             Type type = parameter.getParameterizedType();
-            Type paramType = GenericUtils.getGenericType(type);
 
-            if (paramType instanceof TypeVariable<?>) {
-                TypeVariable<?> typeVariable = (TypeVariable<?>) paramType;
-                if ("ENTITY".equals(typeVariable.getName())) {
-                    return entityClass.getName();
-                } else if ("ID".equals(typeVariable.getName())) {
-                    return idClass.getName();
-                }
-            } else if (paramType instanceof Class<?>) {
-                Class<?> clazz = (Class<?>) paramType;
-                return clazz.getName();
-            } else {
-                return null;
-            }
+            Class<?> clazz = this.getGenericType(type, idClass, entityClass);
+            return clazz.getName();
         }
 
         return null;
@@ -109,18 +97,22 @@ public abstract class AbstractMapperHandler {
 
     private String getResultType(Method method, Class<?> entityClass) {
         Type type = method.getGenericReturnType();
+        Class<?> clazz = this.getGenericType(type, null, entityClass);
+        return clazz != null ? clazz.getName() : null;
+    }
 
-        Type returnType = GenericUtils.getGenericType(type);
-        if (returnType instanceof TypeVariable<?>) {
-            TypeVariable<?> typeVariable = (TypeVariable<?>) returnType;
+    protected Class<?> getGenericType(Type type, Class<?> idClass, Class<?> entityClass) {
+        Type paramType = GenericUtils.getGenericType(type);
+        if (paramType instanceof TypeVariable<?>) {
+            TypeVariable<?> typeVariable = (TypeVariable<?>) paramType;
             if ("ENTITY".equals(typeVariable.getName())) {
-                return entityClass.getName();
+                return entityClass;
+            } else if ("ID".equals(typeVariable.getName())) {
+                return idClass;
             }
-        } else if (returnType instanceof Class<?>) {
-            Class<?> clazz = (Class<?>) returnType;
-            return clazz.getName();
-        } else {
-            return null;
+        } else if (paramType instanceof Class<?>) {
+            Class<?> clazz = (Class<?>) paramType;
+            return clazz;
         }
 
         return null;

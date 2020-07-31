@@ -4,10 +4,8 @@ import com.lc.mybatisx.annotation.MapperMethod;
 import com.lc.mybatisx.annotation.MethodType;
 import com.lc.mybatisx.dao.DeleteDao;
 import com.lc.mybatisx.utils.FreeMarkerUtils;
-import com.lc.mybatisx.wrapper.DeleteSqlWrapper;
-import com.lc.mybatisx.wrapper.ModelWrapper;
-import com.lc.mybatisx.wrapper.SqlWrapper;
-import com.lc.mybatisx.wrapper.WhereWrapper;
+import com.lc.mybatisx.utils.ReflectUtils;
+import com.lc.mybatisx.wrapper.*;
 import freemarker.template.Template;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.apache.ibatis.parsing.XNode;
@@ -16,6 +14,8 @@ import org.apache.ibatis.session.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.persistence.Version;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -78,8 +78,20 @@ public class DeleteMapperHandler extends AbstractMapperHandler {
         List<ModelWrapper> modelWrapperList = modelMapperHandler.buildModelWrapper(modelClass);
         deleteSqlWrapper.setModelWrapperList(modelWrapperList);
 
+        // 构建条件包装器
         WhereWrapper whereWrapper = conditionMapperHandler.buildWhereWrapper(method);
         deleteSqlWrapper.setWhereWrapper(whereWrapper);
+
+        // 乐观锁
+        Field field = ReflectUtils.getField(modelClass, Version.class);
+        if (field != null) {
+            VersionWrapper versionWrapper = new VersionWrapper();
+            versionWrapper.setVersion(true);
+            versionWrapper.setDbColumn(field.getName());
+            versionWrapper.setJavaColumn(field.getName());
+
+            deleteSqlWrapper.setVersionWrapper(versionWrapper);
+        }
 
         return deleteSqlWrapper;
     }

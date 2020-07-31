@@ -22,7 +22,7 @@
         select
         <trim prefix="" suffix="" suffixOverrides=",">
             <#list querySqlWrapper.modelWrapperList as mw>
-                ${mw.dbColumn} as ${mw.entityColumn},
+                ${mw.dbColumn} as ${mw.javaColumn},
             </#list>
         </trim>
         from ${querySqlWrapper.tableName}

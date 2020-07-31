@@ -6,15 +6,15 @@
         insert into ${insertSqlWrapper.tableName}
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <#list insertSqlWrapper.modelWrapperList as mw>
-                <if test="${mw.entityColumn} != null">
+                <if test="${mw.javaColumn} != null">
                     ${mw.dbColumn},
                 </if>
             </#list>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <#list insertSqlWrapper.modelWrapperList as mw>
-                <if test="${mw.entityColumn} != null">
-                    ${r'#{'} ${mw.entityColumn} ${r'}'},
+                <if test="${mw.javaColumn} != null">
+                    ${r'#{'} ${mw.javaColumn} ${r'}'},
                 </if>
             </#list>
         </trim>

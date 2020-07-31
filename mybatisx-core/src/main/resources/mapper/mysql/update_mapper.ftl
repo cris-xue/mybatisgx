@@ -6,8 +6,8 @@
         update ${updateSqlWrapper.tableName}
         <trim prefix="SET" suffixOverrides=",">
             <#list updateSqlWrapper.modelWrapperList as mw>
-                <if test="${mw.entityColumn} != null">
-                    ${mw.dbColumn} = ${r'#{'} ${mw.entityColumn} ${r'}'},
+                <if test="${mw.javaColumn} != null">
+                    ${mw.dbColumn} = ${r'#{'} ${mw.javaColumn} ${r'}'},
                 </if>
             </#list>
         </trim>

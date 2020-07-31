@@ -4,27 +4,44 @@
 
     <delete id="${deleteSqlWrapper.methodName}" <#if deleteSqlWrapper.parameterType??>parameterType="${deleteSqlWrapper.parameterType}"</#if>>
         delete from ${deleteSqlWrapper.tableName}
-        <#--<#if (deleteSqlWrapper.whereWrapperList?size > 0)>
+        <#--<#if (deleteSqlWrapper.whereWrapper)??>
             <where>
-                <#list deleteSqlWrapper.whereWrapperList as ww>
-                    ${ww.field} ${ww.op} ${ww.value}
-                </#list>
+                <@whereTree ww=deleteSqlWrapper.whereWrapper linkOp=""/>
             </where>
         </#if>-->
-        <#if (deleteSqlWrapper.whereWrapper)??>
-            <where>
-                <@whereTree ww=deleteSqlWrapper.whereWrapper/>
-            </where>
-        </#if>
+        <where>
+            <trim prefix="(" suffix=")" prefixOverrides="AND | OR">
+                <#if (deleteSqlWrapper.whereWrapper)??>
+                    <@whereTree ww=deleteSqlWrapper.whereWrapper linkOp=""/>
+                </#if>
+            </trim>
+            <#if (deleteSqlWrapper.versionWrapper)??>
+                <if test="${deleteSqlWrapper.versionWrapper.javaColumn} != null">
+                    AND ${deleteSqlWrapper.versionWrapper.dbColumn}
+                    =
+                    ${r'#{'} ${deleteSqlWrapper.versionWrapper.javaColumn} ${r'}'},
+                </if>
+            </#if>
+        </where>
     </delete>
 
 </mapper>
 
-<#macro whereTree ww>
+<#macro whereTree ww linkOp>
+    <#if ww??>
+        <if test="${ww.value} != null">
+            ${linkOp} ${ww.field} ${ww.operation.key} ${r'#{'} ${ww.value} ${r'}'}
+        </if>
+        <#if ww.whereWrapper??>
+            <@whereTree ww=ww.whereWrapper linkOp=ww.linkOp/>
+        </#if>
+    </#if>
+</#macro>
+<#--<#macro whereTree ww>
     <#if ww??>
         ${ww.field} ${ww.operation.key} ${r'#{'} ${ww.value} ${r'}'},
         <#if ww.whereWrapper??>
             ${ww.linkOp} <@whereTree ww=ww.whereWrapper/>
         </#if>
     </#if>
-</#macro>
+</#macro>-->

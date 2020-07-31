@@ -11,23 +11,31 @@
                 </if>
             </#list>
         </trim>
-        <#if (updateSqlWrapper.whereWrapper)??>
-            <where>
-                <@whereTree ww=updateSqlWrapper.whereWrapper/>
-            </where>
-        </#if>
+        <where>
+            <trim prefix="(" suffix=")" prefixOverrides="AND | OR">
+                <#if (updateSqlWrapper.whereWrapper)??>
+                    <@whereTree ww=updateSqlWrapper.whereWrapper linkOp=""/>
+                </#if>
+            </trim>
+            <#if (updateSqlWrapper.versionWrapper)??>
+                <if test="${updateSqlWrapper.versionWrapper.javaColumn} != null">
+                    AND ${updateSqlWrapper.versionWrapper.dbColumn}
+                    =
+                    ${r'#{'} ${updateSqlWrapper.versionWrapper.javaColumn} ${r'}'},
+                </if>
+            </#if>
+        </where>
     </update>
 
 </mapper>
 
-<#macro whereTree ww>
+<#macro whereTree ww linkOp>
     <#if ww??>
-        ${ww.field} ${ww.operation.key} ${r'#{'} ${ww.value} ${r'}'},
+        <if test="${ww.value} != null">
+            ${linkOp} ${ww.field} ${ww.operation.key} ${r'#{'} ${ww.value} ${r'}'}
+        </if>
         <#if ww.whereWrapper??>
-            ${ww.linkOp} <@whereTree ww=ww.whereWrapper/>
+            <@whereTree ww=ww.whereWrapper linkOp=ww.linkOp/>
         </#if>
     </#if>
 </#macro>
-
-<#--<@whereFragment.whereTree ww=updateSqlWrapper.whereWrapper/>-->
-<#--<#import "where_fragment.ftl" as whereFragment>-->

@@ -9,7 +9,11 @@ public class ModelWrapper {
 
     private String dbColumn;
 
-    private String entityColumn;
+    private String dbType;
+
+    private String javaColumn;
+
+    private String javaType;
 
     public String getDbColumn() {
         return dbColumn;
@@ -19,12 +23,27 @@ public class ModelWrapper {
         this.dbColumn = dbColumn;
     }
 
-    public String getEntityColumn() {
-        return entityColumn;
+    public String getDbType() {
+        return dbType;
     }
 
-    public void setEntityColumn(String entityColumn) {
-        this.entityColumn = entityColumn;
+    public void setDbType(String dbType) {
+        this.dbType = dbType;
     }
 
+    public String getJavaColumn() {
+        return javaColumn;
+    }
+
+    public void setJavaColumn(String javaColumn) {
+        this.javaColumn = javaColumn;
+    }
+
+    public String getJavaType() {
+        return javaType;
+    }
+
+    public void setJavaType(String javaType) {
+        this.javaType = javaType;
+    }
 }

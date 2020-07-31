@@ -26,12 +26,14 @@ public abstract class ModelMapperHandler {
             ModelWrapper modelWrapper = new ModelWrapper();
 
             PropertyDescriptor propertyDescriptor = propertyDescriptors[i];
-            String fieldName = propertyDescriptor.getName();
-            if ("class".equals(fieldName)) {
+            String columnName = propertyDescriptor.getName();
+            if ("class".equals(columnName)) {
                 continue;
             }
-            modelWrapper.setDbColumn(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, fieldName));
-            modelWrapper.setEntityColumn(fieldName);
+            modelWrapper.setDbColumn(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, columnName));
+            modelWrapper.setDbType("db_type");
+            modelWrapper.setJavaColumn(columnName);
+            modelWrapper.setJavaType("java_type");
             modelWrapperList.add(modelWrapper);
         }
 

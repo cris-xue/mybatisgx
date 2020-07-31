@@ -12,7 +12,7 @@ public class UpdateSqlWrapper extends SqlWrapper {
     /**
      * 是否开启乐观锁
      */
-    private boolean lock;
+    private boolean version;
 
     public WhereWrapper getWhereWrapper() {
         return whereWrapper;
@@ -22,11 +22,11 @@ public class UpdateSqlWrapper extends SqlWrapper {
         this.whereWrapper = whereWrapper;
     }
 
-    public boolean isLock() {
-        return lock;
+    public boolean isVersion() {
+        return version;
     }
 
-    public void setLock(boolean lock) {
-        this.lock = lock;
+    public void setVersion(boolean version) {
+        this.version = version;
     }
 }

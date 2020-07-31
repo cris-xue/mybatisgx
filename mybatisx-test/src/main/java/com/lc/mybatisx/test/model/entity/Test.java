@@ -2,6 +2,7 @@ package com.lc.mybatisx.test.model.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Version;
 
 @Entity
 @Table(name = "t_test")
@@ -20,6 +21,9 @@ public class Test {
     private String payStatusXyz;
 
     private String payStatusXyzAbc;
+
+    @Version
+    private int version;
 
     public Long getId() {
         return id;
@@ -75,5 +79,13 @@ public class Test {
 
     public void setPayStatusXyzAbc(String payStatusXyzAbc) {
         this.payStatusXyzAbc = payStatusXyzAbc;
+    }
+
+    public int getVersion() {
+        return version;
+    }
+
+    public void setVersion(int version) {
+        this.version = version;
     }
 }

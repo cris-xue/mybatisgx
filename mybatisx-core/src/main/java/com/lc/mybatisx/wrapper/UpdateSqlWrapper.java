@@ -10,9 +10,9 @@ public class UpdateSqlWrapper extends SqlWrapper {
     private WhereWrapper whereWrapper;
 
     /**
-     * 是否开启乐观锁
+     * 乐观锁包装器
      */
-    private boolean version;
+    private VersionWrapper versionWrapper;
 
     public WhereWrapper getWhereWrapper() {
         return whereWrapper;
@@ -22,11 +22,11 @@ public class UpdateSqlWrapper extends SqlWrapper {
         this.whereWrapper = whereWrapper;
     }
 
-    public boolean isVersion() {
-        return version;
+    public VersionWrapper getVersionWrapper() {
+        return versionWrapper;
     }
 
-    public void setVersion(boolean version) {
-        this.version = version;
+    public void setVersionWrapper(VersionWrapper versionWrapper) {
+        this.versionWrapper = versionWrapper;
     }
 }

@@ -10,9 +10,9 @@ public class DeleteSqlWrapper extends SqlWrapper {
     private WhereWrapper whereWrapper;
 
     /**
-     * 是否开启乐观锁
+     * 乐观锁包装器
      */
-    private boolean lock;
+    private VersionWrapper versionWrapper;
 
     public WhereWrapper getWhereWrapper() {
         return whereWrapper;
@@ -22,11 +22,12 @@ public class DeleteSqlWrapper extends SqlWrapper {
         this.whereWrapper = whereWrapper;
     }
 
-    public boolean isLock() {
-        return lock;
+    public VersionWrapper getVersionWrapper() {
+        return versionWrapper;
     }
 
-    public void setLock(boolean lock) {
-        this.lock = lock;
+    public void setVersionWrapper(VersionWrapper versionWrapper) {
+        this.versionWrapper = versionWrapper;
     }
+
 }

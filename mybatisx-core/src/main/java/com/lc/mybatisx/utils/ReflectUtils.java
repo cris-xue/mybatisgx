@@ -1,7 +1,10 @@
 package com.lc.mybatisx.utils;
 
 import com.google.common.base.CaseFormat;
+import org.springframework.beans.BeanUtils;
 
+import java.beans.PropertyDescriptor;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -13,28 +16,21 @@ import java.util.Map;
  */
 public class ReflectUtils {
 
-    /**
-     * 获取指定字段
-     *
-     * @param clazz
-     * @param fieldName
-     * @return
-     * @throws NoSuchFieldException
-     */
-    public static Field getField(Class<?> clazz, String fieldName) throws NoSuchFieldException {
+    public static PropertyDescriptor[] getPropertyDescriptors(Class<?> clazz) {
+        return BeanUtils.getPropertyDescriptors(clazz);
+    }
+
+    public static Field getField(Class<?> clazz, Class annotationClass) {
         Class<?> superclass = clazz.getSuperclass();
-        Field field;
-        try {
-            field = clazz.getDeclaredField(fieldName);
-        } catch (NoSuchFieldException e) {
-            throw e;
+
+        Field[] fields = clazz.getDeclaredFields();
+        for (Field field : fields) {
+            Annotation annotation = field.getAnnotation(annotationClass);
+            if (annotation != null) {
+                return field;
+            }
         }
-        try {
-            field = superclass.getDeclaredField(fieldName);
-        } catch (NoSuchFieldException e1) {
-            throw e1;
-        }
-        return field;
+        return null;
     }
 
     public static Field[] getDeclaredFields(Class<?> clazz) {

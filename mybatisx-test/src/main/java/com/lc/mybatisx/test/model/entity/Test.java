@@ -6,9 +6,7 @@ import javax.persistence.Version;
 
 @Entity
 @Table(name = "t_test")
-public class Test {
-
-    private Long id;
+public class Test extends BaseEntity<Long> {
 
     private String name;
 
@@ -24,14 +22,6 @@ public class Test {
 
     @Version
     private int version;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public String getName() {
         return name;

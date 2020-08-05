@@ -5,20 +5,18 @@ import javax.persistence.Table;
 import javax.persistence.Version;
 
 @Entity
-@Table(name = "t_test")
+@Table(name = "mybatisx")
 public class Test extends BaseEntity<Long> {
 
     private String name;
 
-    private String username;
+    private Integer age;
+
+    private String userName;
 
     private String password;
 
     private String payStatus;
-
-    private String payStatusXyz;
-
-    private String payStatusXyzAbc;
 
     @Version
     private int version;
@@ -31,12 +29,20 @@ public class Test extends BaseEntity<Long> {
         this.name = name;
     }
 
-    public String getUsername() {
-        return username;
+    public Integer getAge() {
+        return age;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setAge(Integer age) {
+        this.age = age;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
     public String getPassword() {
@@ -53,22 +59,6 @@ public class Test extends BaseEntity<Long> {
 
     public void setPayStatus(String payStatus) {
         this.payStatus = payStatus;
-    }
-
-    public String getPayStatusXyz() {
-        return payStatusXyz;
-    }
-
-    public void setPayStatusXyz(String payStatusXyz) {
-        this.payStatusXyz = payStatusXyz;
-    }
-
-    public String getPayStatusXyzAbc() {
-        return payStatusXyzAbc;
-    }
-
-    public void setPayStatusXyzAbc(String payStatusXyzAbc) {
-        this.payStatusXyzAbc = payStatusXyzAbc;
     }
 
     public int getVersion() {

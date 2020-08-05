@@ -7,7 +7,18 @@ spring:
     url: jdbc:mysql://localhost:3306/mybatisx?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC
     username: root
     password:
+    schema: classpath*:db/schema.sql
 
 mybatis:
   mapper-locations: classpath:com/lc/mybatisx/test/dao/mapper/*Mapper.xml
   type-aliases-package: com.lc.mybatisx.test.model.entity
+  # configuration:
+    # object-factory: org.apache.ibatis.reflection.factory.DefaultObjectFactory
+    # object-wrapper-factory: com.lc.mybatisx.converter.MybatisxObjectWrapperFactory
+  configuration:
+    default-scripting-language: com.lc.mybatisx.converter.MybatisxXMLLanguageDriver
+
+
+logging:
+  level:
+    com.lc.mybatisx.test.dao: debug

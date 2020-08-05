@@ -7,5 +7,6 @@ import java.io.Serializable;
  * @description：一句话描述
  * @date ：2020/7/20 14:44
  */
-public interface SimpleDao<ENTITY, ID extends Serializable> extends InsertDao, UpdateDao, QueryDao, DeleteDao {
+public interface SimpleDao<ENTITY, ID extends Serializable>
+        extends InsertDao<ENTITY, ID>, UpdateDao<ENTITY, ID>, QueryDao<ENTITY, ID>, DeleteDao<ENTITY, ID> {
 }

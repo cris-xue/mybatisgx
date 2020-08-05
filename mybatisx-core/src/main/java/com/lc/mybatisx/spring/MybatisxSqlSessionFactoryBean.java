@@ -55,11 +55,17 @@ public class MybatisxSqlSessionFactoryBean extends SqlSessionFactoryBean {
         try {
             mapperResourceList = getMapper();
             for (Resource mapperResource : mapperResourceList) {
-                InputStream is = mapperResource.getInputStream();
-
-                MybatisxXMLMapperBuilder xmlMapperBuilder = new MybatisxXMLMapperBuilder(is,
-                        configuration, mapperResource.toString(), configuration.getSqlFragments());
-                xmlMapperBuilder.parse();
+                InputStream is = null;
+                try {
+                    is = mapperResource.getInputStream();
+                    MybatisxXMLMapperBuilder xmlMapperBuilder = new MybatisxXMLMapperBuilder(is,
+                            configuration, mapperResource.toString(), configuration.getSqlFragments());
+                    xmlMapperBuilder.parse();
+                } finally {
+                    if (is != null) {
+                        is.close();
+                    }
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();

@@ -1,5 +1,7 @@
 package com.lc.mybatisx;
 
+import com.lc.mybatisx.session.MybatisxSqlSessionFactoryBuilder;
+import com.lc.mybatisx.session.MybatisxSqlSessionTemplate;
 import com.lc.mybatisx.spring.MybatisxSqlSessionFactoryBean;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.mapping.DatabaseIdProvider;
@@ -123,6 +125,9 @@ public class MybatisxAutoConfiguration implements InitializingBean {
             factory.setMapperLocations(this.properties.resolveMapperLocations());
         }
 
+        // 自定义构造
+        factory.setSqlSessionFactoryBuilder(new MybatisxSqlSessionFactoryBuilder());
+
         return factory.getObject();
     }
 
@@ -144,9 +149,9 @@ public class MybatisxAutoConfiguration implements InitializingBean {
     public SqlSessionTemplate sqlSessionTemplate(SqlSessionFactory sqlSessionFactory) {
         ExecutorType executorType = this.properties.getExecutorType();
         if (executorType != null) {
-            return new SqlSessionTemplate(sqlSessionFactory, executorType);
+            return new MybatisxSqlSessionTemplate(sqlSessionFactory, executorType);
         } else {
-            return new SqlSessionTemplate(sqlSessionFactory);
+            return new MybatisxSqlSessionTemplate(sqlSessionFactory);
         }
     }
 

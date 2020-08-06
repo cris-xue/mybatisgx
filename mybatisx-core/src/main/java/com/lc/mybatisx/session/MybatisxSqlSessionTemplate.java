@@ -1,12 +1,16 @@
 package com.lc.mybatisx.session;
 
-import org.apache.ibatis.binding.MapperMethod;
+import org.apache.ibatis.mapping.MappedStatement;
+import org.apache.ibatis.mapping.SqlSource;
+import org.apache.ibatis.scripting.xmltags.DynamicSqlSource;
+import org.apache.ibatis.scripting.xmltags.SqlNode;
+import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
 
-import java.util.Map;
+import java.lang.reflect.Field;
 
 public class MybatisxSqlSessionTemplate extends SqlSessionTemplate {
 
@@ -41,6 +45,15 @@ public class MybatisxSqlSessionTemplate extends SqlSessionTemplate {
 
     @Override
     public int delete(String statement, Object parameter) {
+        Configuration configuration = getConfiguration();
+        MappedStatement mappedStatement = configuration.getMappedStatement(statement);
+        SqlSource sqlSource = mappedStatement.getSqlSource();
+        try {
+            Field field = DynamicSqlSource.class.getDeclaredField("rootSqlNode");
+            SqlNode sqlNode = (SqlNode) field.get(sqlSource);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
         return super.delete(statement, parameter);
     }
 
@@ -49,7 +62,10 @@ public class MybatisxSqlSessionTemplate extends SqlSessionTemplate {
     }
 
     public Object getNamedParams(Object[] args) {
-        final int paramCount = names.size();
+        System.out.println(args);
+
+        return args;
+        /*final int paramCount = names.size();
         if (args == null || paramCount == 0) {
             return null;
         } else if (!hasParamAnnotation && paramCount == 1) {
@@ -68,7 +84,7 @@ public class MybatisxSqlSessionTemplate extends SqlSessionTemplate {
                 i++;
             }
             return param;
-        }
+        }*/
     }
 
 }

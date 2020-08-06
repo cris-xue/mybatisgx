@@ -1,7 +1,7 @@
 package com.lc.mybatisx.spring;
 
+import com.lc.mybatisx.builder.MybatisxXMLMapperBuilder;
 import com.lc.mybatisx.dao.Dao;
-import com.lc.mybatisx.mapper.MybatisxXMLMapperBuilder;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSessionFactory;

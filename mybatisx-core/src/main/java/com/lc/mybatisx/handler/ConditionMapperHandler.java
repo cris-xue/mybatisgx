@@ -163,19 +163,19 @@ public class ConditionMapperHandler {
 
         for (String operationName : operationNameList) {
             if (condition.endsWith(operationName)) {
-                String field = condition.replaceAll(operationName, "");
-                String paramName = this.getParamName(parameter);
+                String methodField = condition.replaceAll(operationName, "");
+                String paramName = this.getParamName(methodField, parameter);
 
                 // 把方法中的Username转成username。判断方法参数和方法名字段是否对应
-                field = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, field);
-                if (!field.equals(paramName)) {
+                methodField = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, methodField);
+                if (!methodField.equals(paramName)) {
                     String methodName = parameter.getDeclaringExecutable().getName();
-                    logger.error("{} method name: {} param: {} un matcher", methodName, field, paramName);
+                    logger.error("{} method name: {} param: {} un matcher", methodName, methodField, paramName);
                     throw new ParamMethodUnMatcherException("方法名条件和参数不匹配!");
                 }
 
-                field = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, field);
-                whereWrapper.setField(field);
+                methodField = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, methodField);
+                whereWrapper.setField(methodField);
                 whereWrapper.setOperation(operation);
                 whereWrapper.setValue(paramName);
 
@@ -186,7 +186,7 @@ public class ConditionMapperHandler {
         return false;
     }
 
-    private String getParamName(Parameter parameter) {
+    protected String getParamName(String methodField, Parameter parameter) {
         if (parameter == null) {
             return null;
         }

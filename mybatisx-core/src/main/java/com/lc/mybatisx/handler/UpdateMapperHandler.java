@@ -1,5 +1,6 @@
 package com.lc.mybatisx.handler;
 
+import com.google.common.base.CaseFormat;
 import com.lc.mybatisx.annotation.MapperMethod;
 import com.lc.mybatisx.annotation.MethodType;
 import com.lc.mybatisx.dao.UpdateDao;
@@ -17,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import javax.persistence.Version;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,7 +40,22 @@ public class UpdateMapperHandler extends AbstractMapperHandler {
             return entityClass;
         }
     };
-    private ConditionMapperHandler conditionMapperHandler = new ConditionMapperHandler();
+    private ConditionMapperHandler conditionMapperHandler = new ConditionMapperHandler() {
+
+        @Override
+        protected String getParamName(String methodField, Parameter parameter) {
+            if (parameter == null) {
+                return null;
+            }
+
+            methodField = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, methodField);
+            Class<?> parameterClass = parameter.getType();
+            Field classField = ReflectUtils.getField(parameterClass, methodField);
+
+            return classField.getName();
+        }
+
+    };
 
     private List<UpdateSqlWrapper> updateSqlWrapperList;
 

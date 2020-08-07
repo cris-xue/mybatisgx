@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<#--<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">-->
 <mapper namespace="${updateSqlWrapper.namespace}">
 
     <update id="${updateSqlWrapper.methodName}" <#if (updateSqlWrapper.parameterType??)>parameterType="${updateSqlWrapper.parameterType}"</#if>>
@@ -26,6 +25,11 @@
             </#if>
         </where>
     </update>
+
+    <#--查询乐观锁的版本号-->
+    <select id="find_${deleteSqlWrapper.methodName}_version">
+
+    </select>
 
 </mapper>
 

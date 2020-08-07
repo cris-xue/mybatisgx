@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <mapper namespace="${deleteSqlWrapper.namespace}">
 
-    <#if !deleteSqlWrapper.versionQuery>
     <delete id="${deleteSqlWrapper.methodName}" <#if deleteSqlWrapper.parameterType??>parameterType="${deleteSqlWrapper.parameterType}"</#if>>
         delete from ${deleteSqlWrapper.tableName}
         <where>
@@ -19,10 +18,9 @@
             </#if>
         </where>
     </delete>
-    </#if>
 
     <#--查询乐观锁的版本号-->
-    <#if deleteSqlWrapper.versionQuery>
+    <#--<#if deleteSqlWrapper.versionQuery>
     <select id="${deleteSqlWrapper.methodName}" resultType="int" <#if deleteSqlWrapper.parameterType??>parameterType="${deleteSqlWrapper.parameterType}"</#if>>
         select version from ${deleteSqlWrapper.tableName}
         <where>
@@ -33,7 +31,7 @@
             </trim>
         </where>
     </select>
-    </#if>
+    </#if>-->
 
 </mapper>
 

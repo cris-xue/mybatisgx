@@ -13,6 +13,7 @@ import org.apache.ibatis.parsing.XPathParser;
 import org.apache.ibatis.session.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 
 import javax.persistence.Version;
 import java.lang.reflect.Field;
@@ -59,6 +60,16 @@ public class DeleteMapperHandler extends AbstractMapperHandler {
             if (deleteSqlWrapper == null) {
                 continue;
             }
+
+            VersionWrapper versionWrapper = deleteSqlWrapper.getVersionWrapper();
+            if (versionWrapper != null && versionWrapper.getVersion()) {
+                DeleteSqlWrapper dw = new DeleteSqlWrapper();
+                BeanUtils.copyProperties(deleteSqlWrapper, dw);
+                dw.setMethodName("find_" + deleteSqlWrapper.getMethodName() + "_version");
+                dw.setVersionQuery(true);
+                deleteSqlWrapperList.add(dw);
+            }
+
             deleteSqlWrapperList.add(deleteSqlWrapper);
         }
 
@@ -111,7 +122,8 @@ public class DeleteMapperHandler extends AbstractMapperHandler {
             XPathParser xPathParser = FreeMarkerUtils.processTemplate(templateData, template);
             XNode mapperXNode = xPathParser.evalNode("/mapper");
 
-            List<XNode> deleteXNode = mapperXNode.evalNodes("delete");
+            String expression = deleteSqlWrapper.getVersionQuery() ? "select" : "delete";
+            List<XNode> deleteXNode = mapperXNode.evalNodes(expression);
             deleteXNodeList.addAll(deleteXNode);
         });
 

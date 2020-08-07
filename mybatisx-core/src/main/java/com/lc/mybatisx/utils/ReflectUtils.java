@@ -21,12 +21,20 @@ public class ReflectUtils {
     }
 
     public static Field getField(Class<?> clazz, Class annotationClass) {
-        Class<?> superclass = clazz.getSuperclass();
-
         Field[] fields = clazz.getDeclaredFields();
         for (Field field : fields) {
             Annotation annotation = field.getAnnotation(annotationClass);
             if (annotation != null) {
+                return field;
+            }
+        }
+        return null;
+    }
+
+    public static Field getField(Class<?> clazz, String fieldName) {
+        Field[] fields = clazz.getDeclaredFields();
+        for (Field field : fields) {
+            if (fieldName.equals(field.getName())) {
                 return field;
             }
         }

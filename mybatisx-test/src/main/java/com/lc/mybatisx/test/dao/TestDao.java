@@ -15,7 +15,7 @@ import java.util.Map;
 public interface TestDao extends SimpleDao<Test, Long> {
 
     @MapperMethod(type = MethodType.UPDATE)
-    int updateByIdAndNameOrUsername(@Param("id") Long id, @Param("name") String name, @Param("username") String username);
+    int updateByIdAndNameOrUsername(Test test);
 
     @MapperMethod(type = MethodType.QUERY)
     List<TestDTO> findByPayStatusAndPayStatusXyzAbc(@Param("payStatus") String payStatus, @Param("payStatusXyzAbc") String payStatusXyzAbc);

@@ -1,5 +1,6 @@
 package com.lc.mybatisx.test.model.entity;
 
+import javax.persistence.Id;
 import java.time.LocalDateTime;
 
 /**
@@ -9,6 +10,7 @@ import java.time.LocalDateTime;
  */
 public abstract class BaseEntity<ID> {
 
+    @Id
     private ID id;
 
     private String inputUserId;

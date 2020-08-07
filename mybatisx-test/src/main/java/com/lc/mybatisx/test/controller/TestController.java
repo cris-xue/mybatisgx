@@ -20,7 +20,7 @@ public class TestController {
 
     @DeleteMapping(path = "/delete-by-id")
     public int deleteById(Long id) {
-        Test test = testDao.findById(id);
+        // Test test = testDao.findById(id);
         int count = testDao.deleteById(id);
         return count;
     }

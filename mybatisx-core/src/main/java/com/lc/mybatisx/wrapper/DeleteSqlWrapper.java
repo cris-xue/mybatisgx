@@ -14,6 +14,8 @@ public class DeleteSqlWrapper extends SqlWrapper {
      */
     private VersionWrapper versionWrapper;
 
+    private Boolean versionQuery = false;
+
     public WhereWrapper getWhereWrapper() {
         return whereWrapper;
     }
@@ -30,4 +32,11 @@ public class DeleteSqlWrapper extends SqlWrapper {
         this.versionWrapper = versionWrapper;
     }
 
+    public Boolean getVersionQuery() {
+        return versionQuery;
+    }
+
+    public void setVersionQuery(Boolean versionQuery) {
+        this.versionQuery = versionQuery;
+    }
 }

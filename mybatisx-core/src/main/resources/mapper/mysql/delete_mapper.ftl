@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <mapper namespace="${deleteSqlWrapper.namespace}">
 
+    <#if !deleteSqlWrapper.versionQuery>
     <delete id="${deleteSqlWrapper.methodName}" <#if deleteSqlWrapper.parameterType??>parameterType="${deleteSqlWrapper.parameterType}"</#if>>
         delete from ${deleteSqlWrapper.tableName}
         <where>
@@ -13,14 +14,16 @@
                 <if test="${deleteSqlWrapper.versionWrapper.javaColumn} != null">
                     AND ${deleteSqlWrapper.versionWrapper.dbColumn}
                     =
-                    ${r'#{'} ${deleteSqlWrapper.versionWrapper.javaColumn} ${r'}'},
+                    ${r'#{'} ${deleteSqlWrapper.versionWrapper.javaColumn} ${r'}'}
                 </if>
             </#if>
         </where>
     </delete>
+    </#if>
 
     <#--查询乐观锁的版本号-->
-    <select id="find_${deleteSqlWrapper.methodName}_version" <#if deleteSqlWrapper.parameterType??>parameterType="${deleteSqlWrapper.parameterType}"</#if>>
+    <#if deleteSqlWrapper.versionQuery>
+    <select id="${deleteSqlWrapper.methodName}" resultType="int" <#if deleteSqlWrapper.parameterType??>parameterType="${deleteSqlWrapper.parameterType}"</#if>>
         select version from ${deleteSqlWrapper.tableName}
         <where>
             <trim prefix="(" suffix=")" prefixOverrides="AND | OR">
@@ -30,6 +33,7 @@
             </trim>
         </where>
     </select>
+    </#if>
 
 </mapper>
 

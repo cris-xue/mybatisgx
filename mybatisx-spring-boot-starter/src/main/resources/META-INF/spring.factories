@@ -1,5 +1,5 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  com.lc.mybatisx.MybatisxAutoConfiguration
+    com.lc.mybatisx.MybatisxAutoConfiguration
 
 org.springframework.boot.autoconfigure.AutoConfigurationImportFilter=\
-    com.iss.dtg.ftc.db.DbExcludeAutoConfigFilter
+    com.lc.mybatisx.MybatisxExcludeAutoConfigFilter

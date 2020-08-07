@@ -22,7 +22,7 @@ public class MybatisxMapperRegistry extends MapperRegistry {
         this.config = config;
     }
 
-    @SuppressWarnings("unchecked")
+    @Override
     public <T> T getMapper(Class<T> type, SqlSession sqlSession) {
         final MybatisxMapperProxyFactory<T> mapperProxyFactory = (MybatisxMapperProxyFactory<T>) knownMappers.get(type);
         if (mapperProxyFactory == null) {
@@ -35,10 +35,12 @@ public class MybatisxMapperRegistry extends MapperRegistry {
         }
     }
 
+    @Override
     public <T> boolean hasMapper(Class<T> type) {
         return knownMappers.containsKey(type);
     }
 
+    @Override
     public <T> void addMapper(Class<T> type) {
         if (type.isInterface()) {
             if (hasMapper(type)) {
@@ -64,6 +66,7 @@ public class MybatisxMapperRegistry extends MapperRegistry {
     /**
      * @since 3.2.2
      */
+    @Override
     public Collection<Class<?>> getMappers() {
         return Collections.unmodifiableCollection(knownMappers.keySet());
     }
@@ -71,6 +74,7 @@ public class MybatisxMapperRegistry extends MapperRegistry {
     /**
      * @since 3.2.2
      */
+    @Override
     public void addMappers(String packageName, Class<?> superType) {
         ResolverUtil<Class<?>> resolverUtil = new ResolverUtil<>();
         resolverUtil.find(new ResolverUtil.IsA(superType), packageName);
@@ -83,6 +87,7 @@ public class MybatisxMapperRegistry extends MapperRegistry {
     /**
      * @since 3.2.2
      */
+    @Override
     public void addMappers(String packageName) {
         addMappers(packageName, Object.class);
     }

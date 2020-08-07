@@ -15,6 +15,7 @@ import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.session.SqlSession;
+import org.springframework.util.StringUtils;
 
 import javax.persistence.Version;
 import java.lang.reflect.*;
@@ -74,20 +75,24 @@ public class MybatisxMapperMethod {
                 break;
             }
             case DELETE: {
-                String mapperInterfaceName = mapperInterface.getName();
-                String methodName = originalMethod.getName();
-                String queryVersionFullName = mapperInterfaceName + ".find_" + methodName + "_version";
+                /*if (StringUtils.hasLength(this.version)) {
+                    String mapperInterfaceName = mapperInterface.getName();
+                    String methodName = originalMethod.getName();
+                    String queryVersionFullName = mapperInterfaceName + ".find_" + methodName + "_version";
 
-                int argsLength = args.length;
-                int versionArgsLength = args.length + 1;
-                Object[] versionArgs = new Object[versionArgsLength];
-                System.arraycopy(args, 0, versionArgs, 0, argsLength);
+                    int argsLength = args.length;
+                    int versionArgsLength = args.length + 1;
+                    Object[] versionArgs = new Object[versionArgsLength];
+                    System.arraycopy(args, 0, versionArgs, 0, argsLength);
 
-                Object queryVersionParam = method.convertArgsToSqlCommandParam(versionArgs);
-                Integer version = sqlSession.selectOne(queryVersionFullName, queryVersionParam);
+                    Object queryVersionParam = method.convertArgsToSqlCommandParam(versionArgs);
+                    Integer version = sqlSession.selectOne(queryVersionFullName, queryVersionParam);
 
-                versionArgs[argsLength] = version;
-                Object param = method.convertArgsToSqlCommandParam(versionArgs);
+                    versionArgs[argsLength] = version;
+                    args = versionArgs;
+                }*/
+
+                Object param = method.convertArgsToSqlCommandParam(args);
                 result = rowCountResult(sqlSession.delete(command.getName(), param));
                 break;
             }

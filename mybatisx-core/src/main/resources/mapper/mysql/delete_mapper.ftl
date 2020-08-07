@@ -20,8 +20,15 @@
     </delete>
 
     <#--查询乐观锁的版本号-->
-    <select id="find_${deleteSqlWrapper.methodName}_version">
-
+    <select id="find_${deleteSqlWrapper.methodName}_version" <#if deleteSqlWrapper.parameterType??>parameterType="${deleteSqlWrapper.parameterType}"</#if>>
+        select version from ${deleteSqlWrapper.tableName}
+        <where>
+            <trim prefix="(" suffix=")" prefixOverrides="AND | OR">
+                <#if (deleteSqlWrapper.whereWrapper)??>
+                    <@whereTree ww=deleteSqlWrapper.whereWrapper linkOp=""/>
+                </#if>
+            </trim>
+        </where>
     </select>
 
 </mapper>

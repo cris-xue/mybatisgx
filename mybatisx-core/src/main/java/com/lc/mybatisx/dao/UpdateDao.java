@@ -2,7 +2,6 @@ package com.lc.mybatisx.dao;
 
 import com.lc.mybatisx.annotation.MapperMethod;
 import com.lc.mybatisx.annotation.MethodType;
-import org.apache.ibatis.annotations.Param;
 
 import java.io.Serializable;
 
@@ -14,6 +13,6 @@ import java.io.Serializable;
 public interface UpdateDao<ENTITY, ID extends Serializable> extends Dao {
 
     @MapperMethod(type = MethodType.UPDATE)
-    int updateById(@Param("id") ID id);
+    int updateById(ENTITY entity);
 
 }

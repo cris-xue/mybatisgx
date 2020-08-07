@@ -1,20 +1,16 @@
 package com.lc.mybatisx.binding;
 
-import com.lc.mybatisx.dao.DeleteDao;
-import com.lc.mybatisx.dao.UpdateDao;
-import com.lc.mybatisx.utils.ReflectUtils;
-import org.apache.ibatis.binding.MapperMethod;
 import org.apache.ibatis.reflection.ExceptionUtil;
 import org.apache.ibatis.session.SqlSession;
-import org.springframework.util.StringUtils;
-import org.springframework.util.TypeUtils;
 
-import javax.persistence.Version;
 import java.io.Serializable;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
-import java.lang.reflect.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Map;
 
 /**
@@ -31,32 +27,10 @@ public class MybatisxMapperProxy<T> implements InvocationHandler, Serializable {
     private final Class<T> mapperInterface;
     private final Map<Method, MapperMethodInvoker> methodCache;
 
-    /**
-     * 版本字段
-     */
-    private String version = null;
-
     public MybatisxMapperProxy(SqlSession sqlSession, Class<T> mapperInterface, Map<Method, MapperMethodInvoker> methodCache) {
         this.sqlSession = sqlSession;
         this.mapperInterface = mapperInterface;
         this.methodCache = methodCache;
-
-        getVersion(mapperInterface);
-    }
-
-    private void getVersion(Class<T> mapperInterface) {
-        Type[] types = mapperInterface.getGenericInterfaces();
-        for (Type type : types) {
-            if (TypeUtils.isAssignable(DeleteDao.class, type) || TypeUtils.isAssignable(UpdateDao.class, type)) {
-                ParameterizedType parameterizedType = (ParameterizedType) type;
-                Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
-                Class<?> entityClass = (Class<?>) actualTypeArguments[0];
-                Field field = ReflectUtils.getField(entityClass, Version.class);
-                if (field != null) {
-                    version = field.getName();
-                }
-            }
-        }
     }
 
     static {
@@ -88,7 +62,6 @@ public class MybatisxMapperProxy<T> implements InvocationHandler, Serializable {
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         try {
-            args = addVersion(args);
             if (Object.class.equals(method.getDeclaringClass())) {
                 return method.invoke(this, args);
             } else {
@@ -97,18 +70,6 @@ public class MybatisxMapperProxy<T> implements InvocationHandler, Serializable {
         } catch (Throwable t) {
             throw ExceptionUtil.unwrapThrowable(t);
         }
-    }
-
-    private Object[] addVersion(Object[] args) {
-        if (StringUtils.hasLength(version)) {
-            int argsLength = args.length;
-            int versionArgsLength = args.length + 1;
-            Object[] versionArgs = new Object[versionArgsLength];
-            System.arraycopy(args, 0, versionArgs, 0, argsLength);
-            versionArgs[argsLength] = version;
-            return versionArgs;
-        }
-        return args;
     }
 
     private MapperMethodInvoker cachedInvoker(Method method) throws Throwable {
@@ -126,7 +87,7 @@ public class MybatisxMapperProxy<T> implements InvocationHandler, Serializable {
                         throw new RuntimeException(e);
                     }
                 } else {
-                    return new PlainMethodInvoker(new MapperMethod(mapperInterface, method, sqlSession.getConfiguration()));
+                    return new PlainMethodInvoker(new MybatisxMapperMethod(mapperInterface, method, sqlSession.getConfiguration()));
                 }
             });
         } catch (RuntimeException re) {
@@ -154,9 +115,9 @@ public class MybatisxMapperProxy<T> implements InvocationHandler, Serializable {
     }
 
     private static class PlainMethodInvoker implements MapperMethodInvoker {
-        private final MapperMethod mapperMethod;
+        private final MybatisxMapperMethod mapperMethod;
 
-        public PlainMethodInvoker(MapperMethod mapperMethod) {
+        public PlainMethodInvoker(MybatisxMapperMethod mapperMethod) {
             super();
             this.mapperMethod = mapperMethod;
         }

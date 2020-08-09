@@ -10,28 +10,16 @@
                 </#if>
             </trim>
             <#if (deleteSqlWrapper.versionWrapper)??>
+                <trim prefixOverrides="AND | OR">
                 <if test="${deleteSqlWrapper.versionWrapper.javaColumn} != null">
                     AND ${deleteSqlWrapper.versionWrapper.dbColumn}
                     =
                     ${r'#{'} ${deleteSqlWrapper.versionWrapper.javaColumn} ${r'}'}
                 </if>
+                </trim>
             </#if>
         </where>
     </delete>
-
-    <#--查询乐观锁的版本号-->
-    <#--<#if deleteSqlWrapper.versionQuery>
-    <select id="${deleteSqlWrapper.methodName}" resultType="int" <#if deleteSqlWrapper.parameterType??>parameterType="${deleteSqlWrapper.parameterType}"</#if>>
-        select version from ${deleteSqlWrapper.tableName}
-        <where>
-            <trim prefix="(" suffix=")" prefixOverrides="AND | OR">
-                <#if (deleteSqlWrapper.whereWrapper)??>
-                    <@whereTree ww=deleteSqlWrapper.whereWrapper linkOp=""/>
-                </#if>
-            </trim>
-        </where>
-    </select>
-    </#if>-->
 
 </mapper>
 

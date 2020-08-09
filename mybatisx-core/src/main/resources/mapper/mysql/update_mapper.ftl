@@ -9,6 +9,13 @@
                     ${mw.dbColumn} = ${r'#{'} ${mw.javaColumn} ${r'}'},
                 </if>
             </#list>
+            <#if (updateSqlWrapper.versionWrapper)??>
+                <if test="${updateSqlWrapper.versionWrapper.javaColumn} != null">
+                    ${updateSqlWrapper.versionWrapper.dbColumn}
+                    =
+                    ${r'#{'} ${updateSqlWrapper.versionWrapper.javaColumn} ${r'}'} + 1
+                </if>
+            </#if>
         </trim>
         <where>
             <trim prefix="(" suffix=")" prefixOverrides="AND | OR">
@@ -17,26 +24,16 @@
                 </#if>
             </trim>
             <#if (updateSqlWrapper.versionWrapper)??>
+                <trim prefixOverrides="AND | OR">
                 <if test="${updateSqlWrapper.versionWrapper.javaColumn} != null">
                     AND ${updateSqlWrapper.versionWrapper.dbColumn}
                     =
-                    ${r'#{'} ${updateSqlWrapper.versionWrapper.javaColumn} ${r'}'},
+                    ${r'#{'} ${updateSqlWrapper.versionWrapper.javaColumn} ${r'}'}
                 </if>
+                </trim>
             </#if>
         </where>
     </update>
-
-    <#--查询乐观锁的版本号-->
-    <#--<select id="find_${updateSqlWrapper.methodName}_version" <#if updateSqlWrapper.parameterType??>parameterType="${updateSqlWrapper.parameterType}"</#if>>
-        select version from ${updateSqlWrapper.tableName}
-        <where>
-            <trim prefix="(" suffix=")" prefixOverrides="AND | OR">
-                <#if (updateSqlWrapper.whereWrapper)??>
-                    <@whereTree ww=updateSqlWrapper.whereWrapper linkOp=""/>
-                </#if>
-            </trim>
-        </where>
-    </select>-->
 
 </mapper>
 

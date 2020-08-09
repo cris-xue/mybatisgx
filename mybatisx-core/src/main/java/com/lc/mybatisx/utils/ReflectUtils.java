@@ -21,7 +21,7 @@ public class ReflectUtils {
     }
 
     public static Field getField(Class<?> clazz, Class annotationClass) {
-        Field[] fields = clazz.getDeclaredFields();
+        Field[] fields = getAllField(clazz);
         for (Field field : fields) {
             Annotation annotation = field.getAnnotation(annotationClass);
             if (annotation != null) {
@@ -31,7 +31,7 @@ public class ReflectUtils {
         return null;
     }
 
-    private static Field[] getAllField(Class<?> clazz) {
+    public static Field[] getAllField(Class<?> clazz) {
         Class<?> superClass = clazz.getSuperclass();
         if (superClass == Object.class) {
             return clazz.getDeclaredFields();

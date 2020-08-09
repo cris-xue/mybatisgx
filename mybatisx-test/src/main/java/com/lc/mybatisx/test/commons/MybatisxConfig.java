@@ -5,18 +5,16 @@ import com.lc.mybatisx.converter.MybatisxObjectWrapperFactory;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSessionFactory;
-import org.springframework.context.annotation.Bean;
 
 @org.springframework.context.annotation.Configuration
 public class MybatisxConfig {
 
-    @Bean
     public Configuration configuration(SqlSessionFactory sqlSessionFactory) {
         Configuration configuration = sqlSessionFactory.getConfiguration();
         configuration.setObjectWrapperFactory(new MybatisxObjectWrapperFactory(new MetaObjectHandler() {
             @Override
             public void set(MetaObject metaObject, Object object) {
-                System.out.println(object.toString());
+                // System.out.println(object.toString());
             }
         }));
 

@@ -16,7 +16,7 @@ mybatis:
     # object-factory: org.apache.ibatis.reflection.factory.DefaultObjectFactory
     # object-wrapper-factory: com.lc.mybatisx.converter.MybatisxObjectWrapperFactory
   configuration:
-    default-scripting-language: com.lc.mybatisx.converter.MybatisxXMLLanguageDriver
+    default-scripting-language: com.lc.mybatisx.scripting.MybatisxXMLLanguageDriver
 
 
 logging:

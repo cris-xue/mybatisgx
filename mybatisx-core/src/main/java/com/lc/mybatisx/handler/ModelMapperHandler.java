@@ -4,7 +4,7 @@ import com.google.common.base.CaseFormat;
 import com.lc.mybatisx.utils.ReflectUtils;
 import com.lc.mybatisx.wrapper.ModelWrapper;
 
-import java.beans.PropertyDescriptor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,13 +19,14 @@ public abstract class ModelMapperHandler {
     public abstract Class<?> getModelClass(Method method, Class<?> entityClass);
 
     public List<ModelWrapper> buildModelWrapper(Class<?> modelClass) {
-        PropertyDescriptor[] propertyDescriptors = ReflectUtils.getPropertyDescriptors(modelClass);
+        Field[] fields = ReflectUtils.getAllField(modelClass);
+        int fieldLength = fields.length;
 
         List<ModelWrapper> modelWrapperList = new ArrayList<>();
-        for (int i = 0; i < propertyDescriptors.length; i++) {
-            PropertyDescriptor propertyDescriptor = propertyDescriptors[i];
-            String columnName = propertyDescriptor.getName();
-            if ("class".equals(columnName)) {
+        for (int i = 0; i < fieldLength; i++) {
+            Field field = fields[i];
+            String columnName = field.getName();
+            if ("class".equals(columnName) || ignoreField(field)) {
                 continue;
             }
 
@@ -38,6 +39,10 @@ public abstract class ModelMapperHandler {
         }
 
         return modelWrapperList;
+    }
+
+    protected boolean ignoreField(Field field) {
+        return false;
     }
 
 }

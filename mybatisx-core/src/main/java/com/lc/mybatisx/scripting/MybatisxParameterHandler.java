@@ -1,4 +1,4 @@
-package com.lc.mybatisx.handler;
+package com.lc.mybatisx.scripting;
 
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;

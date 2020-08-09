@@ -1,6 +1,6 @@
-package com.lc.mybatisx.converter;
+package com.lc.mybatisx.scripting;
 
-import com.lc.mybatisx.handler.MybatisxParameterHandler;
+import com.lc.mybatisx.scripting.MybatisxParameterHandler;
 import org.apache.ibatis.executor.parameter.ParameterHandler;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;

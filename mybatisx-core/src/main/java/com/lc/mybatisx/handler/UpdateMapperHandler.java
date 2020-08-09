@@ -15,6 +15,7 @@ import org.apache.ibatis.session.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.persistence.Id;
 import javax.persistence.Version;
 import java.lang.reflect.*;
 import java.util.ArrayList;
@@ -37,6 +38,13 @@ public class UpdateMapperHandler extends AbstractMapperHandler {
         @Override
         public Class<?> getModelClass(Method method, Class<?> entityClass) {
             return entityClass;
+        }
+
+        @Override
+        protected boolean ignoreField(Field field) {
+            Id id = field.getAnnotation(Id.class);
+            Version version = field.getAnnotation(Version.class);
+            return id != null || version != null;
         }
     };
     private ConditionMapperHandler conditionMapperHandler = new ConditionMapperHandler() {

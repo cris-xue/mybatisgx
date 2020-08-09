@@ -1,7 +1,6 @@
 package com.lc.mybatisx;
 
 import com.lc.mybatisx.session.MybatisxSqlSessionFactoryBuilder;
-import com.lc.mybatisx.session.MybatisxSqlSessionTemplate;
 import com.lc.mybatisx.spring.MybatisxSqlSessionFactoryBean;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.mapping.DatabaseIdProvider;
@@ -12,6 +11,7 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.mybatis.spring.boot.autoconfigure.ConfigurationCustomizer;
 import org.mybatis.spring.boot.autoconfigure.MybatisAutoConfiguration;
+import org.mybatis.spring.boot.autoconfigure.MybatisProperties;
 import org.mybatis.spring.boot.autoconfigure.SpringBootVFS;
 import org.mybatis.spring.mapper.ClassPathMapperScanner;
 import org.mybatis.spring.mapper.MapperFactoryBean;
@@ -51,13 +51,13 @@ import java.util.List;
  */
 @ConditionalOnClass({SqlSessionFactory.class, MybatisxSqlSessionFactoryBean.class})
 @ConditionalOnSingleCandidate(DataSource.class)
-@EnableConfigurationProperties(MybatisxProperties.class)
+@EnableConfigurationProperties(MybatisProperties.class)
 @AutoConfigureAfter(DataSourceAutoConfiguration.class)
 public class MybatisxAutoConfiguration implements InitializingBean {
 
     private static final Logger logger = LoggerFactory.getLogger(MybatisxAutoConfiguration.class);
 
-    private final MybatisxProperties properties;
+    private final MybatisProperties properties;
 
     private final Interceptor[] interceptors;
 
@@ -67,7 +67,7 @@ public class MybatisxAutoConfiguration implements InitializingBean {
 
     private final List<ConfigurationCustomizer> configurationCustomizers;
 
-    public MybatisxAutoConfiguration(MybatisxProperties properties,
+    public MybatisxAutoConfiguration(MybatisProperties properties,
                                      ObjectProvider<Interceptor[]> interceptorsProvider,
                                      ResourceLoader resourceLoader,
                                      ObjectProvider<DatabaseIdProvider> databaseIdProvider,
@@ -125,7 +125,7 @@ public class MybatisxAutoConfiguration implements InitializingBean {
         }
 
         // 自定义构造
-        factory.setSqlSessionFactoryBuilder(new MybatisxSqlSessionFactoryBuilder());
+        // factory.setSqlSessionFactoryBuilder(new MybatisxSqlSessionFactoryBuilder());
 
         return factory.getObject();
     }
@@ -148,9 +148,9 @@ public class MybatisxAutoConfiguration implements InitializingBean {
     public SqlSessionTemplate sqlSessionTemplate(SqlSessionFactory sqlSessionFactory) {
         ExecutorType executorType = this.properties.getExecutorType();
         if (executorType != null) {
-            return new MybatisxSqlSessionTemplate(sqlSessionFactory, executorType);
+            return new SqlSessionTemplate(sqlSessionFactory, executorType);
         } else {
-            return new MybatisxSqlSessionTemplate(sqlSessionFactory);
+            return new SqlSessionTemplate(sqlSessionFactory);
         }
     }
 

@@ -9,15 +9,6 @@
                     <@whereTree ww=deleteSqlWrapper.whereWrapper linkOp=""/>
                 </#if>
             </trim>
-            <#if (deleteSqlWrapper.versionWrapper)??>
-                <trim prefixOverrides="AND | OR">
-                <if test="${deleteSqlWrapper.versionWrapper.javaColumn} != null">
-                    AND ${deleteSqlWrapper.versionWrapper.dbColumn}
-                    =
-                    ${r'#{'} ${deleteSqlWrapper.versionWrapper.javaColumn} ${r'}'}
-                </if>
-                </trim>
-            </#if>
         </where>
     </delete>
 

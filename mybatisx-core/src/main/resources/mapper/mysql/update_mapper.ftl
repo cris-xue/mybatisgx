@@ -24,13 +24,11 @@
                 </#if>
             </trim>
             <#if (updateSqlWrapper.versionWrapper)??>
-                <trim prefixOverrides="AND | OR">
                 <if test="${updateSqlWrapper.versionWrapper.javaColumn} != null">
                     AND ${updateSqlWrapper.versionWrapper.dbColumn}
                     =
                     ${r'#{'} ${updateSqlWrapper.versionWrapper.javaColumn} ${r'}'}
                 </if>
-                </trim>
             </#if>
         </where>
     </update>

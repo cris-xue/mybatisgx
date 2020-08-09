@@ -75,9 +75,9 @@ public class MybatisxParamNameResolver {
         }
 
         // 加入版本参数
-        if (StringUtils.hasLength(version)) {
+        /*if (StringUtils.hasLength(version)) {
             map.put(paramCount, version);
-        }
+        }*/
 
         names = Collections.unmodifiableSortedMap(map);
     }

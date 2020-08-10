@@ -1,5 +1,6 @@
 package com.lc.mybatisx.test.model.entity;
 
+import javax.persistence.Column;
 import javax.persistence.Id;
 import java.time.LocalDateTime;
 
@@ -13,9 +14,17 @@ public abstract class BaseEntity<ID> {
     @Id
     private ID id;
 
+    @Column(insertable = true)
     private String inputUserId;
 
+    @Column(insertable = true)
     private LocalDateTime inputTime;
+
+    @Column(updatable = true)
+    private String updateUserId;
+
+    @Column(updatable = true)
+    private LocalDateTime updateTime;
 
     public ID getId() {
         return id;
@@ -39,5 +48,21 @@ public abstract class BaseEntity<ID> {
 
     public void setInputTime(LocalDateTime inputTime) {
         this.inputTime = inputTime;
+    }
+
+    public String getUpdateUserId() {
+        return updateUserId;
+    }
+
+    public void setUpdateUserId(String updateUserId) {
+        this.updateUserId = updateUserId;
+    }
+
+    public LocalDateTime getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(LocalDateTime updateTime) {
+        this.updateTime = updateTime;
     }
 }

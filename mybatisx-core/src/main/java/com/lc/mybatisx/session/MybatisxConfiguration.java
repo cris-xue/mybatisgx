@@ -1,42 +1,45 @@
 package com.lc.mybatisx.session;
 
-import com.lc.mybatisx.binding.MybatisxMapperRegistry;
-import org.apache.ibatis.binding.MapperRegistry;
+import com.lc.mybatisx.scripting.MetaObjectHandler;
+import org.apache.ibatis.executor.Executor;
+import org.apache.ibatis.executor.statement.StatementHandler;
+import org.apache.ibatis.mapping.BoundSql;
+import org.apache.ibatis.mapping.MappedStatement;
+import org.apache.ibatis.mapping.SqlCommandType;
+import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.session.Configuration;
-import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.ResultHandler;
+import org.apache.ibatis.session.RowBounds;
 
 public class MybatisxConfiguration extends Configuration {
 
-    protected final MybatisxMapperRegistry mapperRegistry = new MybatisxMapperRegistry(this);
+    private MetaObjectHandler metaObjectHandler;
 
-    @Override
-    public MapperRegistry getMapperRegistry() {
-        return mapperRegistry;
+    public MetaObjectHandler getMetaObjectHandler() {
+        return metaObjectHandler;
+    }
+
+    public void setMetaObjectHandler(MetaObjectHandler metaObjectHandler) {
+        this.metaObjectHandler = metaObjectHandler;
     }
 
     @Override
-    public void addMappers(String packageName, Class<?> superType) {
-        mapperRegistry.addMappers(packageName, superType);
+    public StatementHandler newStatementHandler(Executor executor, MappedStatement mappedStatement, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
+        parameterObject = this.setValue(mappedStatement, parameterObject);
+        return super.newStatementHandler(executor, mappedStatement, parameterObject, rowBounds, resultHandler, boundSql);
     }
 
-    @Override
-    public void addMappers(String packageName) {
-        mapperRegistry.addMappers(packageName);
-    }
+    private Object setValue(MappedStatement mappedStatement, Object parameterObject) {
+        SqlCommandType sqlCommandType = mappedStatement.getSqlCommandType();
 
-    @Override
-    public <T> void addMapper(Class<T> type) {
-        mapperRegistry.addMapper(type);
-    }
+        MetaObject metaObject = this.newMetaObject(parameterObject);
+        if (SqlCommandType.INSERT == sqlCommandType) {
+            metaObjectHandler.insert(metaObject);
+        } else if (SqlCommandType.UPDATE == sqlCommandType) {
+            metaObjectHandler.update(metaObject);
+        }
 
-    @Override
-    public <T> T getMapper(Class<T> type, SqlSession sqlSession) {
-        return mapperRegistry.getMapper(type, sqlSession);
-    }
-
-    @Override
-    public boolean hasMapper(Class<?> type) {
-        return mapperRegistry.hasMapper(type);
+        return metaObject.getOriginalObject();
     }
 
 }

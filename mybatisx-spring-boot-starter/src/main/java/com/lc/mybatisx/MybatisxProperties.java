@@ -3,7 +3,6 @@ package com.lc.mybatisx;
 import com.lc.mybatisx.session.MybatisxConfiguration;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.ExecutorType;
-import org.mybatis.spring.boot.autoconfigure.MybatisProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.core.io.Resource;
@@ -18,7 +17,7 @@ import java.util.stream.Stream;
 /**
  * MybatisProperties
  */
-@ConfigurationProperties(prefix = MybatisProperties.MYBATIS_PREFIX)
+@ConfigurationProperties(prefix = MybatisxProperties.MYBATIS_PREFIX)
 public class MybatisxProperties {
 
     public static final String MYBATIS_PREFIX = "mybatis";

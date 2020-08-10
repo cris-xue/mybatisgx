@@ -1,16 +1,16 @@
 package com.lc.mybatisx.converter;
 
-import org.apache.ibatis.reflection.wrapper.ObjectWrapperFactory;
+import com.lc.mybatisx.scripting.MetaObjectHandler;
 import org.springframework.boot.context.properties.ConfigurationPropertiesBinding;
 import org.springframework.core.convert.converter.Converter;
 
 @ConfigurationPropertiesBinding
-public class ObjectFactoryConverter implements Converter<String, ObjectWrapperFactory> {
+public class MetaObjectHandlerConverter implements Converter<String, MetaObjectHandler> {
 
     @Override
-    public ObjectWrapperFactory convert(String s) {
+    public MetaObjectHandler convert(String s) {
         try {
-            return (ObjectWrapperFactory) Class.forName(s).newInstance();
+            return (MetaObjectHandler) Class.forName(s).newInstance();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {

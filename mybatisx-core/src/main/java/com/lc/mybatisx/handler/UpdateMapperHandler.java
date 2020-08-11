@@ -34,7 +34,8 @@ public class UpdateMapperHandler extends AbstractMapperHandler {
 
     private UpdateMapperHandler updateMapperHandler = this;
 
-    private ModelMapperHandler modelMapperHandler = new ModelMapperHandler() {
+    private ModelMapperHandler modelMapperHandler;
+    /*private ModelMapperHandler modelMapperHandler = new ModelMapperHandler() {
         @Override
         public Class<?> getModelClass(Method method, Class<?> entityClass) {
             return entityClass;
@@ -46,8 +47,9 @@ public class UpdateMapperHandler extends AbstractMapperHandler {
             Version version = field.getAnnotation(Version.class);
             return id != null || version != null;
         }
-    };
-    private ConditionMapperHandler conditionMapperHandler = new ConditionMapperHandler() {
+    };*/
+    private ConditionMapperHandler conditionMapperHandler;
+    /*private ConditionMapperHandler conditionMapperHandler = new ConditionMapperHandler() {
 
         @Override
         protected String getParamName(String methodField, Parameter parameter) {
@@ -79,11 +81,21 @@ public class UpdateMapperHandler extends AbstractMapperHandler {
             return classField.getName();
         }
 
-    };
+    };*/
 
     private List<UpdateSqlWrapper> updateSqlWrapperList;
 
     public UpdateMapperHandler(MapperBuilderAssistant builderAssistant, String namespace) {
+        initUpdateSqlWrapper(builderAssistant, namespace);
+
+        List<String> parseMethodList = new ArrayList<>();
+        parseMethodList.add("updateBy");
+        this.conditionMapperHandler = new UpdateConditionMapperHandler(parseMethodList);
+
+        this.modelMapperHandler = new UpdateModelMapperHandler();
+    }
+
+    private void initUpdateSqlWrapper(MapperBuilderAssistant builderAssistant, String namespace) {
         Class<?> daoInterface = getDaoInterface(namespace);
         Type[] daoInterfaceParams = getDaoInterfaceParams(daoInterface, UpdateDao.class);
 
@@ -162,6 +174,63 @@ public class UpdateMapperHandler extends AbstractMapperHandler {
     @Override
     protected SqlWrapper instanceSqlWrapper() {
         return this.sqlWrapper = new UpdateSqlWrapper();
+    }
+
+    /**
+     * 更新条件处理器
+     */
+    class UpdateConditionMapperHandler extends ConditionMapperHandler {
+
+        public UpdateConditionMapperHandler(List<String> parseMethodList) {
+            super(parseMethodList);
+        }
+
+        @Override
+        protected String getParamName(String methodField, Parameter parameter) {
+            if (parameter == null) {
+                return null;
+            }
+
+            Class<?> parameterClass = null;
+
+            SqlWrapper sqlWrapper = updateMapperHandler.sqlWrapper;
+            Type type = parameter.getParameterizedType();
+            if (type instanceof TypeVariable<?>) {
+                TypeVariable typeVariable = (TypeVariable) type;
+                String name = typeVariable.getName();
+                if ("ENTITY".equals(name)) {
+                    try {
+                        parameterClass = Class.forName(sqlWrapper.getParameterType());
+                    } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                }
+            } else {
+                parameterClass = parameter.getType();
+            }
+
+            methodField = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, methodField);
+            Field classField = ReflectUtils.getField(parameterClass, methodField);
+
+            return classField.getName();
+        }
+
+    }
+
+    class UpdateModelMapperHandler extends ModelMapperHandler {
+
+        @Override
+        public Class<?> getModelClass(Method method, Class<?> entityClass) {
+            return entityClass;
+        }
+
+        @Override
+        protected boolean ignoreField(Field field) {
+            Id id = field.getAnnotation(Id.class);
+            Version version = field.getAnnotation(Version.class);
+            return id != null || version != null;
+        }
+
     }
 
 }

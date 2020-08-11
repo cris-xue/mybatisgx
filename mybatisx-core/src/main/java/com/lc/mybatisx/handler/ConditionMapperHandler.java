@@ -12,9 +12,7 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,27 +25,22 @@ public class ConditionMapperHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(ConditionMapperHandler.class);
 
-    private static Map<String, Boolean> unParseMethodMap = new HashMap<>();
-    private static List<String> parseMethodList = new ArrayList<>();
+    protected List<String> parseMethodList;
 
-    static {
-        // 会内存泄漏
-        unParseMethodMap.put("findAll", false);
+    public ConditionMapperHandler(List<String> parseMethodList) {
+        this.parseMethodList = parseMethodList;
+
+        /*unParseMethodMap.put("findAll", false);
         unParseMethodMap.put("find", false);
-    }
 
-    static {
         parseMethodList.add("findTop10By");
         parseMethodList.add("findBy");
         parseMethodList.add("updateBy");
-        parseMethodList.add("deleteBy");
+        parseMethodList.add("deleteBy");*/
     }
 
     public WhereWrapper buildWhereWrapper(Method method) {
-        WhereWrapper whereWrapper = null;
-        if (unParseMethodMap.getOrDefault(method.getName(), true)) {
-            whereWrapper = this.parseMethod(method);
-        }
+        WhereWrapper whereWrapper = this.parseMethod(method);
         return whereWrapper;
     }
 

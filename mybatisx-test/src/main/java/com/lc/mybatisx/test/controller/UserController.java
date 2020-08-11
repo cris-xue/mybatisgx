@@ -21,7 +21,7 @@ public class UserController {
 
     @PostMapping
     public User add(@RequestBody User user) {
-        userDao.insertSelective(user);
+        userDao.insert(user);
         return user;
     }
 

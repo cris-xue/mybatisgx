@@ -16,7 +16,6 @@ mybatis:
     # object-factory: org.apache.ibatis.reflection.factory.DefaultObjectFactory
     # object-wrapper-factory: com.lc.mybatisx.converter.MybatisxObjectWrapperFactory
   configuration:
-    # default-scripting-language: com.lc.mybatisx.scripting.MybatisxXMLLanguageDriver
     meta-object-handler: com.lc.mybatisx.test.commons.TestMetaObjectHandler
 
 logging:

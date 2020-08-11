@@ -29,17 +29,24 @@ import java.util.Map;
  */
 public class InsertMapperHandler extends AbstractMapperHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(InsertMapperHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(InsertMapperHandler.class);
 
-    private ModelMapperHandler modelMapperHandler = new ModelMapperHandler() {
+    private ModelMapperHandler modelMapperHandler;
+    /*private ModelMapperHandler modelMapperHandler = new ModelMapperHandler() {
         @Override
         public Class<?> getModelClass(Method method, Class<?> entityClass) {
             return entityClass;
         }
-    };
+    };*/
     private List<InsertSqlWrapper> insertSqlWrapperList;
 
     public InsertMapperHandler(MapperBuilderAssistant builderAssistant, String namespace) {
+        initInsertSqlWrapper(builderAssistant, namespace);
+
+        this.modelMapperHandler = new InsertModelMapperHandler();
+    }
+
+    private void initInsertSqlWrapper(MapperBuilderAssistant builderAssistant, String namespace) {
         Class<?> daoInterface = getDaoInterface(namespace);
         Type[] daoInterfaceParams = getDaoInterfaceParams(daoInterface, InsertDao.class);
 
@@ -107,4 +114,13 @@ public class InsertMapperHandler extends AbstractMapperHandler {
     protected SqlWrapper instanceSqlWrapper() {
         return new InsertSqlWrapper();
     }
+
+    class InsertModelMapperHandler extends ModelMapperHandler {
+
+        @Override
+        public Class<?> getModelClass(Method method, Class<?> entityClass) {
+            return entityClass;
+        }
+    }
+
 }

@@ -25,21 +25,21 @@ public class MybatisxConfiguration extends Configuration {
 
     @Override
     public StatementHandler newStatementHandler(Executor executor, MappedStatement mappedStatement, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
-        parameterObject = this.setValue(mappedStatement, parameterObject);
+        parameterObject = this.fillParameterObject(mappedStatement, parameterObject);
         return super.newStatementHandler(executor, mappedStatement, parameterObject, rowBounds, resultHandler, boundSql);
     }
 
-    private Object setValue(MappedStatement mappedStatement, Object parameterObject) {
+    private Object fillParameterObject(MappedStatement mappedStatement, Object parameterObject) {
         SqlCommandType sqlCommandType = mappedStatement.getSqlCommandType();
 
-        MetaObject metaObject = this.newMetaObject(parameterObject);
-        if (SqlCommandType.INSERT == sqlCommandType) {
-            metaObjectHandler.insert(metaObject);
-        } else if (SqlCommandType.UPDATE == sqlCommandType) {
-            metaObjectHandler.update(metaObject);
+        boolean isFill = (SqlCommandType.INSERT == sqlCommandType || SqlCommandType.UPDATE == sqlCommandType) && parameterObject != null;
+        if (isFill) {
+            MetaObject metaObject = this.newMetaObject(parameterObject);
+            metaObjectHandler.fillParameterObject(sqlCommandType, metaObject);
+            return metaObject.getOriginalObject();
         }
 
-        return metaObject.getOriginalObject();
+        return parameterObject;
     }
 
 }

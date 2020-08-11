@@ -1,10 +1,10 @@
 package com.lc.mybatisx.scripting;
 
+import com.lc.mybatisx.annotation.Column;
 import com.lc.mybatisx.utils.ReflectUtils;
 import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.reflection.MetaObject;
 
-import javax.persistence.Column;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 

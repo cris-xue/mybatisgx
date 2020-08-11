@@ -2,7 +2,6 @@ package com.lc.mybatisx.scripting;
 
 import com.lc.mybatisx.annotation.Column;
 import com.lc.mybatisx.utils.ReflectUtils;
-import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.reflection.MetaObject;
 
 import java.lang.reflect.Field;
@@ -10,7 +9,7 @@ import java.lang.reflect.Type;
 
 public interface MetaObjectHandler extends Cloneable {
 
-    default void fillParameterObject(SqlCommandType sqlCommandType, MetaObject metaObject) {
+    default void fillParameterObject(MetaObject metaObject) {
         Object params = metaObject.getOriginalObject();
         Field[] fields = ReflectUtils.getAllField(params.getClass());
         for (Field field : fields) {
@@ -24,11 +23,19 @@ public interface MetaObjectHandler extends Cloneable {
                 }
 
                 Object fieldValue = metaObject.getValue(fieldName);
-                if (SqlCommandType.INSERT == sqlCommandType) {
-                    fieldValue = insert(fieldName, fieldValue, clazz);
-                } else if (SqlCommandType.UPDATE == sqlCommandType) {
-                    fieldValue = update(fieldName, fieldValue, clazz);
+                fieldValue = insert(fieldName, fieldValue, clazz);
+
+                metaObject.setValue(fieldName, fieldValue);
+            } else if (column != null && column.updatable()) {
+                String fieldName = field.getName();
+                Type type = field.getType();
+                Class<?> clazz = null;
+                if (type instanceof Class<?>) {
+                    clazz = (Class<?>) type;
                 }
+
+                Object fieldValue = metaObject.getValue(fieldName);
+                fieldValue = update(fieldName, fieldValue, clazz);
 
                 metaObject.setValue(fieldName, fieldValue);
             }

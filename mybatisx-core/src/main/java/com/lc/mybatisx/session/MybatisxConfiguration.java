@@ -35,7 +35,7 @@ public class MybatisxConfiguration extends Configuration {
         boolean isFill = (SqlCommandType.INSERT == sqlCommandType || SqlCommandType.UPDATE == sqlCommandType) && parameterObject != null;
         if (isFill) {
             MetaObject metaObject = this.newMetaObject(parameterObject);
-            metaObjectHandler.fillParameterObject(sqlCommandType, metaObject);
+            metaObjectHandler.fillParameterObject(metaObject);
             return metaObject.getOriginalObject();
         }
 

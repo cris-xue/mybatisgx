@@ -32,6 +32,8 @@ public class UserController {
 
     @PutMapping
     public User updateById(@RequestBody User user) {
+        User u = userDao.findById(user.getId());
+        user.setVersion(u.getVersion());
         userDao.updateById(user);
         return user;
     }

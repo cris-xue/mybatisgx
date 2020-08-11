@@ -13,7 +13,6 @@ import org.apache.ibatis.parsing.XPathParser;
 import org.apache.ibatis.session.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 
 import javax.persistence.Version;
 import java.lang.reflect.Field;
@@ -31,19 +30,31 @@ import java.util.Map;
  */
 public class DeleteMapperHandler extends AbstractMapperHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(DeleteMapperHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(DeleteMapperHandler.class);
 
-    private ModelMapperHandler modelMapperHandler = new ModelMapperHandler() {
+    private ModelMapperHandler modelMapperHandler;
+    /*private ModelMapperHandler modelMapperHandler = new ModelMapperHandler() {
         @Override
         public Class<?> getModelClass(Method method, Class<?> entityClass) {
             return entityClass;
         }
-    };
-    private ConditionMapperHandler conditionMapperHandler = new ConditionMapperHandler();
+    };*/
+    private ConditionMapperHandler conditionMapperHandler;
+    /*private ConditionMapperHandler conditionMapperHandler = new ConditionMapperHandler();*/
 
     private List<DeleteSqlWrapper> deleteSqlWrapperList;
 
     public DeleteMapperHandler(MapperBuilderAssistant builderAssistant, String namespace) {
+        initDeleteSqlWrapper(builderAssistant, namespace);
+
+        this.modelMapperHandler = new DeleteModelMapperHandler();
+
+        List<String> parseMethodList = new ArrayList<>();
+        parseMethodList.add("deleteBy");
+        this.conditionMapperHandler = new DeleteConditionMapperHandler(parseMethodList);
+    }
+
+    private void initDeleteSqlWrapper(MapperBuilderAssistant builderAssistant, String namespace) {
         Class<?> daoInterface = getDaoInterface(namespace);
         Type[] daoInterfaceParams = getDaoInterfaceParams(daoInterface, DeleteDao.class);
 
@@ -135,4 +146,22 @@ public class DeleteMapperHandler extends AbstractMapperHandler {
     protected SqlWrapper instanceSqlWrapper() {
         return new DeleteSqlWrapper();
     }
+
+    class DeleteModelMapperHandler extends ModelMapperHandler {
+
+        @Override
+        public Class<?> getModelClass(Method method, Class<?> entityClass) {
+            return entityClass;
+        }
+
+    }
+
+    class DeleteConditionMapperHandler extends ConditionMapperHandler {
+
+        public DeleteConditionMapperHandler(List<String> parseMethodList) {
+            super(parseMethodList);
+        }
+
+    }
+
 }

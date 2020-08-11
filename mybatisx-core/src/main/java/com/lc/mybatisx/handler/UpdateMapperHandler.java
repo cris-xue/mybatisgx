@@ -35,53 +35,8 @@ public class UpdateMapperHandler extends AbstractMapperHandler {
     private UpdateMapperHandler updateMapperHandler = this;
 
     private ModelMapperHandler modelMapperHandler;
-    /*private ModelMapperHandler modelMapperHandler = new ModelMapperHandler() {
-        @Override
-        public Class<?> getModelClass(Method method, Class<?> entityClass) {
-            return entityClass;
-        }
 
-        @Override
-        protected boolean ignoreField(Field field) {
-            Id id = field.getAnnotation(Id.class);
-            Version version = field.getAnnotation(Version.class);
-            return id != null || version != null;
-        }
-    };*/
     private ConditionMapperHandler conditionMapperHandler;
-    /*private ConditionMapperHandler conditionMapperHandler = new ConditionMapperHandler() {
-
-        @Override
-        protected String getParamName(String methodField, Parameter parameter) {
-            if (parameter == null) {
-                return null;
-            }
-
-            Class<?> parameterClass = null;
-
-            SqlWrapper sqlWrapper = updateMapperHandler.sqlWrapper;
-            Type type = parameter.getParameterizedType();
-            if (type instanceof TypeVariable<?>) {
-                TypeVariable typeVariable = (TypeVariable) type;
-                String name = typeVariable.getName();
-                if ("ENTITY".equals(name)) {
-                    try {
-                        parameterClass = Class.forName(sqlWrapper.getParameterType());
-                    } catch (ClassNotFoundException e) {
-                        e.printStackTrace();
-                    }
-                }
-            } else {
-                parameterClass = parameter.getType();
-            }
-
-            methodField = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, methodField);
-            Field classField = ReflectUtils.getField(parameterClass, methodField);
-
-            return classField.getName();
-        }
-
-    };*/
 
     private List<UpdateSqlWrapper> updateSqlWrapperList;
 

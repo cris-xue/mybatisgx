@@ -33,14 +33,8 @@ public class DeleteMapperHandler extends AbstractMapperHandler {
     private static final Logger logger = LoggerFactory.getLogger(DeleteMapperHandler.class);
 
     private ModelMapperHandler modelMapperHandler;
-    /*private ModelMapperHandler modelMapperHandler = new ModelMapperHandler() {
-        @Override
-        public Class<?> getModelClass(Method method, Class<?> entityClass) {
-            return entityClass;
-        }
-    };*/
+
     private ConditionMapperHandler conditionMapperHandler;
-    /*private ConditionMapperHandler conditionMapperHandler = new ConditionMapperHandler();*/
 
     private List<DeleteSqlWrapper> deleteSqlWrapperList;
 

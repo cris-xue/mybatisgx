@@ -32,12 +32,7 @@ public class InsertMapperHandler extends AbstractMapperHandler {
     private static final Logger logger = LoggerFactory.getLogger(InsertMapperHandler.class);
 
     private ModelMapperHandler modelMapperHandler;
-    /*private ModelMapperHandler modelMapperHandler = new ModelMapperHandler() {
-        @Override
-        public Class<?> getModelClass(Method method, Class<?> entityClass) {
-            return entityClass;
-        }
-    };*/
+
     private List<InsertSqlWrapper> insertSqlWrapperList;
 
     public InsertMapperHandler(MapperBuilderAssistant builderAssistant, String namespace) {

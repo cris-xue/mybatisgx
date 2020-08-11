@@ -33,24 +33,8 @@ public class QueryMapperHandler extends AbstractMapperHandler {
     private static final Logger logger = LoggerFactory.getLogger(QueryMapperHandler.class);
 
     private ModelMapperHandler modelMapperHandler;
-    /*private ModelMapperHandler modelMapperHandler = new ModelMapperHandler() {
-        @Override
-        public Class<?> getModelClass(Method method, Class<?> entityClass) {
-            String methodName = method.getName();
-            if ("findById".equals(methodName)) {
-                return entityClass;
-            } else if ("findAll".equals(methodName)) {
-                return entityClass;
-            } else {
-                Type type = method.getGenericReturnType();
 
-                Class<?> clazz = getGenericType(type, null, entityClass);
-                return clazz;
-            }
-        }
-    };*/
     private ConditionMapperHandler conditionMapperHandler;
-    // private ConditionMapperHandler conditionMapperHandler = new ConditionMapperHandler();
 
     private List<QuerySqlWrapper> querySqlWrapperList;
 

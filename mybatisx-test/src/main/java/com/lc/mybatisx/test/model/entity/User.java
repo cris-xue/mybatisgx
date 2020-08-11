@@ -23,7 +23,7 @@ public class User extends BaseEntity<Long> {
 
     private String password;
 
-    private String status;
+    private Integer status;
 
     @Version
     private int version;
@@ -76,11 +76,11 @@ public class User extends BaseEntity<Long> {
         this.password = password;
     }
 
-    public String getStatus() {
+    public Integer getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Integer status) {
         this.status = status;
     }
 

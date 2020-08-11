@@ -16,13 +16,13 @@ public abstract class BaseEntity<ID> {
     private ID id;
 
     @Column(insertable = true)
-    private String inputUserId;
+    private Long inputUserId;
 
     @Column(insertable = true)
     private LocalDateTime inputTime;
 
     @Column(updatable = true)
-    private String updateUserId;
+    private Long updateUserId;
 
     @Column(updatable = true)
     private LocalDateTime updateTime;
@@ -35,11 +35,11 @@ public abstract class BaseEntity<ID> {
         this.id = id;
     }
 
-    public String getInputUserId() {
+    public Long getInputUserId() {
         return inputUserId;
     }
 
-    public void setInputUserId(String inputUserId) {
+    public void setInputUserId(Long inputUserId) {
         this.inputUserId = inputUserId;
     }
 
@@ -51,11 +51,11 @@ public abstract class BaseEntity<ID> {
         this.inputTime = inputTime;
     }
 
-    public String getUpdateUserId() {
+    public Long getUpdateUserId() {
         return updateUserId;
     }
 
-    public void setUpdateUserId(String updateUserId) {
+    public void setUpdateUserId(Long updateUserId) {
         this.updateUserId = updateUserId;
     }
 

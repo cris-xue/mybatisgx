@@ -8,6 +8,7 @@ import org.apache.ibatis.plugin.Interceptor;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.mybatis.spring.boot.autoconfigure.ConfigurationCustomizer;
 import org.mybatis.spring.boot.autoconfigure.MybatisAutoConfiguration;
@@ -95,7 +96,7 @@ public class MybatisxAutoConfiguration implements InitializingBean {
     @Bean
     @ConditionalOnMissingBean
     public SqlSessionFactory sqlSessionFactory(DataSource dataSource) throws Exception {
-        MybatisxSqlSessionFactoryBean factory = new MybatisxSqlSessionFactoryBean();
+        SqlSessionFactoryBean factory = new MybatisxSqlSessionFactoryBean();
         factory.setDataSource(dataSource);
         factory.setVfs(SpringBootVFS.class);
         if (StringUtils.hasText(this.properties.getConfigLocation())) {
@@ -124,13 +125,10 @@ public class MybatisxAutoConfiguration implements InitializingBean {
             factory.setMapperLocations(this.properties.resolveMapperLocations());
         }
 
-        // 自定义构造
-        // factory.setSqlSessionFactoryBuilder(new MybatisxSqlSessionFactoryBuilder());
-
         return factory.getObject();
     }
 
-    private void applyConfiguration(MybatisxSqlSessionFactoryBean factory) {
+    private void applyConfiguration(SqlSessionFactoryBean factory) {
         Configuration configuration = this.properties.getConfiguration();
         if (configuration == null && !StringUtils.hasText(this.properties.getConfigLocation())) {
             configuration = new Configuration();

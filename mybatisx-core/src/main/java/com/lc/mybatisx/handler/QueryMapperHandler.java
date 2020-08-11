@@ -32,7 +32,8 @@ public class QueryMapperHandler extends AbstractMapperHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(QueryMapperHandler.class);
 
-    private ModelMapperHandler modelMapperHandler = new ModelMapperHandler() {
+    private ModelMapperHandler modelMapperHandler;
+    /*private ModelMapperHandler modelMapperHandler = new ModelMapperHandler() {
         @Override
         public Class<?> getModelClass(Method method, Class<?> entityClass) {
             String methodName = method.getName();
@@ -47,12 +48,26 @@ public class QueryMapperHandler extends AbstractMapperHandler {
                 return clazz;
             }
         }
-    };
-    private ConditionMapperHandler conditionMapperHandler = new ConditionMapperHandler();
+    };*/
+    private ConditionMapperHandler conditionMapperHandler;
+    // private ConditionMapperHandler conditionMapperHandler = new ConditionMapperHandler();
 
     private List<QuerySqlWrapper> querySqlWrapperList;
 
     public QueryMapperHandler(MapperBuilderAssistant builderAssistant, String namespace) {
+        initQuerySqlWrapper(builderAssistant, namespace);
+
+        this.modelMapperHandler = new QueryModelMapperHandler();
+
+        List<String> parseMethodList = new ArrayList<>();
+        parseMethodList.add("findTop10By");
+        parseMethodList.add("findBy");
+        parseMethodList.add("findAll");
+        parseMethodList.add("find");
+        this.conditionMapperHandler = new QueryConditionMapperHandler(parseMethodList);
+    }
+
+    private void initQuerySqlWrapper(MapperBuilderAssistant builderAssistant, String namespace) {
         Class<?> daoInterface = getDaoInterface(namespace);
         Type[] daoInterfaceParams = getDaoInterfaceParams(daoInterface, QueryDao.class);
 
@@ -120,4 +135,31 @@ public class QueryMapperHandler extends AbstractMapperHandler {
     protected SqlWrapper instanceSqlWrapper() {
         return new QuerySqlWrapper();
     }
+
+    class QueryModelMapperHandler extends ModelMapperHandler {
+
+        @Override
+        public Class<?> getModelClass(Method method, Class<?> entityClass) {
+            String methodName = method.getName();
+            if ("findById".equals(methodName)) {
+                return entityClass;
+            } else if ("findAll".equals(methodName)) {
+                return entityClass;
+            } else {
+                Type type = method.getGenericReturnType();
+
+                Class<?> clazz = getGenericType(type, null, entityClass);
+                return clazz;
+            }
+        }
+
+    }
+
+    class QueryConditionMapperHandler extends ConditionMapperHandler {
+
+        public QueryConditionMapperHandler(List<String> parseMethodList) {
+            super(parseMethodList);
+        }
+    }
+
 }

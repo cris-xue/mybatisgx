@@ -88,11 +88,11 @@ public class UpdateMapperHandler extends AbstractMapperHandler {
     public UpdateMapperHandler(MapperBuilderAssistant builderAssistant, String namespace) {
         initUpdateSqlWrapper(builderAssistant, namespace);
 
+        this.modelMapperHandler = new UpdateModelMapperHandler();
+
         List<String> parseMethodList = new ArrayList<>();
         parseMethodList.add("updateBy");
         this.conditionMapperHandler = new UpdateConditionMapperHandler(parseMethodList);
-
-        this.modelMapperHandler = new UpdateModelMapperHandler();
     }
 
     private void initUpdateSqlWrapper(MapperBuilderAssistant builderAssistant, String namespace) {

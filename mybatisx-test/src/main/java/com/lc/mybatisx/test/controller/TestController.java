@@ -18,11 +18,19 @@ public class TestController {
         return test;
     }
 
-    @DeleteMapping(path = "/delete-by-id")
-    public int deleteById(Long id) {
+    @PutMapping(path = "/update-by-id")
+    public int updateById(Long id) {
         Test test = testDao.findById(id);
         int count = testDao.updateById(test);
         return count;
+    }
+
+    @PutMapping(path = "/update-by-id-name-username")
+    public int updateByIdAndNameOrUserName(Long id, String name, String userName) {
+        // int count = testDao.updateByIdAndNameOrUserName(id, name, userName);
+        int count = 1;
+        return count;
+
     }
 
 }

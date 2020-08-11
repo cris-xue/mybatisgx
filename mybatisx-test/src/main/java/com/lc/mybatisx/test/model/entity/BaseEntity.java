@@ -1,6 +1,7 @@
 package com.lc.mybatisx.test.model.entity;
 
-import javax.persistence.Column;
+import com.lc.mybatisx.annotation.Column;
+
 import javax.persistence.Id;
 import java.time.LocalDateTime;
 

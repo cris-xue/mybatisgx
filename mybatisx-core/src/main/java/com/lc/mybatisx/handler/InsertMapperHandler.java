@@ -41,9 +41,9 @@ public class InsertMapperHandler extends AbstractMapperHandler {
     private List<InsertSqlWrapper> insertSqlWrapperList;
 
     public InsertMapperHandler(MapperBuilderAssistant builderAssistant, String namespace) {
-        initInsertSqlWrapper(builderAssistant, namespace);
-
         this.modelMapperHandler = new InsertModelMapperHandler();
+
+        initInsertSqlWrapper(builderAssistant, namespace);
     }
 
     private void initInsertSqlWrapper(MapperBuilderAssistant builderAssistant, String namespace) {

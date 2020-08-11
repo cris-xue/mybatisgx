@@ -86,13 +86,13 @@ public class UpdateMapperHandler extends AbstractMapperHandler {
     private List<UpdateSqlWrapper> updateSqlWrapperList;
 
     public UpdateMapperHandler(MapperBuilderAssistant builderAssistant, String namespace) {
-        initUpdateSqlWrapper(builderAssistant, namespace);
-
         this.modelMapperHandler = new UpdateModelMapperHandler();
 
         List<String> parseMethodList = new ArrayList<>();
         parseMethodList.add("updateBy");
         this.conditionMapperHandler = new UpdateConditionMapperHandler(parseMethodList);
+
+        initUpdateSqlWrapper(builderAssistant, namespace);
     }
 
     private void initUpdateSqlWrapper(MapperBuilderAssistant builderAssistant, String namespace) {

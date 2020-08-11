@@ -55,16 +55,16 @@ public class QueryMapperHandler extends AbstractMapperHandler {
     private List<QuerySqlWrapper> querySqlWrapperList;
 
     public QueryMapperHandler(MapperBuilderAssistant builderAssistant, String namespace) {
-        initQuerySqlWrapper(builderAssistant, namespace);
-
         this.modelMapperHandler = new QueryModelMapperHandler();
 
         List<String> parseMethodList = new ArrayList<>();
         parseMethodList.add("findTop10By");
         parseMethodList.add("findBy");
-        parseMethodList.add("findAll");
-        parseMethodList.add("find");
+        // parseMethodList.add("findAll");
+        // parseMethodList.add("find");
         this.conditionMapperHandler = new QueryConditionMapperHandler(parseMethodList);
+
+        initQuerySqlWrapper(builderAssistant, namespace);
     }
 
     private void initQuerySqlWrapper(MapperBuilderAssistant builderAssistant, String namespace) {

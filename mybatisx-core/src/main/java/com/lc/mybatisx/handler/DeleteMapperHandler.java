@@ -45,13 +45,13 @@ public class DeleteMapperHandler extends AbstractMapperHandler {
     private List<DeleteSqlWrapper> deleteSqlWrapperList;
 
     public DeleteMapperHandler(MapperBuilderAssistant builderAssistant, String namespace) {
-        initDeleteSqlWrapper(builderAssistant, namespace);
-
         this.modelMapperHandler = new DeleteModelMapperHandler();
 
         List<String> parseMethodList = new ArrayList<>();
         parseMethodList.add("deleteBy");
         this.conditionMapperHandler = new DeleteConditionMapperHandler(parseMethodList);
+
+        initDeleteSqlWrapper(builderAssistant, namespace);
     }
 
     private void initDeleteSqlWrapper(MapperBuilderAssistant builderAssistant, String namespace) {

@@ -5,8 +5,9 @@ import com.lc.mybatisx.scripting.MetaObjectHandler;
 import java.time.LocalDateTime;
 
 public class TestMetaObjectHandler implements MetaObjectHandler {
+
     @Override
-    public Object insert(String field, Object object) {
+    public Object insert(String field, Object object, Class<?> clazz) {
         if ("inputUserId".equals(field)) {
             return "111";
         } else if ("inputTime".equals(field)) {
@@ -16,7 +17,7 @@ public class TestMetaObjectHandler implements MetaObjectHandler {
     }
 
     @Override
-    public Object update(String field, Object object) {
+    public Object update(String field, Object object, Class<?> clazz) {
         if ("updateUserId".equals(field)) {
             return "123";
         } else if ("updateTime".equals(field)) {
@@ -24,4 +25,5 @@ public class TestMetaObjectHandler implements MetaObjectHandler {
         }
         return null;
     }
+
 }

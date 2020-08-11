@@ -70,6 +70,10 @@ public class InsertMapperHandler extends AbstractMapperHandler {
 
         InsertSqlWrapper insertSqlWrapper = (InsertSqlWrapper) this.buildSqlWrapper(namespace, method, daoInterfaceParams);
 
+        // 获取方法是否需要动态sql
+        insertSqlWrapper.setDynamic(mapperMethod.dynamic());
+
+        // 构建模型包装器
         Class<?> entityClass = (Class<?>) daoInterfaceParams[0];
         List<ModelWrapper> modelWrapperList = modelMapperHandler.buildModelWrapper(entityClass);
         insertSqlWrapper.setModelWrapperList(modelWrapperList);

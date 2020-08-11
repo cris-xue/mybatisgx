@@ -10,6 +10,10 @@ import java.util.List;
 public class SqlWrapper {
 
     /**
+     * 动态sql
+     */
+    private Boolean dynamic;
+    /**
      * 命名空间
      */
     private String namespace;
@@ -33,6 +37,14 @@ public class SqlWrapper {
      * 方法返回的模型映射器
      */
     private List<ModelWrapper> modelWrapperList;
+
+    public Boolean getDynamic() {
+        return dynamic;
+    }
+
+    public void setDynamic(Boolean dynamic) {
+        this.dynamic = dynamic;
+    }
 
     public String getNamespace() {
         return namespace;

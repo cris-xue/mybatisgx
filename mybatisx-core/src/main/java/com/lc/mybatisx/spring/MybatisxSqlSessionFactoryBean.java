@@ -37,10 +37,14 @@ public class MybatisxSqlSessionFactoryBean extends SqlSessionFactoryBean {
     private static final ResourcePatternResolver RESOURCE_PATTERN_RESOLVER = new PathMatchingResourcePatternResolver();
     private static final MetadataReaderFactory METADATA_READER_FACTORY = new CachingMetadataReaderFactory();
 
-    private static String[] daoPackages;
+    private String[] daoPackages;
 
     public static void setDaoPackages(String[] daoPackages) {
-        MybatisxSqlSessionFactoryBean.daoPackages = daoPackages;
+        // MybatisxSqlSessionFactoryBean.daoPackages = daoPackages;
+    }
+
+    public MybatisxSqlSessionFactoryBean(String[] daoPackages) {
+        this.daoPackages = daoPackages;
     }
 
     private void curdMethod(Configuration configuration) {

@@ -68,8 +68,8 @@ public class ConditionMapperHandler {
         }
 
         List<String> conditionKeywordList = this.parseConditionKeyword(methodName);
-        List<String> conditionGroup = this.concatConditionKeyword(conditionKeywordList);
-        return this.buildWrapper(method, conditionGroup);
+        List<String> conditionList = this.concatConditionKeyword(conditionKeywordList);
+        return this.buildWrapper(method, conditionList);
     }
 
     private List<String> parseConditionKeyword(String methodName) {
@@ -90,20 +90,20 @@ public class ConditionMapperHandler {
     }
 
     private List<String> concatConditionKeyword(List<String> conditionKeywordList) {
-        List<String> conditionGroup = new ArrayList<>();
+        List<String> conditionList = new ArrayList<>();
         String condition = "";
         int conditionKeywordSize = conditionKeywordList.size();
         for (int i = 0; i < conditionKeywordSize; i++) {
             String conditionKeyword = conditionKeywordList.get(i);
 
             if ("By".equals(conditionKeyword) || "And".equals(conditionKeyword) || "Or".equals(conditionKeyword)) {
-                conditionGroup.add(condition);
-                conditionGroup.add(conditionKeyword);
+                conditionList.add(condition);
+                conditionList.add(conditionKeyword);
                 condition = "";
                 continue;
             } else if (i == conditionKeywordSize - 1) {
                 condition = condition + conditionKeyword;
-                conditionGroup.add(condition);
+                conditionList.add(condition);
                 condition = "";
                 continue;
             }
@@ -111,25 +111,25 @@ public class ConditionMapperHandler {
             condition = condition + conditionKeyword;
         }
 
-        return conditionGroup;
+        return conditionList;
     }
 
     /**
      * @param method
-     * @param conditionGroup
+     * @param conditionList
      * @return
      */
-    private WhereWrapper buildWrapper(Method method, List<String> conditionGroup) {
+    private WhereWrapper buildWrapper(Method method, List<String> conditionList) {
         Parameter[] parameters = method.getParameters();
         Operation[] operations = Operation.values();
 
-        int conditionGroupLength = conditionGroup.size();
+        int conditionLength = conditionList.size();
         int parameterLength = parameters.length;
         int operationLength = operations.length;
 
         WhereWrapper whereWrapper = new WhereWrapper();
-        for (int i = conditionGroupLength, k = parameterLength - 1; i > 0; i = i - 2, k--) {
-            String condition = conditionGroup.get(i - 1);
+        for (int i = conditionLength, k = parameterLength - 1; i > 0; i = i - 2, k--) {
+            String condition = conditionList.get(i - 1);
 
             // 分离字段和操作符
             for (int j = 0; j < operationLength; j++) {
@@ -147,7 +147,7 @@ public class ConditionMapperHandler {
                 }
             }
 
-            String linkOp = conditionGroup.get(i - 2);
+            String linkOp = conditionList.get(i - 2);
             if ("By".equals(linkOp)) {
                 break;
             }

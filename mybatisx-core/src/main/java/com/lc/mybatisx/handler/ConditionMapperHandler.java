@@ -177,9 +177,9 @@ public class ConditionMapperHandler {
                 }
 
                 methodField = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, methodField);
-                whereWrapper.setField(methodField);
+                whereWrapper.setDbColumn(methodField);
                 whereWrapper.setOperation(operation);
-                whereWrapper.setValue(paramName);
+                whereWrapper.setJavaColumn(paramName);
 
                 return true;
             }

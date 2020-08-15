@@ -20,8 +20,8 @@
 
 <#macro whereTree ww linkOp>
     <#if ww??>
-        <if test="${ww.value} != null">
-            ${linkOp} ${ww.field} ${ww.operation.key} ${r'#{'} ${ww.value} ${r'}'}
+        <if test="${ww.javaColumn} != null">
+            ${linkOp} ${ww.dbColumn} ${ww.operation.key} ${r'#{'} ${ww.javaColumn} ${r'}'}
         </if>
         <#if ww.whereWrapper??>
             <@whereTree ww=ww.whereWrapper linkOp=ww.linkOp/>

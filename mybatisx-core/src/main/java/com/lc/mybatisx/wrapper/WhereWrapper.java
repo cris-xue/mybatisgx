@@ -11,9 +11,11 @@ import com.lc.mybatisx.wrapper.where.Operation;
 public class WhereWrapper {
 
     /**
-     * 字段
+     * 数据库字段
      */
-    private String field;
+    private String dbColumn;
+
+    private String dbType;
 
     /**
      * 操作符
@@ -21,9 +23,11 @@ public class WhereWrapper {
     private Operation operation;
 
     /**
-     * 字段值
+     * java字段
      */
-    private String value;
+    private String javaColumn;
+
+    private String javaType;
 
     /**
      * 两个条件间的连接符【and,or】
@@ -45,12 +49,20 @@ public class WhereWrapper {
      */
     private WhereWrapper whereWrapper;
 
-    public String getField() {
-        return field;
+    public String getDbColumn() {
+        return dbColumn;
     }
 
-    public void setField(String field) {
-        this.field = field;
+    public void setDbColumn(String dbColumn) {
+        this.dbColumn = dbColumn;
+    }
+
+    public String getDbType() {
+        return dbType;
+    }
+
+    public void setDbType(String dbType) {
+        this.dbType = dbType;
     }
 
     public Operation getOperation() {
@@ -61,12 +73,20 @@ public class WhereWrapper {
         this.operation = operation;
     }
 
-    public String getValue() {
-        return value;
+    public String getJavaColumn() {
+        return javaColumn;
     }
 
-    public void setValue(String value) {
-        this.value = value;
+    public void setJavaColumn(String javaColumn) {
+        this.javaColumn = javaColumn;
+    }
+
+    public String getJavaType() {
+        return javaType;
+    }
+
+    public void setJavaType(String javaType) {
+        this.javaType = javaType;
     }
 
     public LinkOp getLinkOp() {

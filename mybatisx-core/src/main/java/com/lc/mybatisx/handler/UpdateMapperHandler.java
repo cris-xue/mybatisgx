@@ -81,6 +81,9 @@ public class UpdateMapperHandler extends AbstractMapperHandler {
 
         UpdateSqlWrapper updateSqlWrapper = (UpdateSqlWrapper) this.buildSqlWrapper(namespace, method, daoInterfaceParams);
 
+        // 获取方法是否需要动态sql
+        updateSqlWrapper.setDynamic(mapperMethod.dynamic());
+
         Class<?> entityClass = (Class<?>) daoInterfaceParams[0];
         Class<?> modelClass = modelMapperHandler.getModelClass(method, entityClass);
         List<ModelWrapper> modelWrapperList = modelMapperHandler.buildModelWrapper(modelClass);

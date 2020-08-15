@@ -11,6 +11,8 @@ import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 
+import javax.persistence.Entity;
+
 public class MybatisxConfiguration extends Configuration {
 
     private MetaObjectHandler metaObjectHandler;
@@ -30,9 +32,14 @@ public class MybatisxConfiguration extends Configuration {
     }
 
     private Object fillParameterObject(MappedStatement mappedStatement, Object parameterObject) {
-        SqlCommandType sqlCommandType = mappedStatement.getSqlCommandType();
+        if (parameterObject == null) {
+            return null;
+        }
 
-        boolean isFill = (SqlCommandType.INSERT == sqlCommandType || SqlCommandType.UPDATE == sqlCommandType) && parameterObject != null;
+        SqlCommandType sqlCommandType = mappedStatement.getSqlCommandType();
+        Entity entity = parameterObject.getClass().getAnnotation(Entity.class);
+        boolean isFill = (SqlCommandType.INSERT == sqlCommandType || SqlCommandType.UPDATE == sqlCommandType) && entity != null;
+
         if (isFill) {
             MetaObject metaObject = this.newMetaObject(parameterObject);
             metaObjectHandler.fillParameterObject(metaObject);

@@ -1,10 +1,10 @@
 package com.lc.mybatisx.test.commons;
 
-import com.lc.mybatisx.scripting.MetaObjectHandler;
+import com.lc.mybatisx.scripting.AbstractMetaObjectHandler;
 
 import java.time.LocalDateTime;
 
-public class TestMetaObjectHandler implements MetaObjectHandler {
+public class TestMetaObjectHandler extends AbstractMetaObjectHandler {
 
     @Override
     public Object insert(String field, Object object, Class<?> clazz) {

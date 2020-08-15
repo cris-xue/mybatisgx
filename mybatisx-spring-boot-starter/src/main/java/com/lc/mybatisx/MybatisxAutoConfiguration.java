@@ -68,9 +68,6 @@ public class MybatisxAutoConfiguration implements InitializingBean {
 
     private final List<ConfigurationCustomizer> configurationCustomizers;
 
-    // @Autowired
-    // private SqlSessionFactoryBean factory;
-
     public MybatisxAutoConfiguration(MybatisxProperties properties,
                                      ObjectProvider<Interceptor[]> interceptorsProvider,
                                      ResourceLoader resourceLoader,
@@ -99,7 +96,7 @@ public class MybatisxAutoConfiguration implements InitializingBean {
     @Bean
     @ConditionalOnMissingBean
     public SqlSessionFactory sqlSessionFactory(DataSource dataSource) throws Exception {
-        SqlSessionFactoryBean factory = new MybatisxSqlSessionFactoryBean(new String[]{"com"});
+        SqlSessionFactoryBean factory = new MybatisxSqlSessionFactoryBean(properties.getDaoPackages());
         factory.setDataSource(dataSource);
         factory.setVfs(SpringBootVFS.class);
         if (StringUtils.hasText(this.properties.getConfigLocation())) {

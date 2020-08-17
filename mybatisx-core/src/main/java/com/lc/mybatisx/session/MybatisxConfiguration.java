@@ -1,15 +1,12 @@
 package com.lc.mybatisx.session;
 
 import com.lc.mybatisx.scripting.MetaObjectHandler;
-import org.apache.ibatis.executor.Executor;
-import org.apache.ibatis.executor.statement.StatementHandler;
+import org.apache.ibatis.executor.parameter.ParameterHandler;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.session.Configuration;
-import org.apache.ibatis.session.ResultHandler;
-import org.apache.ibatis.session.RowBounds;
 
 import javax.persistence.Entity;
 
@@ -26,9 +23,9 @@ public class MybatisxConfiguration extends Configuration {
     }
 
     @Override
-    public StatementHandler newStatementHandler(Executor executor, MappedStatement mappedStatement, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
+    public ParameterHandler newParameterHandler(MappedStatement mappedStatement, Object parameterObject, BoundSql boundSql) {
         parameterObject = this.fillParameterObject(mappedStatement, parameterObject);
-        return super.newStatementHandler(executor, mappedStatement, parameterObject, rowBounds, resultHandler, boundSql);
+        return super.newParameterHandler(mappedStatement, parameterObject, boundSql);
     }
 
     private Object fillParameterObject(MappedStatement mappedStatement, Object parameterObject) {

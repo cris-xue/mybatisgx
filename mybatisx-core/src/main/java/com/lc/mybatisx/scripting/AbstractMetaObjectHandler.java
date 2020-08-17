@@ -9,6 +9,7 @@ import java.lang.reflect.Type;
 
 public abstract class AbstractMetaObjectHandler implements MetaObjectHandler {
 
+    @Override
     public void fillParameterObject(MetaObject metaObject) {
         Object params = metaObject.getOriginalObject();
         Field[] fields = ReflectUtils.getAllField(params.getClass());

@@ -43,9 +43,9 @@ public class MybatisxRegistrar extends GenericApplicationContext implements Envi
 
     @Override
     public void setEnvironment(Environment environment) {
-        if (environment instanceof StandardEnvironment) {
-            StandardEnvironment sse = (StandardEnvironment) environment;
-            this.mutablePropertySources = sse.getPropertySources();
+        if (environment instanceof ConfigurableEnvironment) {
+            ConfigurableEnvironment ce = (ConfigurableEnvironment) environment;
+            this.mutablePropertySources = ce.getPropertySources();
         }
 
         // 抛出异常

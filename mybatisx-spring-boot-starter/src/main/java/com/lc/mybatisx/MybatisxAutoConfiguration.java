@@ -1,6 +1,7 @@
 package com.lc.mybatisx;
 
 import com.lc.mybatisx.converter.MetaObjectHandlerConverter;
+import com.lc.mybatisx.session.MybatisxConfiguration;
 import com.lc.mybatisx.spring.MybatisxSqlSessionFactoryBean;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.mapping.DatabaseIdProvider;
@@ -131,7 +132,7 @@ public class MybatisxAutoConfiguration implements InitializingBean {
     private void applyConfiguration(SqlSessionFactoryBean factory) {
         Configuration configuration = this.properties.getConfiguration();
         if (configuration == null && !StringUtils.hasText(this.properties.getConfigLocation())) {
-            configuration = new Configuration();
+            configuration = new MybatisxConfiguration();
         }
         if (configuration != null && !CollectionUtils.isEmpty(this.configurationCustomizers)) {
             for (ConfigurationCustomizer customizer : this.configurationCustomizers) {

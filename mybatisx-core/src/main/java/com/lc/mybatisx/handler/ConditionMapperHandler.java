@@ -27,16 +27,29 @@ public class ConditionMapperHandler {
 
     protected List<String> parseMethodList;
 
+    protected List<String> parseKeywordList;
+
+    protected List<String> unParseKeywordList;
+
     public ConditionMapperHandler(List<String> parseMethodList) {
         this.parseMethodList = parseMethodList;
 
-        /*unParseMethodMap.put("findAll", false);
-        unParseMethodMap.put("find", false);
+        parseKeywordList = new ArrayList<>();
+        parseKeywordList.add("And");
+        parseKeywordList.add("Or");
+        parseKeywordList.add("OrderBy");
+        parseKeywordList.add("GroupBy");
 
-        parseMethodList.add("findTop10By");
-        parseMethodList.add("findBy");
-        parseMethodList.add("updateBy");
-        parseMethodList.add("deleteBy");*/
+        unParseKeywordList = new ArrayList<>();
+        unParseKeywordList.add("insert");
+        unParseKeywordList.add("add");
+        unParseKeywordList.add("delete");
+        unParseKeywordList.add("update");
+        unParseKeywordList.add("find");
+        unParseKeywordList.add("select");
+        unParseKeywordList.add("query");
+        unParseKeywordList.add("By");
+        unParseKeywordList.add("Selective");
     }
 
     public WhereWrapper buildWhereWrapper(Method method) {
@@ -67,14 +80,37 @@ public class ConditionMapperHandler {
             return null;
         }
 
-        List<String> conditionKeywordList = this.parseConditionKeyword(methodName);
+        List<String> conditionKeywordList = this.parseConditionKeyword1(methodName);
         List<String> conditionList = this.concatConditionKeyword(conditionKeywordList);
         return this.buildWrapper(method, conditionList);
     }
 
+    private List<String> parseConditionKeyword1(String methodName) {
+        int unParseKeywordOffset = 0;
+        for (int i = 0; i < unParseKeywordList.size(); i++) {
+            String unParseKeyword = unParseKeywordList.get(i);
+            if (methodName.startsWith(unParseKeyword)) {
+                unParseKeywordOffset += unParseKeyword.length();
+                i = 0;
+
+                methodName = methodName.substring(unParseKeyword.length());
+            }
+        }
+
+        int parseKeywordOffset = 0;
+        for (int i = 0; i < parseKeywordList.size(); i++) {
+            String parseKeyword = parseKeywordList.get(i);
+            if (methodName.startsWith(parseKeyword, parseKeywordOffset)) {
+                parseKeywordOffset += parseKeyword.length();
+            }
+        }
+
+        return null;
+    }
+
     private List<String> parseConditionKeyword(String methodName) {
         // methodName = "findTop10ByIdAndNameIsOrAgeLessThanAndAgeLessThan";
-
+        // updateByIdSelect
         // findById、findByIs、findByNameIsAndAgeIs
         // 创建 Pattern 对象
         String regex = "[A-Z][a-z]+[0-9]*";

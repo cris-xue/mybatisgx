@@ -15,4 +15,7 @@ public interface UpdateDao<ENTITY, ID extends Serializable> extends Dao {
     @MapperMethod(type = MethodType.UPDATE)
     int updateById(ENTITY entity);
 
+    @MapperMethod(type = MethodType.UPDATE, dynamic = true)
+    int updateByIdSelective(ENTITY entity);
+
 }

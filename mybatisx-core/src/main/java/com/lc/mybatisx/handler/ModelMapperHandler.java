@@ -25,15 +25,16 @@ public abstract class ModelMapperHandler {
         List<ModelWrapper> modelWrapperList = new ArrayList<>();
         for (int i = 0; i < fieldLength; i++) {
             Field field = fields[i];
-            String columnName = field.getName();
-            if ("class".equals(columnName) || ignoreField(field)) {
+            String javaColumn = field.getName();
+            if ("class".equals(javaColumn) || ignoreField(field)) {
                 continue;
             }
+            String dbColumn = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, javaColumn);
 
             ModelWrapper modelWrapper = new ModelWrapper();
-            modelWrapper.setDbColumn(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, columnName));
+            modelWrapper.setDbColumn(dbColumn);
             modelWrapper.setDbType("db_type");
-            modelWrapper.setJavaColumn(columnName);
+            modelWrapper.setJavaColumn(javaColumn);
             modelWrapper.setJavaType("java_type");
             modelWrapperList.add(modelWrapper);
         }

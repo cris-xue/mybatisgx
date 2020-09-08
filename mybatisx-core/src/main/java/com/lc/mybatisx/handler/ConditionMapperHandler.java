@@ -108,12 +108,12 @@ public class ConditionMapperHandler {
         return null;
     }
 
-    private List<String> parseConditionKeyword(String methodName) {
+    public List<String> parseConditionKeyword(String methodName) {
         // methodName = "findTop10ByIdAndNameIsOrAgeLessThanAndAgeLessThan";
         // updateByIdSelect
         // findById、findByIs、findByNameIsAndAgeIs
         // 创建 Pattern 对象
-        String regex = "[A-Z][a-z]+[0-9]*";
+        String regex = "[a-z]+|GroupBy|OrderBy|[A-Z][a-z]+|[0-9]+";
         Pattern pattern = Pattern.compile(regex);
         // 创建 matcher 对象
         List<String> conditionKeywordList = new ArrayList<>();

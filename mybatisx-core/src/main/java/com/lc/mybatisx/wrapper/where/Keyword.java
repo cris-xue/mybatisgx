@@ -3,7 +3,6 @@ package com.lc.mybatisx.wrapper.where;
 import com.lc.mybatisx.wrapper.WhereWrapper;
 import org.springframework.util.StringUtils;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,26 +10,28 @@ import java.util.Map;
 public enum Keyword {
 
     /*动作关键字*/
-    FIND(false, "find", KeywordType.ACTION, Arrays.asList()) {
+    FIND("find", KeywordType.ACTION, "") {
         @Override
-        public WhereWrapper createWhereWrapper(WhereWrapper tail, List<String> keywordList, int i) {
+        public WhereWrapper createWhereWrapper(List<String> keywordList, int i) {
             return null;
         }
     },
-    SELECT(false, "select", KeywordType.ACTION, Arrays.asList()),
+    SELECT("select", KeywordType.ACTION, ""),
+    DELETE("delete", KeywordType.ACTION, ""),
+    COUNT("count", KeywordType.ACTION, ""),
 
     /*无语义关键字*/
-    BY(false, "By", KeywordType.NONE, Arrays.asList()) {},
-    SELECTIVE(false, "Selective", KeywordType.NONE, Arrays.asList()),
+    BY("By", KeywordType.NONE, ""),
+    SELECTIVE("Selective", KeywordType.NONE, ""),
 
     /*连接关键字*/
-    AND(false, "And", KeywordType.LINK, Arrays.asList()) {
+    AND("And", KeywordType.LINK, "and") {
         @Override
         protected void link(WhereWrapper tail, WhereWrapper whereWrapper) {
             tail.linkRule(whereWrapper, LinkOp.AND);
         }
     },
-    OR(true, "Or", KeywordType.LINK, Arrays.asList()) {
+    OR("Or", KeywordType.LINK, "or") {
         @Override
         protected void link(WhereWrapper tail, WhereWrapper whereWrapper) {
             tail.linkRule(whereWrapper, LinkOp.OR);
@@ -38,20 +39,24 @@ public enum Keyword {
     },
 
     /*操作符关键字*/
-    EQ(true, "Eq", KeywordType.OP, Arrays.asList("=")),
-    BETWEEN(true, "Between", KeywordType.OP, Arrays.asList()),
+    EQ("Eq", KeywordType.OP, "="),
+    IS("Is", KeywordType.OP, "="),
+    BETWEEN("Between", KeywordType.OP, ""),
+
+    /*限定关键字*/
+    TOP("Top", KeywordType.LIMIT, ""),
+    FIRST("First", KeywordType.LIMIT, ""),
 
     /*运算型关键字*/
-    TOP(true, "Top", KeywordType.FUNC, Arrays.asList()),
-    GROUP_BY(true, "GroupBy", KeywordType.FUNC, Arrays.asList()),
-    ORDER_BY(true, "OrderBy", KeywordType.FUNC, Arrays.asList()),
-    DESC(true, "Desc", KeywordType.FUNC, Arrays.asList());
+    GROUP_BY("GroupBy", KeywordType.FUNC, ""),
+    ORDER_BY("OrderBy", KeywordType.FUNC, "order by"),
+    DESC("Desc", KeywordType.FUNC, "desc"),
+    ASC("Desc", KeywordType.FUNC, "asc");
 
     private static Map<String, Keyword> keywordMap = new HashMap<>();
-    private Boolean parse;
     private String keyword;
     private KeywordType keywordType;
-    private List<String> sql;
+    private String sql;
 
     static {
         Keyword[] keywords = Keyword.values();
@@ -60,23 +65,14 @@ public enum Keyword {
         }
     }
 
-    Keyword(Boolean parse, String keyword, KeywordType keywordType, List<String> sql) {
-        this.parse = parse;
+    Keyword(String keyword, KeywordType keywordType, String sql) {
         this.keyword = keyword;
         this.keywordType = keywordType;
         this.sql = sql;
     }
 
-    public Boolean getParse() {
-        return parse;
-    }
-
     public String getKeyword() {
         return keyword;
-    }
-
-    public List<String> getDescription() {
-        return sql;
     }
 
     protected String getJavaColumn(List<String> keywordList, int i) {
@@ -118,7 +114,7 @@ public enum Keyword {
         for (int i = 0; i < keywordList.size(); i++) {
             Keyword keyword = keywordMap.get(keywordList.get(i));
             if (keyword != null) {
-                WhereWrapper whereWrapper = keyword.createWhereWrapper(tail, keywordList, i);
+                WhereWrapper whereWrapper = keyword.createWhereWrapper(keywordList, i);
                 if (whereWrapper == null) {
                     continue;
                 }
@@ -131,7 +127,7 @@ public enum Keyword {
         return head.getWhereWrapper();
     }
 
-    public WhereWrapper createWhereWrapper(WhereWrapper tail, List<String> keywordList, int i) {
+    public WhereWrapper createWhereWrapper(List<String> keywordList, int i) {
         // 获取java字段
         String javaColumn = this.getJavaColumn(keywordList, i);
         if (!StringUtils.hasLength(javaColumn)) {

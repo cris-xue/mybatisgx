@@ -3,6 +3,8 @@ package com.lc.mybatisx.wrapper;
 import com.lc.mybatisx.wrapper.where.LinkOp;
 import com.lc.mybatisx.wrapper.where.Operation;
 
+import java.util.List;
+
 /**
  * @author ：薛承城
  * @description：sql条件包装器
@@ -23,9 +25,9 @@ public class WhereWrapper {
     private Operation operation;
 
     /**
-     * java字段
+     * java字段【可以满足between】
      */
-    private String javaColumn;
+    private List<String> javaColumn;
 
     private String javaType;
 
@@ -73,11 +75,11 @@ public class WhereWrapper {
         this.operation = operation;
     }
 
-    public String getJavaColumn() {
+    public List<String> getJavaColumn() {
         return javaColumn;
     }
 
-    public void setJavaColumn(String javaColumn) {
+    public void setJavaColumn(List<String> javaColumn) {
         this.javaColumn = javaColumn;
     }
 

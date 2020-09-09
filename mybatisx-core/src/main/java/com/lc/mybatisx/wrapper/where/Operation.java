@@ -17,7 +17,8 @@ public enum Operation {
     NOTEQ("<![CDATA[ <> ]]>", Arrays.asList("Not"), "不等"),
     IN("in", Arrays.asList("In"), "包含"),
     IS("=", Arrays.asList("Is"), "等于"),
-    EQ("=", Arrays.asList("Equals", "Eq", ""), "等于");
+    EQ("=", Arrays.asList("Equals", "Eq", ""), "等于"),
+    BETWEEN("", Arrays.asList(), "");
 
     private String key;
     private List<String> name;

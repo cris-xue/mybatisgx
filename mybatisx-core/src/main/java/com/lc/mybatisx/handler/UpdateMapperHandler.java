@@ -3,7 +3,6 @@ package com.lc.mybatisx.handler;
 import com.google.common.base.CaseFormat;
 import com.lc.mybatisx.annotation.MapperMethod;
 import com.lc.mybatisx.annotation.MethodType;
-import com.lc.mybatisx.dao.UpdateDao;
 import com.lc.mybatisx.utils.FreeMarkerUtils;
 import com.lc.mybatisx.utils.ReflectUtils;
 import com.lc.mybatisx.wrapper.*;
@@ -52,7 +51,7 @@ public class UpdateMapperHandler extends AbstractMapperHandler {
 
     private void initUpdateSqlWrapper(MapperBuilderAssistant builderAssistant, String namespace) {
         Class<?> daoInterface = getDaoInterface(namespace);
-        Type[] daoInterfaceParams = getDaoInterfaceParams(daoInterface, UpdateDao.class);
+        Type[] daoInterfaceParams = getDaoInterfaceParams(daoInterface);
 
         List<UpdateSqlWrapper> updateSqlWrapperList = new ArrayList<>();
         Method[] methods = daoInterface.getMethods();

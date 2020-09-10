@@ -2,7 +2,6 @@ package com.lc.mybatisx.handler;
 
 import com.lc.mybatisx.annotation.MapperMethod;
 import com.lc.mybatisx.annotation.MethodType;
-import com.lc.mybatisx.dao.QueryDao;
 import com.lc.mybatisx.utils.FreeMarkerUtils;
 import com.lc.mybatisx.wrapper.ModelWrapper;
 import com.lc.mybatisx.wrapper.QuerySqlWrapper;
@@ -53,7 +52,7 @@ public class QueryMapperHandler extends AbstractMapperHandler {
 
     private void initQuerySqlWrapper(MapperBuilderAssistant builderAssistant, String namespace) {
         Class<?> daoInterface = getDaoInterface(namespace);
-        Type[] daoInterfaceParams = getDaoInterfaceParams(daoInterface, QueryDao.class);
+        Type[] daoInterfaceParams = getDaoInterfaceParams(daoInterface);
 
         List<QuerySqlWrapper> querySqlWrapperList = new ArrayList<>();
         Method[] methods = daoInterface.getMethods();

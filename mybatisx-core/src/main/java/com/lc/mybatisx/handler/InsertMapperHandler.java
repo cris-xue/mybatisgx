@@ -2,7 +2,6 @@ package com.lc.mybatisx.handler;
 
 import com.lc.mybatisx.annotation.MapperMethod;
 import com.lc.mybatisx.annotation.MethodType;
-import com.lc.mybatisx.dao.InsertDao;
 import com.lc.mybatisx.utils.FreeMarkerUtils;
 import com.lc.mybatisx.wrapper.InsertSqlWrapper;
 import com.lc.mybatisx.wrapper.ModelWrapper;
@@ -43,7 +42,7 @@ public class InsertMapperHandler extends AbstractMapperHandler {
 
     private void initInsertSqlWrapper(MapperBuilderAssistant builderAssistant, String namespace) {
         Class<?> daoInterface = getDaoInterface(namespace);
-        Type[] daoInterfaceParams = getDaoInterfaceParams(daoInterface, InsertDao.class);
+        Type[] daoInterfaceParams = getDaoInterfaceParams(daoInterface);
 
         List<InsertSqlWrapper> insertSqlWrapperList = new ArrayList<>();
         Method[] methods = daoInterface.getMethods();

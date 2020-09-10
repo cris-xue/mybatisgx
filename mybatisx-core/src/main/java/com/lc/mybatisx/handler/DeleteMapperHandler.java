@@ -2,7 +2,6 @@ package com.lc.mybatisx.handler;
 
 import com.lc.mybatisx.annotation.MapperMethod;
 import com.lc.mybatisx.annotation.MethodType;
-import com.lc.mybatisx.dao.DeleteDao;
 import com.lc.mybatisx.utils.FreeMarkerUtils;
 import com.lc.mybatisx.utils.ReflectUtils;
 import com.lc.mybatisx.wrapper.*;
@@ -50,7 +49,7 @@ public class DeleteMapperHandler extends AbstractMapperHandler {
 
     private void initDeleteSqlWrapper(MapperBuilderAssistant builderAssistant, String namespace) {
         Class<?> daoInterface = getDaoInterface(namespace);
-        Type[] daoInterfaceParams = getDaoInterfaceParams(daoInterface, DeleteDao.class);
+        Type[] daoInterfaceParams = getDaoInterfaceParams(daoInterface);
 
         List<DeleteSqlWrapper> deleteSqlWrapperList = new ArrayList<>();
         Method[] methods = daoInterface.getMethods();

@@ -1,10 +1,12 @@
 package com.lc.mybatisx.handler;
 
+import com.lc.mybatisx.dao.Dao;
 import com.lc.mybatisx.dao.SimpleDao;
 import com.lc.mybatisx.utils.GenericUtils;
 import com.lc.mybatisx.wrapper.SqlWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.TypeUtils;
 import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
 
 import javax.persistence.Table;
@@ -34,19 +36,22 @@ public abstract class AbstractMapperHandler {
         return null;
     }
 
-    protected Type[] getDaoInterfaceParams(Class<?> daoInterface, Class<?> CURDInterface) {
+    protected Type[] getDaoInterfaceParams(Class<?> daoInterface) {
         Type[] daoSuperInterfaces = daoInterface.getGenericInterfaces();
         for (int i = 0; i < daoSuperInterfaces.length; i++) {
             Type daoSuperInterfaceType = daoSuperInterfaces[i];
             ParameterizedTypeImpl daoSuperInterfaceClass = (ParameterizedTypeImpl) daoSuperInterfaceType;
-            Class<?> daoSuperInterface = daoSuperInterfaceClass.getRawType();
+            // Class<?> daoSuperInterface = daoSuperInterfaceClass.getRawType();
             Type[] daoInterfaceParams = daoSuperInterfaceClass.getActualTypeArguments();
-            if (daoSuperInterface == CURDInterface || daoSuperInterface == SimpleDao.class) {
+            if (TypeUtils.isAssignable(Dao.class, daoInterface)) {
                 return daoInterfaceParams;
             }
+            /*if (daoSuperInterface == CURDInterface || daoSuperInterface == SimpleDao.class) {
+                return daoInterfaceParams;
+            }*/
         }
 
-        logger.info("{} un extend {} or {}", daoInterface.getName(), CURDInterface.getName(), SimpleDao.class.getName());
+        logger.info("{} un extend {}", SimpleDao.class.getName());
         return null;
     }
 

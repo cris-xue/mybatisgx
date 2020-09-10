@@ -114,7 +114,7 @@ public class ConditionMapperHandler {
         // updateByIdSelect
         // findById、findByIs、findByNameIsAndAgeIs
         // 创建 Pattern 对象
-        String regex = "[a-z]+|By|And|Or|GroupBy|OrderBy|[[A-Z][a-z]+]+|[0-9]+";
+        String regex = "[a-z]+|By|And|Or|GroupBy|OrderBy|[A-Z][a-z]+|[0-9]+";
         Pattern pattern = Pattern.compile(regex);
         // 创建 matcher 对象
         List<String> conditionKeywordList = new ArrayList<>();

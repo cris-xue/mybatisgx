@@ -1,8 +1,9 @@
 package com.lc.mybatisx.wrapper.where;
 
-import com.lc.mybatisx.wrapper.WhereWrapper;
+import com.lc.mybatisx.wrapper.*;
 import org.springframework.util.StringUtils;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,28 +11,29 @@ import java.util.Map;
 public enum Keyword {
 
     /*动作关键字*/
-    FIND("find", KeywordType.ACTION, "") {
+    FIND("find", KeywordType.ACTION, "", QuerySqlWrapper.class) {
         @Override
         public WhereWrapper createWhereWrapper(List<String> keywordList, int i) {
             return null;
         }
     },
-    SELECT("select", KeywordType.ACTION, ""),
-    DELETE("delete", KeywordType.ACTION, ""),
-    COUNT("count", KeywordType.ACTION, ""),
+    SELECT("select", KeywordType.ACTION, "", QuerySqlWrapper.class),
+    COUNT("count", KeywordType.ACTION, "", QuerySqlWrapper.class),
+    DELETE("delete", KeywordType.ACTION, "", DeleteSqlWrapper.class),
+
 
     /*无语义关键字*/
-    BY("By", KeywordType.NONE, ""),
-    SELECTIVE("Selective", KeywordType.NONE, ""),
+    BY("By", KeywordType.NONE, "", null),
+    SELECTIVE("Selective", KeywordType.NONE, "", null),
 
     /*连接关键字*/
-    AND("And", KeywordType.LINK, "and") {
+    AND("And", KeywordType.LINK, "and", null) {
         @Override
         protected void link(WhereWrapper tail, WhereWrapper whereWrapper) {
             tail.linkRule(whereWrapper, LinkOp.AND);
         }
     },
-    OR("Or", KeywordType.LINK, "or") {
+    OR("Or", KeywordType.LINK, "or", null) {
         @Override
         protected void link(WhereWrapper tail, WhereWrapper whereWrapper) {
             tail.linkRule(whereWrapper, LinkOp.OR);
@@ -39,24 +41,25 @@ public enum Keyword {
     },
 
     /*操作符关键字*/
-    EQ("Eq", KeywordType.OP, "="),
-    IS("Is", KeywordType.OP, "="),
-    BETWEEN("Between", KeywordType.OP, ""),
+    EQ("Eq", KeywordType.OP, "=", WhereWrapper.class),
+    IS("Is", KeywordType.OP, "=", WhereWrapper.class),
+    BETWEEN("Between", KeywordType.OP, "between #{0} and #{1}", WhereWrapper.class),
 
     /*限定关键字*/
-    TOP("Top", KeywordType.LIMIT, ""),
-    FIRST("First", KeywordType.LIMIT, ""),
+    TOP("Top", KeywordType.LIMIT, "limit", LimitWrapper.class),
+    FIRST("First", KeywordType.LIMIT, "limit", LimitWrapper.class),
 
     /*运算型关键字*/
-    GROUP_BY("GroupBy", KeywordType.FUNC, ""),
-    ORDER_BY("OrderBy", KeywordType.FUNC, "order by"),
-    DESC("Desc", KeywordType.FUNC, "desc"),
-    ASC("Desc", KeywordType.FUNC, "asc");
+    GROUP_BY("GroupBy", KeywordType.FUNC, "group by", FunctionWrapper.class),
+    ORDER_BY("OrderBy", KeywordType.FUNC, "order by", FunctionWrapper.class),
+    DESC("Desc", KeywordType.FUNC, "desc", FunctionWrapper.class),
+    ASC("Desc", KeywordType.FUNC, "asc", FunctionWrapper.class);
 
     private static Map<String, Keyword> keywordMap = new HashMap<>();
     private String keyword;
     private KeywordType keywordType;
     private String sql;
+    private Class<?> clazz;
 
     static {
         Keyword[] keywords = Keyword.values();
@@ -65,10 +68,11 @@ public enum Keyword {
         }
     }
 
-    Keyword(String keyword, KeywordType keywordType, String sql) {
+    Keyword(String keyword, KeywordType keywordType, String sql, Class<?> clazz) {
         this.keyword = keyword;
         this.keywordType = keywordType;
         this.sql = sql;
+        this.clazz = clazz;
     }
 
     public String getKeyword() {
@@ -143,7 +147,7 @@ public enum Keyword {
         WhereWrapper whereWrapper = new WhereWrapper();
         whereWrapper.setDbColumn(javaColumn);
         whereWrapper.setOperation(operation);
-        whereWrapper.setJavaColumn(javaColumn);
+        whereWrapper.setJavaColumn(Arrays.asList(javaColumn));
 
         return whereWrapper;
     }

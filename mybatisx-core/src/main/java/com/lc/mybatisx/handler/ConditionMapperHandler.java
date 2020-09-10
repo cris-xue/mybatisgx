@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -113,7 +114,7 @@ public class ConditionMapperHandler {
         // updateByIdSelect
         // findById、findByIs、findByNameIsAndAgeIs
         // 创建 Pattern 对象
-        String regex = "[a-z]+|GroupBy|OrderBy|[A-Z][a-z]+|[0-9]+";
+        String regex = "[a-z]+|By|And|Or|GroupBy|OrderBy|[[A-Z][a-z]+]+|[0-9]+";
         Pattern pattern = Pattern.compile(regex);
         // 创建 matcher 对象
         List<String> conditionKeywordList = new ArrayList<>();
@@ -215,7 +216,7 @@ public class ConditionMapperHandler {
                 methodField = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, methodField);
                 whereWrapper.setDbColumn(methodField);
                 whereWrapper.setOperation(operation);
-                whereWrapper.setJavaColumn(paramName);
+                whereWrapper.setJavaColumn(Arrays.asList(paramName));
 
                 return true;
             }

@@ -13,7 +13,7 @@ import java.io.Serializable;
  */
 public interface DeleteDao<ENTITY, ID extends Serializable> extends Dao {
 
-    @MapperMethod(type = MethodType.DELETE)
+    // @MapperMethod(type = MethodType.DELETE)
     int deleteById(@Param("id") ID id);
 
 }

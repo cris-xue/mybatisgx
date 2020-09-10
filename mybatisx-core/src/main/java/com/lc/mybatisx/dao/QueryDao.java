@@ -14,13 +14,13 @@ import java.util.List;
  */
 public interface QueryDao<ENTITY, ID extends Serializable> extends Dao {
 
-    @MapperMethod(type = MethodType.QUERY)
+    // @MapperMethod(type = MethodType.QUERY)
     ENTITY findById(@Param("id") ID id);
 
-    @MapperMethod(type = MethodType.QUERY)
-    List<ENTITY> findAll();
+    // @MapperMethod(type = MethodType.QUERY)
+    // List<ENTITY> findAll();
 
-    @MapperMethod(type = MethodType.QUERY)
-    List<ENTITY> find(ENTITY entity);
+    // @MapperMethod(type = MethodType.QUERY)
+    // List<ENTITY> find(ENTITY entity);
 
 }

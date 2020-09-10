@@ -31,6 +31,7 @@ public class CURDMapper {
     public static List<XNode> getNodeList(MapperBuilderAssistant builderAssistant, String namespace) {
         Class<?> daoInterface = getDaoInterface(namespace);
         Type[] daoInterfaceParams = getDaoInterfaceParams(daoInterface);
+        Class<?> entityClass = (Class<?>) daoInterfaceParams[0];
         Method[] methods = daoInterface.getMethods();
         List<Method> methodList = new ArrayList<>();
         for (int i = 0; i < methods.length; i++) {
@@ -46,10 +47,10 @@ public class CURDMapper {
             methodList.add(method);
         }
 
-        InsertMapperHandler insertMapperHandler = new InsertMapperHandler(builderAssistant, namespace);
-        List<XNode> insertList = insertMapperHandler.readTemplate();
+        // InsertMapperHandler insertMapperHandler = new InsertMapperHandler(builderAssistant, namespace);
+        // List<XNode> insertList = insertMapperHandler.readTemplate();
 
-        QueryMapperHandler queryMapperHandler = new QueryMapperHandler(builderAssistant, namespace);
+        QueryMapperHandler queryMapperHandler = new QueryMapperHandler(namespace, methodList, daoInterfaceParams);
         List<XNode> queryList = queryMapperHandler.readTemplate();
 
         UpdateMapperHandler updateMapperHandler = new UpdateMapperHandler(builderAssistant, namespace);
@@ -59,7 +60,7 @@ public class CURDMapper {
         List<XNode> deleteList = deleteMapperHandler.readTemplate();
 
         List<XNode> curdList = new ArrayList<>();
-        curdList.addAll(insertList);
+        // curdList.addAll(insertList);
         curdList.addAll(queryList);
         curdList.addAll(updateList);
         curdList.addAll(deleteList);

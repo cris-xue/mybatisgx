@@ -35,6 +35,9 @@ public class QueryMapperHandler extends AbstractMapperHandler {
 
     private List<QuerySqlWrapper> querySqlWrapperList;
 
+    public QueryMapperHandler() {
+    }
+
     public QueryMapperHandler(String namespace, List<Method> methodList, Type[] daoInterfaceParams) {
         this.modelMapperHandler = new QueryModelMapperHandler();
 
@@ -45,6 +48,11 @@ public class QueryMapperHandler extends AbstractMapperHandler {
         // parseMethodList.add("find");
         this.conditionMapperHandler = new QueryConditionMapperHandler(parseMethodList);
 
+        initQuerySqlWrapper(namespace, methodList, daoInterfaceParams);
+    }
+
+    @Override
+    public void init(String namespace, List<Method> methodList, Type[] daoInterfaceParams) {
         initQuerySqlWrapper(namespace, methodList, daoInterfaceParams);
     }
 
@@ -101,6 +109,7 @@ public class QueryMapperHandler extends AbstractMapperHandler {
         return querySqlWrapper;
     }
 
+    @Override
     public List<XNode> readTemplate() {
         Template template = FreeMarkerUtils.getTemplate("mapper/mysql/query_mapper.ftl");
         List<XNode> xNodeList = generateQueryMethod(template);

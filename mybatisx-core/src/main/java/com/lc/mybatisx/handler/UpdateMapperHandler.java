@@ -109,6 +109,7 @@ public class UpdateMapperHandler extends AbstractMapperHandler {
         return updateSqlWrapper;
     }
 
+    @Override
     public List<XNode> readTemplate() {
         Template template = FreeMarkerUtils.getTemplate("mapper/mysql/update_mapper.ftl");
         List<XNode> xNodeList = generateUpdateMethod(template);

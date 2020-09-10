@@ -82,6 +82,7 @@ public class InsertMapperHandler extends AbstractMapperHandler {
         return insertSqlWrapper;
     }
 
+    @Override
     public List<XNode> readTemplate() {
         Template template = FreeMarkerUtils.getTemplate("mapper/mysql/insert_mapper.ftl");
         List<XNode> xNodeList = generateInsertMethod(template);

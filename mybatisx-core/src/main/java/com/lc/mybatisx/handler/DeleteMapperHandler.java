@@ -112,6 +112,7 @@ public class DeleteMapperHandler extends AbstractMapperHandler {
         return deleteSqlWrapper;
     }
 
+    @Override
     public List<XNode> readTemplate() {
         Template template = FreeMarkerUtils.getTemplate("mapper/mysql/delete_mapper.ftl");
         List<XNode> xNodeList = generateDeleteMethod(template);

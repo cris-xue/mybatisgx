@@ -4,6 +4,7 @@ import com.lc.mybatisx.dao.Dao;
 import com.lc.mybatisx.dao.SimpleDao;
 import com.lc.mybatisx.utils.GenericUtils;
 import com.lc.mybatisx.wrapper.SqlWrapper;
+import org.apache.ibatis.parsing.XNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.TypeUtils;
@@ -14,6 +15,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,6 +28,9 @@ public abstract class AbstractMapperHandler {
     private static final Logger logger = LoggerFactory.getLogger(AbstractMapperHandler.class);
 
     protected SqlWrapper sqlWrapper;
+
+    public void init(String namespace, List<Method> methodList, Type[] daoInterfaceParams) {
+    }
 
     protected Class<?> getDaoInterface(String namespace) {
         try {
@@ -129,6 +134,8 @@ public abstract class AbstractMapperHandler {
 
         return null;
     }
+
+    abstract List<XNode> readTemplate();
 
     abstract protected SqlWrapper instanceSqlWrapper();
 

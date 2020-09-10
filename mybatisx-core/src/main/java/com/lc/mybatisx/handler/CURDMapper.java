@@ -2,8 +2,6 @@ package com.lc.mybatisx.handler;
 
 import com.lc.mybatisx.dao.Dao;
 import com.lc.mybatisx.dao.SimpleDao;
-import com.lc.mybatisx.wrapper.WhereWrapper;
-import com.lc.mybatisx.wrapper.where.Keyword;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.session.Configuration;
@@ -15,7 +13,9 @@ import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,6 +27,12 @@ import java.util.regex.Pattern;
 public class CURDMapper {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractMapperHandler.class);
+
+    private static Map<String, Class<? extends AbstractMapperHandler>> mapperHandlerMap = new HashMap<>();
+
+    static {
+        mapperHandlerMap.put("find", QueryMapperHandler.class);
+    }
 
     public static List<XNode> getNodeList(MapperBuilderAssistant builderAssistant, String namespace) {
         Class<?> daoInterface = getDaoInterface(namespace);
@@ -41,14 +47,30 @@ public class CURDMapper {
                 continue;
             }
 
-            List<String> methodKeywordList = parseMethodKeyword(method.getName());
-            WhereWrapper whereWrapper = Keyword.buildWhereWrapper(methodKeywordList);
-
             methodList.add(method);
         }
 
         // InsertMapperHandler insertMapperHandler = new InsertMapperHandler(builderAssistant, namespace);
         // List<XNode> insertList = insertMapperHandler.readTemplate();
+
+        for (int i = 0; i < methodList.size(); i++) {
+            Method method = methodList.get(i);
+            List<String> methodKeywordList = parseMethodKeyword(method.getName());
+
+            Class<? extends AbstractMapperHandler> abstractMapperHandler = mapperHandlerMap.get(methodKeywordList.get(0));
+            if (abstractMapperHandler == null) {
+                continue;
+            }
+            try {
+                AbstractMapperHandler amh = abstractMapperHandler.newInstance();
+                amh.init(namespace, methodList, daoInterfaceParams);
+                amh.readTemplate();
+            } catch (InstantiationException e) {
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
 
         QueryMapperHandler queryMapperHandler = new QueryMapperHandler(namespace, methodList, daoInterfaceParams);
         List<XNode> queryList = queryMapperHandler.readTemplate();

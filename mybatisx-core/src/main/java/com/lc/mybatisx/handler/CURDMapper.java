@@ -38,6 +38,7 @@ public class CURDMapper {
         Class<?> daoInterface = getDaoInterface(namespace);
         Type[] daoInterfaceParams = getDaoInterfaceParams(daoInterface);
         Class<?> entityClass = (Class<?>) daoInterfaceParams[0];
+        Class<?> idClass = (Class<?>) daoInterfaceParams[1];
         Method[] methods = daoInterface.getMethods();
         List<Method> methodList = new ArrayList<>();
         for (int i = 0; i < methods.length; i++) {
@@ -50,9 +51,7 @@ public class CURDMapper {
             methodList.add(method);
         }
 
-        // InsertMapperHandler insertMapperHandler = new InsertMapperHandler(builderAssistant, namespace);
-        // List<XNode> insertList = insertMapperHandler.readTemplate();
-
+        List<XNode> xNodeList = new ArrayList<>();
         for (int i = 0; i < methodList.size(); i++) {
             Method method = methodList.get(i);
             List<String> methodKeywordList = parseMethodKeyword(method.getName());
@@ -63,14 +62,18 @@ public class CURDMapper {
             }
             try {
                 AbstractMapperHandler amh = abstractMapperHandler.newInstance();
-                amh.init(namespace, methodList, daoInterfaceParams);
-                amh.readTemplate();
+                amh.init(namespace, method, daoInterfaceParams);
+                // List<XNode> xNode = amh.readTemplate();
+                // xNodeList.addAll(xNode);
             } catch (InstantiationException e) {
                 e.printStackTrace();
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
         }
+
+        /*InsertMapperHandler insertMapperHandler = new InsertMapperHandler(builderAssistant, namespace);
+        List<XNode> insertList = insertMapperHandler.readTemplate();
 
         QueryMapperHandler queryMapperHandler = new QueryMapperHandler(namespace, methodList, daoInterfaceParams);
         List<XNode> queryList = queryMapperHandler.readTemplate();
@@ -82,11 +85,11 @@ public class CURDMapper {
         List<XNode> deleteList = deleteMapperHandler.readTemplate();
 
         List<XNode> curdList = new ArrayList<>();
-        // curdList.addAll(insertList);
+        curdList.addAll(insertList);
         curdList.addAll(queryList);
         curdList.addAll(updateList);
-        curdList.addAll(deleteList);
-        return curdList;
+        curdList.addAll(deleteList);*/
+        return xNodeList;
     }
 
     protected static Class<?> getDaoInterface(String namespace) {

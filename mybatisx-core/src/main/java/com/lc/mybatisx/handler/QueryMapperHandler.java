@@ -1,12 +1,11 @@
 package com.lc.mybatisx.handler;
 
-import com.lc.mybatisx.annotation.MapperMethod;
-import com.lc.mybatisx.annotation.MethodType;
 import com.lc.mybatisx.utils.FreeMarkerUtils;
 import com.lc.mybatisx.wrapper.ModelWrapper;
 import com.lc.mybatisx.wrapper.QuerySqlWrapper;
 import com.lc.mybatisx.wrapper.SqlWrapper;
 import com.lc.mybatisx.wrapper.WhereWrapper;
+import com.lc.mybatisx.wrapper.where.KeywordParse;
 import freemarker.template.Template;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.parsing.XPathParser;
@@ -36,6 +35,8 @@ public class QueryMapperHandler extends AbstractMapperHandler {
     private List<QuerySqlWrapper> querySqlWrapperList;
 
     public QueryMapperHandler() {
+        this.modelMapperHandler = new QueryModelMapperHandler();
+        this.conditionMapperHandler = new ConditionMapperHandler();
     }
 
     public QueryMapperHandler(String namespace, List<Method> methodList, Type[] daoInterfaceParams) {
@@ -48,15 +49,16 @@ public class QueryMapperHandler extends AbstractMapperHandler {
         // parseMethodList.add("find");
         this.conditionMapperHandler = new QueryConditionMapperHandler(parseMethodList);
 
-        initQuerySqlWrapper(namespace, methodList, daoInterfaceParams);
+        // initQuerySqlWrapper(namespace, methodList, daoInterfaceParams);
     }
 
     @Override
-    public void init(String namespace, List<Method> methodList, Type[] daoInterfaceParams) {
-        initQuerySqlWrapper(namespace, methodList, daoInterfaceParams);
+    public void init(String namespace, Method method, Type[] daoInterfaceParams) {
+        build(namespace, method, daoInterfaceParams);
+        // initQuerySqlWrapper(namespace, method, daoInterfaceParams);
     }
 
-    private void initQuerySqlWrapper(String namespace, List<Method> methodList, Type[] daoInterfaceParams) {
+    private void initQuerySqlWrapper(String namespace, Method method, Type[] daoInterfaceParams) {
         /*Class<?> daoInterface = getDaoInterface(namespace);
         Type[] daoInterfaceParams = getDaoInterfaceParams(daoInterface);
 
@@ -78,23 +80,50 @@ public class QueryMapperHandler extends AbstractMapperHandler {
 
         this.querySqlWrapperList = querySqlWrapperList;*/
 
-        List<QuerySqlWrapper> querySqlWrapperList = new ArrayList<>();
+        /*List<QuerySqlWrapper> querySqlWrapperList = new ArrayList<>();
         for (int i = 0; i < methodList.size(); i++) {
             QuerySqlWrapper querySqlWrapper = this.buildQuerySqlWrapper(namespace, methodList.get(i), daoInterfaceParams);
             if (querySqlWrapper == null) {
                 continue;
             }
             querySqlWrapperList.add(querySqlWrapper);
+        }*/
+
+        QuerySqlWrapper querySqlWrapper = this.buildQuerySqlWrapper(namespace, method, daoInterfaceParams);
+        if (querySqlWrapper == null) {
+            return;
         }
+        List<QuerySqlWrapper> querySqlWrapperList = new ArrayList<>();
+        querySqlWrapperList.add(querySqlWrapper);
+
+        this.querySqlWrapperList = querySqlWrapperList;
+    }
+
+    private void build(String namespace, Method method, Type[] daoInterfaceParams) {
+        QuerySqlWrapper querySqlWrapper = (QuerySqlWrapper) this.buildSqlWrapper(namespace, method, daoInterfaceParams);
+
+        Class<?> entityClass = (Class<?>) daoInterfaceParams[0];
+        Class<?> modelClass = modelMapperHandler.getModelClass(method, entityClass);
+        List<ModelWrapper> modelWrapperList = modelMapperHandler.buildModelWrapper(modelClass);
+        querySqlWrapper.setModelWrapperList(modelWrapperList);
+
+        // WhereWrapper whereWrapper = conditionMapperHandler.buildWhereWrapper(method);
+        List<String> methodKeywordList = conditionMapperHandler.parseConditionKeyword(method.getName());
+        // methodKeywordList = Keyword.getKeywordList(methodKeywordList);
+        WhereWrapper whereWrapper = KeywordParse.buildWhereWrapper(method, methodKeywordList);
+        querySqlWrapper.setWhereWrapper(whereWrapper);
+
+        List<QuerySqlWrapper> querySqlWrapperList = new ArrayList<>();
+        querySqlWrapperList.add(querySqlWrapper);
 
         this.querySqlWrapperList = querySqlWrapperList;
     }
 
     private QuerySqlWrapper buildQuerySqlWrapper(String namespace, Method method, Type[] daoInterfaceParams) {
-        MapperMethod mapperMethod = method.getAnnotation(MapperMethod.class);
+        /*MapperMethod mapperMethod = method.getAnnotation(MapperMethod.class);
         if (mapperMethod == null || mapperMethod.type() != MethodType.QUERY) {
             return null;
-        }
+        }*/
 
         QuerySqlWrapper querySqlWrapper = (QuerySqlWrapper) this.buildSqlWrapper(namespace, method, daoInterfaceParams);
 

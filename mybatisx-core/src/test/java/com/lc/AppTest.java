@@ -25,8 +25,8 @@ public class AppTest {
         System.out.println(map);
 
         map.forEach((k, v) -> {
-            WhereWrapper whereWrapper = Keyword.buildWhereWrapper(v);
-            System.out.println(whereWrapper);
+            // WhereWrapper whereWrapper = Keyword.buildWhereWrapper(v);
+            // System.out.println(whereWrapper);
         });
     }
 

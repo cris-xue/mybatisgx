@@ -32,6 +32,9 @@ public class ConditionMapperHandler {
 
     protected List<String> unParseKeywordList;
 
+    public ConditionMapperHandler() {
+    }
+
     public ConditionMapperHandler(List<String> parseMethodList) {
         this.parseMethodList = parseMethodList;
 

@@ -29,7 +29,7 @@ public abstract class AbstractMapperHandler {
 
     protected SqlWrapper sqlWrapper;
 
-    public void init(String namespace, List<Method> methodList, Type[] daoInterfaceParams) {
+    public void init(String namespace, Method method, Type[] daoInterfaceParams) {
     }
 
     protected Class<?> getDaoInterface(String namespace) {

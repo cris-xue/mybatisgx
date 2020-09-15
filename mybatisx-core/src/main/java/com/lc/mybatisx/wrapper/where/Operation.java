@@ -14,10 +14,11 @@ public enum Operation {
     LTEQ("<![CDATA[ <= ]]>", Arrays.asList("LessThanEquals", "Lteq"), "小于等于"),
     GT("<![CDATA[ > ]]>", Arrays.asList("GreaterThan", "Gt"), "大于"),
     GTEQ("<![CDATA[ >= ]]>", Arrays.asList("GreaterThanEquals", "Gteq"), "大于等于"),
-    NOTEQ("<![CDATA[ <> ]]>", Arrays.asList("Not"), "不等"),
     IN("in", Arrays.asList("In"), "包含"),
     IS("=", Arrays.asList("Is"), "等于"),
     EQ("=", Arrays.asList("Equals", "Eq", ""), "等于"),
+    NOT("<![CDATA[ <> ]]>", Arrays.asList("Not"), "不等"),
+    NOTEQ("<![CDATA[ <> ]]>", Arrays.asList("Not"), "不等"),
     BETWEEN("", Arrays.asList(), "");
 
     private String key;

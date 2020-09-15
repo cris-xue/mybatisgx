@@ -107,8 +107,14 @@ public class KeywordParse {
 
             // 参数校验
             Parameter[] parameters = method.getParameters();
-            for (int j = 0; j < parameters.length; j++) {
-                Parameter parameter = parameters[whereCount - 1];
+            int j = 0;
+            if (operationKeyword == Operation.BETWEEN) {
+                j = whereCount - 2;
+            } else {
+                j = whereCount - 1;
+            }
+            for (; j < whereCount; j++) {
+                Parameter parameter = parameters[j];
                 String dbColumn = tail.getDbColumn();
                 System.out.println(dbColumn);
             }

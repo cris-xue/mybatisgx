@@ -22,7 +22,7 @@ public interface TestDao extends SimpleDao<Test, Long> {
 
     // @MapperMethod(type = MethodType.QUERY)
     // Map<String, Object> findByUsername(@Param("username") String username);
-    Map<String, Object> findByIdBetween(@Param("start") String start, @Param("end") Long end);
+    Map<String, Object> findByIdBetween(@Param("start") Long start, @Param("end") Long end);
 
     @MapperMethod(type = MethodType.QUERY)
     List<Map<String, Object>> findByPayStatusLteqAndPayStatus1NotOrXyzAbc1Lt(@Param("payStatus") String payStatus,

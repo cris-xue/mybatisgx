@@ -75,17 +75,20 @@ public class KeywordParse {
             for (; i < keywordList.size(); i++) {
                 String javaColumnTemp = keywordList.get(i);
                 Keyword k = keywordMap.get(javaColumnTemp);
-                if (k != null) {
-                    if (k.getKeywordType() == KeywordType.OP) {
-                        operationKeyword = Operation.valueOf(k.name());
-                        continue;
-                    }
-                    if (k.getKeywordType() == KeywordType.LINK) {
-                        linkOpKeyword = LinkOp.valueOf(k.name());
-                        break;
-                    }
+
+                if (k == null) {
+                    javaColumn = javaColumn + javaColumnTemp;
+                    continue;
                 }
-                javaColumn = javaColumn + javaColumnTemp;
+
+                if (k.getKeywordType() == KeywordType.OP) {
+                    operationKeyword = Operation.valueOf(k.name());
+                    continue;
+                }
+                if (k.getKeywordType() == KeywordType.LINK) {
+                    linkOpKeyword = LinkOp.valueOf(k.name());
+                    break;
+                }
             }
             whereWrapper.setDbColumn(javaColumn);
             whereWrapper.setJavaColumn(Arrays.asList(javaColumn));

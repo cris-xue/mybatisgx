@@ -3,12 +3,13 @@ package com.lc.mybatisx.parse;
 import com.lc.mybatisx.wrapper.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public enum Keyword {
 
     /*动作关键字*/
-    FIND("find", KeywordType.ACTION, "", QuerySqlWrapper.class) {
+    FIND("find", KeywordType.ACTION, "select #{0} from", QuerySqlWrapper.class) {
         /*@Override
         public WhereWrapper createWhereWrapper(Method method, List<String> keywordList, int i) {
             return null;
@@ -24,34 +25,24 @@ public enum Keyword {
     SELECTIVE("Selective", KeywordType.NONE, "", null),
 
     /*连接关键字*/
-    AND("And", KeywordType.LINK, "and", null) {
-        /*@Override
-        protected void link(WhereWrapper tail, WhereWrapper whereWrapper) {
-            tail.linkRule(whereWrapper, LinkOp.AND);
-        }*/
-    },
-    OR("Or", KeywordType.LINK, "or", null) {
-        /*@Override
-        protected void link(WhereWrapper tail, WhereWrapper whereWrapper) {
-            tail.linkRule(whereWrapper, LinkOp.OR);
-        }*/
-    },
+    AND("And", KeywordType.LINK, "and", null) {},
+    OR("Or", KeywordType.LINK, "or", null) {},
 
     /*操作符关键字*/
     EQ("Eq", KeywordType.OP, "=", WhereWrapper.class),
     LT("Lt", KeywordType.OP, "=", WhereWrapper.class),
     LTEQ("Lteq", KeywordType.OP, "=", WhereWrapper.class),
     NOT("Not", KeywordType.OP, "=", WhereWrapper.class),
-    IS("Is", KeywordType.OP, "=", WhereWrapper.class),
+    IS("Is", KeywordType.OP, "#{0} = #{1}", WhereWrapper.class),
     BETWEEN("Between", KeywordType.OP, "between #{0} and #{1}", WhereWrapper.class),
 
     /*限定关键字*/
-    TOP("Top", KeywordType.LIMIT, "limit", LimitWrapper.class),
-    FIRST("First", KeywordType.LIMIT, "limit", LimitWrapper.class),
+    TOP("Top", KeywordType.LIMIT, "limit 0, #{0}", LimitWrapper.class),
+    FIRST("First", KeywordType.LIMIT, "limit 0, #{0}", LimitWrapper.class),
 
     /*运算型关键字*/
-    GROUP_BY("GroupBy", KeywordType.FUNC, "group by", FunctionWrapper.class),
-    ORDER_BY("OrderBy", KeywordType.FUNC, "order by", FunctionWrapper.class),
+    GROUP_BY("GroupBy", KeywordType.FUNC, "group by #{0}", FunctionWrapper.class),
+    ORDER_BY("OrderBy", KeywordType.FUNC, "order by #{0}", FunctionWrapper.class),
     DESC("Desc", KeywordType.FUNC, "desc", FunctionWrapper.class),
     ASC("Desc", KeywordType.FUNC, "asc", FunctionWrapper.class);
 
@@ -85,6 +76,14 @@ public enum Keyword {
     }
 
     public String getSql() {
+        return sql;
+    }
+
+    public String getSql(List<String> param) {
+        String sql = this.sql;
+        for (int i = 0; i < param.size(); i++) {
+            sql = sql.replace("#{" + i + "}", param.get(i));
+        }
         return sql;
     }
 }

@@ -5,10 +5,7 @@ import org.apache.ibatis.annotations.Param;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class KeywordParse {
 
@@ -29,39 +26,17 @@ public class KeywordParse {
             String kw = keywordList.get(i);
             Keyword keyword = keywordMap.get(kw);
 
-            if (keyword == null) {
-                String javaColumn = "";
-                Keyword opKeyword = null;
-                Keyword linkOpKeyword = null;
-                for (; i < keywordList.size(); i++) {
-                    String javaColumnTemp = keywordList.get(i);
-                    Keyword k = keywordMap.get(javaColumnTemp);
-
-                    if (k == null) {
-                        javaColumn = javaColumn + javaColumnTemp;
-                        continue;
-                    }
-
-                    if (k.getKeywordType() == KeywordType.OP) {
-                        opKeyword = k;
-                        continue;
-                    }
-                    if (k.getKeywordType() == KeywordType.LINK) {
-                        linkOpKeyword = k;
-                        break;
-                    }
-                }
-            }
-
-            if (keyword.getKeywordType() == KeywordType.ACTION) {
+            if (keyword != null && keyword.getKeywordType() == KeywordType.ACTION) {
                 continue;
             }
 
-            if (keyword.getKeywordType() == KeywordType.NONE) {
+            if (keyword != null && keyword.getKeywordType() == KeywordType.NONE) {
                 continue;
             }
 
-            if (keyword != null) {
+            if (keyword != null && keyword.getKeywordType() == KeywordType.LIMIT) {
+                String a = keywordList.get(++i);
+                keyword.getSql(Arrays.asList(a));
                 continue;
             }
 

@@ -1,8 +1,5 @@
 package com.lc.mybatisx.wrapper;
 
-import com.lc.mybatisx.wrapper.where.LinkOp;
-import com.lc.mybatisx.wrapper.where.Operation;
-
 import java.util.List;
 
 /**
@@ -22,7 +19,7 @@ public class WhereWrapper {
     /**
      * 操作符
      */
-    private Operation operation;
+    private String op;
 
     /**
      * java字段【可以满足between】
@@ -34,7 +31,7 @@ public class WhereWrapper {
     /**
      * 两个条件间的连接符【and,or】
      */
-    private LinkOp linkOp;
+    private String linkOp;
 
     /**
      * 左括号
@@ -67,12 +64,12 @@ public class WhereWrapper {
         this.dbType = dbType;
     }
 
-    public Operation getOperation() {
-        return operation;
+    public String getOp() {
+        return op;
     }
 
-    public void setOperation(Operation operation) {
-        this.operation = operation;
+    public void setOp(String op) {
+        this.op = op;
     }
 
     public List<String> getJavaColumn() {
@@ -91,11 +88,11 @@ public class WhereWrapper {
         this.javaType = javaType;
     }
 
-    public LinkOp getLinkOp() {
+    public String getLinkOp() {
         return linkOp;
     }
 
-    public void setLinkOp(LinkOp linkOp) {
+    public void setLinkOp(String linkOp) {
         this.linkOp = linkOp;
     }
 
@@ -122,17 +119,4 @@ public class WhereWrapper {
     public void setWhereWrapper(WhereWrapper whereWrapper) {
         this.whereWrapper = whereWrapper;
     }
-
-    /**
-     * 连接基本表达式
-     *
-     * @param whereWrapper
-     * @param linkOp
-     * @return
-     */
-    public void linkRule(WhereWrapper whereWrapper, LinkOp linkOp) {
-        this.setWhereWrapper(whereWrapper);
-        this.setLinkOp(linkOp);
-    }
-
 }

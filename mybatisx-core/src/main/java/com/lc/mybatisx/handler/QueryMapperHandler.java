@@ -1,11 +1,11 @@
 package com.lc.mybatisx.handler;
 
+import com.lc.mybatisx.parse.KeywordParse;
 import com.lc.mybatisx.utils.FreeMarkerUtils;
 import com.lc.mybatisx.wrapper.ModelWrapper;
 import com.lc.mybatisx.wrapper.QuerySqlWrapper;
 import com.lc.mybatisx.wrapper.SqlWrapper;
 import com.lc.mybatisx.wrapper.WhereWrapper;
-import com.lc.mybatisx.wrapper.where.KeywordParse;
 import freemarker.template.Template;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.parsing.XPathParser;

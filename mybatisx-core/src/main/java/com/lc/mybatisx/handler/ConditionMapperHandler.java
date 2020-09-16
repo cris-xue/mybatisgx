@@ -193,7 +193,7 @@ public class ConditionMapperHandler {
             }
 
             WhereWrapper ww = new WhereWrapper();
-            ww.linkRule(whereWrapper, LinkOp.valueOf(linkOp.toUpperCase()));
+            // ww.linkRule(whereWrapper, LinkOp.valueOf(linkOp.toUpperCase()));
             whereWrapper = ww;
         }
 
@@ -218,7 +218,7 @@ public class ConditionMapperHandler {
 
                 methodField = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, methodField);
                 whereWrapper.setDbColumn(methodField);
-                whereWrapper.setOperation(operation);
+                // whereWrapper.setOperation(operation);
                 whereWrapper.setJavaColumn(Arrays.asList(paramName));
 
                 return true;

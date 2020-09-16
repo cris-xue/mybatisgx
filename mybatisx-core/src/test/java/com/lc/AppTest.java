@@ -1,8 +1,6 @@
 package com.lc;
 
 import com.lc.mybatisx.handler.ConditionMapperHandler;
-import com.lc.mybatisx.wrapper.WhereWrapper;
-import com.lc.mybatisx.wrapper.where.Keyword;
 import com.lc.mybatisx.wrapper.where.LinkOp;
 import org.junit.Test;
 

@@ -1,7 +1,10 @@
 package com.lc.mybatisx.parse;
 
 import com.lc.mybatisx.wrapper.*;
+import org.apache.ibatis.annotations.Param;
 
+import java.lang.reflect.Parameter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,16 +12,10 @@ import java.util.Map;
 public enum Keyword {
 
     /*动作关键字*/
-    FIND("find", KeywordType.ACTION, "select #{0} from", QuerySqlWrapper.class) {
-        /*@Override
-        public WhereWrapper createWhereWrapper(Method method, List<String> keywordList, int i) {
-            return null;
-        }*/
-    },
+    FIND("find", KeywordType.ACTION, "select #{0} from", QuerySqlWrapper.class) {},
     SELECT("select", KeywordType.ACTION, "", QuerySqlWrapper.class),
     COUNT("count", KeywordType.ACTION, "", QuerySqlWrapper.class),
     DELETE("delete", KeywordType.ACTION, "", DeleteSqlWrapper.class),
-
 
     /*无语义关键字*/
     BY("By", KeywordType.NONE, "", null),
@@ -34,7 +31,26 @@ public enum Keyword {
     LTEQ("Lteq", KeywordType.OP, "=", WhereWrapper.class),
     NOT("Not", KeywordType.OP, "=", WhereWrapper.class),
     IS("Is", KeywordType.OP, "#{0} = #{1}", WhereWrapper.class),
-    BETWEEN("Between", KeywordType.OP, "between #{0} and #{1}", WhereWrapper.class),
+    BETWEEN("Between", KeywordType.OP, "between #{0} and #{1}", WhereWrapper.class) {
+        @Override
+        public Object[] getSql(int i, Parameter[] parameters) {
+            List<String> javaColumnList = new ArrayList<>();
+
+            String sql = this.getSql();
+            int length = i + 2;
+            for (int p = 0; i < length; i++, p++) {
+                Parameter parameter = parameters[i];
+                Param param = parameter.getAnnotation(Param.class);
+                if (param != null) {
+                    sql = sql.replace("#{#{" + p + "}}", param.value());
+                    javaColumnList.add(param.value());
+                }
+            }
+
+            Object[] result = new Object[]{length, sql, javaColumnList};
+            return result;
+        }
+    },
 
     /*限定关键字*/
     TOP("Top", KeywordType.LIMIT, "limit 0, #{0}", LimitWrapper.class),
@@ -86,4 +102,9 @@ public enum Keyword {
         }
         return sql;
     }
+
+    public Object[] getSql(int i, Parameter[] parameters) {
+        return new String[3];
+    }
+
 }

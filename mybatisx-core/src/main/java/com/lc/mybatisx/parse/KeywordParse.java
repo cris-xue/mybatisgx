@@ -1,11 +1,13 @@
 package com.lc.mybatisx.parse;
 
 import com.lc.mybatisx.wrapper.WhereWrapper;
-import org.apache.ibatis.annotations.Param;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class KeywordParse {
 
@@ -61,35 +63,27 @@ public class KeywordParse {
                     break;
                 }
             }
+            if (opKeyword == null) {
+                opKeyword = Keyword.EQ;
+            }
 
             WhereWrapper whereWrapper = new WhereWrapper();
             whereWrapper.setDbColumn(javaColumn);
-            if (opKeyword == null) {
-                whereWrapper.setOp(Keyword.EQ.getSql());
-            } else {
-                whereWrapper.setOp(opKeyword.getSql());
-            }
-            if (linkOpKeyword != null) {
-                whereWrapper.setLinkOp(linkOpKeyword.getSql());
-            }
+            whereWrapper.setOp(opKeyword.getSql());
+            whereWrapper.setLinkOp(linkOpKeyword != null ? linkOpKeyword.getSql() : null);
+
             tail.setWhereWrapper(whereWrapper);
             tail = whereWrapper;
 
-            whereCount++;
-
             // 参数校验
             Parameter[] parameters = method.getParameters();
-            int j = whereCount - 1;
-            if (opKeyword == Keyword.BETWEEN) {
-                whereCount = whereCount + 1;
-            }
-            List<String> javaColumnList = new ArrayList<>();
-            for (; j < whereCount; j++) {
-                Parameter parameter = parameters[j];
-                Param param = parameter.getAnnotation(Param.class);
-                javaColumnList.add(param.value());
-            }
-            whereWrapper.setJavaColumn(javaColumnList);
+            Object[] results = opKeyword.getSql(whereCount, parameters);
+            // whereCount = (int) results[0];
+            // String sql = (String) results[1];
+            // List<String> javaColumnList = (List<String>) results[2];
+            // whereWrapper.setJavaColumn(javaColumnList);
+
+            whereCount++;
         }
 
         return head.getWhereWrapper();

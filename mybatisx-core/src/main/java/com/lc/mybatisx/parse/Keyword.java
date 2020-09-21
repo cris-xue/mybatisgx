@@ -14,6 +14,7 @@ public enum Keyword {
     SELECT("select", KeywordType.ACTION, "", 0, QuerySqlWrapper.class),
     COUNT("count", KeywordType.ACTION, "", 0, QuerySqlWrapper.class),
     DELETE("delete", KeywordType.ACTION, "", 0, DeleteSqlWrapper.class),
+    UPDATE("update", KeywordType.ACTION, "", 0, DeleteSqlWrapper.class),
 
     /*无语义关键字*/
     BY("By", KeywordType.NONE, "", 0, null),

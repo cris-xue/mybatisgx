@@ -187,18 +187,6 @@ public class QueryMapperHandler extends AbstractMapperHandler {
             }
 
             return null;
-
-            /*String methodName = method.getName();
-            if ("findById".equals(methodName)) {
-                return entityClass;
-            } else if ("findAll".equals(methodName)) {
-                return entityClass;
-            } else {
-                Type type = method.getGenericReturnType();
-
-                Class<?> clazz = getGenericType(type, null, entityClass);
-                return clazz;
-            }*/
         }
 
     }

@@ -32,6 +32,7 @@ public class CURDMapper {
 
     static {
         mapperHandlerMap.put("find", QueryMapperHandler.class);
+        mapperHandlerMap.put("update", UpdateMapperHandler.class);
     }
 
     public static List<XNode> getNodeList(MapperBuilderAssistant builderAssistant, String namespace) {

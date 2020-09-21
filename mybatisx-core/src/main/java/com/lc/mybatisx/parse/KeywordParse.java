@@ -1,21 +1,33 @@
 package com.lc.mybatisx.parse;
 
+import com.google.common.base.CaseFormat;
+import com.lc.mybatisx.utils.ReflectUtils;
 import com.lc.mybatisx.wrapper.WhereWrapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.io.Serializable;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.lang.reflect.Type;
 import java.util.*;
 
 public class KeywordParse {
 
     private static Map<String, Keyword> keywordMap = new HashMap<>();
+    private static Map<Class<?>, Boolean> basicTypeMap = new HashMap<>();
 
     static {
         Keyword[] keywords = Keyword.values();
         for (Keyword keyword : keywords) {
             keywordMap.put(keyword.getKeyword(), keyword);
         }
+
+        basicTypeMap.put(Long.class, true);
+        basicTypeMap.put(String.class, true);
+        basicTypeMap.put(Boolean.class, true);
+        basicTypeMap.put(Object.class, true);
+        basicTypeMap.put(Serializable.class, true);
     }
 
     public static WhereWrapper buildWhereWrapper(Method method, List<String> keywordList) {
@@ -61,6 +73,7 @@ public class KeywordParse {
                     break;
                 }
             }
+            javaColumn = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, javaColumn);
             if (opKeyword == null) {
                 opKeyword = Keyword.EQ;
             }
@@ -76,7 +89,7 @@ public class KeywordParse {
             // 参数校验
             int index = opKeyword.getIndex();
             int length = whereCount + index;
-            List<String> javaColumnList = getJavaColumn(whereCount, length, method);
+            List<String> javaColumnList = getJavaColumn(whereCount, length, javaColumn, method);
             whereCount = length;
             whereWrapper.setJavaColumn(javaColumnList);
         }
@@ -84,10 +97,29 @@ public class KeywordParse {
         return head.getWhereWrapper();
     }
 
-    private static List<String> getJavaColumn(int whereCount, int length, Method method) {
+    private static List<String> getJavaColumn(int whereCount, int length, String javaColumn, Method method) {
         List<String> javaColumnList = new ArrayList<>();
 
         Parameter[] parameters = method.getParameters();
+        for (int i = 0; i < parameters.length; i++) {
+            Type type = parameters[i].getParameterizedType();
+
+
+            boolean isBasicType = basicTypeMap.getOrDefault(type, false);
+            if (isBasicType) {
+                break;
+            }
+
+            Field[] fields = ReflectUtils.getAllField((Class<?>) type);
+            for (Field field : fields) {
+                if (javaColumn.equals(field.getName())) {
+                    javaColumnList.add(javaColumn);
+                    break;
+                }
+            }
+            return javaColumnList;
+        }
+
         for (; whereCount < length; whereCount++) {
             Parameter parameter = parameters[whereCount];
             Param param = parameter.getAnnotation(Param.class);

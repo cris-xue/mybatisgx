@@ -21,7 +21,8 @@ public interface TestDao extends SimpleDao<Test, Long> {
     List<TestDTO> findByPayStatusAndPayStatusXyzAbcSelective(@Param("payStatus") String payStatus, @Param("payStatusXyzAbc") String payStatusXyzAbc);
 
     // @MapperMethod(type = MethodType.QUERY)
-    // Map<String, Object> findByUsername(@Param("username") String username);
+    Map<String, Object> findByUsername(@Param("username") String username);
+
     Map<String, Object> findByIdBetween(@Param("start") Long start, @Param("end") Long end);
 
     Map<String, Object> findTop10ByAgeBetween(@Param("start") Long start, @Param("end") Long end);

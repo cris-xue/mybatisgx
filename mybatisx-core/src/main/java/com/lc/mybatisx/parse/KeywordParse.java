@@ -1,13 +1,11 @@
 package com.lc.mybatisx.parse;
 
 import com.lc.mybatisx.wrapper.WhereWrapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class KeywordParse {
 
@@ -76,17 +74,52 @@ public class KeywordParse {
             tail = whereWrapper;
 
             // 参数校验
-            Parameter[] parameters = method.getParameters();
-            Object[] results = opKeyword.getSql(whereCount, parameters);
-            // whereCount = (int) results[0];
-            // String sql = (String) results[1];
-            // List<String> javaColumnList = (List<String>) results[2];
-            // whereWrapper.setJavaColumn(javaColumnList);
-
-            whereCount++;
+            int index = opKeyword.getIndex();
+            int length = whereCount + index;
+            List<String> javaColumnList = getJavaColumn(whereCount, length, method);
+            whereCount = length;
+            whereWrapper.setJavaColumn(javaColumnList);
         }
 
         return head.getWhereWrapper();
+    }
+
+    private static List<String> getJavaColumn(int whereCount, int length, Method method) {
+        List<String> javaColumnList = new ArrayList<>();
+
+        Parameter[] parameters = method.getParameters();
+        for (; whereCount < length; whereCount++) {
+            Parameter parameter = parameters[whereCount];
+            Param param = parameter.getAnnotation(Param.class);
+            if (param != null) {
+                javaColumnList.add(param.value());
+            }
+        }
+
+        return javaColumnList;
+    }
+
+    public static String buildLimitWrapper(List<String> keywordList) {
+        for (int i = 0; i < keywordList.size(); i++) {
+            String kw = keywordList.get(i);
+            Keyword keyword = keywordMap.get(kw);
+            if (keyword == null) {
+                continue;
+            }
+            if (keyword.getKeywordType() == KeywordType.LIMIT) {
+                return keyword.getSql();
+            }
+        }
+        return null;
+    }
+
+    public static boolean isDynamic(List<String> keywordList) {
+        String kw = keywordList.get(keywordList.size() - 1);
+        Keyword keyword = keywordMap.get(kw);
+        if (keyword == Keyword.SELECTIVE) {
+            return true;
+        }
+        return false;
     }
 
 }

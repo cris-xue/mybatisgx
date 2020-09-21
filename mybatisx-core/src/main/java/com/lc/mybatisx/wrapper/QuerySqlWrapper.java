@@ -9,11 +9,21 @@ public class QuerySqlWrapper extends SqlWrapper {
 
     private WhereWrapper whereWrapper;
 
+    private String limit;
+
     public WhereWrapper getWhereWrapper() {
         return whereWrapper;
     }
 
     public void setWhereWrapper(WhereWrapper whereWrapper) {
         this.whereWrapper = whereWrapper;
+    }
+
+    public String getLimit() {
+        return limit;
+    }
+
+    public void setLimit(String limit) {
+        this.limit = limit;
     }
 }

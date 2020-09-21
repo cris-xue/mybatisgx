@@ -2,6 +2,7 @@ package com.lc.mybatisx.handler;
 
 import com.lc.mybatisx.parse.KeywordParse;
 import com.lc.mybatisx.utils.FreeMarkerUtils;
+import com.lc.mybatisx.utils.GenericUtils;
 import com.lc.mybatisx.wrapper.ModelWrapper;
 import com.lc.mybatisx.wrapper.QuerySqlWrapper;
 import com.lc.mybatisx.wrapper.SqlWrapper;
@@ -37,6 +38,7 @@ public class QueryMapperHandler extends AbstractMapperHandler {
     public QueryMapperHandler() {
         this.modelMapperHandler = new QueryModelMapperHandler();
         this.conditionMapperHandler = new ConditionMapperHandler();
+        querySqlWrapperList = new ArrayList<>();
     }
 
     public QueryMapperHandler(String namespace, List<Method> methodList, Type[] daoInterfaceParams) {
@@ -107,16 +109,17 @@ public class QueryMapperHandler extends AbstractMapperHandler {
         List<ModelWrapper> modelWrapperList = modelMapperHandler.buildModelWrapper(modelClass);
         querySqlWrapper.setModelWrapperList(modelWrapperList);
 
-        // WhereWrapper whereWrapper = conditionMapperHandler.buildWhereWrapper(method);
         List<String> methodKeywordList = conditionMapperHandler.parseConditionKeyword(method.getName());
-        // methodKeywordList = Keyword.getKeywordList(methodKeywordList);
         WhereWrapper whereWrapper = KeywordParse.buildWhereWrapper(method, methodKeywordList);
         querySqlWrapper.setWhereWrapper(whereWrapper);
 
-        List<QuerySqlWrapper> querySqlWrapperList = new ArrayList<>();
-        querySqlWrapperList.add(querySqlWrapper);
+        String limit = KeywordParse.buildLimitWrapper(methodKeywordList);
+        querySqlWrapper.setLimit(limit);
 
-        this.querySqlWrapperList = querySqlWrapperList;
+        boolean dynamic = KeywordParse.isDynamic(methodKeywordList);
+        querySqlWrapper.setDynamic(dynamic);
+
+        this.querySqlWrapperList.add(querySqlWrapper);
     }
 
     private QuerySqlWrapper buildQuerySqlWrapper(String namespace, Method method, Type[] daoInterfaceParams) {
@@ -170,7 +173,22 @@ public class QueryMapperHandler extends AbstractMapperHandler {
 
         @Override
         public Class<?> getModelClass(Method method, Class<?> entityClass) {
-            String methodName = method.getName();
+            Type type = GenericUtils.getGenericType(method.getGenericReturnType());
+
+            if (type == Map.class) {
+                return entityClass;
+            }
+            if ("ENTITY".equals(type.getTypeName())) {
+                return entityClass;
+            }
+
+            if (type instanceof Class) {
+                return (Class<?>) type;
+            }
+
+            return null;
+
+            /*String methodName = method.getName();
             if ("findById".equals(methodName)) {
                 return entityClass;
             } else if ("findAll".equals(methodName)) {
@@ -180,7 +198,7 @@ public class QueryMapperHandler extends AbstractMapperHandler {
 
                 Class<?> clazz = getGenericType(type, null, entityClass);
                 return clazz;
-            }
+            }*/
         }
 
     }

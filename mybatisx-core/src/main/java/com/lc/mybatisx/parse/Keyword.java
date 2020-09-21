@@ -5,81 +5,53 @@ import org.apache.ibatis.annotations.Param;
 
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public enum Keyword {
 
     /*动作关键字*/
-    FIND("find", KeywordType.ACTION, "select #{0} from", QuerySqlWrapper.class) {},
-    SELECT("select", KeywordType.ACTION, "", QuerySqlWrapper.class),
-    COUNT("count", KeywordType.ACTION, "", QuerySqlWrapper.class),
-    DELETE("delete", KeywordType.ACTION, "", DeleteSqlWrapper.class),
+    FIND("find", KeywordType.ACTION, "select #{0} from", 0, QuerySqlWrapper.class),
+    SELECT("select", KeywordType.ACTION, "", 0, QuerySqlWrapper.class),
+    COUNT("count", KeywordType.ACTION, "", 0, QuerySqlWrapper.class),
+    DELETE("delete", KeywordType.ACTION, "", 0, DeleteSqlWrapper.class),
 
     /*无语义关键字*/
-    BY("By", KeywordType.NONE, "", null),
-    SELECTIVE("Selective", KeywordType.NONE, "", null),
+    BY("By", KeywordType.NONE, "", 0, null),
+    SELECTIVE("Selective", KeywordType.NONE, "", 0, null),
 
     /*连接关键字*/
-    AND("And", KeywordType.LINK, "and", null) {},
-    OR("Or", KeywordType.LINK, "or", null) {},
+    AND("And", KeywordType.LINK, "and", 0, null),
+    OR("Or", KeywordType.LINK, "or", 0, null),
 
     /*操作符关键字*/
-    EQ("Eq", KeywordType.OP, "=", WhereWrapper.class),
-    LT("Lt", KeywordType.OP, "=", WhereWrapper.class),
-    LTEQ("Lteq", KeywordType.OP, "=", WhereWrapper.class),
-    NOT("Not", KeywordType.OP, "=", WhereWrapper.class),
-    IS("Is", KeywordType.OP, "#{0} = #{1}", WhereWrapper.class),
-    BETWEEN("Between", KeywordType.OP, "between #{0} and #{1}", WhereWrapper.class) {
-        @Override
-        public Object[] getSql(int i, Parameter[] parameters) {
-            List<String> javaColumnList = new ArrayList<>();
-
-            String sql = this.getSql();
-            int length = i + 2;
-            for (int p = 0; i < length; i++, p++) {
-                Parameter parameter = parameters[i];
-                Param param = parameter.getAnnotation(Param.class);
-                if (param != null) {
-                    sql = sql.replace("#{#{" + p + "}}", param.value());
-                    javaColumnList.add(param.value());
-                }
-            }
-
-            Object[] result = new Object[]{length, sql, javaColumnList};
-            return result;
-        }
-    },
+    EQ("Eq", KeywordType.OP, "=", 1, WhereWrapper.class),
+    LT("Lt", KeywordType.OP, "=", 1, WhereWrapper.class),
+    LTEQ("Lteq", KeywordType.OP, "=", 1, WhereWrapper.class),
+    NOT("Not", KeywordType.OP, "=", 1, WhereWrapper.class),
+    IS("Is", KeywordType.OP, "#{0} = #{1}", 1, WhereWrapper.class),
+    BETWEEN("Between", KeywordType.OP, "between #{0} and #{1}", 2, WhereWrapper.class),
 
     /*限定关键字*/
-    TOP("Top", KeywordType.LIMIT, "limit 0, #{0}", LimitWrapper.class),
-    FIRST("First", KeywordType.LIMIT, "limit 0, #{0}", LimitWrapper.class),
+    TOP("Top", KeywordType.LIMIT, "limit 0, #{0}", 0, LimitWrapper.class),
+    FIRST("First", KeywordType.LIMIT, "limit 0, #{0}", 0, LimitWrapper.class),
 
     /*运算型关键字*/
-    GROUP_BY("GroupBy", KeywordType.FUNC, "group by #{0}", FunctionWrapper.class),
-    ORDER_BY("OrderBy", KeywordType.FUNC, "order by #{0}", FunctionWrapper.class),
-    DESC("Desc", KeywordType.FUNC, "desc", FunctionWrapper.class),
-    ASC("Desc", KeywordType.FUNC, "asc", FunctionWrapper.class);
+    GROUP_BY("GroupBy", KeywordType.FUNC, "group by #{0}", 0, FunctionWrapper.class),
+    ORDER_BY("OrderBy", KeywordType.FUNC, "order by #{0}", 0, FunctionWrapper.class),
+    DESC("Desc", KeywordType.FUNC, "desc", 0, FunctionWrapper.class),
+    ASC("Desc", KeywordType.FUNC, "asc", 0, FunctionWrapper.class);
 
-    private static Map<String, Keyword> keywordMap = new HashMap<>();
     private String keyword;
     private KeywordType keywordType;
     private String sql;
+    private int index = 0;
     private Class<?> clazz;
-    private static int index = 0;
 
-    static {
-        Keyword[] keywords = Keyword.values();
-        for (Keyword keyword : keywords) {
-            keywordMap.put(keyword.getKeyword(), keyword);
-        }
-    }
-
-    Keyword(String keyword, KeywordType keywordType, String sql, Class<?> clazz) {
+    Keyword(String keyword, KeywordType keywordType, String sql, int index, Class<?> clazz) {
         this.keyword = keyword;
         this.keywordType = keywordType;
         this.sql = sql;
+        this.index = index;
         this.clazz = clazz;
     }
 
@@ -95,6 +67,10 @@ public enum Keyword {
         return sql;
     }
 
+    public int getIndex() {
+        return index;
+    }
+
     public String getSql(List<String> param) {
         String sql = this.sql;
         for (int i = 0; i < param.size(); i++) {
@@ -104,7 +80,14 @@ public enum Keyword {
     }
 
     public Object[] getSql(int i, Parameter[] parameters) {
-        return new String[3];
+        List<String> javaColumnList = new ArrayList<>();
+        Parameter parameter = parameters[i];
+        Param param = parameter.getAnnotation(Param.class);
+        if (param != null) {
+            javaColumnList.add(param.value());
+        }
+
+        return new Object[]{i + 1, "sql", javaColumnList};
     }
 
 }

@@ -18,7 +18,7 @@ public interface TestDao extends SimpleDao<Test, Long> {
     int updateByIdAndNameOrUserName(Test test);
 
     @MapperMethod(type = MethodType.QUERY)
-    List<TestDTO> findByPayStatusAndPayStatusXyzAbc(@Param("payStatus") String payStatus, @Param("payStatusXyzAbc") String payStatusXyzAbc);
+    List<TestDTO> findByPayStatusAndPayStatusXyzAbcSelective(@Param("payStatus") String payStatus, @Param("payStatusXyzAbc") String payStatusXyzAbc);
 
     // @MapperMethod(type = MethodType.QUERY)
     // Map<String, Object> findByUsername(@Param("username") String username);
@@ -27,8 +27,8 @@ public interface TestDao extends SimpleDao<Test, Long> {
     Map<String, Object> findTop10ByAgeBetween(@Param("start") Long start, @Param("end") Long end);
 
     @MapperMethod(type = MethodType.QUERY)
-    List<Map<String, Object>> findByPayStatusLteqAndPayStatus1NotOrXyzAbc1Lt(@Param("payStatus") String payStatus,
-                                                                             @Param("payStatus1") String payStatus1,
-                                                                             @Param("xyzAbc1") String xyzAbc1);
+    List<Map<String, Object>> findByPayStatusLteqAndPayStatus1NotOrXyzAbc1LtSelective(@Param("payStatus") String payStatus,
+                                                                                      @Param("payStatus1") String payStatus1,
+                                                                                      @Param("xyzAbc1") String xyzAbc1);
 
 }

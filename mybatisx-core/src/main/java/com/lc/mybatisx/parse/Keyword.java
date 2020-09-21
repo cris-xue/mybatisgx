@@ -25,10 +25,10 @@ public enum Keyword {
 
     /*操作符关键字*/
     EQ("Eq", KeywordType.OP, "=", 1, WhereWrapper.class),
-    LT("Lt", KeywordType.OP, "=", 1, WhereWrapper.class),
-    LTEQ("Lteq", KeywordType.OP, "=", 1, WhereWrapper.class),
-    NOT("Not", KeywordType.OP, "=", 1, WhereWrapper.class),
     IS("Is", KeywordType.OP, "#{0} = #{1}", 1, WhereWrapper.class),
+    LT("Lt", KeywordType.OP, "<![CDATA[ < ]]>", 1, WhereWrapper.class),
+    LTEQ("Lteq", KeywordType.OP, "<![CDATA[ <= ]]>", 1, WhereWrapper.class),
+    NOT("Not", KeywordType.OP, "<![CDATA[ <> ]]>", 1, WhereWrapper.class),
     BETWEEN("Between", KeywordType.OP, "between #{0} and #{1}", 2, WhereWrapper.class),
 
     /*限定关键字*/

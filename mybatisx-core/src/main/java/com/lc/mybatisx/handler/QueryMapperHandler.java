@@ -110,7 +110,7 @@ public class QueryMapperHandler extends AbstractMapperHandler {
         querySqlWrapper.setModelWrapperList(modelWrapperList);
 
         List<String> methodKeywordList = conditionMapperHandler.parseConditionKeyword(method.getName());
-        WhereWrapper whereWrapper = KeywordParse.buildWhereWrapper(method, methodKeywordList);
+        WhereWrapper whereWrapper = KeywordParse.buildWhereWrapper(method, methodKeywordList, daoInterfaceParams);
         querySqlWrapper.setWhereWrapper(whereWrapper);
 
         String limit = KeywordParse.buildLimitWrapper(methodKeywordList);

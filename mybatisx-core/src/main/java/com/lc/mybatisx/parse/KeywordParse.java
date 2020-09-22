@@ -5,11 +5,13 @@ import com.lc.mybatisx.utils.ReflectUtils;
 import com.lc.mybatisx.wrapper.WhereWrapper;
 import org.apache.ibatis.annotations.Param;
 
-import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 public class KeywordParse {
@@ -23,14 +25,18 @@ public class KeywordParse {
             keywordMap.put(keyword.getKeyword(), keyword);
         }
 
+        basicTypeMap.put(Integer.class, true);
         basicTypeMap.put(Long.class, true);
+        basicTypeMap.put(Double.class, true);
         basicTypeMap.put(String.class, true);
         basicTypeMap.put(Boolean.class, true);
-        basicTypeMap.put(Object.class, true);
-        basicTypeMap.put(Serializable.class, true);
+        basicTypeMap.put(BigDecimal.class, true);
+        basicTypeMap.put(Date.class, true);
+        basicTypeMap.put(LocalDate.class, true);
+        basicTypeMap.put(LocalDateTime.class, true);
     }
 
-    public static WhereWrapper buildWhereWrapper(Method method, List<String> keywordList) {
+    public static WhereWrapper buildWhereWrapper(Method method, List<String> keywordList, Type[] daoInterfaceParams) {
         int whereCount = 0;
         WhereWrapper tail = new WhereWrapper();
         WhereWrapper head = tail;
@@ -89,7 +95,7 @@ public class KeywordParse {
             // 参数校验
             int index = opKeyword.getIndex();
             int length = whereCount + index;
-            List<String> javaColumnList = getJavaColumn(whereCount, length, javaColumn, method);
+            List<String> javaColumnList = getJavaColumn(whereCount, length, javaColumn, method, daoInterfaceParams);
             whereCount = length;
             whereWrapper.setJavaColumn(javaColumnList);
         }
@@ -97,17 +103,39 @@ public class KeywordParse {
         return head.getWhereWrapper();
     }
 
-    private static List<String> getJavaColumn(int whereCount, int length, String javaColumn, Method method) {
+    private static List<String> getJavaColumn(int whereCount, int length, String javaColumn, Method method, Type[] daoInterfaceParams) {
         List<String> javaColumnList = new ArrayList<>();
 
         Parameter[] parameters = method.getParameters();
         for (int i = 0; i < parameters.length; i++) {
-            Type type = parameters[i].getParameterizedType();
+            Parameter parameter = parameters[i];
+            Type parameterType = parameter.getParameterizedType();
+            Type type = parameter.getType();
 
-
-            boolean isBasicType = basicTypeMap.getOrDefault(type, false);
-            if (isBasicType) {
+            if (basicTypeMap.getOrDefault(parameterType, false)) {
                 break;
+            }
+            if ("ENTITY".equals(parameterType.getTypeName())) {
+                Class<?> entityClass = (Class<?>) daoInterfaceParams[0];
+                Field[] fields = ReflectUtils.getAllField(entityClass);
+                for (Field field : fields) {
+                    if (javaColumn.equals(field.getName())) {
+                        javaColumnList.add(javaColumn);
+                        break;
+                    }
+                }
+                return javaColumnList;
+            }
+            if ("ID".equals(parameterType.getTypeName())) {
+                Class<?> entityClass = (Class<?>) daoInterfaceParams[0];
+                Field[] fields = ReflectUtils.getAllField(entityClass);
+                for (Field field : fields) {
+                    if (javaColumn.equals(field.getName())) {
+                        javaColumnList.add(javaColumn);
+                        break;
+                    }
+                }
+                return javaColumnList;
             }
 
             Field[] fields = ReflectUtils.getAllField((Class<?>) type);

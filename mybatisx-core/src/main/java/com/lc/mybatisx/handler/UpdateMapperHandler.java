@@ -94,7 +94,7 @@ public class UpdateMapperHandler extends AbstractMapperHandler {
         updateSqlWrapper.setModelWrapperList(modelWrapperList);
 
         List<String> methodKeywordList = conditionMapperHandler.parseConditionKeyword(method.getName());
-        WhereWrapper whereWrapper = KeywordParse.buildWhereWrapper(method, methodKeywordList);
+        WhereWrapper whereWrapper = KeywordParse.buildWhereWrapper(method, methodKeywordList, daoInterfaceParams);
         updateSqlWrapper.setWhereWrapper(whereWrapper);
 
         boolean dynamic = KeywordParse.isDynamic(methodKeywordList);

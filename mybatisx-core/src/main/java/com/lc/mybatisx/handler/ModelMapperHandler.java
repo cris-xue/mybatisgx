@@ -1,6 +1,7 @@
 package com.lc.mybatisx.handler;
 
 import com.google.common.base.CaseFormat;
+import com.lc.mybatisx.annotation.LogicDelete;
 import com.lc.mybatisx.utils.ReflectUtils;
 import com.lc.mybatisx.wrapper.ModelWrapper;
 
@@ -43,6 +44,10 @@ public abstract class ModelMapperHandler {
     }
 
     protected boolean ignoreField(Field field) {
+        LogicDelete logicDelete = field.getAnnotation(LogicDelete.class);
+        if (logicDelete != null) {
+            return true;
+        }
         return false;
     }
 

@@ -27,11 +27,12 @@
             </trim>
             <#if (updateSqlWrapper.versionWrapper)??>
                 <if test="${updateSqlWrapper.versionWrapper.javaColumn} != null">
-                    AND ${updateSqlWrapper.versionWrapper.dbColumn}
+                    and ${updateSqlWrapper.versionWrapper.dbColumn}
                     =
                     ${r'#{'} ${updateSqlWrapper.versionWrapper.javaColumn} ${r'}'}
                 </if>
             </#if>
+            and ${updateSqlWrapper.logicDeleteWrapper.dbColumn} = ${updateSqlWrapper.logicDeleteWrapper.notValue}
         </where>
     </update>
     </#if>
@@ -42,9 +43,7 @@
         update ${updateSqlWrapper.tableName}
         <trim prefix="SET" suffixOverrides=",">
             <#list updateSqlWrapper.modelWrapperList as mw>
-                <if test="${mw.javaColumn} != null">
-                    ${mw.dbColumn} = ${r'#{'} ${mw.javaColumn} ${r'}'},
-                </if>
+                ${mw.dbColumn} = ${r'#{'} ${mw.javaColumn} ${r'}'},
             </#list>
             <#if (updateSqlWrapper.versionWrapper)??>
                 <if test="${updateSqlWrapper.versionWrapper.javaColumn} != null">
@@ -59,10 +58,11 @@
                 <@staticWhereTree ww=updateSqlWrapper.whereWrapper linkOp=""/>
             </#if>
             <#if (updateSqlWrapper.versionWrapper)??>
-                AND ${updateSqlWrapper.versionWrapper.dbColumn}
+                and ${updateSqlWrapper.versionWrapper.dbColumn}
                 =
                 ${r'#{'} ${updateSqlWrapper.versionWrapper.javaColumn} ${r'}'}
             </#if>
+            and ${updateSqlWrapper.logicDeleteWrapper.dbColumn} = ${updateSqlWrapper.logicDeleteWrapper.notValue}
         </where>
     </update>
     </#if>
@@ -71,24 +71,20 @@
 
 <#macro dynamicWhereTree ww linkOp>
     <#if ww??>
-        <#--<if test="${ww.value} != null">
-            ${linkOp} ${ww.dbColumn} ${ww.operation.key} ${r'#{'} ${ww.javaColumn} ${r'}'}
-        </if>-->
-        <if test="${ww.test}">
-            ${linkOp} ${ww.sql}
-        </if>
-        <#if ww.whereWrapper??>
-            <@dynamicWhereTree ww=ww.whereWrapper linkOp=ww.linkOp/>
-        </#if>
+            <if test="${ww.test}">
+                ${linkOp} ${ww.sql}
+            </if>
+            <#if ww.whereWrapper??>
+                <@dynamicWhereTree ww=ww.whereWrapper linkOp=ww.linkOp/>
+            </#if>
     </#if>
 </#macro>
 
 <#macro staticWhereTree ww linkOp>
     <#if ww??>
-        <#--${linkOp} ${ww.dbColumn} ${ww.operation.key} ${r'#{'} ${ww.javaColumn} ${r'}'}-->
-        ${linkOp} ${ww.sql}
-        <#if ww.whereWrapper??>
-            <@staticWhereTree ww=ww.whereWrapper linkOp=ww.linkOp/>
-        </#if>
+            ${linkOp} ${ww.sql}
+            <#if ww.whereWrapper??>
+                <@staticWhereTree ww=ww.whereWrapper linkOp=ww.linkOp/>
+            </#if>
     </#if>
 </#macro>

@@ -11,6 +11,9 @@
                     ${mw.dbColumn},
                 </if>
             </#list>
+            <#if insertSqlWrapper.logicDeleteWrapper??>
+                ${insertSqlWrapper.logicDeleteWrapper.dbColumn}
+            </#if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <#list insertSqlWrapper.modelWrapperList as mw>
@@ -18,6 +21,9 @@
                     ${r'#{'} ${mw.javaColumn} ${r'}'},
                 </if>
             </#list>
+            <#if insertSqlWrapper.logicDeleteWrapper??>
+                ${insertSqlWrapper.logicDeleteWrapper.notValue}
+            </#if>
         </trim>
     </insert>
     </#if>
@@ -30,11 +36,17 @@
                 <#list insertSqlWrapper.modelWrapperList as mw>
                     ${mw.dbColumn},
                 </#list>
+                <#if insertSqlWrapper.logicDeleteWrapper??>
+                    ${insertSqlWrapper.logicDeleteWrapper.dbColumn}
+                </#if>
             </trim>
             <trim prefix="values (" suffix=")" suffixOverrides=",">
                 <#list insertSqlWrapper.modelWrapperList as mw>
                     ${r'#{'} ${mw.javaColumn} ${r'}'},
                 </#list>
+                <#if insertSqlWrapper.logicDeleteWrapper??>
+                    ${insertSqlWrapper.logicDeleteWrapper.notValue}
+                </#if>
             </trim>
         </insert>
     </#if>

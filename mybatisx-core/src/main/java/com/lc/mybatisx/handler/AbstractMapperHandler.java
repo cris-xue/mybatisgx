@@ -76,12 +76,12 @@ public abstract class AbstractMapperHandler {
         String resultType = this.getResultType(method, entityClass);
         sqlWrapper.setResultType(resultType);
 
-        // 乐观锁
+        // 逻辑删除
         Field logicDeleteField = ReflectUtils.getField(entityClass, LogicDelete.class);
         if (logicDeleteField != null) {
             LogicDeleteWrapper logicDeleteWrapper = new LogicDeleteWrapper();
             String logicDeleteFieldName = logicDeleteField.getName();
-            logicDeleteWrapper.setDbColumn(logicDeleteFieldName);
+            logicDeleteWrapper.setDbColumn(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, logicDeleteFieldName));
             LogicDelete logicDelete = logicDeleteField.getAnnotation(LogicDelete.class);
             logicDeleteWrapper.setValue(logicDelete.delete());
             logicDeleteWrapper.setNotValue(logicDelete.notDelete());

@@ -220,7 +220,7 @@ public class UpdateMapperHandler extends AbstractMapperHandler {
         protected boolean ignoreField(Field field) {
             Id id = field.getAnnotation(Id.class);
             Version version = field.getAnnotation(Version.class);
-            return id != null || version != null;
+            return id != null || version != null || super.ignoreField(field);
         }
 
     }

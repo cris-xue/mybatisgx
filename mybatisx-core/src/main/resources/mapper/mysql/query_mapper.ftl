@@ -10,10 +10,11 @@
         </trim>
         from ${querySqlWrapper.tableName}
         <#if (querySqlWrapper.whereWrapper)??>
-            <where>
-                (<@whereTree ww=querySqlWrapper.whereWrapper linkOp=""/>)
-                and ${querySqlWrapper.logicDeleteWrapper.dbColumn} = ${querySqlWrapper.logicDeleteWrapper.notValue}
-            </where>
+            where
+            (
+                <@whereTree ww=querySqlWrapper.whereWrapper linkOp=""/>
+            )
+            and ${querySqlWrapper.logicDeleteWrapper.dbColumn} = ${querySqlWrapper.logicDeleteWrapper.notValue}
         </#if>
     </select>
 
@@ -21,14 +22,11 @@
 
 <#macro whereTree ww linkOp>
     <#if ww??>
-        <#--<if test="${ww.javaColumn} != null">-->
-        <#--<if test="<#list ww.javaColumn as javaColumn>${javaColumn} != null<#if (ww.javaColumn?size>1)> and </#if></#list>">-->
-        <if test="${ww.test}">
-            ${linkOp} ${ww.sql}
-            <#--${linkOp} ${ww.dbColumn} ${ww.operation.key} ${r'#{'} ${ww.javaColumn} ${r'}'}-->
-        </if>
-        <#if ww.whereWrapper??>
-            <@whereTree ww=ww.whereWrapper linkOp=ww.linkOp/>
-        </#if>
+            <if test="${ww.test}">
+                ${linkOp} ${ww.sql}
+            </if>
+            <#if ww.whereWrapper??>
+                <@whereTree ww=ww.whereWrapper linkOp=ww.linkOp/>
+            </#if>
     </#if>
 </#macro>

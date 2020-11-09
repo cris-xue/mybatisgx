@@ -24,7 +24,9 @@
             <#if (updateSqlWrapper.versionWrapper)??>
                 and ${updateSqlWrapper.versionWrapper.dbColumn} = ${r'#{'} ${updateSqlWrapper.versionWrapper.javaColumn} ${r'}'}
             </#if>
-            and ${updateSqlWrapper.logicDeleteWrapper.dbColumn} = ${updateSqlWrapper.logicDeleteWrapper.notValue}
+            <#if (updateSqlWrapper.logicDeleteWrapper)??>
+                and ${updateSqlWrapper.logicDeleteWrapper.dbColumn} = ${updateSqlWrapper.logicDeleteWrapper.notValue}
+            </#if>
         </where>
     </update>
     </#if>
@@ -48,7 +50,9 @@
             <#if (updateSqlWrapper.versionWrapper)??>
                 and ${updateSqlWrapper.versionWrapper.dbColumn} = ${r'#{'} ${updateSqlWrapper.versionWrapper.javaColumn} ${r'}'}
             </#if>
-            and ${updateSqlWrapper.logicDeleteWrapper.dbColumn} = ${updateSqlWrapper.logicDeleteWrapper.notValue}
+            <#if (updateSqlWrapper.logicDeleteWrapper)??>
+                and ${updateSqlWrapper.logicDeleteWrapper.dbColumn} = ${updateSqlWrapper.logicDeleteWrapper.notValue}
+            </#if>
         </where>
     </update>
     </#if>

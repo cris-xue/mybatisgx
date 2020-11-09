@@ -9,13 +9,16 @@
             </#list>
         </trim>
         from ${querySqlWrapper.tableName}
-        <#if (querySqlWrapper.whereWrapper)??>
-            where
-            (
-                <@whereTree ww=querySqlWrapper.whereWrapper linkOp=""/>
-            )
-            and ${querySqlWrapper.logicDeleteWrapper.dbColumn} = ${querySqlWrapper.logicDeleteWrapper.notValue}
-        </#if>
+        <where>
+            <#if (querySqlWrapper.whereWrapper)??>
+                (
+                    <@whereTree ww=querySqlWrapper.whereWrapper linkOp=""/>
+                )
+            </#if>
+            <#if (querySqlWrapper.logicDeleteWrapper)??>
+                and ${querySqlWrapper.logicDeleteWrapper.dbColumn} = ${querySqlWrapper.logicDeleteWrapper.notValue}
+            </#if>
+        </where>
     </select>
 
 </mapper>

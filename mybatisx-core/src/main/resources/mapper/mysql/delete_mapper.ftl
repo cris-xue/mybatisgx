@@ -4,12 +4,20 @@
     <#if deleteSqlWrapper.logicDeleteWrapper??>
         <update id="${deleteSqlWrapper.methodName}" <#if (deleteSqlWrapper.parameterType??)>parameterType="${deleteSqlWrapper.parameterType}"</#if>>
             update ${deleteSqlWrapper.tableName}
-            set ${deleteSqlWrapper.logicDeleteWrapper.dbColumn} = ${deleteSqlWrapper.logicDeleteWrapper.value}
+            <trim prefix="SET" suffixOverrides=",">
+                ${deleteSqlWrapper.logicDeleteWrapper.dbColumn} = ${deleteSqlWrapper.logicDeleteWrapper.value},
+                <#if (deleteSqlWrapper.versionWrapper)??>
+                    and ${deleteSqlWrapper.versionWrapper.dbColumn} = ${r'#{'} ${deleteSqlWrapper.versionWrapper.javaColumn} ${r'}'} + 1
+                </#if>
+            </trim>
             where
             <#if (deleteSqlWrapper.whereWrapper)??>
             (
                 <@whereTree ww=deleteSqlWrapper.whereWrapper linkOp=""/>
             )
+            </#if>
+            <#if (deleteSqlWrapper.versionWrapper)??>
+                and ${deleteSqlWrapper.versionWrapper.dbColumn} = ${r'#{'} ${deleteSqlWrapper.versionWrapper.javaColumn} ${r'}'}
             </#if>
             and ${deleteSqlWrapper.logicDeleteWrapper.dbColumn} = ${deleteSqlWrapper.logicDeleteWrapper.notValue}
         </update>

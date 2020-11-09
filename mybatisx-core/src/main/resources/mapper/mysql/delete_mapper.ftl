@@ -16,8 +16,12 @@
 
 <#macro whereTree ww linkOp>
     <#if ww??>
-        <if test="${ww.javaColumn} != null">
-            ${linkOp} ${ww.dbColumn} ${ww.operation.key} ${r'#{'} ${ww.javaColumn} ${r'}'}
+        <#--<if test="<#list ww.javaColumn as javaColumn>javaColumn != null</#list>">-->
+        <#--<if test="${ww.javaColumn} != null">-->
+            <#--${linkOp} ${ww.dbColumn} ${ww.operation.key} ${r'#{'} ${ww.javaColumn} ${r'}'}-->
+        <if test="${ww.test}">
+            ${linkOp} ${ww.sql}
+            <#--${linkOp} ${ww.dbColumn} ${ww.op} ${r'#{'} ${ww.javaColumn} ${r'}'}-->
         </if>
         <#if ww.whereWrapper??>
             <@whereTree ww=ww.whereWrapper linkOp=ww.linkOp/>

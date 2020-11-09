@@ -71,8 +71,11 @@
 
 <#macro dynamicWhereTree ww linkOp>
     <#if ww??>
-        <if test="${ww.value} != null">
+        <#--<if test="${ww.value} != null">
             ${linkOp} ${ww.dbColumn} ${ww.operation.key} ${r'#{'} ${ww.javaColumn} ${r'}'}
+        </if>-->
+        <if test="${ww.test}">
+            ${linkOp} ${ww.sql}
         </if>
         <#if ww.whereWrapper??>
             <@dynamicWhereTree ww=ww.whereWrapper linkOp=ww.linkOp/>
@@ -82,7 +85,8 @@
 
 <#macro staticWhereTree ww linkOp>
     <#if ww??>
-        ${linkOp} ${ww.dbColumn} ${ww.operation.key} ${r'#{'} ${ww.javaColumn} ${r'}'}
+        <#--${linkOp} ${ww.dbColumn} ${ww.operation.key} ${r'#{'} ${ww.javaColumn} ${r'}'}-->
+        ${linkOp} ${ww.sql}
         <#if ww.whereWrapper??>
             <@staticWhereTree ww=ww.whereWrapper linkOp=ww.linkOp/>
         </#if>

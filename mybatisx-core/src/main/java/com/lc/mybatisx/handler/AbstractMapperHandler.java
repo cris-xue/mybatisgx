@@ -1,5 +1,6 @@
 package com.lc.mybatisx.handler;
 
+import com.google.common.base.CaseFormat;
 import com.lc.mybatisx.dao.Dao;
 import com.lc.mybatisx.dao.SimpleDao;
 import com.lc.mybatisx.utils.GenericUtils;
@@ -86,7 +87,7 @@ public abstract class AbstractMapperHandler {
      */
     private String getTableName(Class<?> entityClass) {
         Table table = entityClass.getAnnotation(Table.class);
-        return table != null ? table.name() : entityClass.getSimpleName();
+        return table != null ? table.name() : CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, entityClass.getSimpleName());
     }
 
     /**

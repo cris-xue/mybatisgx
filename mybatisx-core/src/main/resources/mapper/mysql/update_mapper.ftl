@@ -12,11 +12,7 @@
                 </if>
             </#list>
             <#if (updateSqlWrapper.versionWrapper)??>
-                <if test="${updateSqlWrapper.versionWrapper.javaColumn} != null">
-                    ${updateSqlWrapper.versionWrapper.dbColumn}
-                    =
-                    ${r'#{'} ${updateSqlWrapper.versionWrapper.javaColumn} ${r'}'} + 1
-                </if>
+                ${updateSqlWrapper.versionWrapper.dbColumn} = ${r'#{'} ${updateSqlWrapper.versionWrapper.javaColumn} ${r'}'} + 1
             </#if>
         </trim>
         <where>
@@ -26,11 +22,7 @@
                 </#if>
             </trim>
             <#if (updateSqlWrapper.versionWrapper)??>
-                <if test="${updateSqlWrapper.versionWrapper.javaColumn} != null">
-                    and ${updateSqlWrapper.versionWrapper.dbColumn}
-                    =
-                    ${r'#{'} ${updateSqlWrapper.versionWrapper.javaColumn} ${r'}'}
-                </if>
+                and ${updateSqlWrapper.versionWrapper.dbColumn} = ${r'#{'} ${updateSqlWrapper.versionWrapper.javaColumn} ${r'}'}
             </#if>
             and ${updateSqlWrapper.logicDeleteWrapper.dbColumn} = ${updateSqlWrapper.logicDeleteWrapper.notValue}
         </where>
@@ -46,11 +38,7 @@
                 ${mw.dbColumn} = ${r'#{'} ${mw.javaColumn} ${r'}'},
             </#list>
             <#if (updateSqlWrapper.versionWrapper)??>
-                <if test="${updateSqlWrapper.versionWrapper.javaColumn} != null">
-                    ${updateSqlWrapper.versionWrapper.dbColumn}
-                    =
-                    ${r'#{'} ${updateSqlWrapper.versionWrapper.javaColumn} ${r'}'} + 1
-                </if>
+                ${updateSqlWrapper.versionWrapper.dbColumn} = ${r'#{'} ${updateSqlWrapper.versionWrapper.javaColumn} ${r'}'} + 1
             </#if>
         </trim>
         <where>
@@ -58,9 +46,7 @@
                 <@staticWhereTree ww=updateSqlWrapper.whereWrapper linkOp=""/>
             </#if>
             <#if (updateSqlWrapper.versionWrapper)??>
-                and ${updateSqlWrapper.versionWrapper.dbColumn}
-                =
-                ${r'#{'} ${updateSqlWrapper.versionWrapper.javaColumn} ${r'}'}
+                and ${updateSqlWrapper.versionWrapper.dbColumn} = ${r'#{'} ${updateSqlWrapper.versionWrapper.javaColumn} ${r'}'}
             </#if>
             and ${updateSqlWrapper.logicDeleteWrapper.dbColumn} = ${updateSqlWrapper.logicDeleteWrapper.notValue}
         </where>

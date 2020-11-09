@@ -112,7 +112,7 @@ public class DeleteMapperHandler extends AbstractMapperHandler {
         Field field = ReflectUtils.getField(modelClass, Version.class);
         if (field != null) {
             VersionWrapper versionWrapper = new VersionWrapper();
-            versionWrapper.setVersion(true);
+            // versionWrapper.setVersion(true);
             versionWrapper.setDbColumn(field.getName());
             versionWrapper.setJavaColumn(field.getName());
 
@@ -143,7 +143,7 @@ public class DeleteMapperHandler extends AbstractMapperHandler {
         Field field = ReflectUtils.getField(modelClass, Version.class);
         if (field != null) {
             VersionWrapper versionWrapper = new VersionWrapper();
-            versionWrapper.setVersion(true);
+            // versionWrapper.setVersion(true);
             versionWrapper.setDbColumn(field.getName());
             versionWrapper.setJavaColumn(field.getName());
 

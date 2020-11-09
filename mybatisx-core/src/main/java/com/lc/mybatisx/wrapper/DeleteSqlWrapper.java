@@ -7,14 +7,18 @@ package com.lc.mybatisx.wrapper;
  */
 public class DeleteSqlWrapper extends SqlWrapper {
 
+    /**
+     * 条件包装器
+     */
     private WhereWrapper whereWrapper;
-
+    /**
+     *
+     */
+    private Boolean versionQuery = false;
     /**
      * 乐观锁包装器
      */
     private VersionWrapper versionWrapper;
-
-    private Boolean versionQuery = false;
 
     public WhereWrapper getWhereWrapper() {
         return whereWrapper;
@@ -39,4 +43,5 @@ public class DeleteSqlWrapper extends SqlWrapper {
     public void setVersionQuery(Boolean versionQuery) {
         this.versionQuery = versionQuery;
     }
+
 }

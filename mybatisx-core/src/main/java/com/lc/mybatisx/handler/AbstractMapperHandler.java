@@ -1,9 +1,12 @@
 package com.lc.mybatisx.handler;
 
 import com.google.common.base.CaseFormat;
+import com.lc.mybatisx.annotation.LogicDelete;
 import com.lc.mybatisx.dao.Dao;
 import com.lc.mybatisx.dao.SimpleDao;
 import com.lc.mybatisx.utils.GenericUtils;
+import com.lc.mybatisx.utils.ReflectUtils;
+import com.lc.mybatisx.wrapper.LogicDeleteWrapper;
 import com.lc.mybatisx.wrapper.SqlWrapper;
 import org.apache.ibatis.parsing.XNode;
 import org.slf4j.Logger;
@@ -12,10 +15,7 @@ import org.springframework.util.TypeUtils;
 import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
 
 import javax.persistence.Table;
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
+import java.lang.reflect.*;
 import java.util.List;
 import java.util.Map;
 
@@ -75,6 +75,19 @@ public abstract class AbstractMapperHandler {
         sqlWrapper.setTableName(tableName);
         String resultType = this.getResultType(method, entityClass);
         sqlWrapper.setResultType(resultType);
+
+        // 乐观锁
+        Field logicDeleteField = ReflectUtils.getField(entityClass, LogicDelete.class);
+        if (logicDeleteField != null) {
+            LogicDeleteWrapper logicDeleteWrapper = new LogicDeleteWrapper();
+            String logicDeleteFieldName = logicDeleteField.getName();
+            logicDeleteWrapper.setDbColumn(logicDeleteFieldName);
+            LogicDelete logicDelete = logicDeleteField.getAnnotation(LogicDelete.class);
+            logicDeleteWrapper.setValue(logicDelete.delete());
+            logicDeleteWrapper.setNotValue(logicDelete.notDelete());
+
+            sqlWrapper.setLogicDeleteWrapper(logicDeleteWrapper);
+        }
 
         return sqlWrapper;
     }

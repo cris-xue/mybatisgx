@@ -37,6 +37,10 @@ public class SqlWrapper {
      * 方法返回的模型映射器
      */
     private List<ModelWrapper> modelWrapperList;
+    /**
+     * 逻辑删除包装器
+     */
+    private LogicDeleteWrapper logicDeleteWrapper;
 
     public Boolean getDynamic() {
         return dynamic;
@@ -92,5 +96,13 @@ public class SqlWrapper {
 
     public void setModelWrapperList(List<ModelWrapper> modelWrapperList) {
         this.modelWrapperList = modelWrapperList;
+    }
+
+    public LogicDeleteWrapper getLogicDeleteWrapper() {
+        return logicDeleteWrapper;
+    }
+
+    public void setLogicDeleteWrapper(LogicDeleteWrapper logicDeleteWrapper) {
+        this.logicDeleteWrapper = logicDeleteWrapper;
     }
 }

@@ -11,7 +11,8 @@
         from ${querySqlWrapper.tableName}
         <#if (querySqlWrapper.whereWrapper)??>
             <where>
-                <@whereTree ww=querySqlWrapper.whereWrapper linkOp=""/>
+                (<@whereTree ww=querySqlWrapper.whereWrapper linkOp=""/>)
+                and ${querySqlWrapper.logicDeleteWrapper.dbColumn} = ${querySqlWrapper.logicDeleteWrapper.notValue}
             </where>
         </#if>
     </select>

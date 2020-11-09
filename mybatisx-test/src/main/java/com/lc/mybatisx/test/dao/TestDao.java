@@ -1,5 +1,6 @@
 package com.lc.mybatisx.test.dao;
 
+import com.lc.mybatisx.annotation.BetweenStart;
 import com.lc.mybatisx.annotation.MapperMethod;
 import com.lc.mybatisx.annotation.MethodType;
 import com.lc.mybatisx.dao.SimpleDao;
@@ -11,6 +12,11 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @author ：薛承城
+ * @description：一句话描述
+ * @date ：2020/11/9 13:19
+ */
 @Repository
 public interface TestDao extends SimpleDao<Test, Long> {
 
@@ -23,7 +29,7 @@ public interface TestDao extends SimpleDao<Test, Long> {
     // @MapperMethod(type = MethodType.QUERY)
     Map<String, Object> findByUsername(@Param("username") String username);
 
-    Map<String, Object> findByIdBetween(@Param("start") Long start, @Param("end") Long end);
+    Map<String, Object> findByIdBetween(@Param("start") @BetweenStart Long start, @Param("end") @BetweenStart Long end);
 
     Map<String, Object> findTop10ByAgeBetween(@Param("start") Long start, @Param("end") Long end);
 

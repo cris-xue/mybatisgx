@@ -2,6 +2,7 @@ package com.lc.mybatisx.handler;
 
 import com.lc.mybatisx.annotation.MapperMethod;
 import com.lc.mybatisx.annotation.MethodType;
+import com.lc.mybatisx.parse.KeywordParse;
 import com.lc.mybatisx.utils.FreeMarkerUtils;
 import com.lc.mybatisx.wrapper.InsertSqlWrapper;
 import com.lc.mybatisx.wrapper.ModelWrapper;
@@ -32,12 +33,25 @@ public class InsertMapperHandler extends AbstractMapperHandler {
 
     private ModelMapperHandler modelMapperHandler;
 
+    private ConditionMapperHandler conditionMapperHandler;
+
     private List<InsertSqlWrapper> insertSqlWrapperList;
+
+    public InsertMapperHandler() {
+        this.modelMapperHandler = new InsertModelMapperHandler();
+        this.conditionMapperHandler = new ConditionMapperHandler();
+        insertSqlWrapperList = new ArrayList<>();
+    }
 
     public InsertMapperHandler(MapperBuilderAssistant builderAssistant, String namespace) {
         this.modelMapperHandler = new InsertModelMapperHandler();
 
         initInsertSqlWrapper(builderAssistant, namespace);
+    }
+
+    @Override
+    public void init(String namespace, Method method, Type[] daoInterfaceParams) {
+        build(namespace, method, daoInterfaceParams);
     }
 
     private void initInsertSqlWrapper(MapperBuilderAssistant builderAssistant, String namespace) {
@@ -61,6 +75,21 @@ public class InsertMapperHandler extends AbstractMapperHandler {
         }
 
         this.insertSqlWrapperList = insertSqlWrapperList;
+    }
+
+    private void build(String namespace, Method method, Type[] daoInterfaceParams) {
+        InsertSqlWrapper insertSqlWrapper = (InsertSqlWrapper) this.buildSqlWrapper(namespace, method, daoInterfaceParams);
+
+        Class<?> entityClass = (Class<?>) daoInterfaceParams[0];
+        Class<?> modelClass = modelMapperHandler.getModelClass(method, entityClass);
+        List<ModelWrapper> modelWrapperList = modelMapperHandler.buildModelWrapper(modelClass);
+        insertSqlWrapper.setModelWrapperList(modelWrapperList);
+
+        List<String> methodKeywordList = conditionMapperHandler.parseConditionKeyword(method.getName());
+        boolean dynamic = KeywordParse.isDynamic(methodKeywordList);
+        insertSqlWrapper.setDynamic(dynamic);
+
+        this.insertSqlWrapperList.add(insertSqlWrapper);
     }
 
     private InsertSqlWrapper buildInsertSqlWrapper(String namespace, Method method, Type[] daoInterfaceParams) {
@@ -115,6 +144,13 @@ public class InsertMapperHandler extends AbstractMapperHandler {
         @Override
         public Class<?> getModelClass(Method method, Class<?> entityClass) {
             return entityClass;
+        }
+    }
+
+    class InsertConditionMapperHandler extends ConditionMapperHandler {
+
+        public InsertConditionMapperHandler(List<String> parseMethodList) {
+            super(parseMethodList);
         }
     }
 

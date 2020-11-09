@@ -2,6 +2,7 @@ package com.lc.mybatisx.handler;
 
 import com.lc.mybatisx.annotation.MapperMethod;
 import com.lc.mybatisx.annotation.MethodType;
+import com.lc.mybatisx.parse.KeywordParse;
 import com.lc.mybatisx.utils.FreeMarkerUtils;
 import com.lc.mybatisx.utils.ReflectUtils;
 import com.lc.mybatisx.wrapper.*;
@@ -37,6 +38,12 @@ public class DeleteMapperHandler extends AbstractMapperHandler {
 
     private List<DeleteSqlWrapper> deleteSqlWrapperList;
 
+    public DeleteMapperHandler() {
+        this.modelMapperHandler = new DeleteModelMapperHandler();
+        this.conditionMapperHandler = new ConditionMapperHandler();
+        deleteSqlWrapperList = new ArrayList<>();
+    }
+
     public DeleteMapperHandler(MapperBuilderAssistant builderAssistant, String namespace) {
         this.modelMapperHandler = new DeleteModelMapperHandler();
 
@@ -45,6 +52,11 @@ public class DeleteMapperHandler extends AbstractMapperHandler {
         this.conditionMapperHandler = new DeleteConditionMapperHandler(parseMethodList);
 
         initDeleteSqlWrapper(builderAssistant, namespace);
+    }
+
+    @Override
+    public void init(String namespace, Method method, Type[] daoInterfaceParams) {
+        build(namespace, method, daoInterfaceParams);
     }
 
     private void initDeleteSqlWrapper(MapperBuilderAssistant builderAssistant, String namespace) {
@@ -79,6 +91,35 @@ public class DeleteMapperHandler extends AbstractMapperHandler {
         }
 
         this.deleteSqlWrapperList = deleteSqlWrapperList;
+    }
+
+    private void build(String namespace, Method method, Type[] daoInterfaceParams) {
+        DeleteSqlWrapper deleteSqlWrapper = (DeleteSqlWrapper) this.buildSqlWrapper(namespace, method, daoInterfaceParams);
+
+        Class<?> entityClass = (Class<?>) daoInterfaceParams[0];
+        Class<?> modelClass = modelMapperHandler.getModelClass(method, entityClass);
+        List<ModelWrapper> modelWrapperList = modelMapperHandler.buildModelWrapper(modelClass);
+        deleteSqlWrapper.setModelWrapperList(modelWrapperList);
+
+        List<String> methodKeywordList = conditionMapperHandler.parseConditionKeyword(method.getName());
+        WhereWrapper whereWrapper = KeywordParse.buildWhereWrapper(method, methodKeywordList, daoInterfaceParams);
+        deleteSqlWrapper.setWhereWrapper(whereWrapper);
+
+        boolean dynamic = KeywordParse.isDynamic(methodKeywordList);
+        deleteSqlWrapper.setDynamic(dynamic);
+
+        // 乐观锁
+        Field field = ReflectUtils.getField(modelClass, Version.class);
+        if (field != null) {
+            VersionWrapper versionWrapper = new VersionWrapper();
+            versionWrapper.setVersion(true);
+            versionWrapper.setDbColumn(field.getName());
+            versionWrapper.setJavaColumn(field.getName());
+
+            deleteSqlWrapper.setVersionWrapper(versionWrapper);
+        }
+
+        this.deleteSqlWrapperList.add(deleteSqlWrapper);
     }
 
     private DeleteSqlWrapper buildDeleteSqlWrapper(String namespace, Method method, Type[] daoInterfaceParams) {

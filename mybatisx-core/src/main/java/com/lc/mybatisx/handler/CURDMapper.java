@@ -31,8 +31,10 @@ public class CURDMapper {
     private static Map<String, Class<? extends AbstractMapperHandler>> mapperHandlerMap = new HashMap<>();
 
     static {
-        mapperHandlerMap.put("find", QueryMapperHandler.class);
+        mapperHandlerMap.put("insert", InsertMapperHandler.class);
+        mapperHandlerMap.put("delete", DeleteMapperHandler.class);
         mapperHandlerMap.put("update", UpdateMapperHandler.class);
+        mapperHandlerMap.put("find", QueryMapperHandler.class);
     }
 
     public static List<XNode> getNodeList(MapperBuilderAssistant builderAssistant, String namespace) {
@@ -64,8 +66,8 @@ public class CURDMapper {
             try {
                 AbstractMapperHandler amh = abstractMapperHandler.newInstance();
                 amh.init(namespace, method, daoInterfaceParams);
-                // List<XNode> xNode = amh.readTemplate();
-                // xNodeList.addAll(xNode);
+                List<XNode> xNode = amh.readTemplate();
+                xNodeList.addAll(xNode);
             } catch (InstantiationException e) {
                 e.printStackTrace();
             } catch (IllegalAccessException e) {

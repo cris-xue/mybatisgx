@@ -43,6 +43,10 @@ public class WhereWrapper {
      */
     private String rightBracket;
 
+    private String test;
+
+    private String sql;
+
     /**
      * 连接条件
      */
@@ -110,6 +114,22 @@ public class WhereWrapper {
 
     public void setRightBracket(String rightBracket) {
         this.rightBracket = rightBracket;
+    }
+
+    public String getTest() {
+        return test;
+    }
+
+    public void setTest(String test) {
+        this.test = test;
+    }
+
+    public String getSql() {
+        return sql;
+    }
+
+    public void setSql(String sql) {
+        this.sql = sql;
     }
 
     public WhereWrapper getWhereWrapper() {

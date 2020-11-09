@@ -25,16 +25,16 @@ public enum Keyword {
     OR("Or", KeywordType.LINK, "or", 0, null),
 
     /*操作符关键字*/
-    EQ("Eq", KeywordType.OP, "=", 1, WhereWrapper.class),
-    IS("Is", KeywordType.OP, "#{0} = #{1}", 1, WhereWrapper.class),
-    LT("Lt", KeywordType.OP, "<![CDATA[ < ]]>", 1, WhereWrapper.class),
-    LTEQ("Lteq", KeywordType.OP, "<![CDATA[ <= ]]>", 1, WhereWrapper.class),
-    NOT("Not", KeywordType.OP, "<![CDATA[ <> ]]>", 1, WhereWrapper.class),
-    BETWEEN("Between", KeywordType.OP, "between #{0} and #{1}", 2, WhereWrapper.class),
+    EQ("Eq", KeywordType.OP, " = #{0}", 1, WhereWrapper.class),
+    IS("Is", KeywordType.OP, " = #{0}", 1, WhereWrapper.class),
+    LT("Lt", KeywordType.OP, " <![CDATA[ < ]]> #{0}", 1, WhereWrapper.class),
+    LTEQ("Lteq", KeywordType.OP, " <![CDATA[ <= ]]> #{0}", 1, WhereWrapper.class),
+    NOT("Not", KeywordType.OP, " <![CDATA[ <> ]]> #{0}", 1, WhereWrapper.class),
+    BETWEEN("Between", KeywordType.OP, " between #{0} and #{1}", 2, WhereWrapper.class),
 
     /*限定关键字*/
-    TOP("Top", KeywordType.LIMIT, "limit 0, #{0}", 0, LimitWrapper.class),
-    FIRST("First", KeywordType.LIMIT, "limit 0, #{0}", 0, LimitWrapper.class),
+    TOP("Top", KeywordType.LIMIT, " limit 0, #{0}", 0, LimitWrapper.class),
+    FIRST("First", KeywordType.LIMIT, " limit 0, #{0}", 0, LimitWrapper.class),
 
     /*运算型关键字*/
     GROUP_BY("GroupBy", KeywordType.FUNC, "group by #{0}", 0, FunctionWrapper.class),
@@ -72,12 +72,33 @@ public enum Keyword {
         return index;
     }
 
-    public String getSql(List<String> param) {
+    public String getTest(List<String> paramList) {
+        String test = "";
+        for (int i = 0; i < paramList.size(); i++) {
+            if (i != 0) {
+                test += " and ";
+            }
+            test += paramList.get(i) + " != null";
+        }
+        return test;
+    }
+
+    public String getSql(List<String> paramList) {
         String sql = this.sql;
-        for (int i = 0; i < param.size(); i++) {
-            sql = sql.replace("#{" + i + "}", param.get(i));
+        for (int i = 0; i < paramList.size(); i++) {
+            sql = sql.replace("#{" + i + "}", paramList.get(i));
         }
         return sql;
+    }
+
+    public String getSql(WhereWrapper whereWrapper) {
+        String sql = this.sql;
+        List<String> params = whereWrapper.getJavaColumn();
+        for (int i = 0; i < params.size(); i++) {
+            sql = sql.replace("#{" + i + "}", "#{" + params.get(i) + "}");
+        }
+        String dbColumn = whereWrapper.getDbColumn();
+        return dbColumn + sql;
     }
 
     public Object[] getSql(int i, Parameter[] parameters) {

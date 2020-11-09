@@ -85,7 +85,7 @@ public class KeywordParse {
             }
 
             WhereWrapper whereWrapper = new WhereWrapper();
-            whereWrapper.setDbColumn(javaColumn);
+            whereWrapper.setDbColumn(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, javaColumn));
             whereWrapper.setOp(opKeyword.getSql());
             whereWrapper.setLinkOp(linkOpKeyword != null ? linkOpKeyword.getSql() : null);
 
@@ -98,6 +98,9 @@ public class KeywordParse {
             List<String> javaColumnList = getJavaColumn(whereCount, length, javaColumn, method, daoInterfaceParams);
             whereCount = length;
             whereWrapper.setJavaColumn(javaColumnList);
+
+            whereWrapper.setTest(opKeyword.getTest(javaColumnList));
+            whereWrapper.setSql(opKeyword.getSql(whereWrapper));
         }
 
         return head.getWhereWrapper();

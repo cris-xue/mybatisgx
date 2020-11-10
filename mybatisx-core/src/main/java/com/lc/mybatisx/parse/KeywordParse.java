@@ -13,6 +13,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class KeywordParse {
 
@@ -34,6 +36,23 @@ public class KeywordParse {
         basicTypeMap.put(Date.class, true);
         basicTypeMap.put(LocalDate.class, true);
         basicTypeMap.put(LocalDateTime.class, true);
+    }
+
+    public static List<String> parseMethod(Method method) {
+        // methodName = "findTop10ByIdAndNameIsOrAgeLessThanAndAgeLessThan";
+        // updateByIdSelect
+        // findById、findByIs、findByNameIsAndAgeIs
+        // 创建 Pattern 对象
+        String regex = "[a-z]+|By|And|Or|GroupBy|OrderBy|[A-Z][a-z]+|[0-9]+";
+        Pattern pattern = Pattern.compile(regex);
+        // 创建 matcher 对象
+        List<String> conditionKeywordList = new ArrayList<>();
+        Matcher matcher = pattern.matcher(method.getName());
+        while (matcher.find()) {
+            conditionKeywordList.add(matcher.group());
+        }
+
+        return conditionKeywordList;
     }
 
     public static WhereWrapper buildWhereWrapper(Method method, List<String> keywordList, Type[] daoInterfaceParams) {

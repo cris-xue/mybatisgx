@@ -29,14 +29,10 @@ public class DeleteMapperHandler extends AbstractMapperHandler {
     private static final Logger logger = LoggerFactory.getLogger(DeleteMapperHandler.class);
 
     private ModelMapperHandler modelMapperHandler;
-
-    private ConditionMapperHandler conditionMapperHandler;
-
     private List<DeleteSqlWrapper> deleteSqlWrapperList;
 
     public DeleteMapperHandler() {
         this.modelMapperHandler = new DeleteModelMapperHandler();
-        this.conditionMapperHandler = new ConditionMapperHandler();
         deleteSqlWrapperList = new ArrayList<>();
     }
 
@@ -53,7 +49,7 @@ public class DeleteMapperHandler extends AbstractMapperHandler {
         List<ModelWrapper> modelWrapperList = modelMapperHandler.buildModelWrapper(modelClass);
         deleteSqlWrapper.setModelWrapperList(modelWrapperList);
 
-        List<String> methodKeywordList = conditionMapperHandler.parseConditionKeyword(method.getName());
+        List<String> methodKeywordList = KeywordParse.parseMethod(method);
         WhereWrapper whereWrapper = KeywordParse.buildWhereWrapper(method, methodKeywordList, daoInterfaceParams);
         deleteSqlWrapper.setWhereWrapper(whereWrapper);
 

@@ -31,14 +31,10 @@ public class UpdateMapperHandler extends AbstractMapperHandler {
     private static final Logger logger = LoggerFactory.getLogger(UpdateMapperHandler.class);
 
     private ModelMapperHandler modelMapperHandler;
-
-    private ConditionMapperHandler conditionMapperHandler;
-
     private List<UpdateSqlWrapper> updateSqlWrapperList;
 
     public UpdateMapperHandler() {
         this.modelMapperHandler = new UpdateModelMapperHandler();
-        this.conditionMapperHandler = new ConditionMapperHandler();
         updateSqlWrapperList = new ArrayList<>();
     }
 
@@ -55,7 +51,7 @@ public class UpdateMapperHandler extends AbstractMapperHandler {
         List<ModelWrapper> modelWrapperList = modelMapperHandler.buildModelWrapper(modelClass);
         updateSqlWrapper.setModelWrapperList(modelWrapperList);
 
-        List<String> methodKeywordList = conditionMapperHandler.parseConditionKeyword(method.getName());
+        List<String> methodKeywordList = KeywordParse.parseMethod(method);
         WhereWrapper whereWrapper = KeywordParse.buildWhereWrapper(method, methodKeywordList, daoInterfaceParams);
         updateSqlWrapper.setWhereWrapper(whereWrapper);
 

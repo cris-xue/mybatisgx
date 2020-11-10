@@ -28,14 +28,10 @@ public class InsertMapperHandler extends AbstractMapperHandler {
     private static final Logger logger = LoggerFactory.getLogger(InsertMapperHandler.class);
 
     private ModelMapperHandler modelMapperHandler;
-
-    private ConditionMapperHandler conditionMapperHandler;
-
     private List<InsertSqlWrapper> insertSqlWrapperList;
 
     public InsertMapperHandler() {
         this.modelMapperHandler = new InsertModelMapperHandler();
-        this.conditionMapperHandler = new ConditionMapperHandler();
         insertSqlWrapperList = new ArrayList<>();
     }
 
@@ -52,7 +48,7 @@ public class InsertMapperHandler extends AbstractMapperHandler {
         List<ModelWrapper> modelWrapperList = modelMapperHandler.buildModelWrapper(modelClass);
         insertSqlWrapper.setModelWrapperList(modelWrapperList);
 
-        List<String> methodKeywordList = conditionMapperHandler.parseConditionKeyword(method.getName());
+        List<String> methodKeywordList = KeywordParse.parseMethod(method);
         boolean dynamic = KeywordParse.isDynamic(methodKeywordList);
         insertSqlWrapper.setDynamic(dynamic);
 

@@ -39,6 +39,10 @@ public class KeywordParse {
     }
 
     public static List<String> parseMethod(Method method) {
+        return parseMethod(method.getName());
+    }
+
+    public static List<String> parseMethod(String methodName) {
         // methodName = "findTop10ByIdAndNameIsOrAgeLessThanAndAgeLessThan";
         // updateByIdSelect
         // findById、findByIs、findByNameIsAndAgeIs
@@ -47,7 +51,7 @@ public class KeywordParse {
         Pattern pattern = Pattern.compile(regex);
         // 创建 matcher 对象
         List<String> conditionKeywordList = new ArrayList<>();
-        Matcher matcher = pattern.matcher(method.getName());
+        Matcher matcher = pattern.matcher(methodName);
         while (matcher.find()) {
             conditionKeywordList.add(matcher.group());
         }

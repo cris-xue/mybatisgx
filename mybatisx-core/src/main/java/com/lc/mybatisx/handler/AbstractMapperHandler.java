@@ -2,12 +2,14 @@ package com.lc.mybatisx.handler;
 
 import com.google.common.base.CaseFormat;
 import com.lc.mybatisx.annotation.LogicDelete;
+import com.lc.mybatisx.annotation.Version;
 import com.lc.mybatisx.dao.Dao;
 import com.lc.mybatisx.dao.SimpleDao;
 import com.lc.mybatisx.utils.GenericUtils;
 import com.lc.mybatisx.utils.ReflectUtils;
 import com.lc.mybatisx.wrapper.LogicDeleteWrapper;
 import com.lc.mybatisx.wrapper.SqlWrapper;
+import com.lc.mybatisx.wrapper.VersionWrapper;
 import org.apache.ibatis.parsing.XNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,7 +78,12 @@ public abstract class AbstractMapperHandler {
         String resultType = this.getResultType(method, entityClass);
         sqlWrapper.setResultType(resultType);
 
-        // 逻辑删除
+        sqlWrapper.setLogicDeleteWrapper(buildLogicDeleteWrapper(entityClass));
+
+        return sqlWrapper;
+    }
+
+    protected LogicDeleteWrapper buildLogicDeleteWrapper(Class<?> entityClass) {
         Field logicDeleteField = ReflectUtils.getField(entityClass, LogicDelete.class);
         if (logicDeleteField != null) {
             LogicDeleteWrapper logicDeleteWrapper = new LogicDeleteWrapper();
@@ -85,11 +92,28 @@ public abstract class AbstractMapperHandler {
             LogicDelete logicDelete = logicDeleteField.getAnnotation(LogicDelete.class);
             logicDeleteWrapper.setValue(logicDelete.delete());
             logicDeleteWrapper.setNotValue(logicDelete.notDelete());
-
-            sqlWrapper.setLogicDeleteWrapper(logicDeleteWrapper);
+            return logicDeleteWrapper;
         }
+        return null;
+    }
 
-        return sqlWrapper;
+    protected VersionWrapper buildVersionWrapper(Class<?> entityClass) {
+        Field field = ReflectUtils.getField(entityClass, Version.class);
+        if (field != null) {
+            Version version = field.getAnnotation(Version.class);
+            String javaColumn = field.getName();
+            String dbColumn = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, javaColumn);
+
+            VersionWrapper versionWrapper = new VersionWrapper();
+            versionWrapper.setDbColumn(dbColumn);
+            versionWrapper.setJavaColumn(javaColumn);
+            versionWrapper.setInitValue(version.initValue());
+            versionWrapper.setIncrement(version.increment());
+            versionWrapper.buildSql();
+
+            return versionWrapper;
+        }
+        return null;
     }
 
     /**

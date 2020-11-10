@@ -1,6 +1,6 @@
 package com.lc;
 
-import com.lc.mybatisx.handler.ConditionMapperHandler;
+import com.lc.mybatisx.parse.KeywordParse;
 import com.lc.mybatisx.wrapper.where.LinkOp;
 import org.junit.Test;
 
@@ -14,10 +14,9 @@ public class AppTest {
     @Test
     public void test01() {
         List<String> methodList = Arrays.asList("findByIdEq", "findTop50ByIdAndName", "findByIdAndName", "findByNameAndAgeEqOrderByNameDesc", "findByNameAndInputTimeBetween", "findByNameGroupByName", "findByPayStatusAndPayStatusXyzAbc", "updateByIdSelective");
-        ConditionMapperHandler conditionMapperHandler = new ConditionMapperHandler(null);
         Map<String, List<String>> map = new LinkedHashMap<>();
         for (String method : methodList) {
-            List<String> keyList = conditionMapperHandler.parseConditionKeyword(method);
+            List<String> keyList = KeywordParse.parseMethod(method);
             map.put(method, keyList);
         }
         System.out.println(map);

@@ -18,11 +18,23 @@ public class VersionWrapper {
     /**
      * 操作符
      */
-    private String op = " = ";
+    private String op = "=";
     /**
      * 乐观锁初始值
      */
-    private String value = "1";
+    private Integer initValue;
+    /**
+     *
+     */
+    private Integer increment;
+    /**
+     *
+     */
+    private String sql = "%s %s #{ %s }";
+
+    public void buildSql() {
+        this.sql = String.format(sql, this.dbColumn, this.op, this.javaColumn);
+    }
 
     public String getDbColumn() {
         return dbColumn;
@@ -48,11 +60,27 @@ public class VersionWrapper {
         this.op = op;
     }
 
-    public String getValue() {
-        return value;
+    public Integer getInitValue() {
+        return initValue;
     }
 
-    public void setValue(String value) {
-        this.value = value;
+    public void setInitValue(Integer initValue) {
+        this.initValue = initValue;
+    }
+
+    public Integer getIncrement() {
+        return increment;
+    }
+
+    public void setIncrement(Integer increment) {
+        this.increment = increment;
+    }
+
+    public String getSql() {
+        return sql;
+    }
+
+    public void setSql(String sql) {
+        this.sql = sql;
     }
 }

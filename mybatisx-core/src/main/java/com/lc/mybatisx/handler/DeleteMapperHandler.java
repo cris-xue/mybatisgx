@@ -56,16 +56,7 @@ public class DeleteMapperHandler extends AbstractMapperHandler {
         boolean dynamic = KeywordParse.isDynamic(methodKeywordList);
         deleteSqlWrapper.setDynamic(dynamic);
 
-        // 乐观锁
-        Field field = ReflectUtils.getField(modelClass, Version.class);
-        if (field != null) {
-            VersionWrapper versionWrapper = new VersionWrapper();
-            // versionWrapper.setVersion(true);
-            versionWrapper.setDbColumn(field.getName());
-            versionWrapper.setJavaColumn(field.getName());
-
-            deleteSqlWrapper.setVersionWrapper(versionWrapper);
-        }
+        deleteSqlWrapper.setVersionWrapper(buildVersionWrapper(entityClass));
 
         this.deleteSqlWrapperList.add(deleteSqlWrapper);
     }

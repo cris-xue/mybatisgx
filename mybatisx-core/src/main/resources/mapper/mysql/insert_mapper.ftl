@@ -28,7 +28,7 @@
                 ${insertSqlWrapper.logicDeleteWrapper.notValue},
             </#if>
             <#if (insertSqlWrapper.versionWrapper)??>
-                ${insertSqlWrapper.versionWrapper.value}
+                ${insertSqlWrapper.versionWrapper.initValue}
             </#if>
         </trim>
     </insert>
@@ -57,7 +57,7 @@
                     ${insertSqlWrapper.logicDeleteWrapper.notValue},
                 </#if>
                 <#if (insertSqlWrapper.versionWrapper)??>
-                    ${insertSqlWrapper.versionWrapper.value}
+                    ${insertSqlWrapper.versionWrapper.initValue}
                 </#if>
             </trim>
         </insert>

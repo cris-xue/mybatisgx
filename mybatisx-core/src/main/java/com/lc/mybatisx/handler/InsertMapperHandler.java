@@ -57,18 +57,7 @@ public class InsertMapperHandler extends AbstractMapperHandler {
         boolean dynamic = KeywordParse.isDynamic(methodKeywordList);
         insertSqlWrapper.setDynamic(dynamic);
 
-        // 乐观锁
-        Field field = ReflectUtils.getField(modelClass, Version.class);
-        if (field != null) {
-            String javaColumn = field.getName();
-            String dbColumn = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, javaColumn);
-
-            VersionWrapper versionWrapper = new VersionWrapper();
-            versionWrapper.setDbColumn(dbColumn);
-            versionWrapper.setJavaColumn(javaColumn);
-
-            insertSqlWrapper.setVersionWrapper(versionWrapper);
-        }
+        insertSqlWrapper.setVersionWrapper(buildVersionWrapper(entityClass));
 
         this.insertSqlWrapperList.add(insertSqlWrapper);
     }

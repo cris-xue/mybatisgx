@@ -7,27 +7,31 @@
             <trim prefix="SET" suffixOverrides=",">
                 ${deleteSqlWrapper.logicDeleteWrapper.dbColumn} = ${deleteSqlWrapper.logicDeleteWrapper.value},
                 <#if (deleteSqlWrapper.versionWrapper)??>
-                    and ${deleteSqlWrapper.versionWrapper.dbColumn} = ${r'#{'} ${deleteSqlWrapper.versionWrapper.javaColumn} ${r'}'} + 1
+                    and ${deleteSqlWrapper.versionWrapper.sql} + ${deleteSqlWrapper.versionWrapper.increment}
                 </#if>
             </trim>
-            where
-            <#if (deleteSqlWrapper.whereWrapper)??>
-            (
-                <@whereTree ww=deleteSqlWrapper.whereWrapper linkOp=""/>
-            )
-            </#if>
-            <#if (deleteSqlWrapper.versionWrapper)??>
-                and ${deleteSqlWrapper.versionWrapper.dbColumn} = ${r'#{'} ${deleteSqlWrapper.versionWrapper.javaColumn} ${r'}'}
-            </#if>
-            and ${deleteSqlWrapper.logicDeleteWrapper.dbColumn} = ${deleteSqlWrapper.logicDeleteWrapper.notValue}
+            <where>
+                <#if (deleteSqlWrapper.whereWrapper)??>
+                    <trim prefix="(" suffix=")" prefixOverrides="AND | OR">
+                        <@whereTree ww=deleteSqlWrapper.whereWrapper linkOp=""/>
+                    </trim>
+                </#if>
+                <#if (deleteSqlWrapper.versionWrapper)??>
+                    and ${deleteSqlWrapper.versionWrapper.sql}
+                </#if>
+                <#if (deleteSqlWrapper.logicDeleteWrapper)??>
+                    and ${deleteSqlWrapper.logicDeleteWrapper.dbColumn} = ${deleteSqlWrapper.logicDeleteWrapper.notValue}
+                </#if>
+            </where>
         </update>
     <#else>
         <delete id="${deleteSqlWrapper.methodName}" <#if deleteSqlWrapper.parameterType??>parameterType="${deleteSqlWrapper.parameterType}"</#if>>
             delete from ${deleteSqlWrapper.tableName}
-            where
-            <#if (deleteSqlWrapper.whereWrapper)??>
-                <@whereTree ww=deleteSqlWrapper.whereWrapper linkOp=""/>
-            </#if>
+            <where>
+                <#if (deleteSqlWrapper.whereWrapper)??>
+                    <@whereTree ww=deleteSqlWrapper.whereWrapper linkOp=""/>
+                </#if>
+            </where>
         </delete>
     </#if>
 

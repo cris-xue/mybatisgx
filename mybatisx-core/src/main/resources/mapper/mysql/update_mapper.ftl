@@ -12,21 +12,21 @@
                 </if>
             </#list>
             <#if (updateSqlWrapper.versionWrapper)??>
-                ${updateSqlWrapper.versionWrapper.dbColumn} = ${r'#{'} ${updateSqlWrapper.versionWrapper.javaColumn} ${r'}'} + 1
+                ${updateSqlWrapper.versionWrapper.sql} + ${updateSqlWrapper.versionWrapper.increment}
             </#if>
         </trim>
         <where>
-            <trim prefix="(" suffix=")" prefixOverrides="AND | OR">
-                <#if (updateSqlWrapper.whereWrapper)??>
+            <#if (updateSqlWrapper.whereWrapper)??>
+                <trim prefix="(" suffix=")" prefixOverrides="AND | OR">
                     <@dynamicWhereTree ww=updateSqlWrapper.whereWrapper linkOp=""/>
-                </#if>
-                <#if (updateSqlWrapper.versionWrapper)??>
-                    and ${updateSqlWrapper.versionWrapper.dbColumn} = ${r'#{'} ${updateSqlWrapper.versionWrapper.javaColumn} ${r'}'}
-                </#if>
-                <#if (updateSqlWrapper.logicDeleteWrapper)??>
-                    and ${updateSqlWrapper.logicDeleteWrapper.dbColumn} = ${updateSqlWrapper.logicDeleteWrapper.notValue}
-                </#if>
-            </trim>
+                </trim>
+            </#if>
+            <#if (updateSqlWrapper.versionWrapper)??>
+                and ${updateSqlWrapper.versionWrapper.sql}
+            </#if>
+            <#if (updateSqlWrapper.logicDeleteWrapper)??>
+                and ${updateSqlWrapper.logicDeleteWrapper.dbColumn} = ${updateSqlWrapper.logicDeleteWrapper.notValue}
+            </#if>
         </where>
     </update>
     </#if>
@@ -40,21 +40,21 @@
                 ${mw.dbColumn} = ${r'#{'} ${mw.javaColumn} ${r'}'},
             </#list>
             <#if (updateSqlWrapper.versionWrapper)??>
-                ${updateSqlWrapper.versionWrapper.dbColumn} = ${r'#{'} ${updateSqlWrapper.versionWrapper.javaColumn} ${r'}'} + 1
+                ${updateSqlWrapper.versionWrapper.sql} + ${updateSqlWrapper.versionWrapper.increment}
             </#if>
         </trim>
         <where>
-            <trim prefix="(" suffix=")" prefixOverrides="AND | OR">
-                <#if (updateSqlWrapper.whereWrapper)??>
+            <#if (updateSqlWrapper.whereWrapper)??>
+                <trim prefix="(" suffix=")" prefixOverrides="AND | OR">
                     <@staticWhereTree ww=updateSqlWrapper.whereWrapper linkOp=""/>
-                </#if>
-                <#if (updateSqlWrapper.versionWrapper)??>
-                    and ${updateSqlWrapper.versionWrapper.dbColumn} = ${r'#{'} ${updateSqlWrapper.versionWrapper.javaColumn} ${r'}'}
-                </#if>
-                <#if (updateSqlWrapper.logicDeleteWrapper)??>
-                    and ${updateSqlWrapper.logicDeleteWrapper.dbColumn} = ${updateSqlWrapper.logicDeleteWrapper.notValue}
-                </#if>
-            </trim>
+                </trim>
+            </#if>
+            <#if (updateSqlWrapper.versionWrapper)??>
+                and ${updateSqlWrapper.versionWrapper.sql}
+            </#if>
+            <#if (updateSqlWrapper.logicDeleteWrapper)??>
+                and ${updateSqlWrapper.logicDeleteWrapper.dbColumn} = ${updateSqlWrapper.logicDeleteWrapper.notValue}
+            </#if>
         </where>
     </update>
     </#if>

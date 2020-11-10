@@ -1,16 +1,18 @@
 package com.lc.mybatisx.handler;
 
+import com.lc.mybatisx.annotation.Version;
 import com.lc.mybatisx.parse.KeywordParse;
 import com.lc.mybatisx.utils.FreeMarkerUtils;
-import com.lc.mybatisx.utils.ReflectUtils;
-import com.lc.mybatisx.wrapper.*;
+import com.lc.mybatisx.wrapper.DeleteSqlWrapper;
+import com.lc.mybatisx.wrapper.ModelWrapper;
+import com.lc.mybatisx.wrapper.SqlWrapper;
+import com.lc.mybatisx.wrapper.WhereWrapper;
 import freemarker.template.Template;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.parsing.XPathParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.Version;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;

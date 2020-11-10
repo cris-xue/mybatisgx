@@ -1,17 +1,13 @@
 package com.lc.mybatisx.handler;
 
-import com.lc.mybatisx.annotation.MapperMethod;
-import com.lc.mybatisx.annotation.MethodType;
 import com.lc.mybatisx.parse.KeywordParse;
 import com.lc.mybatisx.utils.FreeMarkerUtils;
 import com.lc.mybatisx.wrapper.InsertSqlWrapper;
 import com.lc.mybatisx.wrapper.ModelWrapper;
 import com.lc.mybatisx.wrapper.SqlWrapper;
 import freemarker.template.Template;
-import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.parsing.XPathParser;
-import org.apache.ibatis.session.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,38 +39,9 @@ public class InsertMapperHandler extends AbstractMapperHandler {
         insertSqlWrapperList = new ArrayList<>();
     }
 
-    public InsertMapperHandler(MapperBuilderAssistant builderAssistant, String namespace) {
-        this.modelMapperHandler = new InsertModelMapperHandler();
-
-        initInsertSqlWrapper(builderAssistant, namespace);
-    }
-
     @Override
     public void init(String namespace, Method method, Type[] daoInterfaceParams) {
         build(namespace, method, daoInterfaceParams);
-    }
-
-    private void initInsertSqlWrapper(MapperBuilderAssistant builderAssistant, String namespace) {
-        Class<?> daoInterface = getDaoInterface(namespace);
-        Type[] daoInterfaceParams = getDaoInterfaceParams(daoInterface);
-
-        List<InsertSqlWrapper> insertSqlWrapperList = new ArrayList<>();
-        Method[] methods = daoInterface.getMethods();
-        for (int i = 0; i < methods.length; i++) {
-            Method method = methods[i];
-            Configuration configuration = builderAssistant.getConfiguration();
-            if (configuration.hasStatement(namespace + "." + method.getName())) {
-                continue;
-            }
-
-            InsertSqlWrapper insertSqlWrapper = this.buildInsertSqlWrapper(namespace, method, daoInterfaceParams);
-            if (insertSqlWrapper == null) {
-                continue;
-            }
-            insertSqlWrapperList.add(insertSqlWrapper);
-        }
-
-        this.insertSqlWrapperList = insertSqlWrapperList;
     }
 
     private void build(String namespace, Method method, Type[] daoInterfaceParams) {
@@ -90,25 +57,6 @@ public class InsertMapperHandler extends AbstractMapperHandler {
         insertSqlWrapper.setDynamic(dynamic);
 
         this.insertSqlWrapperList.add(insertSqlWrapper);
-    }
-
-    private InsertSqlWrapper buildInsertSqlWrapper(String namespace, Method method, Type[] daoInterfaceParams) {
-        MapperMethod mapperMethod = method.getAnnotation(MapperMethod.class);
-        if (mapperMethod == null || mapperMethod.type() != MethodType.INSERT) {
-            return null;
-        }
-
-        InsertSqlWrapper insertSqlWrapper = (InsertSqlWrapper) this.buildSqlWrapper(namespace, method, daoInterfaceParams);
-
-        // 获取方法是否需要动态sql
-        insertSqlWrapper.setDynamic(mapperMethod.dynamic());
-
-        // 构建模型包装器
-        Class<?> entityClass = (Class<?>) daoInterfaceParams[0];
-        List<ModelWrapper> modelWrapperList = modelMapperHandler.buildModelWrapper(entityClass);
-        insertSqlWrapper.setModelWrapperList(modelWrapperList);
-
-        return insertSqlWrapper;
     }
 
     @Override
@@ -144,13 +92,6 @@ public class InsertMapperHandler extends AbstractMapperHandler {
         @Override
         public Class<?> getModelClass(Method method, Class<?> entityClass) {
             return entityClass;
-        }
-    }
-
-    class InsertConditionMapperHandler extends ConditionMapperHandler {
-
-        public InsertConditionMapperHandler(List<String> parseMethodList) {
-            super(parseMethodList);
         }
     }
 

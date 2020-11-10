@@ -41,64 +41,9 @@ public class QueryMapperHandler extends AbstractMapperHandler {
         querySqlWrapperList = new ArrayList<>();
     }
 
-    public QueryMapperHandler(String namespace, List<Method> methodList, Type[] daoInterfaceParams) {
-        this.modelMapperHandler = new QueryModelMapperHandler();
-
-        List<String> parseMethodList = new ArrayList<>();
-        // parseMethodList.add("findTop10By");
-        // parseMethodList.add("findBy");
-        // parseMethodList.add("findAll");
-        // parseMethodList.add("find");
-        this.conditionMapperHandler = new QueryConditionMapperHandler(parseMethodList);
-
-        // initQuerySqlWrapper(namespace, methodList, daoInterfaceParams);
-    }
-
     @Override
     public void init(String namespace, Method method, Type[] daoInterfaceParams) {
         build(namespace, method, daoInterfaceParams);
-        // initQuerySqlWrapper(namespace, method, daoInterfaceParams);
-    }
-
-    private void initQuerySqlWrapper(String namespace, Method method, Type[] daoInterfaceParams) {
-        /*Class<?> daoInterface = getDaoInterface(namespace);
-        Type[] daoInterfaceParams = getDaoInterfaceParams(daoInterface);
-
-        List<QuerySqlWrapper> querySqlWrapperList = new ArrayList<>();
-        Method[] methods = daoInterface.getMethods();
-        for (int i = 0; i < methods.length; i++) {
-            Method method = methods[i];
-            Configuration configuration = builderAssistant.getConfiguration();
-            if (configuration.hasStatement(namespace + "." + method.getName())) {
-                continue;
-            }
-
-            QuerySqlWrapper querySqlWrapper = this.buildQuerySqlWrapper(namespace, method, daoInterfaceParams);
-            if (querySqlWrapper == null) {
-                continue;
-            }
-            querySqlWrapperList.add(querySqlWrapper);
-        }
-
-        this.querySqlWrapperList = querySqlWrapperList;*/
-
-        /*List<QuerySqlWrapper> querySqlWrapperList = new ArrayList<>();
-        for (int i = 0; i < methodList.size(); i++) {
-            QuerySqlWrapper querySqlWrapper = this.buildQuerySqlWrapper(namespace, methodList.get(i), daoInterfaceParams);
-            if (querySqlWrapper == null) {
-                continue;
-            }
-            querySqlWrapperList.add(querySqlWrapper);
-        }*/
-
-        QuerySqlWrapper querySqlWrapper = this.buildQuerySqlWrapper(namespace, method, daoInterfaceParams);
-        if (querySqlWrapper == null) {
-            return;
-        }
-        List<QuerySqlWrapper> querySqlWrapperList = new ArrayList<>();
-        querySqlWrapperList.add(querySqlWrapper);
-
-        this.querySqlWrapperList = querySqlWrapperList;
     }
 
     private void build(String namespace, Method method, Type[] daoInterfaceParams) {
@@ -120,25 +65,6 @@ public class QueryMapperHandler extends AbstractMapperHandler {
         querySqlWrapper.setDynamic(dynamic);
 
         this.querySqlWrapperList.add(querySqlWrapper);
-    }
-
-    private QuerySqlWrapper buildQuerySqlWrapper(String namespace, Method method, Type[] daoInterfaceParams) {
-        /*MapperMethod mapperMethod = method.getAnnotation(MapperMethod.class);
-        if (mapperMethod == null || mapperMethod.type() != MethodType.QUERY) {
-            return null;
-        }*/
-
-        QuerySqlWrapper querySqlWrapper = (QuerySqlWrapper) this.buildSqlWrapper(namespace, method, daoInterfaceParams);
-
-        Class<?> entityClass = (Class<?>) daoInterfaceParams[0];
-        Class<?> modelClass = modelMapperHandler.getModelClass(method, entityClass);
-        List<ModelWrapper> modelWrapperList = modelMapperHandler.buildModelWrapper(modelClass);
-        querySqlWrapper.setModelWrapperList(modelWrapperList);
-
-        WhereWrapper whereWrapper = conditionMapperHandler.buildWhereWrapper(method);
-        querySqlWrapper.setWhereWrapper(whereWrapper);
-
-        return querySqlWrapper;
     }
 
     @Override
@@ -189,13 +115,6 @@ public class QueryMapperHandler extends AbstractMapperHandler {
             return null;
         }
 
-    }
-
-    class QueryConditionMapperHandler extends ConditionMapperHandler {
-
-        public QueryConditionMapperHandler(List<String> parseMethodList) {
-            super(parseMethodList);
-        }
     }
 
 }

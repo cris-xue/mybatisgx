@@ -1,16 +1,12 @@
 package com.lc.mybatisx.handler;
 
-import com.lc.mybatisx.annotation.MapperMethod;
-import com.lc.mybatisx.annotation.MethodType;
 import com.lc.mybatisx.parse.KeywordParse;
 import com.lc.mybatisx.utils.FreeMarkerUtils;
 import com.lc.mybatisx.utils.ReflectUtils;
 import com.lc.mybatisx.wrapper.*;
 import freemarker.template.Template;
-import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.parsing.XPathParser;
-import org.apache.ibatis.session.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,53 +40,9 @@ public class DeleteMapperHandler extends AbstractMapperHandler {
         deleteSqlWrapperList = new ArrayList<>();
     }
 
-    public DeleteMapperHandler(MapperBuilderAssistant builderAssistant, String namespace) {
-        this.modelMapperHandler = new DeleteModelMapperHandler();
-
-        List<String> parseMethodList = new ArrayList<>();
-        parseMethodList.add("deleteBy");
-        this.conditionMapperHandler = new DeleteConditionMapperHandler(parseMethodList);
-
-        initDeleteSqlWrapper(builderAssistant, namespace);
-    }
-
     @Override
     public void init(String namespace, Method method, Type[] daoInterfaceParams) {
         build(namespace, method, daoInterfaceParams);
-    }
-
-    private void initDeleteSqlWrapper(MapperBuilderAssistant builderAssistant, String namespace) {
-        Class<?> daoInterface = getDaoInterface(namespace);
-        Type[] daoInterfaceParams = getDaoInterfaceParams(daoInterface);
-
-        List<DeleteSqlWrapper> deleteSqlWrapperList = new ArrayList<>();
-        Method[] methods = daoInterface.getMethods();
-        for (int i = 0; i < methods.length; i++) {
-            Method method = methods[i];
-            Configuration configuration = builderAssistant.getConfiguration();
-            if (configuration.hasStatement(namespace + "." + method.getName())) {
-                continue;
-            }
-
-            DeleteSqlWrapper deleteSqlWrapper = this.buildDeleteSqlWrapper(namespace, method, daoInterfaceParams);
-            if (deleteSqlWrapper == null) {
-                continue;
-            }
-
-            // 自动加入乐观锁查询
-            /*VersionWrapper versionWrapper = deleteSqlWrapper.getVersionWrapper();
-            if (versionWrapper != null && versionWrapper.getVersion()) {
-                DeleteSqlWrapper dw = new DeleteSqlWrapper();
-                BeanUtils.copyProperties(deleteSqlWrapper, dw);
-                dw.setMethodName("find_" + deleteSqlWrapper.getMethodName() + "_version");
-                dw.setVersionQuery(true);
-                deleteSqlWrapperList.add(dw);
-            }*/
-
-            deleteSqlWrapperList.add(deleteSqlWrapper);
-        }
-
-        this.deleteSqlWrapperList = deleteSqlWrapperList;
     }
 
     private void build(String namespace, Method method, Type[] daoInterfaceParams) {
@@ -120,37 +72,6 @@ public class DeleteMapperHandler extends AbstractMapperHandler {
         }
 
         this.deleteSqlWrapperList.add(deleteSqlWrapper);
-    }
-
-    private DeleteSqlWrapper buildDeleteSqlWrapper(String namespace, Method method, Type[] daoInterfaceParams) {
-        MapperMethod mapperMethod = method.getAnnotation(MapperMethod.class);
-        if (mapperMethod == null || mapperMethod.type() != MethodType.DELETE) {
-            return null;
-        }
-
-        DeleteSqlWrapper deleteSqlWrapper = (DeleteSqlWrapper) this.buildSqlWrapper(namespace, method, daoInterfaceParams);
-
-        Class<?> entityClass = (Class<?>) daoInterfaceParams[0];
-        Class<?> modelClass = modelMapperHandler.getModelClass(method, entityClass);
-        List<ModelWrapper> modelWrapperList = modelMapperHandler.buildModelWrapper(modelClass);
-        deleteSqlWrapper.setModelWrapperList(modelWrapperList);
-
-        // 构建条件包装器
-        WhereWrapper whereWrapper = conditionMapperHandler.buildWhereWrapper(method);
-        deleteSqlWrapper.setWhereWrapper(whereWrapper);
-
-        // 乐观锁
-        Field field = ReflectUtils.getField(modelClass, Version.class);
-        if (field != null) {
-            VersionWrapper versionWrapper = new VersionWrapper();
-            // versionWrapper.setVersion(true);
-            versionWrapper.setDbColumn(field.getName());
-            versionWrapper.setJavaColumn(field.getName());
-
-            deleteSqlWrapper.setVersionWrapper(versionWrapper);
-        }
-
-        return deleteSqlWrapper;
     }
 
     @Override
@@ -187,14 +108,6 @@ public class DeleteMapperHandler extends AbstractMapperHandler {
         @Override
         public Class<?> getModelClass(Method method, Class<?> entityClass) {
             return entityClass;
-        }
-
-    }
-
-    class DeleteConditionMapperHandler extends ConditionMapperHandler {
-
-        public DeleteConditionMapperHandler(List<String> parseMethodList) {
-            super(parseMethodList);
         }
 
     }

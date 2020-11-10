@@ -1,8 +1,9 @@
 package com.lc.mybatisx.test.model.entity;
 
+import com.lc.mybatisx.annotation.Version;
+
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import javax.persistence.Version;
 
 @Entity
 @Table(name = "mybatisx")

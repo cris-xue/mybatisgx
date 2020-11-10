@@ -12,7 +12,10 @@
                 </if>
             </#list>
             <#if insertSqlWrapper.logicDeleteWrapper??>
-                ${insertSqlWrapper.logicDeleteWrapper.dbColumn}
+                ${insertSqlWrapper.logicDeleteWrapper.dbColumn},
+            </#if>
+            <#if (insertSqlWrapper.versionWrapper)??>
+                ${insertSqlWrapper.versionWrapper.dbColumn},
             </#if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
@@ -22,7 +25,10 @@
                 </if>
             </#list>
             <#if insertSqlWrapper.logicDeleteWrapper??>
-                ${insertSqlWrapper.logicDeleteWrapper.notValue}
+                ${insertSqlWrapper.logicDeleteWrapper.notValue},
+            </#if>
+            <#if (insertSqlWrapper.versionWrapper)??>
+                ${insertSqlWrapper.versionWrapper.value}
             </#if>
         </trim>
     </insert>
@@ -37,7 +43,10 @@
                     ${mw.dbColumn},
                 </#list>
                 <#if insertSqlWrapper.logicDeleteWrapper??>
-                    ${insertSqlWrapper.logicDeleteWrapper.dbColumn}
+                    ${insertSqlWrapper.logicDeleteWrapper.dbColumn},
+                </#if>
+                <#if (insertSqlWrapper.versionWrapper)??>
+                    ${insertSqlWrapper.versionWrapper.dbColumn},
                 </#if>
             </trim>
             <trim prefix="values (" suffix=")" suffixOverrides=",">
@@ -45,7 +54,10 @@
                     ${r'#{'} ${mw.javaColumn} ${r'}'},
                 </#list>
                 <#if insertSqlWrapper.logicDeleteWrapper??>
-                    ${insertSqlWrapper.logicDeleteWrapper.notValue}
+                    ${insertSqlWrapper.logicDeleteWrapper.notValue},
+                </#if>
+                <#if (insertSqlWrapper.versionWrapper)??>
+                    ${insertSqlWrapper.versionWrapper.value}
                 </#if>
             </trim>
         </insert>

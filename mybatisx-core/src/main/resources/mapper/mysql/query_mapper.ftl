@@ -10,14 +10,14 @@
         </trim>
         from ${querySqlWrapper.tableName}
         <where>
-            <#if (querySqlWrapper.whereWrapper)??>
-                (
+            <trim prefix="(" suffix=")" prefixOverrides="AND | OR">
+                <#if (querySqlWrapper.whereWrapper)??>
                     <@whereTree ww=querySqlWrapper.whereWrapper linkOp=""/>
-                )
-            </#if>
-            <#if (querySqlWrapper.logicDeleteWrapper)??>
-                and ${querySqlWrapper.logicDeleteWrapper.dbColumn} = ${querySqlWrapper.logicDeleteWrapper.notValue}
-            </#if>
+                </#if>
+                <#if (querySqlWrapper.logicDeleteWrapper)??>
+                    and ${querySqlWrapper.logicDeleteWrapper.dbColumn} = ${querySqlWrapper.logicDeleteWrapper.notValue}
+                </#if>
+            </trim>
         </where>
     </select>
 

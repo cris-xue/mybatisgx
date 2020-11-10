@@ -106,6 +106,12 @@ public class DeleteMapperHandler extends AbstractMapperHandler {
             return entityClass;
         }
 
+        @Override
+        protected boolean ignoreField(Field field) {
+            Version version = field.getAnnotation(Version.class);
+            return version != null || super.ignoreField(field);
+        }
+
     }
 
 }

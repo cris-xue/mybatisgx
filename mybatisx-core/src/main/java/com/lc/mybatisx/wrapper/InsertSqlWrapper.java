@@ -7,4 +7,16 @@ package com.lc.mybatisx.wrapper;
  */
 public class InsertSqlWrapper extends SqlWrapper {
 
+    /**
+     * 乐观锁包装器
+     */
+    private VersionWrapper versionWrapper;
+
+    public VersionWrapper getVersionWrapper() {
+        return versionWrapper;
+    }
+
+    public void setVersionWrapper(VersionWrapper versionWrapper) {
+        this.versionWrapper = versionWrapper;
+    }
 }

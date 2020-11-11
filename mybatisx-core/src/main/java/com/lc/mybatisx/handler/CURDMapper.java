@@ -31,9 +31,9 @@ public class CURDMapper {
     private static Map<String, Class<? extends AbstractMapperHandler>> mapperHandlerMap = new HashMap<>();
 
     static {
-        mapperHandlerMap.put("insert", InsertMapperHandler.class);
-        mapperHandlerMap.put("delete", DeleteMapperHandler.class);
-        mapperHandlerMap.put("update", UpdateMapperHandler.class);
+        // mapperHandlerMap.put("insert", InsertMapperHandler.class);
+        // mapperHandlerMap.put("delete", DeleteMapperHandler.class);
+        // mapperHandlerMap.put("update", UpdateMapperHandler.class);
         mapperHandlerMap.put("find", QueryMapperHandler.class);
     }
 
@@ -75,23 +75,6 @@ public class CURDMapper {
             }
         }
 
-        /*InsertMapperHandler insertMapperHandler = new InsertMapperHandler(builderAssistant, namespace);
-        List<XNode> insertList = insertMapperHandler.readTemplate();
-
-        QueryMapperHandler queryMapperHandler = new QueryMapperHandler(namespace, methodList, daoInterfaceParams);
-        List<XNode> queryList = queryMapperHandler.readTemplate();
-
-        UpdateMapperHandler updateMapperHandler = new UpdateMapperHandler(builderAssistant, namespace);
-        List<XNode> updateList = updateMapperHandler.readTemplate();
-
-        DeleteMapperHandler deleteMapperHandler = new DeleteMapperHandler(builderAssistant, namespace);
-        List<XNode> deleteList = deleteMapperHandler.readTemplate();
-
-        List<XNode> curdList = new ArrayList<>();
-        curdList.addAll(insertList);
-        curdList.addAll(queryList);
-        curdList.addAll(updateList);
-        curdList.addAll(deleteList);*/
         return xNodeList;
     }
 

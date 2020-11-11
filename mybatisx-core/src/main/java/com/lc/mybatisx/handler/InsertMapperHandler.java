@@ -50,7 +50,7 @@ public class InsertMapperHandler extends AbstractMapperHandler {
         List<ModelWrapper> modelWrapperList = modelMapperHandler.buildModelWrapper(modelClass);
         insertSqlWrapper.setModelWrapperList(modelWrapperList);
 
-        List<String> methodKeywordList = KeywordParse.parseMethod(method);
+        List<String> methodKeywordList = KeywordParse.parseMethod(method, entityClass);
         boolean dynamic = KeywordParse.isDynamic(methodKeywordList);
         insertSqlWrapper.setDynamic(dynamic);
 

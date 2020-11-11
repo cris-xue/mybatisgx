@@ -47,7 +47,7 @@ public class QueryMapperHandler extends AbstractMapperHandler {
         List<ModelWrapper> modelWrapperList = modelMapperHandler.buildModelWrapper(modelClass);
         querySqlWrapper.setModelWrapperList(modelWrapperList);
 
-        List<String> methodKeywordList = KeywordParse.parseMethod(method);
+        List<String> methodKeywordList = KeywordParse.parseMethod(method, entityClass);
         WhereWrapper whereWrapper = KeywordParse.buildWhereWrapper(method, methodKeywordList, daoInterfaceParams);
         querySqlWrapper.setWhereWrapper(whereWrapper);
 

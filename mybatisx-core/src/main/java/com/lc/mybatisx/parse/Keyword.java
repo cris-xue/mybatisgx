@@ -15,6 +15,7 @@ public enum Keyword {
     COUNT("count", KeywordType.ACTION, "", 0, QuerySqlWrapper.class),
     DELETE("delete", KeywordType.ACTION, "", 0, DeleteSqlWrapper.class),
     UPDATE("update", KeywordType.ACTION, "", 0, DeleteSqlWrapper.class),
+    INSERT("insert", KeywordType.ACTION, "", 0, InsertSqlWrapper.class),
 
     /*无语义关键字*/
     BY("By", KeywordType.NONE, "", 0, null),
@@ -37,9 +38,9 @@ public enum Keyword {
     FIRST("First", KeywordType.LIMIT, " limit 0, #{0}", 0, LimitWrapper.class),
 
     /*排序关键字*/
-    ORDER_BY("OrderBy", KeywordType.ORDER, "order by #{0}", 0, FunctionWrapper.class),
-    DESC("Desc", KeywordType.ORDER, "desc", 0, FunctionWrapper.class),
-    ASC("Asc", KeywordType.ORDER, "asc", 0, FunctionWrapper.class),
+    ORDER_BY("OrderBy", KeywordType.ORDER, "order by #{0}", 0, OrderWrapper.class),
+    DESC("Desc", KeywordType.ORDER, "desc", 0, OrderWrapper.class),
+    ASC("Asc", KeywordType.ORDER, "asc", 0, OrderWrapper.class),
 
     /*运算型关键字*/
     GROUP_BY("GroupBy", KeywordType.FUNC, "group by #{0}", 0, FunctionWrapper.class);

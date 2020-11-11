@@ -52,7 +52,7 @@ public class UpdateMapperHandler extends AbstractMapperHandler {
         List<ModelWrapper> modelWrapperList = modelMapperHandler.buildModelWrapper(modelClass);
         updateSqlWrapper.setModelWrapperList(modelWrapperList);
 
-        List<String> methodKeywordList = KeywordParse.parseMethod(method);
+        List<String> methodKeywordList = KeywordParse.parseMethod(method, entityClass);
         WhereWrapper whereWrapper = KeywordParse.buildWhereWrapper(method, methodKeywordList, daoInterfaceParams);
         updateSqlWrapper.setWhereWrapper(whereWrapper);
 

@@ -20,14 +20,20 @@ import java.util.regex.Pattern;
 
 public class KeywordParse {
 
-    private static Map<String, Keyword> keywordMap = new HashMap<>();
+    private static Map<String, Keyword> keywordMap = new LinkedHashMap<>();
     private static Map<Class<?>, Boolean> basicTypeMap = new HashMap<>();
+    private static String regex = "[a-z]+|[A-Z][a-z]+|[0-9]+";
 
     static {
         Keyword[] keywords = Keyword.values();
+        StringBuilder sb = new StringBuilder("");
         for (Keyword keyword : keywords) {
-            keywordMap.put(keyword.getKeyword(), keyword);
+            String kw = keyword.getKeyword();
+            keywordMap.put(kw, keyword);
+            sb.append(kw).append("|");
         }
+        // sb.append("[a-z]+|[A-Z][a-z]+|[0-9]+");
+        // regex = sb.toString();
 
         basicTypeMap.put(Integer.class, true);
         basicTypeMap.put(Long.class, true);
@@ -40,25 +46,70 @@ public class KeywordParse {
         basicTypeMap.put(LocalDateTime.class, true);
     }
 
-    public static List<String> parseMethod(Method method) {
-        return parseMethod(method.getName());
+    public static List<String> parseMethod(Method method, Class<?> entityClass) {
+        return parseMethod(method.getName(), entityClass);
     }
 
-    public static List<String> parseMethod(String methodName) {
+    public static List<String> parseMethod(String methodName, Class<?> entityClass) {
         // methodName = "findTop10ByIdAndNameIsOrAgeLessThanAndAgeLessThan";
         // updateByIdSelect
         // findById、findByIs、findByNameIsAndAgeIs
         // 创建 Pattern 对象
-        String regex = "[a-z]+|By|And|Or|GroupBy|OrderBy|[A-Z][a-z]+|[0-9]+";
+        // String regex = "[a-z]+|GroupBy|OrderBy|By|And|Or|[A-Z][a-z]+|[0-9]+";
         Pattern pattern = Pattern.compile(regex);
         // 创建 matcher 对象
-        List<String> conditionKeywordList = new ArrayList<>();
+        List<String> methodKeywordList = new LinkedList<>();
         Matcher matcher = pattern.matcher(methodName);
         while (matcher.find()) {
-            conditionKeywordList.add(matcher.group());
+            methodKeywordList.add(matcher.group());
         }
 
-        return conditionKeywordList;
+        List<String> aaa = new ArrayList<>();
+        int length = methodKeywordList.size();
+        for (int i = 0; i < length; i++) {
+            String methodKeyword = methodKeywordList.get(i);
+            aaa.add(methodKeyword);
+
+            if (i + 1 >= length) {
+                break;
+            }
+
+            for (int j = i + 1; j < length; j++) {
+                methodKeyword = methodKeyword + methodKeywordList.get(j);
+                if (keywordMap.containsKey(methodKeyword)) {
+                    aaa.remove(i);
+                    aaa.add(i, methodKeyword);
+                    i = j;
+                }
+            }
+        }
+
+        List<String> newAaaaa = new ArrayList<>();
+        int size = aaa.size();
+        for (int i = 0; i < size; i++) {
+            String methodKeyword = aaa.get(i);
+            newAaaaa.add(methodKeyword);
+
+            if (i + 1 >= size) {
+                break;
+            }
+
+            if (keywordMap.containsKey(methodKeyword)) {
+                continue;
+            }
+
+            for (int j = i + 1; j < size; j++) {
+                methodKeyword = methodKeyword + aaa.get(j);
+                Field field = ReflectUtils.getField(entityClass, CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, methodKeyword));
+                if (field != null) {
+                    newAaaaa.remove(i);
+                    newAaaaa.add(i, methodKeyword);
+                    i = j;
+                }
+            }
+        }
+
+        return newAaaaa;
     }
 
     public static WhereWrapper buildWhereWrapper(Method method, List<String> keywordList, Type[] daoInterfaceParams) {

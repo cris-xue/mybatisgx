@@ -13,40 +13,42 @@ public class WhereWrapper {
      * 数据库字段
      */
     private String dbColumn;
-
+    /**
+     *
+     */
     private String dbType;
-
     /**
      * 操作符
      */
     private String op;
-
     /**
      * java字段【可以满足between】
      */
     private List<String> javaColumn;
-
+    /**
+     *
+     */
     private String javaType;
-
     /**
      * 两个条件间的连接符【and,or】
      */
     private String linkOp;
-
     /**
      * 左括号
      */
     private String leftBracket;
-
     /**
      * 右括号
      */
     private String rightBracket;
-
+    /**
+     *
+     */
     private String test;
-
+    /**
+     *
+     */
     private String sql;
-
     /**
      * 连接条件
      */

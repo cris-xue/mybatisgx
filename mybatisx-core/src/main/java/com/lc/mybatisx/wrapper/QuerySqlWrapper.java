@@ -7,9 +7,14 @@ package com.lc.mybatisx.wrapper;
  */
 public class QuerySqlWrapper extends SqlWrapper {
 
+    /**
+     *
+     */
     private WhereWrapper whereWrapper;
-
-    private String limit;
+    /**
+     *
+     */
+    private LimitWrapper limitWrapper;
 
     public WhereWrapper getWhereWrapper() {
         return whereWrapper;
@@ -19,11 +24,11 @@ public class QuerySqlWrapper extends SqlWrapper {
         this.whereWrapper = whereWrapper;
     }
 
-    public String getLimit() {
-        return limit;
+    public LimitWrapper getLimitWrapper() {
+        return limitWrapper;
     }
 
-    public void setLimit(String limit) {
-        this.limit = limit;
+    public void setLimitWrapper(LimitWrapper limitWrapper) {
+        this.limitWrapper = limitWrapper;
     }
 }

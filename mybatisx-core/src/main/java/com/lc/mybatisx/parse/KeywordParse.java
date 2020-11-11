@@ -2,6 +2,7 @@ package com.lc.mybatisx.parse;
 
 import com.google.common.base.CaseFormat;
 import com.lc.mybatisx.utils.ReflectUtils;
+import com.lc.mybatisx.wrapper.LimitWrapper;
 import com.lc.mybatisx.wrapper.WhereWrapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -76,8 +77,8 @@ public class KeywordParse {
             }
 
             if (keyword != null && keyword.getKeywordType() == KeywordType.LIMIT) {
-                String a = keywordList.get(++i);
-                keyword.getSql(Arrays.asList(a));
+                // 这里执行i++操作是为了让索引跳过top后面的数字
+                i++;
                 continue;
             }
 
@@ -185,7 +186,7 @@ public class KeywordParse {
         return javaColumnList;
     }
 
-    public static String buildLimitWrapper(List<String> keywordList) {
+    public static LimitWrapper buildLimitWrapper(List<String> keywordList) {
         for (int i = 0; i < keywordList.size(); i++) {
             String kw = keywordList.get(i);
             Keyword keyword = keywordMap.get(kw);
@@ -193,7 +194,11 @@ public class KeywordParse {
                 continue;
             }
             if (keyword.getKeywordType() == KeywordType.LIMIT) {
-                return keyword.getSql();
+                LimitWrapper limitWrapper = new LimitWrapper();
+                String top = keywordList.get(++i);
+                String sql = keyword.getSql(Arrays.asList(top));
+                limitWrapper.setSql(sql);
+                return limitWrapper;
             }
         }
         return null;

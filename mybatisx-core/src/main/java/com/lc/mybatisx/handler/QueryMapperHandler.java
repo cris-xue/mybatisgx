@@ -3,10 +3,7 @@ package com.lc.mybatisx.handler;
 import com.lc.mybatisx.parse.KeywordParse;
 import com.lc.mybatisx.utils.FreeMarkerUtils;
 import com.lc.mybatisx.utils.GenericUtils;
-import com.lc.mybatisx.wrapper.ModelWrapper;
-import com.lc.mybatisx.wrapper.QuerySqlWrapper;
-import com.lc.mybatisx.wrapper.SqlWrapper;
-import com.lc.mybatisx.wrapper.WhereWrapper;
+import com.lc.mybatisx.wrapper.*;
 import freemarker.template.Template;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.parsing.XPathParser;
@@ -54,8 +51,8 @@ public class QueryMapperHandler extends AbstractMapperHandler {
         WhereWrapper whereWrapper = KeywordParse.buildWhereWrapper(method, methodKeywordList, daoInterfaceParams);
         querySqlWrapper.setWhereWrapper(whereWrapper);
 
-        String limit = KeywordParse.buildLimitWrapper(methodKeywordList);
-        querySqlWrapper.setLimit(limit);
+        LimitWrapper limitWrapper = KeywordParse.buildLimitWrapper(methodKeywordList);
+        querySqlWrapper.setLimitWrapper(limitWrapper);
 
         boolean dynamic = KeywordParse.isDynamic(methodKeywordList);
         querySqlWrapper.setDynamic(dynamic);

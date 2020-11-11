@@ -31,9 +31,9 @@ public class CURDMapper {
     private static Map<String, Class<? extends AbstractMapperHandler>> mapperHandlerMap = new HashMap<>();
 
     static {
-        // mapperHandlerMap.put("insert", InsertMapperHandler.class);
-        // mapperHandlerMap.put("delete", DeleteMapperHandler.class);
-        // mapperHandlerMap.put("update", UpdateMapperHandler.class);
+        mapperHandlerMap.put("insert", InsertMapperHandler.class);
+        mapperHandlerMap.put("delete", DeleteMapperHandler.class);
+        mapperHandlerMap.put("update", UpdateMapperHandler.class);
         mapperHandlerMap.put("find", QueryMapperHandler.class);
     }
 

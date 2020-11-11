@@ -29,6 +29,7 @@ public enum Keyword {
     EQ("Eq", KeywordType.OP, " = #{0}", 1, WhereWrapper.class),
     IS("Is", KeywordType.OP, " = #{0}", 1, WhereWrapper.class),
     LT("Lt", KeywordType.OP, " <![CDATA[ < ]]> #{0}", 1, WhereWrapper.class),
+    LESS_THAN("LessThan", KeywordType.OP, "<![CDATA[ < ]]>", 1, WhereWrapper.class),
     LTEQ("Lteq", KeywordType.OP, " <![CDATA[ <= ]]> #{0}", 1, WhereWrapper.class),
     NOT("Not", KeywordType.OP, " <![CDATA[ <> ]]> #{0}", 1, WhereWrapper.class),
     BETWEEN("Between", KeywordType.OP, " between #{0} and #{1}", 2, WhereWrapper.class),

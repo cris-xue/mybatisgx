@@ -51,6 +51,13 @@ public class KeywordParse {
     }
 
     public static List<String> parseMethod(String methodName, Class<?> entityClass) {
+        List<String> methodKeywordList = splitKeyword(methodName);
+        methodKeywordList = mergeSqlKeyword(methodKeywordList);
+        methodKeywordList = mergeFieldKeyword(methodKeywordList);
+        return methodKeywordList;
+    }
+
+    private static List<String> splitKeyword(String methodName) {
         // methodName = "findTop10ByIdAndNameIsOrAgeLessThanAndAgeLessThan";
         // updateByIdSelect
         // findById、findByIs、findByNameIsAndAgeIs
@@ -64,11 +71,15 @@ public class KeywordParse {
             methodKeywordList.add(matcher.group());
         }
 
-        List<String> aaa = new ArrayList<>();
+        return methodKeywordList;
+    }
+
+    private static List<String> mergeSqlKeyword(List<String> methodKeywordList) {
+        List<String> keywordList = new ArrayList<>();
         int length = methodKeywordList.size();
         for (int i = 0; i < length; i++) {
             String methodKeyword = methodKeywordList.get(i);
-            aaa.add(methodKeyword);
+            keywordList.add(methodKeyword);
 
             if (i + 1 >= length) {
                 break;
@@ -77,18 +88,22 @@ public class KeywordParse {
             for (int j = i + 1; j < length; j++) {
                 methodKeyword = methodKeyword + methodKeywordList.get(j);
                 if (keywordMap.containsKey(methodKeyword)) {
-                    aaa.remove(i);
-                    aaa.add(i, methodKeyword);
+                    keywordList.remove(keywordList.size() - 1);
+                    keywordList.add(methodKeyword);
                     i = j;
                 }
             }
         }
 
-        List<String> newAaaaa = new ArrayList<>();
-        int size = aaa.size();
+        return keywordList;
+    }
+
+    private static List<String> mergeFieldKeyword(List<String> methodKeywordList) {
+        List<String> keywordList = new ArrayList<>();
+        int size = methodKeywordList.size();
         for (int i = 0; i < size; i++) {
-            String methodKeyword = aaa.get(i);
-            newAaaaa.add(methodKeyword);
+            String methodKeyword = methodKeywordList.get(i);
+            keywordList.add(methodKeyword);
 
             if (i + 1 >= size) {
                 break;
@@ -99,17 +114,19 @@ public class KeywordParse {
             }
 
             for (int j = i + 1; j < size; j++) {
-                methodKeyword = methodKeyword + aaa.get(j);
-                Field field = ReflectUtils.getField(entityClass, CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, methodKeyword));
-                if (field != null) {
-                    newAaaaa.remove(i);
-                    newAaaaa.add(i, methodKeyword);
-                    i = j;
+                String xxxx = methodKeywordList.get(j);
+                if (keywordMap.containsKey(xxxx)) {
+                    break;
                 }
+                methodKeyword = methodKeyword + xxxx;
+                // Field field = ReflectUtils.getField(entityClass, CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, methodKeyword));
+                keywordList.remove(keywordList.size() - 1);
+                keywordList.add(methodKeyword);
+                i = j;
             }
         }
 
-        return newAaaaa;
+        return keywordList;
     }
 
     public static WhereWrapper buildWhereWrapper(Method method, List<String> keywordList, Type[] daoInterfaceParams) {

@@ -18,7 +18,6 @@ public enum Keyword {
     INSERT("insert", KeywordType.ACTION, "", 0, InsertSqlWrapper.class),
 
     /*无语义关键字*/
-    BY("By", KeywordType.NONE, "", 0, null),
     SELECTIVE("Selective", KeywordType.NONE, "", 0, null),
 
     /*连接关键字*/
@@ -26,13 +25,14 @@ public enum Keyword {
     OR("Or", KeywordType.LINK, "or", 0, null),
 
     /*查询条件关键字*/
-    EQ("Eq", KeywordType.OP, " = #{0}", 1, WhereWrapper.class),
-    IS("Is", KeywordType.OP, " = #{0}", 1, WhereWrapper.class),
-    LT("Lt", KeywordType.OP, " <![CDATA[ < ]]> #{0}", 1, WhereWrapper.class),
-    LESS_THAN("LessThan", KeywordType.OP, " <![CDATA[ < ]]> #{0}", 1, WhereWrapper.class),
-    LTEQ("Lteq", KeywordType.OP, " <![CDATA[ <= ]]> #{0}", 1, WhereWrapper.class),
-    NOT("Not", KeywordType.OP, " <![CDATA[ <> ]]> #{0}", 1, WhereWrapper.class),
-    BETWEEN("Between", KeywordType.OP, " between #{0} and #{1}", 2, WhereWrapper.class),
+    BY("By", KeywordType.WHERE, "", 0, WhereWrapper.class),
+    EQ("Eq", KeywordType.WHERE, " = #{0}", 1, WhereWrapper.class),
+    IS("Is", KeywordType.WHERE, " = #{0}", 1, WhereWrapper.class),
+    LT("Lt", KeywordType.WHERE, " <![CDATA[ < ]]> #{0}", 1, WhereWrapper.class),
+    LESS_THAN("LessThan", KeywordType.WHERE, " <![CDATA[ < ]]> #{0}", 1, WhereWrapper.class),
+    LTEQ("Lteq", KeywordType.WHERE, " <![CDATA[ <= ]]> #{0}", 1, WhereWrapper.class),
+    NOT("Not", KeywordType.WHERE, " <![CDATA[ <> ]]> #{0}", 1, WhereWrapper.class),
+    BETWEEN("Between", KeywordType.WHERE, " between #{0} and #{1}", 2, WhereWrapper.class),
 
     /*top关键字*/
     TOP("Top", KeywordType.LIMIT, " limit 0, #{0}", 0, LimitWrapper.class),
@@ -45,7 +45,6 @@ public enum Keyword {
 
     /*运算型关键字*/
     GROUP_BY("GroupBy", KeywordType.FUNC, "group by #{0}", 0, FunctionWrapper.class);
-
 
     private String keyword;
     private KeywordType keywordType;

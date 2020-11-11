@@ -130,6 +130,9 @@ public class KeywordParse {
     }
 
     public static WhereWrapper buildWhereWrapper(Method method, List<String> keywordList, Type[] daoInterfaceParams) {
+        WhereMapperHandler whereMapperHandler = new WhereMapperHandler(keywordMap);
+        whereMapperHandler.build(keywordList);
+
         int whereCount = 0;
         WhereWrapper tail = new WhereWrapper();
         WhereWrapper head = tail;
@@ -163,7 +166,7 @@ public class KeywordParse {
                     continue;
                 }
 
-                if (k.getKeywordType() == KeywordType.OP) {
+                if (k.getKeywordType() == KeywordType.WHERE) {
                     opKeyword = k;
                     continue;
                 }

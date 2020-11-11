@@ -2,6 +2,6 @@ package com.lc.mybatisx.parse;
 
 public enum KeywordType {
 
-    ACTION, NONE, LINK, OP, FUNC, LIMIT
+    ACTION, NONE, LINK, OP, ORDER, FUNC, LIMIT
 
 }

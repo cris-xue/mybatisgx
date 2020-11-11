@@ -24,7 +24,7 @@ public enum Keyword {
     AND("And", KeywordType.LINK, "and", 0, null),
     OR("Or", KeywordType.LINK, "or", 0, null),
 
-    /*操作符关键字*/
+    /*查询条件关键字*/
     EQ("Eq", KeywordType.OP, " = #{0}", 1, WhereWrapper.class),
     IS("Is", KeywordType.OP, " = #{0}", 1, WhereWrapper.class),
     LT("Lt", KeywordType.OP, " <![CDATA[ < ]]> #{0}", 1, WhereWrapper.class),
@@ -32,15 +32,18 @@ public enum Keyword {
     NOT("Not", KeywordType.OP, " <![CDATA[ <> ]]> #{0}", 1, WhereWrapper.class),
     BETWEEN("Between", KeywordType.OP, " between #{0} and #{1}", 2, WhereWrapper.class),
 
-    /*限定关键字*/
+    /*top关键字*/
     TOP("Top", KeywordType.LIMIT, " limit 0, #{0}", 0, LimitWrapper.class),
     FIRST("First", KeywordType.LIMIT, " limit 0, #{0}", 0, LimitWrapper.class),
 
+    /*排序关键字*/
+    ORDER_BY("OrderBy", KeywordType.ORDER, "order by #{0}", 0, FunctionWrapper.class),
+    DESC("Desc", KeywordType.ORDER, "desc", 0, FunctionWrapper.class),
+    ASC("Asc", KeywordType.ORDER, "asc", 0, FunctionWrapper.class),
+
     /*运算型关键字*/
-    GROUP_BY("GroupBy", KeywordType.FUNC, "group by #{0}", 0, FunctionWrapper.class),
-    ORDER_BY("OrderBy", KeywordType.FUNC, "order by #{0}", 0, FunctionWrapper.class),
-    DESC("Desc", KeywordType.FUNC, "desc", 0, FunctionWrapper.class),
-    ASC("Desc", KeywordType.FUNC, "asc", 0, FunctionWrapper.class);
+    GROUP_BY("GroupBy", KeywordType.FUNC, "group by #{0}", 0, FunctionWrapper.class);
+
 
     private String keyword;
     private KeywordType keywordType;
@@ -81,6 +84,10 @@ public enum Keyword {
             test += paramList.get(i) + " != null";
         }
         return test;
+    }
+
+    public String getSql(String param) {
+        return "";
     }
 
     public String getSql(List<String> paramList) {

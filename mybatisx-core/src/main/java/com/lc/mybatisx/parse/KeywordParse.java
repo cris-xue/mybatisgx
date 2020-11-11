@@ -3,6 +3,7 @@ package com.lc.mybatisx.parse;
 import com.google.common.base.CaseFormat;
 import com.lc.mybatisx.utils.ReflectUtils;
 import com.lc.mybatisx.wrapper.LimitWrapper;
+import com.lc.mybatisx.wrapper.OrderWrapper;
 import com.lc.mybatisx.wrapper.WhereWrapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -199,6 +200,29 @@ public class KeywordParse {
                 String sql = keyword.getSql(Arrays.asList(top));
                 limitWrapper.setSql(sql);
                 return limitWrapper;
+            }
+        }
+        return null;
+    }
+
+    public static OrderWrapper buildOrderByWrapper(List<String> keywordList) {
+        int length = keywordList.size();
+        for (int i = 0; i < length; i++) {
+            if (i + 1 >= length) {
+                break;
+            }
+            String kw1 = keywordList.get(i);
+            String kw2 = keywordList.get(i + 1);
+            String kwFull = kw1 + kw2;
+            Keyword keyword = keywordMap.get(kwFull);
+            if (keyword == null) {
+                continue;
+            }
+            if (keyword.getKeywordType() == KeywordType.ORDER) {
+                OrderWrapper orderWrapper = new OrderWrapper();
+                String sql = keyword.getSql(Arrays.asList(kwFull));
+                orderWrapper.setSql(sql);
+                return orderWrapper;
             }
         }
         return null;

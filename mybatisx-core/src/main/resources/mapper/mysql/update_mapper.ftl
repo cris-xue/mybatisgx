@@ -67,7 +67,7 @@
                 ${linkOp} ${ww.sql}
             </if>
             <#if ww.whereWrapper??>
-                <@dynamicWhereTree ww=ww.whereWrapper linkOp=ww.linkOp/>
+                <@dynamicWhereTree ww=ww.whereWrapper linkOp=ww.whereWrapper.linkOp/>
             </#if>
     </#if>
 </#macro>
@@ -76,7 +76,7 @@
     <#if ww??>
             ${linkOp} ${ww.sql}
             <#if ww.whereWrapper??>
-                <@staticWhereTree ww=ww.whereWrapper linkOp=ww.linkOp/>
+                <@staticWhereTree ww=ww.whereWrapper linkOp=ww.whereWrapper.linkOp/>
             </#if>
     </#if>
 </#macro>

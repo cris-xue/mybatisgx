@@ -31,21 +31,6 @@ public class WhereMapperHandler {
                 continue;
             }
 
-            /*if (keyword != null && keyword.getKeywordType() == KeywordType.LINK) {
-                if (keyword == Keyword.AND) {
-                    whereWrapper = new WhereWrapper();
-                    whereWrapper.setLinkOp(keyword.getSql());
-                    isWhere = true;
-                    continue;
-                }
-                if (keyword == Keyword.OR) {
-                    whereWrapper = new WhereWrapper();
-                    whereWrapper.setLinkOp(keyword.getSql());
-                    isWhere = true;
-                    continue;
-                }
-            }*/
-
             boolean isSetOp = setOp(keyword, whereWrapper);
             if (isSetOp) {
                 tail.setWhereWrapper(whereWrapper);
@@ -53,31 +38,6 @@ public class WhereMapperHandler {
                 isWhere = false;
                 continue;
             }
-            /*if (keyword != null && keyword.getKeywordType() == KeywordType.WHERE) {
-                if (keyword == Keyword.BY) {
-                    whereWrapper = new WhereWrapper();
-                    isWhere = true;
-                    continue;
-                }
-
-                if (keyword == Keyword.EQ) {
-                    whereWrapper.setOp(keyword.getSql());
-                }
-                if (keyword == Keyword.IS) {
-                    whereWrapper.setOp(keyword.getSql());
-                }
-                if (keyword == Keyword.LESS_THAN) {
-                    whereWrapper.setOp(keyword.getSql());
-                }
-                if (keyword == Keyword.BETWEEN) {
-                    whereWrapper.setOp(keyword.getSql());
-                }
-
-                tail.setWhereWrapper(whereWrapper);
-                tail = whereWrapper;
-                isWhere = false;
-                continue;
-            }*/
 
             if (isWhere) {
                 whereWrapper.setDbColumn(kw);
@@ -90,19 +50,6 @@ public class WhereMapperHandler {
                 isWhere = false;
                 continue;
             }
-
-            /*Keyword keywordNew = null;
-            if (i + 1 < keywordList.size()) {
-                String aaaa = keywordList.get(i + 1);
-                keywordNew = keywordMap.get(aaaa);
-            }
-            if (isWhere && (keywordNew == null || keywordNew.getKeywordType() != KeywordType.WHERE)) {
-                whereWrapper.setOp(Keyword.EQ.getSql());
-
-                tail.setWhereWrapper(whereWrapper);
-                tail = whereWrapper;
-                isWhere = false;
-            }*/
         }
 
         return head.getWhereWrapper();

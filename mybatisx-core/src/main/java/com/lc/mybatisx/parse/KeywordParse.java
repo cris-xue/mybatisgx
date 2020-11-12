@@ -1,6 +1,5 @@
 package com.lc.mybatisx.parse;
 
-import com.google.common.base.CaseFormat;
 import com.lc.mybatisx.utils.ReflectUtils;
 import com.lc.mybatisx.wrapper.LimitWrapper;
 import com.lc.mybatisx.wrapper.OrderWrapper;
@@ -131,9 +130,9 @@ public class KeywordParse {
 
     public static WhereWrapper buildWhereWrapper(Method method, List<String> keywordList, Type[] daoInterfaceParams) {
         WhereMapperHandler whereMapperHandler = new WhereMapperHandler(keywordMap);
-        whereMapperHandler.build(keywordList);
+        return whereMapperHandler.build(keywordList);
 
-        int whereCount = 0;
+        /*int whereCount = 0;
         WhereWrapper tail = new WhereWrapper();
         WhereWrapper head = tail;
         for (int i = 0; i < keywordList.size(); i++) {
@@ -199,7 +198,7 @@ public class KeywordParse {
             whereWrapper.setSql(opKeyword.getSql(whereWrapper));
         }
 
-        return head.getWhereWrapper();
+        return head.getWhereWrapper();*/
     }
 
     private static List<String> getJavaColumn(int whereCount, int length, String javaColumn, Method method, Type[] daoInterfaceParams) {

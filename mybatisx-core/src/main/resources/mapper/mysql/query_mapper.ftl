@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <mapper namespace="${querySqlWrapper.namespace}">
 
+    <#--动态sql-->
+    <#if querySqlWrapper.dynamic>
     <select id="${querySqlWrapper.methodName}" resultType="${querySqlWrapper.resultType}">
         select
         <trim prefix="" suffix="" suffixOverrides=",">
@@ -12,7 +14,7 @@
         <where>
             <#if (querySqlWrapper.whereWrapper)??>
                 <trim prefix="(" suffix=")" prefixOverrides="AND | OR">
-                    <@whereTree ww=querySqlWrapper.whereWrapper linkOp=""/>
+                    <@dynamicWhereTree ww=querySqlWrapper.whereWrapper linkOp=""/>
                 </trim>
             </#if>
             <#if (querySqlWrapper.logicDeleteWrapper)??>
@@ -23,16 +25,52 @@
             ${querySqlWrapper.limitWrapper.sql}
         </#if>
     </select>
+    </#if>
+
+    <#--静态sql-->
+    <#if !querySqlWrapper.dynamic>
+        <select id="${querySqlWrapper.methodName}" resultType="${querySqlWrapper.resultType}">
+            select
+            <trim prefix="" suffix="" suffixOverrides=",">
+                <#list querySqlWrapper.modelWrapperList as mw>
+                    ${mw.dbColumn} as ${mw.javaColumn},
+                </#list>
+            </trim>
+            from ${querySqlWrapper.tableName}
+            <where>
+                <#if (querySqlWrapper.whereWrapper)??>
+                    <trim prefix="(" suffix=")" prefixOverrides="AND | OR">
+                        <@staticWhereTree ww=querySqlWrapper.whereWrapper linkOp=""/>
+                    </trim>
+                </#if>
+                <#if (querySqlWrapper.logicDeleteWrapper)??>
+                    and ${querySqlWrapper.logicDeleteWrapper.dbColumn} = ${querySqlWrapper.logicDeleteWrapper.notValue}
+                </#if>
+            </where>
+            <#if (querySqlWrapper.limitWrapper)??>
+                ${querySqlWrapper.limitWrapper.sql}
+            </#if>
+        </select>
+    </#if>
 
 </mapper>
 
-<#macro whereTree ww linkOp>
+<#macro dynamicWhereTree ww linkOp>
     <#if ww??>
-            <if test="${ww.test}">
-                ${linkOp} ${ww.sql}
-            </if>
-            <#if ww.whereWrapper??>
-                <@whereTree ww=ww.whereWrapper linkOp=ww.whereWrapper.linkOp/>
-            </#if>
+                    <if test="${ww.test}">
+                        ${linkOp} ${ww.sql}
+                    </if>
+                    <#if ww.whereWrapper??>
+                        <@dynamicWhereTree ww=ww.whereWrapper linkOp=ww.whereWrapper.linkOp/>
+                    </#if>
+    </#if>
+</#macro>
+
+<#macro staticWhereTree ww linkOp>
+    <#if ww??>
+                    ${linkOp} ${ww.sql}
+                    <#if ww.whereWrapper??>
+                        <@staticWhereTree ww=ww.whereWrapper linkOp=ww.whereWrapper.linkOp/>
+                    </#if>
     </#if>
 </#macro>

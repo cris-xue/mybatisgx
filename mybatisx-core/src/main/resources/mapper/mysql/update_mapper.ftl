@@ -74,9 +74,9 @@
 
 <#macro staticWhereTree ww linkOp>
     <#if ww??>
-            ${linkOp} ${ww.sql}
-            <#if ww.whereWrapper??>
-                <@staticWhereTree ww=ww.whereWrapper linkOp=ww.whereWrapper.linkOp/>
-            </#if>
+                ${linkOp} ${ww.sql}
+                <#if ww.whereWrapper??>
+                    <@staticWhereTree ww=ww.whereWrapper linkOp=ww.whereWrapper.linkOp/>
+                </#if>
     </#if>
 </#macro>

@@ -6,8 +6,9 @@
             update ${deleteSqlWrapper.tableName}
             <trim prefix="SET" suffixOverrides=",">
                 ${deleteSqlWrapper.logicDeleteWrapper.dbColumn} = ${deleteSqlWrapper.logicDeleteWrapper.value},
+
                 <#if (deleteSqlWrapper.versionWrapper)??>
-                    and ${deleteSqlWrapper.versionWrapper.sql} + ${deleteSqlWrapper.versionWrapper.increment}
+                    ${deleteSqlWrapper.versionWrapper.sql} + ${deleteSqlWrapper.versionWrapper.increment}
                 </#if>
             </trim>
             <where>
@@ -39,9 +40,9 @@
 
 <#macro whereTree ww linkOp>
     <#if ww??>
-            ${linkOp} ${ww.sql}
-            <#if ww.whereWrapper??>
-                <@whereTree ww=ww.whereWrapper linkOp=ww.whereWrapper.linkOp/>
-            </#if>
+                        ${linkOp} ${ww.sql}
+                        <#if ww.whereWrapper??>
+                            <@whereTree ww=ww.whereWrapper linkOp=ww.whereWrapper.linkOp/>
+                        </#if>
     </#if>
 </#macro>

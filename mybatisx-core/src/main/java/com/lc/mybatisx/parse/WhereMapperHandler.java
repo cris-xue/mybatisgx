@@ -2,6 +2,7 @@ package com.lc.mybatisx.parse;
 
 import com.lc.mybatisx.wrapper.WhereWrapper;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -31,16 +32,17 @@ public class WhereMapperHandler {
                 continue;
             }
 
+            if (isWhere && keyword == null) {
+                whereWrapper.setDbColumn(kw);
+                whereWrapper.setJavaColumn(Arrays.asList(kw));
+            }
+
             boolean isSetOp = setOp(keyword, whereWrapper);
             if (isSetOp) {
                 tail.setWhereWrapper(whereWrapper);
                 tail = whereWrapper;
                 isWhere = false;
                 continue;
-            }
-
-            if (isWhere) {
-                whereWrapper.setDbColumn(kw);
             }
 
             boolean isSetDefaultOp = setDefaultOp(keywordList, i, isWhere, whereWrapper);
@@ -75,19 +77,9 @@ public class WhereMapperHandler {
 
     private boolean setOp(Keyword keyword, WhereWrapper whereWrapper) {
         if (keyword != null && keyword.getKeywordType() == KeywordType.WHERE) {
-            if (keyword == Keyword.EQ) {
-                whereWrapper.setOp(keyword.getSql());
-            }
-            if (keyword == Keyword.IS) {
-                whereWrapper.setOp(keyword.getSql());
-            }
-            if (keyword == Keyword.LESS_THAN) {
-                whereWrapper.setOp(keyword.getSql());
-            }
-            if (keyword == Keyword.BETWEEN) {
-                whereWrapper.setOp(keyword.getSql());
-            }
-
+            whereWrapper.setOp(keyword.getSql());
+            whereWrapper.setSql(keyword.getSql(whereWrapper));
+            whereWrapper.setTest(keyword.getTest(whereWrapper));
             return true;
         }
 
@@ -95,14 +87,17 @@ public class WhereMapperHandler {
     }
 
     private boolean setDefaultOp(List<String> keywordList, int index, boolean isWhere, WhereWrapper whereWrapper) {
-        Keyword defaultOpKeyword = null;
+        Keyword nextkeyword = null;
         int nextIndex = index + 1;
         if (nextIndex < keywordList.size()) {
             String nextKeyword = keywordList.get(nextIndex);
-            defaultOpKeyword = keywordMap.get(nextKeyword);
+            nextkeyword = keywordMap.get(nextKeyword);
         }
-        if (isWhere && (defaultOpKeyword == null || defaultOpKeyword.getKeywordType() != KeywordType.WHERE)) {
-            whereWrapper.setOp(Keyword.EQ.getSql());
+        if (isWhere && (nextkeyword == null || nextkeyword.getKeywordType() != KeywordType.WHERE)) {
+            Keyword keyword = Keyword.EQ;
+            whereWrapper.setOp(keyword.getSql());
+            whereWrapper.setSql(keyword.getSql(whereWrapper));
+            whereWrapper.setTest(keyword.getTest(whereWrapper));
             return true;
         }
 

@@ -32,7 +32,7 @@
                 ${linkOp} ${ww.sql}
             </if>
             <#if ww.whereWrapper??>
-                <@whereTree ww=ww.whereWrapper linkOp=ww.linkOp/>
+                <@whereTree ww=ww.whereWrapper linkOp=ww.whereWrapper.linkOp/>
             </#if>
     </#if>
 </#macro>

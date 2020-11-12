@@ -32,6 +32,13 @@ public enum Keyword {
     LESS_THAN("LessThan", KeywordType.WHERE, " <![CDATA[ < ]]> #{0}", 1, WhereWrapper.class),
     LTEQ("Lteq", KeywordType.WHERE, " <![CDATA[ <= ]]> #{0}", 1, WhereWrapper.class),
     NOT("Not", KeywordType.WHERE, " <![CDATA[ <> ]]> #{0}", 1, WhereWrapper.class),
+
+    LIKE("Like", KeywordType.WHERE, " like #{0}", 1, WhereWrapper.class),
+    NOT_LIKE("NotLike", KeywordType.WHERE, " not like #{0}", 1, WhereWrapper.class),
+    STARTING_WITH("StartingWith", KeywordType.WHERE, " like #{0}%", 1, WhereWrapper.class),
+    ENDING_WITH("EndingWith", KeywordType.WHERE, " like %#{0}", 1, WhereWrapper.class),
+    CONTAINING("Containing", KeywordType.WHERE, " like %#{0}%", 1, WhereWrapper.class),
+
     BETWEEN("Between", KeywordType.WHERE, " between #{0} and #{1}", 2, WhereWrapper.class),
 
     /*top关键字*/

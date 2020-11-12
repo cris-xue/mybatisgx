@@ -1,7 +1,9 @@
 package com.lc.mybatisx.parse;
 
+import com.lc.mybatisx.handler.WhereMapperHandler;
 import com.lc.mybatisx.utils.ReflectUtils;
 import com.lc.mybatisx.wrapper.LimitWrapper;
+import com.lc.mybatisx.wrapper.ModelWrapper;
 import com.lc.mybatisx.wrapper.OrderWrapper;
 import com.lc.mybatisx.wrapper.WhereWrapper;
 import org.apache.ibatis.annotations.Param;
@@ -43,6 +45,10 @@ public class KeywordParse {
         basicTypeMap.put(Date.class, true);
         basicTypeMap.put(LocalDate.class, true);
         basicTypeMap.put(LocalDateTime.class, true);
+    }
+
+    public static Map<String, Keyword> getKeywordMap() {
+        return keywordMap;
     }
 
     public static List<String> parseMethod(Method method, Class<?> entityClass) {
@@ -113,11 +119,11 @@ public class KeywordParse {
             }
 
             for (int j = i + 1; j < size; j++) {
-                String xxxx = methodKeywordList.get(j);
-                if (keywordMap.containsKey(xxxx)) {
+                String nextMethodKeyword = methodKeywordList.get(j);
+                if (keywordMap.containsKey(nextMethodKeyword)) {
                     break;
                 }
-                methodKeyword = methodKeyword + xxxx;
+                methodKeyword = methodKeyword + nextMethodKeyword;
                 // Field field = ReflectUtils.getField(entityClass, CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, methodKeyword));
                 keywordList.remove(keywordList.size() - 1);
                 keywordList.add(methodKeyword);
@@ -128,9 +134,9 @@ public class KeywordParse {
         return keywordList;
     }
 
-    public static WhereWrapper buildWhereWrapper(Method method, List<String> keywordList, Type[] daoInterfaceParams) {
+    public static WhereWrapper buildWhereWrapper(Method method, List<String> keywordList, Type[] daoInterfaceParams, List<ModelWrapper> modelWrapperList) {
         WhereMapperHandler whereMapperHandler = new WhereMapperHandler(keywordMap);
-        return whereMapperHandler.build(keywordList);
+        return whereMapperHandler.build(method, keywordList, modelWrapperList);
 
         /*int whereCount = 0;
         WhereWrapper tail = new WhereWrapper();

@@ -13,7 +13,6 @@ import org.apache.ibatis.parsing.XPathParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.Id;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -53,7 +52,7 @@ public class UpdateMapperHandler extends AbstractMapperHandler {
         updateSqlWrapper.setModelWrapperList(modelWrapperList);
 
         List<String> methodKeywordList = KeywordParse.parseMethod(method, entityClass);
-        WhereWrapper whereWrapper = KeywordParse.buildWhereWrapper(method, methodKeywordList, daoInterfaceParams);
+        WhereWrapper whereWrapper = KeywordParse.buildWhereWrapper(method, methodKeywordList, daoInterfaceParams, modelWrapperList);
         updateSqlWrapper.setWhereWrapper(whereWrapper);
 
         boolean dynamic = KeywordParse.isDynamic(methodKeywordList);
@@ -101,9 +100,8 @@ public class UpdateMapperHandler extends AbstractMapperHandler {
 
         @Override
         protected boolean ignoreField(Field field) {
-            Id id = field.getAnnotation(Id.class);
             Version version = field.getAnnotation(Version.class);
-            return id != null || version != null || super.ignoreField(field);
+            return version != null || super.ignoreField(field);
         }
 
     }

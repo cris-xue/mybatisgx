@@ -27,10 +27,12 @@ public class QueryMapperHandler extends AbstractMapperHandler {
     private static final Logger logger = LoggerFactory.getLogger(QueryMapperHandler.class);
 
     private ModelMapperHandler modelMapperHandler;
+    private WhereMapperHandler whereMapperHandler;
     private List<QuerySqlWrapper> querySqlWrapperList;
 
     public QueryMapperHandler() {
         this.modelMapperHandler = new QueryModelMapperHandler();
+        whereMapperHandler = new WhereMapperHandler(KeywordParse.getKeywordMap());
         querySqlWrapperList = new ArrayList<>();
     }
 
@@ -48,7 +50,7 @@ public class QueryMapperHandler extends AbstractMapperHandler {
         querySqlWrapper.setModelWrapperList(modelWrapperList);
 
         List<String> methodKeywordList = KeywordParse.parseMethod(method, entityClass);
-        WhereWrapper whereWrapper = KeywordParse.buildWhereWrapper(method, methodKeywordList, daoInterfaceParams);
+        WhereWrapper whereWrapper = KeywordParse.buildWhereWrapper(method, methodKeywordList, daoInterfaceParams, modelWrapperList);
         querySqlWrapper.setWhereWrapper(whereWrapper);
 
         LimitWrapper limitWrapper = KeywordParse.buildLimitWrapper(methodKeywordList);

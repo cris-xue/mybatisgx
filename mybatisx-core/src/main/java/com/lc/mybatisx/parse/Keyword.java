@@ -1,16 +1,13 @@
 package com.lc.mybatisx.parse;
 
 import com.lc.mybatisx.wrapper.*;
-import org.apache.ibatis.annotations.Param;
 
-import java.lang.reflect.Parameter;
-import java.util.ArrayList;
 import java.util.List;
 
 public enum Keyword {
 
     /*动作关键字*/
-    FIND("find", KeywordType.ACTION, "select #{0} from", 0, QuerySqlWrapper.class),
+    FIND("find", KeywordType.ACTION, "select #{ %s } from", 0, QuerySqlWrapper.class),
     SELECT("select", KeywordType.ACTION, "", 0, QuerySqlWrapper.class),
     COUNT("count", KeywordType.ACTION, "", 0, QuerySqlWrapper.class),
     DELETE("delete", KeywordType.ACTION, "", 0, DeleteSqlWrapper.class),
@@ -26,32 +23,32 @@ public enum Keyword {
 
     /*查询条件关键字*/
     BY("By", KeywordType.WHERE, "", 0, WhereWrapper.class),
-    EQ("Eq", KeywordType.WHERE, " = #{0}", 1, WhereWrapper.class),
-    IS("Is", KeywordType.WHERE, " = #{0}", 1, WhereWrapper.class),
-    LT("Lt", KeywordType.WHERE, " <![CDATA[ < ]]> #{0}", 1, WhereWrapper.class),
-    LESS_THAN("LessThan", KeywordType.WHERE, " <![CDATA[ < ]]> #{0}", 1, WhereWrapper.class),
-    LTEQ("Lteq", KeywordType.WHERE, " <![CDATA[ <= ]]> #{0}", 1, WhereWrapper.class),
-    NOT("Not", KeywordType.WHERE, " <![CDATA[ <> ]]> #{0}", 1, WhereWrapper.class),
+    EQ("Eq", KeywordType.WHERE, " = #{ %s }", 1, WhereWrapper.class),
+    IS("Is", KeywordType.WHERE, " = #{ %s }", 1, WhereWrapper.class),
+    LT("Lt", KeywordType.WHERE, " <![CDATA[ < ]]> #{ %s }", 1, WhereWrapper.class),
+    LESS_THAN("LessThan", KeywordType.WHERE, " <![CDATA[ < ]]> #{ %s }", 1, WhereWrapper.class),
+    LTEQ("Lteq", KeywordType.WHERE, " <![CDATA[ <= ]]> #{ %s }", 1, WhereWrapper.class),
+    NOT("Not", KeywordType.WHERE, " <![CDATA[ <> ]]> #{ %s }", 1, WhereWrapper.class),
 
-    LIKE("Like", KeywordType.WHERE, " like #{0}", 1, WhereWrapper.class),
-    NOT_LIKE("NotLike", KeywordType.WHERE, " not like #{0}", 1, WhereWrapper.class),
-    STARTING_WITH("StartingWith", KeywordType.WHERE, " like #{0}%", 1, WhereWrapper.class),
-    ENDING_WITH("EndingWith", KeywordType.WHERE, " like %#{0}", 1, WhereWrapper.class),
-    CONTAINING("Containing", KeywordType.WHERE, " like %#{0}%", 1, WhereWrapper.class),
+    LIKE("Like", KeywordType.WHERE, " like #{ %s }", 1, WhereWrapper.class),
+    NOT_LIKE("NotLike", KeywordType.WHERE, " not like #{ %s }", 1, WhereWrapper.class),
+    STARTING_WITH("StartingWith", KeywordType.WHERE, " like #{ %s }%%", 1, WhereWrapper.class),
+    ENDING_WITH("EndingWith", KeywordType.WHERE, " like %%#{ %s }", 1, WhereWrapper.class),
+    CONTAINING("Containing", KeywordType.WHERE, " like %%#{ %s }%%", 1, WhereWrapper.class),
 
-    BETWEEN("Between", KeywordType.WHERE, " between #{0} and #{1}", 2, WhereWrapper.class),
+    BETWEEN("Between", KeywordType.WHERE, " between #{ %s } and #{ %s }", 2, WhereWrapper.class),
 
     /*top关键字*/
-    TOP("Top", KeywordType.LIMIT, " limit 0, #{0}", 0, LimitWrapper.class),
-    FIRST("First", KeywordType.LIMIT, " limit 0, #{0}", 0, LimitWrapper.class),
+    TOP("Top", KeywordType.LIMIT, " limit 0,  %s ", 0, LimitWrapper.class),
+    FIRST("First", KeywordType.LIMIT, " limit 0, #{ %s }", 0, LimitWrapper.class),
 
     /*排序关键字*/
-    ORDER_BY("OrderBy", KeywordType.ORDER, "order by #{0}", 0, OrderWrapper.class),
+    ORDER_BY("OrderBy", KeywordType.ORDER, "order by #{ %s }", 0, OrderWrapper.class),
     DESC("Desc", KeywordType.ORDER, "desc", 0, OrderWrapper.class),
     ASC("Asc", KeywordType.ORDER, "asc", 0, OrderWrapper.class),
 
     /*运算型关键字*/
-    GROUP_BY("GroupBy", KeywordType.FUNC, "group by #{0}", 0, FunctionWrapper.class);
+    GROUP_BY("GroupBy", KeywordType.FUNC, "group by #{ %s }", 0, FunctionWrapper.class);
 
     private String keyword;
     private KeywordType keywordType;
@@ -100,26 +97,12 @@ public enum Keyword {
     }
 
     public String getSql(String dbColumn, List<String> javaColumnList) {
-        String sql = this.sql;
-        for (int i = 0; i < javaColumnList.size(); i++) {
-            sql = sql.replace("#{" + i + "}", "#{ " + javaColumnList.get(i) + " }");
-        }
+        String sql = String.format(this.sql, javaColumnList.toArray());
         return dbColumn + sql;
     }
 
     public String getSql(WhereWrapper whereWrapper) {
         return getSql(whereWrapper.getDbColumn(), whereWrapper.getJavaColumn());
-    }
-
-    public Object[] getSql(int i, Parameter[] parameters) {
-        List<String> javaColumnList = new ArrayList<>();
-        Parameter parameter = parameters[i];
-        Param param = parameter.getAnnotation(Param.class);
-        if (param != null) {
-            javaColumnList.add(param.value());
-        }
-
-        return new Object[]{i + 1, "sql", javaColumnList};
     }
 
 }

@@ -1,7 +1,17 @@
-package com.lc.mybatisx.parse;
+package com.lc.mybatisx.handler;
 
+import com.google.common.base.CaseFormat;
+import com.lc.mybatisx.annotation.BetweenEnd;
+import com.lc.mybatisx.annotation.BetweenStart;
+import com.lc.mybatisx.parse.Keyword;
+import com.lc.mybatisx.parse.KeywordType;
+import com.lc.mybatisx.wrapper.ModelWrapper;
 import com.lc.mybatisx.wrapper.WhereWrapper;
+import org.apache.ibatis.annotations.Param;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +24,7 @@ public class WhereMapperHandler {
         this.keywordMap = keywordMap;
     }
 
-    public WhereWrapper build(List<String> keywordList) {
+    public WhereWrapper build(Method method, List<String> keywordList, List<ModelWrapper> modelWrapperList) {
         WhereWrapper head = new WhereWrapper();
         WhereWrapper tail = new WhereWrapper();
         head = tail;
@@ -33,8 +43,38 @@ public class WhereMapperHandler {
             }
 
             if (isWhere && keyword == null) {
-                whereWrapper.setDbColumn(kw);
-                whereWrapper.setJavaColumn(Arrays.asList(kw));
+                String methodDbColumn = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, kw);
+                String methodJavaColumn = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, kw);
+                for (ModelWrapper modelWrapper : modelWrapperList) {
+                    // 方法名字段和模型字段做校验
+                    String modelDbColumn = modelWrapper.getDbColumn();
+                    String modelJavaColumn = modelWrapper.getJavaColumn();
+                    if (modelDbColumn.equals(methodDbColumn)) {
+                        whereWrapper.setDbColumn(modelDbColumn);
+                        whereWrapper.setJavaColumn(Arrays.asList(modelJavaColumn));
+                    }
+                }
+            }
+
+            // 获取对应的条件关键字参数
+            if (keyword == Keyword.BETWEEN) {
+                List<String> betweenList = new ArrayList<>();
+                Parameter[] parameters = method.getParameters();
+                for (Parameter parameter : parameters) {
+                    Param param = parameter.getAnnotation(Param.class);
+                    BetweenStart betweenStart = parameter.getAnnotation(BetweenStart.class);
+                    BetweenEnd betweenEnd = parameter.getAnnotation(BetweenEnd.class);
+
+                    if (betweenStart != null) {
+                        String methodJavaColumn = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, param.value());
+                        betweenList.add(0, methodJavaColumn);
+                    }
+                    if (betweenEnd != null) {
+                        String methodJavaColumn = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, param.value());
+                        betweenList.add(1, methodJavaColumn);
+                    }
+                }
+                whereWrapper.setJavaColumn(betweenList);
             }
 
             boolean isSetOp = setOp(keyword, whereWrapper);
@@ -55,6 +95,19 @@ public class WhereMapperHandler {
         }
 
         return head.getWhereWrapper();
+    }
+
+    private Map<String, Parameter> getParameters(Method method) {
+        Parameter[] parameters = method.getParameters();
+        for (Parameter parameter : parameters) {
+            Param param = parameter.getAnnotation(Param.class);
+            BetweenStart betweenStart = parameter.getAnnotation(BetweenStart.class);
+            BetweenEnd betweenEnd = parameter.getAnnotation(BetweenEnd.class);
+            /*if (param.value().equals(methodJavaColumn)) {
+
+            }*/
+        }
+        return null;
     }
 
     private WhereWrapper createWhereWrapper(Keyword keyword) {

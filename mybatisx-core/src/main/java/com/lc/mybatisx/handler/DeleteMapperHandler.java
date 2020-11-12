@@ -52,7 +52,7 @@ public class DeleteMapperHandler extends AbstractMapperHandler {
         deleteSqlWrapper.setModelWrapperList(modelWrapperList);
 
         List<String> methodKeywordList = KeywordParse.parseMethod(method, entityClass);
-        WhereWrapper whereWrapper = KeywordParse.buildWhereWrapper(method, methodKeywordList, daoInterfaceParams);
+        WhereWrapper whereWrapper = KeywordParse.buildWhereWrapper(method, methodKeywordList, daoInterfaceParams, modelWrapperList);
         deleteSqlWrapper.setWhereWrapper(whereWrapper);
 
         boolean dynamic = KeywordParse.isDynamic(methodKeywordList);

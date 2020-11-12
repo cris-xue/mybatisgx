@@ -267,7 +267,7 @@ public class KeywordParse {
             if (keyword.getKeywordType() == KeywordType.LIMIT) {
                 LimitWrapper limitWrapper = new LimitWrapper();
                 String top = keywordList.get(++i);
-                String sql = keyword.getSql(Arrays.asList(top));
+                String sql = keyword.getSql("", Arrays.asList(top));
                 limitWrapper.setSql(sql);
                 return limitWrapper;
             }
@@ -290,7 +290,7 @@ public class KeywordParse {
             }
             if (keyword.getKeywordType() == KeywordType.ORDER) {
                 OrderWrapper orderWrapper = new OrderWrapper();
-                String sql = keyword.getSql(Arrays.asList(kwFull));
+                String sql = keyword.getSql("", Arrays.asList(kwFull));
                 orderWrapper.setSql(sql);
                 return orderWrapper;
             }

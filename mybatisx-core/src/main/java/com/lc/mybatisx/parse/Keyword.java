@@ -76,37 +76,32 @@ public enum Keyword {
         return index;
     }
 
-    public String getTest(List<String> paramList) {
+    public String getTest(List<String> javaColumnList) {
         String test = "";
-        for (int i = 0; i < paramList.size(); i++) {
+        for (int i = 0; i < javaColumnList.size(); i++) {
             if (i != 0) {
                 test += " and ";
             }
-            test += paramList.get(i) + " != null";
+            test += javaColumnList.get(i) + " != null";
         }
         return test;
     }
 
-    public String getSql(String param) {
-        return "";
+    public String getTest(WhereWrapper whereWrapper) {
+        List<String> javaColumnList = whereWrapper.getJavaColumn();
+        return getTest(javaColumnList);
     }
 
-    public String getSql(List<String> paramList) {
+    public String getSql(String dbColumn, List<String> javaColumnList) {
         String sql = this.sql;
-        for (int i = 0; i < paramList.size(); i++) {
-            sql = sql.replace("#{" + i + "}", paramList.get(i));
+        for (int i = 0; i < javaColumnList.size(); i++) {
+            sql = sql.replace("#{" + i + "}", "#{ " + javaColumnList.get(i) + " }");
         }
-        return sql;
+        return dbColumn + sql;
     }
 
     public String getSql(WhereWrapper whereWrapper) {
-        String sql = this.sql;
-        List<String> params = whereWrapper.getJavaColumn();
-        for (int i = 0; i < params.size(); i++) {
-            sql = sql.replace("#{" + i + "}", "#{ " + params.get(i) + " }");
-        }
-        String dbColumn = whereWrapper.getDbColumn();
-        return dbColumn + sql;
+        return getSql(whereWrapper.getDbColumn(), whereWrapper.getJavaColumn());
     }
 
     public Object[] getSql(int i, Parameter[] parameters) {

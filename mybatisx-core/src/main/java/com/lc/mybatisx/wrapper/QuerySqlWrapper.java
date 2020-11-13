@@ -15,6 +15,10 @@ public class QuerySqlWrapper extends SqlWrapper {
      *
      */
     private LimitWrapper limitWrapper;
+    /**
+     *
+     */
+    private OrderWrapper orderWrapper;
 
     public WhereWrapper getWhereWrapper() {
         return whereWrapper;
@@ -30,5 +34,13 @@ public class QuerySqlWrapper extends SqlWrapper {
 
     public void setLimitWrapper(LimitWrapper limitWrapper) {
         this.limitWrapper = limitWrapper;
+    }
+
+    public OrderWrapper getOrderWrapper() {
+        return orderWrapper;
+    }
+
+    public void setOrderWrapper(OrderWrapper orderWrapper) {
+        this.orderWrapper = orderWrapper;
     }
 }

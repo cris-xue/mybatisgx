@@ -1,5 +1,6 @@
 package com.lc.mybatisx.parse;
 
+import com.google.common.base.CaseFormat;
 import com.lc.mybatisx.handler.WhereMapperHandler;
 import com.lc.mybatisx.utils.ReflectUtils;
 import com.lc.mybatisx.wrapper.LimitWrapper;
@@ -282,26 +283,39 @@ public class KeywordParse {
     }
 
     public static OrderWrapper buildOrderByWrapper(List<String> keywordList) {
+        OrderWrapper orderWrapper = null;
+        String sql = "";
+
         int length = keywordList.size();
+        boolean isOrder = false;
         for (int i = 0; i < length; i++) {
-            if (i + 1 >= length) {
-                break;
-            }
-            String kw1 = keywordList.get(i);
-            String kw2 = keywordList.get(i + 1);
-            String kwFull = kw1 + kw2;
-            Keyword keyword = keywordMap.get(kwFull);
-            if (keyword == null) {
+            String kw = keywordList.get(i);
+            Keyword keyword = keywordMap.get(kw);
+            if (keyword != null && keyword == Keyword.ORDER_BY) {
+                orderWrapper = new OrderWrapper();
+                isOrder = true;
                 continue;
             }
-            if (keyword.getKeywordType() == KeywordType.ORDER) {
-                OrderWrapper orderWrapper = new OrderWrapper();
-                String sql = keyword.getSql("", Arrays.asList(kwFull));
-                orderWrapper.setSql(sql);
-                return orderWrapper;
+            if (keyword == null && isOrder) {
+                String dbColumn = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, kw);
+                sql = orderWrapper.getKeyword().getSql(dbColumn);
+                isOrder = false;
+                continue;
+            }
+            if (keyword != null && keyword == Keyword.DESC) {
+                sql += keyword.getSql();
+                break;
+            }
+            if (keyword != null && keyword == Keyword.ASC) {
+                sql += keyword.getSql();
+                break;
             }
         }
-        return null;
+        if (orderWrapper != null) {
+            orderWrapper.setSql(sql);
+        }
+
+        return orderWrapper;
     }
 
     public static boolean isDynamic(List<String> keywordList) {

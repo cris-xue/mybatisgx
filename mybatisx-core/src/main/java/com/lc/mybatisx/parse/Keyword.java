@@ -23,12 +23,22 @@ public enum Keyword {
     OR("Or", KeywordType.LINK, "or", 0, null),
 
     /*查询条件关键字*/
-    EQ("Eq", KeywordType.WHERE, " = #{ %s }", 1, WhereWrapper.class),
     IS("Is", KeywordType.WHERE, " = #{ %s }", 1, WhereWrapper.class),
+    EQ("Eq", KeywordType.WHERE, " = #{ %s }", 1, WhereWrapper.class),
+    EQUALS("Equals", KeywordType.WHERE, " = #{ %s }", 1, WhereWrapper.class),
+
     LT("Lt", KeywordType.WHERE, " <![CDATA[ < ]]> #{ %s }", 1, WhereWrapper.class),
     LESS_THAN("LessThan", KeywordType.WHERE, " <![CDATA[ < ]]> #{ %s }", 1, WhereWrapper.class),
     LTEQ("Lteq", KeywordType.WHERE, " <![CDATA[ <= ]]> #{ %s }", 1, WhereWrapper.class),
-    NOT("Not", KeywordType.WHERE, " <![CDATA[ <> ]]> #{ %s }", 1, WhereWrapper.class),
+    LESS_THAN_EQUAL("LessThanEqual", KeywordType.WHERE, " <![CDATA[ <= ]]> #{ %s }", 1, WhereWrapper.class),
+
+    GT("GreaterThan", KeywordType.WHERE, " <![CDATA[ > ]]> #{ %s }", 1, WhereWrapper.class),
+    GREATER_THAN("GreaterThan", KeywordType.WHERE, " <![CDATA[ > ]]> #{ %s }", 1, WhereWrapper.class),
+    GTEQ("GreaterThanEqual", KeywordType.WHERE, " <![CDATA[ >= ]]> #{ %s }", 1, WhereWrapper.class),
+    GREATER_THAN_EQUAL("GreaterThanEqual", KeywordType.WHERE, " <![CDATA[ >= ]]> #{ %s }", 1, WhereWrapper.class),
+
+    AFTER("After", KeywordType.WHERE, " <![CDATA[ > ]]> #{ %s }", 1, WhereWrapper.class),
+    BEFORE("Before", KeywordType.WHERE, " <![CDATA[ < ]]> #{ %s }", 1, WhereWrapper.class),
 
     LIKE("Like", KeywordType.WHERE, " like #{ %s }", 1, WhereWrapper.class),
     NOT_LIKE("NotLike", KeywordType.WHERE, " not like #{ %s }", 1, WhereWrapper.class),
@@ -36,19 +46,43 @@ public enum Keyword {
     ENDING_WITH("EndingWith", KeywordType.WHERE, " like %%#{ %s }", 1, WhereWrapper.class),
     CONTAINING("Containing", KeywordType.WHERE, " like %%#{ %s }%%", 1, WhereWrapper.class),
 
+    IS_NULL("IsNull", KeywordType.WHERE, " is null", 0, WhereWrapper.class) {
+        @Override
+        public String getTest(List<String> javaColumnList) {
+            return "";
+        }
+    },
+    IS_NOT_NULL("IsNotNull", KeywordType.WHERE, " not null", 0, WhereWrapper.class) {
+        @Override
+        public String getTest(List<String> javaColumnList) {
+            return "";
+        }
+    },
+    NOT_NULL("NotNull", KeywordType.WHERE, " not null", 0, WhereWrapper.class) {
+        @Override
+        public String getTest(List<String> javaColumnList) {
+            return "";
+        }
+    },
+
     BETWEEN("Between", KeywordType.WHERE, " between #{ %s } and #{ %s }", 2, WhereWrapper.class),
+    NOT("Not", KeywordType.WHERE, " <![CDATA[ <> ]]> #{ %s }", 1, WhereWrapper.class),
+    IN("In", KeywordType.WHERE, " in (#{ %s })", 1, WhereWrapper.class),
+    NOT_IN("NotIn", KeywordType.WHERE, " not in (#{ %s })", 1, WhereWrapper.class),
+    TRUE("True", KeywordType.WHERE, " = true", 0, WhereWrapper.class),
+    FALSE("False", KeywordType.WHERE, " = false", 0, WhereWrapper.class),
 
     /*top关键字*/
-    TOP("Top", KeywordType.LIMIT, " limit 0,  %s ", 0, LimitWrapper.class),
-    FIRST("First", KeywordType.LIMIT, " limit 0, #{ %s }", 0, LimitWrapper.class),
+    TOP("Top", KeywordType.LIMIT, " limit 0, %s", 0, LimitWrapper.class),
+    FIRST("First", KeywordType.LIMIT, " limit 0, %s", 0, LimitWrapper.class),
 
     /*排序关键字*/
-    ORDER_BY("OrderBy", KeywordType.ORDER, "order by #{ %s }", 0, OrderWrapper.class),
-    DESC("Desc", KeywordType.ORDER, "desc", 0, OrderWrapper.class),
-    ASC("Asc", KeywordType.ORDER, "asc", 0, OrderWrapper.class),
+    ORDER_BY("OrderBy", KeywordType.ORDER, " order by %s", 0, OrderWrapper.class),
+    DESC("Desc", KeywordType.ORDER, " desc", 0, OrderWrapper.class),
+    ASC("Asc", KeywordType.ORDER, " asc", 0, OrderWrapper.class),
 
     /*运算型关键字*/
-    GROUP_BY("GroupBy", KeywordType.FUNC, "group by #{ %s }", 0, FunctionWrapper.class);
+    GROUP_BY("GroupBy", KeywordType.FUNC, "group by %s", 0, FunctionWrapper.class);
 
     private String keyword;
     private KeywordType keywordType;
@@ -94,6 +128,10 @@ public enum Keyword {
     public String getTest(WhereWrapper whereWrapper) {
         List<String> javaColumnList = whereWrapper.getJavaColumn();
         return getTest(javaColumnList);
+    }
+
+    public String getSql(String dbColumn) {
+        return String.format(this.sql, dbColumn);
     }
 
     public String getSql(String dbColumn, List<String> javaColumnList) {

@@ -21,6 +21,9 @@
                 and ${querySqlWrapper.logicDeleteWrapper.dbColumn} = ${querySqlWrapper.logicDeleteWrapper.notValue}
             </#if>
         </where>
+        <#if (querySqlWrapper.orderWrapper)??>
+            ${querySqlWrapper.orderWrapper.sql}
+        </#if>
         <#if (querySqlWrapper.limitWrapper)??>
             ${querySqlWrapper.limitWrapper.sql}
         </#if>
@@ -47,6 +50,9 @@
                     and ${querySqlWrapper.logicDeleteWrapper.dbColumn} = ${querySqlWrapper.logicDeleteWrapper.notValue}
                 </#if>
             </where>
+            <#if (querySqlWrapper.orderWrapper)??>
+                ${querySqlWrapper.orderWrapper.sql}
+            </#if>
             <#if (querySqlWrapper.limitWrapper)??>
                 ${querySqlWrapper.limitWrapper.sql}
             </#if>
@@ -57,12 +63,16 @@
 
 <#macro dynamicWhereTree ww>
     <#if ww??>
-                    <if test="${ww.test}">
-                        ${ww.linkOp} ${ww.sql}
-                    </if>
-                    <#if ww.whereWrapper??>
-                        <@dynamicWhereTree ww=ww.whereWrapper/>
-                    </#if>
+        <#if (ww.test)?? && ww.test != "">
+            <if test="${ww.test}">
+                ${ww.linkOp} ${ww.sql}
+            </if>
+        <#else>
+            ${ww.linkOp} ${ww.sql}
+        </#if>
+        <#if ww.whereWrapper??>
+            <@dynamicWhereTree ww=ww.whereWrapper/>
+        </#if>
     </#if>
 </#macro>
 

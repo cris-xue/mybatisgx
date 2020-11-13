@@ -56,7 +56,8 @@ public class QueryMapperHandler extends AbstractMapperHandler {
         LimitWrapper limitWrapper = KeywordParse.buildLimitWrapper(methodKeywordList);
         querySqlWrapper.setLimitWrapper(limitWrapper);
 
-        KeywordParse.buildOrderByWrapper(methodKeywordList);
+        OrderWrapper orderWrapper = KeywordParse.buildOrderByWrapper(methodKeywordList);
+        querySqlWrapper.setOrderWrapper(orderWrapper);
 
         boolean dynamic = KeywordParse.isDynamic(methodKeywordList);
         querySqlWrapper.setDynamic(dynamic);

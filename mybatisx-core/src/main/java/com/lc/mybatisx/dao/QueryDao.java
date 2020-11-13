@@ -1,7 +1,5 @@
 package com.lc.mybatisx.dao;
 
-import com.lc.mybatisx.annotation.MapperMethod;
-import com.lc.mybatisx.annotation.MethodType;
 import org.apache.ibatis.annotations.Param;
 
 import java.io.Serializable;
@@ -18,7 +16,7 @@ public interface QueryDao<ENTITY, ID extends Serializable> extends Dao {
     ENTITY findById(@Param("id") ID id);
 
     // @MapperMethod(type = MethodType.QUERY)
-    // List<ENTITY> findAll();
+    List<ENTITY> findAll();
 
     // @MapperMethod(type = MethodType.QUERY)
     // List<ENTITY> find(ENTITY entity);

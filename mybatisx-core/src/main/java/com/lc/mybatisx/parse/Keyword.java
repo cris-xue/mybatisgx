@@ -18,11 +18,11 @@ public enum Keyword {
     SELECTIVE("Selective", KeywordType.NONE, "", 0, null),
 
     /*连接关键字*/
+    BY("By", KeywordType.LINK, "", 0, null),
     AND("And", KeywordType.LINK, "and", 0, null),
     OR("Or", KeywordType.LINK, "or", 0, null),
 
     /*查询条件关键字*/
-    BY("By", KeywordType.WHERE, "", 0, WhereWrapper.class),
     EQ("Eq", KeywordType.WHERE, " = #{ %s }", 1, WhereWrapper.class),
     IS("Is", KeywordType.WHERE, " = #{ %s }", 1, WhereWrapper.class),
     LT("Lt", KeywordType.WHERE, " <![CDATA[ < ]]> #{ %s }", 1, WhereWrapper.class),

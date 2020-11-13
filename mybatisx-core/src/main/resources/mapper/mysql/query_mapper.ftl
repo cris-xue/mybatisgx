@@ -14,7 +14,7 @@
         <where>
             <#if (querySqlWrapper.whereWrapper)??>
                 <trim prefix="(" suffix=")" prefixOverrides="AND | OR">
-                    <@dynamicWhereTree ww=querySqlWrapper.whereWrapper linkOp=""/>
+                    <@dynamicWhereTree ww=querySqlWrapper.whereWrapper/>
                 </trim>
             </#if>
             <#if (querySqlWrapper.logicDeleteWrapper)??>
@@ -40,7 +40,7 @@
             <where>
                 <#if (querySqlWrapper.whereWrapper)??>
                     <trim prefix="(" suffix=")" prefixOverrides="AND | OR">
-                        <@staticWhereTree ww=querySqlWrapper.whereWrapper linkOp=""/>
+                        <@staticWhereTree ww=querySqlWrapper.whereWrapper/>
                     </trim>
                 </#if>
                 <#if (querySqlWrapper.logicDeleteWrapper)??>
@@ -55,22 +55,22 @@
 
 </mapper>
 
-<#macro dynamicWhereTree ww linkOp>
+<#macro dynamicWhereTree ww>
     <#if ww??>
                     <if test="${ww.test}">
-                        ${linkOp} ${ww.sql}
+                        ${ww.linkOp} ${ww.sql}
                     </if>
                     <#if ww.whereWrapper??>
-                        <@dynamicWhereTree ww=ww.whereWrapper linkOp=ww.whereWrapper.linkOp/>
+                        <@dynamicWhereTree ww=ww.whereWrapper/>
                     </#if>
     </#if>
 </#macro>
 
-<#macro staticWhereTree ww linkOp>
+<#macro staticWhereTree ww>
     <#if ww??>
-                    ${linkOp} ${ww.sql}
+                    ${ww.linkOp} ${ww.sql}
                     <#if ww.whereWrapper??>
-                        <@staticWhereTree ww=ww.whereWrapper linkOp=ww.whereWrapper.linkOp/>
+                        <@staticWhereTree ww=ww.whereWrapper/>
                     </#if>
     </#if>
 </#macro>

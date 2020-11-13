@@ -113,14 +113,7 @@ public class WhereMapperHandler {
     private WhereWrapper createWhereWrapper(Keyword keyword) {
         WhereWrapper whereWrapper = null;
 
-        if (keyword != null && keyword == Keyword.BY) {
-            whereWrapper = new WhereWrapper();
-        }
-        if (keyword != null && keyword == Keyword.AND) {
-            whereWrapper = new WhereWrapper();
-            whereWrapper.setLinkOp(keyword.getSql());
-        }
-        if (keyword != null && keyword == Keyword.OR) {
+        if (keyword != null && keyword.getKeywordType() == KeywordType.LINK) {
             whereWrapper = new WhereWrapper();
             whereWrapper.setLinkOp(keyword.getSql());
         }

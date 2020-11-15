@@ -10,8 +10,10 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Retention(RUNTIME)
 public @interface LeftJoin {
 
+    Table t();
+
     String value() default "";
 
-    Table aaaa();
+    LeftJoin aaa();
 
 }

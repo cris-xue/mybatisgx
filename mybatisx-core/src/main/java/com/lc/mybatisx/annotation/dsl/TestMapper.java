@@ -9,11 +9,11 @@ public interface TestMapper {
 
     @QueryDsl(
             table = @Table(
-                    name = User.class,
-                    where = @Where(value = "id"),
-                    leftJoin = @LeftJoin
+                    name = User.class, where = @Where(value = "id"),
+                    leftJoin = @LeftJoin(value = ""
+                    )
             )
     )
-    void aaaa();
+    User aaaa();
 
 }

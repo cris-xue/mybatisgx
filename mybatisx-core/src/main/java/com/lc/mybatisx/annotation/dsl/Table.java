@@ -10,7 +10,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Retention(RUNTIME)
 public @interface Table {
 
-    Class<?> name() default Void.class;
+    Class<?> name();
 
     LeftJoin leftJoin() default @LeftJoin;
 

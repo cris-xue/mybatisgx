@@ -1,14 +1,17 @@
 package com.lc;
 
-import antlr.ParseTree;
+import com.lc.jpa.JPALexer;
+import com.lc.jpa.JPAParser;
 import org.antlr.runtime.ANTLRInputStream;
-import org.antlr.runtime.CommonTokenStream;
-import org.antlr.runtime.TokenStream;
-import org.antlr.v4.parse.ActionSplitter;
-import org.antlr.v4.parse.ToolANTLRLexer;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.TokenStream;
+import org.antlr.v4.runtime.UnbufferedCharStream;
+import org.antlr.v4.runtime.atn.ATN;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.io.StringReader;
 
 /**
  * @author ：薛承城
@@ -24,11 +27,26 @@ public class TestLex {
         // https://github.com/antlr/grammars-v4/blob/master/jpa/JPA.g4
         String s = "query(std::map .find(x) == y): bla";
         ANTLRInputStream input = new ANTLRInputStream();
-        TokenStream tokens = new CommonTokenStream(new ActionSplitter(input));
+        // TokenStream tokens = new CommonTokenStream(new ActionSplitter(input));
 
-        ActionSplitter parser = new ActionSplitter(tokens);
+        /*ActionSplitter parser = new ActionSplitter(tokens);
         ParseTree tree = parser.query();
-        System.out.println(tree.toStringTree());
+        System.out.println(tree.toStringTree());*/
+    }
+
+    @Test
+    public void testJpa() {
+        // CodePointBuffer codePointBuffer = CodePointBuffer.builder(1024).build();
+        // CodePointCharStream codePointCharStream = CodePointCharStream.fromBuffer(codePointBuffer);
+
+        String sql = "SELECT f FROM Country";
+        StringReader stringReader = new StringReader(sql);
+        UnbufferedCharStream unbufferedCharStream = new UnbufferedCharStream(stringReader);
+
+        JPALexer jpaLexer = new JPALexer(unbufferedCharStream);
+        TokenStream tokens = new CommonTokenStream(jpaLexer);
+        JPAParser jpaParser = new JPAParser(tokens);
+        jpaParser.select_statement();
     }
 
 }

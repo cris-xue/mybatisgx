@@ -1,17 +1,16 @@
 package com.lc;
 
-import com.lc.jpa.JPALexer;
-import com.lc.jpa.JPAParser;
+import com.lc.mybatisx.syntax.MethodNameLexer;
+import com.lc.mybatisx.syntax.MethodNameParser;
 import org.antlr.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CodePointBuffer;
+import org.antlr.v4.runtime.CodePointCharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.TokenStream;
-import org.antlr.v4.runtime.UnbufferedCharStream;
-import org.antlr.v4.runtime.atn.ATN;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.io.StringReader;
+import java.nio.CharBuffer;
 
 /**
  * @author ：薛承城
@@ -39,14 +38,20 @@ public class TestLex {
         // CodePointBuffer codePointBuffer = CodePointBuffer.builder(1024).build();
         // CodePointCharStream codePointCharStream = CodePointCharStream.fromBuffer(codePointBuffer);
 
-        String sql = "SELECT f FROM Country";
-        StringReader stringReader = new StringReader(sql);
-        UnbufferedCharStream unbufferedCharStream = new UnbufferedCharStream(stringReader);
+        // StringReader stringReader = new StringReader(jpaMethodName);
+        // UnbufferedCharStream unbufferedCharStream = new UnbufferedCharStream(stringReader);
 
-        JPALexer jpaLexer = new JPALexer(unbufferedCharStream);
-        TokenStream tokens = new CommonTokenStream(jpaLexer);
-        JPAParser jpaParser = new JPAParser(tokens);
-        jpaParser.select_statement();
+        String jpaMethodName = "findById";
+        CodePointBuffer.withChars(CharBuffer.wrap(jpaMethodName));
+        CodePointBuffer codePointBuffer = CodePointBuffer.builder(1024).build();
+        CodePointCharStream codePointCharStream = CodePointCharStream.fromBuffer(codePointBuffer);
+
+        MethodNameLexer methodNameLexer = new MethodNameLexer(codePointCharStream);
+        TokenStream tokens = new CommonTokenStream(methodNameLexer);
+        MethodNameParser methodNameParser = new MethodNameParser(tokens);
+        String a = methodNameParser.ql_statement().getPayload().getText();
+
+        System.out.println("asdf");
     }
 
 }

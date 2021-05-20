@@ -1,4 +1,4 @@
-grammar jpa_method_name;
+grammar MethodName;
 
 ql_statement
    : select_statement
@@ -55,7 +55,7 @@ orderby_item
    : (FIELD ('Asc' | 'Desc')?)+
    ;
 
-SELECT_ACTION: ('select' | 'get' | 'query' | 'find' | 'add')?;
+SELECT_ACTION: 'find' | 'select' | 'get' | 'query' ;
 WHERE: 'By';
 LINK_OP: 'And' | 'Or' ;
 CONDITION_OP: 'Lt' | 'Eq' ;

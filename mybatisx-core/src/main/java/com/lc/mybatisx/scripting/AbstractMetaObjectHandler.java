@@ -2,6 +2,7 @@ package com.lc.mybatisx.scripting;
 
 import com.lc.mybatisx.annotation.Column;
 import com.lc.mybatisx.utils.ReflectUtils;
+import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.reflection.MetaObject;
 
 import java.lang.reflect.Field;
@@ -10,7 +11,7 @@ import java.lang.reflect.Type;
 public abstract class AbstractMetaObjectHandler implements MetaObjectHandler {
 
     @Override
-    public void fillParameterObject(MetaObject metaObject) {
+    public void fillParameterObject(SqlCommandType sqlCommandType, MetaObject metaObject) {
         Object params = metaObject.getOriginalObject();
         Field[] fields = ReflectUtils.getAllField(params.getClass());
         for (Field field : fields) {
@@ -22,9 +23,9 @@ public abstract class AbstractMetaObjectHandler implements MetaObjectHandler {
             String fieldName = field.getName();
             Object fieldValue = metaObject.getValue(fieldName);
             Class<?> clazz = getFieldClass(field);
-            if (column.insertable()) {
+            if (SqlCommandType.INSERT == sqlCommandType && column.insertable()) {
                 fieldValue = insert(fieldName, fieldValue, clazz);
-            } else if (column.updatable()) {
+            } else if (SqlCommandType.UPDATE == sqlCommandType && column.updatable()) {
                 fieldValue = update(fieldName, fieldValue, clazz);
             }
 

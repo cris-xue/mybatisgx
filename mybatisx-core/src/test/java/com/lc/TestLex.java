@@ -41,7 +41,7 @@ public class TestLex {
         // StringReader stringReader = new StringReader(jpaMethodName);
         // UnbufferedCharStream unbufferedCharStream = new UnbufferedCharStream(stringReader);
 
-        String jpaMethodName = "findById";
+        String jpaMethodName = "findByIdAndName";
         CodePointBuffer.withChars(CharBuffer.wrap(jpaMethodName));
         CodePointBuffer codePointBuffer = CodePointBuffer.builder(1024).build();
         CodePointCharStream codePointCharStream = CodePointCharStream.fromBuffer(codePointBuffer);
@@ -49,7 +49,12 @@ public class TestLex {
         MethodNameLexer methodNameLexer = new MethodNameLexer(codePointCharStream);
         TokenStream tokens = new CommonTokenStream(methodNameLexer);
         MethodNameParser methodNameParser = new MethodNameParser(tokens);
+
+        new MethodNameParser.Ql_statementContext();
+
         String a = methodNameParser.ql_statement().getPayload().getText();
+
+        methodNameParser.select_clause().getPayload();
 
         System.out.println("asdf");
     }

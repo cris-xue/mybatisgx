@@ -31,6 +31,8 @@ public class AppTest {
     public void testLinkOp() {
         LinkOp linkOp = LinkOp.valueOf("AND");
         System.out.println(linkOp);
+
+        // sumTableUserLeftJoinUserByNameAndAgeAndAbcOrCdbGroupByMnbOrderByAbcDesc
     }
 
 }

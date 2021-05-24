@@ -1,4 +1,4 @@
-// Generated from F:/ec/lc/mybatisx/mybatisx-core/src/test/resources\MethodName.g4 by ANTLR 4.9.1
+// Generated from D:/project/mybatisx/mybatisx-core/src/test/resources\MethodName.g4 by ANTLR 4.9.1
 package com.lc.mybatisx.syntax;
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
@@ -115,6 +115,11 @@ public class MethodNameParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof MethodNameListener ) ((MethodNameListener)listener).exitQl_statement(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MethodNameVisitor ) return ((MethodNameVisitor<? extends T>)visitor).visitQl_statement(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final Ql_statementContext ql_statement() throws RecognitionException {
@@ -177,6 +182,11 @@ public class MethodNameParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof MethodNameListener ) ((MethodNameListener)listener).exitSelect_statement(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MethodNameVisitor ) return ((MethodNameVisitor<? extends T>)visitor).visitSelect_statement(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -296,6 +306,11 @@ public class MethodNameParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof MethodNameListener ) ((MethodNameListener)listener).exitSelect_clause(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MethodNameVisitor ) return ((MethodNameVisitor<? extends T>)visitor).visitSelect_clause(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final Select_clauseContext select_clause() throws RecognitionException {
@@ -331,6 +346,11 @@ public class MethodNameParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof MethodNameListener ) ((MethodNameListener)listener).exitAggregate_expression(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MethodNameVisitor ) return ((MethodNameVisitor<? extends T>)visitor).visitAggregate_expression(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -377,6 +397,11 @@ public class MethodNameParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof MethodNameListener ) ((MethodNameListener)listener).exitFrom_clause(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MethodNameVisitor ) return ((MethodNameVisitor<? extends T>)visitor).visitFrom_clause(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final From_clauseContext from_clause() throws RecognitionException {
@@ -411,6 +436,11 @@ public class MethodNameParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof MethodNameListener ) ((MethodNameListener)listener).exitTable_clause(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MethodNameVisitor ) return ((MethodNameVisitor<? extends T>)visitor).visitTable_clause(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -450,6 +480,11 @@ public class MethodNameParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof MethodNameListener ) ((MethodNameListener)listener).exitJoin_clause(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MethodNameVisitor ) return ((MethodNameVisitor<? extends T>)visitor).visitJoin_clause(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -501,6 +536,11 @@ public class MethodNameParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof MethodNameListener ) ((MethodNameListener)listener).exitWhere_clause(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MethodNameVisitor ) return ((MethodNameVisitor<? extends T>)visitor).visitWhere_clause(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -580,6 +620,11 @@ public class MethodNameParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof MethodNameListener ) ((MethodNameListener)listener).exitGroupby_clause(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MethodNameVisitor ) return ((MethodNameVisitor<? extends T>)visitor).visitGroupby_clause(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final Groupby_clauseContext groupby_clause() throws RecognitionException {
@@ -634,6 +679,11 @@ public class MethodNameParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof MethodNameListener ) ((MethodNameListener)listener).exitGroupby_item(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MethodNameVisitor ) return ((MethodNameVisitor<? extends T>)visitor).visitGroupby_item(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final Groupby_itemContext groupby_item() throws RecognitionException {
@@ -669,6 +719,11 @@ public class MethodNameParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof MethodNameListener ) ((MethodNameListener)listener).exitHaving_clause(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MethodNameVisitor ) return ((MethodNameVisitor<? extends T>)visitor).visitHaving_clause(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -712,6 +767,11 @@ public class MethodNameParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof MethodNameListener ) ((MethodNameListener)listener).exitOrderby_clause(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MethodNameVisitor ) return ((MethodNameVisitor<? extends T>)visitor).visitOrderby_clause(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -769,6 +829,11 @@ public class MethodNameParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof MethodNameListener ) ((MethodNameListener)listener).exitOrderby_item(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MethodNameVisitor ) return ((MethodNameVisitor<? extends T>)visitor).visitOrderby_item(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 

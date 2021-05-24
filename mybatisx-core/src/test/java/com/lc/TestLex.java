@@ -1,5 +1,6 @@
 package com.lc;
 
+import com.lc.mybatisx.syntax.MethodNameBaseVisitor;
 import com.lc.mybatisx.syntax.MethodNameLexer;
 import com.lc.mybatisx.syntax.MethodNameParser;
 import org.antlr.runtime.ANTLRInputStream;
@@ -50,13 +51,42 @@ public class TestLex {
         TokenStream tokens = new CommonTokenStream(methodNameLexer);
         MethodNameParser methodNameParser = new MethodNameParser(tokens);
 
-        new MethodNameParser.Ql_statementContext();
+        // new MethodNameParser.Ql_statementContext();
 
         String a = methodNameParser.ql_statement().getPayload().getText();
 
         methodNameParser.select_clause().getPayload();
 
         System.out.println("asdf");
+    }
+
+    @Test
+    public void test03() throws IOException {
+        String jpaMethodName = "findByIdAndName";
+        CodePointBuffer.withChars(CharBuffer.wrap(jpaMethodName));
+        CodePointBuffer codePointBuffer = CodePointBuffer.builder(1024).build();
+        CodePointCharStream codePointCharStream = CodePointCharStream.fromBuffer(codePointBuffer);
+
+        MethodNameLexer methodNameLexer = new MethodNameLexer(codePointCharStream);
+        CommonTokenStream commonStream = new CommonTokenStream(methodNameLexer);
+        MethodNameParser methodNameParser = new MethodNameParser(commonStream);
+
+        /*MethodNameBaseListener methodNameBaseListener = new MethodNameBaseListener();
+        methodNameParser.ql_statement().enterRule(methodNameBaseListener);*/
+        MethodNameBaseVisitor methodNameBaseVisitor = new MethodNameBaseVisitor();
+        methodNameParser.select_clause().accept(methodNameBaseVisitor);
+
+        System.out.println("adfads");
+
+        /*new MethodNameBaseListener().p
+        SomeClass someClass = new MethodNameBaseListener().parse(parser.classDeclaration());
+        Gson gson = new Gson();
+        System.out.println(gson.toJson(someClass));
+        System.out.println("======================================\n visitor方式");
+        // visitor方式遍历
+        SomeLanguageParser parser2 = getParseTree(code);
+        SomeClass someClass1 = new SomeLangVisitorParser().parse(parser2.classDeclaration());
+        System.out.println(gson.toJson(someClass1));*/
     }
 
 }

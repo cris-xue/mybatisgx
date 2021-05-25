@@ -1,13 +1,10 @@
 package com.lc;
 
-import com.lc.mybatisx.syntax.MethodNameBaseVisitor;
-import com.lc.mybatisx.syntax.MethodNameLexer;
-import com.lc.mybatisx.syntax.MethodNameParser;
+import com.lc.mybatisx.syntax.*;
 import org.antlr.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.CodePointBuffer;
-import org.antlr.v4.runtime.CodePointCharStream;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.TokenStream;
+import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -52,7 +49,7 @@ public class TestLex {
         MethodNameParser methodNameParser = new MethodNameParser(tokens);
 
         // new MethodNameParser.Ql_statementContext();
-
+        ParseTree aaaa = methodNameParser.ql_statement();
         String a = methodNameParser.ql_statement().getPayload().getText();
 
         methodNameParser.select_clause().getPayload();
@@ -71,10 +68,16 @@ public class TestLex {
         CommonTokenStream commonStream = new CommonTokenStream(methodNameLexer);
         MethodNameParser methodNameParser = new MethodNameParser(commonStream);
 
+        MethodNameParser.Select_statementContext aaaa = methodNameParser.select_statement();
+        System.out.println(aaaa.toStringTree(methodNameParser));
+
+        MethodNameListener listener = new MethodNameBaseListener();
+        ParseTreeWalker.DEFAULT.walk(listener, aaaa);
+
         /*MethodNameBaseListener methodNameBaseListener = new MethodNameBaseListener();
         methodNameParser.ql_statement().enterRule(methodNameBaseListener);*/
-        MethodNameBaseVisitor methodNameBaseVisitor = new MethodNameBaseVisitor();
-        methodNameParser.select_clause().accept(methodNameBaseVisitor);
+        // MethodNameBaseVisitor methodNameBaseVisitor = new MethodNameBaseVisitor();
+        // methodNameParser.select_clause().accept(methodNameBaseVisitor);
 
         System.out.println("adfads");
 
@@ -87,6 +90,33 @@ public class TestLex {
         SomeLanguageParser parser2 = getParseTree(code);
         SomeClass someClass1 = new SomeLangVisitorParser().parse(parser2.classDeclaration());
         System.out.println(gson.toJson(someClass1));*/
+    }
+
+    @Test
+    public void test05() {
+        CharStream input = CharStreams.fromString("findByIdAndNameGroupByIdOrderByNameAscIdDesc");
+        MethodNameLexer methodNameLexer = new MethodNameLexer(input);
+        CommonTokenStream commonStream = new CommonTokenStream(methodNameLexer);
+        MethodNameParser methodNameParser = new MethodNameParser(commonStream);
+
+        MethodNameVisitor methodNameVisitor = new MethodNameBaseVisitor();
+
+        ParseTree qlStatementContext = methodNameParser.ql_statement();
+        aaa(qlStatementContext);
+        System.out.println("aaaaaa");
+    }
+
+    private void aaa(ParseTree parseTree) {
+        int childCount = parseTree.getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            ParseTree parseTreeChild = parseTree.getChild(i);
+            String tokens = parseTreeChild.getText();
+
+            System.out.println(tokens);
+            System.out.println(parseTreeChild.getClass());
+
+            aaa(parseTreeChild);
+        }
     }
 
 }

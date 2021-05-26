@@ -1,4 +1,4 @@
-// Generated from D:/project/mybatisx/mybatisx-core/src/test/resources\MethodName.g4 by ANTLR 4.9.1
+// Generated from F:/ec/lc/mybatisx/mybatisx-core/src/test/resources\MethodName.g4 by ANTLR 4.9.1
 package com.lc.mybatisx.syntax;
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 

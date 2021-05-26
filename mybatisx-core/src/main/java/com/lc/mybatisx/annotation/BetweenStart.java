@@ -12,6 +12,6 @@ import java.lang.annotation.*;
 @Target(ElementType.PARAMETER)
 public @interface BetweenStart {
 
-    String filed();
+    String filed() default "";
 
 }

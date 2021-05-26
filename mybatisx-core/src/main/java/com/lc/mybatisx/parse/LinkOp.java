@@ -1,4 +1,4 @@
-package com.lc.mybatisx.wrapper.where;
+package com.lc.mybatisx.parse;
 
 public enum LinkOp {
 

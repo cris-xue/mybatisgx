@@ -2,11 +2,19 @@ package com.lc.mybatisx.parse;
 
 import com.google.common.base.CaseFormat;
 import com.lc.mybatisx.handler.WhereMapperHandler;
+import com.lc.mybatisx.syntax.MethodNameLexer;
+import com.lc.mybatisx.syntax.MethodNameParser;
 import com.lc.mybatisx.utils.ReflectUtils;
 import com.lc.mybatisx.wrapper.LimitWrapper;
 import com.lc.mybatisx.wrapper.ModelWrapper;
 import com.lc.mybatisx.wrapper.OrderWrapper;
 import com.lc.mybatisx.wrapper.WhereWrapper;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.TerminalNodeImpl;
 import org.apache.ibatis.annotations.Param;
 
 import java.lang.reflect.Field;
@@ -56,11 +64,68 @@ public class KeywordParse {
         return parseMethod(method.getName(), entityClass);
     }
 
-    public static List<String> parseMethod(String methodName, Class<?> entityClass) {
+    /*public static List<String> parseMethod(String methodName, Class<?> entityClass) {
         List<String> methodKeywordList = splitKeyword(methodName);
         methodKeywordList = mergeSqlKeyword(methodKeywordList);
         methodKeywordList = mergeFieldKeyword(methodKeywordList);
         return methodKeywordList;
+    }*/
+
+    public static List<String> parseMethod(String methodName, Class<?> entityClass) {
+        CharStream input = CharStreams.fromString(methodName);
+        MethodNameLexer methodNameLexer = new MethodNameLexer(input);
+        CommonTokenStream commonStream = new CommonTokenStream(methodNameLexer);
+        MethodNameParser methodNameParser = new MethodNameParser(commonStream);
+
+        ParseTree qlStatementContext = methodNameParser.ql_statement();
+        List<String> sqlKeyword = new ArrayList<>();
+        getSqlKeyword(sqlKeyword, qlStatementContext);
+        return sqlKeyword;
+    }
+
+    private static void getSqlKeyword(List<String> sqlKeyword, ParseTree parseTree) {
+        int childCount = parseTree.getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            ParseTree parseTreeChild = parseTree.getChild(i);
+            if (parseTreeChild instanceof TerminalNodeImpl) {
+                sqlKeyword.add(parseTreeChild.getText());
+            }
+            getSqlKeyword(sqlKeyword, parseTreeChild);
+        }
+    }
+
+    public static Map<Class<?>, List<Token>> parseMethod1(Method method, Class<?> entityClass) {
+        return parseMethod1(method.getName(), entityClass);
+    }
+
+    public static Map<Class<?>, List<Token>> parseMethod1(String methodName, Class<?> entityClass) {
+        CharStream input = CharStreams.fromString(methodName);
+        MethodNameLexer methodNameLexer = new MethodNameLexer(input);
+        CommonTokenStream commonStream = new CommonTokenStream(methodNameLexer);
+        MethodNameParser methodNameParser = new MethodNameParser(commonStream);
+
+        ParseTree qlStatementContext = methodNameParser.ql_statement();
+        Map<Class<?>, List<Token>> sqlKeyword = new HashMap<>();
+        getSqlKeyword1(sqlKeyword, qlStatementContext);
+        return sqlKeyword;
+    }
+
+    private static void getSqlKeyword1(Map<Class<?>, List<Token>> sqlKeyword, ParseTree parseTree) {
+        int childCount = parseTree.getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            ParseTree parseTreeChild = parseTree.getChild(i);
+            if (parseTreeChild instanceof TerminalNodeImpl) {
+                TerminalNodeImpl terminalNode = (TerminalNodeImpl) parseTreeChild;
+
+                Class<?> terminalNodeParentClass = terminalNode.getParent().getClass();
+                if (!sqlKeyword.containsKey(terminalNodeParentClass)) {
+                    sqlKeyword.put(terminalNodeParentClass, new ArrayList<>());
+                }
+                List<Token> tokenList = sqlKeyword.get(terminalNodeParentClass);
+                tokenList.add(terminalNode.getSymbol());
+            }
+            getSqlKeyword1(sqlKeyword, parseTreeChild);
+        }
     }
 
     private static List<String> splitKeyword(String methodName) {

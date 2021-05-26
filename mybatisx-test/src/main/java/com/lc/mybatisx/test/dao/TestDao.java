@@ -1,5 +1,6 @@
 package com.lc.mybatisx.test.dao;
 
+import com.lc.mybatisx.annotation.BetweenEnd;
 import com.lc.mybatisx.annotation.BetweenStart;
 import com.lc.mybatisx.annotation.MapperMethod;
 import com.lc.mybatisx.annotation.MethodType;
@@ -29,7 +30,7 @@ public interface TestDao extends SimpleDao<Test, Long> {
     // @MapperMethod(type = MethodType.QUERY)
     Map<String, Object> findByUsername(@Param("username") String username);
 
-    Map<String, Object> findByIdBetween(@Param("start") @BetweenStart Long start, @Param("end") @BetweenStart Long end);
+    Map<String, Object> findByIdBetween(@Param("start") @BetweenStart Long start, @Param("end") @BetweenEnd Long end);
 
     Map<String, Object> findTop10ByAgeBetween(@Param("start") Long start, @Param("end") Long end);
 

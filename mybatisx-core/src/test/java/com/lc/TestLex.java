@@ -5,10 +5,13 @@ import org.antlr.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.antlr.v4.runtime.tree.TerminalNodeImpl;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.nio.CharBuffer;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author ：薛承城
@@ -94,7 +97,7 @@ public class TestLex {
 
     @Test
     public void test05() {
-        CharStream input = CharStreams.fromString("findByIdAndNameGroupByIdOrderByNameAscIdDesc");
+        CharStream input = CharStreams.fromString("findByIdLtAndNameEqGroupByIdOrderByNameAscIdDesc");
         MethodNameLexer methodNameLexer = new MethodNameLexer(input);
         CommonTokenStream commonStream = new CommonTokenStream(methodNameLexer);
         MethodNameParser methodNameParser = new MethodNameParser(commonStream);
@@ -102,20 +105,20 @@ public class TestLex {
         MethodNameVisitor methodNameVisitor = new MethodNameBaseVisitor();
 
         ParseTree qlStatementContext = methodNameParser.ql_statement();
-        aaa(qlStatementContext);
+        aaa(null, qlStatementContext);
         System.out.println("aaaaaa");
     }
 
-    private void aaa(ParseTree parseTree) {
+    private void aaa(Map<Class<ParseTree>, List<String>> aaaa, ParseTree parseTree) {
         int childCount = parseTree.getChildCount();
         for (int i = 0; i < childCount; i++) {
             ParseTree parseTreeChild = parseTree.getChild(i);
             String tokens = parseTreeChild.getText();
 
-            System.out.println(tokens);
-            System.out.println(parseTreeChild.getClass());
-
-            aaa(parseTreeChild);
+            if (parseTreeChild instanceof TerminalNodeImpl) {
+                System.out.println(tokens + "----" + parseTreeChild.getClass().getName());
+            }
+            aaa(aaaa, parseTreeChild);
         }
     }
 

@@ -16,8 +16,8 @@ public class AppTest {
         List<String> methodList = Arrays.asList("findByIdEq", "findTop50ByIdAndName", "findByIdAndName", "findByNameAndAgeEqOrderByNameDesc", "findByNameAndInputTimeBetween", "findByNameGroupByName", "findByPayStatusAndPayStatusXyzAbc", "updateByIdSelective");
         Map<String, List<String>> map = new LinkedHashMap<>();
         for (String method : methodList) {
-            List<String> keyList = KeywordParse.parseMethod(method, null);
-            map.put(method, keyList);
+            /*List<String> keyList = KeywordParse.parseMethod(method, null);
+            map.put(method, keyList);*/
         }
         System.out.println(map);
 

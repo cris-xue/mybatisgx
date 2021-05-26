@@ -5,6 +5,7 @@ import com.lc.mybatisx.utils.FreeMarkerUtils;
 import com.lc.mybatisx.utils.GenericUtils;
 import com.lc.mybatisx.wrapper.*;
 import freemarker.template.Template;
+import org.antlr.v4.runtime.Token;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.parsing.XPathParser;
 import org.slf4j.Logger;
@@ -49,8 +50,9 @@ public class QueryMapperHandler extends AbstractMapperHandler {
         List<ModelWrapper> modelWrapperList = modelMapperHandler.buildModelWrapper(modelClass);
         querySqlWrapper.setModelWrapperList(modelWrapperList);
 
-        List<String> methodKeywordList = KeywordParse.parseMethod(method, entityClass);
-        WhereWrapper whereWrapper = KeywordParse.buildWhereWrapper(method, methodKeywordList, daoInterfaceParams, modelWrapperList);
+        Map<Class<?>, List<Token>> methodKeywordList = KeywordParse.parseMethod1(method, entityClass);
+
+        /*WhereWrapper whereWrapper = KeywordParse.buildWhereWrapper(method, methodKeywordList, daoInterfaceParams, modelWrapperList);
         querySqlWrapper.setWhereWrapper(whereWrapper);
 
         LimitWrapper limitWrapper = KeywordParse.buildLimitWrapper(methodKeywordList);
@@ -60,7 +62,7 @@ public class QueryMapperHandler extends AbstractMapperHandler {
         querySqlWrapper.setOrderWrapper(orderWrapper);
 
         boolean dynamic = KeywordParse.isDynamic(methodKeywordList);
-        querySqlWrapper.setDynamic(dynamic);
+        querySqlWrapper.setDynamic(dynamic);*/
 
         this.querySqlWrapperList.add(querySqlWrapper);
     }

@@ -1,4 +1,4 @@
-// Generated from D:/project/mybatisx/mybatisx-core/src/test/resources\MethodName.g4 by ANTLR 4.9.1
+// Generated from F:/ec/lc/mybatisx/mybatisx-core/src/test/resources\MethodName.g4 by ANTLR 4.9.1
 package com.lc.mybatisx.syntax;
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
@@ -18,8 +18,8 @@ public class MethodNameParser extends Parser {
 		new PredictionContextCache();
 	public static final int
 		T__0=1, T__1=2, T__2=3, T__3=4, T__4=5, T__5=6, T__6=7, T__7=8, T__8=9, 
-		SELECT_ACTION=10, WHERE=11, LINK_OP=12, CONDITION_OP=13, KEY_WORD=14, 
-		FIELD=15;
+		INSERT_ACTION=10, DELETE_ACTION=11, UPDATE_ACTION=12, SELECT_ACTION=13, 
+		WHERE_LINK_OP=14, CONDITION_OP=15, KEY_WORD=16, FIELD=17;
 	public static final int
 		RULE_ql_statement = 0, RULE_select_statement = 1, RULE_select_clause = 2, 
 		RULE_aggregate_expression = 3, RULE_from_clause = 4, RULE_table_clause = 5, 
@@ -38,14 +38,15 @@ public class MethodNameParser extends Parser {
 	private static String[] makeLiteralNames() {
 		return new String[] {
 			null, "'count'", "'max'", "'min'", "'sum'", "'Table'", "'LeftJoin'", 
-			"'Having'", "'Asc'", "'Desc'", null, "'By'"
+			"'Having'", "'Asc'", "'Desc'", null, "'delete'", "'update'"
 		};
 	}
 	private static final String[] _LITERAL_NAMES = makeLiteralNames();
 	private static String[] makeSymbolicNames() {
 		return new String[] {
-			null, null, null, null, null, null, null, null, null, null, "SELECT_ACTION", 
-			"WHERE", "LINK_OP", "CONDITION_OP", "KEY_WORD", "FIELD"
+			null, null, null, null, null, null, null, null, null, null, "INSERT_ACTION", 
+			"DELETE_ACTION", "UPDATE_ACTION", "SELECT_ACTION", "WHERE_LINK_OP", "CONDITION_OP", 
+			"KEY_WORD", "FIELD"
 		};
 	}
 	private static final String[] _SYMBOLIC_NAMES = makeSymbolicNames();
@@ -200,7 +201,7 @@ public class MethodNameParser extends Parser {
 			setState(29);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			if (_la==SELECT_ACTION) {
+			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << INSERT_ACTION) | (1L << DELETE_ACTION) | (1L << UPDATE_ACTION) | (1L << SELECT_ACTION))) != 0)) {
 				{
 				setState(28);
 				select_clause();
@@ -242,7 +243,7 @@ public class MethodNameParser extends Parser {
 			setState(42);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			if (_la==WHERE) {
+			if (_la==WHERE_LINK_OP) {
 				{
 				setState(41);
 				where_clause();
@@ -293,6 +294,9 @@ public class MethodNameParser extends Parser {
 	}
 
 	public static class Select_clauseContext extends ParserRuleContext {
+		public TerminalNode INSERT_ACTION() { return getToken(MethodNameParser.INSERT_ACTION, 0); }
+		public TerminalNode DELETE_ACTION() { return getToken(MethodNameParser.DELETE_ACTION, 0); }
+		public TerminalNode UPDATE_ACTION() { return getToken(MethodNameParser.UPDATE_ACTION, 0); }
 		public TerminalNode SELECT_ACTION() { return getToken(MethodNameParser.SELECT_ACTION, 0); }
 		public Select_clauseContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -316,11 +320,20 @@ public class MethodNameParser extends Parser {
 	public final Select_clauseContext select_clause() throws RecognitionException {
 		Select_clauseContext _localctx = new Select_clauseContext(_ctx, getState());
 		enterRule(_localctx, 4, RULE_select_clause);
+		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
 			setState(53);
-			match(SELECT_ACTION);
+			_la = _input.LA(1);
+			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << INSERT_ACTION) | (1L << DELETE_ACTION) | (1L << UPDATE_ACTION) | (1L << SELECT_ACTION))) != 0)) ) {
+			_errHandler.recoverInline(this);
+			}
+			else {
+				if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
+				_errHandler.reportMatch(this);
+				consume();
+			}
 			}
 		}
 		catch (RecognitionException re) {
@@ -512,7 +525,10 @@ public class MethodNameParser extends Parser {
 	}
 
 	public static class Where_clauseContext extends ParserRuleContext {
-		public TerminalNode WHERE() { return getToken(MethodNameParser.WHERE, 0); }
+		public List<TerminalNode> WHERE_LINK_OP() { return getTokens(MethodNameParser.WHERE_LINK_OP); }
+		public TerminalNode WHERE_LINK_OP(int i) {
+			return getToken(MethodNameParser.WHERE_LINK_OP, i);
+		}
 		public List<TerminalNode> FIELD() { return getTokens(MethodNameParser.FIELD); }
 		public TerminalNode FIELD(int i) {
 			return getToken(MethodNameParser.FIELD, i);
@@ -520,10 +536,6 @@ public class MethodNameParser extends Parser {
 		public List<TerminalNode> CONDITION_OP() { return getTokens(MethodNameParser.CONDITION_OP); }
 		public TerminalNode CONDITION_OP(int i) {
 			return getToken(MethodNameParser.CONDITION_OP, i);
-		}
-		public List<TerminalNode> LINK_OP() { return getTokens(MethodNameParser.LINK_OP); }
-		public TerminalNode LINK_OP(int i) {
-			return getToken(MethodNameParser.LINK_OP, i);
 		}
 		public Where_clauseContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -552,7 +564,7 @@ public class MethodNameParser extends Parser {
 			enterOuterAlt(_localctx, 1);
 			{
 			setState(65);
-			match(WHERE);
+			match(WHERE_LINK_OP);
 			setState(73); 
 			_errHandler.sync(this);
 			_la = _input.LA(1);
@@ -574,10 +586,10 @@ public class MethodNameParser extends Parser {
 				setState(71);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-				if (_la==LINK_OP) {
+				if (_la==WHERE_LINK_OP) {
 					{
 					setState(70);
-					match(LINK_OP);
+					match(WHERE_LINK_OP);
 					}
 				}
 
@@ -897,7 +909,7 @@ public class MethodNameParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\21l\4\2\t\2\4\3\t"+
+		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\23l\4\2\t\2\4\3\t"+
 		"\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t\13\4"+
 		"\f\t\f\4\r\t\r\4\16\t\16\3\2\3\2\3\3\5\3 \n\3\3\3\5\3#\n\3\3\3\3\3\5\3"+
 		"\'\n\3\3\3\5\3*\n\3\3\3\5\3-\n\3\3\3\5\3\60\n\3\3\3\5\3\63\n\3\3\3\5\3"+
@@ -905,23 +917,23 @@ public class MethodNameParser extends Parser {
 		"\tG\n\t\3\t\5\tJ\n\t\6\tL\n\t\r\t\16\tM\3\n\3\n\3\n\7\nS\n\n\f\n\16\n"+
 		"V\13\n\3\13\3\13\3\f\3\f\3\r\3\r\3\r\7\r_\n\r\f\r\16\rb\13\r\3\16\3\16"+
 		"\5\16f\n\16\6\16h\n\16\r\16\16\16i\3\16\2\2\17\2\4\6\b\n\f\16\20\22\24"+
-		"\26\30\32\2\4\3\2\3\6\3\2\n\13\2m\2\34\3\2\2\2\4\37\3\2\2\2\6\67\3\2\2"+
-		"\2\b9\3\2\2\2\n;\3\2\2\2\f=\3\2\2\2\16@\3\2\2\2\20C\3\2\2\2\22O\3\2\2"+
-		"\2\24W\3\2\2\2\26Y\3\2\2\2\30[\3\2\2\2\32g\3\2\2\2\34\35\5\4\3\2\35\3"+
-		"\3\2\2\2\36 \5\6\4\2\37\36\3\2\2\2\37 \3\2\2\2 \"\3\2\2\2!#\5\b\5\2\""+
-		"!\3\2\2\2\"#\3\2\2\2#$\3\2\2\2$&\5\n\6\2%\'\5\f\7\2&%\3\2\2\2&\'\3\2\2"+
-		"\2\')\3\2\2\2(*\5\16\b\2)(\3\2\2\2)*\3\2\2\2*,\3\2\2\2+-\5\20\t\2,+\3"+
-		"\2\2\2,-\3\2\2\2-/\3\2\2\2.\60\5\22\n\2/.\3\2\2\2/\60\3\2\2\2\60\62\3"+
-		"\2\2\2\61\63\5\26\f\2\62\61\3\2\2\2\62\63\3\2\2\2\63\65\3\2\2\2\64\66"+
-		"\5\30\r\2\65\64\3\2\2\2\65\66\3\2\2\2\66\5\3\2\2\2\678\7\f\2\28\7\3\2"+
-		"\2\29:\t\2\2\2:\t\3\2\2\2;<\3\2\2\2<\13\3\2\2\2=>\7\7\2\2>?\7\21\2\2?"+
-		"\r\3\2\2\2@A\7\b\2\2AB\7\21\2\2B\17\3\2\2\2CK\7\r\2\2DF\7\21\2\2EG\7\17"+
-		"\2\2FE\3\2\2\2FG\3\2\2\2GI\3\2\2\2HJ\7\16\2\2IH\3\2\2\2IJ\3\2\2\2JL\3"+
-		"\2\2\2KD\3\2\2\2LM\3\2\2\2MK\3\2\2\2MN\3\2\2\2N\21\3\2\2\2OP\7\20\2\2"+
-		"PT\5\24\13\2QS\5\24\13\2RQ\3\2\2\2SV\3\2\2\2TR\3\2\2\2TU\3\2\2\2U\23\3"+
-		"\2\2\2VT\3\2\2\2WX\7\21\2\2X\25\3\2\2\2YZ\7\t\2\2Z\27\3\2\2\2[\\\7\20"+
+		"\26\30\32\2\5\3\2\f\17\3\2\3\6\3\2\n\13\2m\2\34\3\2\2\2\4\37\3\2\2\2\6"+
+		"\67\3\2\2\2\b9\3\2\2\2\n;\3\2\2\2\f=\3\2\2\2\16@\3\2\2\2\20C\3\2\2\2\22"+
+		"O\3\2\2\2\24W\3\2\2\2\26Y\3\2\2\2\30[\3\2\2\2\32g\3\2\2\2\34\35\5\4\3"+
+		"\2\35\3\3\2\2\2\36 \5\6\4\2\37\36\3\2\2\2\37 \3\2\2\2 \"\3\2\2\2!#\5\b"+
+		"\5\2\"!\3\2\2\2\"#\3\2\2\2#$\3\2\2\2$&\5\n\6\2%\'\5\f\7\2&%\3\2\2\2&\'"+
+		"\3\2\2\2\')\3\2\2\2(*\5\16\b\2)(\3\2\2\2)*\3\2\2\2*,\3\2\2\2+-\5\20\t"+
+		"\2,+\3\2\2\2,-\3\2\2\2-/\3\2\2\2.\60\5\22\n\2/.\3\2\2\2/\60\3\2\2\2\60"+
+		"\62\3\2\2\2\61\63\5\26\f\2\62\61\3\2\2\2\62\63\3\2\2\2\63\65\3\2\2\2\64"+
+		"\66\5\30\r\2\65\64\3\2\2\2\65\66\3\2\2\2\66\5\3\2\2\2\678\t\2\2\28\7\3"+
+		"\2\2\29:\t\3\2\2:\t\3\2\2\2;<\3\2\2\2<\13\3\2\2\2=>\7\7\2\2>?\7\23\2\2"+
+		"?\r\3\2\2\2@A\7\b\2\2AB\7\23\2\2B\17\3\2\2\2CK\7\20\2\2DF\7\23\2\2EG\7"+
+		"\21\2\2FE\3\2\2\2FG\3\2\2\2GI\3\2\2\2HJ\7\20\2\2IH\3\2\2\2IJ\3\2\2\2J"+
+		"L\3\2\2\2KD\3\2\2\2LM\3\2\2\2MK\3\2\2\2MN\3\2\2\2N\21\3\2\2\2OP\7\22\2"+
+		"\2PT\5\24\13\2QS\5\24\13\2RQ\3\2\2\2SV\3\2\2\2TR\3\2\2\2TU\3\2\2\2U\23"+
+		"\3\2\2\2VT\3\2\2\2WX\7\23\2\2X\25\3\2\2\2YZ\7\t\2\2Z\27\3\2\2\2[\\\7\22"+
 		"\2\2\\`\5\32\16\2]_\5\32\16\2^]\3\2\2\2_b\3\2\2\2`^\3\2\2\2`a\3\2\2\2"+
-		"a\31\3\2\2\2b`\3\2\2\2ce\7\21\2\2df\t\3\2\2ed\3\2\2\2ef\3\2\2\2fh\3\2"+
+		"a\31\3\2\2\2b`\3\2\2\2ce\7\23\2\2df\t\4\2\2ed\3\2\2\2ef\3\2\2\2fh\3\2"+
 		"\2\2gc\3\2\2\2hi\3\2\2\2ig\3\2\2\2ij\3\2\2\2j\33\3\2\2\2\21\37\"&),/\62"+
 		"\65FIMT`ei";
 	public static final ATN _ATN =

@@ -1,4 +1,4 @@
-package com.lc.mybatisx.wrapper.where;
+package com.lc.mybatisx.parse;
 
 import java.util.Arrays;
 import java.util.List;

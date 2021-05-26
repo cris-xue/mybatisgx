@@ -3,7 +3,9 @@ package com.lc.mybatisx.handler;
 import com.lc.mybatisx.parse.KeywordParse;
 import com.lc.mybatisx.utils.FreeMarkerUtils;
 import com.lc.mybatisx.utils.GenericUtils;
-import com.lc.mybatisx.wrapper.*;
+import com.lc.mybatisx.wrapper.ModelWrapper;
+import com.lc.mybatisx.wrapper.QuerySqlWrapper;
+import com.lc.mybatisx.wrapper.SqlWrapper;
 import freemarker.template.Template;
 import org.antlr.v4.runtime.Token;
 import org.apache.ibatis.parsing.XNode;
@@ -51,6 +53,7 @@ public class QueryMapperHandler extends AbstractMapperHandler {
         querySqlWrapper.setModelWrapperList(modelWrapperList);
 
         Map<Class<?>, List<Token>> methodKeywordList = KeywordParse.parseMethod1(method, entityClass);
+        whereMapperHandler.build(methodKeywordList);
 
         /*WhereWrapper whereWrapper = KeywordParse.buildWhereWrapper(method, methodKeywordList, daoInterfaceParams, modelWrapperList);
         querySqlWrapper.setWhereWrapper(whereWrapper);

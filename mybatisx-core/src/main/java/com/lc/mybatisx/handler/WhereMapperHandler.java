@@ -7,6 +7,7 @@ import com.lc.mybatisx.parse.Keyword;
 import com.lc.mybatisx.parse.KeywordType;
 import com.lc.mybatisx.wrapper.ModelWrapper;
 import com.lc.mybatisx.wrapper.WhereWrapper;
+import org.antlr.v4.runtime.Token;
 import org.apache.ibatis.annotations.Param;
 
 import java.lang.reflect.Method;
@@ -22,6 +23,10 @@ public class WhereMapperHandler {
 
     public WhereMapperHandler(Map<String, Keyword> keywordMap) {
         this.keywordMap = keywordMap;
+    }
+
+    public WhereWrapper build(Map<Class<?>, List<Token>> methodKeywordList) {
+        return null;
     }
 
     public WhereWrapper build(Method method, List<String> keywordList, List<ModelWrapper> modelWrapperList) {

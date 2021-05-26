@@ -1,7 +1,5 @@
 package com.lc;
 
-import com.lc.mybatisx.parse.KeywordParse;
-import com.lc.mybatisx.wrapper.where.LinkOp;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -29,8 +27,8 @@ public class AppTest {
 
     @Test
     public void testLinkOp() {
-        LinkOp linkOp = LinkOp.valueOf("AND");
-        System.out.println(linkOp);
+        /*LinkOp linkOp = LinkOp.valueOf("AND");
+        System.out.println(linkOp);*/
 
         // sumTableUserLeftJoinUserByNameAndAgeAndAbcOrCdbGroupByMnbOrderByAbcDesc
     }

@@ -27,8 +27,12 @@ join_clause
    : 'LeftJoin' FIELD
    ;
 
+// where_clause
+//    : WHERE_LINK_OP ((FIELD)+ (CONDITION_OP)? (WHERE_LINK_OP)?)+
+//    ;
 where_clause
-   : WHERE_LINK_OP (FIELD (CONDITION_OP)? (WHERE_LINK_OP)?)+
+   : (WHERE_LINK_OP (FIELD)+ (CONDITION_OP)?)+
+   // | WHERE_LINK_OP FIELD (CONDITION_OP)? where_clause
    ;
 
 groupby_clause
@@ -62,5 +66,8 @@ SELECT_ACTION: 'find' | 'select' | 'get' | 'query' ;
 WHERE_LINK_OP: 'By' | 'And' | 'Or' ;
 CONDITION_OP: 'Lt' | 'Eq' ;
 KEY_WORD: 'GroupBy' | 'OrderBy' ;
-FIELD: [A-Z][a-z]+ ;
+FIELD: [A-Z]+[a-z]+ ;
+// FIELD: FIELD1 (FIELD1 | FIELD1)* ;
+// FIELD1: [A-Z][a-z]+ ;
+// FIELD: ([A-Z] [a-z] [0-9])+ ;
 // FIELD: [0-9a-zA-Z_]{1,} ;

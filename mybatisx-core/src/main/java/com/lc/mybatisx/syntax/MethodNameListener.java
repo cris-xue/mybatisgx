@@ -1,4 +1,4 @@
-// Generated from F:/ec/lc/mybatisx/mybatisx-core/src/test/resources\MethodName.g4 by ANTLR 4.9.1
+// Generated from D:/project/mybatisx/mybatisx-core/src/test/resources\MethodName.g4 by ANTLR 4.9.1
 package com.lc.mybatisx.syntax;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
@@ -137,4 +137,14 @@ public interface MethodNameListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitOrderby_item(MethodNameParser.Orderby_itemContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MethodNameParser#field_clause}.
+	 * @param ctx the parse tree
+	 */
+	void enterField_clause(MethodNameParser.Field_clauseContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MethodNameParser#field_clause}.
+	 * @param ctx the parse tree
+	 */
+	void exitField_clause(MethodNameParser.Field_clauseContext ctx);
 }

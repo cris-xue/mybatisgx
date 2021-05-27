@@ -31,7 +31,7 @@ join_clause
 //    : WHERE_LINK_OP ((FIELD)+ (CONDITION_OP)? (WHERE_LINK_OP)?)+
 //    ;
 where_clause
-   : (WHERE_LINK_OP (FIELD)+ (CONDITION_OP)?)+
+   : (WHERE_LINK_OP field_clause (CONDITION_OP)?)+
    // | WHERE_LINK_OP FIELD (CONDITION_OP)? where_clause
    ;
 
@@ -40,7 +40,7 @@ groupby_clause
    ;
 
 groupby_item
-   : FIELD
+   : field_clause
    ;
 
 having_clause
@@ -54,8 +54,10 @@ orderby_clause
 
 // ?表示可选 |表示或
 orderby_item
-   : (FIELD ('Asc' | 'Desc')?)+
+   : (field_clause ('Asc' | 'Desc')?)+
    ;
+
+field_clause: (FIELD)+ ;
 
 INSERT_ACTION: 'insert' | 'add' ;
 DELETE_ACTION: 'delete' ;

@@ -97,7 +97,7 @@ public class TestLex {
 
     @Test
     public void test05() {
-        CharStream input = CharStreams.fromString("findByIdLtAndNameEqGroupByIdOrderByNameAscIdDesc");
+        CharStream input = CharStreams.fromString("findByIdLtAndUserNameAgeEqGroupByIdOrderByNameAscIdUserDesc");
         MethodNameLexer methodNameLexer = new MethodNameLexer(input);
         CommonTokenStream commonStream = new CommonTokenStream(methodNameLexer);
         MethodNameParser methodNameParser = new MethodNameParser(commonStream);
@@ -116,6 +116,9 @@ public class TestLex {
             String tokens = parseTreeChild.getText();
 
             if (parseTreeChild instanceof TerminalNodeImpl) {
+                System.out.println(tokens + "----" + parseTreeChild.getClass().getName());
+            }
+            if (parseTreeChild instanceof MethodNameParser.Field_clauseContext) {
                 System.out.println(tokens + "----" + parseTreeChild.getClass().getName());
             }
             aaa(aaaa, parseTreeChild);

@@ -1,4 +1,4 @@
-// Generated from F:/ec/lc/mybatisx/mybatisx-core/src/test/resources\MethodName.g4 by ANTLR 4.9.1
+// Generated from D:/project/mybatisx/mybatisx-core/src/test/resources\MethodName.g4 by ANTLR 4.9.1
 package com.lc.mybatisx.syntax;
 
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -167,6 +167,18 @@ public class MethodNameBaseListener implements MethodNameListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitOrderby_item(MethodNameParser.Orderby_itemContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterField_clause(MethodNameParser.Field_clauseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitField_clause(MethodNameParser.Field_clauseContext ctx) { }
 
 	/**
 	 * {@inheritDoc}

@@ -114,14 +114,17 @@ public class TestLex {
         for (int i = 0; i < childCount; i++) {
             ParseTree parseTreeChild = parseTree.getChild(i);
             String tokens = parseTreeChild.getText();
+            String parentSimpleName = parseTreeChild.getParent().getClass().getSimpleName();
+            String simpleName = parseTreeChild.getClass().getSimpleName();
 
             if (parseTreeChild instanceof TerminalNodeImpl) {
-                System.out.println(tokens + "----" + parseTreeChild.getClass().getName());
+                System.out.println(tokens + "---" + simpleName + "---" + parentSimpleName);
             }
             if (parseTreeChild instanceof MethodNameParser.Field_clauseContext) {
-                System.out.println(tokens + "----" + parseTreeChild.getClass().getName());
+                System.out.println(tokens + "----" + simpleName + "---" + parentSimpleName);
+            } else {
+                aaa(aaaa, parseTreeChild);
             }
-            aaa(aaaa, parseTreeChild);
         }
     }
 

@@ -1,5 +1,6 @@
 package com.lc;
 
+import com.lc.mybatisx.parse.SqlModel;
 import com.lc.mybatisx.syntax.*;
 import org.antlr.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.*;
@@ -105,11 +106,11 @@ public class TestLex {
         MethodNameVisitor methodNameVisitor = new MethodNameBaseVisitor();
 
         ParseTree qlStatementContext = methodNameParser.ql_statement();
-        aaa(null, qlStatementContext);
+        getKeywordMap(null, qlStatementContext);
         System.out.println("aaaaaa");
     }
 
-    private void aaa(Map<Class<ParseTree>, List<String>> aaaa, ParseTree parseTree) {
+    private void getKeywordMap(Map<Class<ParseTree>, List<String>> aaaa, ParseTree parseTree) {
         int childCount = parseTree.getChildCount();
         for (int i = 0; i < childCount; i++) {
             ParseTree parseTreeChild = parseTree.getChild(i);
@@ -119,13 +120,25 @@ public class TestLex {
 
             if (parseTreeChild instanceof TerminalNodeImpl) {
                 System.out.println(tokens + "---" + simpleName + "---" + parentSimpleName);
-            }
-            if (parseTreeChild instanceof MethodNameParser.Field_clauseContext) {
+            } else if (parseTreeChild instanceof MethodNameParser.Field_clauseContext) {
                 System.out.println(tokens + "----" + simpleName + "---" + parentSimpleName);
             } else {
-                aaa(aaaa, parseTreeChild);
+                getKeywordMap(aaaa, parseTreeChild);
             }
         }
+    }
+
+    @Test
+    public void test06() {
+        CharStream input = CharStreams.fromString("findByIdLtAndUserNameAgeEqGroupByIdOrderByNameAscIdUserDesc");
+        MethodNameLexer methodNameLexer = new MethodNameLexer(input);
+        CommonTokenStream commonStream = new CommonTokenStream(methodNameLexer);
+        MethodNameParser methodNameParser = new MethodNameParser(commonStream);
+
+        ParseTree qlStatementContext = methodNameParser.ql_statement();
+        SqlModel.buildSqlModel(qlStatementContext);
+        SqlModel sqlModel = SqlModel.build();
+        System.out.println("aaaaaaaa");
     }
 
 }

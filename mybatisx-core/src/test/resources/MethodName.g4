@@ -36,7 +36,7 @@ where_clause
    ;
 
 groupby_clause
-   : KEY_WORD groupby_item (groupby_item)*
+   : KEY_WORD field_clause
    ;
 
 groupby_item
@@ -47,9 +47,9 @@ having_clause
    : 'Having'
    ;
 
-//
+// + 一次或者多次   ？：零次或者一次
 orderby_clause
-   : KEY_WORD orderby_item (orderby_item)*
+   : KEY_WORD (field_clause ('Asc' | 'Desc')?)+
    ;
 
 // ?表示可选 |表示或

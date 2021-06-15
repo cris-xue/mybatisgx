@@ -12,13 +12,13 @@ public class SqlModel {
 
     private static SqlModel sqlModel = new SqlModel();
 
-    private ParseTree action;
+    private String action;
 
-    private List<ParseTree> where;
+    private List<String> where;
 
-    private List<ParseTree> groupBy;
+    private List<String> groupBy;
 
-    private List<ParseTree> orderBy;
+    private List<String> orderBy;
 
     private SqlModel() {
     }
@@ -50,66 +50,66 @@ public class SqlModel {
     private static void parseTree(ParseTree parseTree) {
         ParseTree parentParseTree = parseTree.getParent();
         if (parentParseTree instanceof MethodNameParser.Select_clauseContext) {
-            sqlModel.setAction(parseTree);
+            sqlModel.setAction(parseTree.getText());
         } else if (parentParseTree instanceof MethodNameParser.Where_clauseContext) {
-            sqlModel.setWhere(parseTree);
+            sqlModel.setWhere(parseTree.getText());
         } else if (parentParseTree instanceof MethodNameParser.Groupby_clauseContext) {
-            sqlModel.setGroupBy(parseTree);
+            sqlModel.setGroupBy(parseTree.getText());
         } else if (parentParseTree instanceof MethodNameParser.Orderby_clauseContext) {
-            sqlModel.setOrderBy(parseTree);
+            sqlModel.setOrderBy(parseTree.getText());
         }
     }
 
-    public ParseTree getAction() {
+    public String getAction() {
         return action;
     }
 
-    public void setAction(ParseTree action) {
+    public void setAction(String action) {
         this.action = action;
     }
 
-    public List<ParseTree> getWhere() {
+    public List<String> getWhere() {
         return where;
     }
 
-    public void setWhere(ParseTree where) {
+    public void setWhere(String where) {
         if (ObjectUtils.isEmpty(this.where)) {
             this.where = new ArrayList();
         }
         this.where.add(where);
     }
 
-    public void setWhere(List<ParseTree> where) {
+    public void setWhere(List<String> where) {
         this.where = where;
     }
 
-    public List<ParseTree> getGroupBy() {
+    public List<String> getGroupBy() {
         return groupBy;
     }
 
-    public void setGroupBy(ParseTree groupBy) {
+    public void setGroupBy(String groupBy) {
         if (ObjectUtils.isEmpty(this.groupBy)) {
             this.groupBy = new ArrayList();
         }
         this.groupBy.add(groupBy);
     }
 
-    public void setGroupBy(List<ParseTree> groupBy) {
+    public void setGroupBy(List<String> groupBy) {
         this.groupBy = groupBy;
     }
 
-    public List<ParseTree> getOrderBy() {
+    public List<String> getOrderBy() {
         return orderBy;
     }
 
-    public void setOrderBy(ParseTree orderBy) {
+    public void setOrderBy(String orderBy) {
         if (ObjectUtils.isEmpty(this.orderBy)) {
             this.orderBy = new ArrayList();
         }
         this.orderBy.add(orderBy);
     }
 
-    public void setOrderBy(List<ParseTree> orderBy) {
+    public void setOrderBy(List<String> orderBy) {
         this.orderBy = orderBy;
     }
 }

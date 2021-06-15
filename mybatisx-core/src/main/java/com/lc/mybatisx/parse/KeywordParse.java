@@ -94,20 +94,22 @@ public class KeywordParse {
         }
     }
 
-    public static Map<Class<?>, List<Token>> parseMethod1(Method method, Class<?> entityClass) {
+    public static SqlModel parseMethod1(Method method, Class<?> entityClass) {
         return parseMethod1(method.getName(), entityClass);
     }
 
-    public static Map<Class<?>, List<Token>> parseMethod1(String methodName, Class<?> entityClass) {
+    public static SqlModel parseMethod1(String methodName, Class<?> entityClass) {
         CharStream input = CharStreams.fromString(methodName);
         MethodNameLexer methodNameLexer = new MethodNameLexer(input);
         CommonTokenStream commonStream = new CommonTokenStream(methodNameLexer);
         MethodNameParser methodNameParser = new MethodNameParser(commonStream);
 
         ParseTree qlStatementContext = methodNameParser.ql_statement();
-        Map<Class<?>, List<Token>> sqlKeyword = new HashMap<>();
-        getSqlKeyword1(sqlKeyword, qlStatementContext);
-        return sqlKeyword;
+
+        SqlModel.buildSqlModel(qlStatementContext);
+        SqlModel sqlModel = SqlModel.build();
+
+        return sqlModel;
     }
 
     private static void getSqlKeyword1(Map<Class<?>, List<Token>> sqlKeyword, ParseTree parseTree) {

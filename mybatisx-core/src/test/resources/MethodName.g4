@@ -20,20 +20,24 @@ from_clause
    ;
 
 table_clause
-   : 'Table' FIELD
+   : 'Table' field_clause
    ;
 
 join_clause
-   : 'LeftJoin' FIELD
+   : 'LeftJoin' field_clause
    ;
 
 // where_clause
 //    : WHERE_LINK_OP ((FIELD)+ (CONDITION_OP)? (WHERE_LINK_OP)?)+
 //    ;
 where_clause
-   : (WHERE_LINK_OP field_clause (CONDITION_OP)?)+
+   : (where_link_op_clause field_clause (where_op_clause)?)+
    // | WHERE_LINK_OP FIELD (CONDITION_OP)? where_clause
    ;
+
+where_link_op_clause: WHERE_LINK_OP ;
+
+where_op_clause: CONDITION_OP ;
 
 groupby_clause
    : KEY_WORD field_clause

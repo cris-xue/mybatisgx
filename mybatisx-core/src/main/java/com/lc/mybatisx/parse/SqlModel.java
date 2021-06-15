@@ -16,7 +16,7 @@ public class SqlModel {
 
     private String action;
 
-    private List<String> where;
+    private List<SqlWhere> sqlWheres;
 
     private List<String> groupBy;
 
@@ -78,19 +78,19 @@ public class SqlModel {
         this.action = action;
     }
 
-    public List<String> getWhere() {
-        return where;
+    public List<SqlWhere> getSqlWheres() {
+        return sqlWheres;
     }
 
-    public void setWhere(String where) {
-        if (ObjectUtils.isEmpty(this.where)) {
-            this.where = new ArrayList();
+    public void setSqlWhere(SqlWhere sqlWhere) {
+        if (ObjectUtils.isEmpty(this.sqlWheres)) {
+            this.sqlWheres = new ArrayList<>();
         }
-        this.where.add(where);
+        this.sqlWheres.add(sqlWhere);
     }
 
-    public void setWhere(List<String> where) {
-        this.where = where;
+    public void setSqlWheres(List<SqlWhere> sqlWheres) {
+        this.sqlWheres = sqlWheres;
     }
 
     public List<String> getGroupBy() {

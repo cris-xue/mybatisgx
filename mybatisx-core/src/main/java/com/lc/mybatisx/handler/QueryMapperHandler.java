@@ -7,6 +7,7 @@ import com.lc.mybatisx.utils.GenericUtils;
 import com.lc.mybatisx.wrapper.ModelWrapper;
 import com.lc.mybatisx.wrapper.QuerySqlWrapper;
 import com.lc.mybatisx.wrapper.SqlWrapper;
+import com.lc.mybatisx.wrapper.WhereWrapper;
 import freemarker.template.Template;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.parsing.XPathParser;
@@ -58,17 +59,17 @@ public class QueryMapperHandler extends AbstractMapperHandler {
 
         // querySqlWrapper.setWhereWrapper();
 
-        /*WhereWrapper whereWrapper = KeywordParse.buildWhereWrapper(method, methodKeywordList, daoInterfaceParams, modelWrapperList);
+        WhereWrapper whereWrapper = KeywordParse.buildWhereWrapper(method, this.sqlModel.getWhere(), daoInterfaceParams, modelWrapperList);
         querySqlWrapper.setWhereWrapper(whereWrapper);
 
-        LimitWrapper limitWrapper = KeywordParse.buildLimitWrapper(methodKeywordList);
+        /*LimitWrapper limitWrapper = KeywordParse.buildLimitWrapper(methodKeywordList);
         querySqlWrapper.setLimitWrapper(limitWrapper);
 
         OrderWrapper orderWrapper = KeywordParse.buildOrderByWrapper(methodKeywordList);
-        querySqlWrapper.setOrderWrapper(orderWrapper);
+        querySqlWrapper.setOrderWrapper(orderWrapper);*/
 
-        boolean dynamic = KeywordParse.isDynamic(methodKeywordList);
-        querySqlWrapper.setDynamic(dynamic);*/
+        // boolean dynamic = KeywordParse.isDynamic(methodKeywordList);
+        querySqlWrapper.setDynamic(false);
 
         this.querySqlWrapperList.add(querySqlWrapper);
     }

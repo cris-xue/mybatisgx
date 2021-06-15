@@ -40,7 +40,8 @@ public class QueryMapperHandler extends AbstractMapperHandler {
     }
 
     @Override
-    public void init(String namespace, Method method, Type[] daoInterfaceParams) {
+    public void init(SqlModel sqlModel, String namespace, Method method, Type[] daoInterfaceParams) {
+        this.sqlModel = sqlModel;
         build(namespace, method, daoInterfaceParams);
     }
 
@@ -52,7 +53,7 @@ public class QueryMapperHandler extends AbstractMapperHandler {
         List<ModelWrapper> modelWrapperList = modelMapperHandler.buildModelWrapper(modelClass);
         querySqlWrapper.setModelWrapperList(modelWrapperList);
 
-        SqlModel sqlModel = KeywordParse.parseMethod1(method, entityClass);
+        // SqlModel sqlModel = KeywordParse.parseMethod1(method, entityClass);
         // whereMapperHandler.build(methodKeywordList);
 
         // querySqlWrapper.setWhereWrapper();

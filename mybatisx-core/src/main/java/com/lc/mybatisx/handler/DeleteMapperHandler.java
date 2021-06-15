@@ -2,6 +2,7 @@ package com.lc.mybatisx.handler;
 
 import com.lc.mybatisx.annotation.Version;
 import com.lc.mybatisx.parse.KeywordParse;
+import com.lc.mybatisx.parse.SqlModel;
 import com.lc.mybatisx.utils.FreeMarkerUtils;
 import com.lc.mybatisx.wrapper.DeleteSqlWrapper;
 import com.lc.mybatisx.wrapper.ModelWrapper;
@@ -39,7 +40,8 @@ public class DeleteMapperHandler extends AbstractMapperHandler {
     }
 
     @Override
-    public void init(String namespace, Method method, Type[] daoInterfaceParams) {
+    public void init(SqlModel sqlModel, String namespace, Method method, Type[] daoInterfaceParams) {
+        this.sqlModel = sqlModel;
         build(namespace, method, daoInterfaceParams);
     }
 

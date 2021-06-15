@@ -5,6 +5,7 @@ import com.lc.mybatisx.annotation.LogicDelete;
 import com.lc.mybatisx.annotation.Version;
 import com.lc.mybatisx.dao.Dao;
 import com.lc.mybatisx.dao.SimpleDao;
+import com.lc.mybatisx.parse.SqlModel;
 import com.lc.mybatisx.utils.GenericUtils;
 import com.lc.mybatisx.utils.ReflectUtils;
 import com.lc.mybatisx.wrapper.LogicDeleteWrapper;
@@ -30,9 +31,10 @@ public abstract class AbstractMapperHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractMapperHandler.class);
 
+    protected SqlModel sqlModel;
     protected SqlWrapper sqlWrapper;
 
-    public void init(String namespace, Method method, Type[] daoInterfaceParams) {
+    public void init(SqlModel sqlModel, String namespace, Method method, Type[] daoInterfaceParams) {
     }
 
     protected Class<?> getDaoInterface(String namespace) {

@@ -1,6 +1,5 @@
 package com.lc;
 
-import com.lc.mybatisx.parse.SqlModel;
 import com.lc.mybatisx.syntax.*;
 import org.antlr.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.*;
@@ -136,8 +135,8 @@ public class TestLex {
         MethodNameParser methodNameParser = new MethodNameParser(commonStream);
 
         ParseTree qlStatementContext = methodNameParser.ql_statement();
-        SqlModel.buildSqlModel(qlStatementContext);
-        SqlModel sqlModel = SqlModel.build();
+        // SqlModel.buildSqlModel(qlStatementContext);
+        // SqlModel sqlModel = SqlModel.build();
         System.out.println("aaaaaaaa");
     }
 

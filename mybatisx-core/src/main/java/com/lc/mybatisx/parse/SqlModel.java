@@ -1,6 +1,10 @@
 package com.lc.mybatisx.parse;
 
+import com.lc.mybatisx.syntax.MethodNameLexer;
 import com.lc.mybatisx.syntax.MethodNameParser;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNodeImpl;
 import org.springframework.util.ObjectUtils;
@@ -9,8 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SqlModel {
-
-    private static SqlModel sqlModel = new SqlModel();
 
     private String action;
 
@@ -23,11 +25,19 @@ public class SqlModel {
     private SqlModel() {
     }
 
-    public static SqlModel build() {
+    public static SqlModel parse(String methodName) {
+        CharStream input = CharStreams.fromString(methodName);
+        MethodNameLexer methodNameLexer = new MethodNameLexer(input);
+        CommonTokenStream commonStream = new CommonTokenStream(methodNameLexer);
+        MethodNameParser methodNameParser = new MethodNameParser(commonStream);
+
+        ParseTree qlStatementContext = methodNameParser.ql_statement();
+        SqlModel sqlModel = new SqlModel();
+        buildSqlModel(sqlModel, qlStatementContext);
         return sqlModel;
     }
 
-    public static void buildSqlModel(ParseTree parseTree) {
+    public static void buildSqlModel(SqlModel sqlModel, ParseTree parseTree) {
         int childCount = parseTree.getChildCount();
         for (int i = 0; i < childCount; i++) {
             ParseTree parseTreeChild = parseTree.getChild(i);
@@ -37,17 +47,17 @@ public class SqlModel {
 
             if (parseTreeChild instanceof TerminalNodeImpl) {
                 System.out.println(tokens + "---" + simpleName + "---" + parentSimpleName);
-                parseTree(parseTreeChild);
+                parseTree(sqlModel, parseTreeChild);
             } else if (parseTreeChild instanceof MethodNameParser.Field_clauseContext) {
                 System.out.println(tokens + "---" + simpleName + "---" + parentSimpleName);
-                parseTree(parseTreeChild);
+                parseTree(sqlModel, parseTreeChild);
             } else {
-                buildSqlModel(parseTreeChild);
+                buildSqlModel(sqlModel, parseTreeChild);
             }
         }
     }
 
-    private static void parseTree(ParseTree parseTree) {
+    private static void parseTree(SqlModel sqlModel, ParseTree parseTree) {
         ParseTree parentParseTree = parseTree.getParent();
         if (parentParseTree instanceof MethodNameParser.Select_clauseContext) {
             sqlModel.setAction(parseTree.getText());

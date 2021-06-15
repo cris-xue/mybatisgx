@@ -2,6 +2,7 @@ package com.lc.mybatisx.handler;
 
 import com.lc.mybatisx.dao.Dao;
 import com.lc.mybatisx.dao.SimpleDao;
+import com.lc.mybatisx.parse.SqlModel;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.session.Configuration;
@@ -57,15 +58,15 @@ public class CURDMapper {
         List<XNode> xNodeList = new ArrayList<>();
         for (int i = 0; i < methodList.size(); i++) {
             Method method = methodList.get(i);
-            List<String> methodKeywordList = parseMethodKeyword(method.getName());
+            SqlModel sqlModel = SqlModel.parse(method.getName());
 
-            Class<? extends AbstractMapperHandler> abstractMapperHandler = mapperHandlerMap.get(methodKeywordList.get(0));
+            Class<? extends AbstractMapperHandler> abstractMapperHandler = mapperHandlerMap.get(sqlModel.getAction());
             if (abstractMapperHandler == null) {
                 continue;
             }
             try {
                 AbstractMapperHandler amh = abstractMapperHandler.newInstance();
-                amh.init(namespace, method, daoInterfaceParams);
+                amh.init(sqlModel, namespace, method, daoInterfaceParams);
                 List<XNode> xNode = amh.readTemplate();
                 xNodeList.addAll(xNode);
             } catch (InstantiationException e) {

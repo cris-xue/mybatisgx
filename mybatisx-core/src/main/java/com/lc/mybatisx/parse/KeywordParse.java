@@ -106,9 +106,7 @@ public class KeywordParse {
 
         ParseTree qlStatementContext = methodNameParser.ql_statement();
 
-        SqlModel.buildSqlModel(qlStatementContext);
-        SqlModel sqlModel = SqlModel.build();
-
+        SqlModel sqlModel = SqlModel.parse(methodName);
         return sqlModel;
     }
 

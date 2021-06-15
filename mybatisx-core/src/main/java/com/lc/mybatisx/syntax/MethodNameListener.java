@@ -88,6 +88,26 @@ public interface MethodNameListener extends ParseTreeListener {
 	 */
 	void exitWhere_clause(MethodNameParser.Where_clauseContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link MethodNameParser#where_link_op_clause}.
+	 * @param ctx the parse tree
+	 */
+	void enterWhere_link_op_clause(MethodNameParser.Where_link_op_clauseContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MethodNameParser#where_link_op_clause}.
+	 * @param ctx the parse tree
+	 */
+	void exitWhere_link_op_clause(MethodNameParser.Where_link_op_clauseContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MethodNameParser#where_op_clause}.
+	 * @param ctx the parse tree
+	 */
+	void enterWhere_op_clause(MethodNameParser.Where_op_clauseContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MethodNameParser#where_op_clause}.
+	 * @param ctx the parse tree
+	 */
+	void exitWhere_op_clause(MethodNameParser.Where_op_clauseContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link MethodNameParser#groupby_clause}.
 	 * @param ctx the parse tree
 	 */

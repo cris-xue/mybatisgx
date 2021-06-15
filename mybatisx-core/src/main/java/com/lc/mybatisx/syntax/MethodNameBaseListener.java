@@ -112,6 +112,30 @@ public class MethodNameBaseListener implements MethodNameListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterWhere_link_op_clause(MethodNameParser.Where_link_op_clauseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitWhere_link_op_clause(MethodNameParser.Where_link_op_clauseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterWhere_op_clause(MethodNameParser.Where_op_clauseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitWhere_op_clause(MethodNameParser.Where_op_clauseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterGroupby_clause(MethodNameParser.Groupby_clauseContext ctx) { }
 	/**
 	 * {@inheritDoc}

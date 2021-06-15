@@ -62,7 +62,7 @@ public class SqlModel {
         if (parentParseTree instanceof MethodNameParser.Select_clauseContext) {
             sqlModel.setAction(parseTree.getText());
         } else if (parentParseTree instanceof MethodNameParser.Where_clauseContext) {
-            sqlModel.setWhere(parseTree.getText());
+            sqlModel.setSqlWhere(parseTree.getText());
         } else if (parentParseTree instanceof MethodNameParser.Groupby_clauseContext) {
             sqlModel.setGroupBy(parseTree.getText());
         } else if (parentParseTree instanceof MethodNameParser.Orderby_clauseContext) {

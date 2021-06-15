@@ -59,6 +59,18 @@ public interface MethodNameVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitWhere_clause(MethodNameParser.Where_clauseContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link MethodNameParser#where_link_op_clause}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitWhere_link_op_clause(MethodNameParser.Where_link_op_clauseContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MethodNameParser#where_op_clause}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitWhere_op_clause(MethodNameParser.Where_op_clauseContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link MethodNameParser#groupby_clause}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

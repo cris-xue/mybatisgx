@@ -32,6 +32,9 @@ public class SqlModel {
         MethodNameParser methodNameParser = new MethodNameParser(commonStream);
 
         ParseTree qlStatementContext = methodNameParser.ql_statement();
+
+        qlStatementContext.get
+
         SqlModel sqlModel = new SqlModel();
         buildSqlModel(sqlModel, qlStatementContext);
         return sqlModel;
@@ -45,7 +48,11 @@ public class SqlModel {
             String parentSimpleName = parseTreeChild.getParent().getClass().getSimpleName();
             String simpleName = parseTreeChild.getClass().getSimpleName();
 
-            if (parseTreeChild instanceof TerminalNodeImpl) {
+            if (parseTreeChild instanceof MethodNameParser.Select_clauseContext) {
+                System.out.println(tokens + "---" + simpleName + "---" + parentSimpleName);
+            } else if (parseTreeChild instanceof MethodNameParser.Where_clauseContext) {
+                System.out.println(tokens + "---" + simpleName + "---" + parentSimpleName);
+            }/* else if (parseTreeChild instanceof TerminalNodeImpl) {
                 System.out.println(tokens + "---" + simpleName + "---" + parentSimpleName);
                 parseTree(sqlModel, parseTreeChild);
             } else if (parseTreeChild instanceof MethodNameParser.Field_clauseContext) {
@@ -53,7 +60,7 @@ public class SqlModel {
                 parseTree(sqlModel, parseTreeChild);
             } else {
                 buildSqlModel(sqlModel, parseTreeChild);
-            }
+            }*/
         }
     }
 
@@ -62,7 +69,8 @@ public class SqlModel {
         if (parentParseTree instanceof MethodNameParser.Select_clauseContext) {
             sqlModel.setAction(parseTree.getText());
         } else if (parentParseTree instanceof MethodNameParser.Where_clauseContext) {
-            sqlModel.setSqlWhere(parseTree.getText());
+            // sqlModel.setSqlWhere(parseTree.getText());
+            System.out.println("adfadsf");
         } else if (parentParseTree instanceof MethodNameParser.Groupby_clauseContext) {
             sqlModel.setGroupBy(parseTree.getText());
         } else if (parentParseTree instanceof MethodNameParser.Orderby_clauseContext) {

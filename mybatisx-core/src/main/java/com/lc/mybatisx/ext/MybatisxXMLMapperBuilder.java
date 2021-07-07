@@ -1,4 +1,4 @@
-package com.lc.mybatisx.builder;
+package com.lc.mybatisx.ext;
 
 import com.lc.mybatisx.handler.CURDMapper;
 import org.apache.ibatis.builder.*;

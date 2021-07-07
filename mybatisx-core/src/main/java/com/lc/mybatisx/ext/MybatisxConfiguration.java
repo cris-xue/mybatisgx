@@ -1,4 +1,4 @@
-package com.lc.mybatisx.session;
+package com.lc.mybatisx.ext;
 
 import com.lc.mybatisx.scripting.MetaObjectHandler;
 import org.apache.ibatis.executor.Executor;

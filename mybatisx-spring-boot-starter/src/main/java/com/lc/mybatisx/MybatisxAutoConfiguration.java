@@ -1,8 +1,8 @@
 package com.lc.mybatisx;
 
 import com.lc.mybatisx.converter.MetaObjectHandlerConverter;
-import com.lc.mybatisx.session.MybatisxConfiguration;
-import com.lc.mybatisx.spring.MybatisxSqlSessionFactoryBean;
+import com.lc.mybatisx.ext.MybatisxConfiguration;
+import com.lc.mybatisx.ext.MybatisxSqlSessionFactoryBean;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.mapping.DatabaseIdProvider;
 import org.apache.ibatis.plugin.Interceptor;

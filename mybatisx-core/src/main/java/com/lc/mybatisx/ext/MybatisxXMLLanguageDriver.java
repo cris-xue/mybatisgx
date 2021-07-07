@@ -1,4 +1,4 @@
-package com.lc.mybatisx.scripting;
+package com.lc.mybatisx.ext;
 
 import org.apache.ibatis.executor.parameter.ParameterHandler;
 import org.apache.ibatis.mapping.BoundSql;

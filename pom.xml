@@ -19,6 +19,7 @@
 	<modules>
 		<module>mybatisx-core</module>
 		<module>mybatisx-spring-boot-starter</module>
+		<module>mybatisx-test</module>
 	</modules>
 	
 	<dependencies>

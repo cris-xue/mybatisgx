@@ -34,7 +34,7 @@ public class SqlModel {
 
         ParseTree qlStatementContext = methodNameParser.ql_statement();
 
-        qlStatementContext.get
+        // qlStatementContext.get
 
         SqlModel sqlModel = new SqlModel();
         buildSqlModel(sqlModel, qlStatementContext);

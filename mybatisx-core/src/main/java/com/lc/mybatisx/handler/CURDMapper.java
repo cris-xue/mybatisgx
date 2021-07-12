@@ -2,16 +2,14 @@ package com.lc.mybatisx.handler;
 
 import com.lc.mybatisx.dao.Dao;
 import com.lc.mybatisx.dao.SimpleDao;
-import com.lc.mybatisx.parse.SqlModel;
+import com.lc.mybatisx.model.DaoParse;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.apache.ibatis.parsing.XNode;
-import org.apache.ibatis.session.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.TypeUtils;
 import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
 
-import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,6 +37,12 @@ public class CURDMapper {
     }
 
     public static List<XNode> getNodeList(MapperBuilderAssistant builderAssistant, String namespace) {
+        DaoParse daoParse = new DaoParse();
+        daoParse.parse(builderAssistant);
+        return null;
+    }
+
+    /*public static List<XNode> getNodeList(MapperBuilderAssistant builderAssistant, String namespace) {
         Class<?> daoInterface = getDaoInterface(namespace);
         Type[] daoInterfaceParams = getDaoInterfaceParams(daoInterface);
         Class<?> entityClass = (Class<?>) daoInterfaceParams[0];
@@ -77,7 +81,7 @@ public class CURDMapper {
         }
 
         return xNodeList;
-    }
+    }*/
 
     protected static Class<?> getDaoInterface(String namespace) {
         try {

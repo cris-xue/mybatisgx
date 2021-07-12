@@ -6,15 +6,25 @@ import java.util.List;
 /**
  * @author ：薛承城
  * @description：一句话描述
- * @date ：2021/7/9 17:39
+ * @date ：2021/7/9 17:34
  */
-public class FieldNode {
+public class StructNode {
+
+    private Boolean isBasicType;
 
     private Class<?> type;
 
-    private String name;
+    private List<FieldNode> fieldNodeList;
 
     private List<Annotation> annotationList;
+
+    public Boolean getBasicType() {
+        return isBasicType;
+    }
+
+    public void setBasicType(Boolean basicType) {
+        isBasicType = basicType;
+    }
 
     public Class<?> getType() {
         return type;
@@ -24,12 +34,12 @@ public class FieldNode {
         this.type = type;
     }
 
-    public String getName() {
-        return name;
+    public List<FieldNode> getFieldNodeList() {
+        return fieldNodeList;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setFieldNodeList(List<FieldNode> fieldNodeList) {
+        this.fieldNodeList = fieldNodeList;
     }
 
     public List<Annotation> getAnnotationList() {

@@ -1,6 +1,6 @@
 package com.lc.mybatisx.model;
 
-public class WhereModel extends SqlModel {
+public class WhereModel {
 
     private WhereModel whereModel;
 

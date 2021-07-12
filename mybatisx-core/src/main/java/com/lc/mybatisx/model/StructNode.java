@@ -1,6 +1,5 @@
 package com.lc.mybatisx.model;
 
-import java.lang.annotation.Annotation;
 import java.util.List;
 
 /**
@@ -15,8 +14,6 @@ public class StructNode {
     private Class<?> type;
 
     private List<FieldNode> fieldNodeList;
-
-    private List<Annotation> annotationList;
 
     public Boolean getBasicType() {
         return isBasicType;
@@ -42,11 +39,4 @@ public class StructNode {
         this.fieldNodeList = fieldNodeList;
     }
 
-    public List<Annotation> getAnnotationList() {
-        return annotationList;
-    }
-
-    public void setAnnotationList(List<Annotation> annotationList) {
-        this.annotationList = annotationList;
-    }
 }

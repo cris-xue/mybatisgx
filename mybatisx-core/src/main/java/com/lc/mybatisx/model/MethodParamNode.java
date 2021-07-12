@@ -1,7 +1,6 @@
 package com.lc.mybatisx.model;
 
-import java.lang.annotation.Annotation;
-import java.util.List;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * @author ：薛承城
@@ -12,7 +11,7 @@ public class MethodParamNode extends StructNode {
 
     private String name;
 
-    private List<Annotation> paramAnnotationList;
+    private Param param;
 
     public String getName() {
         return name;
@@ -22,11 +21,11 @@ public class MethodParamNode extends StructNode {
         this.name = name;
     }
 
-    public List<Annotation> getParamAnnotationList() {
-        return paramAnnotationList;
+    public Param getParam() {
+        return param;
     }
 
-    public void setParamAnnotationList(List<Annotation> paramAnnotationList) {
-        this.paramAnnotationList = paramAnnotationList;
+    public void setParam(Param param) {
+        this.param = param;
     }
 }

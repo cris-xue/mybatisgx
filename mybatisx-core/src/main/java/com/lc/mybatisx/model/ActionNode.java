@@ -1,6 +1,7 @@
 package com.lc.mybatisx.model;
 
-import java.lang.annotation.Annotation;
+import com.lc.mybatisx.annotation.Dynamic;
+
 import java.lang.reflect.Method;
 import java.util.List;
 
@@ -19,9 +20,7 @@ public class ActionNode {
 
     private ResultNode resultNode;
 
-    private Boolean isDynamic;
-
-    private List<Annotation> annotationList;
+    private Dynamic dynamic;
 
     public Method getMethod() {
         return method;
@@ -55,19 +54,11 @@ public class ActionNode {
         this.resultNode = resultNode;
     }
 
-    public Boolean getDynamic() {
-        return isDynamic;
+    public Dynamic getDynamic() {
+        return dynamic;
     }
 
-    public void setDynamic(Boolean dynamic) {
-        isDynamic = dynamic;
-    }
-
-    public List<Annotation> getAnnotationList() {
-        return annotationList;
-    }
-
-    public void setAnnotationList(List<Annotation> annotationList) {
-        this.annotationList = annotationList;
+    public void setDynamic(Dynamic dynamic) {
+        this.dynamic = dynamic;
     }
 }

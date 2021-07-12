@@ -1,7 +1,8 @@
 package com.lc.mybatisx.model;
 
-import java.lang.annotation.Annotation;
-import java.util.List;
+import com.lc.mybatisx.annotation.Column;
+import com.lc.mybatisx.annotation.Id;
+import com.lc.mybatisx.annotation.LogicDelete;
 
 /**
  * @author ：薛承城
@@ -14,7 +15,11 @@ public class FieldNode {
 
     private String name;
 
-    private List<Annotation> annotationList;
+    private Id id;
+
+    private Column column;
+
+    private LogicDelete logicDelete;
 
     public Class<?> getType() {
         return type;
@@ -32,11 +37,29 @@ public class FieldNode {
         this.name = name;
     }
 
-    public List<Annotation> getAnnotationList() {
-        return annotationList;
+    public LogicDelete getLogicDelete() {
+        return logicDelete;
     }
 
-    public void setAnnotationList(List<Annotation> annotationList) {
-        this.annotationList = annotationList;
+    public void setLogicDelete(LogicDelete logicDelete) {
+        this.logicDelete = logicDelete;
     }
+
+    public Id getId() {
+        return id;
+    }
+
+    public void setId(Id id) {
+        this.id = id;
+    }
+
+    public Column getColumn() {
+        return column;
+    }
+
+    public void setColumn(Column column) {
+        this.column = column;
+    }
+
+
 }

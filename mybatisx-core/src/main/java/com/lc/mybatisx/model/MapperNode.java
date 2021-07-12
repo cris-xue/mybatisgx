@@ -1,6 +1,7 @@
 package com.lc.mybatisx.model;
 
-import java.lang.annotation.Annotation;
+import com.lc.mybatisx.annotation.LogicDelete;
+
 import java.util.List;
 
 /**
@@ -10,31 +11,15 @@ import java.util.List;
  */
 public class MapperNode {
 
-    private List<Class<?>> superInterfaceClassList;
-
     private Class<?> interfaceClass;
 
-    private List<TypeParamNode> typeParamNodeList;
-    /**
-     * 实体节点
-     */
     private TypeParamNode entityTypeParamNode;
 
     private TypeParamNode primaryKeyTypeParamNode;
 
     private List<ActionNode> actionNodeList;
 
-    private Boolean isLogicDelete;
-
-    private List<Annotation> annotationList;
-
-    public List<Class<?>> getSuperInterfaceClassList() {
-        return superInterfaceClassList;
-    }
-
-    public void setSuperInterfaceClassList(List<Class<?>> superInterfaceClassList) {
-        this.superInterfaceClassList = superInterfaceClassList;
-    }
+    private LogicDelete logicDelete;
 
     public Class<?> getInterfaceClass() {
         return interfaceClass;
@@ -42,14 +27,6 @@ public class MapperNode {
 
     public void setInterfaceClass(Class<?> interfaceClass) {
         this.interfaceClass = interfaceClass;
-    }
-
-    public List<TypeParamNode> getTypeParamNodeList() {
-        return typeParamNodeList;
-    }
-
-    public void setTypeParamNodeList(List<TypeParamNode> typeParamNodeList) {
-        this.typeParamNodeList = typeParamNodeList;
     }
 
     public TypeParamNode getEntityTypeParamNode() {
@@ -76,20 +53,11 @@ public class MapperNode {
         this.actionNodeList = actionNodeList;
     }
 
-    public Boolean getLogicDelete() {
-        return isLogicDelete;
+    public LogicDelete getLogicDelete() {
+        return logicDelete;
     }
 
-    public void setLogicDelete(Boolean logicDelete) {
-        isLogicDelete = logicDelete;
+    public void setLogicDelete(LogicDelete logicDelete) {
+        this.logicDelete = logicDelete;
     }
-
-    public List<Annotation> getAnnotationList() {
-        return annotationList;
-    }
-
-    public void setAnnotationList(List<Annotation> annotationList) {
-        this.annotationList = annotationList;
-    }
-
 }

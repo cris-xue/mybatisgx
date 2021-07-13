@@ -7,13 +7,13 @@ import java.util.List;
  * @description：一句话描述
  * @date ：2021/7/9 17:16
  */
-public class MapperNode {
+public class InterfaceNode {
 
     private Class<?> interfaceClass;
 
     private List<TypeParamNode> typeParamNodeList;
 
-    private List<ActionNode> actionNodeList;
+    private List<MethodNode> methodNodeList;
 
     public Class<?> getInterfaceClass() {
         return interfaceClass;
@@ -31,12 +31,12 @@ public class MapperNode {
         this.typeParamNodeList = typeParamNodeList;
     }
 
-    public List<ActionNode> getActionNodeList() {
-        return actionNodeList;
+    public List<MethodNode> getMethodNodeList() {
+        return methodNodeList;
     }
 
-    public void setActionNodeList(List<ActionNode> actionNodeList) {
-        this.actionNodeList = actionNodeList;
+    public void setMethodNodeList(List<MethodNode> methodNodeList) {
+        this.methodNodeList = methodNodeList;
     }
 
 }

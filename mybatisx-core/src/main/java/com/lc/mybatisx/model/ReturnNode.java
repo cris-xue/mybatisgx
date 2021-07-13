@@ -5,6 +5,6 @@ package com.lc.mybatisx.model;
  * @description：一句话描述
  * @date ：2021/7/9 17:14
  */
-public class ResultNode extends StructNode {
+public class ReturnNode extends StructNode {
 
 }

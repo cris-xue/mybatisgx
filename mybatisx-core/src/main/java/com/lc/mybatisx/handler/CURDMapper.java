@@ -2,7 +2,6 @@ package com.lc.mybatisx.handler;
 
 import com.lc.mybatisx.dao.Dao;
 import com.lc.mybatisx.dao.SimpleDao;
-import com.lc.mybatisx.model.DaoParse;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.apache.ibatis.parsing.XNode;
 import org.slf4j.Logger;

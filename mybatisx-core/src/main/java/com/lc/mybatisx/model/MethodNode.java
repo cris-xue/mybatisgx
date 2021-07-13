@@ -10,7 +10,7 @@ import java.util.List;
  * @description：一句话描述
  * @date ：2021/7/9 17:14
  */
-public class ActionNode {
+public class MethodNode {
 
     private Method method;
 
@@ -18,7 +18,7 @@ public class ActionNode {
 
     private List<MethodParamNode> methodParamNodeList;
 
-    private ResultNode resultNode;
+    private ReturnNode returnNode;
 
     private Dynamic dynamic;
 
@@ -46,12 +46,12 @@ public class ActionNode {
         this.methodParamNodeList = methodParamNodeList;
     }
 
-    public ResultNode getResultNode() {
-        return resultNode;
+    public ReturnNode getReturnNode() {
+        return returnNode;
     }
 
-    public void setResultNode(ResultNode resultNode) {
-        this.resultNode = resultNode;
+    public void setReturnNode(ReturnNode returnNode) {
+        this.returnNode = returnNode;
     }
 
     public Dynamic getDynamic() {

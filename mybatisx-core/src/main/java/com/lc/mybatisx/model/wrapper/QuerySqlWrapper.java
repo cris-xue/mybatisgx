@@ -8,10 +8,6 @@ package com.lc.mybatisx.model.wrapper;
 public class QuerySqlWrapper extends SqlWrapper {
 
     /**
-     * 数据
-     */
-    private DataWrapper dataWrapper;
-    /**
      * 条件
      */
     private WhereWrapper whereWrapper;
@@ -23,14 +19,6 @@ public class QuerySqlWrapper extends SqlWrapper {
      *
      */
     private OrderWrapper orderWrapper;
-
-    public DataWrapper getDataWrapper() {
-        return dataWrapper;
-    }
-
-    public void setDataWrapper(DataWrapper dataWrapper) {
-        this.dataWrapper = dataWrapper;
-    }
 
     public WhereWrapper getWhereWrapper() {
         return whereWrapper;

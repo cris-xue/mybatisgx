@@ -20,6 +20,10 @@ public class SqlWrapper {
      */
     private String tableName;
     /**
+     * 数据
+     */
+    private DataWrapper dataWrapper;
+    /**
      * 返回结果
      */
     private ResultMapWrapper resultMapWrapper;
@@ -50,6 +54,14 @@ public class SqlWrapper {
 
     public void setTableName(String tableName) {
         this.tableName = tableName;
+    }
+
+    public DataWrapper getDataWrapper() {
+        return dataWrapper;
+    }
+
+    public void setDataWrapper(DataWrapper dataWrapper) {
+        this.dataWrapper = dataWrapper;
     }
 
     public ResultMapWrapper getResultMapWrapper() {

@@ -8,15 +8,45 @@ import org.antlr.v4.runtime.tree.ParseTreeListener;
  */
 public interface MethodNameListener extends ParseTreeListener {
 	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#ql_statement}.
+	 * Enter a parse tree produced by {@link MethodNameParser#sql_statement}.
 	 * @param ctx the parse tree
 	 */
-	void enterQl_statement(MethodNameParser.Ql_statementContext ctx);
+	void enterSql_statement(MethodNameParser.Sql_statementContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#ql_statement}.
+	 * Exit a parse tree produced by {@link MethodNameParser#sql_statement}.
 	 * @param ctx the parse tree
 	 */
-	void exitQl_statement(MethodNameParser.Ql_statementContext ctx);
+	void exitSql_statement(MethodNameParser.Sql_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MethodNameParser#insert_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterInsert_statement(MethodNameParser.Insert_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MethodNameParser#insert_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitInsert_statement(MethodNameParser.Insert_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MethodNameParser#delete_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterDelete_statement(MethodNameParser.Delete_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MethodNameParser#delete_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitDelete_statement(MethodNameParser.Delete_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MethodNameParser#update_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterUpdate_statement(MethodNameParser.Update_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MethodNameParser#update_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitUpdate_statement(MethodNameParser.Update_statementContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MethodNameParser#select_statement}.
 	 * @param ctx the parse tree
@@ -88,6 +118,16 @@ public interface MethodNameListener extends ParseTreeListener {
 	 */
 	void exitWhere_clause(MethodNameParser.Where_clauseContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link MethodNameParser#where_item}.
+	 * @param ctx the parse tree
+	 */
+	void enterWhere_item(MethodNameParser.Where_itemContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MethodNameParser#where_item}.
+	 * @param ctx the parse tree
+	 */
+	void exitWhere_item(MethodNameParser.Where_itemContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link MethodNameParser#where_link_op_clause}.
 	 * @param ctx the parse tree
 	 */
@@ -118,16 +158,6 @@ public interface MethodNameListener extends ParseTreeListener {
 	 */
 	void exitGroupby_clause(MethodNameParser.Groupby_clauseContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#groupby_item}.
-	 * @param ctx the parse tree
-	 */
-	void enterGroupby_item(MethodNameParser.Groupby_itemContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#groupby_item}.
-	 * @param ctx the parse tree
-	 */
-	void exitGroupby_item(MethodNameParser.Groupby_itemContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link MethodNameParser#having_clause}.
 	 * @param ctx the parse tree
 	 */
@@ -147,16 +177,6 @@ public interface MethodNameListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitOrderby_clause(MethodNameParser.Orderby_clauseContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#orderby_item}.
-	 * @param ctx the parse tree
-	 */
-	void enterOrderby_item(MethodNameParser.Orderby_itemContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#orderby_item}.
-	 * @param ctx the parse tree
-	 */
-	void exitOrderby_item(MethodNameParser.Orderby_itemContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MethodNameParser#field_clause}.
 	 * @param ctx the parse tree

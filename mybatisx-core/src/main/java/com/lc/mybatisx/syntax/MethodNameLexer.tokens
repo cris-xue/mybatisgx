@@ -24,5 +24,7 @@ FIELD=17
 'Having'=7
 'Asc'=8
 'Desc'=9
+'insert'=10
 'delete'=11
 'update'=12
+'find'=13

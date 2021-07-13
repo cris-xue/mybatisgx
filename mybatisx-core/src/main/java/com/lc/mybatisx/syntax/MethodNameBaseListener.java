@@ -16,13 +16,49 @@ public class MethodNameBaseListener implements MethodNameListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterQl_statement(MethodNameParser.Ql_statementContext ctx) { }
+	@Override public void enterSql_statement(MethodNameParser.Sql_statementContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitQl_statement(MethodNameParser.Ql_statementContext ctx) { }
+	@Override public void exitSql_statement(MethodNameParser.Sql_statementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterInsert_statement(MethodNameParser.Insert_statementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitInsert_statement(MethodNameParser.Insert_statementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterDelete_statement(MethodNameParser.Delete_statementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitDelete_statement(MethodNameParser.Delete_statementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterUpdate_statement(MethodNameParser.Update_statementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitUpdate_statement(MethodNameParser.Update_statementContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -112,6 +148,18 @@ public class MethodNameBaseListener implements MethodNameListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterWhere_item(MethodNameParser.Where_itemContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitWhere_item(MethodNameParser.Where_itemContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterWhere_link_op_clause(MethodNameParser.Where_link_op_clauseContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -148,18 +196,6 @@ public class MethodNameBaseListener implements MethodNameListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterGroupby_item(MethodNameParser.Groupby_itemContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitGroupby_item(MethodNameParser.Groupby_itemContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterHaving_clause(MethodNameParser.Having_clauseContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -179,18 +215,6 @@ public class MethodNameBaseListener implements MethodNameListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitOrderby_clause(MethodNameParser.Orderby_clauseContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterOrderby_item(MethodNameParser.Orderby_itemContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitOrderby_item(MethodNameParser.Orderby_itemContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

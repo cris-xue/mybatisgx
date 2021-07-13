@@ -11,11 +11,29 @@ import org.antlr.v4.runtime.tree.ParseTreeVisitor;
  */
 public interface MethodNameVisitor<T> extends ParseTreeVisitor<T> {
 	/**
-	 * Visit a parse tree produced by {@link MethodNameParser#ql_statement}.
+	 * Visit a parse tree produced by {@link MethodNameParser#sql_statement}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitQl_statement(MethodNameParser.Ql_statementContext ctx);
+	T visitSql_statement(MethodNameParser.Sql_statementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MethodNameParser#insert_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInsert_statement(MethodNameParser.Insert_statementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MethodNameParser#delete_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDelete_statement(MethodNameParser.Delete_statementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MethodNameParser#update_statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitUpdate_statement(MethodNameParser.Update_statementContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MethodNameParser#select_statement}.
 	 * @param ctx the parse tree
@@ -59,6 +77,12 @@ public interface MethodNameVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitWhere_clause(MethodNameParser.Where_clauseContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link MethodNameParser#where_item}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitWhere_item(MethodNameParser.Where_itemContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link MethodNameParser#where_link_op_clause}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -77,12 +101,6 @@ public interface MethodNameVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitGroupby_clause(MethodNameParser.Groupby_clauseContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MethodNameParser#groupby_item}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitGroupby_item(MethodNameParser.Groupby_itemContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link MethodNameParser#having_clause}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -94,12 +112,6 @@ public interface MethodNameVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitOrderby_clause(MethodNameParser.Orderby_clauseContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link MethodNameParser#orderby_item}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitOrderby_item(MethodNameParser.Orderby_itemContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MethodNameParser#field_clause}.
 	 * @param ctx the parse tree

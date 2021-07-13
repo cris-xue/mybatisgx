@@ -1,7 +1,5 @@
 package com.lc.mybatisx.model;
 
-import com.lc.mybatisx.annotation.LogicDelete;
-
 import java.util.List;
 
 /**
@@ -13,13 +11,9 @@ public class MapperNode {
 
     private Class<?> interfaceClass;
 
-    private TypeParamNode entityTypeParamNode;
-
-    private TypeParamNode primaryKeyTypeParamNode;
+    private List<TypeParamNode> typeParamNodeList;
 
     private List<ActionNode> actionNodeList;
-
-    private LogicDelete logicDelete;
 
     public Class<?> getInterfaceClass() {
         return interfaceClass;
@@ -29,20 +23,12 @@ public class MapperNode {
         this.interfaceClass = interfaceClass;
     }
 
-    public TypeParamNode getEntityTypeParamNode() {
-        return entityTypeParamNode;
+    public List<TypeParamNode> getTypeParamNodeList() {
+        return typeParamNodeList;
     }
 
-    public void setEntityTypeParamNode(TypeParamNode entityTypeParamNode) {
-        this.entityTypeParamNode = entityTypeParamNode;
-    }
-
-    public TypeParamNode getPrimaryKeyTypeParamNode() {
-        return primaryKeyTypeParamNode;
-    }
-
-    public void setPrimaryKeyTypeParamNode(TypeParamNode primaryKeyTypeParamNode) {
-        this.primaryKeyTypeParamNode = primaryKeyTypeParamNode;
+    public void setTypeParamNodeList(List<TypeParamNode> typeParamNodeList) {
+        this.typeParamNodeList = typeParamNodeList;
     }
 
     public List<ActionNode> getActionNodeList() {
@@ -53,11 +39,4 @@ public class MapperNode {
         this.actionNodeList = actionNodeList;
     }
 
-    public LogicDelete getLogicDelete() {
-        return logicDelete;
-    }
-
-    public void setLogicDelete(LogicDelete logicDelete) {
-        this.logicDelete = logicDelete;
-    }
 }

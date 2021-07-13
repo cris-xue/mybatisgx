@@ -1,10 +1,5 @@
 package com.lc.mybatisx.model.wrapper;
 
-import com.lc.mybatisx.wrapper.LimitWrapper;
-import com.lc.mybatisx.wrapper.OrderWrapper;
-import com.lc.mybatisx.wrapper.SqlWrapper;
-import com.lc.mybatisx.wrapper.WhereWrapper;
-
 /**
  * @author ：薛承城
  * @description：一句话描述
@@ -13,7 +8,11 @@ import com.lc.mybatisx.wrapper.WhereWrapper;
 public class QuerySqlWrapper extends SqlWrapper {
 
     /**
-     *
+     * 数据
+     */
+    private DataWrapper dataWrapper;
+    /**
+     * 条件
      */
     private WhereWrapper whereWrapper;
     /**
@@ -24,6 +23,14 @@ public class QuerySqlWrapper extends SqlWrapper {
      *
      */
     private OrderWrapper orderWrapper;
+
+    public DataWrapper getDataWrapper() {
+        return dataWrapper;
+    }
+
+    public void setDataWrapper(DataWrapper dataWrapper) {
+        this.dataWrapper = dataWrapper;
+    }
 
     public WhereWrapper getWhereWrapper() {
         return whereWrapper;

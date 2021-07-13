@@ -1,4 +1,4 @@
-package com.lc.mybatisx.model;
+package com.lc.mybatisx.model.wrapper;
 
 import java.util.Arrays;
 import java.util.List;

@@ -175,7 +175,7 @@ public abstract class AbstractMapperHandler {
         return null;
     }
 
-    abstract List<XNode> readTemplate();
+    protected abstract List<XNode> readTemplate();
 
     abstract protected SqlWrapper instanceSqlWrapper();
 

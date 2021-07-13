@@ -2,8 +2,12 @@ package com.lc.mybatisx.handler;
 
 import com.lc.mybatisx.dao.Dao;
 import com.lc.mybatisx.dao.SimpleDao;
+import com.lc.mybatisx.model.InterfaceNode;
+import com.lc.mybatisx.model.MethodNode;
+import com.lc.mybatisx.parse.SqlModel;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.apache.ibatis.parsing.XNode;
+import org.apache.ibatis.session.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.TypeUtils;
@@ -28,17 +32,38 @@ public class CURDMapper {
 
     private static Map<String, Class<? extends AbstractMapperHandler>> mapperHandlerMap = new HashMap<>();
 
-    static {
+    /*static {
         mapperHandlerMap.put("insert", InsertMapperHandler.class);
         mapperHandlerMap.put("delete", DeleteMapperHandler.class);
         mapperHandlerMap.put("update", UpdateMapperHandler.class);
         mapperHandlerMap.put("find", QueryMapperHandler.class);
-    }
+    }*/
 
     public static List<XNode> getNodeList(MapperBuilderAssistant builderAssistant, String namespace) {
         DaoParse daoParse = new DaoParse();
-        daoParse.parse(builderAssistant);
-        return null;
+        InterfaceNode interfaceNode = daoParse.parse(builderAssistant);
+        List<XNode> xNodeList = buildWrapper(builderAssistant, interfaceNode);
+        return xNodeList;
+    }
+
+    private static List<XNode> buildWrapper(MapperBuilderAssistant builderAssistant, InterfaceNode interfaceNode) {
+        List<XNode> xNodeList = new ArrayList<>();
+
+        List<MethodNode> methodNodeList = interfaceNode.getMethodNodeList();
+        String interfaceName = interfaceNode.getName();
+        for (MethodNode methodNode : methodNodeList) {
+            String methodName = methodNode.getName();
+            Configuration configuration = builderAssistant.getConfiguration();
+            if (configuration.hasStatement(interfaceName + "." + methodName)) {
+                continue;
+            }
+
+            SqlModel sqlModel = SqlModel.parse(methodName);
+            QueryMapperHandler queryMapperHandler = new QueryMapperHandler();
+            List<XNode> xNode = queryMapperHandler.readTemplate();
+            xNodeList.addAll(xNode);
+        }
+        return xNodeList;
     }
 
     /*public static List<XNode> getNodeList(MapperBuilderAssistant builderAssistant, String namespace) {

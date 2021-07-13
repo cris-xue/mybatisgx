@@ -9,11 +9,21 @@ import java.util.List;
  */
 public class InterfaceNode {
 
+    private String name;
+
     private Class<?> interfaceClass;
 
     private List<TypeParamNode> typeParamNodeList;
 
     private List<MethodNode> methodNodeList;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public Class<?> getInterfaceClass() {
         return interfaceClass;

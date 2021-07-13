@@ -52,8 +52,8 @@ public class TestLex {
         MethodNameParser methodNameParser = new MethodNameParser(tokens);
 
         // new MethodNameParser.Ql_statementContext();
-        ParseTree aaaa = methodNameParser.ql_statement();
-        String a = methodNameParser.ql_statement().getPayload().getText();
+        ParseTree aaaa = methodNameParser.sql_statement();
+        String a = methodNameParser.sql_statement().getPayload().getText();
 
         methodNameParser.select_clause().getPayload();
 
@@ -104,7 +104,7 @@ public class TestLex {
 
         MethodNameVisitor methodNameVisitor = new MethodNameBaseVisitor();
 
-        ParseTree qlStatementContext = methodNameParser.ql_statement();
+        ParseTree qlStatementContext = methodNameParser.sql_statement();
         getKeywordMap(null, qlStatementContext);
         System.out.println("aaaaaa");
     }
@@ -134,7 +134,7 @@ public class TestLex {
         CommonTokenStream commonStream = new CommonTokenStream(methodNameLexer);
         MethodNameParser methodNameParser = new MethodNameParser(commonStream);
 
-        ParseTree qlStatementContext = methodNameParser.ql_statement();
+        ParseTree qlStatementContext = methodNameParser.sql_statement();
         // SqlModel.buildSqlModel(qlStatementContext);
         // SqlModel sqlModel = SqlModel.build();
         System.out.println("aaaaaaaa");

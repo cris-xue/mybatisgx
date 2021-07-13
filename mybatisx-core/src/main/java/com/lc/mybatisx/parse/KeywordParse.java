@@ -77,7 +77,7 @@ public class KeywordParse {
         CommonTokenStream commonStream = new CommonTokenStream(methodNameLexer);
         MethodNameParser methodNameParser = new MethodNameParser(commonStream);
 
-        ParseTree qlStatementContext = methodNameParser.ql_statement();
+        ParseTree qlStatementContext = methodNameParser.sql_statement();
         List<String> sqlKeyword = new ArrayList<>();
         getSqlKeyword(sqlKeyword, qlStatementContext);
         return sqlKeyword;
@@ -104,7 +104,7 @@ public class KeywordParse {
         CommonTokenStream commonStream = new CommonTokenStream(methodNameLexer);
         MethodNameParser methodNameParser = new MethodNameParser(commonStream);
 
-        ParseTree qlStatementContext = methodNameParser.ql_statement();
+        ParseTree qlStatementContext = methodNameParser.sql_statement();
 
         SqlModel sqlModel = SqlModel.parse(methodName);
         return sqlModel;

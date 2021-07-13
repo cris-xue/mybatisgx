@@ -43,6 +43,7 @@ public class DaoParse {
         Class<?> daoInterface = getDaoInterface(namespace);
 
         InterfaceNode interfaceNode = new InterfaceNode();
+        interfaceNode.setName(daoInterface.getName());
         interfaceNode.setInterfaceClass(daoInterface);
         interfaceNode.setTypeParamNodeList(parseTypeParam(daoInterface));
         interfaceNode.setMethodNodeList(parseAction(daoInterface, interfaceNode.getTypeParamNodeList()));

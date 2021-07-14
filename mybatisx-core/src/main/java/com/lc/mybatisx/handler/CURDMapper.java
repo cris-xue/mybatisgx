@@ -58,7 +58,7 @@ public class CURDMapper {
                 continue;
             }
 
-            SqlModel sqlModel = SqlModel.parse(methodName);
+            SqlModel sqlModel = SqlModel.parse(methodNode, methodName);
             QueryMapperHandler queryMapperHandler = new QueryMapperHandler();
             List<XNode> xNode = queryMapperHandler.readTemplate();
             xNodeList.addAll(xNode);

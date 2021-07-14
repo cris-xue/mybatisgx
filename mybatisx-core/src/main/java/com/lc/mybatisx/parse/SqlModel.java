@@ -1,5 +1,6 @@
 package com.lc.mybatisx.parse;
 
+import com.lc.mybatisx.model.MethodNode;
 import com.lc.mybatisx.model.wrapper.WhereWrapper;
 import com.lc.mybatisx.syntax.MethodNameLexer;
 import com.lc.mybatisx.syntax.MethodNameParser;
@@ -7,7 +8,6 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.TerminalNodeImpl;
 import org.springframework.util.ObjectUtils;
 
 import java.util.ArrayList;
@@ -29,7 +29,7 @@ public class SqlModel {
     private SqlModel() {
     }
 
-    public static SqlModel parse(String methodName) {
+    public static SqlModel parse(MethodNode methodNode, String methodName) {
         CharStream input = CharStreams.fromString(methodName);
         MethodNameLexer methodNameLexer = new MethodNameLexer(input);
         CommonTokenStream commonStream = new CommonTokenStream(methodNameLexer);
@@ -46,64 +46,113 @@ public class SqlModel {
         for (int i = 0; i < childCount; i++) {
             ParseTree parseTreeChild = parseTree.getChild(i);
 
-            if (parseTreeChild instanceof MethodNameParser.Select_clauseContext) {
-            } else if (parseTreeChild instanceof MethodNameParser.Where_clauseContext) {
-                List<WhereWrapper> whereWrapperList = new ArrayList<>();
-                buildWhere(whereWrapperList, null, parseTreeChild);
-                System.out.println("aa");
-            } else if (parseTreeChild instanceof TerminalNodeImpl) {
-                parseTree(sqlModel, parseTreeChild);
-            } else if (parseTreeChild instanceof MethodNameParser.Field_clauseContext) {
-                parseTree(sqlModel, parseTreeChild);
-            } else {
-                buildSqlModel(sqlModel, parseTreeChild);
-            }
+            buildInsert(parseTreeChild);
+            buildDelete(parseTreeChild);
+            buildUpdate(parseTreeChild);
+            buildSelectStatement(parseTreeChild);
         }
     }
 
-    private static WhereWrapper buildWhere(List<WhereWrapper> whereWrapperList, WhereWrapper whereWrapper, ParseTree parseTree) {
-        int count = parseTree.getChildCount();
+    private static void buildInsert(ParseTree parseTree) {
+        if (parseTree instanceof MethodNameParser.Insert_statementContext) {
+            int childCount = parseTree.getChildCount();
+            for (int i = 0; i < childCount; i++) {
+                buildInsert(parseTree.getChild(i));
+            }
+        }
+        if (!(parseTree instanceof MethodNameParser.Insert_clauseContext)) {
+            return;
+        }
+    }
 
+    private static void buildDelete(ParseTree parseTree) {
+        if (parseTree instanceof MethodNameParser.Delete_statementContext) {
+            int childCount = parseTree.getChildCount();
+            for (int i = 0; i < childCount; i++) {
+                buildDelete(parseTree.getChild(i));
+            }
+        }
+        if (!(parseTree instanceof MethodNameParser.Delete_clauseContext)) {
+            return;
+        }
+    }
+
+    private static void buildUpdate(ParseTree parseTree) {
+        if (parseTree instanceof MethodNameParser.Update_statementContext) {
+            int childCount = parseTree.getChildCount();
+            for (int i = 0; i < childCount; i++) {
+                buildUpdate(parseTree.getChild(i));
+            }
+        }
+        if (!(parseTree instanceof MethodNameParser.Update_clauseContext)) {
+            return;
+        }
+    }
+
+    private static void buildSelectStatement(ParseTree parseTree) {
+        ParseTree parseTreeParent = parseTree.getParent();
+        if (!(parseTree instanceof MethodNameParser.Select_statementContext)
+                || !(parseTreeParent instanceof MethodNameParser.Select_statementContext)) {
+            return;
+        }
+
+        int childCount = parseTree.getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            buildSelectStatement(parseTree.getChild(i));
+        }
+
+        if (!(parseTree.getParent() instanceof MethodNameParser.Select_statementContext)) {
+            return;
+        }
+        // 构建动作
+
+        // 构建条件
+        List<WhereWrapper> whereWrapperList = new ArrayList<>();
+        buildWhereClause(whereWrapperList, parseTree);
+    }
+
+    private static void buildWhereClause(List<WhereWrapper> whereWrapperList, ParseTree parseTree) {
+        if (!(parseTree instanceof MethodNameParser.Where_clauseContext)) {
+            return;
+        }
+
+        buildWhereItem(whereWrapperList, parseTree);
+    }
+
+    private static void buildWhereItem(List<WhereWrapper> whereWrapperList, ParseTree parseTree) {
+        if (!(parseTree instanceof MethodNameParser.Where_itemContext)) {
+            return;
+        }
+
+        int count = parseTree.getChildCount();
         for (int i = 0; i < count; i++) {
             ParseTree parseTreeChild = parseTree.getChild(i);
-
             String tokens = parseTreeChild.getText();
-            String parentSimpleName = parseTreeChild.getParent().getClass().getSimpleName();
-            String simpleName = parseTreeChild.getClass().getSimpleName();
 
             if (parseTreeChild instanceof MethodNameParser.Where_itemContext) {
-                WhereWrapper ww = buildWhere(null, new WhereWrapper(), parseTreeChild);
-                whereWrapperList.add(ww);
+                buildWhereItem(whereWrapperList, parseTreeChild);
             }
 
+            WhereWrapper whereWrapper = new WhereWrapper();
             if (parseTreeChild instanceof MethodNameParser.Where_link_op_clauseContext) {
-                System.out.println(tokens + "---" + simpleName + "---" + parentSimpleName);
                 whereWrapper.setLinkOp(tokens);
-            } else if (parseTreeChild instanceof MethodNameParser.Field_clauseContext) {
-                System.out.println(tokens + "---" + simpleName + "---" + parentSimpleName);
-                whereWrapper.setJavaColumn(Arrays.asList(tokens));
             } else if (parseTreeChild instanceof MethodNameParser.Where_op_clauseContext) {
-                System.out.println(tokens + "---" + simpleName + "---" + parentSimpleName);
                 whereWrapper.setOp(tokens);
             }
+            String field = buildField(parseTree);
+            whereWrapper.setJavaColumn(Arrays.asList(field));
+
+            whereWrapperList.add(whereWrapper);
         }
-
-        return whereWrapper;
     }
 
-    private static void parseTree(SqlModel sqlModel, ParseTree parseTree) {
-        ParseTree parentParseTree = parseTree.getParent();
-        if (parentParseTree instanceof MethodNameParser.Select_clauseContext) {
-            sqlModel.setAction(parseTree.getText());
-        } else if (parentParseTree instanceof MethodNameParser.Where_clauseContext) {
-            // sqlModel.setSqlWhere(parseTree.getText());
-            System.out.println("adfadsf");
-        }/* else if (parentParseTree instanceof MethodNameParser.Groupby_clauseContext) {
-            sqlModel.setGroupBy(parseTree.getText());
-        } else if (parentParseTree instanceof MethodNameParser.Orderby_clauseContext) {
-            sqlModel.setOrderBy(parseTree.getText());
-        }*/
+    private static String buildField(ParseTree parseTree) {
+        if (!(parseTree instanceof MethodNameParser.Field_clauseContext)) {
+            return null;
+        }
+        return parseTree.getText();
     }
+
 
     public String getAction() {
         return action;

@@ -1,5 +1,6 @@
 package com.lc.mybatisx.handler.handler;
 
+import com.lc.mybatisx.model.MethodNode;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 /**
@@ -9,6 +10,6 @@ import org.antlr.v4.runtime.tree.ParseTree;
  */
 public interface MapperHandlerFilter {
 
-    void doFilter(ParseTree parseTree);
+    void doFilter(MethodNode methodNode, ParseTree parseTree, MapperHandlerFilterChain filterChain);
 
 }

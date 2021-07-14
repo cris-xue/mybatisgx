@@ -2,9 +2,9 @@ package com.lc.mybatisx.handler;
 
 import com.lc.mybatisx.dao.Dao;
 import com.lc.mybatisx.dao.SimpleDao;
+import com.lc.mybatisx.handler.handler.MapperHandlerFilterChain;
 import com.lc.mybatisx.model.InterfaceNode;
 import com.lc.mybatisx.model.MethodNode;
-import com.lc.mybatisx.parse.SqlModel;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.session.Configuration;
@@ -58,10 +58,12 @@ public class CURDMapper {
                 continue;
             }
 
-            SqlModel sqlModel = SqlModel.parse(methodNode, methodName);
-            QueryMapperHandler queryMapperHandler = new QueryMapperHandler();
+            // SqlModel sqlModel = SqlModel.parse(methodNode, methodName);
+            MapperHandlerFilterChain filterChain = new MapperHandlerFilterChain();
+            filterChain.chain(null, null);
+            /*QueryMapperHandler queryMapperHandler = new QueryMapperHandler();
             List<XNode> xNode = queryMapperHandler.readTemplate();
-            xNodeList.addAll(xNode);
+            xNodeList.addAll(xNode);*/
         }
         return xNodeList;
     }

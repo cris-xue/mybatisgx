@@ -12,8 +12,6 @@ public class MapperHandlerFilterChain {
 
     private int pos = 0;
     private MapperHandlerFilter[] filters = new MapperHandlerFilter[]{
-            new SqlMapperHandlerFilter(),
-
             new InsertMapperHandlerFilter(),
             new DeleteMapperHandlerFilter(),
             new UpdateMapperHandlerFilter(),

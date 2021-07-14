@@ -45,20 +45,15 @@ public class SqlModel {
         int childCount = parseTree.getChildCount();
         for (int i = 0; i < childCount; i++) {
             ParseTree parseTreeChild = parseTree.getChild(i);
-            String tokens = parseTreeChild.getText();
-            String parentSimpleName = parseTreeChild.getParent().getClass().getSimpleName();
-            String simpleName = parseTreeChild.getClass().getSimpleName();
 
             if (parseTreeChild instanceof MethodNameParser.Select_clauseContext) {
-                System.out.println(tokens + "---" + simpleName + "---" + parentSimpleName);
             } else if (parseTreeChild instanceof MethodNameParser.Where_clauseContext) {
-                System.out.println(tokens + "---" + simpleName + "---" + parentSimpleName);
-                buildWhere(parseTreeChild, null);
+                List<WhereWrapper> whereWrapperList = new ArrayList<>();
+                buildWhere(whereWrapperList, null, parseTreeChild);
+                System.out.println("aa");
             } else if (parseTreeChild instanceof TerminalNodeImpl) {
-                System.out.println(tokens + "---" + simpleName + "---" + parentSimpleName);
                 parseTree(sqlModel, parseTreeChild);
             } else if (parseTreeChild instanceof MethodNameParser.Field_clauseContext) {
-                System.out.println(tokens + "---" + simpleName + "---" + parentSimpleName);
                 parseTree(sqlModel, parseTreeChild);
             } else {
                 buildSqlModel(sqlModel, parseTreeChild);
@@ -66,10 +61,9 @@ public class SqlModel {
         }
     }
 
-    private static WhereWrapper buildWhere(ParseTree parseTree, WhereWrapper whereWrapper) {
+    private static WhereWrapper buildWhere(List<WhereWrapper> whereWrapperList, WhereWrapper whereWrapper, ParseTree parseTree) {
         int count = parseTree.getChildCount();
 
-        List<WhereWrapper> whereWrapperList = new ArrayList<>();
         for (int i = 0; i < count; i++) {
             ParseTree parseTreeChild = parseTree.getChild(i);
 
@@ -78,7 +72,7 @@ public class SqlModel {
             String simpleName = parseTreeChild.getClass().getSimpleName();
 
             if (parseTreeChild instanceof MethodNameParser.Where_itemContext) {
-                WhereWrapper ww = buildWhere(parseTreeChild, new WhereWrapper());
+                WhereWrapper ww = buildWhere(null, new WhereWrapper(), parseTreeChild);
                 whereWrapperList.add(ww);
             }
 
@@ -104,11 +98,11 @@ public class SqlModel {
         } else if (parentParseTree instanceof MethodNameParser.Where_clauseContext) {
             // sqlModel.setSqlWhere(parseTree.getText());
             System.out.println("adfadsf");
-        } else if (parentParseTree instanceof MethodNameParser.Groupby_clauseContext) {
+        }/* else if (parentParseTree instanceof MethodNameParser.Groupby_clauseContext) {
             sqlModel.setGroupBy(parseTree.getText());
         } else if (parentParseTree instanceof MethodNameParser.Orderby_clauseContext) {
             sqlModel.setOrderBy(parseTree.getText());
-        }
+        }*/
     }
 
     public String getAction() {

@@ -1,7 +1,8 @@
 package com.lc.mybatisx.test.dao;
 
-import com.lc.mybatisx.annotation.MapperMethod;
-import com.lc.mybatisx.annotation.MethodType;
+import com.lc.mybatisx.annotation.BetweenEnd;
+import com.lc.mybatisx.annotation.BetweenStart;
+import com.lc.mybatisx.annotation.Dynamic;
 import com.lc.mybatisx.dao.QueryDao;
 import com.lc.mybatisx.test.model.dto.TestDTO;
 import com.lc.mybatisx.test.model.entity.Test;
@@ -20,21 +21,22 @@ import java.util.Map;
 public interface TestDao extends QueryDao<Test, Long> {
 
     // @MapperMethod(type = MethodType.UPDATE)
-    // int updateByIdAndNameOrUserName(Test test);
-
-    @MapperMethod(type = MethodType.QUERY)
-    List<TestDTO> findByPayStatusAndPayStatusXyzAbcSelective(@Param("payStatus") String payStatus, @Param("payStatusXyzAbc") String payStatusXyzAbc);
+    int updateByIdAndNameOrUserName(Test test);
 
     // @MapperMethod(type = MethodType.QUERY)
-    // Map<String, Object> findByUsername(@Param("username") String username);
+    @Dynamic
+    List<TestDTO> findByPayStatusLteqAndPayStatusNotOrXyzAbcLt(@Param("payStatus") String payStatus, @Param("payStatusXyzAbc") String payStatusXyzAbc);
 
-    // Map<String, Object> findByIdBetween(@Param("start") @BetweenStart Long start, @Param("end") @BetweenEnd Long end);
+    // @MapperMethod(type = MethodType.QUERY)
+    Map<String, Object> findByUsername(@Param("username") String username);
+
+    Map<String, Object> findByIdBetween(@Param("start") @BetweenStart Long start, @Param("end") @BetweenEnd Long end);
 
     // Map<String, Object> findTop10ByAgeBetween(@Param("start") Long start, @Param("end") Long end);
 
-    @MapperMethod(type = MethodType.QUERY)
-    List<Map<String, Object>> findByPayStatusLteqAndPayStatus1NotOrXyzAbc1LtSelective(@Param("payStatus") String payStatus,
-                                                                                      @Param("payStatus1") String payStatus1,
-                                                                                      @Param("xyzAbc1") String xyzAbc1);
+    // @MapperMethod(type = MethodType.QUERY)
+    // List<Map<String, Object>> findByPayStatusLteqAndPayStatus1NotOrXyzAbc1LtSelective(@Param("payStatus") String payStatus,
+    //                                                                                   @Param("payStatus1") String payStatus1,
+    //                                                                                   @Param("xyzAbc1") String xyzAbc1);
 
 }

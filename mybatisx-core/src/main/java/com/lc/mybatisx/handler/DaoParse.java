@@ -111,19 +111,22 @@ public class DaoParse {
 
     private List<MethodParamNode> parseMethodParam(Method method, List<TypeParamNode> typeParamNodeList) {
         Parameter[] parameters = method.getParameters();
-
         List<MethodParamNode> methodParamNodeList = new ArrayList<>();
-        for (Parameter parameter : parameters) {
+
+        for (int i = 0; i < parameters.length; i++) {
             MethodParamNode methodParamNode = new MethodParamNode();
 
+            Parameter parameter = parameters[i];
             Type type = parameter.getParameterizedType();
-            String actualTypeName = type.getTypeName();
             Class<?> clazz = getActualMethodParam(typeParamNodeList, type);
 
-            methodParamNode.setName(actualTypeName);
             methodParamNode.setType(clazz);
             methodParamNode.setFieldNodeList(parseField(clazz));
-            methodParamNode.setParam(parameter.getAnnotation(Param.class));
+            Param param = parameter.getAnnotation(Param.class);
+            if (param != null) {
+                methodParamNode.setName(param.value());
+                methodParamNode.setParam(param);
+            }
 
             methodParamNodeList.add(methodParamNode);
         }

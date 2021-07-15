@@ -1,6 +1,7 @@
 package com.lc.mybatisx.handler.handler;
 
 import com.lc.mybatisx.model.MethodNode;
+import com.lc.mybatisx.model.MethodParamNode;
 import com.lc.mybatisx.model.wrapper.QuerySqlWrapper;
 import com.lc.mybatisx.model.wrapper.SqlWrapper;
 import com.lc.mybatisx.model.wrapper.WhereWrapper;
@@ -10,6 +11,7 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,13 +25,14 @@ import java.util.List;
 public class SqlMapperHandler {
 
     private static SqlMapperHandler instance = new SqlMapperHandler();
+    private MethodNode methodNode;
 
     public static SqlWrapper build(MethodNode methodNode, String methodName) {
-        ParseTree parseTree = instance.getParseTree(methodNode, methodName);
-        return instance.buildSqlWrapper(parseTree);
+        ParseTree parseTree = instance.getParseTree(methodName);
+        return instance.buildSqlWrapper(methodNode, parseTree);
     }
 
-    private ParseTree getParseTree(MethodNode methodNode, String methodName) {
+    private ParseTree getParseTree(String methodName) {
         CharStream input = CharStreams.fromString(methodName);
         MethodNameLexer methodNameLexer = new MethodNameLexer(input);
         CommonTokenStream commonStream = new CommonTokenStream(methodNameLexer);
@@ -39,7 +42,8 @@ public class SqlMapperHandler {
         return sqlStatementContext;
     }
 
-    private SqlWrapper buildSqlWrapper(ParseTree parseTree) {
+    private SqlWrapper buildSqlWrapper(MethodNode methodNode, ParseTree parseTree) {
+        this.methodNode = methodNode;
         int childCount = parseTree.getChildCount();
         for (int i = 0; i < childCount; i++) {
             ParseTree parseTreeChild = parseTree.getChild(i);
@@ -140,12 +144,14 @@ public class SqlMapperHandler {
         }
 
         List<WhereWrapper> whereWrapperList = new ArrayList<>();
-
         int childCount = parseTree.getChildCount();
         for (int i = 0; i < childCount; i++) {
             ParseTree parseTreeChild = parseTree.getChild(i);
             parseWhereItem(whereWrapperList, parseTreeChild);
         }
+
+        // 方法名条件和方法参数做匹配
+        matchField(whereWrapperList);
 
         int whereSize = whereWrapperList.size();
         WhereWrapper ww1 = null;
@@ -170,7 +176,6 @@ public class SqlMapperHandler {
         }
 
         WhereWrapper whereWrapper = new WhereWrapper();
-
         int count = parseTree.getChildCount();
         for (int i = 0; i < count; i++) {
             ParseTree parseTreeChild = parseTree.getChild(i);
@@ -181,10 +186,34 @@ public class SqlMapperHandler {
             } else if (parseTreeChild instanceof MethodNameParser.Where_op_clauseContext) {
                 whereWrapper.setOp(tokens);
             }
-            String field = parseFieldClause(parseTree);
-            whereWrapper.setJavaColumn(Arrays.asList(field));
+            String field = parseFieldClause(parseTreeChild);
+            if (StringUtils.isNoneBlank(field)) {
+                whereWrapper.setJavaColumn(Arrays.asList(field));
+            }
         }
         whereWrapperList.add(whereWrapper);
+    }
+
+    private void matchField(List<WhereWrapper> whereWrapperList) {
+        List<MethodParamNode> methodParamNodeList = methodNode.getMethodParamNodeList();
+
+        int paramCount = methodParamNodeList.size();
+        int whereCount = whereWrapperList.size();
+        if (paramCount == whereCount) {
+
+        }
+
+        for (WhereWrapper whereWrapper : whereWrapperList) {
+
+        }
+
+        for (MethodParamNode methodParamNode : methodParamNodeList) {
+            String methodParamName = methodParamNode.getName();
+            if (field.equalsIgnoreCase(methodParamName)) {
+
+            }
+        }
+        throw new RuntimeException("方法名和参数条件不匹配");
     }
 
     private String parseFieldClause(ParseTree parseTree) {

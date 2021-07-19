@@ -8,6 +8,7 @@ import com.lc.mybatisx.dao.Dao;
 import com.lc.mybatisx.dao.SimpleDao;
 import com.lc.mybatisx.model.*;
 import com.lc.mybatisx.utils.GenericUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.ibatis.annotations.Param;
@@ -17,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.TypeUtils;
 import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -33,6 +35,14 @@ import java.util.stream.Collectors;
 public class DaoParse {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractMapperHandler.class);
+
+    private static List<Class<?>> basicTypeList = new ArrayList<>();
+
+    static {
+        basicTypeList.add(Integer.class);
+        basicTypeList.add(Long.class);
+        basicTypeList.add(String.class);
+    }
 
     public InterfaceNode parse(MapperBuilderAssistant builderAssistant) {
         String namespace = builderAssistant.getCurrentNamespace();
@@ -62,8 +72,12 @@ public class DaoParse {
 
         TypeParamNode entityTypeParamNode = new TypeParamNode();
         entityTypeParamNode.setName("ENTITY");
-        entityTypeParamNode.setType((Class<?>) daoInterfaceParams[0]);
-        entityTypeParamNode.setFieldNodeList(parseField(daoInterfaceParams[0]));
+        Class<?> clazz = (Class<?>) daoInterfaceParams[0];
+        entityTypeParamNode.setType(clazz);
+        Boolean basicType = isBasicType(clazz);
+        if (!basicType) {
+            entityTypeParamNode.setFieldNodeList(parseField(clazz));
+        }
 
         typeParamNodeList.add(idTypeParamNode);
         typeParamNodeList.add(entityTypeParamNode);
@@ -120,12 +134,20 @@ public class DaoParse {
             Type type = parameter.getParameterizedType();
             Class<?> clazz = getActualMethodParam(typeParamNodeList, type);
 
+            Boolean basicType = isBasicType(clazz);
+            methodParamNode.setBasicType(basicType);
             methodParamNode.setType(clazz);
-            methodParamNode.setFieldNodeList(parseField(clazz));
+            if (!basicType) {
+                methodParamNode.setFieldNodeList(parseField(clazz));
+            }
             Param param = parameter.getAnnotation(Param.class);
             if (param != null) {
                 methodParamNode.setName(param.value());
                 methodParamNode.setParam(param);
+            }
+            Annotation[] annotations = parameter.getAnnotations();
+            if (ArrayUtils.isNotEmpty(annotations)) {
+                methodParamNode.setAnnotations(parameter.getAnnotations());
             }
 
             methodParamNodeList.add(methodParamNode);
@@ -140,8 +162,10 @@ public class DaoParse {
 
         ReturnNode returnNode = new ReturnNode();
         returnNode.setType(clazz);
-        returnNode.setFieldNodeList(parseField(clazz));
-
+        Boolean basicType = isBasicType(clazz);
+        if (!basicType) {
+            returnNode.setFieldNodeList(parseField(clazz));
+        }
         return returnNode;
     }
 
@@ -182,6 +206,15 @@ public class DaoParse {
 
         logger.info("{} un extend {}", SimpleDao.class.getName());
         return null;
+    }
+
+    private Boolean isBasicType(Class<?> clazz) {
+        for (Class<?> bt : basicTypeList) {
+            if (clazz == bt) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

@@ -30,7 +30,7 @@ public interface TestDao extends QueryDao<Test, Long> {
     // @MapperMethod(type = MethodType.QUERY)
     Map<String, Object> findByUsername(@Param("username") String username);
 
-    Map<String, Object> findByIdBetween(@Param("start") @BetweenStart Long start, @Param("end") @BetweenEnd Long end);
+    Map<String, Object> findByIdBetween(@Param("start") @BetweenStart("id") Long start, @Param("end") @BetweenEnd("id") Long end);
 
     // Map<String, Object> findTop10ByAgeBetween(@Param("start") Long start, @Param("end") Long end);
 

@@ -1,5 +1,7 @@
 package com.lc.mybatisx.handler.handler;
 
+import com.lc.mybatisx.annotation.BetweenEnd;
+import com.lc.mybatisx.annotation.BetweenStart;
 import com.lc.mybatisx.model.MethodNode;
 import com.lc.mybatisx.model.MethodParamNode;
 import com.lc.mybatisx.model.wrapper.QuerySqlWrapper;
@@ -12,9 +14,11 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.ibatis.annotations.Param;
+import org.springframework.core.annotation.AnnotationUtils;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -188,7 +192,7 @@ public class SqlMapperHandler {
             }
             String field = parseFieldClause(parseTreeChild);
             if (StringUtils.isNoneBlank(field)) {
-                whereWrapper.setJavaColumn(Arrays.asList(field));
+                whereWrapper.setDbColumn(field);
             }
         }
         whereWrapperList.add(whereWrapper);
@@ -196,24 +200,43 @@ public class SqlMapperHandler {
 
     private void matchField(List<WhereWrapper> whereWrapperList) {
         List<MethodParamNode> methodParamNodeList = methodNode.getMethodParamNodeList();
-
-        int paramCount = methodParamNodeList.size();
-        int whereCount = whereWrapperList.size();
-        if (paramCount == whereCount) {
-
-        }
-
         for (WhereWrapper whereWrapper : whereWrapperList) {
-
+            matchField(whereWrapper, methodParamNodeList);
         }
+        throw new RuntimeException("方法名和参数条件不匹配");
+    }
 
+    private void matchField(WhereWrapper whereWrapper, List<MethodParamNode> methodParamNodeList) {
         for (MethodParamNode methodParamNode : methodParamNodeList) {
             String methodParamName = methodParamNode.getName();
-            if (field.equalsIgnoreCase(methodParamName)) {
+            isBetween(methodParamNode);
+        }
+    }
+
+    private void isBetween(MethodParamNode methodParamNode) {
+        Annotation[] annotations = methodParamNode.getAnnotations();
+        for (int i = 0; i < annotations.length; i++) {
+            Annotation annotation = annotations[i];
+            if (annotation.annotationType() == BetweenStart.class) {
+                javaColumnList = new ArrayList<>();
+                if (annotation.annotationType() == Param.class) {
+                    String param = (String) AnnotationUtils.getValue(annotation, "value");
+                    javaColumnList.add(param);
+                    continue;
+                }
+                throw new RuntimeException("方法名和参数条件不匹配");
+            } else if (annotation.annotationType() == BetweenEnd.class) {
+                if (annotation.annotationType() == Param.class) {
+                    String param = (String) AnnotationUtils.getValue(annotation, "value");
+                    javaColumnList.add(param);
+                    whereWrapper.setJavaColumn(javaColumnList);
+                    continue;
+                }
+                throw new RuntimeException("方法名和参数条件不匹配");
+            } else {
 
             }
         }
-        throw new RuntimeException("方法名和参数条件不匹配");
     }
 
     private String parseFieldClause(ParseTree parseTree) {

@@ -13,8 +13,8 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.core.annotation.AnnotationUtils;
 
 import java.lang.annotation.Annotation;
@@ -203,40 +203,45 @@ public class SqlMapperHandler {
         for (WhereWrapper whereWrapper : whereWrapperList) {
             matchField(whereWrapper, methodParamNodeList);
         }
-        throw new RuntimeException("方法名和参数条件不匹配");
+        // throw new RuntimeException("方法名和参数条件不匹配");
     }
 
     private void matchField(WhereWrapper whereWrapper, List<MethodParamNode> methodParamNodeList) {
+        List<String> javaColumnList = new ArrayList<>();
+
         for (MethodParamNode methodParamNode : methodParamNodeList) {
+            String dbColumn = whereWrapper.getDbColumn();
             String methodParamName = methodParamNode.getName();
-            isBetween(methodParamNode);
+
+            Annotation annotation = isBetween(methodParamNode);
+            if (annotation != null) {
+                String value = (String) AnnotationUtils.getValue(annotation);
+                if (value.equalsIgnoreCase(dbColumn)) {
+                    javaColumnList.add(methodParamName);
+                }
+            } else {
+                if (dbColumn.equalsIgnoreCase(methodParamName)) {
+                    javaColumnList.add(methodParamName);
+                }
+            }
         }
+
+        if (ObjectUtils.isEmpty(javaColumnList)) {
+            throw new RuntimeException("方法名中条件和方法参数无匹配！" + whereWrapper.getDbColumn());
+        }
+
+        whereWrapper.setJavaColumn(javaColumnList);
     }
 
-    private void isBetween(MethodParamNode methodParamNode) {
+    private Annotation isBetween(MethodParamNode methodParamNode) {
         Annotation[] annotations = methodParamNode.getAnnotations();
         for (int i = 0; i < annotations.length; i++) {
             Annotation annotation = annotations[i];
-            if (annotation.annotationType() == BetweenStart.class) {
-                javaColumnList = new ArrayList<>();
-                if (annotation.annotationType() == Param.class) {
-                    String param = (String) AnnotationUtils.getValue(annotation, "value");
-                    javaColumnList.add(param);
-                    continue;
-                }
-                throw new RuntimeException("方法名和参数条件不匹配");
-            } else if (annotation.annotationType() == BetweenEnd.class) {
-                if (annotation.annotationType() == Param.class) {
-                    String param = (String) AnnotationUtils.getValue(annotation, "value");
-                    javaColumnList.add(param);
-                    whereWrapper.setJavaColumn(javaColumnList);
-                    continue;
-                }
-                throw new RuntimeException("方法名和参数条件不匹配");
-            } else {
-
+            if (annotation.annotationType() == BetweenStart.class || annotation.annotationType() == BetweenEnd.class) {
+                return annotation;
             }
         }
+        return null;
     }
 
     private String parseFieldClause(ParseTree parseTree) {

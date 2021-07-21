@@ -13,6 +13,8 @@ public class StructNode {
 
     private Class<?> type;
 
+    private Class<?> containerType;
+
     private List<FieldNode> fieldNodeList;
 
     public Boolean getBasicType() {
@@ -29,6 +31,14 @@ public class StructNode {
 
     public void setType(Class<?> type) {
         this.type = type;
+    }
+
+    public Class<?> getContainerType() {
+        return containerType;
+    }
+
+    public void setContainerType(Class<?> containerType) {
+        this.containerType = containerType;
     }
 
     public List<FieldNode> getFieldNodeList() {

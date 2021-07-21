@@ -19,6 +19,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -212,16 +213,30 @@ public class SqlMapperHandler {
         for (MethodParamNode methodParamNode : methodParamNodeList) {
             String dbColumn = whereWrapper.getDbColumn();
             String methodParamName = methodParamNode.getName();
+            Boolean isUse = methodParamNode.getUse();
 
             Annotation annotation = isBetween(methodParamNode);
-            if (annotation != null) {
+            if ("between".equalsIgnoreCase(whereWrapper.getOp())) {
                 String value = (String) AnnotationUtils.getValue(annotation);
-                if (value.equalsIgnoreCase(dbColumn)) {
+                if (!isUse && value.equalsIgnoreCase(dbColumn)) {
+                    methodParamNode.setUse(true);
                     javaColumnList.add(methodParamName);
                 }
-            } else {
-                if (dbColumn.equalsIgnoreCase(methodParamName)) {
+            } else if ("in".equalsIgnoreCase(whereWrapper.getOp())) {
+                Class<?> containerType = methodParamNode.getContainerType();
+                if (containerType != Collection.class) {
+                    throw new RuntimeException("in查询参数必须是Collection类型");
+                }
+                if (!isUse && dbColumn.equalsIgnoreCase(methodParamName)) {
+                    methodParamNode.setUse(true);
                     javaColumnList.add(methodParamName);
+                    break;
+                }
+            } else {
+                if (!isUse && dbColumn.equalsIgnoreCase(methodParamName)) {
+                    methodParamNode.setUse(true);
+                    javaColumnList.add(methodParamName);
+                    break;
                 }
             }
         }

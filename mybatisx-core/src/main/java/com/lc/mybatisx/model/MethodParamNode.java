@@ -23,6 +23,8 @@ public class MethodParamNode extends StructNode {
 
     private Annotation[] annotations;
 
+    private Boolean isUse = false;
+
     public String getName() {
         return name;
     }
@@ -61,5 +63,13 @@ public class MethodParamNode extends StructNode {
 
     public void setAnnotations(Annotation[] annotations) {
         this.annotations = annotations;
+    }
+
+    public Boolean getUse() {
+        return isUse;
+    }
+
+    public void setUse(Boolean use) {
+        isUse = use;
     }
 }

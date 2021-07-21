@@ -60,7 +60,6 @@ public class CURDMapper {
             }
 
             SqlWrapper sqlWrapper = SqlMapperHandler.build(methodNode, methodName);
-            System.out.println("1111");
 
             // SqlModel sqlModel = SqlModel.parse(methodNode, methodName);
             /*QueryMapperHandler queryMapperHandler = new QueryMapperHandler();

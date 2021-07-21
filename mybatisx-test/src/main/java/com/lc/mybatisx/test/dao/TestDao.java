@@ -25,12 +25,19 @@ public interface TestDao extends QueryDao<Test, Long> {
 
     // @MapperMethod(type = MethodType.QUERY)
     @Dynamic
-    List<TestDTO> findByPayStatusLteqAndPayStatusNotOrXyzAbcLt(@Param("payStatus") String payStatus, @Param("payStatusXyzAbc") String payStatusXyzAbc);
+    List<TestDTO> findByPayStatusLteqAndPayStatusNotOrXyzAbcLt(
+            @Param("payStatus") String payStatus,
+            @Param("payStatus") String payStatus1,
+            @Param("XyzAbc") String payStatusXyzAbc);
+
+    List<TestDTO> findByIdsIn(@Param("ids") List<Long> ids);
 
     // @MapperMethod(type = MethodType.QUERY)
     Map<String, Object> findByUsername(@Param("username") String username);
 
-    Map<String, Object> findByIdBetween(@Param("start") @BetweenStart("id") Long start, @Param("end") @BetweenEnd("id") Long end);
+    Map<String, Object> findByIdBetween(
+            @Param("start") @BetweenStart("id") Long start,
+            @Param("end") @BetweenEnd("id") Long end);
 
     // Map<String, Object> findTop10ByAgeBetween(@Param("start") Long start, @Param("end") Long end);
 

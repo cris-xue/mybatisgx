@@ -24,7 +24,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -131,12 +133,12 @@ public class DaoParse {
             MethodParamNode methodParamNode = new MethodParamNode();
 
             Parameter parameter = parameters[i];
-            Type type = parameter.getParameterizedType();
-            Class<?> clazz = getActualMethodParam(typeParamNodeList, type);
+            Class<?> clazz = getActualMethodParam(typeParamNodeList, parameter.getParameterizedType());
 
             Boolean basicType = isBasicType(clazz);
             methodParamNode.setBasicType(basicType);
             methodParamNode.setType(clazz);
+            methodParamNode.setContainerType(isContainerType(parameter.getType()));
             if (!basicType) {
                 methodParamNode.setFieldNodeList(parseField(clazz));
             }
@@ -178,6 +180,15 @@ public class DaoParse {
                 .collect(Collectors.toList());
 
         return ObjectUtils.isNotEmpty(filterTypeParamNode) ? filterTypeParamNode.get(0).getType() : (Class<?>) actualType;
+    }
+
+    private Class<?> isContainerType(Type type) {
+        if (TypeUtils.isAssignable(Collection.class, type)) {
+            return Collection.class;
+        } else if (TypeUtils.isAssignable(Map.class, type)) {
+            return Map.class;
+        }
+        return null;
     }
 
     public void parseMethodName(MethodNode methodNode) {

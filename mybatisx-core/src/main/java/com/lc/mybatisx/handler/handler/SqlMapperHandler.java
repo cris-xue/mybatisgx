@@ -2,8 +2,13 @@ package com.lc.mybatisx.handler.handler;
 
 import com.lc.mybatisx.annotation.BetweenEnd;
 import com.lc.mybatisx.annotation.BetweenStart;
+import com.lc.mybatisx.annotation.LogicDelete;
+import com.lc.mybatisx.annotation.Table;
+import com.lc.mybatisx.model.EntityTypeParamNode;
+import com.lc.mybatisx.model.InterfaceNode;
 import com.lc.mybatisx.model.MethodNode;
 import com.lc.mybatisx.model.MethodParamNode;
+import com.lc.mybatisx.model.wrapper.LogicDeleteWrapper;
 import com.lc.mybatisx.model.wrapper.QuerySqlWrapper;
 import com.lc.mybatisx.model.wrapper.SqlWrapper;
 import com.lc.mybatisx.model.wrapper.WhereWrapper;
@@ -30,11 +35,12 @@ import java.util.List;
 public class SqlMapperHandler {
 
     private static SqlMapperHandler instance = new SqlMapperHandler();
+    private InterfaceNode interfaceNode;
     private MethodNode methodNode;
 
-    public static SqlWrapper build(MethodNode methodNode, String methodName) {
+    public static SqlWrapper build(InterfaceNode interfaceNode, MethodNode methodNode, String methodName) {
         ParseTree parseTree = instance.getParseTree(methodName);
-        return instance.buildSqlWrapper(methodNode, parseTree);
+        return instance.buildSqlWrapper(interfaceNode, methodNode, parseTree);
     }
 
     private ParseTree getParseTree(String methodName) {
@@ -47,8 +53,10 @@ public class SqlMapperHandler {
         return sqlStatementContext;
     }
 
-    private SqlWrapper buildSqlWrapper(MethodNode methodNode, ParseTree parseTree) {
+    private SqlWrapper buildSqlWrapper(InterfaceNode interfaceNode, MethodNode methodNode, ParseTree parseTree) {
+        this.interfaceNode = interfaceNode;
         this.methodNode = methodNode;
+
         int childCount = parseTree.getChildCount();
         for (int i = 0; i < childCount; i++) {
             ParseTree parseTreeChild = parseTree.getChild(i);
@@ -109,6 +117,20 @@ public class SqlMapperHandler {
         }
 
         QuerySqlWrapper querySqlWrapper = new QuerySqlWrapper();
+        querySqlWrapper.setNamespace(this.interfaceNode.getName());
+        EntityTypeParamNode entityTypeParamNode = interfaceNode.getEntityTypeParamNode();
+        Table table = entityTypeParamNode.getTable();
+        querySqlWrapper.setTableName(table.name());
+
+        LogicDelete logicDelete = entityTypeParamNode.getLogicDelete();
+        if (logicDelete != null) {
+            LogicDeleteWrapper logicDeleteWrapper = new LogicDeleteWrapper();
+            logicDeleteWrapper.setValue(logicDelete.delete());
+            logicDeleteWrapper.setNotValue(logicDelete.notDelete());
+            querySqlWrapper.setLogicDeleteWrapper(logicDeleteWrapper);
+        }
+
+        querySqlWrapper.setMethodName(methodNode.getName());
 
         int childCount = parseTree.getChildCount();
         for (int i = 0; i < childCount; i++) {

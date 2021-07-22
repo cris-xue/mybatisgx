@@ -15,6 +15,10 @@ public class InterfaceNode {
 
     private List<TypeParamNode> typeParamNodeList;
 
+    private TypeParamNode idTypeParamNode;
+
+    private EntityTypeParamNode entityTypeParamNode;
+
     private List<MethodNode> methodNodeList;
 
     public String getName() {
@@ -39,6 +43,22 @@ public class InterfaceNode {
 
     public void setTypeParamNodeList(List<TypeParamNode> typeParamNodeList) {
         this.typeParamNodeList = typeParamNodeList;
+    }
+
+    public TypeParamNode getIdTypeParamNode() {
+        return idTypeParamNode;
+    }
+
+    public void setIdTypeParamNode(TypeParamNode idTypeParamNode) {
+        this.idTypeParamNode = idTypeParamNode;
+    }
+
+    public EntityTypeParamNode getEntityTypeParamNode() {
+        return entityTypeParamNode;
+    }
+
+    public void setEntityTypeParamNode(EntityTypeParamNode entityTypeParamNode) {
+        this.entityTypeParamNode = entityTypeParamNode;
     }
 
     public List<MethodNode> getMethodNodeList() {

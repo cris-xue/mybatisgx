@@ -1,20 +1,17 @@
 package com.lc.mybatisx.handler;
 
-import com.lc.mybatisx.annotation.Column;
-import com.lc.mybatisx.annotation.Dynamic;
-import com.lc.mybatisx.annotation.Id;
-import com.lc.mybatisx.annotation.LogicDelete;
+import com.lc.mybatisx.annotation.*;
 import com.lc.mybatisx.dao.Dao;
 import com.lc.mybatisx.dao.SimpleDao;
 import com.lc.mybatisx.model.*;
 import com.lc.mybatisx.utils.GenericUtils;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.util.TypeUtils;
 import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
 
@@ -27,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * @author ：薛承城
@@ -41,6 +37,7 @@ public class DaoParse {
     private static List<Class<?>> basicTypeList = new ArrayList<>();
 
     static {
+        basicTypeList.add(int.class);
         basicTypeList.add(Integer.class);
         basicTypeList.add(Long.class);
         basicTypeList.add(String.class);
@@ -57,37 +54,48 @@ public class DaoParse {
         InterfaceNode interfaceNode = new InterfaceNode();
         interfaceNode.setName(daoInterface.getName());
         interfaceNode.setInterfaceClass(daoInterface);
-        interfaceNode.setTypeParamNodeList(parseTypeParam(daoInterface));
-        interfaceNode.setMethodNodeList(parseAction(daoInterface, interfaceNode.getTypeParamNodeList()));
+
+        Type[] daoInterfaceParams = getDaoInterfaceParams(daoInterface);
+        interfaceNode.setIdTypeParamNode(parseTypeParam("ID", daoInterfaceParams[1]));
+        interfaceNode.setEntityTypeParamNode(parseEntityTypeParam("ENTITY", daoInterfaceParams[0]));
+
+        List<MethodNode> methodNodeList = parseMethod(daoInterface, interfaceNode);
+        interfaceNode.setMethodNodeList(methodNodeList);
 
         return interfaceNode;
     }
 
-    public List<TypeParamNode> parseTypeParam(Class<?> daoInterface) {
-        List<TypeParamNode> typeParamNodeList = new ArrayList<>();
+    private EntityTypeParamNode parseEntityTypeParam(String name, Type daoInterface) {
+        TypeParamNode typeParamNode = parseTypeParam(name, daoInterface);
 
-        Type[] daoInterfaceParams = getDaoInterfaceParams(daoInterface);
+        EntityTypeParamNode entityTypeParamNode = new EntityTypeParamNode();
+        BeanUtils.copyProperties(typeParamNode, entityTypeParamNode);
 
-        TypeParamNode idTypeParamNode = new TypeParamNode();
-        idTypeParamNode.setName("ID");
-        idTypeParamNode.setType((Class<?>) daoInterfaceParams[1]);
+        Class<?> clazz = (Class<?>) daoInterface;
+        entityTypeParamNode.setTable(clazz.getAnnotation(Table.class));
+        entityTypeParamNode.setLogicDelete(clazz.getAnnotation(LogicDelete.class));
+        entityTypeParamNode.setVersion(clazz.getAnnotation(Version.class));
 
-        TypeParamNode entityTypeParamNode = new TypeParamNode();
-        entityTypeParamNode.setName("ENTITY");
-        Class<?> clazz = (Class<?>) daoInterfaceParams[0];
-        entityTypeParamNode.setType(clazz);
-        Boolean basicType = isBasicType(clazz);
-        if (!basicType) {
-            entityTypeParamNode.setFieldNodeList(parseField(clazz));
-        }
-
-        typeParamNodeList.add(idTypeParamNode);
-        typeParamNodeList.add(entityTypeParamNode);
-
-        return typeParamNodeList;
+        return entityTypeParamNode;
     }
 
-    public List<MethodNode> parseAction(Class<?> daoInterface, List<TypeParamNode> typeParamNodeList) {
+    private TypeParamNode parseTypeParam(String name, Type daoInterface) {
+        Class<?> clazz = (Class<?>) daoInterface;
+
+        TypeParamNode typeParamNode = new TypeParamNode();
+        typeParamNode.setName(name);
+        typeParamNode.setType(clazz);
+
+        Boolean basicType = isBasicType(clazz);
+        if (!basicType) {
+            typeParamNode.setAnnotations(clazz.getAnnotations());
+            typeParamNode.setFieldNodeList(parseField(clazz));
+        }
+
+        return typeParamNode;
+    }
+
+    private List<MethodNode> parseMethod(Class<?> daoInterface, InterfaceNode interfaceNode) {
         Method[] methods = daoInterface.getMethods();
 
         List<MethodNode> methodNodeList = new ArrayList<>();
@@ -96,8 +104,8 @@ public class DaoParse {
 
             methodNode.setMethod(method);
             methodNode.setName(method.getName());
-            methodNode.setMethodParamNodeList(parseMethodParam(method, typeParamNodeList));
-            methodNode.setReturnNode(parseMethodResult(method, typeParamNodeList));
+            methodNode.setMethodParamNodeList(parseMethodParam(interfaceNode, method));
+            methodNode.setReturnNode(parseMethodReturn(interfaceNode, method));
             methodNode.setDynamic(method.getAnnotation(Dynamic.class));
 
             methodNodeList.add(methodNode);
@@ -106,7 +114,7 @@ public class DaoParse {
         return methodNodeList;
     }
 
-    public List<FieldNode> parseField(Type type) {
+    private List<FieldNode> parseField(Type type) {
         Field[] fields = FieldUtils.getAllFields((Class<?>) type);
 
         List<FieldNode> fieldNodeList = new ArrayList<>();
@@ -125,7 +133,7 @@ public class DaoParse {
         return fieldNodeList;
     }
 
-    private List<MethodParamNode> parseMethodParam(Method method, List<TypeParamNode> typeParamNodeList) {
+    private List<MethodParamNode> parseMethodParam(InterfaceNode interfaceNode, Method method) {
         Parameter[] parameters = method.getParameters();
         List<MethodParamNode> methodParamNodeList = new ArrayList<>();
 
@@ -133,12 +141,12 @@ public class DaoParse {
             MethodParamNode methodParamNode = new MethodParamNode();
 
             Parameter parameter = parameters[i];
-            Class<?> clazz = getActualMethodParam(typeParamNodeList, parameter.getParameterizedType());
+            Class<?> clazz = getMethodParamType(interfaceNode, parameter);
 
             Boolean basicType = isBasicType(clazz);
             methodParamNode.setBasicType(basicType);
             methodParamNode.setType(clazz);
-            methodParamNode.setContainerType(isContainerType(parameter.getType()));
+            methodParamNode.setContainerType(getContainerType(parameter.getType()));
             if (!basicType) {
                 methodParamNode.setFieldNodeList(parseField(clazz));
             }
@@ -158,31 +166,50 @@ public class DaoParse {
         return methodParamNodeList;
     }
 
-    private ReturnNode parseMethodResult(Method method, List<TypeParamNode> typeParamNodeList) {
-        Type type = method.getGenericReturnType();
-        Class<?> clazz = getActualMethodParam(typeParamNodeList, type);
+    private ReturnNode parseMethodReturn(InterfaceNode interfaceNode, Method method) {
+        Class<?> clazz = getMethodReturnType(interfaceNode, method);
 
         ReturnNode returnNode = new ReturnNode();
         returnNode.setType(clazz);
         Boolean basicType = isBasicType(clazz);
+        returnNode.setBasicType(basicType);
+        returnNode.setContainerType(getContainerType(clazz));
         if (!basicType) {
             returnNode.setFieldNodeList(parseField(clazz));
         }
         return returnNode;
     }
 
-    public Class<?> getActualMethodParam(List<TypeParamNode> typeParamNodeList, Type type) {
-        Type actualType = GenericUtils.getGenericType(type);
-        String actualTypeName = actualType.getTypeName();
-        List<TypeParamNode> filterTypeParamNode = typeParamNodeList
-                .stream()
-                .filter(i -> actualTypeName.equals(i.getName()))
-                .collect(Collectors.toList());
-
-        return ObjectUtils.isNotEmpty(filterTypeParamNode) ? filterTypeParamNode.get(0).getType() : (Class<?>) actualType;
+    private Class<?> getMethodParamType(InterfaceNode interfaceNode, Parameter parameter) {
+        Type type = parameter.getParameterizedType();
+        return getMethodType(interfaceNode, type);
     }
 
-    private Class<?> isContainerType(Type type) {
+    private Class<?> getMethodReturnType(InterfaceNode interfaceNode, Method method) {
+        Type type = method.getGenericReturnType();
+        return getMethodType(interfaceNode, type);
+    }
+
+    private Class<?> getMethodType(InterfaceNode interfaceNode, Type type) {
+        Type actualType = GenericUtils.getGenericType(type);
+        String actualTypeName = actualType.getTypeName();
+
+        TypeParamNode idTypeParamNode = interfaceNode.getIdTypeParamNode();
+        String idTypeParamName = idTypeParamNode.getName();
+
+        TypeParamNode entityTypeParamNode = interfaceNode.getEntityTypeParamNode();
+        String entityTypeParamName = entityTypeParamNode.getName();
+
+        if (actualTypeName.equals(idTypeParamName)) {
+            return idTypeParamNode.getType();
+        } else if (actualTypeName.equals(entityTypeParamName)) {
+            return entityTypeParamNode.getType();
+        } else {
+            return (Class<?>) actualType;
+        }
+    }
+
+    private Class<?> getContainerType(Type type) {
         if (TypeUtils.isAssignable(Collection.class, type)) {
             return Collection.class;
         } else if (TypeUtils.isAssignable(Map.class, type)) {
@@ -191,11 +218,7 @@ public class DaoParse {
         return null;
     }
 
-    public void parseMethodName(MethodNode methodNode) {
-
-    }
-
-    protected static Class<?> getDaoInterface(String namespace) {
+    private static Class<?> getDaoInterface(String namespace) {
         try {
             return Class.forName(namespace);
         } catch (ClassNotFoundException e) {
@@ -204,7 +227,7 @@ public class DaoParse {
         return null;
     }
 
-    protected static Type[] getDaoInterfaceParams(Class<?> daoInterface) {
+    private static Type[] getDaoInterfaceParams(Class<?> daoInterface) {
         Type[] daoSuperInterfaces = daoInterface.getGenericInterfaces();
         for (int i = 0; i < daoSuperInterfaces.length; i++) {
             Type daoSuperInterfaceType = daoSuperInterfaces[i];
@@ -219,9 +242,9 @@ public class DaoParse {
         return null;
     }
 
-    private Boolean isBasicType(Class<?> clazz) {
+    private Boolean isBasicType(Type type) {
         for (Class<?> bt : basicTypeList) {
-            if (clazz == bt) {
+            if (type == bt) {
                 return true;
             }
         }

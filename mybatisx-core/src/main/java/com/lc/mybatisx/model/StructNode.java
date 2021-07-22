@@ -1,5 +1,6 @@
 package com.lc.mybatisx.model;
 
+import java.lang.annotation.Annotation;
 import java.util.List;
 
 /**
@@ -14,6 +15,8 @@ public class StructNode {
     private Class<?> type;
 
     private Class<?> containerType;
+
+    private Annotation[] annotations;
 
     private List<FieldNode> fieldNodeList;
 
@@ -39,6 +42,14 @@ public class StructNode {
 
     public void setContainerType(Class<?> containerType) {
         this.containerType = containerType;
+    }
+
+    public Annotation[] getAnnotations() {
+        return annotations;
+    }
+
+    public void setAnnotations(Annotation[] annotations) {
+        this.annotations = annotations;
     }
 
     public List<FieldNode> getFieldNodeList() {

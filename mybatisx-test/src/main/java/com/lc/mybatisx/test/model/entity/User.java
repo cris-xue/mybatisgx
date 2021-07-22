@@ -1,10 +1,10 @@
 package com.lc.mybatisx.test.model.entity;
 
 import com.lc.mybatisx.annotation.Column;
+import com.lc.mybatisx.annotation.Table;
 import com.lc.mybatisx.annotation.Version;
 
 import javax.persistence.Entity;
-import javax.persistence.Table;
 
 @Entity
 @Table(name = "user")

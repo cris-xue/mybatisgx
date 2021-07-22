@@ -4,8 +4,6 @@ import com.lc.mybatisx.annotation.BetweenEnd;
 import com.lc.mybatisx.annotation.BetweenStart;
 import org.apache.ibatis.annotations.Param;
 
-import java.lang.annotation.Annotation;
-
 /**
  * @author ：薛承城
  * @description：一句话描述
@@ -20,8 +18,6 @@ public class MethodParamNode extends StructNode {
     private BetweenStart betweenStart;
 
     private BetweenEnd betweenEnd;
-
-    private Annotation[] annotations;
 
     private Boolean isUse = false;
 
@@ -55,14 +51,6 @@ public class MethodParamNode extends StructNode {
 
     public void setBetweenEnd(BetweenEnd betweenEnd) {
         this.betweenEnd = betweenEnd;
-    }
-
-    public Annotation[] getAnnotations() {
-        return annotations;
-    }
-
-    public void setAnnotations(Annotation[] annotations) {
-        this.annotations = annotations;
     }
 
     public Boolean getUse() {

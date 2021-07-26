@@ -1,8 +1,9 @@
-package com.lc.mybatisx.handler;
+package com.lc.mybatisx.parse;
 
 import com.lc.mybatisx.annotation.*;
 import com.lc.mybatisx.dao.Dao;
 import com.lc.mybatisx.dao.SimpleDao;
+import com.lc.mybatisx.handler.AbstractMapperHandler;
 import com.lc.mybatisx.model.*;
 import com.lc.mybatisx.utils.GenericUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -30,7 +31,7 @@ import java.util.Map;
  * @description：一句话描述
  * @date ：2021/7/12 14:33
  */
-public class DaoParse {
+public class DaoInterfaceParse {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractMapperHandler.class);
 

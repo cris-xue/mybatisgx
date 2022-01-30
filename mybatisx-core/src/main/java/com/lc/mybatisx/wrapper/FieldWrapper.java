@@ -1,4 +1,4 @@
-package com.lc.mybatisx.model.wrapper;
+package com.lc.mybatisx.wrapper;
 
 import java.lang.reflect.Field;
 

@@ -2,7 +2,7 @@ package com.lc.mybatisx.wrapper;
 
 /**
  * @author ：薛承城
- * @description：一句话描述
+ * @description：逻辑删除包装器
  * @date ：2020/11/9 16:54
  */
 public class LogicDeleteWrapper {

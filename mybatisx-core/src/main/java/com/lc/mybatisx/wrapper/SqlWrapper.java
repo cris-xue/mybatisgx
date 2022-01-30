@@ -1,7 +1,5 @@
 package com.lc.mybatisx.wrapper;
 
-import java.util.List;
-
 /**
  * @author ：薛承城
  * @description：一句话描述
@@ -9,10 +7,6 @@ import java.util.List;
  */
 public class SqlWrapper {
 
-    /**
-     * 动态sql
-     */
-    private Boolean dynamic;
     /**
      * 命名空间
      */
@@ -22,33 +16,21 @@ public class SqlWrapper {
      */
     private String methodName;
     /**
-     * 参数类型
-     */
-    private String parameterType;
-    /**
      * 数据库表名
      */
     private String tableName;
     /**
-     * 返回结果类型
+     * 数据
      */
-    private String resultType;
+    private DataWrapper dataWrapper;
     /**
-     * 方法返回的模型映射器
+     * 返回结果
      */
-    private List<ModelWrapper> modelWrapperList;
+    private ResultMapWrapper resultMapWrapper;
     /**
      * 逻辑删除包装器
      */
     private LogicDeleteWrapper logicDeleteWrapper;
-
-    public Boolean getDynamic() {
-        return dynamic;
-    }
-
-    public void setDynamic(Boolean dynamic) {
-        this.dynamic = dynamic;
-    }
 
     public String getNamespace() {
         return namespace;
@@ -66,14 +48,6 @@ public class SqlWrapper {
         this.methodName = methodName;
     }
 
-    public String getParameterType() {
-        return parameterType;
-    }
-
-    public void setParameterType(String parameterType) {
-        this.parameterType = parameterType;
-    }
-
     public String getTableName() {
         return tableName;
     }
@@ -82,20 +56,20 @@ public class SqlWrapper {
         this.tableName = tableName;
     }
 
-    public String getResultType() {
-        return resultType;
+    public DataWrapper getDataWrapper() {
+        return dataWrapper;
     }
 
-    public void setResultType(String resultType) {
-        this.resultType = resultType;
+    public void setDataWrapper(DataWrapper dataWrapper) {
+        this.dataWrapper = dataWrapper;
     }
 
-    public List<ModelWrapper> getModelWrapperList() {
-        return modelWrapperList;
+    public ResultMapWrapper getResultMapWrapper() {
+        return resultMapWrapper;
     }
 
-    public void setModelWrapperList(List<ModelWrapper> modelWrapperList) {
-        this.modelWrapperList = modelWrapperList;
+    public void setResultMapWrapper(ResultMapWrapper resultMapWrapper) {
+        this.resultMapWrapper = resultMapWrapper;
     }
 
     public LogicDeleteWrapper getLogicDeleteWrapper() {

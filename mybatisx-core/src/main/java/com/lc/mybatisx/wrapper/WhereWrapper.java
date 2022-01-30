@@ -10,6 +10,10 @@ import java.util.List;
 public class WhereWrapper {
 
     /**
+     * 动态sql
+     */
+    private Boolean dynamic;
+    /**
      * 数据库字段
      */
     private String dbColumn;
@@ -53,6 +57,14 @@ public class WhereWrapper {
      * 连接条件
      */
     private WhereWrapper whereWrapper;
+
+    public Boolean getDynamic() {
+        return dynamic;
+    }
+
+    public void setDynamic(Boolean dynamic) {
+        this.dynamic = dynamic;
+    }
 
     public String getDbColumn() {
         return dbColumn;

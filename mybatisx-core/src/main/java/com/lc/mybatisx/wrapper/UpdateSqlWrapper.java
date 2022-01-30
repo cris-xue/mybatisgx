@@ -1,5 +1,7 @@
 package com.lc.mybatisx.wrapper;
 
+import com.lc.mybatisx.wrapper.VersionWrapper;
+
 /**
  * @author ：薛承城
  * @description：一句话描述
@@ -8,7 +10,6 @@ package com.lc.mybatisx.wrapper;
 public class UpdateSqlWrapper extends SqlWrapper {
 
     private WhereWrapper whereWrapper;
-
     /**
      * 乐观锁包装器
      */

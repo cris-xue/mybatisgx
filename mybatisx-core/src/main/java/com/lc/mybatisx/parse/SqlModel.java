@@ -1,7 +1,7 @@
 package com.lc.mybatisx.parse;
 
 import com.lc.mybatisx.model.MethodNode;
-import com.lc.mybatisx.model.wrapper.WhereWrapper;
+import com.lc.mybatisx.wrapper.WhereWrapper;
 import com.lc.mybatisx.syntax.MethodNameLexer;
 import com.lc.mybatisx.syntax.MethodNameParser;
 import org.antlr.v4.runtime.CharStream;

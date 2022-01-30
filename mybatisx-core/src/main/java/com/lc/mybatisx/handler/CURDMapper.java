@@ -5,7 +5,7 @@ import com.lc.mybatisx.dao.SimpleDao;
 import com.lc.mybatisx.handler.handler.SqlMapperHandler;
 import com.lc.mybatisx.model.InterfaceNode;
 import com.lc.mybatisx.model.MethodNode;
-import com.lc.mybatisx.model.wrapper.SqlWrapper;
+import com.lc.mybatisx.wrapper.SqlWrapper;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.session.Configuration;

@@ -1,5 +1,7 @@
 package com.lc.mybatisx.wrapper;
 
+import com.lc.mybatisx.wrapper.VersionWrapper;
+
 /**
  * @author ：薛承城
  * @description：一句话描述
@@ -11,10 +13,6 @@ public class DeleteSqlWrapper extends SqlWrapper {
      * 条件包装器
      */
     private WhereWrapper whereWrapper;
-    /**
-     *
-     */
-    private Boolean versionQuery = false;
     /**
      * 乐观锁包装器
      */
@@ -34,14 +32,6 @@ public class DeleteSqlWrapper extends SqlWrapper {
 
     public void setVersionWrapper(VersionWrapper versionWrapper) {
         this.versionWrapper = versionWrapper;
-    }
-
-    public Boolean getVersionQuery() {
-        return versionQuery;
-    }
-
-    public void setVersionQuery(Boolean versionQuery) {
-        this.versionQuery = versionQuery;
     }
 
 }

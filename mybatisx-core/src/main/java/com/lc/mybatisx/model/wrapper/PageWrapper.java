@@ -1,9 +1,11 @@
 package com.lc.mybatisx.model.wrapper;
 
 /**
- *
+ * @author ：薛承城
+ * @description：分页包装器
+ * @date ：2022/1/30 14:17
  */
-public class LimitWrapper {
+public class PageWrapper {
 
     private String sql;
 

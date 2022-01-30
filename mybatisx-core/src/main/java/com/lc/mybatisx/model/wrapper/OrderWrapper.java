@@ -3,7 +3,9 @@ package com.lc.mybatisx.model.wrapper;
 import com.lc.mybatisx.parse.Keyword;
 
 /**
- *
+ * @author ：薛承城
+ * @description：排序包装器
+ * @date ：2022/1/30 14:18
  */
 public class OrderWrapper {
 

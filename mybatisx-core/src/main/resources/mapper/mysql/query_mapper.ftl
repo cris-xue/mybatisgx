@@ -24,8 +24,8 @@
         <#if (querySqlWrapper.orderWrapper)??>
             ${querySqlWrapper.orderWrapper.sql}
         </#if>
-        <#if (querySqlWrapper.limitWrapper)??>
-            ${querySqlWrapper.limitWrapper.sql}
+        <#if (querySqlWrapper.pageWrapper)??>
+            ${querySqlWrapper.pageWrapper.sql}
         </#if>
     </select>
     </#if>
@@ -53,8 +53,8 @@
             <#if (querySqlWrapper.orderWrapper)??>
                 ${querySqlWrapper.orderWrapper.sql}
             </#if>
-            <#if (querySqlWrapper.limitWrapper)??>
-                ${querySqlWrapper.limitWrapper.sql}
+            <#if (querySqlWrapper.pageWrapper)??>
+                ${querySqlWrapper.pageWrapper.sql}
             </#if>
         </select>
     </#if>

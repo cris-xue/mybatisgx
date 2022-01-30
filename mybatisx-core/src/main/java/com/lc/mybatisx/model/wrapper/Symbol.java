@@ -5,7 +5,7 @@ import java.util.List;
 
 /**
  * @author ：薛承城
- * @description：一句话描述
+ * @description：关键字符号
  * @date ：2020/2/21 17:23
  */
 public enum Symbol {

@@ -2,7 +2,7 @@ package com.lc.mybatisx.model.wrapper;
 
 /**
  * @author ：薛承城
- * @description：一句话描述
+ * @description：查询sql包装器
  * @date ：2019/11/30 20:29
  */
 public class QuerySqlWrapper extends SqlWrapper {
@@ -14,7 +14,7 @@ public class QuerySqlWrapper extends SqlWrapper {
     /**
      *
      */
-    private LimitWrapper limitWrapper;
+    private PageWrapper pageWrapper;
     /**
      *
      */
@@ -28,12 +28,12 @@ public class QuerySqlWrapper extends SqlWrapper {
         this.whereWrapper = whereWrapper;
     }
 
-    public LimitWrapper getLimitWrapper() {
-        return limitWrapper;
+    public PageWrapper getPageWrapper() {
+        return pageWrapper;
     }
 
-    public void setLimitWrapper(LimitWrapper limitWrapper) {
-        this.limitWrapper = limitWrapper;
+    public void setPageWrapper(PageWrapper pageWrapper) {
+        this.pageWrapper = pageWrapper;
     }
 
     public OrderWrapper getOrderWrapper() {

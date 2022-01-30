@@ -5,7 +5,6 @@ import com.lc.mybatisx.handler.WhereMapperHandler;
 import com.lc.mybatisx.syntax.MethodNameLexer;
 import com.lc.mybatisx.syntax.MethodNameParser;
 import com.lc.mybatisx.utils.ReflectUtils;
-import com.lc.mybatisx.wrapper.LimitWrapper;
 import com.lc.mybatisx.wrapper.ModelWrapper;
 import com.lc.mybatisx.wrapper.OrderWrapper;
 import com.lc.mybatisx.wrapper.WhereWrapper;
@@ -329,7 +328,7 @@ public class KeywordParse {
         return javaColumnList;
     }
 
-    public static LimitWrapper buildLimitWrapper(List<String> keywordList) {
+    /*public static LimitWrapper buildLimitWrapper(List<String> keywordList) {
         for (int i = 0; i < keywordList.size(); i++) {
             String kw = keywordList.get(i);
             Keyword keyword = keywordMap.get(kw);
@@ -345,7 +344,7 @@ public class KeywordParse {
             }
         }
         return null;
-    }
+    }*/
 
     public static OrderWrapper buildOrderByWrapper(List<String> keywordList) {
         OrderWrapper orderWrapper = null;

@@ -52,7 +52,7 @@ public class QueryMapperHandler extends AbstractMapperHandler {
         Class<?> entityClass = (Class<?>) daoInterfaceParams[0];
         Class<?> modelClass = modelMapperHandler.getModelClass(method, entityClass);
         List<ModelWrapper> modelWrapperList = modelMapperHandler.buildModelWrapper(modelClass);
-        querySqlWrapper.setModelWrapperList(modelWrapperList);
+        // querySqlWrapper.setModelWrapperList(modelWrapperList);
 
         // SqlModel sqlModel = KeywordParse.parseMethod1(method, entityClass);
         // whereMapperHandler.build(methodKeywordList);
@@ -69,7 +69,7 @@ public class QueryMapperHandler extends AbstractMapperHandler {
         querySqlWrapper.setOrderWrapper(orderWrapper);*/
 
         // boolean dynamic = KeywordParse.isDynamic(methodKeywordList);
-        querySqlWrapper.setDynamic(false);
+        // querySqlWrapper.setDynamic(false);
 
         this.querySqlWrapperList.add(querySqlWrapper);
     }

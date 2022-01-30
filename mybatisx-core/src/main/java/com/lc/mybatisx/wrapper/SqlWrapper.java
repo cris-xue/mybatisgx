@@ -1,5 +1,7 @@
 package com.lc.mybatisx.wrapper;
 
+import java.util.List;
+
 /**
  * @author ：薛承城
  * @description：一句话描述
@@ -22,11 +24,15 @@ public class SqlWrapper {
     /**
      * 数据
      */
-    private DataWrapper dataWrapper;
+    private List<ParamWrapper> paramWrapper;
+    /**
+     * 结果包装器
+     */
+    private List<ResultWrapper> resultWrapper;
     /**
      * 返回结果
      */
-    private ResultMapWrapper resultMapWrapper;
+    private List<ResultMapWrapper> resultMapWrapper;
     /**
      * 逻辑删除包装器
      */
@@ -56,19 +62,27 @@ public class SqlWrapper {
         this.tableName = tableName;
     }
 
-    public DataWrapper getDataWrapper() {
-        return dataWrapper;
+    public List<ParamWrapper> getParamWrapper() {
+        return paramWrapper;
     }
 
-    public void setDataWrapper(DataWrapper dataWrapper) {
-        this.dataWrapper = dataWrapper;
+    public void setParamWrapper(List<ParamWrapper> paramWrapper) {
+        this.paramWrapper = paramWrapper;
     }
 
-    public ResultMapWrapper getResultMapWrapper() {
+    public List<ResultWrapper> getResultWrapper() {
+        return resultWrapper;
+    }
+
+    public void setResultWrapper(List<ResultWrapper> resultWrapper) {
+        this.resultWrapper = resultWrapper;
+    }
+
+    public List<ResultMapWrapper> getResultMapWrapper() {
         return resultMapWrapper;
     }
 
-    public void setResultMapWrapper(ResultMapWrapper resultMapWrapper) {
+    public void setResultMapWrapper(List<ResultMapWrapper> resultMapWrapper) {
         this.resultMapWrapper = resultMapWrapper;
     }
 

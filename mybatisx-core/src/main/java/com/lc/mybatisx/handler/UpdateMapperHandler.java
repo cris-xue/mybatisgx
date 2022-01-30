@@ -51,14 +51,14 @@ public class UpdateMapperHandler extends AbstractMapperHandler {
         Class<?> entityClass = (Class<?>) daoInterfaceParams[0];
         Class<?> modelClass = modelMapperHandler.getModelClass(method, entityClass);
         List<ModelWrapper> modelWrapperList = modelMapperHandler.buildModelWrapper(modelClass);
-        updateSqlWrapper.setModelWrapperList(modelWrapperList);
+        // updateSqlWrapper.setParamWrapper(modelWrapperList);
 
         List<String> methodKeywordList = KeywordParse.parseMethod(method, entityClass);
         WhereWrapper whereWrapper = KeywordParse.buildWhereWrapper(method, methodKeywordList, daoInterfaceParams, modelWrapperList);
         updateSqlWrapper.setWhereWrapper(whereWrapper);
 
         boolean dynamic = KeywordParse.isDynamic(methodKeywordList);
-        updateSqlWrapper.setDynamic(dynamic);
+        // updateSqlWrapper.setDynamic(dynamic);
 
         updateSqlWrapper.setVersionWrapper(buildVersionWrapper(entityClass));
 

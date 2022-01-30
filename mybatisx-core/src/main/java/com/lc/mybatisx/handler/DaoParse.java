@@ -76,7 +76,7 @@ public class DaoParse {
 
         List<FieldNode> fieldNodeList = entityTypeParamNode.getFieldNodeList();
         fieldNodeList.forEach(fn -> {
-            LogicDelete logicDelete = fn.getLogicDelete();
+            /*LogicDelete logicDelete = fn.getLogicDelete();
             if (logicDelete != null) {
                 entityTypeParamNode.setLogicDelete(logicDelete);
             }
@@ -84,7 +84,7 @@ public class DaoParse {
             Version version = fn.getVersion();
             if (version != null) {
                 entityTypeParamNode.setVersion(version);
-            }
+            }*/
         });
 
         return entityTypeParamNode;
@@ -135,10 +135,10 @@ public class DaoParse {
 
             fieldNode.setType(field.getType());
             fieldNode.setName(field.getName());
-            fieldNode.setId(field.getAnnotation(Id.class));
+            /*fieldNode.setId(field.getAnnotation(Id.class));
             fieldNode.setColumn(field.getAnnotation(Column.class));
             fieldNode.setLogicDelete(field.getAnnotation(LogicDelete.class));
-            fieldNode.setVersion(field.getAnnotation(Version.class));
+            fieldNode.setVersion(field.getAnnotation(Version.class));*/
 
             fieldNodeList.add(fieldNode);
         }

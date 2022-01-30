@@ -73,16 +73,16 @@ public enum Keyword {
     FALSE("False", KeywordType.WHERE, " = false", 0, WhereWrapper.class),
 
     /*top关键字*/
-    TOP("Top", KeywordType.LIMIT, " limit 0, %s", 0, LimitWrapper.class),
-    FIRST("First", KeywordType.LIMIT, " limit 0, %s", 0, LimitWrapper.class),
+    TOP("Top", KeywordType.LIMIT, " limit 0, %s", 0, PageWrapper.class),
+    FIRST("First", KeywordType.LIMIT, " limit 0, %s", 0, PageWrapper.class),
 
     /*排序关键字*/
     ORDER_BY("OrderBy", KeywordType.ORDER, " order by %s", 0, OrderWrapper.class),
     DESC("Desc", KeywordType.ORDER, " desc", 0, OrderWrapper.class),
-    ASC("Asc", KeywordType.ORDER, " asc", 0, OrderWrapper.class),
+    ASC("Asc", KeywordType.ORDER, " asc", 0, OrderWrapper.class);
 
     /*运算型关键字*/
-    GROUP_BY("GroupBy", KeywordType.FUNC, "group by %s", 0, FunctionWrapper.class);
+    // GROUP_BY("GroupBy", KeywordType.FUNC, "group by %s", 0, FunctionWrapper.class);
 
     private String keyword;
     private KeywordType keywordType;

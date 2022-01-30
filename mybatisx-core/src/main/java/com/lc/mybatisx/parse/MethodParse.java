@@ -19,8 +19,8 @@ public class MethodParse {
 
             methodNode.setMethod(method);
             methodNode.setName(method.getName());
-            methodNode.setMethodParamNodeList(parseMethodParam(interfaceNode, method));
-            methodNode.setReturnNode(parseMethodReturn(interfaceNode, method));
+            /*methodNode.setMethodParamNodeList(parseMethodParam(interfaceNode, method));
+            methodNode.setReturnNode(parseMethodReturn(interfaceNode, method));*/
             methodNode.setDynamic(method.getAnnotation(Dynamic.class));
 
             methodNodeList.add(methodNode);

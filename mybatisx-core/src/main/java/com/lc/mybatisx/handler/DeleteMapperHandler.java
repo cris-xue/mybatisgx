@@ -51,14 +51,14 @@ public class DeleteMapperHandler extends AbstractMapperHandler {
         Class<?> entityClass = (Class<?>) daoInterfaceParams[0];
         Class<?> modelClass = modelMapperHandler.getModelClass(method, entityClass);
         List<ModelWrapper> modelWrapperList = modelMapperHandler.buildModelWrapper(modelClass);
-        deleteSqlWrapper.setModelWrapperList(modelWrapperList);
+        // deleteSqlWrapper.setModelWrapperList(modelWrapperList);
 
         List<String> methodKeywordList = KeywordParse.parseMethod(method, entityClass);
         WhereWrapper whereWrapper = KeywordParse.buildWhereWrapper(method, methodKeywordList, daoInterfaceParams, modelWrapperList);
         deleteSqlWrapper.setWhereWrapper(whereWrapper);
 
         boolean dynamic = KeywordParse.isDynamic(methodKeywordList);
-        deleteSqlWrapper.setDynamic(dynamic);
+        // deleteSqlWrapper.setDynamic(dynamic);
 
         deleteSqlWrapper.setVersionWrapper(buildVersionWrapper(entityClass));
 
@@ -81,9 +81,9 @@ public class DeleteMapperHandler extends AbstractMapperHandler {
             XPathParser xPathParser = FreeMarkerUtils.processTemplate(templateData, template);
             XNode mapperXNode = xPathParser.evalNode("/mapper");
 
-            String expression = deleteSqlWrapper.getVersionQuery() ? "select" : "delete";
-            List<XNode> deleteXNode = mapperXNode.evalNodes(expression);
-            deleteXNodeList.addAll(deleteXNode);
+            // String expression = deleteSqlWrapper.getVersionQuery() ? "select" : "delete";
+            // List<XNode> deleteXNode = mapperXNode.evalNodes(expression);
+            // deleteXNodeList.addAll(deleteXNode);
         });
 
         return deleteXNodeList;

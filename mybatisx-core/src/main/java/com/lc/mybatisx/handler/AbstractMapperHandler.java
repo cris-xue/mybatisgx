@@ -75,10 +75,10 @@ public abstract class AbstractMapperHandler {
         sqlWrapper.setNamespace(namespace);
         sqlWrapper.setMethodName(methodName);
         String parameterType = this.getParameterType(method, idClass, entityClass);
-        sqlWrapper.setParameterType(parameterType);
+        // sqlWrapper.setParameterType(parameterType);
         sqlWrapper.setTableName(tableName);
         String resultType = this.getResultType(method, entityClass);
-        sqlWrapper.setResultType(resultType);
+        // sqlWrapper.setResultType(resultType);
 
         sqlWrapper.setLogicDeleteWrapper(buildLogicDeleteWrapper(entityClass));
 

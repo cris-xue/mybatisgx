@@ -23,10 +23,10 @@ public class FieldParse {
 
             fieldNode.setType(field.getType());
             fieldNode.setName(field.getName());
-            fieldNode.setId(field.getAnnotation(Id.class));
+            /*fieldNode.setId(field.getAnnotation(Id.class));
             fieldNode.setColumn(field.getAnnotation(Column.class));
             fieldNode.setLogicDelete(field.getAnnotation(LogicDelete.class));
-            fieldNode.setVersion(field.getAnnotation(Version.class));
+            fieldNode.setVersion(field.getAnnotation(Version.class));*/
 
             fieldNodeList.add(fieldNode);
         }

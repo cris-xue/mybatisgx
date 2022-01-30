@@ -50,11 +50,11 @@ public class InsertMapperHandler extends AbstractMapperHandler {
         Class<?> entityClass = (Class<?>) daoInterfaceParams[0];
         Class<?> modelClass = modelMapperHandler.getModelClass(method, entityClass);
         List<ModelWrapper> modelWrapperList = modelMapperHandler.buildModelWrapper(modelClass);
-        insertSqlWrapper.setModelWrapperList(modelWrapperList);
+        // insertSqlWrapper.setModelWrapperList(modelWrapperList);
 
         List<String> methodKeywordList = KeywordParse.parseMethod(method, entityClass);
         boolean dynamic = KeywordParse.isDynamic(methodKeywordList);
-        insertSqlWrapper.setDynamic(dynamic);
+        // insertSqlWrapper.setDynamic(dynamic);
 
         insertSqlWrapper.setVersionWrapper(buildVersionWrapper(entityClass));
 

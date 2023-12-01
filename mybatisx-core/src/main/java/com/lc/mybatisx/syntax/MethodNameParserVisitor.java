@@ -1,4 +1,4 @@
-// Generated from F:/ec/lc/mybatisx/mybatisx-core/src/test/resources\MethodName.g4 by ANTLR 4.9.1
+// Generated from F:/ec/lc/mybatisx/mybatisx-core/src/test/resources/MethodNameParser.g4 by ANTLR 4.13.1
 package com.lc.mybatisx.syntax;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
@@ -9,13 +9,19 @@ import org.antlr.v4.runtime.tree.ParseTreeVisitor;
  * @param <T> The return type of the visit operation. Use {@link Void} for
  * operations with no return type.
  */
-public interface MethodNameVisitor<T> extends ParseTreeVisitor<T> {
+public interface MethodNameParserVisitor<T> extends ParseTreeVisitor<T> {
 	/**
 	 * Visit a parse tree produced by {@link MethodNameParser#sql_statement}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitSql_statement(MethodNameParser.Sql_statementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MethodNameParser#end}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitEnd(MethodNameParser.EndContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MethodNameParser#insert_statement}.
 	 * @param ctx the parse tree
@@ -88,6 +94,48 @@ public interface MethodNameVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitWhere_op_clause(MethodNameParser.Where_op_clauseContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MethodNameParser#dynamic_parameter_clause}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDynamic_parameter_clause(MethodNameParser.Dynamic_parameter_clauseContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MethodNameParser#group_clause}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitGroup_clause(MethodNameParser.Group_clauseContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MethodNameParser#group_op_clause}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitGroup_op_clause(MethodNameParser.Group_op_clauseContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MethodNameParser#order_clause}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitOrder_clause(MethodNameParser.Order_clauseContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MethodNameParser#order_op_clause}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitOrder_op_clause(MethodNameParser.Order_op_clauseContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MethodNameParser#order_op_direction_clause}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitOrder_op_direction_clause(MethodNameParser.Order_op_direction_clauseContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MethodNameParser#aggregate_function_clause}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAggregate_function_clause(MethodNameParser.Aggregate_function_clauseContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MethodNameParser#field_clause}.
 	 * @param ctx the parse tree

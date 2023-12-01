@@ -1,16 +1,17 @@
-// Generated from F:/ec/lc/mybatisx/mybatisx-core/src/test/resources\MethodName.g4 by ANTLR 4.9.1
+// Generated from F:/ec/lc/mybatisx/mybatisx-core/src/test/resources/MethodNameParser.g4 by ANTLR 4.13.1
 package com.lc.mybatisx.syntax;
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 
 /**
- * This class provides an empty implementation of {@link MethodNameVisitor},
+ * This class provides an empty implementation of {@link MethodNameParserVisitor},
  * which can be extended to create a visitor which only needs to handle a subset
  * of the available methods.
  *
  * @param <T> The return type of the visit operation. Use {@link Void} for
  * operations with no return type.
  */
-public class MethodNameBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements MethodNameVisitor<T> {
+@SuppressWarnings("CheckReturnValue")
+public class MethodNameParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements MethodNameParserVisitor<T> {
 	/**
 	 * {@inheritDoc}
 	 *
@@ -18,6 +19,13 @@ public class MethodNameBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
 	@Override public T visitSql_statement(MethodNameParser.Sql_statementContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitEnd(MethodNameParser.EndContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -102,6 +110,55 @@ public class MethodNameBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
 	@Override public T visitWhere_op_clause(MethodNameParser.Where_op_clauseContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitDynamic_parameter_clause(MethodNameParser.Dynamic_parameter_clauseContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitGroup_clause(MethodNameParser.Group_clauseContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitGroup_op_clause(MethodNameParser.Group_op_clauseContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitOrder_clause(MethodNameParser.Order_clauseContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitOrder_op_clause(MethodNameParser.Order_op_clauseContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitOrder_op_direction_clause(MethodNameParser.Order_op_direction_clauseContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitAggregate_function_clause(MethodNameParser.Aggregate_function_clauseContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *

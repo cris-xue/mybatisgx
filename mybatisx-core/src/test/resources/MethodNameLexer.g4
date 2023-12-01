@@ -1,13 +1,21 @@
 lexer grammar MethodNameLexer;
-// ? 表示可有可无
+// ? 表示可有可无（0或1次）
 // + 表示至少有一个
 // | 表示或的关系
 // * 表示有0或者多个
 // fragment 定义不被直接解析的规则
 INSERT_ACTION: 'insert' ;
-DELETE_ACTION: 'delete' ;
-UPDATE_ACTION: 'update' ;
-SELECT_ACTION: 'find' ;
+DELETE_ACTION: 'delete' | 'remove' ;
+UPDATE_ACTION: 'update' | 'modify' ;
+SELECT_ACTION: 'find' | 'get' | 'select' | 'query' ;
 WHERE_LINK_OP: 'By' | 'And' | 'Or' ;
 CONDITION_OP: 'Lt' | 'Lteq' | 'Gt' | 'Gteq' | 'In' | 'Is' | 'Eq' | 'Not' | 'Noteq' | 'Between' ;
-FIELD: [A-Z][a-z]+ ;
+DYNAMIC_PARAMETER: 'Selective' ;
+GROUP_OP: 'GroupBy' ;
+ORDER_OP: 'OrderBy' ;
+ORDER_OP_DIRECTION: 'Desc' | 'Asc' ;
+AGGREGATE_FUNCTION: 'Sum' | 'Count' | 'Avg' | 'Max' | 'Min' ;
+// antlr是从上向下解析的，常量一定要放在正则的上面
+FIELD: [A-Z]+[a-z0-9]+ ;
+// 忽略空白符
+WS: [ \t\r\n]+ -> skip;

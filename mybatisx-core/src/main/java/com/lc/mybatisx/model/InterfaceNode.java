@@ -9,24 +9,24 @@ import java.util.List;
  */
 public class InterfaceNode {
 
-    private String name;
+    private String interfaceName;
 
     private Class<?> interfaceClass;
 
-    private List<TypeParamNode> typeParamNodeList;
+    private String tableName;
 
-    private TypeParamNode idTypeParamNode;
+    private IdNode idNode;
 
-    private EntityTypeParamNode entityTypeParamNode;
+    private EntityNode entityNode;
 
     private List<MethodNode> methodNodeList;
 
-    public String getName() {
-        return name;
+    public String getInterfaceName() {
+        return interfaceName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setInterfaceName(String interfaceName) {
+        this.interfaceName = interfaceName;
     }
 
     public Class<?> getInterfaceClass() {
@@ -37,28 +37,28 @@ public class InterfaceNode {
         this.interfaceClass = interfaceClass;
     }
 
-    public List<TypeParamNode> getTypeParamNodeList() {
-        return typeParamNodeList;
+    public String getTableName() {
+        return tableName;
     }
 
-    public void setTypeParamNodeList(List<TypeParamNode> typeParamNodeList) {
-        this.typeParamNodeList = typeParamNodeList;
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
     }
 
-    public TypeParamNode getIdTypeParamNode() {
-        return idTypeParamNode;
+    public IdNode getIdNode() {
+        return idNode;
     }
 
-    public void setIdTypeParamNode(TypeParamNode idTypeParamNode) {
-        this.idTypeParamNode = idTypeParamNode;
+    public void setIdNode(IdNode idNode) {
+        this.idNode = idNode;
     }
 
-    public EntityTypeParamNode getEntityTypeParamNode() {
-        return entityTypeParamNode;
+    public EntityNode getEntityNode() {
+        return entityNode;
     }
 
-    public void setEntityTypeParamNode(EntityTypeParamNode entityTypeParamNode) {
-        this.entityTypeParamNode = entityTypeParamNode;
+    public void setEntityNode(EntityNode entityNode) {
+        this.entityNode = entityNode;
     }
 
     public List<MethodNode> getMethodNodeList() {
@@ -68,5 +68,4 @@ public class InterfaceNode {
     public void setMethodNodeList(List<MethodNode> methodNodeList) {
         this.methodNodeList = methodNodeList;
     }
-
 }

@@ -4,18 +4,20 @@ import com.lc.mybatisx.model.InterfaceNode;
 import com.lc.mybatisx.model.MethodNode;
 import com.lc.mybatisx.syntax.MethodNameLexer;
 import com.lc.mybatisx.syntax.MethodNameParser;
+import com.lc.mybatisx.utils.FreeMarkerUtils;
+import freemarker.template.Template;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNodeImpl;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
+import org.apache.ibatis.parsing.XNode;
+import org.apache.ibatis.parsing.XPathParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author ：薛承城
@@ -27,14 +29,14 @@ public class CURDMapperHandler {
     private static final Logger logger = LoggerFactory.getLogger(CURDMapperHandler.class);
 
     private static List<String> simpleMethodList = Arrays.asList(
-            "insert",
-            "insertSelective",
+            "insert"
+            /*"insertSelective",
             "deleteById",
             "updateById",
             "updateByIdSelective",
             "findById",
             "findAll",
-            "findList"
+            "findList"*/
     );
     private static InterfaceNodeHandler interfaceNodeHandler = new InterfaceNodeHandler();
     private static MethodNodeHandler methodNodeHandler = new MethodNodeHandler();
@@ -47,12 +49,13 @@ public class CURDMapperHandler {
 
         for (int i = 0; i < methodNodeList.size(); i++) {
             MethodNode methodNode = methodNodeList.get(i);
-            String methodName = methodNode.getName();
+            String methodName = methodNode.getMethodName();
             if (simpleMethodList.contains(methodName)) {
                 // 生成简单方法
+                readTemplate(interfaceNode, methodNode);
                 continue;
             }
-            aaa(methodNode.getName());
+            aaa(methodNode.getMethodName());
         }
     }
 
@@ -82,6 +85,31 @@ public class CURDMapperHandler {
                 getKeywordMap(aaaa, parseTreeChild);
             }
         }
+    }
+
+    public static List<XNode> readTemplate(InterfaceNode interfaceNode, MethodNode methodNode) {
+        Template template = FreeMarkerUtils.getTemplate(String.format("mapper/mysql/simple_mapper/%s.ftl", methodNode.getMethodName()));
+        List<XNode> xNodeList = generateDeleteMethod(template, interfaceNode, methodNode);
+        return xNodeList;
+    }
+
+    public static List<XNode> generateDeleteMethod(Template template, InterfaceNode interfaceNode, MethodNode methodNode) {
+        List<XNode> deleteXNodeList = new ArrayList<>();
+        Map<String, Object> templateData = new HashMap<>();
+        templateData.put("interfaceNode", interfaceNode);
+        templateData.put("methodNode", methodNode);
+
+        XPathParser xPathParser = FreeMarkerUtils.processTemplate(templateData, template);
+        String sql = xPathParser.evalString("/mapper");
+        logger.info(sql);
+
+        // XNode mapperXNode = xPathParser.evalNode("/mapper");
+
+        // String expression = deleteSqlWrapper.getVersionQuery() ? "select" : "delete";
+        // List<XNode> deleteXNode = mapperXNode.evalNodes(expression);
+        // deleteXNodeList.addAll(deleteXNode);
+
+        return deleteXNodeList;
     }
 
 }

@@ -31,13 +31,20 @@ public class MethodNodeHandler {
 
         List<MethodNode> methodNodeList = new ArrayList<>();
         for (Method method : methods) {
-            MethodNode methodNode = new MethodNode();
+            List<MethodParamNode> methodParamNodeList = parseMethodParam(interfaceNode, method);
+            ReturnNode returnNode = parseMethodReturn(interfaceNode, method);
 
+            MethodNode methodNode = new MethodNode();
             methodNode.setMethod(method);
-            methodNode.setName(method.getName());
-            methodNode.setMethodParamNodeList(parseMethodParam(interfaceNode, method));
-            methodNode.setReturnNode(parseMethodReturn(interfaceNode, method));
-            methodNode.setDynamic(method.getAnnotation(Dynamic.class));
+            methodNode.setMethodName(method.getName());
+            methodNode.setReturnNode(returnNode);
+            methodNode.setDynamic(method.getAnnotation(Dynamic.class) != null);
+            methodNode.setSingleParam(methodParamNodeList.size() == 1);
+            if (methodNode.getSingleParam()) {
+                methodNode.setMethodParamNode(methodParamNodeList.get(0));
+            } else {
+                methodNode.setMethodParamNodeList(methodParamNodeList);
+            }
 
             methodNodeList.add(methodNode);
         }
@@ -57,6 +64,7 @@ public class MethodNodeHandler {
 
             Boolean basicType = structNodeHandler.isBasicType(clazz);
             methodParamNode.setBasicType(basicType);
+            methodParamNode.setTypeName(clazz.getName());
             methodParamNode.setType(clazz);
             methodParamNode.setContainerType(getContainerType(parameter.getType()));
             if (!basicType) {
@@ -106,10 +114,10 @@ public class MethodNodeHandler {
         Type actualType = GenericUtils.getGenericType(type);
         String actualTypeName = actualType.getTypeName();
 
-        TypeParamNode idTypeParamNode = interfaceNode.getIdTypeParamNode();
+        IdNode idTypeParamNode = interfaceNode.getIdNode();
         String idTypeParamName = idTypeParamNode.getName();
 
-        TypeParamNode entityTypeParamNode = interfaceNode.getEntityTypeParamNode();
+        EntityNode entityTypeParamNode = interfaceNode.getEntityNode();
         String entityTypeParamName = entityTypeParamNode.getName();
 
         if (actualTypeName.equals(idTypeParamName)) {

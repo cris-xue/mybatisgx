@@ -14,6 +14,8 @@ public class StructNode {
 
     private Class<?> type;
 
+    private String typeName;
+
     private Class<?> containerType;
 
     private Annotation[] annotations;
@@ -34,6 +36,14 @@ public class StructNode {
 
     public void setType(Class<?> type) {
         this.type = type;
+    }
+
+    public String getTypeName() {
+        return typeName;
+    }
+
+    public void setTypeName(String typeName) {
+        this.typeName = typeName;
     }
 
     public Class<?> getContainerType() {
@@ -59,5 +69,4 @@ public class StructNode {
     public void setFieldNodeList(List<FieldNode> fieldNodeList) {
         this.fieldNodeList = fieldNodeList;
     }
-
 }

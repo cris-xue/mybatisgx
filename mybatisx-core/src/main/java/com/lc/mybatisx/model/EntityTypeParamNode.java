@@ -1,14 +1,16 @@
 package com.lc.mybatisx.model;
 
 import com.lc.mybatisx.annotation.LogicDelete;
-import com.lc.mybatisx.annotation.Table;
 import com.lc.mybatisx.annotation.Version;
+
+import javax.persistence.Table;
 
 /**
  * @author ：薛承城
  * @description：一句话描述
  * @date ：2021/7/9 17:13
  */
+@Deprecated
 public class EntityTypeParamNode extends TypeParamNode {
 
     private Table table;

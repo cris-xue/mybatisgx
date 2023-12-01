@@ -1,7 +1,5 @@
 package com.lc.mybatisx.model;
 
-import com.lc.mybatisx.annotation.Dynamic;
-
 import java.lang.reflect.Method;
 import java.util.List;
 
@@ -14,13 +12,21 @@ public class MethodNode {
 
     private Method method;
 
-    private String name;
-
-    private List<MethodParamNode> methodParamNodeList;
+    private String methodName;
 
     private ReturnNode returnNode;
+    /**
+     * 是否动态参数
+     */
+    private Boolean isDynamic;
+    /**
+     * 是否单参数
+     */
+    private Boolean isSingleParam;
 
-    private Dynamic dynamic;
+    private MethodParamNode methodParamNode;
+
+    private List<MethodParamNode> methodParamNodeList;
 
     public Method getMethod() {
         return method;
@@ -30,20 +36,12 @@ public class MethodNode {
         this.method = method;
     }
 
-    public String getName() {
-        return name;
+    public String getMethodName() {
+        return methodName;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public List<MethodParamNode> getMethodParamNodeList() {
-        return methodParamNodeList;
-    }
-
-    public void setMethodParamNodeList(List<MethodParamNode> methodParamNodeList) {
-        this.methodParamNodeList = methodParamNodeList;
+    public void setMethodName(String methodName) {
+        this.methodName = methodName;
     }
 
     public ReturnNode getReturnNode() {
@@ -54,11 +52,35 @@ public class MethodNode {
         this.returnNode = returnNode;
     }
 
-    public Dynamic getDynamic() {
-        return dynamic;
+    public Boolean getDynamic() {
+        return isDynamic;
     }
 
-    public void setDynamic(Dynamic dynamic) {
-        this.dynamic = dynamic;
+    public void setDynamic(Boolean dynamic) {
+        isDynamic = dynamic;
+    }
+
+    public Boolean getSingleParam() {
+        return isSingleParam;
+    }
+
+    public void setSingleParam(Boolean singleParam) {
+        isSingleParam = singleParam;
+    }
+
+    public MethodParamNode getMethodParamNode() {
+        return methodParamNode;
+    }
+
+    public void setMethodParamNode(MethodParamNode methodParamNode) {
+        this.methodParamNode = methodParamNode;
+    }
+
+    public List<MethodParamNode> getMethodParamNodeList() {
+        return methodParamNodeList;
+    }
+
+    public void setMethodParamNodeList(List<MethodParamNode> methodParamNodeList) {
+        this.methodParamNodeList = methodParamNodeList;
     }
 }

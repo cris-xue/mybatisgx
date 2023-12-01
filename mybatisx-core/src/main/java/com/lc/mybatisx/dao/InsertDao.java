@@ -1,7 +1,6 @@
 package com.lc.mybatisx.dao;
 
-import com.lc.mybatisx.annotation.MapperMethod;
-import com.lc.mybatisx.annotation.MethodType;
+import com.lc.mybatisx.annotation.Dynamic;
 
 import java.io.Serializable;
 
@@ -16,6 +15,7 @@ public interface InsertDao<ENTITY, ID extends Serializable> extends Dao {
     int insert(ENTITY entity);
 
     // @MapperMethod(type = MethodType.INSERT, dynamic = true)
+    @Dynamic
     int insertSelective(ENTITY entity);
 
 }

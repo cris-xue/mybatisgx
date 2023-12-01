@@ -1,7 +1,5 @@
 package com.lc.mybatisx.dao;
 
-import com.lc.mybatisx.annotation.MapperMethod;
-import com.lc.mybatisx.annotation.MethodType;
 import org.apache.ibatis.annotations.Param;
 
 import java.io.Serializable;

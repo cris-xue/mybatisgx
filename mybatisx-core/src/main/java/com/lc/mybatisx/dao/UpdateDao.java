@@ -1,5 +1,7 @@
 package com.lc.mybatisx.dao;
 
+import com.lc.mybatisx.annotation.Dynamic;
+
 import java.io.Serializable;
 
 /**
@@ -13,6 +15,7 @@ public interface UpdateDao<ENTITY, ID extends Serializable> extends Dao {
     int updateById(ENTITY entity);
 
     // @MapperMethod(type = MethodType.UPDATE, dynamic = true)
+    @Dynamic
     int updateByIdSelective(ENTITY entity);
 
 }

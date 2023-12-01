@@ -74,7 +74,7 @@ public class TestLex {
         MethodNameParser.Select_statementContext aaaa = methodNameParser.select_statement();
         System.out.println(aaaa.toStringTree(methodNameParser));
 
-        MethodNameListener listener = new MethodNameBaseListener();
+        MethodNameParserListener listener = new MethodNameParserBaseListener();
         ParseTreeWalker.DEFAULT.walk(listener, aaaa);
 
         /*MethodNameBaseListener methodNameBaseListener = new MethodNameBaseListener();
@@ -97,12 +97,12 @@ public class TestLex {
 
     @Test
     public void test05() {
-        CharStream input = CharStreams.fromString("findByIdLtAndUserNameAgeEqGroupByIdOrderByNameAscIdUserDesc");
+        CharStream input = CharStreams.fromString("getByIdLtAndUserNameAgeEqGroupByIdOrderByNameAscIdUserDesc");
         MethodNameLexer methodNameLexer = new MethodNameLexer(input);
         CommonTokenStream commonStream = new CommonTokenStream(methodNameLexer);
         MethodNameParser methodNameParser = new MethodNameParser(commonStream);
 
-        MethodNameVisitor methodNameVisitor = new MethodNameBaseVisitor();
+        MethodNameParserVisitor methodNameVisitor = new MethodNameParserBaseVisitor();
 
         ParseTree qlStatementContext = methodNameParser.sql_statement();
         getKeywordMap(null, qlStatementContext);

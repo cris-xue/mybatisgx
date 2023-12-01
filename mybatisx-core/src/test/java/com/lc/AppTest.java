@@ -1,5 +1,8 @@
 package com.lc;
 
+import com.lc.mybatisx.handler.handler.SqlMapperHandler;
+import com.lc.mybatisx.model.InterfaceNode;
+import com.lc.mybatisx.model.MethodNode;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -13,7 +16,10 @@ public class AppTest {
     public void test01() {
         List<String> methodList = Arrays.asList("findByIdEq", "findTop50ByIdAndName", "findByIdAndName", "findByNameAndAgeEqOrderByNameDesc", "findByNameAndInputTimeBetween", "findByNameGroupByName", "findByPayStatusAndPayStatusXyzAbc", "updateByIdSelective");
         Map<String, List<String>> map = new LinkedHashMap<>();
+
+        SqlMapperHandler sqlMapperHandler = new SqlMapperHandler();
         for (String method : methodList) {
+            SqlMapperHandler.build(new InterfaceNode(), new MethodNode(), method);
             /*List<String> keyList = KeywordParse.parseMethod(method, null);
             map.put(method, keyList);*/
         }

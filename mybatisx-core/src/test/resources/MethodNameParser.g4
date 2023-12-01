@@ -14,13 +14,13 @@ end: EOF ;
 insert_statement: insert_clause ;
 insert_clause: INSERT_ACTION ;
 
-delete_statement: delete_clause where_clause dynamic_parameter_clause ;
+delete_statement: delete_clause where_clause ;
 delete_clause: DELETE_ACTION ;
 
-update_statement: update_clause where_clause dynamic_parameter_clause ;
+update_statement: update_clause where_clause ;
 update_clause: UPDATE_ACTION ;
 
-select_statement: select_clause where_clause group_clause order_clause dynamic_parameter_clause ;
+select_statement: select_clause where_clause group_clause order_clause ;
 select_clause: SELECT_ACTION ;
 
 where_clause: ((where_item)+)? ;

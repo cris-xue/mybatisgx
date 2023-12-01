@@ -20,4 +20,24 @@
         </trim>
     </insert>
 
+    <!--
+    <insert id="insert" keyProperty="id" useGeneratedKeys="true" parameterType="${methodNode.methodParamNodeList[0].type}">
+        insert into ${interfaceNode.tableName}
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <#list methodNode.methodParamNodeList[0].fieldNodeList as fieldNode>
+                <if test="${fieldNode.name} != null">
+                    ${fieldNode.name},
+                </if>
+            </#list>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <#list methodNode.methodParamNodeList[0].fieldNodeList as fieldNode>
+                <if test="${fieldNode.name} != null">
+                    ${r'#{'} ${fieldNode.name} ${r'}'},
+                </if>
+            </#list>
+        </trim>
+    </insert>
+    -->
+
 </mapper>

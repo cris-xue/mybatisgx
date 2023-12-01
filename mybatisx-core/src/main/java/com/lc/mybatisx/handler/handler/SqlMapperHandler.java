@@ -3,17 +3,16 @@ package com.lc.mybatisx.handler.handler;
 import com.lc.mybatisx.annotation.BetweenEnd;
 import com.lc.mybatisx.annotation.BetweenStart;
 import com.lc.mybatisx.annotation.LogicDelete;
-import com.lc.mybatisx.annotation.Table;
-import com.lc.mybatisx.model.EntityTypeParamNode;
+import com.lc.mybatisx.model.EntityNode;
 import com.lc.mybatisx.model.InterfaceNode;
 import com.lc.mybatisx.model.MethodNode;
 import com.lc.mybatisx.model.MethodParamNode;
+import com.lc.mybatisx.syntax.MethodNameLexer;
+import com.lc.mybatisx.syntax.MethodNameParser;
 import com.lc.mybatisx.wrapper.LogicDeleteWrapper;
 import com.lc.mybatisx.wrapper.QuerySqlWrapper;
 import com.lc.mybatisx.wrapper.SqlWrapper;
 import com.lc.mybatisx.wrapper.WhereWrapper;
-import com.lc.mybatisx.syntax.MethodNameLexer;
-import com.lc.mybatisx.syntax.MethodNameParser;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -22,6 +21,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 
+import javax.persistence.Table;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -48,7 +48,6 @@ public class SqlMapperHandler {
         MethodNameLexer methodNameLexer = new MethodNameLexer(input);
         CommonTokenStream commonStream = new CommonTokenStream(methodNameLexer);
         MethodNameParser methodNameParser = new MethodNameParser(commonStream);
-
         ParseTree sqlStatementContext = methodNameParser.sql_statement();
         return sqlStatementContext;
     }
@@ -117,8 +116,8 @@ public class SqlMapperHandler {
         }
 
         QuerySqlWrapper querySqlWrapper = new QuerySqlWrapper();
-        querySqlWrapper.setNamespace(this.interfaceNode.getName());
-        EntityTypeParamNode entityTypeParamNode = interfaceNode.getEntityTypeParamNode();
+        querySqlWrapper.setNamespace(this.interfaceNode.getInterfaceName());
+        EntityNode entityTypeParamNode = interfaceNode.getEntityNode();
         Table table = entityTypeParamNode.getTable();
         querySqlWrapper.setTableName(table.name());
 
@@ -130,7 +129,7 @@ public class SqlMapperHandler {
             querySqlWrapper.setLogicDeleteWrapper(logicDeleteWrapper);
         }
 
-        querySqlWrapper.setMethodName(methodNode.getName());
+        querySqlWrapper.setMethodName(methodNode.getMethodName());
 
         int childCount = parseTree.getChildCount();
         for (int i = 0; i < childCount; i++) {

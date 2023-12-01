@@ -51,9 +51,9 @@ public class CURDMapper {
         List<XNode> xNodeList = new ArrayList<>();
 
         List<MethodNode> methodNodeList = interfaceNode.getMethodNodeList();
-        String interfaceName = interfaceNode.getName();
+        String interfaceName = interfaceNode.getInterfaceName();
         for (MethodNode methodNode : methodNodeList) {
-            String methodName = methodNode.getName();
+            String methodName = methodNode.getMethodName();
             Configuration configuration = builderAssistant.getConfiguration();
             if (configuration.hasStatement(interfaceName + "." + methodName)) {
                 continue;

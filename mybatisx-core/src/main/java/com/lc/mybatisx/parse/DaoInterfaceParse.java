@@ -1,6 +1,6 @@
 package com.lc.mybatisx.parse;
 
-import com.lc.mybatisx.annotation.*;
+import com.lc.mybatisx.annotation.Dynamic;
 import com.lc.mybatisx.dao.Dao;
 import com.lc.mybatisx.dao.SimpleDao;
 import com.lc.mybatisx.handler.AbstractMapperHandler;
@@ -16,6 +16,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.util.TypeUtils;
 import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
 
+import javax.persistence.Table;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -53,12 +54,12 @@ public class DaoInterfaceParse {
         Class<?> daoInterface = getDaoInterface(namespace);
 
         InterfaceNode interfaceNode = new InterfaceNode();
-        interfaceNode.setName(daoInterface.getName());
+        interfaceNode.setInterfaceName(daoInterface.getName());
         interfaceNode.setInterfaceClass(daoInterface);
 
         Type[] daoInterfaceParams = getDaoInterfaceParams(daoInterface);
-        interfaceNode.setIdTypeParamNode(parseTypeParam("ID", daoInterfaceParams[1]));
-        interfaceNode.setEntityTypeParamNode(parseEntityTypeParam("ENTITY", daoInterfaceParams[0]));
+        interfaceNode.setIdNode(parseTypeParam("ID", daoInterfaceParams[1]));
+        interfaceNode.setEntityNode(parseEntityTypeParam("ENTITY", daoInterfaceParams[0]));
 
         List<MethodNode> methodNodeList = parseMethod(daoInterface, interfaceNode);
         interfaceNode.setMethodNodeList(methodNodeList);
@@ -66,10 +67,10 @@ public class DaoInterfaceParse {
         return interfaceNode;
     }
 
-    private EntityTypeParamNode parseEntityTypeParam(String name, Type daoInterface) {
-        TypeParamNode typeParamNode = parseTypeParam(name, daoInterface);
+    private EntityNode parseEntityTypeParam(String name, Type daoInterface) {
+        StructNode typeParamNode = parseTypeParam(name, daoInterface);
 
-        EntityTypeParamNode entityTypeParamNode = new EntityTypeParamNode();
+        EntityNode entityTypeParamNode = new EntityNode();
         BeanUtils.copyProperties(typeParamNode, entityTypeParamNode);
 
         Class<?> clazz = (Class<?>) daoInterface;
@@ -91,11 +92,11 @@ public class DaoInterfaceParse {
         return entityTypeParamNode;
     }
 
-    private TypeParamNode parseTypeParam(String name, Type daoInterface) {
+    private IdNode parseTypeParam(String name, Type daoInterface) {
         Class<?> clazz = (Class<?>) daoInterface;
 
-        TypeParamNode typeParamNode = new TypeParamNode();
-        typeParamNode.setName(name);
+        IdNode typeParamNode = new IdNode();
+        // typeParamNode.setName(name);
         typeParamNode.setType(clazz);
 
         Boolean basicType = isBasicType(clazz);
@@ -115,11 +116,11 @@ public class DaoInterfaceParse {
         for (Method method : methods) {
             MethodNode methodNode = new MethodNode();
 
-            methodNode.setMethod(method);
+            /*methodNode.setMethod(method);
             methodNode.setName(method.getName());
             methodNode.setMethodParamNodeList(parseMethodParam(interfaceNode, method));
             methodNode.setReturnNode(parseMethodReturn(interfaceNode, method));
-            methodNode.setDynamic(method.getAnnotation(Dynamic.class));
+            methodNode.setDynamic(method.getAnnotation(Dynamic.class));*/
 
             methodNodeList.add(methodNode);
         }
@@ -208,10 +209,10 @@ public class DaoInterfaceParse {
         Type actualType = GenericUtils.getGenericType(type);
         String actualTypeName = actualType.getTypeName();
 
-        TypeParamNode idTypeParamNode = interfaceNode.getIdTypeParamNode();
+        IdNode idTypeParamNode = interfaceNode.getIdNode();
         String idTypeParamName = idTypeParamNode.getName();
 
-        TypeParamNode entityTypeParamNode = interfaceNode.getEntityTypeParamNode();
+        EntityNode entityTypeParamNode = interfaceNode.getEntityNode();
         String entityTypeParamName = entityTypeParamNode.getName();
 
         if (actualTypeName.equals(idTypeParamName)) {

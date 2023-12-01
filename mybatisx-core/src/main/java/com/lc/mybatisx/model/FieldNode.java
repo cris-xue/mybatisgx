@@ -9,7 +9,9 @@ public class FieldNode {
 
     private Class<?> type;
 
-    private String name;
+    private String typeName;
+
+    private String dbFieldName;
 
     public Class<?> getType() {
         return type;

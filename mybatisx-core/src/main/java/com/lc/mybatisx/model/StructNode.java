@@ -10,6 +10,9 @@ import java.util.List;
  */
 public class StructNode {
 
+    /**
+     * 是否基础类型【int、boolean、long、Integer、String、Long】
+     */
     private Boolean isBasicType;
 
     private Class<?> type;

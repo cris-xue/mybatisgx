@@ -11,7 +11,14 @@ import org.apache.ibatis.annotations.Param;
  */
 public class MethodParamNode extends StructNode {
 
-    private String name;
+    /**
+     * 参数名，userName
+     */
+    private String paramName;
+    /**
+     * 数据库中的字段名，user_name = #{userName}
+     */
+    private String dbFieldName;
 
     private Param param;
 
@@ -21,12 +28,20 @@ public class MethodParamNode extends StructNode {
 
     private Boolean isUse = false;
 
-    public String getName() {
-        return name;
+    public String getParamName() {
+        return paramName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setParamName(String paramName) {
+        this.paramName = paramName;
+    }
+
+    public String getDbFieldName() {
+        return dbFieldName;
+    }
+
+    public void setDbFieldName(String dbFieldName) {
+        this.dbFieldName = dbFieldName;
     }
 
     public Param getParam() {

@@ -5,6 +5,7 @@ package com.lc.mybatisx.model;
  * @description：一句话描述
  * @date ：2021/7/9 17:13
  */
+@Deprecated
 public class TypeParamNode extends StructNode {
 
     private String name;

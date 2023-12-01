@@ -1,6 +1,6 @@
 package com.lc.mybatisx.ext;
 
-import com.lc.mybatisx.handler.CURDMapper;
+import com.lc.mybatisx.model.handler.CURDMapperHandler;
 import org.apache.ibatis.builder.*;
 import org.apache.ibatis.builder.xml.XMLMapperEntityResolver;
 import org.apache.ibatis.builder.xml.XMLStatementBuilder;
@@ -81,7 +81,8 @@ public class MybatisxXMLMapperBuilder extends BaseBuilder {
 
             // 对mybatis改造的源码
             List<XNode> oldXNode = context.evalNodes("select|insert|update|delete");
-            List<XNode> curdList = CURDMapper.getNodeList(builderAssistant, namespace);
+            // List<XNode> curdList = CURDMapperHandler.execute(builderAssistant);
+            CURDMapperHandler.execute(builderAssistant);
             // oldXNode.addAll(curdList);
 
             buildStatementFromContext(oldXNode);

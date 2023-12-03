@@ -233,7 +233,7 @@ public class SqlMapperHandler {
 
         for (MethodParamNode methodParamNode : methodParamNodeList) {
             String dbColumn = whereWrapper.getDbColumn();
-            String methodParamName = methodParamNode.getName();
+            String methodParamName = methodParamNode.getParamName();
             Boolean isUse = methodParamNode.getUse();
 
             Annotation annotation = isBetween(methodParamNode);

@@ -1,6 +1,5 @@
 package com.lc.mybatisx.parse;
 
-import com.lc.mybatisx.annotation.Dynamic;
 import com.lc.mybatisx.dao.Dao;
 import com.lc.mybatisx.dao.SimpleDao;
 import com.lc.mybatisx.handler.AbstractMapperHandler;
@@ -167,7 +166,7 @@ public class DaoInterfaceParse {
             }
             Param param = parameter.getAnnotation(Param.class);
             if (param != null) {
-                methodParamNode.setName(param.value());
+                methodParamNode.setParamName(param.value());
                 methodParamNode.setParam(param);
             }
             Annotation[] annotations = parameter.getAnnotations();

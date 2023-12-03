@@ -169,7 +169,7 @@ public class DaoParse {
             }
             Param param = parameter.getAnnotation(Param.class);
             if (param != null) {
-                methodParamNode.setName(param.value());
+                methodParamNode.setParamName(param.value());
                 methodParamNode.setParam(param);
             }
             Annotation[] annotations = parameter.getAnnotations();

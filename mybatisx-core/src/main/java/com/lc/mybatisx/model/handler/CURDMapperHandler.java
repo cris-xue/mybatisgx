@@ -2,6 +2,7 @@ package com.lc.mybatisx.model.handler;
 
 import com.lc.mybatisx.model.InterfaceNode;
 import com.lc.mybatisx.model.MethodNode;
+import com.lc.mybatisx.model.TableInfo;
 import com.lc.mybatisx.syntax.MethodNameLexer;
 import com.lc.mybatisx.syntax.MethodNameParser;
 import com.lc.mybatisx.utils.FreeMarkerUtils;
@@ -38,25 +39,34 @@ public class CURDMapperHandler {
             "findAll",
             "findList"*/
     );
-    private static InterfaceNodeHandler interfaceNodeHandler = new InterfaceNodeHandler();
-    private static MethodNodeHandler methodNodeHandler = new MethodNodeHandler();
+    private static TableInfoHandler tableInfoHandler = new TableInfoHandler();
+    private static DaoMethodInfoHandler daoMethodInfoHandler = new DaoMethodInfoHandler();
 
     public static void execute(MapperBuilderAssistant builderAssistant) {
         String namespace = builderAssistant.getCurrentNamespace();
-        InterfaceNode interfaceNode = interfaceNodeHandler.execute(namespace);
-        List<MethodNode> methodNodeList = methodNodeHandler.execute(interfaceNode);
-        interfaceNode.setMethodNodeList(methodNodeList);
+        Class<?> daoInterface = getDaoInterface(namespace);
+        TableInfo tableInfo = tableInfoHandler.execute(daoInterface);
+        List<MethodNode> methodNodeList = daoMethodInfoHandler.execute(daoInterface);
 
         for (int i = 0; i < methodNodeList.size(); i++) {
             MethodNode methodNode = methodNodeList.get(i);
             String methodName = methodNode.getMethodName();
             if (simpleMethodList.contains(methodName)) {
                 // 生成简单方法
-                readTemplate(interfaceNode, methodNode);
+                // readTemplate(interfaceNode, methodNode);
                 continue;
             }
             aaa(methodNode.getMethodName());
         }
+    }
+
+    private static Class<?> getDaoInterface(String namespace) {
+        try {
+            return Class.forName(namespace);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     private static void aaa(String methodName) {

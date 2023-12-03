@@ -24,10 +24,6 @@ public class InterfaceNodeHandler {
     private StructNodeHandler structNodeHandler = new StructNodeHandler();
 
     public InterfaceNode execute(String namespace) {
-        return parseMapper(namespace);
-    }
-
-    public InterfaceNode parseMapper(String namespace) {
         Class<?> daoInterface = getDaoInterface(namespace);
 
         InterfaceNode interfaceNode = new InterfaceNode();

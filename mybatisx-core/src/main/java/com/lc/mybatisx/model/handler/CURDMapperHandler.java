@@ -43,7 +43,7 @@ public class CURDMapperHandler {
     private static TableInfoHandler tableInfoHandler = new TableInfoHandler();
     private static MapperMethodInfoHandler mapperMethodInfoHandler = new MapperMethodInfoHandler();
 
-    public static void execute(MapperBuilderAssistant builderAssistant) {
+    public static List<XNode> execute(MapperBuilderAssistant builderAssistant) {
         String namespace = builderAssistant.getCurrentNamespace();
         Class<?> daoInterface = getDaoInterface(namespace);
 
@@ -51,16 +51,20 @@ public class CURDMapperHandler {
         TableInfo tableInfo = tableInfoHandler.execute(daoInterface);
         List<MethodInfo> methodInfoList = mapperMethodInfoHandler.execute(mapperInfo, daoInterface);
 
+        List<XNode> xNodeList = new ArrayList<>(15);
         for (int i = 0; i < methodInfoList.size(); i++) {
             MethodInfo methodInfo = methodInfoList.get(i);
             String methodName = methodInfo.getMethodName();
             if (simpleMethodList.contains(methodName)) {
                 // 生成简单方法
-                readTemplate(mapperInfo, methodInfo, tableInfo);
-                continue;
+                XNode xNode = readTemplate(mapperInfo, methodInfo, tableInfo);
+                xNodeList.add(xNode);
+            } else {
+                // 自定义方法处理
+                // aaa(mapperMethodInfo.getMethodName());
             }
-            // aaa(mapperMethodInfo.getMethodName());
         }
+        return xNodeList;
     }
 
     private static Class<?> getDaoInterface(String namespace) {
@@ -100,15 +104,13 @@ public class CURDMapperHandler {
         }
     }
 
-    public static List<XNode> readTemplate(MapperInfo mapperInfo, MethodInfo methodInfo, TableInfo tableInfo) {
+    public static XNode readTemplate(MapperInfo mapperInfo, MethodInfo methodInfo, TableInfo tableInfo) {
         String templatePath = String.format("mapper/mysql/simple_mapper/%s.ftl", methodInfo.getMethodName());
         Template template = FreeMarkerUtils.getTemplate(templatePath);
-        List<XNode> xNodeList = generateDeleteMethod(template, mapperInfo, methodInfo, tableInfo);
-        return xNodeList;
+        return generateDeleteMethod(template, mapperInfo, methodInfo, tableInfo);
     }
 
-    public static List<XNode> generateDeleteMethod(Template template, MapperInfo mapperInfo, MethodInfo methodInfo, TableInfo tableInfo) {
-        List<XNode> deleteXNodeList = new ArrayList<>();
+    public static XNode generateDeleteMethod(Template template, MapperInfo mapperInfo, MethodInfo methodInfo, TableInfo tableInfo) {
         Map<String, Object> templateData = new HashMap<>();
         templateData.put("mapperInfo", mapperInfo);
         templateData.put("methodInfo", methodInfo);
@@ -117,13 +119,13 @@ public class CURDMapperHandler {
         XPathParser xPathParser = FreeMarkerUtils.processTemplate(templateData, template);
         System.out.println(xPathParser.toString());
 
-        // XNode mapperXNode = xPathParser.evalNode("/mapper");
+        XNode mapperXNode = xPathParser.evalNode("/mapper/*");
 
         // String expression = deleteSqlWrapper.getVersionQuery() ? "select" : "delete";
         // List<XNode> deleteXNode = mapperXNode.evalNodes(expression);
         // deleteXNodeList.addAll(deleteXNode);
 
-        return deleteXNodeList;
+        return mapperXNode;
     }
 
 }

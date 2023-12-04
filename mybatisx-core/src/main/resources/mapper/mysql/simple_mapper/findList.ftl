@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <mapper>
 
-    <select id="findList">
+    <select id="findList" resultType="${methodInfo.methodReturnInfo.typeName}">
         select * from ${tableInfo.tableName}
         <trim prefix="where" prefixOverrides="and">
             <#list tableInfo.columnInfoList as columnInfo>

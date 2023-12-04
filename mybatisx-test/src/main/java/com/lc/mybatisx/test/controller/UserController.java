@@ -45,7 +45,7 @@ public class UserController {
 
     @GetMapping(path = "/all")
     public List<User> findByAll() {
-        return null;
+        return userDao.findAll();
     }
 
 }

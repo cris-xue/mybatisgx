@@ -28,7 +28,7 @@ public class MybatisxConfiguration extends Configuration {
 
     @Override
     public StatementHandler newStatementHandler(Executor executor, MappedStatement mappedStatement, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
-        parameterObject = this.fillParameterObject(mappedStatement, parameterObject);
+        // parameterObject = this.fillParameterObject(mappedStatement, parameterObject);
         return super.newStatementHandler(executor, mappedStatement, parameterObject, rowBounds, resultHandler, boundSql);
     }
 

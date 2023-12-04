@@ -91,6 +91,7 @@ public class MapperMethodInfoHandler {
 
         MethodReturnInfo methodReturnInfo = new MethodReturnInfo();
         methodReturnInfo.setType(clazz);
+        methodReturnInfo.setTypeName(clazz.getName());
         Boolean basicType = structNodeHandler.isBasicType(clazz);
         methodReturnInfo.setBasicType(basicType);
         methodReturnInfo.setContainerType(getContainerType(clazz));

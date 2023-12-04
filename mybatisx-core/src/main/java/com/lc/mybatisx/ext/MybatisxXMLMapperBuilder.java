@@ -81,9 +81,8 @@ public class MybatisxXMLMapperBuilder extends BaseBuilder {
 
             // 对mybatis改造的源码
             List<XNode> oldXNode = context.evalNodes("select|insert|update|delete");
-            // List<XNode> curdList = CURDMapperHandler.execute(builderAssistant);
-            CURDMapperHandler.execute(builderAssistant);
-            // oldXNode.addAll(curdList);
+            List<XNode> curdList = CURDMapperHandler.execute(builderAssistant);
+            oldXNode.addAll(curdList);
 
             buildStatementFromContext(oldXNode);
         } catch (Exception e) {

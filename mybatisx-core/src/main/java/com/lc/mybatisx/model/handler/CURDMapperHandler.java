@@ -32,12 +32,12 @@ public class CURDMapperHandler {
     private static List<String> simpleMethodList = Arrays.asList(
             "insert",
             "insertSelective",
-            "deleteById"
-            /*"updateById",
+            "deleteById",
+            "updateById",
             "updateByIdSelective",
             "findById",
             "findAll",
-            "findList"*/
+            "findList"
     );
     private static MapperInfoHandler mapperInfoHandler = new MapperInfoHandler();
     private static TableInfoHandler tableInfoHandler = new TableInfoHandler();

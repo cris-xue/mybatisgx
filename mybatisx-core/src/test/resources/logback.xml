@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration>
+    <!--配置集中管理属性 我们可以直接更改属性value的值 格式: ${name}-->
+    <property name="pattern" value="[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} %c %M %L [%thread] %m%n"/>
+
+    <appender name="console" class = "ch.qos.logback.core.ConsoleAppender">
+        <!--控制输出流对象 默认System.out改为System.err-->
+        <target>System.err</target>
+        <!--引用上面的属性 用${name}-->
+        <encoder class = "ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${pattern}</pattern>
+        </encoder>
+    </appender>
+
+    <!--root logger-->
+    <root level = "ALL">
+        <appender-ref ref="console"/>
+    </root>
+</configuration>

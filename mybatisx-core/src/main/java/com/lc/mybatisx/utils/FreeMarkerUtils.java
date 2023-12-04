@@ -17,7 +17,7 @@ import java.util.Map;
  */
 public class FreeMarkerUtils {
 
-    private static final Logger log = LoggerFactory.getLogger(FreeMarkerUtils.class);
+    private static final Logger logger = LoggerFactory.getLogger(FreeMarkerUtils.class);
 
     /**
      * 获取模板
@@ -59,7 +59,8 @@ public class FreeMarkerUtils {
             stringWriter = new StringWriter();
             template.process(model, stringWriter);
             String methodXml = stringWriter.toString();
-            log.info(methodXml);
+            System.out.println(methodXml);
+            logger.info(methodXml);
             inputStream = new ByteArrayInputStream(methodXml.getBytes());
 
             // 把xml字符串转换成Document

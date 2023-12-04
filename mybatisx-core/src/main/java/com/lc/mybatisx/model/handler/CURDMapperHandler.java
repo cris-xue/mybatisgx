@@ -1,7 +1,7 @@
 package com.lc.mybatisx.model.handler;
 
-import com.lc.mybatisx.model.InterfaceNode;
-import com.lc.mybatisx.model.MethodNode;
+import com.lc.mybatisx.model.MapperInfo;
+import com.lc.mybatisx.model.MethodInfo;
 import com.lc.mybatisx.model.TableInfo;
 import com.lc.mybatisx.syntax.MethodNameLexer;
 import com.lc.mybatisx.syntax.MethodNameParser;
@@ -30,33 +30,36 @@ public class CURDMapperHandler {
     private static final Logger logger = LoggerFactory.getLogger(CURDMapperHandler.class);
 
     private static List<String> simpleMethodList = Arrays.asList(
-            "insert"
-            /*"insertSelective",
-            "deleteById",
-            "updateById",
+            "insert",
+            "insertSelective",
+            "deleteById"
+            /*"updateById",
             "updateByIdSelective",
             "findById",
             "findAll",
             "findList"*/
     );
+    private static MapperInfoHandler mapperInfoHandler = new MapperInfoHandler();
     private static TableInfoHandler tableInfoHandler = new TableInfoHandler();
-    private static DaoMethodInfoHandler daoMethodInfoHandler = new DaoMethodInfoHandler();
+    private static MapperMethodInfoHandler mapperMethodInfoHandler = new MapperMethodInfoHandler();
 
     public static void execute(MapperBuilderAssistant builderAssistant) {
         String namespace = builderAssistant.getCurrentNamespace();
         Class<?> daoInterface = getDaoInterface(namespace);
-        TableInfo tableInfo = tableInfoHandler.execute(daoInterface);
-        List<MethodNode> methodNodeList = daoMethodInfoHandler.execute(daoInterface);
 
-        for (int i = 0; i < methodNodeList.size(); i++) {
-            MethodNode methodNode = methodNodeList.get(i);
-            String methodName = methodNode.getMethodName();
+        MapperInfo mapperInfo = mapperInfoHandler.execute(daoInterface);
+        TableInfo tableInfo = tableInfoHandler.execute(daoInterface);
+        List<MethodInfo> methodInfoList = mapperMethodInfoHandler.execute(mapperInfo, daoInterface);
+
+        for (int i = 0; i < methodInfoList.size(); i++) {
+            MethodInfo methodInfo = methodInfoList.get(i);
+            String methodName = methodInfo.getMethodName();
             if (simpleMethodList.contains(methodName)) {
                 // 生成简单方法
-                // readTemplate(interfaceNode, methodNode);
+                readTemplate(mapperInfo, methodInfo, tableInfo);
                 continue;
             }
-            aaa(methodNode.getMethodName());
+            // aaa(mapperMethodInfo.getMethodName());
         }
     }
 
@@ -97,21 +100,22 @@ public class CURDMapperHandler {
         }
     }
 
-    public static List<XNode> readTemplate(InterfaceNode interfaceNode, MethodNode methodNode) {
-        Template template = FreeMarkerUtils.getTemplate(String.format("mapper/mysql/simple_mapper/%s.ftl", methodNode.getMethodName()));
-        List<XNode> xNodeList = generateDeleteMethod(template, interfaceNode, methodNode);
+    public static List<XNode> readTemplate(MapperInfo mapperInfo, MethodInfo methodInfo, TableInfo tableInfo) {
+        String templatePath = String.format("mapper/mysql/simple_mapper/%s.ftl", methodInfo.getMethodName());
+        Template template = FreeMarkerUtils.getTemplate(templatePath);
+        List<XNode> xNodeList = generateDeleteMethod(template, mapperInfo, methodInfo, tableInfo);
         return xNodeList;
     }
 
-    public static List<XNode> generateDeleteMethod(Template template, InterfaceNode interfaceNode, MethodNode methodNode) {
+    public static List<XNode> generateDeleteMethod(Template template, MapperInfo mapperInfo, MethodInfo methodInfo, TableInfo tableInfo) {
         List<XNode> deleteXNodeList = new ArrayList<>();
         Map<String, Object> templateData = new HashMap<>();
-        templateData.put("interfaceNode", interfaceNode);
-        templateData.put("methodNode", methodNode);
+        templateData.put("mapperInfo", mapperInfo);
+        templateData.put("methodInfo", methodInfo);
+        templateData.put("tableInfo", tableInfo);
 
         XPathParser xPathParser = FreeMarkerUtils.processTemplate(templateData, template);
-        String sql = xPathParser.evalString("/mapper");
-        logger.info(sql);
+        System.out.println(xPathParser.toString());
 
         // XNode mapperXNode = xPathParser.evalNode("/mapper");
 

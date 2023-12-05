@@ -53,15 +53,14 @@ public class MethodInfoHandler {
 
             MethodInfo methodInfo = new MethodInfo();
             methodInfo.setMethodName(methodName);
-            methodInfo.setMethodNameQueryInfo(getMethodNameQueryInfo(methodName));
+            methodInfo.setMethodNameInfo(getMethodNameInfo(methodName));
             methodInfo.setMethodReturnInfo(methodReturnInfo);
             methodInfo.setDynamic(method.getAnnotation(Dynamic.class) != null);
+            methodInfo.setMethodParamInfoList(methodParamInfoList);
             methodInfo.setSingleParam(isSingleParam);
-            if (isSingleParam) {
-                methodInfo.setMethodParamInfo(methodParamInfoList.get(0));
-            } else {
-                methodInfo.setMethodParamInfoList(methodParamInfoList);
-            }
+            methodInfo.setMethodParamInfo(isSingleParam ? methodParamInfoList.get(0) : null);
+
+            check(methodInfo);
 
             methodNodeList.add(methodInfo);
         }
@@ -125,12 +124,33 @@ public class MethodInfoHandler {
         return methodReturnInfo;
     }
 
-    public MethodNameQueryInfo getMethodNameQueryInfo(String methodName) {
+    public MethodNameInfo getMethodNameInfo(String methodName) {
         if (simpleMethodList.contains(methodName)) {
             return null;
         }
-        methodNameInfoHandler.execute(methodName);
-        return null;
+        MethodNameInfo methodNameInfo = methodNameInfoHandler.execute(methodName);
+        return methodNameInfo;
+    }
+
+    /**
+     * 检查方法名信息和方法信息参数是否匹配
+     */
+    public void check(MethodInfo methodInfo) {
+        MethodNameInfo methodNameInfo = methodInfo.getMethodNameInfo();
+        if (methodNameInfo == null) {
+            return;
+        }
+        List<MethodNameWhereInfo> methodNameWhereInfoList = methodNameInfo.getMethodNameWhereInfoList();
+        List<MethodParamInfo> methodParamInfoList = methodInfo.getMethodParamInfoList();
+
+        if (methodNameWhereInfoList.size() != methodParamInfoList.size()) {
+            throw new RuntimeException("方法名中的查询条件和方法参数中中查询条件个数不匹配");
+        }
+
+        for (int i = 0; i < methodNameWhereInfoList.size(); i++) {
+            MethodNameWhereInfo methodNameWhereInfo = methodNameWhereInfoList.get(i);
+            MethodParamInfo methodParamInfo = methodParamInfoList.get(i);
+        }
     }
 
     private Class<?> getMethodParamType(MapperInfo mapperInfo, Parameter parameter) {

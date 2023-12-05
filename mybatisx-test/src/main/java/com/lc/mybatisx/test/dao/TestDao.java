@@ -21,7 +21,7 @@ import java.util.Map;
 public interface TestDao extends QueryDao<Test, Long> {
 
     // @MapperMethod(type = MethodType.UPDATE)
-    int updateByIdAndNameOrUserName(Test test);
+    // int updateByIdAndNameOrUserName(Test test);
 
     // @MapperMethod(type = MethodType.QUERY)
     @Dynamic

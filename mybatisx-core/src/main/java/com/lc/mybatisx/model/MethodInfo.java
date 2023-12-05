@@ -16,7 +16,7 @@ public class MethodInfo {
     /**
      * 方法名查询信息
      */
-    private MethodNameQueryInfo methodNameQueryInfo;
+    private MethodNameInfo methodNameInfo;
     /**
      * 是否动态参数
      */
@@ -46,12 +46,12 @@ public class MethodInfo {
         this.methodName = methodName;
     }
 
-    public MethodNameQueryInfo getMethodNameQueryInfo() {
-        return methodNameQueryInfo;
+    public MethodNameInfo getMethodNameInfo() {
+        return methodNameInfo;
     }
 
-    public void setMethodNameQueryInfo(MethodNameQueryInfo methodNameQueryInfo) {
-        this.methodNameQueryInfo = methodNameQueryInfo;
+    public void setMethodNameInfo(MethodNameInfo methodNameInfo) {
+        this.methodNameInfo = methodNameInfo;
     }
 
     public Boolean getDynamic() {

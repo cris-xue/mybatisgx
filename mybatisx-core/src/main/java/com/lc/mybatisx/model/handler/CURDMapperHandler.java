@@ -2,6 +2,7 @@ package com.lc.mybatisx.model.handler;
 
 import com.lc.mybatisx.model.MapperInfo;
 import com.lc.mybatisx.model.MethodInfo;
+import com.lc.mybatisx.model.MethodNameInfo;
 import com.lc.mybatisx.model.TableInfo;
 import com.lc.mybatisx.utils.FreeMarkerUtils;
 import freemarker.template.Template;
@@ -40,8 +41,13 @@ public class CURDMapperHandler {
         List<XNode> xNodeList = new ArrayList<>(15);
         for (int i = 0; i < methodInfoList.size(); i++) {
             MethodInfo methodInfo = methodInfoList.get(i);
-            XNode xNode = readTemplate(mapperInfo, methodInfo, tableInfo);
-            xNodeList.add(xNode);
+            MethodNameInfo methodNameInfo = methodInfo.getMethodNameInfo();
+            if (methodNameInfo == null) {
+                XNode xNode = simpleTemplateHandle(mapperInfo, methodInfo, tableInfo);
+                xNodeList.add(xNode);
+            } else {
+
+            }
         }
         return xNodeList;
     }
@@ -55,13 +61,13 @@ public class CURDMapperHandler {
         return null;
     }
 
-    public static XNode readTemplate(MapperInfo mapperInfo, MethodInfo methodInfo, TableInfo tableInfo) {
+    public static XNode simpleTemplateHandle(MapperInfo mapperInfo, MethodInfo methodInfo, TableInfo tableInfo) {
         String templatePath = String.format("mapper/mysql/simple_mapper/%s.ftl", methodInfo.getMethodName());
         Template template = FreeMarkerUtils.getTemplate(templatePath);
-        return generateDeleteMethod(template, mapperInfo, methodInfo, tableInfo);
+        return generateSimpleSql(template, mapperInfo, methodInfo, tableInfo);
     }
 
-    public static XNode generateDeleteMethod(Template template, MapperInfo mapperInfo, MethodInfo methodInfo, TableInfo tableInfo) {
+    public static XNode generateSimpleSql(Template template, MapperInfo mapperInfo, MethodInfo methodInfo, TableInfo tableInfo) {
         Map<String, Object> templateData = new HashMap<>();
         templateData.put("mapperInfo", mapperInfo);
         templateData.put("methodInfo", methodInfo);

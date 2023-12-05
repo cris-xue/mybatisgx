@@ -3,22 +3,18 @@ package com.lc.mybatisx.model.handler;
 import com.lc.mybatisx.model.MapperInfo;
 import com.lc.mybatisx.model.MethodInfo;
 import com.lc.mybatisx.model.TableInfo;
-import com.lc.mybatisx.syntax.MethodNameLexer;
-import com.lc.mybatisx.syntax.MethodNameParser;
 import com.lc.mybatisx.utils.FreeMarkerUtils;
 import freemarker.template.Template;
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.TerminalNodeImpl;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.parsing.XPathParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author ：薛承城
@@ -29,19 +25,9 @@ public class CURDMapperHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(CURDMapperHandler.class);
 
-    private static List<String> simpleMethodList = Arrays.asList(
-            "insert",
-            "insertSelective",
-            "deleteById",
-            "updateById",
-            "updateByIdSelective",
-            "findById",
-            "findAll",
-            "findList"
-    );
     private static MapperInfoHandler mapperInfoHandler = new MapperInfoHandler();
     private static TableInfoHandler tableInfoHandler = new TableInfoHandler();
-    private static MapperMethodInfoHandler mapperMethodInfoHandler = new MapperMethodInfoHandler();
+    private static MethodInfoHandler methodInfoHandler = new MethodInfoHandler();
 
     public static List<XNode> execute(MapperBuilderAssistant builderAssistant) {
         String namespace = builderAssistant.getCurrentNamespace();
@@ -49,20 +35,13 @@ public class CURDMapperHandler {
 
         MapperInfo mapperInfo = mapperInfoHandler.execute(daoInterface);
         TableInfo tableInfo = tableInfoHandler.execute(daoInterface);
-        List<MethodInfo> methodInfoList = mapperMethodInfoHandler.execute(mapperInfo, daoInterface);
+        List<MethodInfo> methodInfoList = methodInfoHandler.execute(mapperInfo, daoInterface);
 
         List<XNode> xNodeList = new ArrayList<>(15);
         for (int i = 0; i < methodInfoList.size(); i++) {
             MethodInfo methodInfo = methodInfoList.get(i);
-            String methodName = methodInfo.getMethodName();
-            if (simpleMethodList.contains(methodName)) {
-                // 生成简单方法
-                XNode xNode = readTemplate(mapperInfo, methodInfo, tableInfo);
-                xNodeList.add(xNode);
-            } else {
-                // 自定义方法处理
-                // aaa(mapperMethodInfo.getMethodName());
-            }
+            XNode xNode = readTemplate(mapperInfo, methodInfo, tableInfo);
+            xNodeList.add(xNode);
         }
         return xNodeList;
     }
@@ -74,34 +53,6 @@ public class CURDMapperHandler {
             e.printStackTrace();
         }
         return null;
-    }
-
-    private static void aaa(String methodName) {
-        CharStream charStream = CharStreams.fromString(methodName);
-        MethodNameLexer methodNameLexer = new MethodNameLexer(charStream);
-        CommonTokenStream commonStream = new CommonTokenStream(methodNameLexer);
-        MethodNameParser methodNameParser = new MethodNameParser(commonStream);
-
-        ParseTree sqlStatementContext = methodNameParser.sql_statement();
-        getKeywordMap(null, sqlStatementContext);
-    }
-
-    private static void getKeywordMap(Map<Class<ParseTree>, List<String>> aaaa, ParseTree parseTree) {
-        int childCount = parseTree.getChildCount();
-        for (int i = 0; i < childCount; i++) {
-            ParseTree parseTreeChild = parseTree.getChild(i);
-            String tokens = parseTreeChild.getText();
-            String parentSimpleName = parseTreeChild.getParent().getClass().getSimpleName();
-            String simpleName = parseTreeChild.getClass().getSimpleName();
-
-            if (parseTreeChild instanceof TerminalNodeImpl) {
-                System.out.println(tokens + "---" + simpleName + "---" + parentSimpleName);
-            } else if (parseTreeChild instanceof MethodNameParser.Field_clauseContext) {
-                System.out.println(tokens + "----" + simpleName + "---" + parentSimpleName);
-            } else {
-                getKeywordMap(aaaa, parseTreeChild);
-            }
-        }
     }
 
     public static XNode readTemplate(MapperInfo mapperInfo, MethodInfo methodInfo, TableInfo tableInfo) {

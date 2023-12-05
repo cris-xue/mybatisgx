@@ -1,32 +1,70 @@
 package com.lc.mybatisx.model;
 
-import com.lc.mybatisx.annotation.BetweenEnd;
-import com.lc.mybatisx.annotation.BetweenStart;
-import org.apache.ibatis.annotations.Param;
+import java.util.List;
 
 /**
  * @author ：薛承城
  * @description：一句话描述
  * @date ：2021/7/9 17:13
  */
-public class MethodParamInfo extends StructNode {
+public class MethodParamInfo {
 
+    /**
+     * 是否基础类型
+     */
+    private Boolean isBasicType;
+    /**
+     * 类型，Integer、User
+     */
+    private Class<?> type;
+    /**
+     * 类型名称：java.lang.Long、java.lang.Object
+     */
+    private String typeName;
     /**
      * 参数名，userName
      */
     private String paramName;
     /**
-     * 数据库中的字段名，user_name = #{userName}
+     * 字段信息
      */
-    private String dbFieldName;
+    private List<ColumnInfo> columnInfoList;
+    /**
+     * 是否容器类型
+     */
+    private Boolean isContainerType = false;
+    /**
+     * 容器类型，List、Map
+     */
+    private Class<?> containerType;
+    /**
+     * 容器类型名
+     */
+    private String containerTypeName;
 
-    private Param param;
+    public Boolean getBasicType() {
+        return isBasicType;
+    }
 
-    private BetweenStart betweenStart;
+    public void setBasicType(Boolean basicType) {
+        isBasicType = basicType;
+    }
 
-    private BetweenEnd betweenEnd;
+    public Class<?> getType() {
+        return type;
+    }
 
-    private Boolean isUse = false;
+    public void setType(Class<?> type) {
+        this.type = type;
+    }
+
+    public String getTypeName() {
+        return typeName;
+    }
+
+    public void setTypeName(String typeName) {
+        this.typeName = typeName;
+    }
 
     public String getParamName() {
         return paramName;
@@ -36,43 +74,36 @@ public class MethodParamInfo extends StructNode {
         this.paramName = paramName;
     }
 
-    public String getDbFieldName() {
-        return dbFieldName;
+    public List<ColumnInfo> getColumnInfoList() {
+        return columnInfoList;
     }
 
-    public void setDbFieldName(String dbFieldName) {
-        this.dbFieldName = dbFieldName;
+    public void setColumnInfoList(List<ColumnInfo> columnInfoList) {
+        this.columnInfoList = columnInfoList;
     }
 
-    public Param getParam() {
-        return param;
+    public Boolean getIsContainerType() {
+        return this.isContainerType;
     }
 
-    public void setParam(Param param) {
-        this.param = param;
+    public void setIsContainerType(Boolean isContainerType) {
+        this.isContainerType = isContainerType;
     }
 
-    public BetweenStart getBetweenStart() {
-        return betweenStart;
+    public Class<?> getContainerType() {
+        return this.containerType;
     }
 
-    public void setBetweenStart(BetweenStart betweenStart) {
-        this.betweenStart = betweenStart;
+    public void setContainerType(Class<?> containerType) {
+        this.containerType = containerType;
     }
 
-    public BetweenEnd getBetweenEnd() {
-        return betweenEnd;
+    public String getContainerTypeName() {
+        return containerTypeName;
     }
 
-    public void setBetweenEnd(BetweenEnd betweenEnd) {
-        this.betweenEnd = betweenEnd;
+    public void setContainerTypeName(String containerTypeName) {
+        this.containerTypeName = containerTypeName;
     }
 
-    public Boolean getUse() {
-        return isUse;
-    }
-
-    public void setUse(Boolean use) {
-        isUse = use;
-    }
 }

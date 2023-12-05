@@ -9,7 +9,14 @@ import java.util.List;
  */
 public class MethodInfo {
 
+    /**
+     * 方法名
+     */
     private String methodName;
+    /**
+     * 方法名查询信息
+     */
+    private MethodNameQueryInfo methodNameQueryInfo;
     /**
      * 是否动态参数
      */
@@ -22,7 +29,9 @@ public class MethodInfo {
      * 方法参数信息
      */
     private MethodParamInfo methodParamInfo;
-
+    /**
+     * 方法参数列表
+     */
     private List<MethodParamInfo> methodParamInfoList;
     /**
      * 方法返回信息
@@ -35,6 +44,14 @@ public class MethodInfo {
 
     public void setMethodName(String methodName) {
         this.methodName = methodName;
+    }
+
+    public MethodNameQueryInfo getMethodNameQueryInfo() {
+        return methodNameQueryInfo;
+    }
+
+    public void setMethodNameQueryInfo(MethodNameQueryInfo methodNameQueryInfo) {
+        this.methodNameQueryInfo = methodNameQueryInfo;
     }
 
     public Boolean getDynamic() {

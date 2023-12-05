@@ -46,7 +46,7 @@ public class CURDMapperHandler {
                 XNode xNode = simpleTemplateHandle(mapperInfo, methodInfo, tableInfo);
                 xNodeList.add(xNode);
             } else {
-
+                complexTemplateHandle(mapperInfo, methodInfo, tableInfo);
             }
         }
         return xNodeList;
@@ -63,6 +63,13 @@ public class CURDMapperHandler {
 
     public static XNode simpleTemplateHandle(MapperInfo mapperInfo, MethodInfo methodInfo, TableInfo tableInfo) {
         String templatePath = String.format("mapper/mysql/simple_mapper/%s.ftl", methodInfo.getMethodName());
+        Template template = FreeMarkerUtils.getTemplate(templatePath);
+        return generateSimpleSql(template, mapperInfo, methodInfo, tableInfo);
+    }
+
+    public static XNode complexTemplateHandle(MapperInfo mapperInfo, MethodInfo methodInfo, TableInfo tableInfo) {
+        MethodNameInfo methodNameInfo = methodInfo.getMethodNameInfo();
+        String templatePath = String.format("mapper/mysql/%s_mapper.ftl", methodNameInfo.getAction());
         Template template = FreeMarkerUtils.getTemplate(templatePath);
         return generateSimpleSql(template, mapperInfo, methodInfo, tableInfo);
     }

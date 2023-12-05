@@ -1,4 +1,4 @@
-// Generated from F:/ec/lc/mybatisx/mybatisx-core/src/test/resources/MethodNameParser.g4 by ANTLR 4.13.1
+// Generated from E:/project/devops/mybatisx/mybatisx-core/src/test/resources/MethodNameParser.g4 by ANTLR 4.13.1
 package com.lc.mybatisx.syntax;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
@@ -89,11 +89,11 @@ public interface MethodNameParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitWhere_link_op_clause(MethodNameParser.Where_link_op_clauseContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MethodNameParser#where_op_clause}.
+	 * Visit a parse tree produced by {@link MethodNameParser#condition_op_clause}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitWhere_op_clause(MethodNameParser.Where_op_clauseContext ctx);
+	T visitCondition_op_clause(MethodNameParser.Condition_op_clauseContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MethodNameParser#dynamic_parameter_clause}.
 	 * @param ctx the parse tree

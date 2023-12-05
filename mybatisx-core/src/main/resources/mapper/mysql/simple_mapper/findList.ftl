@@ -3,13 +3,15 @@
 
     <select id="findList" resultType="${methodInfo.methodReturnInfo.typeName}">
         select * from ${tableInfo.tableName}
-        <trim prefix="where" prefixOverrides="and">
-            <#list tableInfo.columnInfoList as columnInfo>
-                <if test="${columnInfo.javaColumnName} != null">
-                    AND ${columnInfo.dbColumnName} = ${r'#{'} ${columnInfo.javaColumnName} ${r'}'}
-                </if>
-            </#list>
-        </trim>
+        <where>
+            <trim prefixOverrides="and">
+                <#list tableInfo.columnInfoList as columnInfo>
+                    <if test="${columnInfo.javaColumnName} != null">
+                        and ${columnInfo.dbColumnName} = ${r'#{'} ${columnInfo.javaColumnName} ${r'}'}
+                    </if>
+                </#list>
+            </trim>
+        </where>
     </select>
 
 </mapper>

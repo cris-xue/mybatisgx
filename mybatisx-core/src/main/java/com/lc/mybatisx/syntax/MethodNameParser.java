@@ -1,4 +1,4 @@
-// Generated from F:/ec/lc/mybatisx/mybatisx-core/src/test/resources/MethodNameParser.g4 by ANTLR 4.13.1
+// Generated from E:/project/devops/mybatisx/mybatisx-core/src/test/resources/MethodNameParser.g4 by ANTLR 4.13.1
 package com.lc.mybatisx.syntax;
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
@@ -25,7 +25,7 @@ public class MethodNameParser extends Parser {
 		RULE_delete_statement = 4, RULE_delete_clause = 5, RULE_update_statement = 6, 
 		RULE_update_clause = 7, RULE_select_statement = 8, RULE_select_clause = 9, 
 		RULE_where_clause = 10, RULE_where_item = 11, RULE_where_link_op_clause = 12, 
-		RULE_where_op_clause = 13, RULE_dynamic_parameter_clause = 14, RULE_group_clause = 15, 
+		RULE_condition_op_clause = 13, RULE_dynamic_parameter_clause = 14, RULE_group_clause = 15, 
 		RULE_group_op_clause = 16, RULE_order_clause = 17, RULE_order_op_clause = 18, 
 		RULE_order_op_direction_clause = 19, RULE_aggregate_function_clause = 20, 
 		RULE_field_clause = 21;
@@ -34,7 +34,7 @@ public class MethodNameParser extends Parser {
 			"sql_statement", "end", "insert_statement", "insert_clause", "delete_statement", 
 			"delete_clause", "update_statement", "update_clause", "select_statement", 
 			"select_clause", "where_clause", "where_item", "where_link_op_clause", 
-			"where_op_clause", "dynamic_parameter_clause", "group_clause", "group_op_clause", 
+			"condition_op_clause", "dynamic_parameter_clause", "group_clause", "group_op_clause", 
 			"order_clause", "order_op_clause", "order_op_direction_clause", "aggregate_function_clause", 
 			"field_clause"
 		};
@@ -690,8 +690,8 @@ public class MethodNameParser extends Parser {
 		public Field_clauseContext field_clause() {
 			return getRuleContext(Field_clauseContext.class,0);
 		}
-		public Where_op_clauseContext where_op_clause() {
-			return getRuleContext(Where_op_clauseContext.class,0);
+		public Condition_op_clauseContext condition_op_clause() {
+			return getRuleContext(Condition_op_clauseContext.class,0);
 		}
 		public Where_itemContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -729,7 +729,7 @@ public class MethodNameParser extends Parser {
 			if (_la==CONDITION_OP) {
 				{
 				setState(84);
-				where_op_clause();
+				condition_op_clause();
 				}
 			}
 
@@ -790,30 +790,30 @@ public class MethodNameParser extends Parser {
 	}
 
 	@SuppressWarnings("CheckReturnValue")
-	public static class Where_op_clauseContext extends ParserRuleContext {
+	public static class Condition_op_clauseContext extends ParserRuleContext {
 		public TerminalNode CONDITION_OP() { return getToken(MethodNameParser.CONDITION_OP, 0); }
-		public Where_op_clauseContext(ParserRuleContext parent, int invokingState) {
+		public Condition_op_clauseContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_where_op_clause; }
+		@Override public int getRuleIndex() { return RULE_condition_op_clause; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MethodNameParserListener ) ((MethodNameParserListener)listener).enterWhere_op_clause(this);
+			if ( listener instanceof MethodNameParserListener ) ((MethodNameParserListener)listener).enterCondition_op_clause(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MethodNameParserListener ) ((MethodNameParserListener)listener).exitWhere_op_clause(this);
+			if ( listener instanceof MethodNameParserListener ) ((MethodNameParserListener)listener).exitCondition_op_clause(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MethodNameParserVisitor ) return ((MethodNameParserVisitor<? extends T>)visitor).visitWhere_op_clause(this);
+			if ( visitor instanceof MethodNameParserVisitor ) return ((MethodNameParserVisitor<? extends T>)visitor).visitCondition_op_clause(this);
 			else return visitor.visitChildren(this);
 		}
 	}
 
-	public final Where_op_clauseContext where_op_clause() throws RecognitionException {
-		Where_op_clauseContext _localctx = new Where_op_clauseContext(_ctx, getState());
-		enterRule(_localctx, 26, RULE_where_op_clause);
+	public final Condition_op_clauseContext condition_op_clause() throws RecognitionException {
+		Condition_op_clauseContext _localctx = new Condition_op_clauseContext(_ctx, getState());
+		enterRule(_localctx, 26, RULE_condition_op_clause);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
@@ -1256,7 +1256,7 @@ public class MethodNameParser extends Parser {
 				setState(122); 
 				_errHandler.sync(this);
 				_alt = getInterpreter().adaptivePredict(_input,9,_ctx);
-			} while ( _alt!=2 && _alt!= ATN.INVALID_ALT_NUMBER );
+			} while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER );
 			}
 		}
 		catch (RecognitionException re) {

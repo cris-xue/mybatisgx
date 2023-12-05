@@ -44,7 +44,7 @@ select_clause
 where_clause
 where_item
 where_link_op_clause
-where_op_clause
+condition_op_clause
 dynamic_parameter_clause
 group_clause
 group_op_clause

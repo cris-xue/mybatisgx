@@ -2,6 +2,8 @@ package com.lc.mybatisx.model;
 
 public class MethodNameWhereInfo {
 
+    private String origin;
+
     private String linkOp;
 
     private String dbColumnName;
@@ -9,6 +11,14 @@ public class MethodNameWhereInfo {
     private String op = "=";
 
     private String javaColumnName;
+
+    public String getOrigin() {
+        return origin;
+    }
+
+    public void setOrigin(String origin) {
+        this.origin = origin;
+    }
 
     public String getLinkOp() {
         return linkOp;

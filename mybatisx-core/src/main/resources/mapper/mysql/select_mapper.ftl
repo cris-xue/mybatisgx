@@ -11,13 +11,11 @@
         from ${tableInfo.tableName}
         <where>
             <#if (methodInfo.methodNameInfo)??>
-                <trim prefix="where" prefixOverrides="and">
-                    <#list methodInfo.methodNameInfo.methodNameWhereInfoList as methodNameWhereInfo>
-                        <if test="${methodNameWhereInfo.javaColumnName} != null">
-                            ${methodNameWhereInfo.linkOp} ${methodNameWhereInfo.dbColumnName} ${methodNameWhereInfo.op} ${r'#{'} ${methodNameWhereInfo.javaColumnName} ${r'}'}
-                        </if>
-                    </#list>
-                </trim>
+                <#list methodInfo.methodNameInfo.methodNameWhereInfoList as methodNameWhereInfo>
+                    <if test="${methodNameWhereInfo.javaColumnName} != null">
+                        ${methodNameWhereInfo.linkOp} ${methodNameWhereInfo.dbColumnName} ${methodNameWhereInfo.op} ${r'#{'} ${methodNameWhereInfo.javaColumnName} ${r'}'}
+                    </if>
+                </#list>
             </#if>
         </where>
     </select>
@@ -34,11 +32,9 @@
             from ${tableInfo.tableName}
             <where>
                 <#if (methodInfo.methodNameInfo)??>
-                    <trim prefix="where" prefixOverrides="and">
-                        <#list methodInfo.methodNameInfo.methodNameWhereInfoList as methodNameWhereInfo>
-                            ${methodNameWhereInfo.linkOp} ${methodNameWhereInfo.dbColumnName} ${methodNameWhereInfo.op} ${r'#{'} ${methodNameWhereInfo.javaColumnName} ${r'}'}
-                        </#list>
-                    </trim>
+                    <#list methodInfo.methodNameInfo.methodNameWhereInfoList as methodNameWhereInfo>
+                        ${methodNameWhereInfo.linkOp} ${methodNameWhereInfo.dbColumnName} ${methodNameWhereInfo.op} ${r'#{'} ${methodNameWhereInfo.javaColumnName} ${r'}'}
+                    </#list>
                 </#if>
             </where>
         </select>

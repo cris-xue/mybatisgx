@@ -129,8 +129,7 @@ public class MethodInfoHandler {
         if (simpleMethodList.contains(methodName)) {
             return null;
         }
-        MethodNameInfo methodNameInfo = methodNameInfoHandler.execute(methodName);
-        return methodNameInfo;
+        return methodNameInfoHandler.execute(methodName);
     }
 
     /**
@@ -159,6 +158,7 @@ public class MethodInfoHandler {
                 throw new RuntimeException("方法名中的字段在实体类中不存在: " + javaColumnName);
             }
             methodNameWhereInfo.setDbColumnName(columnInfo.getDbColumnName());
+            methodNameWhereInfo.setJavaColumnName(methodParamInfo.getParamName());
         }
     }
 

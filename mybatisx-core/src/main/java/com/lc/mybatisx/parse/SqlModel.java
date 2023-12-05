@@ -1,9 +1,9 @@
 package com.lc.mybatisx.parse;
 
 import com.lc.mybatisx.model.MethodNode;
-import com.lc.mybatisx.wrapper.WhereWrapper;
 import com.lc.mybatisx.syntax.MethodNameLexer;
 import com.lc.mybatisx.syntax.MethodNameParser;
+import com.lc.mybatisx.wrapper.WhereWrapper;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -136,8 +136,6 @@ public class SqlModel {
             WhereWrapper whereWrapper = new WhereWrapper();
             if (parseTreeChild instanceof MethodNameParser.Where_link_op_clauseContext) {
                 whereWrapper.setLinkOp(tokens);
-            } else if (parseTreeChild instanceof MethodNameParser.Where_op_clauseContext) {
-                whereWrapper.setOp(tokens);
             }
             String field = buildField(parseTree);
             whereWrapper.setJavaColumn(Arrays.asList(field));

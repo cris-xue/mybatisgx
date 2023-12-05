@@ -1,4 +1,4 @@
-// Generated from F:/ec/lc/mybatisx/mybatisx-core/src/test/resources/MethodNameParser.g4 by ANTLR 4.13.1
+// Generated from E:/project/devops/mybatisx/mybatisx-core/src/test/resources/MethodNameParser.g4 by ANTLR 4.13.1
 package com.lc.mybatisx.syntax;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
@@ -138,15 +138,15 @@ public interface MethodNameParserListener extends ParseTreeListener {
 	 */
 	void exitWhere_link_op_clause(MethodNameParser.Where_link_op_clauseContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#where_op_clause}.
+	 * Enter a parse tree produced by {@link MethodNameParser#condition_op_clause}.
 	 * @param ctx the parse tree
 	 */
-	void enterWhere_op_clause(MethodNameParser.Where_op_clauseContext ctx);
+	void enterCondition_op_clause(MethodNameParser.Condition_op_clauseContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#where_op_clause}.
+	 * Exit a parse tree produced by {@link MethodNameParser#condition_op_clause}.
 	 * @param ctx the parse tree
 	 */
-	void exitWhere_op_clause(MethodNameParser.Where_op_clauseContext ctx);
+	void exitCondition_op_clause(MethodNameParser.Condition_op_clauseContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MethodNameParser#dynamic_parameter_clause}.
 	 * @param ctx the parse tree

@@ -1,4 +1,4 @@
-// Generated from F:/ec/lc/mybatisx/mybatisx-core/src/test/resources/MethodNameParser.g4 by ANTLR 4.13.1
+// Generated from E:/project/devops/mybatisx/mybatisx-core/src/test/resources/MethodNameParser.g4 by ANTLR 4.13.1
 package com.lc.mybatisx.syntax;
 
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -173,13 +173,13 @@ public class MethodNameParserBaseListener implements MethodNameParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterWhere_op_clause(MethodNameParser.Where_op_clauseContext ctx) { }
+	@Override public void enterCondition_op_clause(MethodNameParser.Condition_op_clauseContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitWhere_op_clause(MethodNameParser.Where_op_clauseContext ctx) { }
+	@Override public void exitCondition_op_clause(MethodNameParser.Condition_op_clauseContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

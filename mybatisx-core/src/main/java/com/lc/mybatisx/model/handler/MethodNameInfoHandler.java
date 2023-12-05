@@ -20,20 +20,18 @@ public class MethodNameInfoHandler {
     private static final Map<String, String> tokenMap = new HashMap<>();
 
     static {
-        tokenMap.put("By", "where");
+        tokenMap.put("By", "");
         tokenMap.put("And", "and");
         tokenMap.put("Or", "or");
 
-        tokenMap.put("Lt", "<");
-        tokenMap.put("Lteq", "<=");
-        tokenMap.put("Gt", ">");
-        tokenMap.put("Gteq", ">=");
+        tokenMap.put("Lt", "<![CDATA[ < ]]>");
+        tokenMap.put("Lteq", "<![CDATA[ <= ]]>");
+        tokenMap.put("Gt", "<![CDATA[ > ]]>");
+        tokenMap.put("Gteq", "<![CDATA[ >= ]]>");
         tokenMap.put("In", "in");
         tokenMap.put("Is", "=");
         tokenMap.put("Eq", "=");
-        tokenMap.put("Not", "<>");
-        tokenMap.put("Noteq", "<>");
-        tokenMap.put("Between", "between");
+        tokenMap.put("Not", "<![CDATA[ <> ]]>");
     }
 
     public MethodNameInfo execute(String methodName) {
@@ -88,10 +86,11 @@ public class MethodNameInfoHandler {
             String token = parseTreeChild.getText();
             if (parseTreeChild instanceof MethodNameParser.Where_link_op_clauseContext) {
                 methodNameWhereInfoList.add(methodNameWhereInfo);
+                methodNameWhereInfo.setOrigin(parseTree.getText());
                 methodNameWhereInfo.setLinkOp(tokenMap.get(token));
             } else if (parseTreeChild instanceof MethodNameParser.Field_clauseContext) {
                 methodNameWhereInfo.setJavaColumnName(token);
-            } else if (parseTreeChild instanceof MethodNameParser.Where_op_clauseContext) {
+            } else if (parseTreeChild instanceof MethodNameParser.Condition_op_clauseContext) {
                 methodNameWhereInfo.setOp(tokenMap.get(token));
             } else {
                 parseWhere(methodNameWhereInfoList, parseTreeChild);

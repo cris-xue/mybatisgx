@@ -209,8 +209,6 @@ public class SqlMapperHandler {
 
             if (parseTreeChild instanceof MethodNameParser.Where_link_op_clauseContext) {
                 whereWrapper.setLinkOp(tokens);
-            } else if (parseTreeChild instanceof MethodNameParser.Where_op_clauseContext) {
-                whereWrapper.setOp(tokens);
             }
             String field = parseFieldClause(parseTreeChild);
             if (StringUtils.isNoneBlank(field)) {

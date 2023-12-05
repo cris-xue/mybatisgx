@@ -24,9 +24,9 @@ select_statement: select_clause where_clause group_clause order_clause ;
 select_clause: SELECT_ACTION ;
 
 where_clause: ((where_item)+)? ;
-where_item: where_link_op_clause field_clause (where_op_clause)? ;
+where_item: where_link_op_clause field_clause (condition_op_clause)? ;
 where_link_op_clause: WHERE_LINK_OP ;
-where_op_clause: CONDITION_OP ;
+condition_op_clause: CONDITION_OP ;
 
 // 动态参数
 dynamic_parameter_clause: (DYNAMIC_PARAMETER)? ;

@@ -64,17 +64,17 @@ public class CURDMapperHandler {
     public static XNode simpleTemplateHandle(MapperInfo mapperInfo, MethodInfo methodInfo, TableInfo tableInfo) {
         String templatePath = String.format("mapper/mysql/simple_mapper/%s.ftl", methodInfo.getMethodName());
         Template template = FreeMarkerUtils.getTemplate(templatePath);
-        return generateSimpleSql(template, mapperInfo, methodInfo, tableInfo);
+        return generateSql(template, mapperInfo, methodInfo, tableInfo);
     }
 
     public static XNode complexTemplateHandle(MapperInfo mapperInfo, MethodInfo methodInfo, TableInfo tableInfo) {
         MethodNameInfo methodNameInfo = methodInfo.getMethodNameInfo();
         String templatePath = String.format("mapper/mysql/%s_mapper.ftl", methodNameInfo.getAction());
         Template template = FreeMarkerUtils.getTemplate(templatePath);
-        return generateSimpleSql(template, mapperInfo, methodInfo, tableInfo);
+        return generateSql(template, mapperInfo, methodInfo, tableInfo);
     }
 
-    public static XNode generateSimpleSql(Template template, MapperInfo mapperInfo, MethodInfo methodInfo, TableInfo tableInfo) {
+    public static XNode generateSql(Template template, MapperInfo mapperInfo, MethodInfo methodInfo, TableInfo tableInfo) {
         Map<String, Object> templateData = new HashMap<>();
         templateData.put("mapperInfo", mapperInfo);
         templateData.put("methodInfo", methodInfo);
@@ -83,13 +83,13 @@ public class CURDMapperHandler {
         XPathParser xPathParser = FreeMarkerUtils.processTemplate(templateData, template);
         System.out.println(xPathParser.toString());
 
-        XNode mapperXNode = xPathParser.evalNode("/mapper/*");
+        XNode xNode = xPathParser.evalNode("/mapper/*");
 
         // String expression = deleteSqlWrapper.getVersionQuery() ? "select" : "delete";
         // List<XNode> deleteXNode = mapperXNode.evalNodes(expression);
         // deleteXNodeList.addAll(deleteXNode);
 
-        return mapperXNode;
+        return xNode;
     }
 
 }

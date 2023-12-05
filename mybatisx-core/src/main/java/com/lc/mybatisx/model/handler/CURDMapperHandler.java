@@ -36,7 +36,7 @@ public class CURDMapperHandler {
 
         MapperInfo mapperInfo = mapperInfoHandler.execute(daoInterface);
         TableInfo tableInfo = tableInfoHandler.execute(daoInterface);
-        List<MethodInfo> methodInfoList = methodInfoHandler.execute(mapperInfo, daoInterface);
+        List<MethodInfo> methodInfoList = methodInfoHandler.execute(mapperInfo, tableInfo, daoInterface);
 
         List<XNode> xNodeList = new ArrayList<>(15);
         for (int i = 0; i < methodInfoList.size(); i++) {

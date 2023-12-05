@@ -1,7 +1,5 @@
 package com.lc.mybatisx.test.dao;
 
-import com.lc.mybatisx.annotation.BetweenEnd;
-import com.lc.mybatisx.annotation.BetweenStart;
 import com.lc.mybatisx.annotation.Dynamic;
 import com.lc.mybatisx.dao.QueryDao;
 import com.lc.mybatisx.test.model.dto.TestDTO;
@@ -25,19 +23,18 @@ public interface TestDao extends QueryDao<Test, Long> {
 
     // @MapperMethod(type = MethodType.QUERY)
     @Dynamic
-    List<TestDTO> findByPayStatusLteqAndPayStatusNotOrXyzAbcLt(
+    List<TestDTO> findByPayStatusLteqAndPayStatusNot(
             @Param("payStatus") String payStatus,
-            @Param("payStatus") String payStatus1,
-            @Param("XyzAbc") String payStatusXyzAbc);
+            @Param("payStatus") String payStatus1);
 
-    List<TestDTO> findByIdsIn(@Param("ids") List<Long> ids);
+    List<TestDTO> findByIdIn(@Param("id") List<Long> id);
 
     // @MapperMethod(type = MethodType.QUERY)
-    Map<String, Object> findByUsername(@Param("username") String username);
+    Map<String, Object> findByUserName(@Param("username") String username);
 
-    Map<String, Object> findByIdBetween(
+    /*Map<String, Object> findByIdBetween(
             @Param("start") @BetweenStart("id") Long start,
-            @Param("end") @BetweenEnd("id") Long end);
+            @Param("end") @BetweenEnd("id") Long end);*/
 
     // Map<String, Object> findTop10ByAgeBetween(@Param("start") Long start, @Param("end") Long end);
 

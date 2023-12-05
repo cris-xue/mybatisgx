@@ -1,5 +1,6 @@
 package com.lc.mybatisx.model.handler;
 
+import com.google.common.base.CaseFormat;
 import com.lc.mybatisx.annotation.Dynamic;
 import com.lc.mybatisx.model.*;
 import com.lc.mybatisx.utils.GenericUtils;
@@ -41,7 +42,7 @@ public class MethodInfoHandler {
     private ColumnInfoHandler columnInfoHandler = new ColumnInfoHandler();
     private MethodNameInfoHandler methodNameInfoHandler = new MethodNameInfoHandler();
 
-    public List<MethodInfo> execute(MapperInfo mapperInfo, Class<?> interfaceClass) {
+    public List<MethodInfo> execute(MapperInfo mapperInfo, TableInfo tableInfo, Class<?> interfaceClass) {
         Method[] methods = interfaceClass.getMethods();
 
         List<MethodInfo> methodNodeList = new ArrayList<>();
@@ -60,7 +61,7 @@ public class MethodInfoHandler {
             methodInfo.setSingleParam(isSingleParam);
             methodInfo.setMethodParamInfo(isSingleParam ? methodParamInfoList.get(0) : null);
 
-            check(methodInfo);
+            check(tableInfo, methodInfo);
 
             methodNodeList.add(methodInfo);
         }
@@ -135,7 +136,7 @@ public class MethodInfoHandler {
     /**
      * 检查方法名信息和方法信息参数是否匹配
      */
-    public void check(MethodInfo methodInfo) {
+    public void check(TableInfo tableInfo, MethodInfo methodInfo) {
         MethodNameInfo methodNameInfo = methodInfo.getMethodNameInfo();
         if (methodNameInfo == null) {
             return;
@@ -150,6 +151,14 @@ public class MethodInfoHandler {
         for (int i = 0; i < methodNameWhereInfoList.size(); i++) {
             MethodNameWhereInfo methodNameWhereInfo = methodNameWhereInfoList.get(i);
             MethodParamInfo methodParamInfo = methodParamInfoList.get(i);
+
+            String javaColumnName = methodNameWhereInfo.getJavaColumnName();
+            javaColumnName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, javaColumnName);
+            ColumnInfo columnInfo = tableInfo.getColumnInfoMap().get(javaColumnName);
+            if (columnInfo == null) {
+                throw new RuntimeException("方法名中的字段在实体类中不存在: " + javaColumnName);
+            }
+            methodNameWhereInfo.setDbColumnName(columnInfo.getDbColumnName());
         }
     }
 

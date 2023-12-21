@@ -5,6 +5,8 @@ import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import java.util.ArrayList;
+
 public class CURDMapperHandlerTest {
 
     @Test
@@ -12,7 +14,7 @@ public class CURDMapperHandlerTest {
         MapperBuilderAssistant mapperBuilderAssistant = Mockito.mock(MapperBuilderAssistant.class);
         Mockito.when(mapperBuilderAssistant.getCurrentNamespace()).thenReturn("com.lc.mybatisx.handler.dao.UserDao");
         // mapperBuilderAssistant.setCurrentNamespace("com.lc.mybatisx.handler.dao.UserDao");
-        CURDMapperHandler.execute(mapperBuilderAssistant);
+        CURDMapperHandler.execute(mapperBuilderAssistant, new ArrayList<>());
     }
 
 }

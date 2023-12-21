@@ -14,6 +14,14 @@ public class ColumnInfo {
     private String dbTypeName;
 
     private String dbColumnName;
+    /**
+     * 是否是主键
+     */
+    private YesOrNo primaryKey;
+    /**
+     * 类型处理器
+     */
+    private String typeHandler;
 
     public Class<?> getJavaType() {
         return javaType;
@@ -53,5 +61,21 @@ public class ColumnInfo {
 
     public void setDbColumnName(String dbColumnName) {
         this.dbColumnName = dbColumnName;
+    }
+
+    public YesOrNo getPrimaryKey() {
+        return primaryKey;
+    }
+
+    public void setPrimaryKey(YesOrNo primaryKey) {
+        this.primaryKey = primaryKey;
+    }
+
+    public String getTypeHandler() {
+        return typeHandler;
+    }
+
+    public void setTypeHandler(String typeHandler) {
+        this.typeHandler = typeHandler;
     }
 }

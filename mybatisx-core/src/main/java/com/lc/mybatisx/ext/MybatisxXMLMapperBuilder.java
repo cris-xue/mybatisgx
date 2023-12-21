@@ -76,7 +76,7 @@ public class MybatisxXMLMapperBuilder extends BaseBuilder {
 
             // 增加自动处理的resultMap
             List<XNode> resultMapXNode = context.evalNodes("/mapper/resultMap");
-            ResultMapInfoHandler.execute(null);
+            ResultMapInfoHandler.execute(builderAssistant, resultMapXNode);
             resultMapElements(resultMapXNode);
 
             sqlElement(context.evalNodes("/mapper/sql"));

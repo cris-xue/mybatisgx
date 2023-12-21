@@ -27,7 +27,7 @@ public class MapperInfoHandler {
         return mapperInfo;
     }
 
-    private static Type[] getDaoInterfaceParams(Class<?> daoInterface) {
+    private Type[] getDaoInterfaceParams(Class<?> daoInterface) {
         Type[] daoSuperInterfaces = daoInterface.getGenericInterfaces();
         for (int i = 0; i < daoSuperInterfaces.length; i++) {
             Type daoSuperInterfaceType = daoSuperInterfaces[i];

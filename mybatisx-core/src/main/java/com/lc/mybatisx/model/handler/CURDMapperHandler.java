@@ -46,7 +46,8 @@ public class CURDMapperHandler {
                 XNode xNode = simpleTemplateHandle(mapperInfo, methodInfo, tableInfo);
                 xNodeList.add(xNode);
             } else {
-                complexTemplateHandle(mapperInfo, methodInfo, tableInfo);
+                XNode xNode = complexTemplateHandle(mapperInfo, methodInfo, tableInfo);
+                xNodeList.add(xNode);
             }
         }
         return xNodeList;

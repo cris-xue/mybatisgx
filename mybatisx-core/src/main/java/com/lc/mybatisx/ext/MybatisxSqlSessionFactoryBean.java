@@ -111,10 +111,8 @@ public class MybatisxSqlSessionFactoryBean extends SqlSessionFactoryBean {
     @Override
     public SqlSessionFactory getObject() throws Exception {
         SqlSessionFactory sqlSessionFactory = super.getObject();
-
         Configuration configuration = sqlSessionFactory.getConfiguration();
         curdMethod(configuration);
-
         return sqlSessionFactory;
     }
 

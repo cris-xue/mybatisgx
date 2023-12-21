@@ -4,7 +4,7 @@ import com.lc.mybatisx.model.ResultMapInfo;
 
 public class ResultMapInfoHandler {
 
-    public ResultMapInfo execute(Class<?> daoInterface) {
+    public static ResultMapInfo execute(Class<?> daoInterface) {
         return null;
     }
 

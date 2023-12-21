@@ -1,6 +1,7 @@
 package com.lc.mybatisx.ext;
 
 import com.lc.mybatisx.model.handler.CURDMapperHandler;
+import com.lc.mybatisx.model.handler.ResultMapInfoHandler;
 import org.apache.ibatis.builder.*;
 import org.apache.ibatis.builder.xml.XMLMapperEntityResolver;
 import org.apache.ibatis.builder.xml.XMLStatementBuilder;
@@ -62,10 +63,6 @@ public class MybatisxXMLMapperBuilder extends BaseBuilder {
         parsePendingStatements();
     }
 
-    public XNode getSqlFragment(String refid) {
-        return sqlFragments.get(refid);
-    }
-
     private void configurationElement(XNode context) {
         try {
             String namespace = context.getStringAttribute("namespace");
@@ -76,15 +73,18 @@ public class MybatisxXMLMapperBuilder extends BaseBuilder {
             cacheRefElement(context.evalNode("cache-ref"));
             cacheElement(context.evalNode("cache"));
             parameterMapElement(context.evalNodes("/mapper/parameterMap"));
-            resultMapElements(context.evalNodes("/mapper/resultMap"));
+
+            // 增加自动处理的resultMap
+            List<XNode> resultMapXNode = context.evalNodes("/mapper/resultMap");
+            ResultMapInfoHandler.execute(null);
+            resultMapElements(resultMapXNode);
+
             sqlElement(context.evalNodes("/mapper/sql"));
 
-            // 对mybatis改造的源码
-            List<XNode> oldXNode = context.evalNodes("select|insert|update|delete");
-            List<XNode> curdList = CURDMapperHandler.execute(builderAssistant);
-            oldXNode.addAll(curdList);
-
-            buildStatementFromContext(oldXNode);
+            // 增加自动处理的增删改查sql
+            List<XNode> curdXNode = context.evalNodes("select|insert|update|delete");
+            CURDMapperHandler.execute(builderAssistant, curdXNode);
+            buildStatementFromContext(curdXNode);
         } catch (Exception e) {
             e.printStackTrace();
             throw new BuilderException("Error parsing Mapper XML. The XML location is '" + resource + "'. Cause: " + e, e);

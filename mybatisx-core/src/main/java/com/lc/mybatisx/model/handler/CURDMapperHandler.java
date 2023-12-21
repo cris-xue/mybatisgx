@@ -5,6 +5,7 @@ import com.lc.mybatisx.model.MethodInfo;
 import com.lc.mybatisx.model.MethodNameInfo;
 import com.lc.mybatisx.model.TableInfo;
 import com.lc.mybatisx.utils.FreeMarkerUtils;
+import com.lc.mybatisx.utils.XmlUtils;
 import freemarker.template.Template;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.apache.ibatis.parsing.XNode;
@@ -81,9 +82,8 @@ public class CURDMapperHandler {
         templateData.put("methodInfo", methodInfo);
         templateData.put("tableInfo", tableInfo);
 
-        XPathParser xPathParser = FreeMarkerUtils.processTemplate(templateData, template);
-        System.out.println(xPathParser.toString());
-
+        String methodXml = FreeMarkerUtils.processTemplate(templateData, template);
+        XPathParser xPathParser = XmlUtils.processXml(methodXml);
         XNode xNode = xPathParser.evalNode("/mapper/*");
 
         // String expression = deleteSqlWrapper.getVersionQuery() ? "select" : "delete";

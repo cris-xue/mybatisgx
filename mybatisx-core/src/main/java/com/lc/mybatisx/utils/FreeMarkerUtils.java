@@ -2,7 +2,6 @@ package com.lc.mybatisx.utils;
 
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
-import org.apache.ibatis.parsing.XPathParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
@@ -32,17 +31,16 @@ public class FreeMarkerUtils {
             reader = new InputStreamReader(classPathResource.getInputStream());
             return new Template("mapper", reader, null, "utf-8");
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e);
         } finally {
             try {
                 if (reader != null) {
                     reader.close();
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                throw new RuntimeException(e.getMessage(), e);
             }
         }
-        return null;
     }
 
     /**
@@ -52,23 +50,19 @@ public class FreeMarkerUtils {
      * @param template
      * @return
      */
-    public static XPathParser processTemplate(Map<String, Object> model, Template template) {
+    public static String processTemplate(Map<String, Object> model, Template template) {
         StringWriter stringWriter = null;
         InputStream inputStream = null;
         try {
             stringWriter = new StringWriter();
             template.process(model, stringWriter);
-            String methodXml = stringWriter.toString();
-            System.out.println(methodXml);
-            logger.info(methodXml);
-            inputStream = new ByteArrayInputStream(methodXml.getBytes());
-
-            // 把xml字符串转换成Document
-            return new XPathParser(inputStream);
+            String ftlText = stringWriter.toString();
+            logger.info(ftlText);
+            return ftlText;
         } catch (TemplateException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e);
         } finally {
             try {
                 if (inputStream != null) {
@@ -76,15 +70,12 @@ public class FreeMarkerUtils {
                 }
                 if (stringWriter != null) {
                     stringWriter.flush();
-                }
-                if (stringWriter != null) {
                     stringWriter.close();
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                throw new RuntimeException(e.getMessage(), e);
             }
         }
-        return null;
     }
 
 }

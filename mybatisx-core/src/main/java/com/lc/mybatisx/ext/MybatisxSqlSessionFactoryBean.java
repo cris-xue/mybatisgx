@@ -1,6 +1,8 @@
 package com.lc.mybatisx.ext;
 
 import com.lc.mybatisx.dao.Dao;
+import com.lc.mybatisx.utils.FreeMarkerUtils;
+import freemarker.template.Template;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -19,10 +21,7 @@ import org.springframework.util.ClassUtils;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * create by: 薛承城
@@ -97,11 +96,16 @@ public class MybatisxSqlSessionFactoryBean extends SqlSessionFactoryBean {
     }
 
     private String createMapperXml(String namespace) {
-        String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+        Template template = FreeMarkerUtils.getTemplate("mapper/base.ftl");
+        Map<String, Object> templateData = new HashMap<>();
+        templateData.put("namespace", namespace);
+        String baseXml = FreeMarkerUtils.processTemplate(templateData, template);
+
+        /*String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
         xml = xml.concat("<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">\n");
         xml = xml.concat("<mapper namespace=\"" + namespace + "\">\n");
-        xml = xml.concat("</mapper>");
-        return xml;
+        xml = xml.concat("</mapper>");*/
+        return baseXml;
     }
 
     @Override

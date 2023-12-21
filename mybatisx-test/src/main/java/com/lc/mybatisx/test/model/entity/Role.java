@@ -1,4 +1,9 @@
 package com.lc.mybatisx.test.model.entity;
 
-public class Role {
+import javax.persistence.Entity;
+import javax.persistence.Table;
+
+@Entity
+@Table(name = "user")
+public class Role extends BaseEntity<Long> {
 }

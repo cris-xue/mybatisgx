@@ -1,0 +1,5 @@
+需要确认查询条件是否支持类型处理器
+
+<select id="selectByDateRange" resultType="my.package.MyObject">
+  SELECT * FROM my_table WHERE date_range = #{range, typeHandler=com.example.DateRangeTypeHandler}
+</select>

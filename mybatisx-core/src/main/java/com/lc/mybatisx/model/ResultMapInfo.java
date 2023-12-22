@@ -7,15 +7,15 @@ import java.util.List;
  * https://pythonjishu.com/ywljunyfdqtftcc/
  * https://blog.csdn.net/WG102753/article/details/107989681
  * <resultMap id="blogResult" type="Blog">
- *   <id property="id" column="id" />
- *   <result property="title" column="title"/>
- *   <association property="author" javaType="Author" resultSet="authors" column="author_id" foreignColumn="id">
- *     <id property="id" column="id"/>
- *     <result property="username" column="username"/>
- *     <result property="password" column="password"/>
- *     <result property="email" column="email"/>
- *     <result property="bio" column="bio"/>
- *   </association>
+ * <id property="id" column="id" />
+ * <result property="title" column="title"/>
+ * <association property="author" javaType="Author" resultSet="authors" column="author_id" foreignColumn="id">
+ * <id property="id" column="id"/>
+ * <result property="username" column="username"/>
+ * <result property="password" column="password"/>
+ * <result property="email" column="email"/>
+ * <result property="bio" column="bio"/>
+ * </association>
  * </resultMap>
  */
 public class ResultMapInfo {
@@ -24,7 +24,7 @@ public class ResultMapInfo {
 
     private String type;
 
-    private List<ResultInfo> resultInfoList;
+    private List<ColumnInfo> columnInfoList;
 
     public String getId() {
         return id;
@@ -42,11 +42,11 @@ public class ResultMapInfo {
         this.type = type;
     }
 
-    public List<ResultInfo> getResultInfoList() {
-        return resultInfoList;
+    public List<ColumnInfo> getColumnInfoList() {
+        return columnInfoList;
     }
 
-    public void setResultInfoList(List<ResultInfo> resultInfoList) {
-        this.resultInfoList = resultInfoList;
+    public void setColumnInfoList(List<ColumnInfo> columnInfoList) {
+        this.columnInfoList = columnInfoList;
     }
 }

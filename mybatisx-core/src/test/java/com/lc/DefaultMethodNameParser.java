@@ -9,6 +9,4 @@ public class DefaultMethodNameParser extends MethodNameParser {
         super(input);
     }
 
-
-
 }

@@ -96,7 +96,6 @@ public class MethodNameInfoHandler {
                 parseWhere(methodNameWhereInfoList, parseTreeChild);
             }
         }
-
     }
 
 }

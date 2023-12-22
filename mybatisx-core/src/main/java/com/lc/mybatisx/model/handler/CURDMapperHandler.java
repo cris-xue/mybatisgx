@@ -31,7 +31,11 @@ public class CURDMapperHandler {
     private static TableInfoHandler tableInfoHandler = new TableInfoHandler();
     private static MethodInfoHandler methodInfoHandler = new MethodInfoHandler();
 
-    public static void execute(MapperBuilderAssistant builderAssistant, List<XNode> curdXNode) {
+    public static CURDMapperHandler build() {
+        return new CURDMapperHandler();
+    }
+
+    public void execute(MapperBuilderAssistant builderAssistant, List<XNode> curdXNode) {
         String namespace = builderAssistant.getCurrentNamespace();
         Class<?> daoInterface = getDaoInterface(namespace);
 

@@ -14,7 +14,7 @@ public class CURDMapperHandlerTest {
         MapperBuilderAssistant mapperBuilderAssistant = Mockito.mock(MapperBuilderAssistant.class);
         Mockito.when(mapperBuilderAssistant.getCurrentNamespace()).thenReturn("com.lc.mybatisx.handler.dao.UserDao");
         // mapperBuilderAssistant.setCurrentNamespace("com.lc.mybatisx.handler.dao.UserDao");
-        CURDMapperHandler.execute(mapperBuilderAssistant, new ArrayList<>());
+        CURDMapperHandler.build().execute(mapperBuilderAssistant, new ArrayList<>());
     }
 
 }

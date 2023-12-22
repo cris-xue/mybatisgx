@@ -48,4 +48,14 @@ public class UserController {
         return userDao.findAll();
     }
 
+    @GetMapping(path = "/name")
+    public List<User> findByName(String name) {
+        return userDao.findByName(name);
+    }
+
+    @GetMapping(path = "/ids")
+    public List<User> findByIdIn(@RequestParam("ids") List<Long> ids) {
+        return userDao.findByIdIn(ids);
+    }
+
 }

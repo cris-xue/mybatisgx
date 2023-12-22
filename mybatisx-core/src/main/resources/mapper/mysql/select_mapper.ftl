@@ -12,10 +12,23 @@
         <where>
             <#if (methodInfo.methodNameInfo)??>
                 <#list methodInfo.methodNameInfo.methodNameWhereInfoList as methodNameWhereInfo>
-                    ${methodNameWhereInfo.linkOp} ${methodNameWhereInfo.dbColumnName} ${methodNameWhereInfo.op} ${r'#{'} ${methodNameWhereInfo.javaColumnName} ${r'}'}
+                    ${methodNameWhereInfo.linkOp} ${methodNameWhereInfo.dbColumnName} ${methodNameWhereInfo.op}
+                    <@whereParamHandle op=methodNameWhereInfo.op param=methodNameWhereInfo.javaColumnName/>
                 </#list>
             </#if>
         </where>
     </select>
 
 </mapper>
+
+<#macro whereParamHandle op param>
+    <#switch op>
+        <#case "in">
+            <foreach item="item" index="index" collection="${param}" open="(" separator="," close=")">
+                ${r"#{item}"}
+            </foreach>
+            <#break>
+        <#default>
+            ${r'#{'} ${param} ${r'}'}
+    </#switch>
+</#macro>

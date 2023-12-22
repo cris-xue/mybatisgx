@@ -1,7 +1,6 @@
 package com.lc.mybatisx.ext;
 
-import com.lc.mybatisx.model.handler.CURDMapperHandler;
-import com.lc.mybatisx.model.handler.ResultMapInfoHandler;
+import com.lc.mybatisx.template.TemplateHandler;
 import org.apache.ibatis.builder.*;
 import org.apache.ibatis.builder.xml.XMLMapperEntityResolver;
 import org.apache.ibatis.builder.xml.XMLStatementBuilder;
@@ -73,17 +72,16 @@ public class MybatisxXMLMapperBuilder extends BaseBuilder {
             cacheRefElement(context.evalNode("cache-ref"));
             cacheElement(context.evalNode("cache"));
             parameterMapElement(context.evalNodes("/mapper/parameterMap"));
-
-            // 增加自动处理的resultMap
-            List<XNode> resultMapXNode = context.evalNodes("/mapper/resultMap");
-            ResultMapInfoHandler.build().execute(builderAssistant, resultMapXNode);
-            resultMapElements(resultMapXNode);
-
             sqlElement(context.evalNodes("/mapper/sql"));
 
+            TemplateHandler templateHandler = TemplateHandler.build().execute(builderAssistant);
+            // 增加自动处理的resultMap
+            List<XNode> resultMapXNode = context.evalNodes("/mapper/resultMap");
+            templateHandler.mergeResultMap(resultMapXNode);
+            resultMapElements(resultMapXNode);
             // 增加自动处理的增删改查sql
             List<XNode> curdXNode = context.evalNodes("select|insert|update|delete");
-            CURDMapperHandler.build().execute(builderAssistant, curdXNode);
+            templateHandler.mergeMapper(curdXNode);
             buildStatementFromContext(curdXNode);
         } catch (Exception e) {
             e.printStackTrace();

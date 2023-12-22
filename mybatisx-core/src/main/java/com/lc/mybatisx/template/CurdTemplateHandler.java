@@ -1,4 +1,4 @@
-package com.lc.mybatisx.model.handler;
+package com.lc.mybatisx.template;
 
 import com.lc.mybatisx.model.MapperInfo;
 import com.lc.mybatisx.model.MethodInfo;
@@ -7,42 +7,17 @@ import com.lc.mybatisx.model.TableInfo;
 import com.lc.mybatisx.utils.FreeMarkerUtils;
 import com.lc.mybatisx.utils.XmlUtils;
 import freemarker.template.Template;
-import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.parsing.XPathParser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @author ：薛承城
- * @description：用于解析mybatis接口
- * @date ：2023/12/1
- */
-public class CURDMapperHandler {
+public class CurdTemplateHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(CURDMapperHandler.class);
-
-    private static MapperInfoHandler mapperInfoHandler = new MapperInfoHandler();
-    private static TableInfoHandler tableInfoHandler = new TableInfoHandler();
-    private static MethodInfoHandler methodInfoHandler = new MethodInfoHandler();
-
-    public static CURDMapperHandler build() {
-        return new CURDMapperHandler();
-    }
-
-    public void execute(MapperBuilderAssistant builderAssistant, List<XNode> curdXNode) {
-        String namespace = builderAssistant.getCurrentNamespace();
-        Class<?> daoInterface = getDaoInterface(namespace);
-
-        MapperInfo mapperInfo = mapperInfoHandler.execute(daoInterface);
-        TableInfo tableInfo = tableInfoHandler.execute(daoInterface);
-        List<MethodInfo> methodInfoList = methodInfoHandler.execute(mapperInfo, tableInfo, daoInterface);
-
+    public List<XNode> execute(MapperInfo mapperInfo, List<MethodInfo> methodInfoList, TableInfo tableInfo) {
         List<XNode> xNodeList = new ArrayList<>(15);
         for (int i = 0; i < methodInfoList.size(); i++) {
             MethodInfo methodInfo = methodInfoList.get(i);
@@ -55,36 +30,28 @@ public class CURDMapperHandler {
                 xNodeList.add(xNode);
             }
         }
-        curdXNode.addAll(xNodeList);
+        return xNodeList;
     }
 
-    private static Class<?> getDaoInterface(String namespace) {
-        try {
-            return Class.forName(namespace);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public static XNode simpleTemplateHandle(MapperInfo mapperInfo, MethodInfo methodInfo, TableInfo tableInfo) {
+    private XNode simpleTemplateHandle(MapperInfo mapperInfo, MethodInfo methodInfo, TableInfo tableInfo) {
         String templatePath = String.format("mapper/mysql/simple_mapper/%s.ftl", methodInfo.getMethodName());
         Template template = FreeMarkerUtils.getTemplate(templatePath);
         return generateSql(template, mapperInfo, methodInfo, tableInfo);
     }
 
-    public static XNode complexTemplateHandle(MapperInfo mapperInfo, MethodInfo methodInfo, TableInfo tableInfo) {
+    private XNode complexTemplateHandle(MapperInfo mapperInfo, MethodInfo methodInfo, TableInfo tableInfo) {
         MethodNameInfo methodNameInfo = methodInfo.getMethodNameInfo();
         String templatePath = String.format("mapper/mysql/%s_mapper.ftl", methodNameInfo.getAction());
         Template template = FreeMarkerUtils.getTemplate(templatePath);
         return generateSql(template, mapperInfo, methodInfo, tableInfo);
     }
 
-    public static XNode generateSql(Template template, MapperInfo mapperInfo, MethodInfo methodInfo, TableInfo tableInfo) {
+    private XNode generateSql(Template template, MapperInfo mapperInfo, MethodInfo methodInfo, TableInfo tableInfo) {
         Map<String, Object> templateData = new HashMap<>();
         templateData.put("mapperInfo", mapperInfo);
         templateData.put("methodInfo", methodInfo);
         templateData.put("tableInfo", tableInfo);
+        templateData.put("resultMapInfo", mapperInfo.getResultMapInfo());
 
         String methodXml = FreeMarkerUtils.processTemplate(templateData, template);
         XPathParser xPathParser = XmlUtils.processXml(methodXml);

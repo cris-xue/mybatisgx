@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <mapper>
     <#if methodInfo.dynamic>
-    <select id="${methodInfo.methodName}" resultType="${methodInfo.methodReturnInfo.typeName}">
+    <select id="${methodInfo.methodName}" resultMap="${resultMapInfo.id}">
         select
         <trim prefix="" suffix="" suffixOverrides=",">
             <#list tableInfo.columnInfoList as columnInfo>

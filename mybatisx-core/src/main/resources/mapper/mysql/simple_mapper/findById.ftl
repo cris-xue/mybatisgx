@@ -2,7 +2,13 @@
 <mapper>
 
     <select id="findById" resultMap="${resultMapInfo.id}">
-        select * from ${tableInfo.tableName} where id = ${r'#{id}'}
+        select
+        <trim prefix="" suffix="" suffixOverrides=",">
+            <#list tableInfo.columnInfoList as columnInfo>
+                ${columnInfo.dbColumnName},
+            </#list>
+        </trim>
+        from ${tableInfo.tableName} where id = ${r'#{id}'}
     </select>
 
 </mapper>

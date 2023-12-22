@@ -2,7 +2,13 @@
 <mapper>
 
     <select id="findList" resultMap="${resultMapInfo.id}">
-        select * from ${tableInfo.tableName}
+        select
+        <trim prefix="" suffix="" suffixOverrides=",">
+            <#list tableInfo.columnInfoList as columnInfo>
+                ${columnInfo.dbColumnName},
+            </#list>
+        </trim>
+        from ${tableInfo.tableName}
         <where>
             <trim prefixOverrides="and">
                 <#list tableInfo.columnInfoList as columnInfo>

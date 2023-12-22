@@ -5,7 +5,7 @@
         select
         <trim prefix="" suffix="" suffixOverrides=",">
             <#list tableInfo.columnInfoList as columnInfo>
-                ${columnInfo.dbColumnName} as ${columnInfo.javaColumnName},
+                ${columnInfo.dbColumnName},
             </#list>
         </trim>
         from ${tableInfo.tableName}

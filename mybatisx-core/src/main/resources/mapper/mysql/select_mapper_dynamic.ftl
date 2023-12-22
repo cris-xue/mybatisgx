@@ -12,7 +12,9 @@
         <where>
             <#if (methodInfo.methodNameInfo)??>
                 <#list methodInfo.methodNameInfo.methodNameWhereInfoList as methodNameWhereInfo>
-                    ${methodNameWhereInfo.linkOp} ${methodNameWhereInfo.dbColumnName} ${methodNameWhereInfo.op} ${r'#{'} ${methodNameWhereInfo.javaColumnName} ${r'}'}
+                    <if test="${methodNameWhereInfo.javaColumnName} != null">
+                        ${methodNameWhereInfo.linkOp} ${methodNameWhereInfo.dbColumnName} ${methodNameWhereInfo.op} ${r'#{'} ${methodNameWhereInfo.javaColumnName} ${r'}'}
+                    </if>
                 </#list>
             </#if>
         </where>

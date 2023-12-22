@@ -41,7 +41,8 @@ public class CurdTemplateHandler {
 
     private XNode complexTemplateHandle(MapperInfo mapperInfo, MethodInfo methodInfo, TableInfo tableInfo) {
         MethodNameInfo methodNameInfo = methodInfo.getMethodNameInfo();
-        String templatePath = String.format("mapper/mysql/%s_mapper.ftl", methodNameInfo.getAction());
+        String path = methodInfo.getDynamic() ? "mapper/mysql/%s_mapper_dynamic.ftl" : "mapper/mysql/%s_mapper.ftl";
+        String templatePath = String.format(path, methodNameInfo.getAction());
         Template template = FreeMarkerUtils.getTemplate(templatePath);
         return generateSql(template, mapperInfo, methodInfo, tableInfo);
     }

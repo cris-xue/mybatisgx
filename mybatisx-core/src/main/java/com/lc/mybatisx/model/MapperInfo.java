@@ -9,21 +9,22 @@ import java.util.List;
  */
 public class MapperInfo {
 
+    /**
+     * id类型
+     */
     private Class<?> idClass;
-
+    /**
+     * 实体类型
+     */
     private Class<?> entityClass;
+    /**
+     * 表名称
+     */
+    private String tableName;
     /**
      * 命名空间
      */
     private String namespace;
-    /**
-     * 表信息
-     */
-    private TableInfo tableInfo;
-    /**
-     * 字段信息列表
-     */
-    private List<ColumnInfo> columnInfoList;
     /**
      * 方法信息列表
      */
@@ -49,28 +50,20 @@ public class MapperInfo {
         this.entityClass = entityClass;
     }
 
+    public String getTableName() {
+        return tableName;
+    }
+
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
+    }
+
     public String getNamespace() {
         return namespace;
     }
 
     public void setNamespace(String namespace) {
         this.namespace = namespace;
-    }
-
-    public TableInfo getTableInfo() {
-        return tableInfo;
-    }
-
-    public void setTableInfo(TableInfo tableInfo) {
-        this.tableInfo = tableInfo;
-    }
-
-    public List<ColumnInfo> getColumnInfoList() {
-        return columnInfoList;
-    }
-
-    public void setColumnInfoList(List<ColumnInfo> columnInfoList) {
-        this.columnInfoList = columnInfoList;
     }
 
     public List<MethodInfo> getMethodInfoList() {

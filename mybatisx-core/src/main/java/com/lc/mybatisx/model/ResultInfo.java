@@ -1,5 +1,6 @@
 package com.lc.mybatisx.model;
 
+@Deprecated
 public class ResultInfo {
 
     private String property;

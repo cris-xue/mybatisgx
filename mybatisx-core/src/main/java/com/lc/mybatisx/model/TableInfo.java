@@ -9,6 +9,7 @@ import java.util.Map;
  * @description：一句话描述
  * @date ：2021/7/9 17:34
  */
+@Deprecated
 public class TableInfo {
 
     /**

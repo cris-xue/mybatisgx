@@ -1,6 +1,8 @@
 package com.lc.mybatisx.model;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * https://blog.csdn.net/wangruoao/article/details/83147374/
@@ -23,8 +25,14 @@ public class ResultMapInfo {
     private String id;
 
     private String type;
-
+    /**
+     * 字段信息列表
+     */
     private List<ColumnInfo> columnInfoList;
+    /**
+     * java字段映射字段信息，userName={userName=1}
+     */
+    private Map<String, ColumnInfo> columnInfoMap;
 
     public String getId() {
         return id;
@@ -48,5 +56,16 @@ public class ResultMapInfo {
 
     public void setColumnInfoList(List<ColumnInfo> columnInfoList) {
         this.columnInfoList = columnInfoList;
+        Map<String, ColumnInfo> columnInfoMap = new HashMap<>();
+        columnInfoList.forEach(columnInfo -> columnInfoMap.put(columnInfo.getJavaColumnName(), columnInfo));
+        this.columnInfoMap = columnInfoMap;
+    }
+
+    public Map<String, ColumnInfo> getColumnInfoMap() {
+        return columnInfoMap;
+    }
+
+    public void setColumnInfoMap(Map<String, ColumnInfo> columnInfoMap) {
+        this.columnInfoMap = columnInfoMap;
     }
 }

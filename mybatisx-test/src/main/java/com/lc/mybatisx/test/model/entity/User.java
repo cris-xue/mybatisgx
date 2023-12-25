@@ -1,14 +1,23 @@
 package com.lc.mybatisx.test.model.entity;
 
 import com.lc.mybatisx.annotation.Column;
+import com.lc.mybatisx.annotation.TypeHandler;
 import com.lc.mybatisx.annotation.Version;
+import com.lc.mybatisx.test.commons.handler.ListLongTypeHandler;
 
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import java.util.List;
 
 @Entity
 @Table(name = "user")
 public class User extends BaseEntity<Long> {
+
+    @ElementCollection
+    @Column(name = "role_ids")
+    @TypeHandler(ListLongTypeHandler.class)
+    private List<Long> roleIds;
 
     private String name;
 
@@ -27,6 +36,14 @@ public class User extends BaseEntity<Long> {
 
     @Version
     private int version;
+
+    public List<Long> getRoleIds() {
+        return roleIds;
+    }
+
+    public void setRoleIds(List<Long> roleIds) {
+        this.roleIds = roleIds;
+    }
 
     public String getName() {
         return name;

@@ -1,6 +1,7 @@
 package com.lc.mybatisx.model.handler;
 
 import com.google.common.base.CaseFormat;
+import com.lc.mybatisx.annotation.TypeHandler;
 import com.lc.mybatisx.model.ColumnInfo;
 import com.lc.mybatisx.model.YesOrNo;
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -21,8 +22,9 @@ public class ColumnInfoHandler {
             Class<?> fieldType = field.getType();
             String fieldName = field.getName();
             String dbColumnName = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, fieldName);
-            Column column = field.getAnnotation(Column.class);
             Id id = field.getAnnotation(Id.class);
+            Column column = field.getAnnotation(Column.class);
+            TypeHandler typeHandler = field.getAnnotation(TypeHandler.class);
 
             ColumnInfo columnInfo = new ColumnInfo();
             columnInfo.setJavaType(fieldType);
@@ -31,7 +33,7 @@ public class ColumnInfoHandler {
             columnInfo.setDbTypeName(null);
             columnInfo.setDbColumnName(column != null ? column.name() : dbColumnName);
             columnInfo.setPrimaryKey(id != null ? YesOrNo.YES : YesOrNo.NO);
-            columnInfo.setTypeHandler(null);
+            columnInfo.setTypeHandler(typeHandler.value().getTypeName());
 
             columnInfoList.add(columnInfo);
         }

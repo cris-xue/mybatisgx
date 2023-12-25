@@ -4,7 +4,7 @@
     <select id="findAll" resultMap="${resultMapInfo.id}">
         select
         <trim prefix="" suffix="" suffixOverrides=",">
-            <#list tableInfo.columnInfoList as columnInfo>
+            <#list resultMapInfo.columnInfoList as columnInfo>
                 ${columnInfo.dbColumnName},
             </#list>
         </trim>

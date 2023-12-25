@@ -4,7 +4,7 @@
     <update id="updateByIdSelective">
         update ${mapperInfo.tableName}
         <trim prefix="set" suffixOverrides=",">
-            <#list tableInfo.columnInfoList as columnInfo>
+            <#list resultMapInfo.columnInfoList as columnInfo>
                 <if test="${columnInfo.javaColumnName} != null">
                     ${columnInfo.dbColumnName} = ${r'#{'} ${columnInfo.javaColumnName} ${r'}'},
                 </if>

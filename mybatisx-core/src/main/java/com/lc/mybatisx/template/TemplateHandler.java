@@ -23,7 +23,7 @@ public class TemplateHandler {
         MapperInfoHandler mapperInfoHandler = new MapperInfoHandler();
         MapperInfo mapperInfo = mapperInfoHandler.execute(builderAssistant);
 
-        this.mapperXNodeList = curdTemplateHandler.execute(mapperInfo, mapperInfo.getMethodInfoList(), mapperInfo.getTableInfo());
+        this.mapperXNodeList = curdTemplateHandler.execute(mapperInfo);
         this.resultMapXNode = resultMapTemplateHandler.execute(mapperInfo.getResultMapInfo());
         return this;
     }

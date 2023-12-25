@@ -5,13 +5,13 @@ import com.lc.mybatisx.dao.SimpleDao;
 import com.lc.mybatisx.model.MapperInfo;
 import com.lc.mybatisx.model.MethodInfo;
 import com.lc.mybatisx.model.ResultMapInfo;
-import com.lc.mybatisx.model.TableInfo;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.TypeUtils;
 import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
 
+import javax.persistence.Table;
 import java.lang.reflect.Type;
 import java.util.List;
 
@@ -25,7 +25,6 @@ public class MapperInfoHandler extends BasicInfoHandler {
     private static final Logger logger = LoggerFactory.getLogger(MapperInfoHandler.class);
 
     private static ResultMapInfoHandler resultMapInfoHandler = new ResultMapInfoHandler();
-    private static TableInfoHandler tableInfoHandler = new TableInfoHandler();
     private static MethodInfoHandler methodInfoHandler = new MethodInfoHandler();
 
     public MapperInfo execute(MapperBuilderAssistant builderAssistant) {
@@ -33,21 +32,24 @@ public class MapperInfoHandler extends BasicInfoHandler {
         Class<?> daoInterface = getDaoInterface(namespace);
 
         MapperInfo mapperInfo = getMapperInfo(daoInterface);
-        TableInfo tableInfo = tableInfoHandler.execute(daoInterface);
-        List<MethodInfo> methodInfoList = methodInfoHandler.execute(mapperInfo, tableInfo, daoInterface);
         ResultMapInfo resultMapInfo = resultMapInfoHandler.execute(mapperInfo.getEntityClass());
+        List<MethodInfo> methodInfoList = methodInfoHandler.execute(mapperInfo, resultMapInfo, daoInterface);
 
         mapperInfo.setMethodInfoList(methodInfoList);
-        mapperInfo.setTableInfo(tableInfo);
         mapperInfo.setResultMapInfo(resultMapInfo);
         return mapperInfo;
     }
 
     public MapperInfo getMapperInfo(Class<?> daoInterface) {
         Type[] daoInterfaceParams = getDaoInterfaceParams(daoInterface);
+        Class<?> idClass = (Class<?>) daoInterfaceParams[1];
+        Class<?> entityClass = (Class<?>) daoInterfaceParams[0];
+
         MapperInfo mapperInfo = new MapperInfo();
-        mapperInfo.setIdClass((Class<?>) daoInterfaceParams[1]);
-        mapperInfo.setEntityClass((Class<?>) daoInterfaceParams[0]);
+        mapperInfo.setIdClass(idClass);
+        mapperInfo.setEntityClass(entityClass);
+        mapperInfo.setTableName(entityClass.getAnnotation(Table.class).name());
+        mapperInfo.setNamespace(daoInterface.getName());
         return mapperInfo;
     }
 

@@ -8,7 +8,7 @@
                 ${columnInfo.dbColumnName},
             </#list>
         </trim>
-        from ${tableInfo.tableName} where id = ${r'#{id}'}
+        from ${mapperInfo.tableName} where id = ${r'#{id}'}
     </select>
 
 </mapper>

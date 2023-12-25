@@ -8,7 +8,7 @@
                 ${columnInfo.dbColumnName},
             </#list>
         </trim>
-        from ${tableInfo.tableName}
+        from ${mapperInfo.tableName}
         <where>
             <trim prefixOverrides="and">
                 <#list tableInfo.columnInfoList as columnInfo>

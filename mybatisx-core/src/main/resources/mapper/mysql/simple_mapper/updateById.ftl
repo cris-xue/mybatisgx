@@ -2,7 +2,7 @@
 <mapper>
 
     <update id="updateById">
-        update ${tableInfo.tableName}
+        update ${mapperInfo.tableName}
         <trim prefix="set" suffixOverrides=",">
             <#list tableInfo.columnInfoList as columnInfo>
                 ${columnInfo.dbColumnName} = ${r'#{'} ${columnInfo.javaColumnName} ${r'}'},

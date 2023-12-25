@@ -42,7 +42,7 @@ public class MethodInfoHandler {
     private ColumnInfoHandler columnInfoHandler = new ColumnInfoHandler();
     private MethodNameInfoHandler methodNameInfoHandler = new MethodNameInfoHandler();
 
-    public List<MethodInfo> execute(MapperInfo mapperInfo, TableInfo tableInfo, Class<?> interfaceClass) {
+    public List<MethodInfo> execute(MapperInfo mapperInfo, ResultMapInfo resultMapInfo, Class<?> interfaceClass) {
         Method[] methods = interfaceClass.getMethods();
 
         List<MethodInfo> methodNodeList = new ArrayList<>();
@@ -61,7 +61,7 @@ public class MethodInfoHandler {
             methodInfo.setSingleParam(isSingleParam);
             methodInfo.setMethodParamInfo(isSingleParam ? methodParamInfoList.get(0) : null);
 
-            check(tableInfo, methodInfo);
+            check(resultMapInfo, methodInfo);
 
             methodNodeList.add(methodInfo);
         }
@@ -135,7 +135,7 @@ public class MethodInfoHandler {
     /**
      * 检查方法名信息和方法信息参数是否匹配
      */
-    public void check(TableInfo tableInfo, MethodInfo methodInfo) {
+    public void check(ResultMapInfo resultMapInfo, MethodInfo methodInfo) {
         MethodNameInfo methodNameInfo = methodInfo.getMethodNameInfo();
         if (methodNameInfo == null) {
             return;
@@ -153,7 +153,7 @@ public class MethodInfoHandler {
 
             String javaColumnName = methodNameWhereInfo.getJavaColumnName();
             javaColumnName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, javaColumnName);
-            ColumnInfo columnInfo = tableInfo.getColumnInfoMap().get(javaColumnName);
+            ColumnInfo columnInfo = resultMapInfo.getColumnInfoMap().get(javaColumnName);
             if (columnInfo == null) {
                 throw new RuntimeException("方法名中的字段在实体类中不存在: " + javaColumnName);
             }

@@ -2,7 +2,7 @@
 <mapper>
 
     <insert id="insertSelective" keyProperty="id" useGeneratedKeys="true">
-        insert into ${tableInfo.tableName}
+        insert into ${mapperInfo.tableName}
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <#list tableInfo.columnInfoList as columnInfo>
                 <if test="${columnInfo.javaColumnName} != null">

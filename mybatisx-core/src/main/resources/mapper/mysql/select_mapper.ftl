@@ -8,7 +8,7 @@
                 ${columnInfo.dbColumnName},
             </#list>
         </trim>
-        from ${tableInfo.tableName}
+        from ${mapperInfo.tableName}
         <where>
             <#if (methodInfo.methodNameInfo)??>
                 <#list methodInfo.methodNameInfo.methodNameWhereInfoList as methodNameWhereInfo>

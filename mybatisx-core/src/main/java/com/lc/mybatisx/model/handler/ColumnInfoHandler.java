@@ -1,6 +1,7 @@
 package com.lc.mybatisx.model.handler;
 
 import com.google.common.base.CaseFormat;
+import com.google.common.collect.Maps;
 import com.lc.mybatisx.annotation.TypeHandler;
 import com.lc.mybatisx.model.ColumnInfo;
 import com.lc.mybatisx.model.YesOrNo;
@@ -12,8 +13,15 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class ColumnInfoHandler {
+
+    private static final Map<String, String> typeMap = Maps.newHashMap();
+
+    static {
+        typeMap.put("", "");
+    }
 
     public List<ColumnInfo> getColumnInfoList(Type type) {
         Field[] fields = FieldUtils.getAllFields((Class<?>) type);
@@ -30,10 +38,12 @@ public class ColumnInfoHandler {
             columnInfo.setJavaType(fieldType);
             columnInfo.setJavaTypeName(fieldType.getTypeName());
             columnInfo.setJavaColumnName(fieldName);
-            columnInfo.setDbTypeName(null);
+            columnInfo.setDbTypeName(column != null ? column.columnDefinition() : null);
             columnInfo.setDbColumnName(column != null ? column.name() : dbColumnName);
             columnInfo.setPrimaryKey(id != null ? YesOrNo.YES : YesOrNo.NO);
-            columnInfo.setTypeHandler(typeHandler.value().getTypeName());
+            if (typeHandler != null) {
+                columnInfo.setTypeHandler(typeHandler.value().getTypeName());
+            }
 
             columnInfoList.add(columnInfo);
         }

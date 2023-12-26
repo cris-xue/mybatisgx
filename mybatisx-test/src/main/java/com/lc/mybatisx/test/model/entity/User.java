@@ -1,10 +1,10 @@
 package com.lc.mybatisx.test.model.entity;
 
-import com.lc.mybatisx.annotation.Column;
 import com.lc.mybatisx.annotation.TypeHandler;
 import com.lc.mybatisx.annotation.Version;
 import com.lc.mybatisx.test.commons.handler.ListLongTypeHandler;
 
+import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -15,8 +15,8 @@ import java.util.List;
 public class User extends BaseEntity<Long> {
 
     @ElementCollection
-    @Column(name = "role_ids")
-    @TypeHandler(ListLongTypeHandler.class)
+    @Column(name = "role_ids", columnDefinition = "varchar")
+    @TypeHandler(value = ListLongTypeHandler.class)
     private List<Long> roleIds;
 
     private String name;

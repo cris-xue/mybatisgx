@@ -4,6 +4,7 @@ import com.lc.mybatisx.model.ColumnInfo;
 import com.lc.mybatisx.model.ResultMapInfo;
 import com.lc.mybatisx.model.YesOrNo;
 import com.lc.mybatisx.utils.XmlUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.parsing.XPathParser;
 import org.dom4j.Document;
@@ -51,7 +52,8 @@ public class ResultMapTemplateHandler {
             }
             element.addAttribute("property", columnInfo.getJavaColumnName());
             element.addAttribute("column", columnInfo.getDbColumnName());
-            element.addAttribute("jdbcType", columnInfo.getDbTypeName());
+            String dbTypeName = columnInfo.getDbTypeName();
+            element.addAttribute("jdbcType", StringUtils.isNotBlank(dbTypeName) ? dbTypeName.toUpperCase() : null);
             element.addAttribute("typeHandler", columnInfo.getTypeHandler());
         });
     }

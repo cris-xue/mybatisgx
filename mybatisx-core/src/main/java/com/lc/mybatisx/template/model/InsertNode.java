@@ -1,6 +1,8 @@
 package com.lc.mybatisx.template.model;
 
 import com.lc.mybatisx.model.ColumnInfo;
+import com.lc.mybatisx.model.MethodInfo;
+import com.lc.mybatisx.model.MethodParamInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
@@ -39,16 +41,20 @@ public class InsertNode {
         return this;
     }
 
-    public InsertNode dbColumn(List<ColumnInfo> columnInfoList) {
+    public InsertNode dbColumn(MethodInfo methodInfo) {
         TrimNode trimNode = new TrimNode(insertElement);
         trimNode.prefix("(");
         trimNode.suffix(")");
         trimNode.suffixOverrides(",");
-        columnInfoList.forEach(columnInfo -> trimNode.text(element -> element.addText(String.format("%s, ", columnInfo.getDbColumnName()))));
+        List<MethodParamInfo> methodParamInfoList = methodInfo.getMethodParamInfoList();
+        if () {
+
+        }
+        methodInfo.get.forEach(columnInfo -> trimNode.text(element -> element.addText(String.format("%s, ", columnInfo.getDbColumnName()))));
         return this;
     }
 
-    public InsertNode javaColumn(List<ColumnInfo> columnInfoList) {
+    public InsertNode javaColumn(MethodInfo methodInfo) {
         TrimNode trimNode = new TrimNode(insertElement);
         trimNode.prefix("value (");
         trimNode.suffix(")");
@@ -56,7 +62,6 @@ public class InsertNode {
         columnInfoList.forEach(columnInfo -> {
             String typeHandlerTemplate = typeHandler(columnInfo);
             String javaColumn = String.format("#{%s%s}, ", columnInfo.getJavaColumnName(), typeHandlerTemplate);
-
             trimNode.text(element -> element.addText(javaColumn));
         });
         return this;
@@ -69,6 +74,10 @@ public class InsertNode {
             typeHandlerTemplate = String.format(", typeHandler=%s", typeHandler);
         }
         return typeHandlerTemplate;
+    }
+
+    public String getXml() {
+        return document.asXML();
     }
 
 }

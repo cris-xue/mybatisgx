@@ -1,0 +1,25 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mapper.MajorMapper">
+    <!-- id:resultMap的名字  type:方法返回值类型  autoMapper:自动映射 -->
+    <resultMap id="majResult" type="com.domain.Major" autoMapping="true">
+        <id property="mid" column="mid"></id>
+        <result colunm="mname" property="mname" />
+
+
+        <!-- 如果关联一个对象 -->
+        <association column="tid" property="teacher" select="com.bjsxt.mapper.TeacherMapper.selById"></association>
+        <collection column="id" property="list" select="com.bjsxt.mapper.StudentMapper.selByTid"></collection>
+    </resultMap>
+
+    <parameterMap id="testaaa" type="arraylist">
+
+    </parameterMap>
+
+    <!-- 接口中对应的方法名 -->
+    <select id="findMajorById" parameterMap="testaaa" resultMap="majResult">
+        select * from student where mid = #{mid}
+    </select>
+
+</mapper>

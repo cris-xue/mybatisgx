@@ -3,6 +3,7 @@ package com.lc.mybatisx.template;
 import com.lc.mybatisx.model.MapperInfo;
 import com.lc.mybatisx.model.MethodInfo;
 import com.lc.mybatisx.model.MethodNameInfo;
+import com.lc.mybatisx.template.model.InsertNode;
 import com.lc.mybatisx.utils.FreeMarkerUtils;
 import com.lc.mybatisx.utils.XmlUtils;
 import freemarker.template.Template;
@@ -22,7 +23,7 @@ import java.util.Map;
 
 public class CurdTemplateHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(ResultMapTemplateHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(CurdTemplateHandler.class);
 
     public List<XNode> execute(MapperInfo mapperInfo) {
         List<MethodInfo> methodInfoList = mapperInfo.getMethodInfoList();
@@ -44,9 +45,9 @@ public class CurdTemplateHandler {
     private XNode simpleTemplateHandle(MapperInfo mapperInfo, MethodInfo methodInfo) {
         String methodName = methodInfo.getMethodName();
         if ("insert".equals(methodName)) {
-            return buildInsertXNode(mapperInfo);
+            return buildInsertXNode(mapperInfo, methodInfo);
         } else if ("insertSelective".equals(methodName)) {
-            return buildInsertSelectiveXNode(mapperInfo);
+            return buildInsertSelectiveXNode(mapperInfo, methodInfo);
         } else {
             String templatePath = String.format("mapper/mysql/simple_mapper/%s.ftl", methodInfo.getMethodName());
             Template template = FreeMarkerUtils.getTemplate(templatePath);
@@ -54,8 +55,18 @@ public class CurdTemplateHandler {
         }
     }
 
-    private XNode buildInsertXNode(MapperInfo mapperInfo) {
-        Document document = DocumentHelper.createDocument();
+    private XNode buildInsertXNode(MapperInfo mapperInfo, MethodInfo methodInfo) {
+        InsertNode insertNode = new InsertNode();
+        insertNode.id("");
+        insertNode.keyProperty("");
+        insertNode.useGeneratedKeys(Boolean.TRUE);
+        insertNode.tableName(mapperInfo.getTableName());
+        insertNode.dbColumn(mapperInfo.getResultMapInfo().getColumnInfoList());
+        insertNode.javaColumn(mapperInfo.getResultMapInfo().getColumnInfoList());
+        String insertXmlString = insertNode.getXml();
+
+
+        /*Document document = DocumentHelper.createDocument();
         Element mapperElement = document.addElement("mapper");
         Element insertElement = mapperElement.addElement("insert");
         insertElement.addAttribute("id", "insert");
@@ -85,14 +96,14 @@ public class CurdTemplateHandler {
             javaTrimElement.addText(javaColumn);
         });
 
-        String insertXmlString = document.asXML();
+        String insertXmlString = document.asXML();*/
         logger.info(insertXmlString);
         XPathParser xPathParser = XmlUtils.processXml(insertXmlString);
         XNode xNode = xPathParser.evalNode("/mapper/insert");
         return xNode;
     }
 
-    private XNode buildInsertSelectiveXNode(MapperInfo mapperInfo) {
+    private XNode buildInsertSelectiveXNode(MapperInfo mapperInfo, MethodInfo methodInfo) {
         Document document = DocumentHelper.createDocument();
         Element mapperElement = document.addElement("mapper");
         Element insertElement = mapperElement.addElement("insert");

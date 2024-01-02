@@ -9,6 +9,7 @@ import java.util.List;
  */
 public class MethodParamInfo {
 
+    private Integer index;
     /**
      * 是否基础类型
      */
@@ -22,7 +23,7 @@ public class MethodParamInfo {
      */
     private String typeName;
     /**
-     * 参数名，userName
+     * 参数名，userName。有@Param则使用@Param中的值，如果没有则使用param1、param2这种方式
      */
     private String paramName;
     /**

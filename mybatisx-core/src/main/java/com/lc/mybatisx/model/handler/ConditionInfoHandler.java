@@ -16,23 +16,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MethodNameInfoHandler {
+public class ConditionInfoHandler {
 
-    private static final Map<String, String> tokenMap = new HashMap<>();
+    private static final Map<String, String> TOKEN_MAP = new HashMap<>();
 
     static {
-        tokenMap.put("By", "");
-        tokenMap.put("And", "and");
-        tokenMap.put("Or", "or");
+        TOKEN_MAP.put("By", "");
+        TOKEN_MAP.put("And", "and");
+        TOKEN_MAP.put("Or", "or");
 
-        tokenMap.put("Lt", "<![CDATA[ < ]]>");
-        tokenMap.put("Lteq", "<![CDATA[ <= ]]>");
-        tokenMap.put("Gt", "<![CDATA[ > ]]>");
-        tokenMap.put("Gteq", "<![CDATA[ >= ]]>");
-        tokenMap.put("In", "in");
-        tokenMap.put("Is", "=");
-        tokenMap.put("Eq", "=");
-        tokenMap.put("Not", "<![CDATA[ <> ]]>");
+        TOKEN_MAP.put("Lt", "<![CDATA[ < ]]>");
+        TOKEN_MAP.put("Lteq", "<![CDATA[ <= ]]>");
+        TOKEN_MAP.put("Gt", "<![CDATA[ > ]]>");
+        TOKEN_MAP.put("Gteq", "<![CDATA[ >= ]]>");
+        TOKEN_MAP.put("In", "in");
+        TOKEN_MAP.put("Is", "=");
+        TOKEN_MAP.put("Eq", "=");
+        TOKEN_MAP.put("Not", "<![CDATA[ <> ]]>");
     }
 
     public MethodNameInfo execute(MethodInfo methodInfo, String methodName) {
@@ -88,11 +88,11 @@ public class MethodNameInfoHandler {
             if (parseTreeChild instanceof MethodNameParser.Where_link_op_clauseContext) {
                 methodNameWhereInfoList.add(methodNameWhereInfo);
                 methodNameWhereInfo.setOrigin(parseTree.getText());
-                methodNameWhereInfo.setLinkOp(tokenMap.get(token));
+                methodNameWhereInfo.setLinkOp(TOKEN_MAP.get(token));
             } else if (parseTreeChild instanceof MethodNameParser.Field_clauseContext) {
                 methodNameWhereInfo.setJavaColumnName(token);
             } else if (parseTreeChild instanceof MethodNameParser.Condition_op_clauseContext) {
-                methodNameWhereInfo.setOp(tokenMap.get(token));
+                methodNameWhereInfo.setOp(TOKEN_MAP.get(token));
             } else {
                 parseWhere(methodNameWhereInfoList, parseTreeChild);
             }

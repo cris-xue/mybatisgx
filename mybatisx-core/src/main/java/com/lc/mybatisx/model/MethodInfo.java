@@ -1,5 +1,6 @@
 package com.lc.mybatisx.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -10,13 +11,17 @@ import java.util.List;
 public class MethodInfo {
 
     /**
+     * sql动作，insert、delete、update、select
+     */
+    private String action;
+    /**
      * 方法名
      */
     private String methodName;
     /**
      * 方法名查询信息
      */
-    private MethodNameInfo methodNameInfo;
+    private List<ConditionInfo> conditionInfoList = new ArrayList<>();
     /**
      * 是否动态参数
      */
@@ -38,6 +43,14 @@ public class MethodInfo {
      */
     private MethodReturnInfo methodReturnInfo;
 
+    public String getAction() {
+        return action;
+    }
+
+    public void setAction(String action) {
+        this.action = action;
+    }
+
     public String getMethodName() {
         return methodName;
     }
@@ -46,12 +59,12 @@ public class MethodInfo {
         this.methodName = methodName;
     }
 
-    public MethodNameInfo getMethodNameInfo() {
-        return methodNameInfo;
+    public List<ConditionInfo> getConditionInfoList() {
+        return conditionInfoList;
     }
 
-    public void setMethodNameInfo(MethodNameInfo methodNameInfo) {
-        this.methodNameInfo = methodNameInfo;
+    public void setConditionInfoList(List<ConditionInfo> conditionInfoList) {
+        this.conditionInfoList = conditionInfoList;
     }
 
     public Boolean getDynamic() {

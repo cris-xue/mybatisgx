@@ -1,6 +1,6 @@
 package com.lc.mybatisx.model;
 
-public class MethodNameWhereInfo {
+public class ConditionInfo {
 
     /**
      * AndUserNameEq

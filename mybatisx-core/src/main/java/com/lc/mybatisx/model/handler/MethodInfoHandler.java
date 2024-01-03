@@ -4,6 +4,7 @@ import com.google.common.base.CaseFormat;
 import com.lc.mybatisx.annotation.Dynamic;
 import com.lc.mybatisx.model.*;
 import com.lc.mybatisx.utils.GenericUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.util.TypeUtils;
 
@@ -40,7 +41,7 @@ public class MethodInfoHandler {
     );
 
     private ColumnInfoHandler columnInfoHandler = new ColumnInfoHandler();
-    private MethodNameInfoHandler methodNameInfoHandler = new MethodNameInfoHandler();
+    private ConditionInfoHandler conditionInfoHandler = new ConditionInfoHandler();
 
     public List<MethodInfo> execute(MapperInfo mapperInfo, ResultMapInfo resultMapInfo, Class<?> interfaceClass) {
         Method[] methods = interfaceClass.getMethods();
@@ -54,7 +55,7 @@ public class MethodInfoHandler {
 
             MethodInfo methodInfo = new MethodInfo();
             methodInfo.setMethodName(methodName);
-            methodInfo.setMethodNameInfo(getMethodNameInfo(methodName));
+            getConditionInfo(methodInfo, methodName);
             methodInfo.setMethodReturnInfo(methodReturnInfo);
             methodInfo.setDynamic(method.getAnnotation(Dynamic.class) != null);
             methodInfo.setMethodParamInfoList(methodParamInfoList);
@@ -125,40 +126,39 @@ public class MethodInfoHandler {
         return methodReturnInfo;
     }
 
-    public MethodNameInfo getMethodNameInfo(String methodName) {
+    public MethodNameInfo getConditionInfo(MethodInfo methodInfo, String methodName) {
         if (simpleMethodList.contains(methodName)) {
             return null;
         }
-        return methodNameInfoHandler.execute(methodName);
+        return conditionInfoHandler.execute(methodInfo, methodName);
     }
 
     /**
      * 检查方法名信息和方法信息参数是否匹配
      */
     public void check(ResultMapInfo resultMapInfo, MethodInfo methodInfo) {
-        MethodNameInfo methodNameInfo = methodInfo.getMethodNameInfo();
-        if (methodNameInfo == null) {
+        List<ConditionInfo> conditionInfoList = methodInfo.getConditionInfoList();
+        if (ObjectUtils.isEmpty(conditionInfoList)) {
             return;
         }
-        List<MethodNameWhereInfo> methodNameWhereInfoList = methodNameInfo.getMethodNameWhereInfoList();
         List<MethodParamInfo> methodParamInfoList = methodInfo.getMethodParamInfoList();
 
-        if (methodNameWhereInfoList.size() != methodParamInfoList.size()) {
+        if (conditionInfoList.size() != methodParamInfoList.size()) {
             throw new RuntimeException("方法名中的查询条件和方法参数中中查询条件个数不匹配");
         }
 
-        for (int i = 0; i < methodNameWhereInfoList.size(); i++) {
-            MethodNameWhereInfo methodNameWhereInfo = methodNameWhereInfoList.get(i);
+        for (int i = 0; i < conditionInfoList.size(); i++) {
+            ConditionInfo conditionInfo = conditionInfoList.get(i);
             MethodParamInfo methodParamInfo = methodParamInfoList.get(i);
 
-            String javaColumnName = methodNameWhereInfo.getJavaColumnName();
+            String javaColumnName = conditionInfo.getJavaColumnName();
             javaColumnName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, javaColumnName);
             ColumnInfo columnInfo = resultMapInfo.getColumnInfoMap().get(javaColumnName);
             if (columnInfo == null) {
                 throw new RuntimeException("方法名中的字段在实体类中不存在: " + javaColumnName);
             }
-            methodNameWhereInfo.setDbColumnName(columnInfo.getDbColumnName());
-            methodNameWhereInfo.setJavaColumnName(methodParamInfo.getParamName());
+            conditionInfo.setDbColumnName(columnInfo.getDbColumnName());
+            conditionInfo.setJavaColumnName(methodParamInfo.getParamName());
         }
     }
 

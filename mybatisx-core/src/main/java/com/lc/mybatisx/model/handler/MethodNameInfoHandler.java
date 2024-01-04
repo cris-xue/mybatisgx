@@ -70,7 +70,7 @@ public class MethodNameInfoHandler {
             } else if (parseTreeChild instanceof MethodNameParser.Where_clauseContext) {
                 List<MethodNameWhereInfo> methodNameWhereInfoList = new ArrayList<>();
                 parseWhere(methodNameWhereInfoList, parseTreeChild);
-                methodInfo.setMethodNameWhereInfoList(methodNameWhereInfoList);
+                // methodInfo.setMethodNameWhereInfoList(methodNameWhereInfoList);
             } else if (parseTreeChild instanceof MethodNameParser.EndContext) {
                 return;
             } else {

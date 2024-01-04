@@ -49,20 +49,22 @@ public class MethodInfoHandler {
         List<MethodInfo> methodNodeList = new ArrayList<>();
         for (Method method : methods) {
             String methodName = method.getName();
-            List<MethodParamInfo> methodParamInfoList = getMethodParam(mapperInfo, method);
-            Boolean isSingleParam = methodParamInfoList.size() == 1;
+            Map<String, MethodParamInfo> methodParamInfoMap = getMethodParam(mapperInfo, method);
+            // Boolean isSingleParam = methodParamInfoList.size() == 1;
             MethodReturnInfo methodReturnInfo = getMethodReturn(mapperInfo, method);
 
             MethodInfo methodInfo = new MethodInfo();
+            methodInfo.setMethod(method);
             methodInfo.setMethodName(methodName);
-            getConditionInfo(methodInfo, methodName);
-            methodInfo.setMethodReturnInfo(methodReturnInfo);
             methodInfo.setDynamic(method.getAnnotation(Dynamic.class) != null);
-            methodInfo.setMethodParamInfoList(methodParamInfoList);
-            methodInfo.setSingleParam(isSingleParam);
-            methodInfo.setMethodParamInfo(isSingleParam ? methodParamInfoList.get(0) : null);
+            methodInfo.setMethodParamInfoMap(methodParamInfoMap);
+            methodInfo.setMethodReturnInfo(methodReturnInfo);
+            // methodInfo.setSingleParam(isSingleParam);
+            // methodInfo.setMethodParamInfo(isSingleParam ? methodParamInfoList.get(0) : null);
+            getConditionInfo(mapperInfo, methodInfo);
 
-            check(resultMapInfo, methodInfo);
+            handleConditionParamInfo(methodInfo);
+            // check(resultMapInfo, methodInfo);
 
             methodNodeList.add(methodInfo);
         }
@@ -70,9 +72,9 @@ public class MethodInfoHandler {
         return methodNodeList;
     }
 
-    private List<MethodParamInfo> getMethodParam(MapperInfo mapperInfo, Method method) {
+    private Map<String, MethodParamInfo> getMethodParam(MapperInfo mapperInfo, Method method) {
         Parameter[] parameters = method.getParameters();
-        List<MethodParamInfo> methodParamInfoList = new ArrayList<>();
+        Map<String, MethodParamInfo> methodParamInfoMap = new HashMap<>();
 
         for (int i = 0; i < parameters.length; i++) {
             Parameter parameter = parameters[i];
@@ -83,10 +85,14 @@ public class MethodInfoHandler {
             methodParamInfo.setBasicType(basicType);
             methodParamInfo.setType(clazz);
             methodParamInfo.setTypeName(clazz.getName());
+
             Param param = parameter.getAnnotation(Param.class);
             if (param != null) {
                 methodParamInfo.setParamName(param.value());
+            } else {
+                methodParamInfo.setParamName(parameter.getName());
             }
+
             if (!basicType) {
                 List<ColumnInfo> columnInfoList = columnInfoHandler.getColumnInfoList(clazz);
                 methodParamInfo.setColumnInfoList(columnInfoList);
@@ -98,10 +104,12 @@ public class MethodInfoHandler {
                 methodParamInfo.setContainerTypeName(containerType.getTypeName());
             }
 
-            methodParamInfoList.add(methodParamInfo);
+            // 写字段的时候在参数或者方法名中可能出现user_name写成username、userName两种情况
+            methodParamInfoMap.put(methodParamInfo.getParamName(), methodParamInfo);
+            methodParamInfoMap.put(methodParamInfo.getParamName().toLowerCase(), methodParamInfo);
         }
 
-        return methodParamInfoList;
+        return methodParamInfoMap;
     }
 
     private MethodReturnInfo getMethodReturn(MapperInfo mapperInfo, Method method) {
@@ -126,11 +134,43 @@ public class MethodInfoHandler {
         return methodReturnInfo;
     }
 
-    public MethodNameInfo getConditionInfo(MethodInfo methodInfo, String methodName) {
-        if (simpleMethodList.contains(methodName)) {
-            return null;
+    public void getConditionInfo(MapperInfo mapperInfo, MethodInfo methodInfo) {
+        if (simpleMethodList.contains(methodInfo.getMethodName())) {
+            return;
         }
-        return conditionInfoHandler.execute(methodInfo, methodName);
+        conditionInfoHandler.execute(mapperInfo, methodInfo);
+    }
+
+    /**
+     * 处理查询条件和方法参数的关联
+     *
+     * @param methodInfo
+     */
+    public void handleConditionParamInfo(MethodInfo methodInfo) {
+        List<ConditionInfo> conditionInfoList = methodInfo.getConditionInfoList();
+        for (int i = 0; i < conditionInfoList.size(); i++) {
+            ConditionInfo conditionInfo = conditionInfoList.get(i);
+
+            // 处理查询条件和参数之间的关系，需要对特殊操作符进行处理，如between
+            Integer index = conditionInfo.getIndex();
+            String javaColumnName = conditionInfo.getJavaColumnName();
+            String op = conditionInfo.getOp();
+
+            // 通过方法名中的条件字段匹配方法中对应的参数
+            MethodParamInfo methodParamInfo = methodInfo.getMethodParamInfo("arg" + index);
+            if (methodParamInfo == null) {
+                methodParamInfo = methodInfo.getMethodParamInfo(javaColumnName);
+            }
+            if (methodParamInfo == null) {
+                methodParamInfo = methodInfo.getMethodParamInfo(javaColumnName.toLowerCase());
+            }
+
+            // between的匹配可以根据索引   0,1   2,3这种方式，获取根据@Param("id0"),@Param("id1")
+            conditionInfo.addParamName(methodParamInfo.getParamName());
+            if ("between".equalsIgnoreCase(op)) {
+                // conditionInfo.addParamName(methodParamInfo.getParamName());
+            }
+        }
     }
 
     /**
@@ -141,15 +181,15 @@ public class MethodInfoHandler {
         if (ObjectUtils.isEmpty(conditionInfoList)) {
             return;
         }
-        List<MethodParamInfo> methodParamInfoList = methodInfo.getMethodParamInfoList();
+        Map<String, MethodParamInfo> methodParamInfoMap = methodInfo.getMethodParamInfoMap();
 
-        if (conditionInfoList.size() != methodParamInfoList.size()) {
+        if (conditionInfoList.size() != methodParamInfoMap.size()) {
             throw new RuntimeException("方法名中的查询条件和方法参数中中查询条件个数不匹配");
         }
 
         for (int i = 0; i < conditionInfoList.size(); i++) {
             ConditionInfo conditionInfo = conditionInfoList.get(i);
-            MethodParamInfo methodParamInfo = methodParamInfoList.get(i);
+            MethodParamInfo methodParamInfo = methodParamInfoMap.get(i);
 
             String javaColumnName = conditionInfo.getJavaColumnName();
             javaColumnName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, javaColumnName);

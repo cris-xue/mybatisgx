@@ -30,13 +30,14 @@ public class MapperInfoHandler extends BasicInfoHandler {
     public MapperInfo execute(MapperBuilderAssistant builderAssistant) {
         String namespace = builderAssistant.getCurrentNamespace();
         Class<?> daoInterface = getDaoInterface(namespace);
-
         MapperInfo mapperInfo = getMapperInfo(daoInterface);
-        ResultMapInfo resultMapInfo = resultMapInfoHandler.execute(mapperInfo.getEntityClass());
-        List<MethodInfo> methodInfoList = methodInfoHandler.execute(mapperInfo, resultMapInfo, daoInterface);
 
-        mapperInfo.setMethodInfoList(methodInfoList);
+        ResultMapInfo resultMapInfo = resultMapInfoHandler.execute(mapperInfo.getEntityClass());
         mapperInfo.setResultMapInfo(resultMapInfo);
+
+        List<MethodInfo> methodInfoList = methodInfoHandler.execute(mapperInfo, resultMapInfo, daoInterface);
+        mapperInfo.setMethodInfoList(methodInfoList);
+
         return mapperInfo;
     }
 

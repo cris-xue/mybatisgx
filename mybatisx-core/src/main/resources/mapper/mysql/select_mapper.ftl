@@ -10,10 +10,10 @@
         </trim>
         from ${mapperInfo.tableName}
         <where>
-            <#if (methodInfo.methodNameInfo)??>
-                <#list methodInfo.methodNameInfo.methodNameWhereInfoList as methodNameWhereInfo>
-                    ${methodNameWhereInfo.linkOp} ${methodNameWhereInfo.dbColumnName} ${methodNameWhereInfo.op}
-                    <@whereParamHandle op=methodNameWhereInfo.op param=methodNameWhereInfo.javaColumnName/>
+            <#if (methodInfo.conditionInfoList)??>
+                <#list methodInfo.conditionInfoList as conditionInfo>
+                    ${conditionInfo.linkOp} ${conditionInfo.dbColumnName} ${conditionInfo.op}
+                    <@conditionHandle op=conditionInfo.op param=conditionInfo.paramName/>
                 </#list>
             </#if>
         </where>
@@ -21,14 +21,17 @@
 
 </mapper>
 
-<#macro whereParamHandle op param>
+<#macro conditionHandle op param>
     <#switch op>
         <#case "in">
-            <foreach item="item" index="index" collection="${param}" open="(" separator="," close=")">
+            <foreach item="item" index="index" collection="${param[0]}" open="(" separator="," close=")">
                 ${r"#{item}"}
             </foreach>
             <#break>
+        <#case "between">
+            ${r'#{'} ${param[0]} ${r'}'} and ${r'#{'} ${param[1]} ${r'}'}
+            <#break>
         <#default>
-            ${r'#{'} ${param} ${r'}'}
+            ${r'#{'} ${param[0]} ${r'}'}
     </#switch>
 </#macro>

@@ -30,7 +30,7 @@ public class ResultMapInfo {
      */
     private List<ColumnInfo> columnInfoList;
     /**
-     * java字段映射字段信息，userName={userName=1}
+     * java字段映射字段信息，userName={userName=user_name}
      */
     private Map<String, ColumnInfo> columnInfoMap;
 

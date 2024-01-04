@@ -10,9 +10,9 @@
         </trim>
         from ${mapperInfo.tableName}
         <where>
-            <#if (methodInfo.methodNameInfo)??>
-                <#list methodInfo.methodNameInfo.methodNameWhereInfoList as methodNameWhereInfo>
-                    <@dynamicParamHandle type="string" param=methodNameWhereInfo.javaColumnName methodNameWhereInfo=methodNameWhereInfo />
+            <#if (methodInfo.conditionInfoList)??>
+                <#list methodInfo.conditionInfoList as conditionInfo>
+                    <@dynamicHandle type="string" param=conditionInfo.javaColumnName conditionInfo=conditionInfo />
                 </#list>
             </#if>
         </where>
@@ -20,34 +20,37 @@
 
 </mapper>
 
-<#macro dynamicParamHandle type param methodNameWhereInfo>
+<#macro dynamicHandle type param conditionInfo>
     <#switch type>
         <#case "string">
-            <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(${param})">
-                <@whereParamHandle methodNameWhereInfo=methodNameWhereInfo/>
+            <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(${conditionInfo.paramName[0]})">
+                <@conditionHandle conditionInfo=conditionInfo/>
             </if>
             <#break>
         <#case "list">
-            <if test="@org.apache.commons.lang3.ObjectUtils@isNotEmpty(${param})">
-                <@whereParamHandle methodNameWhereInfo=methodNameWhereInfo/>
+            <if test="@org.apache.commons.lang3.ObjectUtils@isNotEmpty(${conditionInfo.paramName[0]})">
+                <@conditionHandle conditionInfo=conditionInfo/>
             </if>
             <#break>
         <#default>
-            <if test="${param} != null">
-                <@whereParamHandle methodNameWhereInfo=methodNameWhereInfo/>
+            <if test="${conditionInfo.paramName[0]} != null">
+                <@conditionHandle conditionInfo=conditionInfo/>
             </if>
     </#switch>
 </#macro>
 
-<#macro whereParamHandle methodNameWhereInfo>
-    ${methodNameWhereInfo.linkOp} ${methodNameWhereInfo.dbColumnName} ${methodNameWhereInfo.op}
-    <#switch methodNameWhereInfo.op>
+<#macro conditionHandle conditionInfo>
+    ${conditionInfo.linkOp} ${conditionInfo.dbColumnName} ${conditionInfo.op}
+    <#switch conditionInfo.op>
         <#case "in">
-            <foreach item="item" index="index" collection="${methodNameWhereInfo.javaColumnName}" open="(" separator="," close=")">
+            <foreach item="item" index="index" collection="${conditionInfo.paramName[0]}" open="(" separator="," close=")">
                 ${r"#{item}"}
             </foreach>
             <#break>
+        <#case "between">
+            ${r'#{'} ${conditionInfo.paramName[0]} ${r'}'} and ${r'#{'} ${conditionInfo.paramName[1]} ${r'}'}
+            <#break>
         <#default>
-            ${r'#{'} ${methodNameWhereInfo.javaColumnName} ${r'}'}
+            ${r'#{'} ${conditionInfo.paramName[0]} ${r'}'}
     </#switch>
 </#macro>

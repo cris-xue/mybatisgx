@@ -1,7 +1,10 @@
 package com.lc.mybatisx.model;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author ：薛承城
@@ -10,6 +13,7 @@ import java.util.List;
  */
 public class MethodInfo {
 
+    private Method method;
     /**
      * sql动作，insert、delete、update、select
      */
@@ -29,19 +33,29 @@ public class MethodInfo {
     /**
      * 是否单参数
      */
+    @Deprecated
     private Boolean isSingleParam;
     /**
      * 方法参数信息
      */
+    @Deprecated
     private MethodParamInfo methodParamInfo;
     /**
-     * 方法参数列表
+     * 方法参数映射列表
      */
-    private List<MethodParamInfo> methodParamInfoList;
+    private Map<String, MethodParamInfo> methodParamInfoMap = new HashMap<>();
     /**
      * 方法返回信息
      */
     private MethodReturnInfo methodReturnInfo;
+
+    public Method getMethod() {
+        return method;
+    }
+
+    public void setMethod(Method method) {
+        this.method = method;
+    }
 
     public String getAction() {
         return action;
@@ -91,12 +105,16 @@ public class MethodInfo {
         this.methodParamInfo = methodParamInfo;
     }
 
-    public List<MethodParamInfo> getMethodParamInfoList() {
-        return methodParamInfoList;
+    public MethodParamInfo getMethodParamInfo(String paramName) {
+        return methodParamInfoMap.get(paramName);
     }
 
-    public void setMethodParamInfoList(List<MethodParamInfo> methodParamInfoList) {
-        this.methodParamInfoList = methodParamInfoList;
+    public Map<String, MethodParamInfo> getMethodParamInfoMap() {
+        return methodParamInfoMap;
+    }
+
+    public void setMethodParamInfoMap(Map<String, MethodParamInfo> methodParamInfoMap) {
+        this.methodParamInfoMap = methodParamInfoMap;
     }
 
     public MethodReturnInfo getMethodReturnInfo() {

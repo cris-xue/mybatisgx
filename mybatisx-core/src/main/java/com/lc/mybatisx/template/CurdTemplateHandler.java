@@ -2,8 +2,6 @@ package com.lc.mybatisx.template;
 
 import com.lc.mybatisx.model.MapperInfo;
 import com.lc.mybatisx.model.MethodInfo;
-import com.lc.mybatisx.model.MethodNameInfo;
-import com.lc.mybatisx.template.model.InsertNode;
 import com.lc.mybatisx.utils.FreeMarkerUtils;
 import com.lc.mybatisx.utils.XmlUtils;
 import freemarker.template.Template;
@@ -30,8 +28,8 @@ public class CurdTemplateHandler {
         List<XNode> xNodeList = new ArrayList<>(15);
         for (int i = 0; i < methodInfoList.size(); i++) {
             MethodInfo methodInfo = methodInfoList.get(i);
-            MethodNameInfo methodNameInfo = methodInfo.getMethodNameInfo();
-            if (methodNameInfo == null) {
+            String action = methodInfo.getAction();
+            if (StringUtils.isBlank(action)) {
                 XNode xNode = simpleTemplateHandle(mapperInfo, methodInfo);
                 xNodeList.add(xNode);
             } else {
@@ -56,17 +54,16 @@ public class CurdTemplateHandler {
     }
 
     private XNode buildInsertXNode(MapperInfo mapperInfo, MethodInfo methodInfo) {
-        InsertNode insertNode = new InsertNode();
+        /*InsertNode insertNode = new InsertNode();
         insertNode.id("");
         insertNode.keyProperty("");
         insertNode.useGeneratedKeys(Boolean.TRUE);
         insertNode.tableName(mapperInfo.getTableName());
         insertNode.dbColumn(mapperInfo.getResultMapInfo().getColumnInfoList());
         insertNode.javaColumn(mapperInfo.getResultMapInfo().getColumnInfoList());
-        String insertXmlString = insertNode.getXml();
+        String insertXmlString = insertNode.getXml();*/
 
-
-        /*Document document = DocumentHelper.createDocument();
+        Document document = DocumentHelper.createDocument();
         Element mapperElement = document.addElement("mapper");
         Element insertElement = mapperElement.addElement("insert");
         insertElement.addAttribute("id", "insert");
@@ -96,7 +93,7 @@ public class CurdTemplateHandler {
             javaTrimElement.addText(javaColumn);
         });
 
-        String insertXmlString = document.asXML();*/
+        String insertXmlString = document.asXML();
         logger.info(insertXmlString);
         XPathParser xPathParser = XmlUtils.processXml(insertXmlString);
         XNode xNode = xPathParser.evalNode("/mapper/insert");
@@ -146,9 +143,8 @@ public class CurdTemplateHandler {
     }
 
     private XNode complexTemplateHandle(MapperInfo mapperInfo, MethodInfo methodInfo) {
-        MethodNameInfo methodNameInfo = methodInfo.getMethodNameInfo();
         String path = methodInfo.getDynamic() ? "mapper/mysql/%s_mapper_dynamic.ftl" : "mapper/mysql/%s_mapper.ftl";
-        String templatePath = String.format(path, methodNameInfo.getAction());
+        String templatePath = String.format(path, methodInfo.getAction());
         Template template = FreeMarkerUtils.getTemplate(templatePath);
         return generateSql(template, mapperInfo, methodInfo);
     }

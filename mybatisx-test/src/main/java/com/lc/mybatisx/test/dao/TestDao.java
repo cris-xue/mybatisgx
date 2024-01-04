@@ -5,7 +5,6 @@ import com.lc.mybatisx.dao.QueryDao;
 import com.lc.mybatisx.test.model.dto.TestDTO;
 import com.lc.mybatisx.test.model.entity.Test;
 import org.apache.ibatis.annotations.Param;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Map;
@@ -15,7 +14,7 @@ import java.util.Map;
  * @description：一句话描述
  * @date ：2020/11/9 13:19
  */
-@Repository
+// @Repository
 public interface TestDao extends QueryDao<Test, Long> {
 
     // @MapperMethod(type = MethodType.UPDATE)

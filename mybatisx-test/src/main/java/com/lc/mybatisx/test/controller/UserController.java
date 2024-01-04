@@ -58,4 +58,19 @@ public class UserController {
         return userDao.findByIdIn(ids);
     }
 
+    @GetMapping(path = "/age")
+    public List<User> findByAge(Integer age) {
+        return userDao.findByAge(age);
+    }
+
+    @GetMapping(path = "/name-and-age")
+    public List<User> findByNameAndAge(String name, Integer age) {
+        return userDao.findByNameAndAge(name, age);
+    }
+
+    @GetMapping(path = "/name-or-age")
+    public List<User> findByNameOrAge(String name, Integer age) {
+        return userDao.findByNameOrAge(name, age);
+    }
+
 }

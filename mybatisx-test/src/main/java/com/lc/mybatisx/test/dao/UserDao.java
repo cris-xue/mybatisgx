@@ -1,5 +1,6 @@
 package com.lc.mybatisx.test.dao;
 
+import com.lc.mybatisx.annotation.Dynamic;
 import com.lc.mybatisx.dao.SimpleDao;
 import com.lc.mybatisx.test.model.entity.User;
 import org.apache.ibatis.annotations.Param;
@@ -18,5 +19,12 @@ public interface UserDao extends SimpleDao<User, Long> {
     List<User> findByIdIn(@Param("id") List<Long> id);
 
     List<User> findByName(@Param("name") String name);
+
+    List<User> findByAge(Integer age);
+
+    List<User> findByNameAndAge(String name, Integer age);
+
+    @Dynamic
+    List<User> findByNameOrAge(String name, Integer age);
 
 }

@@ -58,6 +58,11 @@ public class UserController {
         return userDao.findByIdIn(ids);
     }
 
+    @GetMapping(path = "/role-ids")
+    public List<User> findByRoleIds(@RequestParam("roleIds") List<Long> roleIds) {
+        return userDao.findByRoleIds(roleIds);
+    }
+
     @GetMapping(path = "/age")
     public List<User> findByAge(Integer age) {
         return userDao.findByAge(age);
@@ -68,9 +73,9 @@ public class UserController {
         return userDao.findByNameAndAge(name, age);
     }
 
-    @GetMapping(path = "/name-or-age")
-    public List<User> findByNameOrAge(String name, Integer age) {
-        return userDao.findByNameOrAge(name, age);
+    @GetMapping(path = "/name-or-age-or-roleids")
+    public List<User> findByNameOrAgeOrRoleIds(String name, Integer age, @RequestParam(value = "roleIds", required = false) List<Long> roleIds) {
+        return userDao.findByNameOrAgeOrRoleIds(name, age, roleIds);
     }
 
 }

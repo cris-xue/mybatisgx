@@ -70,4 +70,24 @@
 		</dependency>
 	</dependencies>
 
+	<build>
+		<finalName>${project.artifactId}</finalName>
+		<resources>
+			<resource>
+				<directory>src/main/java</directory>
+				<includes>
+					<include>**/*Mapper.xml</include>
+				</includes>
+				<!--<targetPath>${build.directory}/classes</targetPath>-->
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+				<includes>
+					<include>**/*</include>
+				</includes>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
+	</build>
+
 </project>

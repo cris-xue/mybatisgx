@@ -2,10 +2,12 @@ server:
   port: 8083
 
 spring:
+  application:
+    name: @project.artifactId@
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/mybatisx?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC
-    username: root
+    username: app
     # password: 123456
     password: 123456
     schema: classpath*:db/schema.sql

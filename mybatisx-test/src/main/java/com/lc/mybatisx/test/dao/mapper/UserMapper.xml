@@ -1,0 +1,19 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lc.mybatisx.test.dao.UserDao">
+
+    <select id="findByNameOrAgeOrRoleIds" resultType="com.lc.mybatisx.test.model.entity.User">
+        select
+        <trim prefix="" suffix="" suffixOverrides=",">
+            role_ids, name, age, phone, email, user_name, password, status, version, id
+        </trim>
+        from user
+        <where>
+            <trim prefix="(" suffix=")" prefixOverrides="AND|OR|and|or">
+                <if test="arg0 != null">  name = #{arg0}</if>
+                <if test="arg1 != null"> or age = #{arg1}</if>
+                <if test="arg2 != null"> or role_ids = #{arg2, typeHandler=com.lc.mybatisx.test.commons.handler.ListLongTypeHandler}</if>
+            </trim>
+        </where>
+    </select>
+
+</mapper>

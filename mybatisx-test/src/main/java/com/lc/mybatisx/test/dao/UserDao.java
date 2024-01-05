@@ -18,6 +18,8 @@ public interface UserDao extends SimpleDao<User, Long> {
 
     List<User> findByIdIn(@Param("id") List<Long> id);
 
+    List<User> findByRoleIds(List<Long> ids);
+
     List<User> findByName(@Param("name") String name);
 
     List<User> findByAge(Integer age);
@@ -25,6 +27,6 @@ public interface UserDao extends SimpleDao<User, Long> {
     List<User> findByNameAndAge(String name, Integer age);
 
     @Dynamic
-    List<User> findByNameOrAge(String name, Integer age);
+    List<User> findByNameOrAgeOrRoleIds(String name, Integer age, List<Long> roleIds);
 
 }

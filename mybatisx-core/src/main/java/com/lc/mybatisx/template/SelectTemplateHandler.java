@@ -45,7 +45,7 @@ public class SelectTemplateHandler {
             Element trimElement = whereElement.addElement("trim");
             trimElement.addAttribute("prefix", "(");
             trimElement.addAttribute("suffix", ")");
-            // trimElement.addAttribute("prefixOverrides", "and | or");
+            trimElement.addAttribute("prefixOverrides", "AND|OR|and|or");
             methodInfo.getConditionInfoList().forEach(conditionInfo -> {
                 Element ifElement = trimElement.addElement("if");
                 List<String> paramNameList = conditionInfo.getParamName();
@@ -79,9 +79,9 @@ public class SelectTemplateHandler {
             foreachElement.addAttribute("close", ")");
             foreachElement.addText("#{item}");
         } else if ("between".equals(op)) {
-            parentElement.addText(String.format("%s and %s", paramNameList.get(0), paramNameList.get(1)));
+            parentElement.addText(String.format("#{%s} and #{%s}", paramNameList.get(0), paramNameList.get(1)));
         } else {
-            parentElement.addText(paramNameList.get(0));
+            parentElement.addText(String.format("#{%s}", paramNameList.get(0)));
         }
     }
 

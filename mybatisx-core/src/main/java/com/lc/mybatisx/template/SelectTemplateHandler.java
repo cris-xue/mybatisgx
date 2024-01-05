@@ -1,5 +1,6 @@
 package com.lc.mybatisx.template;
 
+import com.lc.mybatisx.annotation.LogicDelete;
 import com.lc.mybatisx.model.ColumnInfo;
 import com.lc.mybatisx.model.ConditionInfo;
 import com.lc.mybatisx.model.MapperInfo;
@@ -61,6 +62,14 @@ public class SelectTemplateHandler {
                 buildCondition(whereElement, columnInfo, conditionInfo);
             });
         }
+
+        // 逻辑删除
+        mapperInfo.getResultMapInfo().getColumnInfoMap().forEach((k, columnInfo) -> {
+            LogicDelete logicDelete = columnInfo.getDelete();
+            if (logicDelete != null) {
+                whereElement.addText(String.format(" and %s = %s", columnInfo.getDbColumnName(), logicDelete.show()));
+            }
+        });
 
         String insertXmlString = document.asXML();
         logger.info(insertXmlString);

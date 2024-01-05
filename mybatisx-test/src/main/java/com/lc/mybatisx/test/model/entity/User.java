@@ -1,7 +1,8 @@
 package com.lc.mybatisx.test.model.entity;
 
+import com.lc.mybatisx.annotation.Lock;
+import com.lc.mybatisx.annotation.LogicDelete;
 import com.lc.mybatisx.annotation.TypeHandler;
-import com.lc.mybatisx.annotation.Version;
 import com.lc.mybatisx.test.commons.handler.ListLongTypeHandler;
 
 import javax.persistence.Column;
@@ -32,11 +33,17 @@ public class User extends BaseEntity<Long> {
 
     private String password;
 
+    @LogicDelete
     private Integer status;
 
-    @Version
-    private int version;
+    @Lock
+    private Integer version;
 
+    /**
+     * 关联查询
+     */
+    // @OneToMany
+    // private List<UserRole> userRole;
     public List<Long> getRoleIds() {
         return roleIds;
     }
@@ -108,4 +115,9 @@ public class User extends BaseEntity<Long> {
     public void setVersion(int version) {
         this.version = version;
     }
+
+    public void setVersion(Integer version) {
+        this.version = version;
+    }
+
 }

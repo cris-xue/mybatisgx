@@ -1,33 +1,32 @@
 package com.lc.mybatisx.test.model.entity;
 
 import javax.persistence.Entity;
-import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import java.util.List;
 
 @Entity
 @Table(name = "user")
 public class UserRole extends BaseEntity<Long> {
 
-    @ManyToMany
-    private List<User> users;
+    @ManyToOne
+    private User user;
 
-    @ManyToMany
-    private List<Role> roles;
+    @ManyToOne
+    private Role role;
 
-    public List<User> getUsers() {
-        return users;
+    public User getUser() {
+        return user;
     }
 
-    public void setUsers(List<User> users) {
-        this.users = users;
+    public void setUser(User user) {
+        this.user = user;
     }
 
-    public List<Role> getRoles() {
-        return roles;
+    public Role getRole() {
+        return role;
     }
 
-    public void setRoles(List<Role> roles) {
-        this.roles = roles;
+    public void setRole(Role role) {
+        this.role = role;
     }
 }

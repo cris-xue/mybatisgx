@@ -1,9 +1,11 @@
 package com.lc.mybatisx.template;
 
+import com.lc.mybatisx.model.ColumnInfo;
 import com.lc.mybatisx.model.ConditionInfo;
 import com.lc.mybatisx.model.MapperInfo;
 import com.lc.mybatisx.model.MethodInfo;
 import com.lc.mybatisx.utils.XmlUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.parsing.XPathParser;
 import org.dom4j.Document;
@@ -47,14 +49,16 @@ public class SelectTemplateHandler {
             trimElement.addAttribute("suffix", ")");
             trimElement.addAttribute("prefixOverrides", "AND|OR|and|or");
             methodInfo.getConditionInfoList().forEach(conditionInfo -> {
+                ColumnInfo columnInfo = mapperInfo.getResultMapInfo().getColumnInfoMap().get(conditionInfo.getJavaColumnName());
                 Element ifElement = trimElement.addElement("if");
                 List<String> paramNameList = conditionInfo.getParamName();
                 ifElement.addAttribute("test", String.format("%s != null", paramNameList.get(0)));
-                buildCondition(ifElement, conditionInfo);
+                buildCondition(ifElement, columnInfo, conditionInfo);
             });
         } else {
             methodInfo.getConditionInfoList().forEach(conditionInfo -> {
-                buildCondition(whereElement, conditionInfo);
+                ColumnInfo columnInfo = mapperInfo.getResultMapInfo().getColumnInfoMap().get(conditionInfo.getJavaColumnName());
+                buildCondition(whereElement, columnInfo, conditionInfo);
             });
         }
 
@@ -65,7 +69,7 @@ public class SelectTemplateHandler {
         return xNode;
     }
 
-    private void buildCondition(Element parentElement, ConditionInfo conditionInfo) {
+    private void buildCondition(Element parentElement, ColumnInfo columnInfo, ConditionInfo conditionInfo) {
         String op = conditionInfo.getOp();
         List<String> paramNameList = conditionInfo.getParamName();
         parentElement.addText(String.format(" %s %s %s ", conditionInfo.getLinkOp(), conditionInfo.getDbColumnName(), op));
@@ -81,7 +85,12 @@ public class SelectTemplateHandler {
         } else if ("between".equals(op)) {
             parentElement.addText(String.format("#{%s} and #{%s}", paramNameList.get(0), paramNameList.get(1)));
         } else {
-            parentElement.addText(String.format("#{%s}", paramNameList.get(0)));
+            String typeHandler = columnInfo.getTypeHandler();
+            String typeHandlerTemplate = "";
+            if (StringUtils.isNotBlank(typeHandler)) {
+                typeHandlerTemplate = String.format(", typeHandler=%s", typeHandler);
+            }
+            parentElement.addText(String.format("#{%s%s}", paramNameList.get(0), typeHandlerTemplate));
         }
     }
 

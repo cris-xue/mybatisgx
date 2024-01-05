@@ -143,10 +143,15 @@ public class CurdTemplateHandler {
     }
 
     private XNode complexTemplateHandle(MapperInfo mapperInfo, MethodInfo methodInfo) {
-        String path = methodInfo.getDynamic() ? "mapper/mysql/%s_mapper_dynamic.ftl" : "mapper/mysql/%s_mapper.ftl";
-        String templatePath = String.format(path, methodInfo.getAction());
-        Template template = FreeMarkerUtils.getTemplate(templatePath);
-        return generateSql(template, mapperInfo, methodInfo);
+        if ("select".equals(methodInfo.getAction())) {
+            SelectTemplateHandler selectTemplateHandler = new SelectTemplateHandler();
+            return selectTemplateHandler.execute(mapperInfo, methodInfo);
+        } else {
+            String path = methodInfo.getDynamic() ? "mapper/mysql/%s_mapper_dynamic.ftl" : "mapper/mysql/%s_mapper.ftl";
+            String templatePath = String.format(path, methodInfo.getAction());
+            Template template = FreeMarkerUtils.getTemplate(templatePath);
+            return generateSql(template, mapperInfo, methodInfo);
+        }
     }
 
     private XNode generateSql(Template template, MapperInfo mapperInfo, MethodInfo methodInfo) {

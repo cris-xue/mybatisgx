@@ -1,5 +1,8 @@
 package com.lc.mybatisx.model;
 
+import com.lc.mybatisx.annotation.Lock;
+import com.lc.mybatisx.annotation.LogicDelete;
+
 /**
  * 列信息
  */
@@ -17,11 +20,19 @@ public class ColumnInfo {
     /**
      * 是否是主键
      */
-    private YesOrNo primaryKey;
+    private YesOrNo primaryKey = YesOrNo.NO;
     /**
      * 类型处理器
      */
     private String typeHandler;
+    /**
+     * 是否是乐观锁字段
+     */
+    private Lock lock;
+    /**
+     * 是否是逻辑删除字段
+     */
+    private LogicDelete delete;
 
     public Class<?> getJavaType() {
         return javaType;
@@ -77,5 +88,21 @@ public class ColumnInfo {
 
     public void setTypeHandler(String typeHandler) {
         this.typeHandler = typeHandler;
+    }
+
+    public Lock getLock() {
+        return lock;
+    }
+
+    public void setLock(Lock lock) {
+        this.lock = lock;
+    }
+
+    public LogicDelete getDelete() {
+        return delete;
+    }
+
+    public void setDelete(LogicDelete delete) {
+        this.delete = delete;
     }
 }

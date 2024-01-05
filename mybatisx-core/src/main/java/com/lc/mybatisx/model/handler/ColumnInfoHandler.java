@@ -2,6 +2,8 @@ package com.lc.mybatisx.model.handler;
 
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.Maps;
+import com.lc.mybatisx.annotation.Lock;
+import com.lc.mybatisx.annotation.LogicDelete;
 import com.lc.mybatisx.annotation.TypeHandler;
 import com.lc.mybatisx.model.ColumnInfo;
 import com.lc.mybatisx.model.YesOrNo;
@@ -33,6 +35,8 @@ public class ColumnInfoHandler {
             Id id = field.getAnnotation(Id.class);
             Column column = field.getAnnotation(Column.class);
             TypeHandler typeHandler = field.getAnnotation(TypeHandler.class);
+            Lock lock = field.getAnnotation(Lock.class);
+            LogicDelete logicDelete = field.getAnnotation(LogicDelete.class);
 
             ColumnInfo columnInfo = new ColumnInfo();
             columnInfo.setJavaType(fieldType);
@@ -44,6 +48,8 @@ public class ColumnInfoHandler {
             if (typeHandler != null) {
                 columnInfo.setTypeHandler(typeHandler.value().getTypeName());
             }
+            columnInfo.setLock(lock);
+            columnInfo.setDelete(logicDelete);
 
             columnInfoList.add(columnInfo);
         }

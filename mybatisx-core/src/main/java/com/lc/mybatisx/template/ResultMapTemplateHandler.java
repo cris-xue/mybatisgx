@@ -2,7 +2,6 @@ package com.lc.mybatisx.template;
 
 import com.lc.mybatisx.model.ColumnInfo;
 import com.lc.mybatisx.model.ResultMapInfo;
-import com.lc.mybatisx.model.YesOrNo;
 import com.lc.mybatisx.utils.XmlUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.parsing.XNode;
@@ -13,6 +12,7 @@ import org.dom4j.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.persistence.Id;
 import java.util.List;
 
 public class ResultMapTemplateHandler {
@@ -41,15 +41,8 @@ public class ResultMapTemplateHandler {
 
     private void addElement(Element resultMapElement, List<ColumnInfo> columnInfoList) {
         columnInfoList.forEach(columnInfo -> {
-            YesOrNo yesOrNo = columnInfo.getPrimaryKey();
-            Element element;
-            if (yesOrNo == YesOrNo.YES) {
-                element = resultMapElement.addElement("id");
-            } else if (yesOrNo == YesOrNo.NO) {
-                element = resultMapElement.addElement("result");
-            } else {
-                throw new RuntimeException();
-            }
+            Id id = columnInfo.getId();
+            Element element = resultMapElement.addElement(id != null ? "id" : "result");
             element.addAttribute("property", columnInfo.getJavaColumnName());
             element.addAttribute("column", columnInfo.getDbColumnName());
             String dbTypeName = columnInfo.getDbTypeName();

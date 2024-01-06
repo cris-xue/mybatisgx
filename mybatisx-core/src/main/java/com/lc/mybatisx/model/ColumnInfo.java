@@ -3,6 +3,8 @@ package com.lc.mybatisx.model;
 import com.lc.mybatisx.annotation.Lock;
 import com.lc.mybatisx.annotation.LogicDelete;
 
+import javax.persistence.Id;
+
 /**
  * 列信息
  */
@@ -20,7 +22,7 @@ public class ColumnInfo {
     /**
      * 是否是主键
      */
-    private YesOrNo primaryKey = YesOrNo.NO;
+    private Id id;
     /**
      * 类型处理器
      */
@@ -74,12 +76,12 @@ public class ColumnInfo {
         this.dbColumnName = dbColumnName;
     }
 
-    public YesOrNo getPrimaryKey() {
-        return primaryKey;
+    public Id getId() {
+        return id;
     }
 
-    public void setPrimaryKey(YesOrNo primaryKey) {
-        this.primaryKey = primaryKey;
+    public void setId(Id id) {
+        this.id = id;
     }
 
     public String getTypeHandler() {

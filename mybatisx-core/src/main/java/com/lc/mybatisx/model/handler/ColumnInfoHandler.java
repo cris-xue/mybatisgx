@@ -6,7 +6,6 @@ import com.lc.mybatisx.annotation.Lock;
 import com.lc.mybatisx.annotation.LogicDelete;
 import com.lc.mybatisx.annotation.TypeHandler;
 import com.lc.mybatisx.model.ColumnInfo;
-import com.lc.mybatisx.model.YesOrNo;
 import org.apache.commons.lang3.reflect.FieldUtils;
 
 import javax.persistence.Column;
@@ -44,7 +43,7 @@ public class ColumnInfoHandler {
             columnInfo.setJavaColumnName(fieldName);
             columnInfo.setDbTypeName(column != null ? column.columnDefinition() : null);
             columnInfo.setDbColumnName(column != null ? column.name() : dbColumnName);
-            columnInfo.setPrimaryKey(id != null ? YesOrNo.YES : YesOrNo.NO);
+            columnInfo.setId(id);
             if (typeHandler != null) {
                 columnInfo.setTypeHandler(typeHandler.value().getTypeName());
             }

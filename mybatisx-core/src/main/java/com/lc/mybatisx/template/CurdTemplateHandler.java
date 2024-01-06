@@ -8,9 +8,6 @@ import freemarker.template.Template;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.parsing.XPathParser;
-import org.dom4j.Document;
-import org.dom4j.DocumentHelper;
-import org.dom4j.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,6 +42,9 @@ public class CurdTemplateHandler {
         if ("insert".equals(methodName) || "insertSelective".equals(methodName)) {
             InsertTemplateHandler insertTemplateHandler = new InsertTemplateHandler();
             return insertTemplateHandler.execute(mapperInfo, methodInfo);
+        } else if ("updateById".equals(methodName) || "updateByIdSelective".equals(methodName)) {
+            UpdateTemplateHandler updateTemplateHandler = new UpdateTemplateHandler();
+            return updateTemplateHandler.execute(mapperInfo, methodInfo);
         } else {
             String templatePath = String.format("mapper/mysql/simple_mapper/%s.ftl", methodInfo.getMethodName());
             Template template = FreeMarkerUtils.getTemplate(templatePath);

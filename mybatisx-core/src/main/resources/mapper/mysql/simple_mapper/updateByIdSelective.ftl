@@ -2,7 +2,7 @@
 <mapper>
 
     <update id="updateByIdSelective">
-        update ${mapperInfo.tableName}
+        update ${mapperInfo.tableInfo.tableName}
         <trim prefix="set" suffixOverrides=",">
             <#list resultMapInfo.columnInfoList as columnInfo>
                 <if test="${columnInfo.javaColumnName} != null">

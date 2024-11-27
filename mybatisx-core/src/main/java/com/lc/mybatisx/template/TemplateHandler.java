@@ -15,7 +15,7 @@ public class TemplateHandler {
     private CurdTemplateHandler curdTemplateHandler = new CurdTemplateHandler();
     private ResultMapTemplateHandler resultMapTemplateHandler = new ResultMapTemplateHandler();
 
-    private XNode resultMapXNode = null;
+    private List<XNode> resultMapXNodeList = null;
     private List<XNode> mapperXNodeList = null;
 
     public static TemplateHandler build() {
@@ -28,7 +28,7 @@ public class TemplateHandler {
         mergeMethod(builderAssistant, mapperInfo);
 
         this.mapperXNodeList = curdTemplateHandler.execute(mapperInfo);
-        this.resultMapXNode = resultMapTemplateHandler.execute(mapperInfo.getResultMapInfo());
+        this.resultMapXNodeList = resultMapTemplateHandler.execute(mapperInfo.getMethodInfoList());
         return this;
     }
 
@@ -47,7 +47,7 @@ public class TemplateHandler {
     }
 
     public void mergeResultMap(List<XNode> resultMapXNode) {
-        resultMapXNode.add(this.resultMapXNode);
+        resultMapXNode.addAll(this.resultMapXNodeList);
     }
 
     public void mergeMapper(List<XNode> curdXNode) {

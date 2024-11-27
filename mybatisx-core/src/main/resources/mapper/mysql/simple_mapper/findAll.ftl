@@ -8,7 +8,7 @@
                 ${columnInfo.dbColumnName},
             </#list>
         </trim>
-        from ${mapperInfo.tableName}
+        from ${mapperInfo.tableInfo.tableName}
     </select>
 
 </mapper>

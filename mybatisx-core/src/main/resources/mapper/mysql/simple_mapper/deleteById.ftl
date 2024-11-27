@@ -2,7 +2,7 @@
 <mapper>
 
     <delete id="deleteById">
-        delete from ${mapperInfo.tableName} where id = ${r'#{id}'}
+        delete from ${mapperInfo.tableInfo.tableName} where id = ${r'#{id}'}
     </delete>
 
 </mapper>

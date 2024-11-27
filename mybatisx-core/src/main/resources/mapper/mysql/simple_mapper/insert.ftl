@@ -2,7 +2,7 @@
 <mapper>
 
     <insert id="insert" keyProperty="id" useGeneratedKeys="true">
-        insert into ${mapperInfo.tableName}
+        insert into ${mapperInfo.tableInfo.tableName}
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <#list resultMapInfo.columnInfoList as columnInfo>
                 ${columnInfo.dbColumnName},

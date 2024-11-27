@@ -6,3 +6,6 @@
 
 mybatis参数文章
 https://blog.csdn.net/zsy_yyds/article/details/127190737
+
+
+逻辑删除和乐观锁需要考虑自定义方法也需要增加

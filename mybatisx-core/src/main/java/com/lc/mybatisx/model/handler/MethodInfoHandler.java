@@ -42,40 +42,40 @@ public class MethodInfoHandler {
 
     private ColumnInfoHandler columnInfoHandler = new ColumnInfoHandler();
     private ConditionInfoHandler conditionInfoHandler = new ConditionInfoHandler();
+    private ResultMapInfoHandler resultMapInfoHandler = new ResultMapInfoHandler();
 
-    public List<MethodInfo> execute(MapperInfo mapperInfo, ResultMapInfo resultMapInfo, Class<?> interfaceClass) {
+    public List<MethodInfo> execute(MapperInfo mapperInfo, Class<?> interfaceClass) {
         Method[] methods = interfaceClass.getMethods();
 
-        List<MethodInfo> methodNodeList = new ArrayList<>();
+        List<MethodInfo> methodInfoList = new ArrayList<>();
         for (Method method : methods) {
             String methodName = method.getName();
-            Map<String, MethodParamInfo> methodParamInfoMap = getMethodParam(mapperInfo, method);
-            // Boolean isSingleParam = methodParamInfoList.size() == 1;
+            List<MethodParamInfo> methodParamInfoList = getMethodParam(mapperInfo, method);
             MethodReturnInfo methodReturnInfo = getMethodReturn(mapperInfo, method);
+            ResultMapInfo resultMapInfo = resultMapInfoHandler.execute(methodName, methodReturnInfo);
 
             MethodInfo methodInfo = new MethodInfo();
             methodInfo.setMethod(method);
             methodInfo.setMethodName(methodName);
             methodInfo.setDynamic(method.getAnnotation(Dynamic.class) != null);
-            methodInfo.setMethodParamInfoMap(methodParamInfoMap);
+            // methodInfo.setConditionInfoList();
+            methodInfo.setMethodParamInfoList(methodParamInfoList);
             methodInfo.setMethodReturnInfo(methodReturnInfo);
-            // methodInfo.setSingleParam(isSingleParam);
-            // methodInfo.setMethodParamInfo(isSingleParam ? methodParamInfoList.get(0) : null);
+            methodInfo.setResultMapInfo(resultMapInfo);
             getConditionInfo(mapperInfo, methodInfo);
 
             handleConditionParamInfo(methodInfo);
             // check(resultMapInfo, methodInfo);
 
-            methodNodeList.add(methodInfo);
+            methodInfoList.add(methodInfo);
         }
 
-        return methodNodeList;
+        return methodInfoList;
     }
 
-    private Map<String, MethodParamInfo> getMethodParam(MapperInfo mapperInfo, Method method) {
+    private List<MethodParamInfo> getMethodParam(MapperInfo mapperInfo, Method method) {
         Parameter[] parameters = method.getParameters();
-        Map<String, MethodParamInfo> methodParamInfoMap = new HashMap<>();
-
+        List<MethodParamInfo> methodParamInfoList = new ArrayList<>();
         for (int i = 0; i < parameters.length; i++) {
             Parameter parameter = parameters[i];
             Class<?> clazz = getMethodParamType(mapperInfo, parameter);
@@ -86,12 +86,12 @@ public class MethodInfoHandler {
             methodParamInfo.setType(clazz);
             methodParamInfo.setTypeName(clazz.getName());
 
+            String paramName = parameter.getName();
             Param param = parameter.getAnnotation(Param.class);
             if (param != null) {
-                methodParamInfo.setParamName(param.value());
-            } else {
-                methodParamInfo.setParamName(parameter.getName());
+                paramName = param.value();
             }
+            methodParamInfo.setParamName(paramName);
 
             if (!basicType) {
                 List<ColumnInfo> columnInfoList = columnInfoHandler.getColumnInfoList(clazz);
@@ -105,11 +105,12 @@ public class MethodInfoHandler {
             }
 
             // 写字段的时候在参数或者方法名中可能出现user_name写成username、userName两种情况
-            methodParamInfoMap.put(methodParamInfo.getParamName(), methodParamInfo);
-            methodParamInfoMap.put(methodParamInfo.getParamName().toLowerCase(), methodParamInfo);
+            methodParamInfoList.add(methodParamInfo);
+            /*methodParamInfoMap.put(methodParamInfo.getParamName(), methodParamInfo);
+            methodParamInfoMap.put(methodParamInfo.getParamName().toLowerCase(), methodParamInfo);*/
         }
 
-        return methodParamInfoMap;
+        return methodParamInfoList;
     }
 
     private MethodReturnInfo getMethodReturn(MapperInfo mapperInfo, Method method) {

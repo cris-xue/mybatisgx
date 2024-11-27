@@ -26,12 +26,17 @@ public class MapperInfo {
      */
     private String namespace;
     /**
+     * 表信息
+     */
+    private TableInfo tableInfo;
+    /**
      * 方法信息列表
      */
     private List<MethodInfo> methodInfoList;
     /**
      * 结果集信息
      */
+    @Deprecated
     private ResultMapInfo resultMapInfo;
 
     public Class<?> getIdClass() {
@@ -64,6 +69,14 @@ public class MapperInfo {
 
     public void setNamespace(String namespace) {
         this.namespace = namespace;
+    }
+
+    public TableInfo getTableInfo() {
+        return tableInfo;
+    }
+
+    public void setTableInfo(TableInfo tableInfo) {
+        this.tableInfo = tableInfo;
     }
 
     public List<MethodInfo> getMethodInfoList() {

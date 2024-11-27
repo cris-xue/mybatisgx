@@ -38,7 +38,7 @@ public class UpdateTemplateHandler {
         Element dbTrimElement = setElement.addElement("trim");
         dbTrimElement.addAttribute("suffixOverrides", ",");
 
-        List<ColumnInfo> columnInfoList = mapperInfo.getResultMapInfo().getColumnInfoList();
+        List<ColumnInfo> columnInfoList = methodInfo.getResultMapInfo().getColumnInfoList();
         if (methodInfo.getDynamic()) {
             for (int i = 0; i < columnInfoList.size(); i++) {
                 ColumnInfo columnInfo = columnInfoList.get(i);
@@ -94,7 +94,7 @@ public class UpdateTemplateHandler {
         // 更新操作的条件不设置动态，因为动态有可能确实条件的时候修改所有数据，比较危险
         Element whereElement = updateElement.addElement("where");
         if ("updateById".equals(methodInfo.getMethodName()) || "updateByIdSelective".equals(methodInfo.getMethodName())) {
-            mapperInfo.getResultMapInfo().getColumnInfoMap().forEach((k, columnInfo) -> {
+            methodInfo.getResultMapInfo().getColumnInfoMap().forEach((k, columnInfo) -> {
                 Id id = columnInfo.getId();
                 if (id != null) {
                     buildIdCondition(whereElement, columnInfo.getDbColumnName(), columnInfo.getJavaColumnName());
@@ -102,13 +102,13 @@ public class UpdateTemplateHandler {
             });
         } else {
             methodInfo.getConditionInfoList().forEach(conditionInfo -> {
-                ColumnInfo columnInfo = mapperInfo.getResultMapInfo().getColumnInfoMap().get(conditionInfo.getJavaColumnName());
+                ColumnInfo columnInfo = methodInfo.getResultMapInfo().getColumnInfoMap().get(conditionInfo.getJavaColumnName());
                 buildCondition(whereElement, columnInfo, conditionInfo);
             });
         }
 
         // 逻辑删除
-        mapperInfo.getResultMapInfo().getColumnInfoMap().forEach((k, columnInfo) -> {
+        methodInfo.getResultMapInfo().getColumnInfoMap().forEach((k, columnInfo) -> {
             LogicDelete logicDelete = columnInfo.getDelete();
             if (logicDelete != null) {
                 whereElement.addText(String.format(" and %s = %s", columnInfo.getDbColumnName(), logicDelete.show()));
@@ -116,7 +116,7 @@ public class UpdateTemplateHandler {
         });
 
         // 乐观锁版本号
-        mapperInfo.getResultMapInfo().getColumnInfoMap().forEach((k, columnInfo) -> {
+        methodInfo.getResultMapInfo().getColumnInfoMap().forEach((k, columnInfo) -> {
             Lock lock = columnInfo.getLock();
             if (lock != null) {
                 whereElement.addText(String.format(" and %s = #{%s}", columnInfo.getDbColumnName(), columnInfo.getJavaColumnName()));

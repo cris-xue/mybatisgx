@@ -3,6 +3,7 @@ package com.lc.mybatisx.model.handler;
 import com.lc.mybatisx.dao.Dao;
 import com.lc.mybatisx.dao.SimpleDao;
 import com.lc.mybatisx.model.ColumnInfo;
+import com.lc.mybatisx.model.MapperInfo;
 import com.lc.mybatisx.model.TableInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,13 +25,22 @@ public class TableInfoHandler {
 
     private ColumnInfoHandler columnInfoHandler = new ColumnInfoHandler();
 
+    public TableInfo execute(MapperInfo mapperInfo) {
+        Class<?> entityClass = mapperInfo.getEntityClass();
+        List<ColumnInfo> columnInfoList = columnInfoHandler.getColumnInfoList(entityClass);
+        TableInfo tableInfo = new TableInfo();
+        tableInfo.setTableName(entityClass.getAnnotation(Table.class).name());
+        tableInfo.setColumnInfoList(columnInfoList);
+        return tableInfo;
+    }
+
     public TableInfo execute(Class<?> daoInterface) {
         Type[] daoInterfaceParams = getDaoInterfaceParams(daoInterface);
         Class<?> entityClass = (Class<?>) daoInterfaceParams[0];
         Class<?> idClass = (Class<?>) daoInterfaceParams[1];
         List<ColumnInfo> columnInfoList = columnInfoHandler.getColumnInfoList(entityClass);
         TableInfo tableInfo = new TableInfo();
-        tableInfo.setNamespace(daoInterface.getName());
+        // tableInfo.setNamespace(daoInterface.getName());
         tableInfo.setTableName(entityClass.getAnnotation(Table.class).name());
         tableInfo.setColumnInfoList(columnInfoList);
         return tableInfo;

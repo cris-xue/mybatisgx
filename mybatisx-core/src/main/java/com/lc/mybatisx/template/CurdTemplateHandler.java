@@ -68,7 +68,7 @@ public class CurdTemplateHandler {
         Map<String, Object> templateData = new HashMap<>();
         templateData.put("mapperInfo", mapperInfo);
         templateData.put("methodInfo", methodInfo);
-        templateData.put("resultMapInfo", mapperInfo.getResultMapInfo());
+        templateData.put("resultMapInfo", methodInfo.getResultMapInfo());
 
         String methodXml = FreeMarkerUtils.processTemplate(templateData, template);
         XPathParser xPathParser = XmlUtils.processXml(methodXml);

@@ -2,7 +2,7 @@ package com.lc.mybatisx.model;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -23,31 +23,29 @@ public class MethodInfo {
      */
     private String methodName;
     /**
-     * 方法名查询信息
-     */
-    private List<ConditionInfo> conditionInfoList = new ArrayList<>();
-    /**
      * 是否动态参数
      */
     private Boolean isDynamic;
     /**
-     * 是否单参数
+     * 方法名查询信息
      */
-    @Deprecated
-    private Boolean isSingleParam;
+    private List<ConditionInfo> conditionInfoList = new ArrayList<>();
     /**
      * 方法参数信息
      */
-    @Deprecated
-    private MethodParamInfo methodParamInfo;
+    private List<MethodParamInfo> methodParamInfoList;
     /**
      * 方法参数映射列表
      */
-    private Map<String, MethodParamInfo> methodParamInfoMap = new HashMap<>();
+    private Map<String, MethodParamInfo> methodParamInfoMap = new LinkedHashMap<>();
     /**
      * 方法返回信息
      */
     private MethodReturnInfo methodReturnInfo;
+    /**
+     * 结果集信息
+     */
+    private ResultMapInfo resultMapInfo;
 
     public Method getMethod() {
         return method;
@@ -89,20 +87,17 @@ public class MethodInfo {
         isDynamic = dynamic;
     }
 
-    public Boolean getSingleParam() {
-        return isSingleParam;
+    public List<MethodParamInfo> getMethodParamInfoList() {
+        return methodParamInfoList;
     }
 
-    public void setSingleParam(Boolean singleParam) {
-        isSingleParam = singleParam;
-    }
-
-    public MethodParamInfo getMethodParamInfo() {
-        return methodParamInfo;
-    }
-
-    public void setMethodParamInfo(MethodParamInfo methodParamInfo) {
-        this.methodParamInfo = methodParamInfo;
+    public void setMethodParamInfoList(List<MethodParamInfo> methodParamInfoList) {
+        this.methodParamInfoList = methodParamInfoList;
+        // 写字段的时候在参数或者方法名中可能出现user_name写成username、userName两种情况
+        this.methodParamInfoList.forEach(methodParamInfo -> {
+            methodParamInfoMap.put(methodParamInfo.getParamName(), methodParamInfo);
+            methodParamInfoMap.put(methodParamInfo.getParamName().toLowerCase(), methodParamInfo);
+        });
     }
 
     public MethodParamInfo getMethodParamInfo(String paramName) {
@@ -123,5 +118,13 @@ public class MethodInfo {
 
     public void setMethodReturnInfo(MethodReturnInfo methodReturnInfo) {
         this.methodReturnInfo = methodReturnInfo;
+    }
+
+    public ResultMapInfo getResultMapInfo() {
+        return resultMapInfo;
+    }
+
+    public void setResultMapInfo(ResultMapInfo resultMapInfo) {
+        this.resultMapInfo = resultMapInfo;
     }
 }

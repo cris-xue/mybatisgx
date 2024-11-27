@@ -9,17 +9,12 @@ import java.util.Map;
  * @description：一句话描述
  * @date ：2021/7/9 17:34
  */
-@Deprecated
 public class TableInfo {
 
     /**
      * 表名称
      */
     private String tableName;
-    /**
-     * 命名空间
-     */
-    private String namespace;
     /**
      * 字段信息列表
      */
@@ -35,14 +30,6 @@ public class TableInfo {
 
     public void setTableName(String tableName) {
         this.tableName = tableName;
-    }
-
-    public String getNamespace() {
-        return namespace;
-    }
-
-    public void setNamespace(String namespace) {
-        this.namespace = namespace;
     }
 
     public List<ColumnInfo> getColumnInfoList() {
@@ -63,4 +50,9 @@ public class TableInfo {
     public void setColumnInfoMap(Map<String, ColumnInfo> columnInfoMap) {
         this.columnInfoMap = columnInfoMap;
     }
+
+    public ColumnInfo getColumnInfo(String javaColumnName) {
+        return this.columnInfoMap.get(javaColumnName);
+    }
+
 }

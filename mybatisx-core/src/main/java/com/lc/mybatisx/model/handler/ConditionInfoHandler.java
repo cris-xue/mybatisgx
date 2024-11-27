@@ -1,10 +1,7 @@
 package com.lc.mybatisx.model.handler;
 
 import com.google.common.base.CaseFormat;
-import com.lc.mybatisx.model.ColumnInfo;
-import com.lc.mybatisx.model.ConditionInfo;
-import com.lc.mybatisx.model.MapperInfo;
-import com.lc.mybatisx.model.MethodInfo;
+import com.lc.mybatisx.model.*;
 import com.lc.mybatisx.syntax.MethodNameLexer;
 import com.lc.mybatisx.syntax.MethodNameParser;
 import org.antlr.v4.runtime.CharStream;
@@ -92,9 +89,10 @@ public class ConditionInfoHandler {
                 conditionInfo.setLinkOp(TOKEN_MAP.get(token));
             } else if (parseTreeChild instanceof MethodNameParser.Field_clauseContext) {
                 String javaColumnName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, token);
-                Map<String, ColumnInfo> columnInfoMap = mapperInfo.getResultMapInfo().getColumnInfoMap();
-                conditionInfo.setDbColumnName(columnInfoMap.get(javaColumnName).getDbColumnName());
-                conditionInfo.setJavaColumnName(javaColumnName);
+                TableInfo tableInfo = mapperInfo.getTableInfo();
+                ColumnInfo columnInfo = tableInfo.getColumnInfo(javaColumnName);
+                conditionInfo.setDbColumnName(columnInfo.getDbColumnName());
+                conditionInfo.setJavaColumnName(columnInfo.getJavaColumnName());
             } else if (parseTreeChild instanceof MethodNameParser.Condition_op_clauseContext) {
                 conditionInfo.setOp(TOKEN_MAP.get(token));
             } else {

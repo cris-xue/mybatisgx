@@ -1,6 +1,7 @@
 package com.lc.mybatisx.model.handler;
 
 import com.lc.mybatisx.model.ColumnInfo;
+import com.lc.mybatisx.model.MethodReturnInfo;
 import com.lc.mybatisx.model.ResultMapInfo;
 
 import java.util.List;
@@ -9,15 +10,21 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
 
     private static ColumnInfoHandler columnInfoHandler = new ColumnInfoHandler();
 
-    public ResultMapInfo execute(Class<?> entityClass) {
-        List<ColumnInfo> columnInfoList = columnInfoHandler.getColumnInfoList(entityClass);
+    public ResultMapInfo execute(String methodName, MethodReturnInfo methodReturnInfo) {
+        Class<?> resultClass = methodReturnInfo.getType();
+        String resultMapId = getResultMapId(resultClass, methodName);
+        List<ColumnInfo> columnInfoList = columnInfoHandler.getColumnInfoList(resultClass);
 
         ResultMapInfo resultMapInfo = new ResultMapInfo();
-        resultMapInfo.setId(getResultMap(entityClass));
-        resultMapInfo.setType(entityClass.getTypeName());
+        resultMapInfo.setId(resultMapId);
+        resultMapInfo.setType(resultClass.getTypeName());
         resultMapInfo.setColumnInfoList(columnInfoList);
 
         return resultMapInfo;
+    }
+
+    protected String getResultMapId(Class<?> entityClass, String methodName) {
+        return String.format("%s%sColumnResultMap", methodName, entityClass.getSimpleName());
     }
 
 }

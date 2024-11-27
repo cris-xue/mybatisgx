@@ -30,18 +30,18 @@ public class SelectTemplateHandler {
         Element mapperElement = document.addElement("mapper");
         Element selectElement = mapperElement.addElement("select");
         selectElement.addAttribute("id", methodInfo.getMethodName());
-        selectElement.addAttribute("resultMap", mapperInfo.getResultMapInfo().getId());
+        selectElement.addAttribute("resultMap", methodInfo.getResultMapInfo().getId());
         selectElement.addText("select");
 
         Element dbTrimElement = selectElement.addElement("trim");
         dbTrimElement.addAttribute("prefix", "");
         dbTrimElement.addAttribute("suffix", "");
         dbTrimElement.addAttribute("suffixOverrides", ",");
-        mapperInfo.getResultMapInfo().getColumnInfoList().forEach(columnInfo -> {
+        methodInfo.getResultMapInfo().getColumnInfoList().forEach(columnInfo -> {
             dbTrimElement.addText(String.format("%s, ", columnInfo.getDbColumnName()));
         });
 
-        selectElement.addText(String.format("from %s", mapperInfo.getTableName()));
+        selectElement.addText(String.format("from %s", mapperInfo.getTableInfo().getTableName()));
 
         Element whereElement = selectElement.addElement("where");
         if (methodInfo.getDynamic()) {
@@ -50,7 +50,7 @@ public class SelectTemplateHandler {
             trimElement.addAttribute("suffix", ")");
             trimElement.addAttribute("prefixOverrides", "AND|OR|and|or");
             methodInfo.getConditionInfoList().forEach(conditionInfo -> {
-                ColumnInfo columnInfo = mapperInfo.getResultMapInfo().getColumnInfoMap().get(conditionInfo.getJavaColumnName());
+                ColumnInfo columnInfo = methodInfo.getResultMapInfo().getColumnInfoMap().get(conditionInfo.getJavaColumnName());
                 Element ifElement = trimElement.addElement("if");
                 List<String> paramNameList = conditionInfo.getParamName();
                 ifElement.addAttribute("test", String.format("%s != null", paramNameList.get(0)));
@@ -58,13 +58,13 @@ public class SelectTemplateHandler {
             });
         } else {
             methodInfo.getConditionInfoList().forEach(conditionInfo -> {
-                ColumnInfo columnInfo = mapperInfo.getResultMapInfo().getColumnInfoMap().get(conditionInfo.getJavaColumnName());
+                ColumnInfo columnInfo = methodInfo.getResultMapInfo().getColumnInfoMap().get(conditionInfo.getJavaColumnName());
                 buildCondition(whereElement, columnInfo, conditionInfo);
             });
         }
 
         // 逻辑删除
-        mapperInfo.getResultMapInfo().getColumnInfoMap().forEach((k, columnInfo) -> {
+        methodInfo.getResultMapInfo().getColumnInfoMap().forEach((k, columnInfo) -> {
             LogicDelete logicDelete = columnInfo.getDelete();
             if (logicDelete != null) {
                 whereElement.addText(String.format(" and %s = %s", columnInfo.getDbColumnName(), logicDelete.show()));

@@ -4,14 +4,13 @@ import com.lc.mybatisx.dao.Dao;
 import com.lc.mybatisx.dao.SimpleDao;
 import com.lc.mybatisx.model.MapperInfo;
 import com.lc.mybatisx.model.MethodInfo;
-import com.lc.mybatisx.model.ResultMapInfo;
+import com.lc.mybatisx.model.TableInfo;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.TypeUtils;
 import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
 
-import javax.persistence.Table;
 import java.lang.reflect.Type;
 import java.util.List;
 
@@ -24,6 +23,8 @@ public class MapperInfoHandler extends BasicInfoHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(MapperInfoHandler.class);
 
+    private static TableInfoHandler tableInfoHandler = new TableInfoHandler();
+    private static ColumnInfoHandler columnInfoHandler = new ColumnInfoHandler();
     private static ResultMapInfoHandler resultMapInfoHandler = new ResultMapInfoHandler();
     private static MethodInfoHandler methodInfoHandler = new MethodInfoHandler();
 
@@ -31,11 +32,12 @@ public class MapperInfoHandler extends BasicInfoHandler {
         String namespace = builderAssistant.getCurrentNamespace();
         Class<?> daoInterface = getDaoInterface(namespace);
         MapperInfo mapperInfo = getMapperInfo(daoInterface);
+        TableInfo tableInfo = tableInfoHandler.execute(mapperInfo);
+        mapperInfo.setTableInfo(tableInfo);
+        /*ResultMapInfo resultMapInfo = resultMapInfoHandler.execute(mapperInfo.getEntityClass());
+        mapperInfo.setResultMapInfo(resultMapInfo);*/
 
-        ResultMapInfo resultMapInfo = resultMapInfoHandler.execute(mapperInfo.getEntityClass());
-        mapperInfo.setResultMapInfo(resultMapInfo);
-
-        List<MethodInfo> methodInfoList = methodInfoHandler.execute(mapperInfo, resultMapInfo, daoInterface);
+        List<MethodInfo> methodInfoList = methodInfoHandler.execute(mapperInfo, daoInterface);
         mapperInfo.setMethodInfoList(methodInfoList);
 
         return mapperInfo;
@@ -49,7 +51,6 @@ public class MapperInfoHandler extends BasicInfoHandler {
         MapperInfo mapperInfo = new MapperInfo();
         mapperInfo.setIdClass(idClass);
         mapperInfo.setEntityClass(entityClass);
-        mapperInfo.setTableName(entityClass.getAnnotation(Table.class).name());
         mapperInfo.setNamespace(daoInterface.getName());
         return mapperInfo;
     }

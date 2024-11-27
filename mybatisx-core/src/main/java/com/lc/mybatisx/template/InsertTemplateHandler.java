@@ -42,7 +42,7 @@ public class InsertTemplateHandler {
         dbTrimElement.addAttribute("prefix", "(");
         dbTrimElement.addAttribute("suffix", ")");
         dbTrimElement.addAttribute("suffixOverrides", ",");
-        mapperInfo.getResultMapInfo().getColumnInfoList().forEach(columnInfo -> {
+        methodInfo.getResultMapInfo().getColumnInfoList().forEach(columnInfo -> {
             dbTrimElement.addText(String.format("%s, ", columnInfo.getDbColumnName()));
         });
 
@@ -50,7 +50,7 @@ public class InsertTemplateHandler {
         javaTrimElement.addAttribute("prefix", "values (");
         javaTrimElement.addAttribute("suffix", ")");
         javaTrimElement.addAttribute("suffixOverrides", ",");
-        mapperInfo.getResultMapInfo().getColumnInfoList().forEach(columnInfo -> {
+        methodInfo.getResultMapInfo().getColumnInfoList().forEach(columnInfo -> {
             String typeHandler = columnInfo.getTypeHandler();
             String typeHandlerTemplate = "";
             if (StringUtils.isNotBlank(typeHandler)) {
@@ -74,14 +74,14 @@ public class InsertTemplateHandler {
         insertElement.addAttribute("id", methodInfo.getMethodName());
         insertElement.addAttribute("keyProperty", "id");
         insertElement.addAttribute("useGeneratedKeys", "true");
-        insertElement.addText(String.format("insert into %s", mapperInfo.getTableName()));
+        insertElement.addText(String.format("insert into %s", mapperInfo.getTableInfo().getTableName()));
 
         Element dbTrimElement = insertElement.addElement("trim");
         dbTrimElement.addAttribute("prefix", "(");
         dbTrimElement.addAttribute("suffix", ")");
         dbTrimElement.addAttribute("suffixOverrides", ",");
 
-        List<ColumnInfo> columnInfoList = mapperInfo.getResultMapInfo().getColumnInfoList();
+        List<ColumnInfo> columnInfoList = methodInfo.getResultMapInfo().getColumnInfoList();
 
         if (methodInfo.getDynamic()) {
             for (int i = 0; i < columnInfoList.size(); i++) {
@@ -108,7 +108,7 @@ public class InsertTemplateHandler {
                 dbTrimIfElement.addText(String.format("%s, ", dbColumnName));
             }
         } else {
-            mapperInfo.getResultMapInfo().getColumnInfoList().forEach(columnInfo -> {
+            methodInfo.getResultMapInfo().getColumnInfoList().forEach(columnInfo -> {
                 dbTrimElement.addText(String.format("%s, ", columnInfo.getDbColumnName()));
             });
         }

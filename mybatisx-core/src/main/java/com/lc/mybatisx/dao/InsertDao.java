@@ -11,10 +11,8 @@ import java.io.Serializable;
  */
 public interface InsertDao<ENTITY, ID extends Serializable> extends Dao {
 
-    // @MapperMethod(type = MethodType.INSERT)
     int insert(ENTITY entity);
 
-    // @MapperMethod(type = MethodType.INSERT, dynamic = true)
     @Dynamic
     int insertSelective(ENTITY entity);
 

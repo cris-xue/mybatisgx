@@ -2,10 +2,7 @@ package com.lc.mybatisx.template;
 
 import com.lc.mybatisx.annotation.Lock;
 import com.lc.mybatisx.annotation.LogicDelete;
-import com.lc.mybatisx.model.ColumnInfo;
-import com.lc.mybatisx.model.ConditionInfo;
-import com.lc.mybatisx.model.MapperInfo;
-import com.lc.mybatisx.model.MethodInfo;
+import com.lc.mybatisx.model.*;
 import com.lc.mybatisx.utils.XmlUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.parsing.XNode;
@@ -16,7 +13,6 @@ import org.dom4j.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.Id;
 import java.util.List;
 
 public class UpdateTemplateHandler {
@@ -38,77 +34,79 @@ public class UpdateTemplateHandler {
         Element dbTrimElement = setElement.addElement("trim");
         dbTrimElement.addAttribute("suffixOverrides", ",");
 
-        List<ColumnInfo> columnInfoList = methodInfo.getResultMapInfo().getColumnInfoList();
-        if (methodInfo.getDynamic()) {
-            for (int i = 0; i < columnInfoList.size(); i++) {
-                ColumnInfo columnInfo = columnInfoList.get(i);
+        this.setValue(methodInfo, dbTrimElement);
+        this.setWhere(mapperInfo.getTableInfo(), methodInfo, updateElement);
+
+        String insertXmlString = document.asXML();
+        logger.info(insertXmlString);
+        XPathParser xPathParser = XmlUtils.processXml(insertXmlString);
+        XNode xNode = xPathParser.evalNode("/mapper/update");
+        return xNode;
+    }
+
+    private void setValue(MethodInfo methodInfo, Element dbTrimElement) {
+        List<MethodParamInfo> methodParamInfoList = methodInfo.getMethodParamInfoList();
+
+        for (int i = 0; i < methodParamInfoList.size(); i++) {
+            MethodParamInfo methodParamInfo = methodParamInfoList.get(i);
+            List<ColumnInfo> columnInfoList = methodParamInfo.getColumnInfoList();
+            for (int j = 0; j < columnInfoList.size(); j++) {
+                ColumnInfo columnInfo = columnInfoList.get(j);
+
                 String javaColumnName = columnInfo.getJavaColumnName();
                 String dbColumnName = columnInfo.getDbColumnName();
                 String typeHandler = columnInfo.getTypeHandler();
                 Lock lock = columnInfo.getLock();
                 LogicDelete delete = columnInfo.getDelete();
 
-                if (lock != null) {
-                    String javaColumn = String.format("%s = #{%s} + %s, ", dbColumnName, javaColumnName, lock.increment());
-                    dbTrimElement.addText(javaColumn);
-                    continue;
+                if (methodInfo.getDynamic()) {
+                    if (lock != null) {
+                        String javaColumn = String.format("%s = #{%s} + %s, ", dbColumnName, javaColumnName, lock.increment());
+                        dbTrimElement.addText(javaColumn);
+                        continue;
+                    }
+
+                    if (delete != null) {
+                        String javaColumn = String.format("%s = %s, ", dbColumnName, delete.show());
+                        dbTrimElement.addText(javaColumn);
+                        continue;
+                    }
+
+                    Element dbTrimIfElement = dbTrimElement.addElement("if");
+                    dbTrimIfElement.addAttribute("test", buildTestNotNull(javaColumnName));
+                    String javaColumn = String.format("#{%s%s},", javaColumnName, buildTypeHandler(typeHandler));
+                    dbTrimIfElement.addText(String.format("%s = %s", dbColumnName, javaColumn));
+                } else {
+                    if (lock != null) {
+                        String javaColumn = String.format("%s = #{%s} + %s, ", dbColumnName, javaColumnName, lock.increment());
+                        dbTrimElement.addText(javaColumn);
+                        continue;
+                    }
+
+                    if (delete != null) {
+                        String javaColumn = String.format("%s = %s, ", dbColumnName, delete.show());
+                        dbTrimElement.addText(javaColumn);
+                        continue;
+                    }
+
+                    String javaColumn = String.format("#{%s%s},", javaColumnName, buildTypeHandler(typeHandler));
+                    dbTrimElement.addText(String.format("%s = %s", dbColumnName, javaColumn));
                 }
-
-                if (delete != null) {
-                    String javaColumn = String.format("%s = %s, ", dbColumnName, delete.show());
-                    dbTrimElement.addText(javaColumn);
-                    continue;
-                }
-
-                Element dbTrimIfElement = dbTrimElement.addElement("if");
-                dbTrimIfElement.addAttribute("test", buildTestNotNull(javaColumnName));
-                String javaColumn = String.format("#{%s%s},", javaColumnName, buildTypeHandler(typeHandler));
-                dbTrimIfElement.addText(String.format("%s = %s", dbColumnName, javaColumn));
-            }
-        } else {
-            for (int i = 0; i < columnInfoList.size(); i++) {
-                ColumnInfo columnInfo = columnInfoList.get(i);
-                String javaColumnName = columnInfo.getJavaColumnName();
-                String dbColumnName = columnInfo.getDbColumnName();
-                String typeHandler = columnInfo.getTypeHandler();
-                Lock lock = columnInfo.getLock();
-                LogicDelete delete = columnInfo.getDelete();
-
-                if (lock != null) {
-                    String javaColumn = String.format("%s = #{%s} + %s, ", dbColumnName, javaColumnName, lock.increment());
-                    dbTrimElement.addText(javaColumn);
-                    continue;
-                }
-
-                if (delete != null) {
-                    String javaColumn = String.format("%s = %s, ", dbColumnName, delete.show());
-                    dbTrimElement.addText(javaColumn);
-                    continue;
-                }
-
-                String javaColumn = String.format("#{%s%s},", javaColumnName, buildTypeHandler(typeHandler));
-                dbTrimElement.addText(String.format("%s = %s", dbColumnName, javaColumn));
             }
         }
+    }
 
+    private void setWhere(TableInfo tableInfo, MethodInfo methodInfo, Element updateElement) {
         // 更新操作的条件不设置动态，因为动态有可能确实条件的时候修改所有数据，比较危险
         Element whereElement = updateElement.addElement("where");
-        if ("updateById".equals(methodInfo.getMethodName()) || "updateByIdSelective".equals(methodInfo.getMethodName())) {
-            methodInfo.getResultMapInfo().getColumnInfoMap().forEach((k, columnInfo) -> {
-                Id id = columnInfo.getId();
-                if (id != null) {
-                    buildIdCondition(whereElement, columnInfo.getDbColumnName(), columnInfo.getJavaColumnName());
-                }
-            });
-        } else {
-            methodInfo.getConditionInfoList().forEach(conditionInfo -> {
-                ColumnInfo columnInfo = methodInfo.getResultMapInfo().getColumnInfoMap().get(conditionInfo.getJavaColumnName());
-                buildCondition(whereElement, columnInfo, conditionInfo);
-            });
-        }
+
+        methodInfo.getConditionInfoList().forEach(conditionInfo -> {
+            ColumnInfo columnInfo = tableInfo.getColumnInfo(conditionInfo.getJavaColumnName());
+            buildCondition(whereElement, columnInfo, conditionInfo);
+        });
 
         // 逻辑删除
-        methodInfo.getResultMapInfo().getColumnInfoMap().forEach((k, columnInfo) -> {
+        tableInfo.getColumnInfoMap().forEach((k, columnInfo) -> {
             LogicDelete logicDelete = columnInfo.getDelete();
             if (logicDelete != null) {
                 whereElement.addText(String.format(" and %s = %s", columnInfo.getDbColumnName(), logicDelete.show()));
@@ -116,18 +114,12 @@ public class UpdateTemplateHandler {
         });
 
         // 乐观锁版本号
-        methodInfo.getResultMapInfo().getColumnInfoMap().forEach((k, columnInfo) -> {
+        tableInfo.getColumnInfoMap().forEach((k, columnInfo) -> {
             Lock lock = columnInfo.getLock();
             if (lock != null) {
                 whereElement.addText(String.format(" and %s = #{%s}", columnInfo.getDbColumnName(), columnInfo.getJavaColumnName()));
             }
         });
-
-        String insertXmlString = document.asXML();
-        logger.info(insertXmlString);
-        XPathParser xPathParser = XmlUtils.processXml(insertXmlString);
-        XNode xNode = xPathParser.evalNode("/mapper/update");
-        return xNode;
     }
 
     private String buildTypeHandler(String typeHandler) {

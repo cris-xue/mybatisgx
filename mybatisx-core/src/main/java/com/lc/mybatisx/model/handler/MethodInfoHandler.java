@@ -41,7 +41,7 @@ public class MethodInfoHandler {
     );
 
     private ColumnInfoHandler columnInfoHandler = new ColumnInfoHandler();
-    private ConditionInfoHandler conditionInfoHandler = new ConditionInfoHandler();
+    private MethodNameAstHandler methodNameAstHandler = new MethodNameAstHandler();
     private ResultMapInfoHandler resultMapInfoHandler = new ResultMapInfoHandler();
 
     public List<MethodInfo> execute(MapperInfo mapperInfo, Class<?> interfaceClass) {
@@ -52,7 +52,6 @@ public class MethodInfoHandler {
             String methodName = method.getName();
             List<MethodParamInfo> methodParamInfoList = getMethodParam(mapperInfo, method);
             MethodReturnInfo methodReturnInfo = getMethodReturn(mapperInfo, method);
-            ResultMapInfo resultMapInfo = resultMapInfoHandler.execute(methodName, methodReturnInfo);
 
             MethodInfo methodInfo = new MethodInfo();
             methodInfo.setMethod(method);
@@ -61,8 +60,12 @@ public class MethodInfoHandler {
             // methodInfo.setConditionInfoList();
             methodInfo.setMethodParamInfoList(methodParamInfoList);
             methodInfo.setMethodReturnInfo(methodReturnInfo);
+
+            // 方法名解析
+            methodNameParse(mapperInfo.getTableInfo(), methodInfo);
+
+            ResultMapInfo resultMapInfo = resultMapInfoHandler.execute(methodInfo, methodReturnInfo);
             methodInfo.setResultMapInfo(resultMapInfo);
-            getConditionInfo(mapperInfo, methodInfo);
 
             handleConditionParamInfo(methodInfo);
             // check(resultMapInfo, methodInfo);
@@ -135,11 +138,11 @@ public class MethodInfoHandler {
         return methodReturnInfo;
     }
 
-    public void getConditionInfo(MapperInfo mapperInfo, MethodInfo methodInfo) {
+    public void methodNameParse(TableInfo tableInfo, MethodInfo methodInfo) {
         if (simpleMethodList.contains(methodInfo.getMethodName())) {
             return;
         }
-        conditionInfoHandler.execute(mapperInfo, methodInfo);
+        methodNameAstHandler.execute(tableInfo, methodInfo);
     }
 
     /**

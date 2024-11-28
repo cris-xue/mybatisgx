@@ -1,7 +1,10 @@
 package com.lc.mybatisx.model.handler;
 
 import com.google.common.base.CaseFormat;
-import com.lc.mybatisx.model.*;
+import com.lc.mybatisx.model.ColumnInfo;
+import com.lc.mybatisx.model.ConditionInfo;
+import com.lc.mybatisx.model.MethodInfo;
+import com.lc.mybatisx.model.TableInfo;
 import com.lc.mybatisx.syntax.MethodNameLexer;
 import com.lc.mybatisx.syntax.MethodNameParser;
 import org.antlr.v4.runtime.CharStream;
@@ -15,7 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ConditionInfoHandler {
+public class MethodNameAstHandler {
 
     private static final Map<String, String> TOKEN_MAP = new HashMap<>();
 
@@ -34,17 +37,17 @@ public class ConditionInfoHandler {
         TOKEN_MAP.put("Not", "<![CDATA[ <> ]]>");
     }
 
-    public void execute(MapperInfo mapperInfo, MethodInfo methodInfo) {
+    public void execute(TableInfo tableInfo, MethodInfo methodInfo) {
         CharStream charStream = CharStreams.fromString(methodInfo.getMethodName());
         MethodNameLexer methodNameLexer = new MethodNameLexer(charStream);
         CommonTokenStream commonStream = new CommonTokenStream(methodNameLexer);
         MethodNameParser methodNameParser = new MethodNameParser(commonStream);
         ParseTree sqlStatementContext = methodNameParser.sql_statement();
 
-        getTokens(mapperInfo, methodInfo, sqlStatementContext);
+        getTokens(tableInfo, methodInfo, sqlStatementContext);
     }
 
-    private void getTokens(MapperInfo mapperInfo, MethodInfo methodInfo, ParseTree parseTree) {
+    private void getTokens(TableInfo tableInfo, MethodInfo methodInfo, ParseTree parseTree) {
         int childCount = parseTree.getChildCount();
         for (int i = 0; i < childCount; i++) {
             ParseTree parseTreeChild = parseTree.getChild(i);
@@ -66,17 +69,17 @@ public class ConditionInfoHandler {
                 methodInfo.setAction("select");
             } else if (parseTreeChild instanceof MethodNameParser.Where_clauseContext) {
                 List<ConditionInfo> conditionInfoList = new ArrayList<>();
-                parseCondition(conditionInfoList, parseTreeChild, mapperInfo);
+                parseCondition(conditionInfoList, parseTreeChild, tableInfo);
                 methodInfo.setConditionInfoList(conditionInfoList);
             } else if (parseTreeChild instanceof MethodNameParser.EndContext) {
                 return;
             } else {
-                getTokens(mapperInfo, methodInfo, parseTreeChild);
+                getTokens(tableInfo, methodInfo, parseTreeChild);
             }
         }
     }
 
-    private void parseCondition(List<ConditionInfo> conditionInfoList, ParseTree parseTree, MapperInfo mapperInfo) {
+    private void parseCondition(List<ConditionInfo> conditionInfoList, ParseTree parseTree, TableInfo tableInfo) {
         ConditionInfo conditionInfo = new ConditionInfo();
         int childCount = parseTree.getChildCount();
         for (int i = 0; i < childCount; i++) {
@@ -89,14 +92,13 @@ public class ConditionInfoHandler {
                 conditionInfo.setLinkOp(TOKEN_MAP.get(token));
             } else if (parseTreeChild instanceof MethodNameParser.Field_clauseContext) {
                 String javaColumnName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, token);
-                TableInfo tableInfo = mapperInfo.getTableInfo();
                 ColumnInfo columnInfo = tableInfo.getColumnInfo(javaColumnName);
                 conditionInfo.setDbColumnName(columnInfo.getDbColumnName());
                 conditionInfo.setJavaColumnName(columnInfo.getJavaColumnName());
             } else if (parseTreeChild instanceof MethodNameParser.Condition_op_clauseContext) {
                 conditionInfo.setOp(TOKEN_MAP.get(token));
             } else {
-                parseCondition(conditionInfoList, parseTreeChild, mapperInfo);
+                parseCondition(conditionInfoList, parseTreeChild, tableInfo);
             }
         }
     }

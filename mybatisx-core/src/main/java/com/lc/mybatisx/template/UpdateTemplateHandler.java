@@ -32,7 +32,7 @@ public class UpdateTemplateHandler {
         Element mapperElement = document.addElement("mapper");
         Element updateElement = mapperElement.addElement("update");
         updateElement.addAttribute("id", methodInfo.getMethodName());
-        updateElement.addText(String.format("update %s", mapperInfo.getTableName()));
+        updateElement.addText(String.format("update %s", mapperInfo.getTableInfo().getTableName()));
 
         Element setElement = updateElement.addElement("set");
         Element dbTrimElement = setElement.addElement("trim");

@@ -31,7 +31,7 @@ public class DeleteTemplateHandler {
         Element mapperElement = document.addElement("mapper");
         Element updateElement = mapperElement.addElement("delete");
         updateElement.addAttribute("id", methodInfo.getMethodName());
-        updateElement.addText(String.format("delete from %s", mapperInfo.getTableName()));
+        updateElement.addText(String.format("delete from %s", mapperInfo.getTableInfo().getTableName()));
 
         Element setElement = updateElement.addElement("set");
         Element dbTrimElement = setElement.addElement("trim");

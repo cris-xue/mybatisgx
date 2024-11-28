@@ -139,9 +139,9 @@ public class MethodInfoHandler {
     }
 
     public void methodNameParse(TableInfo tableInfo, MethodInfo methodInfo) {
-        if (simpleMethodList.contains(methodInfo.getMethodName())) {
+        /*if (simpleMethodList.contains(methodInfo.getMethodName())) {
             return;
-        }
+        }*/
         methodNameAstHandler.execute(tableInfo, methodInfo);
     }
 

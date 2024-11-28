@@ -26,6 +26,9 @@ public class ResultMapTemplateHandler {
         for (int i = 0; i < methodInfoList.size(); i++) {
             MethodInfo methodInfo = methodInfoList.get(i);
             ResultMapInfo resultMapInfo = methodInfo.getResultMapInfo();
+            if (resultMapInfo == null) {
+                continue;
+            }
 
             Document document = DocumentHelper.createDocument();
             Element mapperElement = document.addElement("mapper");

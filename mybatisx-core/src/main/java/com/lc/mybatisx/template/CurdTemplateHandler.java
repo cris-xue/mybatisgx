@@ -56,21 +56,20 @@ public class CurdTemplateHandler {
         if ("select".equals(methodInfo.getAction())) {
             SelectTemplateHandler selectTemplateHandler = new SelectTemplateHandler();
             return selectTemplateHandler.execute(mapperInfo, methodInfo);
-        } else if ("insert".equals(methodInfo.getAction())) {
+        }
+        if ("insert".equals(methodInfo.getAction())) {
             InsertTemplateHandler insertTemplateHandler = new InsertTemplateHandler();
             return insertTemplateHandler.execute(mapperInfo, methodInfo);
-        } else if ("delete".equals(methodInfo.getAction())) {
+        }
+        if ("delete".equals(methodInfo.getAction())) {
             DeleteTemplateHandler deleteTemplateHandler = new DeleteTemplateHandler();
             return deleteTemplateHandler.execute(mapperInfo, methodInfo);
-        } else if ("update".equals(methodInfo.getAction())) {
+        }
+        if ("update".equals(methodInfo.getAction())) {
             UpdateTemplateHandler updateTemplateHandler = new UpdateTemplateHandler();
             return updateTemplateHandler.execute(mapperInfo, methodInfo);
-        } else {
-            String path = methodInfo.getDynamic() ? "mapper/mysql/%s_mapper_dynamic.ftl" : "mapper/mysql/%s_mapper.ftl";
-            String templatePath = String.format(path, methodInfo.getAction());
-            Template template = FreeMarkerUtils.getTemplate(templatePath);
-            return generateSql(template, mapperInfo, methodInfo);
         }
+        throw new RuntimeException("不存在的操作方式");
     }
 
     private XNode generateSql(Template template, MapperInfo mapperInfo, MethodInfo methodInfo) {

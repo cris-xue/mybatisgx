@@ -1,10 +1,7 @@
 package com.lc.mybatisx.template;
 
 import com.lc.mybatisx.annotation.LogicDelete;
-import com.lc.mybatisx.model.ColumnInfo;
-import com.lc.mybatisx.model.ConditionInfo;
-import com.lc.mybatisx.model.MapperInfo;
-import com.lc.mybatisx.model.MethodInfo;
+import com.lc.mybatisx.model.*;
 import com.lc.mybatisx.utils.XmlUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.parsing.XNode;
@@ -58,7 +55,8 @@ public class SelectTemplateHandler {
             });
         } else {
             methodInfo.getConditionInfoList().forEach(conditionInfo -> {
-                ColumnInfo columnInfo = methodInfo.getResultMapInfo().getColumnInfoMap().get(conditionInfo.getJavaColumnName());
+                TableInfo tableInfo = mapperInfo.getTableInfo();
+                ColumnInfo columnInfo = tableInfo.getColumnInfo(conditionInfo.getJavaColumnName());
                 buildCondition(whereElement, columnInfo, conditionInfo);
             });
         }

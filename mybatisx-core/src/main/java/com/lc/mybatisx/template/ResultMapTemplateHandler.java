@@ -1,5 +1,6 @@
 package com.lc.mybatisx.template;
 
+import com.lc.mybatisx.annotation.Id;
 import com.lc.mybatisx.model.ColumnInfo;
 import com.lc.mybatisx.model.MethodInfo;
 import com.lc.mybatisx.model.ResultMapInfo;
@@ -13,7 +14,6 @@ import org.dom4j.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.Id;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,11 +38,6 @@ public class ResultMapTemplateHandler {
             addElement(resultMapElement, resultMapInfo.getColumnInfoList());
             String resultMapXmlString = XmlUtils.writeString(document);
             logger.info(resultMapXmlString);
-            /*Template template = FreeMarkerUtils.getTemplate("mapper/result_map.ftl");
-            Map<String, Object> templateData = new HashMap<>();
-            templateData.put("resultMapInfo", resultMapInfo);
-            templateData.put("resultMapXmlString", resultMapXmlString);
-            String resultMapXml = FreeMarkerUtils.processTemplate(templateData, template);*/
 
             XPathParser xPathParser = XmlUtils.processXml(resultMapXmlString);
             XNode xNode = xPathParser.evalNode("/mapper/resultMap");

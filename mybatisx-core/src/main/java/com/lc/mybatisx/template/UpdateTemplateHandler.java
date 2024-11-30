@@ -19,6 +19,8 @@ public class UpdateTemplateHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(UpdateTemplateHandler.class);
 
+    private WhereTemplateHandler whereTemplateHandler = new WhereTemplateHandler();
+
     public XNode execute(MapperInfo mapperInfo, MethodInfo methodInfo) {
         return buildUpdateXNode(mapperInfo, methodInfo);
     }
@@ -35,7 +37,7 @@ public class UpdateTemplateHandler {
         dbTrimElement.addAttribute("suffixOverrides", ",");
 
         this.setValue(methodInfo, dbTrimElement);
-        this.setWhere(mapperInfo.getTableInfo(), methodInfo, updateElement);
+        whereTemplateHandler.execute(updateElement, mapperInfo.getTableInfo(), methodInfo);
 
         String insertXmlString = document.asXML();
         logger.info(insertXmlString);
@@ -46,7 +48,6 @@ public class UpdateTemplateHandler {
 
     private void setValue(MethodInfo methodInfo, Element dbTrimElement) {
         List<MethodParamInfo> methodParamInfoList = methodInfo.getMethodParamInfoList();
-
         for (int i = 0; i < methodParamInfoList.size(); i++) {
             MethodParamInfo methodParamInfo = methodParamInfoList.get(i);
             List<ColumnInfo> columnInfoList = methodParamInfo.getColumnInfoList();

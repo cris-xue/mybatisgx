@@ -76,16 +76,21 @@ public class MethodInfoHandler {
         return methodInfoList;
     }
 
+    /**
+     * findByIds(List)
+     *
+     * @param mapperInfo
+     * @param method
+     * @return
+     */
     private List<MethodParamInfo> getMethodParam(MapperInfo mapperInfo, Method method) {
         Parameter[] parameters = method.getParameters();
         List<MethodParamInfo> methodParamInfoList = new ArrayList<>();
         for (int i = 0; i < parameters.length; i++) {
             Parameter parameter = parameters[i];
             Class<?> clazz = getMethodParamType(mapperInfo, parameter);
-            Boolean basicType = isBasicType(clazz);
 
             MethodParamInfo methodParamInfo = new MethodParamInfo();
-            methodParamInfo.setBasicType(basicType);
             methodParamInfo.setType(clazz);
             methodParamInfo.setTypeName(clazz.getName());
 
@@ -96,6 +101,8 @@ public class MethodInfoHandler {
             }
             methodParamInfo.setParamName(paramName);
 
+            Boolean basicType = isBasicType(clazz);
+            methodParamInfo.setBasicType(basicType);
             if (!basicType) {
                 List<ColumnInfo> columnInfoList = columnInfoHandler.getColumnInfoList(clazz);
                 methodParamInfo.setColumnInfoList(columnInfoList);
@@ -107,10 +114,7 @@ public class MethodInfoHandler {
                 methodParamInfo.setContainerTypeName(containerType.getTypeName());
             }
 
-            // 写字段的时候在参数或者方法名中可能出现user_name写成username、userName两种情况
             methodParamInfoList.add(methodParamInfo);
-            /*methodParamInfoMap.put(methodParamInfo.getParamName(), methodParamInfo);
-            methodParamInfoMap.put(methodParamInfo.getParamName().toLowerCase(), methodParamInfo);*/
         }
 
         return methodParamInfoList;
@@ -151,66 +155,26 @@ public class MethodInfoHandler {
      * @param methodInfo
      */
     public void handleConditionParamInfo(MethodInfo methodInfo) {
-        Map<String, MethodParamInfo> methodParamInfoMap = methodInfo.getMethodParamInfoMap();
-        Integer methodParamCount = methodParamInfoMap.size();
-        if (methodParamCount == 1) {
-            // 对单参数单独处理
-            List<ConditionInfo> conditionInfoList = methodInfo.getConditionInfoList();
-            if (ObjectUtils.isEmpty(conditionInfoList)) {
-                return;
-            }
-            ConditionInfo conditionInfo = conditionInfoList.get(0);
+        List<ConditionInfo> conditionInfoList = methodInfo.getConditionInfoList();
+        for (int i = 0; i < conditionInfoList.size(); i++) {
+            ConditionInfo conditionInfo = conditionInfoList.get(i);
 
             // 处理查询条件和参数之间的关系，需要对特殊操作符进行处理，如between
             Integer index = conditionInfo.getIndex();
             String javaColumnName = conditionInfo.getJavaColumnName();
             String op = conditionInfo.getOp();
 
-            MethodParamInfo argMethodParamInfo = methodInfo.getMethodParamInfoMap().get("arg" + index);
-            MethodParamInfo aliasMethodParamInfo = null;
-            if (argMethodParamInfo == null) {
-                aliasMethodParamInfo = methodInfo.getMethodParamInfo(javaColumnName);
+            MethodParamInfo methodParamInfo = methodInfo.getMethodParamInfo("arg" + index);
+            if (methodParamInfo == null) {
+                methodParamInfo = methodInfo.getMethodParamInfo(javaColumnName);
             }
-            if (argMethodParamInfo == null) {
-                aliasMethodParamInfo = methodInfo.getMethodParamInfo(javaColumnName.toLowerCase());
+            if (methodParamInfo == null) {
+                methodParamInfo = methodInfo.getMethodParamInfo(javaColumnName.toLowerCase());
             }
-
-            String paramName = null;
-            if (argMethodParamInfo != null) {
-                if (argMethodParamInfo.getContainerType() == Collection.class) {
-                    paramName = "list";
-                }
-            } else if (aliasMethodParamInfo != null) {
-                paramName = aliasMethodParamInfo.getParamName();
-            } else {
-                throw new RuntimeException("方法名查询条件没有对应的参数");
+            if (methodParamInfo == null) {
+                throw new RuntimeException("查询条件没有对应的参数");
             }
-            conditionInfo.addParamName(paramName);
-        } else if (methodParamCount > 1) {
-            List<ConditionInfo> conditionInfoList = methodInfo.getConditionInfoList();
-            for (int i = 0; i < conditionInfoList.size(); i++) {
-                ConditionInfo conditionInfo = conditionInfoList.get(i);
-
-                // 处理查询条件和参数之间的关系，需要对特殊操作符进行处理，如between
-                Integer index = conditionInfo.getIndex();
-                String javaColumnName = conditionInfo.getJavaColumnName();
-                String op = conditionInfo.getOp();
-
-                // 通过方法名中的条件字段匹配方法中对应的参数
-                MethodParamInfo methodParamInfo = methodInfo.getMethodParamInfo("arg" + index);
-                if (methodParamInfo == null) {
-                    methodParamInfo = methodInfo.getMethodParamInfo(javaColumnName);
-                }
-                if (methodParamInfo == null) {
-                    methodParamInfo = methodInfo.getMethodParamInfo(javaColumnName.toLowerCase());
-                }
-
-                // between的匹配可以根据索引   0,1   2,3这种方式，获取根据@Param("id0"),@Param("id1")
-                conditionInfo.addParamName(methodParamInfo.getParamName());
-                if ("between".equalsIgnoreCase(op)) {
-                    // conditionInfo.addParamName(methodParamInfo.getParamName());
-                }
-            }
+            conditionInfo.addMethodParamInfo(methodParamInfo);
         }
     }
 

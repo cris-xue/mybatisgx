@@ -37,10 +37,8 @@ public class TableInfoHandler {
     public TableInfo execute(Class<?> daoInterface) {
         Type[] daoInterfaceParams = getDaoInterfaceParams(daoInterface);
         Class<?> entityClass = (Class<?>) daoInterfaceParams[0];
-        Class<?> idClass = (Class<?>) daoInterfaceParams[1];
         List<ColumnInfo> columnInfoList = columnInfoHandler.getColumnInfoList(entityClass);
         TableInfo tableInfo = new TableInfo();
-        // tableInfo.setNamespace(daoInterface.getName());
         tableInfo.setTableName(entityClass.getAnnotation(Table.class).name());
         tableInfo.setColumnInfoList(columnInfoList);
         return tableInfo;

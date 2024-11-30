@@ -1,5 +1,8 @@
 package com.lc.mybatisx.model;
 
+import com.lc.mybatisx.annotation.Lock;
+import com.lc.mybatisx.annotation.LogicDelete;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +26,14 @@ public class TableInfo {
      * java字段映射字段信息，userName={userName=1}
      */
     private Map<String, ColumnInfo> columnInfoMap;
+    /**
+     * 逻辑删除
+     */
+    private ColumnInfo logicDeleteColumnInfo;
+    /**
+     * 乐观锁
+     */
+    private ColumnInfo lockColumnInfo;
 
     public String getTableName() {
         return tableName;
@@ -39,7 +50,17 @@ public class TableInfo {
     public void setColumnInfoList(List<ColumnInfo> columnInfoList) {
         this.columnInfoList = columnInfoList;
         Map<String, ColumnInfo> columnInfoMap = new HashMap<>();
-        columnInfoList.forEach(columnInfo -> columnInfoMap.put(columnInfo.getJavaColumnName(), columnInfo));
+        columnInfoList.forEach(columnInfo -> {
+            Lock lock = columnInfo.getLock();
+            if (lock != null) {
+                lockColumnInfo = columnInfo;
+            }
+            LogicDelete logicDelete = columnInfo.getDelete();
+            if (logicDelete != null) {
+                logicDeleteColumnInfo = columnInfo;
+            }
+            columnInfoMap.put(columnInfo.getJavaColumnName(), columnInfo);
+        });
         this.columnInfoMap = columnInfoMap;
     }
 
@@ -55,4 +76,19 @@ public class TableInfo {
         return this.columnInfoMap.get(javaColumnName);
     }
 
+    public ColumnInfo getLogicDeleteColumnInfo() {
+        return logicDeleteColumnInfo;
+    }
+
+    public void setLogicDeleteColumnInfo(ColumnInfo logicDeleteColumnInfo) {
+        this.logicDeleteColumnInfo = logicDeleteColumnInfo;
+    }
+
+    public ColumnInfo getLockColumnInfo() {
+        return lockColumnInfo;
+    }
+
+    public void setLockColumnInfo(ColumnInfo lockColumnInfo) {
+        this.lockColumnInfo = lockColumnInfo;
+    }
 }

@@ -30,6 +30,10 @@ public class ConditionInfo {
      */
     private String javaColumnName;
     /**
+     * 方法参数信息列表
+     */
+    private List<MethodParamInfo> methodParamInfoList = new ArrayList<>();
+    /**
      * 条件对应的方法中的参数
      */
     private List<String> paramName = new ArrayList<>();
@@ -80,6 +84,18 @@ public class ConditionInfo {
 
     public void setJavaColumnName(String javaColumnName) {
         this.javaColumnName = javaColumnName;
+    }
+
+    public List<MethodParamInfo> getMethodParamInfoList() {
+        return methodParamInfoList;
+    }
+
+    public void addMethodParamInfo(MethodParamInfo methodParamInfo) {
+        this.methodParamInfoList.add(methodParamInfo);
+    }
+
+    public void setMethodParamInfoList(List<MethodParamInfo> methodParamInfoList) {
+        this.methodParamInfoList = methodParamInfoList;
     }
 
     public List<String> getParamName() {

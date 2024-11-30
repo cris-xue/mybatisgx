@@ -32,8 +32,6 @@ public class UserController {
 
     @PutMapping
     public User updateById(@RequestBody User user) {
-        User u = userDao.findById(user.getId());
-        user.setVersion(u.getVersion());
         userDao.updateById(user);
         return user;
     }
@@ -44,8 +42,8 @@ public class UserController {
     }
 
     @GetMapping(path = "/all")
-    public List<User> findByAll() {
-        return userDao.findAll();
+    public List<User> findByAll(User user) {
+        return userDao.findList(user);
     }
 
     @GetMapping(path = "/name")

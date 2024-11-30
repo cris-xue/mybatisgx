@@ -1,5 +1,6 @@
 package com.lc.mybatisx.model.handler;
 
+import com.lc.mybatisx.annotation.Table;
 import com.lc.mybatisx.dao.Dao;
 import com.lc.mybatisx.dao.SimpleDao;
 import com.lc.mybatisx.model.ColumnInfo;
@@ -10,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.TypeUtils;
 import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
 
-import javax.persistence.Table;
 import java.lang.reflect.Type;
 import java.util.List;
 

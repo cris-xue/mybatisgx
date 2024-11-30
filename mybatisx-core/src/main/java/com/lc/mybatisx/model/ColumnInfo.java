@@ -1,9 +1,8 @@
 package com.lc.mybatisx.model;
 
+import com.lc.mybatisx.annotation.Id;
 import com.lc.mybatisx.annotation.Lock;
 import com.lc.mybatisx.annotation.LogicDelete;
-
-import javax.persistence.Id;
 
 /**
  * 列信息

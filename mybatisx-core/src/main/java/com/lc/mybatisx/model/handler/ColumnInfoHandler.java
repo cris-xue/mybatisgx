@@ -2,14 +2,10 @@ package com.lc.mybatisx.model.handler;
 
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.Maps;
-import com.lc.mybatisx.annotation.Lock;
-import com.lc.mybatisx.annotation.LogicDelete;
-import com.lc.mybatisx.annotation.TypeHandler;
+import com.lc.mybatisx.annotation.*;
 import com.lc.mybatisx.model.ColumnInfo;
 import org.apache.commons.lang3.reflect.FieldUtils;
 
-import javax.persistence.Column;
-import javax.persistence.Id;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.ArrayList;

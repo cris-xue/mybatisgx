@@ -1,9 +1,7 @@
 package com.lc.mybatisx.template;
 
-import com.lc.mybatisx.model.ManyToManyInfo;
 import com.lc.mybatisx.model.MapperInfo;
 import com.lc.mybatisx.model.MethodInfo;
-import com.lc.mybatisx.model.TableInfo;
 import com.lc.mybatisx.utils.FreeMarkerUtils;
 import com.lc.mybatisx.utils.XmlUtils;
 import freemarker.template.Template;
@@ -22,6 +20,8 @@ public class CurdTemplateHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(CurdTemplateHandler.class);
 
+    private AssociationSelectTemplateHandler associationSelectTemplateHandler = new AssociationSelectTemplateHandler();
+
     public List<XNode> execute(MapperInfo mapperInfo) {
         List<MethodInfo> methodInfoList = mapperInfo.getMethodInfoList();
         List<XNode> xNodeList = new ArrayList<>(15);
@@ -37,12 +37,8 @@ public class CurdTemplateHandler {
             }
         }
 
-        /*TableInfo tableInfo = mapperInfo.getTableInfo();
-        List<ManyToManyInfo> manyToManyInfoList = tableInfo.getAssociationTableInfoList();
-        manyToManyInfoList.forEach(manyToManyInfo -> {
-            SelectTemplateHandler selectTemplateHandler = new SelectTemplateHandler();
-            return selectTemplateHandler.execute(mapperInfo, methodInfo);
-        });*/
+        List<XNode> associationSelectXNodeList = associationSelectTemplateHandler.execute(mapperInfo, methodInfoList);
+        xNodeList.addAll(associationSelectXNodeList);
         return xNodeList;
     }
 

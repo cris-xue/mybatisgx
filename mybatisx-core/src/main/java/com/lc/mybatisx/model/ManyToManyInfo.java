@@ -24,6 +24,8 @@ public class ManyToManyInfo {
 
     FetchType fetch;
 
+    private String select;
+
     public String getJavaColumnName() {
         return javaColumnName;
     }
@@ -78,5 +80,13 @@ public class ManyToManyInfo {
 
     public void setFetch(FetchType fetch) {
         this.fetch = fetch;
+    }
+
+    public String getSelect() {
+        return select;
+    }
+
+    public void setSelect(String select) {
+        this.select = select;
     }
 }

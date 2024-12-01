@@ -72,6 +72,7 @@ public class ColumnInfoHandler {
             manyToManyInfo.setForeignKey(manyToMany.foreignKey());
             manyToManyInfo.setInverseForeignKey(manyToMany.inverseForeignKey());
             manyToManyInfo.setFetch(manyToMany.fetch());
+            manyToManyInfo.setSelect(String.format("find%s", manyToMany.targetEntity().getSimpleName()));
             manyToManyInfoList.add(manyToManyInfo);
         }
         return manyToManyInfoList;

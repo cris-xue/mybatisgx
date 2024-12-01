@@ -67,7 +67,7 @@ public class ResultMapTemplateHandler {
             resultMapCollectionElement.addAttribute("property", manyToManyInfo.getJavaColumnName());
             resultMapCollectionElement.addAttribute("javaType", "ArrayList");
             resultMapCollectionElement.addAttribute("ofType", manyToManyInfo.targetEntity.getTypeName());
-            resultMapCollectionElement.addAttribute("select", String.format("find%s", manyToManyInfo.targetEntity.getSimpleName()));
+            resultMapCollectionElement.addAttribute("select", manyToManyInfo.getSelect());
             resultMapCollectionElement.addAttribute("column", "id");
         });
     }

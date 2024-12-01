@@ -34,9 +34,8 @@ create table if not exists user
     email          varchar(32)  null comment '',
     user_name      varchar(32)  not null comment '',
     password       varchar(128) not null comment '',
-    status         int          not null default 1 comment '',
-    version        int          not null default 0 comment '',
-    delete         int          not null default 1 comment '',
+    status         int          not null comment '',
+    version        int          not null comment '',
 
     primary key (id)
 ) engine = InnoDB

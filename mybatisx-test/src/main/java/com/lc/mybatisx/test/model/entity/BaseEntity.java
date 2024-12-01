@@ -15,16 +15,16 @@ public abstract class BaseEntity<ID> {
     @Id
     private ID id;
 
-    @Column(insertable = true)
+    @Column(name = "input_user_id", insertable = true)
     private Long inputUserId;
 
-    @Column(insertable = true)
+    @Column(name = "input_time", insertable = true)
     private LocalDateTime inputTime;
 
-    @Column(updatable = true)
+    @Column(name = "update_user_id", updatable = true)
     private Long updateUserId;
 
-    @Column(updatable = true)
+    @Column(name = "update_time", updatable = true)
     private LocalDateTime updateTime;
 
     public ID getId() {

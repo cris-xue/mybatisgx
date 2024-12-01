@@ -1,21 +1,15 @@
 package com.lc.mybatisx.test.model.entity;
 
-import com.lc.mybatisx.annotation.Lock;
-import com.lc.mybatisx.annotation.LogicDelete;
-import com.lc.mybatisx.annotation.TypeHandler;
+import com.lc.mybatisx.annotation.*;
 import com.lc.mybatisx.test.commons.handler.ListLongTypeHandler;
 
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.FetchType;
 import java.util.List;
 
 @Entity
 @Table(name = "user")
 public class User extends BaseEntity<Long> {
 
-    @ElementCollection
     @Column(name = "role_ids", columnDefinition = "varchar")
     @TypeHandler(value = ListLongTypeHandler.class)
     private List<Long> roleIds;
@@ -40,10 +34,22 @@ public class User extends BaseEntity<Long> {
     private Integer version;
 
     /**
-     * 关联查询
+     * 关联查询，有可能外键是联合外键，所以外键需要是数组
+     * <select id="aaaaa">
+     * select role.* form
+     * user_role.user_id left join role role on user_role.role_id = role.id
+     * where user.user_id = id
+     * </select>
      */
-    // @OneToMany
-    // private List<UserRole> userRole;
+    @ManyToMany(targetEntity = Role.class, associationEntity = UserRole.class, foreignKey = "user_id", inverseForeignKey = "role_id", fetch = FetchType.LAZY)
+    private List<Role> roleList;
+    /**
+     * select * from user user left join order order on user.id = order.user_id where user.id = id
+     */
+    // @OneToMany(targetEntity = Order.class, foreignKey = "userId", fetch = FetchType.LAZY)
+    @ManyToMany(targetEntity = Order.class, associationEntity = UserRole.class, foreignKey = "user_id", inverseForeignKey = "role_id", fetch = FetchType.LAZY)
+    private List<Order> orderList;
+
     public List<Long> getRoleIds() {
         return roleIds;
     }

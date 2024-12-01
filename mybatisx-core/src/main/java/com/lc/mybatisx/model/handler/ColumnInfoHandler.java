@@ -67,10 +67,10 @@ public class ColumnInfoHandler {
             }
             AssociationTableInfo associationTableInfo = new AssociationTableInfo();
             associationTableInfo.setType("");
-            associationTableInfo.setTargetEntity(manyToMany.targetEntity());
-            associationTableInfo.setAssociationEntity(manyToMany.associationEntity());
+            associationTableInfo.setAssociationEntityClass(manyToMany.associationEntity());
+            associationTableInfo.setTargetEntityClass(manyToMany.targetEntity());
             associationTableInfo.setForeignKey(manyToMany.foreignKey());
-            associationTableInfo.setInverseForeignKey(manyToMany.inverseForeignKey());
+            associationTableInfo.setTargetForeignKey(manyToMany.inverseForeignKey());
             associationTableInfo.setFetch(manyToMany.fetch());
             associationTableInfo.setSelect(String.format("find%s", manyToMany.targetEntity().getSimpleName()));
             associationTableInfoList.add(associationTableInfo);

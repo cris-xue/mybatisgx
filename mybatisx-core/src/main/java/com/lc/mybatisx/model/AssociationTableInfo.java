@@ -4,27 +4,48 @@ import javax.persistence.FetchType;
 
 public class AssociationTableInfo {
 
+    /**
+     * 关联查询映射的java字段
+     */
     private String javaColumnName;
     /**
      * 关联类型，多对多，一对多，一对一
      */
     private String type;
-
-    public Class<?> targetEntity;
-
-    public String targetTableName;
-
-    public Class<?> associationEntity;
     /**
-     * 外键字段
-     *
-     * @return
+     * 关联表实体，如UserRole、RoleResource
      */
-    String[] foreignKey;
+    private Class<?> associationEntityClass;
+    /**
+     * 目标表实体类名
+     */
+    private String associationEntityClassName;
+    /**
+     * 关联表表名，如user_role
+     */
+    private String associationTableName;
+    /**
+     * 当前表在关联表中的外键字段
+     */
+    private String[] foreignKey;
+    /**
+     * 目标表实体
+     */
+    private Class<?> targetEntityClass;
+    /**
+     * 目标表实体类名
+     */
+    private String targetEntityClassName;
+    /**
+     * 目标表表名
+     */
+    private String targetTableName;
+    /**
+     * 目标表在关联表中的外键字段
+     */
+    private String[] targetForeignKey;
 
-    String[] inverseForeignKey;
-
-    FetchType fetch;
+    private FetchType fetch = FetchType.LAZY;
 
     private String select;
 
@@ -44,28 +65,28 @@ public class AssociationTableInfo {
         this.type = type;
     }
 
-    public Class<?> getTargetEntity() {
-        return targetEntity;
+    public Class<?> getAssociationEntityClass() {
+        return associationEntityClass;
     }
 
-    public void setTargetEntity(Class<?> targetEntity) {
-        this.targetEntity = targetEntity;
+    public void setAssociationEntityClass(Class<?> associationEntityClass) {
+        this.associationEntityClass = associationEntityClass;
     }
 
-    public String getTargetTableName() {
-        return targetTableName;
+    public String getAssociationEntityClassName() {
+        return associationEntityClassName;
     }
 
-    public void setTargetTableName(String targetTableName) {
-        this.targetTableName = targetTableName;
+    public void setAssociationEntityClassName(String associationEntityClassName) {
+        this.associationEntityClassName = associationEntityClassName;
     }
 
-    public Class<?> getAssociationEntity() {
-        return associationEntity;
+    public String getAssociationTableName() {
+        return associationTableName;
     }
 
-    public void setAssociationEntity(Class<?> associationEntity) {
-        this.associationEntity = associationEntity;
+    public void setAssociationTableName(String associationTableName) {
+        this.associationTableName = associationTableName;
     }
 
     public String[] getForeignKey() {
@@ -76,12 +97,37 @@ public class AssociationTableInfo {
         this.foreignKey = foreignKey;
     }
 
-    public String[] getInverseForeignKey() {
-        return inverseForeignKey;
+    public Class<?> getTargetEntityClass() {
+        return targetEntityClass;
     }
 
-    public void setInverseForeignKey(String[] inverseForeignKey) {
-        this.inverseForeignKey = inverseForeignKey;
+    public void setTargetEntityClass(Class<?> targetEntityClass) {
+        this.targetEntityClass = targetEntityClass;
+        this.targetEntityClassName = targetEntityClass.getName();
+    }
+
+    public String getTargetEntityClassName() {
+        return targetEntityClassName;
+    }
+
+    public void setTargetEntityClassName(String targetEntityClassName) {
+        this.targetEntityClassName = targetEntityClassName;
+    }
+
+    public String getTargetTableName() {
+        return targetTableName;
+    }
+
+    public void setTargetTableName(String targetTableName) {
+        this.targetTableName = targetTableName;
+    }
+
+    public String[] getTargetForeignKey() {
+        return targetForeignKey;
+    }
+
+    public void setTargetForeignKey(String[] targetForeignKey) {
+        this.targetForeignKey = targetForeignKey;
     }
 
     public FetchType getFetch() {

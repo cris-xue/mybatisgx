@@ -72,7 +72,7 @@ public class ResultMapTemplateHandler {
             Element resultMapCollectionElement = resultMapElement.addElement("collection");
             resultMapCollectionElement.addAttribute("property", associationTableInfo.getJavaColumnName());
             resultMapCollectionElement.addAttribute("javaType", "ArrayList");
-            resultMapCollectionElement.addAttribute("ofType", associationTableInfo.targetEntity.getTypeName());
+            resultMapCollectionElement.addAttribute("ofType", associationTableInfo.getTargetEntityClassName());
             resultMapCollectionElement.addAttribute("select", associationTableInfo.getSelect());
             resultMapCollectionElement.addAttribute("column", "id");
         });

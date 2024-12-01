@@ -1,9 +1,6 @@
 package com.lc.mybatisx.template;
 
-import com.lc.mybatisx.model.AssociationTableInfo;
-import com.lc.mybatisx.model.MapperInfo;
-import com.lc.mybatisx.model.MethodInfo;
-import com.lc.mybatisx.model.ResultMapInfo;
+import com.lc.mybatisx.model.*;
 import com.lc.mybatisx.utils.XmlUtils;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.parsing.XPathParser;
@@ -45,11 +42,14 @@ public class AssociationSelectTemplateHandler {
     }
 
     private XNode buildSelectXNode(AssociationTableInfo associationTableInfo) {
+        TableInfo tableInfo = TableInfoContextHolder.get(associationTableInfo.getAssociationEntityClass());
+        TableInfo targetTableInfo = TableInfoContextHolder.get(associationTableInfo.getTargetEntityClass());
+
         Document document = DocumentHelper.createDocument();
         Element mapperElement = document.addElement("mapper");
         Element selectElement = mapperElement.addElement("select");
         selectElement.addAttribute("id", associationTableInfo.getSelect());
-        selectElement.addAttribute("resultType", associationTableInfo.getTargetEntity().getTypeName());
+        selectElement.addAttribute("resultType", associationTableInfo.getTargetEntityClassName());
         /**
          *      * select role.* from
          *      * user_role user_role left join role role on user_role.role_id = role.id
@@ -58,16 +58,19 @@ public class AssociationSelectTemplateHandler {
         selectElement.addText(
                 String.format(
                         "select %s.* from %s %s left join %s %s on %s.%s = %s.%s where %s.%s = #{id}",
-                        associationTableInfo.targetEntity.getSimpleName(),
-                        associationTableInfo.getAssociationEntity().getSimpleName(),
-                        associationTableInfo.getAssociationEntity().getSimpleName(),
-                        associationTableInfo.targetEntity.getSimpleName(),
-                        associationTableInfo.targetEntity.getSimpleName(),
-                        associationTableInfo.targetEntity.getSimpleName(),
-                        associationTableInfo.getForeignKey()[0],
-                        associationTableInfo.getAssociationEntity().getSimpleName(),
-                        associationTableInfo.getInverseForeignKey()[0],
-                        associationTableInfo.getAssociationEntity().getSimpleName(),
+                        targetTableInfo.getTableName(),
+                        tableInfo.getTableName(),
+                        tableInfo.getTableName(),
+                        targetTableInfo.getTableName(),
+                        targetTableInfo.getTableName(),
+
+                        tableInfo.getTableName(),
+                        associationTableInfo.getTargetForeignKey()[0],
+
+                        targetTableInfo.getTableName(),
+                        targetTableInfo.getColumnInfo("id").getDbColumnName(),
+
+                        tableInfo.getTableName(),
                         associationTableInfo.getForeignKey()[0]
                 )
         );

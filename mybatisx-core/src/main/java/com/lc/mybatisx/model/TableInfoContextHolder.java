@@ -5,22 +5,23 @@ import java.util.Map;
 
 public class TableInfoContextHolder {
 
-    private static ThreadLocal<Map<Class<?>, MapperInfo>> mapThreadLocal = new ThreadLocal<>();
+    private static ThreadLocal<Map<Class<?>, TableInfo>> mapThreadLocal = new ThreadLocal<>();
 
-    public static void set(Class<?> clazz, MapperInfo mapperInfo) {
-        Map<Class<?>, MapperInfo> mapperInfoMap = mapThreadLocal.get();
+    public static void set(Class<?> clazz, TableInfo tableInfo) {
+        Map<Class<?>, TableInfo> mapperInfoMap = mapThreadLocal.get();
         if (mapperInfoMap == null) {
             mapperInfoMap = new HashMap<>();
+            mapThreadLocal.set(mapperInfoMap);
         }
-        mapperInfoMap.put(clazz, mapperInfo);
+        mapperInfoMap.put(clazz, tableInfo);
     }
 
-    public static MapperInfo get(Class<?> clazz) {
-        Map<Class<?>, MapperInfo> mapperInfoMap = mapThreadLocal.get();
-        if (mapperInfoMap == null) {
+    public static TableInfo get(Class<?> clazz) {
+        Map<Class<?>, TableInfo> tableInfoMap = mapThreadLocal.get();
+        if (tableInfoMap == null) {
             return null;
         }
-        return mapperInfoMap.get(clazz);
+        return tableInfoMap.get(clazz);
     }
 
 }

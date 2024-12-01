@@ -4,6 +4,7 @@ import com.lc.mybatisx.annotation.Table;
 import com.lc.mybatisx.dao.Dao;
 import com.lc.mybatisx.dao.SimpleDao;
 import com.lc.mybatisx.model.ColumnInfo;
+import com.lc.mybatisx.model.ManyToManyInfo;
 import com.lc.mybatisx.model.MapperInfo;
 import com.lc.mybatisx.model.TableInfo;
 import org.slf4j.Logger;
@@ -28,9 +29,11 @@ public class TableInfoHandler {
     public TableInfo execute(MapperInfo mapperInfo) {
         Class<?> entityClass = mapperInfo.getEntityClass();
         List<ColumnInfo> columnInfoList = columnInfoHandler.getColumnInfoList(entityClass);
+        List<ManyToManyInfo> manyToManyInfoList = columnInfoHandler.getAssociationTableInfoList(entityClass);
         TableInfo tableInfo = new TableInfo();
         tableInfo.setTableName(entityClass.getAnnotation(Table.class).name());
         tableInfo.setColumnInfoList(columnInfoList);
+        tableInfo.setAssociationTableInfoList(manyToManyInfoList);
         return tableInfo;
     }
 

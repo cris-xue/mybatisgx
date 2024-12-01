@@ -19,13 +19,13 @@ public class ColumnInfo {
 
     private String dbColumnName;
     /**
-     * 是否是主键
-     */
-    private Id id;
-    /**
      * 类型处理器
      */
     private String typeHandler;
+    /**
+     * 是否是主键
+     */
+    private Id id;
     /**
      * 是否是乐观锁字段
      */

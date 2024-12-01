@@ -34,8 +34,6 @@ public class MapperInfoHandler extends BasicInfoHandler {
         MapperInfo mapperInfo = getMapperInfo(daoInterface);
         TableInfo tableInfo = tableInfoHandler.execute(mapperInfo);
         mapperInfo.setTableInfo(tableInfo);
-        /*ResultMapInfo resultMapInfo = resultMapInfoHandler.execute(mapperInfo.getEntityClass());
-        mapperInfo.setResultMapInfo(resultMapInfo);*/
 
         List<MethodInfo> methodInfoList = methodInfoHandler.execute(mapperInfo, daoInterface);
         mapperInfo.setMethodInfoList(methodInfoList);

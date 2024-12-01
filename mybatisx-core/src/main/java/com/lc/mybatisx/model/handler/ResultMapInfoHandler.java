@@ -1,9 +1,6 @@
 package com.lc.mybatisx.model.handler;
 
-import com.lc.mybatisx.model.ColumnInfo;
-import com.lc.mybatisx.model.MethodInfo;
-import com.lc.mybatisx.model.MethodReturnInfo;
-import com.lc.mybatisx.model.ResultMapInfo;
+import com.lc.mybatisx.model.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -22,11 +19,13 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
         Class<?> resultClass = methodReturnInfo.getType();
         String resultMapId = getResultMapId(resultClass, methodName);
         List<ColumnInfo> columnInfoList = columnInfoHandler.getColumnInfoList(resultClass);
+        List<ManyToManyInfo> manyToManyInfoList = columnInfoHandler.getAssociationTableInfoList(resultClass);
 
         ResultMapInfo resultMapInfo = new ResultMapInfo();
         resultMapInfo.setId(resultMapId);
         resultMapInfo.setType(resultClass.getTypeName());
         resultMapInfo.setColumnInfoList(columnInfoList);
+        resultMapInfo.setAssociationTableInfoList(manyToManyInfoList);
 
         return resultMapInfo;
     }

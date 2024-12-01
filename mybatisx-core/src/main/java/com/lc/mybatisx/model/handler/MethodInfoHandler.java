@@ -57,7 +57,6 @@ public class MethodInfoHandler {
             methodInfo.setMethod(method);
             methodInfo.setMethodName(methodName);
             methodInfo.setDynamic(method.getAnnotation(Dynamic.class) != null);
-            // methodInfo.setConditionInfoList();
             methodInfo.setMethodParamInfoList(methodParamInfoList);
             methodInfo.setMethodReturnInfo(methodReturnInfo);
 

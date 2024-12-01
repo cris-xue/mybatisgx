@@ -4,6 +4,7 @@ import com.google.common.base.CaseFormat;
 import com.google.common.collect.Maps;
 import com.lc.mybatisx.annotation.*;
 import com.lc.mybatisx.model.ColumnInfo;
+import com.lc.mybatisx.model.ManyToManyInfo;
 import org.apache.commons.lang3.reflect.FieldUtils;
 
 import java.lang.reflect.Field;
@@ -24,6 +25,11 @@ public class ColumnInfoHandler {
         Field[] fields = FieldUtils.getAllFields((Class<?>) type);
         List<ColumnInfo> columnInfoList = new ArrayList<>();
         for (Field field : fields) {
+            ManyToMany manyToMany = field.getAnnotation(ManyToMany.class);
+            if (manyToMany != null) {
+                continue;
+            }
+
             Class<?> fieldType = field.getType();
             String fieldName = field.getName();
             String dbColumnName = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, fieldName);
@@ -49,6 +55,26 @@ public class ColumnInfoHandler {
             columnInfoList.add(columnInfo);
         }
         return columnInfoList;
+    }
+
+    public List<ManyToManyInfo> getAssociationTableInfoList(Type type) {
+        Field[] fields = FieldUtils.getAllFields((Class<?>) type);
+        List<ManyToManyInfo> manyToManyInfoList = new ArrayList<>();
+        for (Field field : fields) {
+            ManyToMany manyToMany = field.getAnnotation(ManyToMany.class);
+            if (manyToMany == null) {
+                continue;
+            }
+            ManyToManyInfo manyToManyInfo = new ManyToManyInfo();
+            manyToManyInfo.setType("");
+            manyToManyInfo.setTargetEntity(manyToMany.targetEntity());
+            manyToManyInfo.setAssociationEntity(manyToMany.associationEntity());
+            manyToManyInfo.setForeignKey(manyToMany.foreignKey());
+            manyToManyInfo.setInverseForeignKey(manyToMany.inverseForeignKey());
+            manyToManyInfo.setFetch(manyToMany.fetch());
+            manyToManyInfoList.add(manyToManyInfo);
+        }
+        return manyToManyInfoList;
     }
 
 }

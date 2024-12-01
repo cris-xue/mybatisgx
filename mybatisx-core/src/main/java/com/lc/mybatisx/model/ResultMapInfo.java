@@ -33,6 +33,10 @@ public class ResultMapInfo {
      * java字段映射字段信息，userName={userName=user_name}
      */
     private Map<String, ColumnInfo> columnInfoMap;
+    /**
+     * 表关联信息
+     */
+    private List<ManyToManyInfo> associationTableInfoList;
 
     public String getId() {
         return id;
@@ -67,5 +71,13 @@ public class ResultMapInfo {
 
     public void setColumnInfoMap(Map<String, ColumnInfo> columnInfoMap) {
         this.columnInfoMap = columnInfoMap;
+    }
+
+    public List<ManyToManyInfo> getAssociationTableInfoList() {
+        return associationTableInfoList;
+    }
+
+    public void setAssociationTableInfoList(List<ManyToManyInfo> associationTableInfoList) {
+        this.associationTableInfoList = associationTableInfoList;
     }
 }

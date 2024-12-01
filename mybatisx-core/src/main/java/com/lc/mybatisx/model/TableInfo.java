@@ -34,6 +34,10 @@ public class TableInfo {
      * 乐观锁
      */
     private ColumnInfo lockColumnInfo;
+    /**
+     * 表关联信息
+     */
+    private List<ManyToManyInfo> associationTableInfoList;
 
     public String getTableName() {
         return tableName;
@@ -90,5 +94,13 @@ public class TableInfo {
 
     public void setLockColumnInfo(ColumnInfo lockColumnInfo) {
         this.lockColumnInfo = lockColumnInfo;
+    }
+
+    public List<ManyToManyInfo> getAssociationTableInfoList() {
+        return associationTableInfoList;
+    }
+
+    public void setAssociationTableInfoList(List<ManyToManyInfo> associationTableInfoList) {
+        this.associationTableInfoList = associationTableInfoList;
     }
 }

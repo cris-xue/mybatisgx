@@ -1,7 +1,9 @@
 package com.lc.mybatisx.template;
 
+import com.lc.mybatisx.model.ManyToManyInfo;
 import com.lc.mybatisx.model.MapperInfo;
 import com.lc.mybatisx.model.MethodInfo;
+import com.lc.mybatisx.model.TableInfo;
 import com.lc.mybatisx.utils.FreeMarkerUtils;
 import com.lc.mybatisx.utils.XmlUtils;
 import freemarker.template.Template;
@@ -34,6 +36,13 @@ public class CurdTemplateHandler {
                 xNodeList.add(xNode);
             }
         }
+
+        /*TableInfo tableInfo = mapperInfo.getTableInfo();
+        List<ManyToManyInfo> manyToManyInfoList = tableInfo.getAssociationTableInfoList();
+        manyToManyInfoList.forEach(manyToManyInfo -> {
+            SelectTemplateHandler selectTemplateHandler = new SelectTemplateHandler();
+            return selectTemplateHandler.execute(mapperInfo, methodInfo);
+        });*/
         return xNodeList;
     }
 

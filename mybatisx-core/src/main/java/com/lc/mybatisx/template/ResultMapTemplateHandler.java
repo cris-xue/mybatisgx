@@ -2,6 +2,7 @@ package com.lc.mybatisx.template;
 
 import com.lc.mybatisx.annotation.Id;
 import com.lc.mybatisx.model.ColumnInfo;
+import com.lc.mybatisx.model.ManyToManyInfo;
 import com.lc.mybatisx.model.MethodInfo;
 import com.lc.mybatisx.model.ResultMapInfo;
 import com.lc.mybatisx.utils.XmlUtils;
@@ -35,7 +36,8 @@ public class ResultMapTemplateHandler {
             Element resultMapElement = mapperElement.addElement("resultMap");
             resultMapElement.addAttribute("id", resultMapInfo.getId());
             resultMapElement.addAttribute("type", resultMapInfo.getType());
-            addElement(resultMapElement, resultMapInfo.getColumnInfoList());
+            addColumnElement(resultMapElement, resultMapInfo.getColumnInfoList());
+            addAssociationElement(resultMapElement, resultMapInfo.getAssociationTableInfoList());
             String resultMapXmlString = XmlUtils.writeString(document);
             logger.info(resultMapXmlString);
 
@@ -47,7 +49,7 @@ public class ResultMapTemplateHandler {
         return xNodeList;
     }
 
-    private void addElement(Element resultMapElement, List<ColumnInfo> columnInfoList) {
+    private void addColumnElement(Element resultMapElement, List<ColumnInfo> columnInfoList) {
         columnInfoList.forEach(columnInfo -> {
             Id id = columnInfo.getId();
             Element element = resultMapElement.addElement(id != null ? "id" : "result");
@@ -56,6 +58,17 @@ public class ResultMapTemplateHandler {
             String dbTypeName = columnInfo.getDbTypeName();
             element.addAttribute("jdbcType", StringUtils.isNotBlank(dbTypeName) ? dbTypeName.toUpperCase() : null);
             element.addAttribute("typeHandler", columnInfo.getTypeHandler());
+        });
+    }
+
+    private void addAssociationElement(Element resultMapElement, List<ManyToManyInfo> manyToManyInfoList) {
+        manyToManyInfoList.forEach(manyToManyInfo -> {
+            Element resultMapCollectionElement = resultMapElement.addElement("collection");
+            resultMapCollectionElement.addAttribute("property", manyToManyInfo.getJavaColumnName());
+            resultMapCollectionElement.addAttribute("javaType", "ArrayList");
+            resultMapCollectionElement.addAttribute("ofType", manyToManyInfo.targetEntity.getTypeName());
+            resultMapCollectionElement.addAttribute("select", String.format("find%s", manyToManyInfo.targetEntity.getSimpleName()));
+            resultMapCollectionElement.addAttribute("column", "id");
         });
     }
 

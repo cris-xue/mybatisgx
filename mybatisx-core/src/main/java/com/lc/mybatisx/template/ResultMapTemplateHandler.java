@@ -16,21 +16,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ResultMapTemplateHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(ResultMapTemplateHandler.class);
 
     public List<XNode> execute(List<MethodInfo> methodInfoList) {
-        List<XNode> xNodeList = new ArrayList<>();
+        Map<String, ResultMapInfo> resultMapInfoMap = new LinkedHashMap<>();
         for (int i = 0; i < methodInfoList.size(); i++) {
             MethodInfo methodInfo = methodInfoList.get(i);
             ResultMapInfo resultMapInfo = methodInfo.getResultMapInfo();
             if (resultMapInfo == null) {
                 continue;
             }
+            resultMapInfoMap.put(resultMapInfo.getId(), resultMapInfo);
+        }
 
+        List<XNode> xNodeList = new ArrayList<>();
+        resultMapInfoMap.forEach((k, resultMapInfo) -> {
             Document document = DocumentHelper.createDocument();
             Element mapperElement = document.addElement("mapper");
             Element resultMapElement = mapperElement.addElement("resultMap");
@@ -44,7 +50,7 @@ public class ResultMapTemplateHandler {
             XPathParser xPathParser = XmlUtils.processXml(resultMapXmlString);
             XNode xNode = xPathParser.evalNode("/mapper/resultMap");
             xNodeList.add(xNode);
-        }
+        });
 
         return xNodeList;
     }

@@ -15,9 +15,8 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
             return null;
         }
 
-        String methodName = methodInfo.getMethodName();
         Class<?> resultClass = methodReturnInfo.getType();
-        String resultMapId = getResultMapId(resultClass, methodName);
+        String resultMapId = getResultMapId(resultClass);
         List<ColumnInfo> columnInfoList = columnInfoHandler.getColumnInfoList(resultClass);
         List<ManyToManyInfo> manyToManyInfoList = columnInfoHandler.getAssociationTableInfoList(resultClass);
 
@@ -30,8 +29,8 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
         return resultMapInfo;
     }
 
-    protected String getResultMapId(Class<?> entityClass, String methodName) {
-        return String.format("%s%sColumnResultMap", methodName, entityClass.getSimpleName());
+    protected String getResultMapId(Class<?> entityClass) {
+        return String.format("%sResultMap", entityClass.getTypeName().replaceAll("\\.", "_"));
     }
 
 }

@@ -37,7 +37,7 @@ public class TableInfo {
     /**
      * 表关联信息
      */
-    private List<ManyToManyInfo> associationTableInfoList;
+    private List<AssociationTableInfo> associationTableInfoList;
 
     public String getTableName() {
         return tableName;
@@ -96,11 +96,11 @@ public class TableInfo {
         this.lockColumnInfo = lockColumnInfo;
     }
 
-    public List<ManyToManyInfo> getAssociationTableInfoList() {
+    public List<AssociationTableInfo> getAssociationTableInfoList() {
         return associationTableInfoList;
     }
 
-    public void setAssociationTableInfoList(List<ManyToManyInfo> associationTableInfoList) {
+    public void setAssociationTableInfoList(List<AssociationTableInfo> associationTableInfoList) {
         this.associationTableInfoList = associationTableInfoList;
     }
 }

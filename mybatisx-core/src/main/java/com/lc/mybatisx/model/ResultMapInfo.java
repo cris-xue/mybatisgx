@@ -36,7 +36,7 @@ public class ResultMapInfo {
     /**
      * 表关联信息
      */
-    private List<ManyToManyInfo> associationTableInfoList;
+    private List<AssociationTableInfo> associationTableInfoList;
 
     public String getId() {
         return id;
@@ -73,11 +73,11 @@ public class ResultMapInfo {
         this.columnInfoMap = columnInfoMap;
     }
 
-    public List<ManyToManyInfo> getAssociationTableInfoList() {
+    public List<AssociationTableInfo> getAssociationTableInfoList() {
         return associationTableInfoList;
     }
 
-    public void setAssociationTableInfoList(List<ManyToManyInfo> associationTableInfoList) {
+    public void setAssociationTableInfoList(List<AssociationTableInfo> associationTableInfoList) {
         this.associationTableInfoList = associationTableInfoList;
     }
 }

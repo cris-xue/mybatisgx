@@ -2,7 +2,7 @@ package com.lc.mybatisx.model;
 
 import javax.persistence.FetchType;
 
-public class ManyToManyInfo {
+public class AssociationTableInfo {
 
     private String javaColumnName;
     /**
@@ -50,6 +50,14 @@ public class ManyToManyInfo {
 
     public void setTargetEntity(Class<?> targetEntity) {
         this.targetEntity = targetEntity;
+    }
+
+    public String getTargetTableName() {
+        return targetTableName;
+    }
+
+    public void setTargetTableName(String targetTableName) {
+        this.targetTableName = targetTableName;
     }
 
     public Class<?> getAssociationEntity() {

@@ -3,8 +3,8 @@ package com.lc.mybatisx.model.handler;
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.Maps;
 import com.lc.mybatisx.annotation.*;
+import com.lc.mybatisx.model.AssociationTableInfo;
 import com.lc.mybatisx.model.ColumnInfo;
-import com.lc.mybatisx.model.ManyToManyInfo;
 import org.apache.commons.lang3.reflect.FieldUtils;
 
 import java.lang.reflect.Field;
@@ -57,25 +57,25 @@ public class ColumnInfoHandler {
         return columnInfoList;
     }
 
-    public List<ManyToManyInfo> getAssociationTableInfoList(Type type) {
+    public List<AssociationTableInfo> getAssociationTableInfoList(Type type) {
         Field[] fields = FieldUtils.getAllFields((Class<?>) type);
-        List<ManyToManyInfo> manyToManyInfoList = new ArrayList<>();
+        List<AssociationTableInfo> associationTableInfoList = new ArrayList<>();
         for (Field field : fields) {
             ManyToMany manyToMany = field.getAnnotation(ManyToMany.class);
             if (manyToMany == null) {
                 continue;
             }
-            ManyToManyInfo manyToManyInfo = new ManyToManyInfo();
-            manyToManyInfo.setType("");
-            manyToManyInfo.setTargetEntity(manyToMany.targetEntity());
-            manyToManyInfo.setAssociationEntity(manyToMany.associationEntity());
-            manyToManyInfo.setForeignKey(manyToMany.foreignKey());
-            manyToManyInfo.setInverseForeignKey(manyToMany.inverseForeignKey());
-            manyToManyInfo.setFetch(manyToMany.fetch());
-            manyToManyInfo.setSelect(String.format("find%s", manyToMany.targetEntity().getSimpleName()));
-            manyToManyInfoList.add(manyToManyInfo);
+            AssociationTableInfo associationTableInfo = new AssociationTableInfo();
+            associationTableInfo.setType("");
+            associationTableInfo.setTargetEntity(manyToMany.targetEntity());
+            associationTableInfo.setAssociationEntity(manyToMany.associationEntity());
+            associationTableInfo.setForeignKey(manyToMany.foreignKey());
+            associationTableInfo.setInverseForeignKey(manyToMany.inverseForeignKey());
+            associationTableInfo.setFetch(manyToMany.fetch());
+            associationTableInfo.setSelect(String.format("find%s", manyToMany.targetEntity().getSimpleName()));
+            associationTableInfoList.add(associationTableInfo);
         }
-        return manyToManyInfoList;
+        return associationTableInfoList;
     }
 
 }

@@ -18,13 +18,13 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
         Class<?> resultClass = methodReturnInfo.getType();
         String resultMapId = getResultMapId(resultClass);
         List<ColumnInfo> columnInfoList = columnInfoHandler.getColumnInfoList(resultClass);
-        List<ManyToManyInfo> manyToManyInfoList = columnInfoHandler.getAssociationTableInfoList(resultClass);
+        List<AssociationTableInfo> associationTableInfoList = columnInfoHandler.getAssociationTableInfoList(resultClass);
 
         ResultMapInfo resultMapInfo = new ResultMapInfo();
         resultMapInfo.setId(resultMapId);
         resultMapInfo.setType(resultClass.getTypeName());
         resultMapInfo.setColumnInfoList(columnInfoList);
-        resultMapInfo.setAssociationTableInfoList(manyToManyInfoList);
+        resultMapInfo.setAssociationTableInfoList(associationTableInfoList);
 
         return resultMapInfo;
     }

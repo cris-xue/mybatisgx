@@ -1,8 +1,8 @@
 package com.lc.mybatisx.template;
 
 import com.lc.mybatisx.annotation.Id;
+import com.lc.mybatisx.model.AssociationTableInfo;
 import com.lc.mybatisx.model.ColumnInfo;
-import com.lc.mybatisx.model.ManyToManyInfo;
 import com.lc.mybatisx.model.MethodInfo;
 import com.lc.mybatisx.model.ResultMapInfo;
 import com.lc.mybatisx.utils.XmlUtils;
@@ -67,13 +67,13 @@ public class ResultMapTemplateHandler {
         });
     }
 
-    private void addAssociationElement(Element resultMapElement, List<ManyToManyInfo> manyToManyInfoList) {
-        manyToManyInfoList.forEach(manyToManyInfo -> {
+    private void addAssociationElement(Element resultMapElement, List<AssociationTableInfo> associationTableInfoList) {
+        associationTableInfoList.forEach(associationTableInfo -> {
             Element resultMapCollectionElement = resultMapElement.addElement("collection");
-            resultMapCollectionElement.addAttribute("property", manyToManyInfo.getJavaColumnName());
+            resultMapCollectionElement.addAttribute("property", associationTableInfo.getJavaColumnName());
             resultMapCollectionElement.addAttribute("javaType", "ArrayList");
-            resultMapCollectionElement.addAttribute("ofType", manyToManyInfo.targetEntity.getTypeName());
-            resultMapCollectionElement.addAttribute("select", manyToManyInfo.getSelect());
+            resultMapCollectionElement.addAttribute("ofType", associationTableInfo.targetEntity.getTypeName());
+            resultMapCollectionElement.addAttribute("select", associationTableInfo.getSelect());
             resultMapCollectionElement.addAttribute("column", "id");
         });
     }

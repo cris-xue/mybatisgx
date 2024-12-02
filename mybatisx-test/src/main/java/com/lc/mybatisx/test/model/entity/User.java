@@ -3,12 +3,14 @@ package com.lc.mybatisx.test.model.entity;
 import com.lc.mybatisx.annotation.*;
 import com.lc.mybatisx.test.commons.handler.ListLongTypeHandler;
 
-import javax.persistence.FetchType;
 import java.util.List;
 
 @Entity
 @Table(name = "user")
 public class User extends BaseEntity<Long> {
+
+    @Id
+    private Long tenantId;
 
     @Column(name = "role_ids", columnDefinition = "varchar")
     @TypeHandler(value = ListLongTypeHandler.class)
@@ -41,14 +43,27 @@ public class User extends BaseEntity<Long> {
      * where user.user_id = id
      * </select>
      */
-    @ManyToMany(targetEntity = Role.class, associationEntity = UserRole.class, foreignKey = "user_id", inverseForeignKey = "role_id", fetch = FetchType.LAZY)
+    @ManyToMany
+    @JoinTable(
+            name = UserRole.class,
+            joinColumns = {@JoinColumn(name = "userId", referencedColumnName = "id")},
+            inverseJoinColumns = {@JoinColumn(name = "roleId", referencedColumnName = "id")}
+    )
     private List<Role> roleList;
-    /**
-     * select * from user user left join order order on user.id = order.user_id where user.id = id
-     */
-    // @OneToMany(targetEntity = Order.class, foreignKey = "userId", fetch = FetchType.LAZY)
-    @ManyToMany(targetEntity = Order.class, associationEntity = UserRole.class, foreignKey = "user_id", inverseForeignKey = "role_id", fetch = FetchType.LAZY)
+
+    @OneToMany
+    @JoinTable(
+            name = Order.class,
+            joinColumns = {@JoinColumn(name = "userId", referencedColumnName = "id")}
+    )
     private List<Order> orderList;
+
+    @OneToOne
+    @JoinTable(
+            name = UserDetail.class,
+            joinColumns = {@JoinColumn(name = "userId", referencedColumnName = "id")}
+    )
+    private List<UserDetail> userDetailList;
 
     public List<Long> getRoleIds() {
         return roleIds;
@@ -114,16 +129,19 @@ public class User extends BaseEntity<Long> {
         this.status = status;
     }
 
-    public int getVersion() {
+    public Integer getVersion() {
         return version;
-    }
-
-    public void setVersion(int version) {
-        this.version = version;
     }
 
     public void setVersion(Integer version) {
         this.version = version;
     }
 
+    public List<Role> getRoleList() {
+        return roleList;
+    }
+
+    public void setRoleList(List<Role> roleList) {
+        this.roleList = roleList;
+    }
 }

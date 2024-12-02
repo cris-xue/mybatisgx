@@ -1,21 +1,26 @@
 package com.lc.mybatisx.test.model.entity;
 
-import com.lc.mybatisx.annotation.Entity;
-import com.lc.mybatisx.annotation.ManyToMany;
-import com.lc.mybatisx.annotation.Table;
+import com.lc.mybatisx.annotation.*;
 
-import javax.persistence.FetchType;
 import java.util.List;
 
 @Entity
 @Table(name = "role")
 public class Role extends BaseEntity<Long> {
 
+    @Id
+    private Long tenantId;
+
     private String name;
 
     private String code;
 
-    @ManyToMany(targetEntity = User.class, associationEntity = UserRole.class, foreignKey = "role_id", inverseForeignKey = "user_id", fetch = FetchType.LAZY)
+    @ManyToMany
+    @JoinTable(
+            name = UserRole.class,
+            joinColumns = {@JoinColumn(name = "roleId", referencedColumnName = "id")},
+            inverseJoinColumns = {@JoinColumn(name = "userId", referencedColumnName = "id")}
+    )
     private List<User> userList;
 
     public String getName() {

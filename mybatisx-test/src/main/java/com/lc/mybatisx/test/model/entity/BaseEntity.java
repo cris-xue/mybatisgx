@@ -1,8 +1,8 @@
 package com.lc.mybatisx.test.model.entity;
 
 import com.lc.mybatisx.annotation.Column;
+import com.lc.mybatisx.annotation.Id;
 
-import javax.persistence.Id;
 import java.time.LocalDateTime;
 
 /**

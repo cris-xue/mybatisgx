@@ -1,15 +1,19 @@
 package com.lc.mybatisx.annotation;
 
-import javax.persistence.FetchType;
+import java.lang.annotation.*;
 
-import static javax.persistence.FetchType.LAZY;
-
+/**
+ * 描述关联字段，用于多对多的关系
+ */
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.FIELD)
 public @interface JoinTable {
 
-    Class targetEntity() default void.class;
-
-    FetchType fetch() default LAZY;
+    Class<?> name();
 
     JoinColumn[] joinColumns() default {};
+
+    JoinColumn[] inverseJoinColumns() default {};
 
 }

@@ -10,19 +10,6 @@ import static javax.persistence.FetchType.LAZY;
 @Target(ElementType.FIELD)
 public @interface ManyToMany {
 
-    Class targetEntity() default void.class;
-
-    Class associationEntity() default void.class;
-
     FetchType fetch() default LAZY;
-
-    /**
-     * 外键字段
-     *
-     * @return
-     */
-    String[] foreignKey();
-
-    String[] inverseForeignKey();
 
 }

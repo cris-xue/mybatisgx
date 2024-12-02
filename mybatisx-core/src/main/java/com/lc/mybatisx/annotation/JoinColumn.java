@@ -1,5 +1,8 @@
 package com.lc.mybatisx.annotation;
 
+/**
+ * 描述关联字段
+ */
 public @interface JoinColumn {
 
     String name() default "";
@@ -16,7 +19,9 @@ public @interface JoinColumn {
      */
     boolean unique() default false;
 
-    /** (Optional) Whether the foreign key column is nullable. */
+    /**
+     * (Optional) Whether the foreign key column is nullable.
+     */
     boolean nullable() default true;
 
     /**

@@ -8,7 +8,7 @@ import static javax.persistence.FetchType.LAZY;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface OneToMany {
+public @interface ManyToOne {
 
     FetchType fetch() default LAZY;
 

@@ -1,11 +1,12 @@
 package com.lc.mybatisx.model.handler;
 
+import com.lc.mybatisx.context.MapperInfoContextHolder;
+import com.lc.mybatisx.context.TableInfoContextHolder;
 import com.lc.mybatisx.dao.Dao;
 import com.lc.mybatisx.dao.SimpleDao;
 import com.lc.mybatisx.model.MapperInfo;
 import com.lc.mybatisx.model.MethodInfo;
 import com.lc.mybatisx.model.TableInfo;
-import com.lc.mybatisx.model.TableInfoContextHolder;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +33,10 @@ public class MapperInfoHandler extends BasicInfoHandler {
     public MapperInfo execute(MapperBuilderAssistant builderAssistant) {
         String namespace = builderAssistant.getCurrentNamespace();
         Class<?> daoInterface = getDaoInterface(namespace);
+        return MapperInfoContextHolder.get(daoInterface);
+    }
+
+    public MapperInfo execute(Class<?> daoInterface) {
         MapperInfo mapperInfo = getMapperInfo(daoInterface);
         TableInfo tableInfo = TableInfoContextHolder.get(mapperInfo.getEntityClass());
         mapperInfo.setTableInfo(tableInfo);

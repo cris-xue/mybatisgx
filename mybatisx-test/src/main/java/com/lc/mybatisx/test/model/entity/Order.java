@@ -1,7 +1,7 @@
 package com.lc.mybatisx.test.model.entity;
 
 import com.lc.mybatisx.annotation.Entity;
-import com.lc.mybatisx.annotation.JoinColumn;
+import com.lc.mybatisx.annotation.ForeignKey;
 import com.lc.mybatisx.annotation.ManyToOne;
 import com.lc.mybatisx.annotation.Table;
 
@@ -13,8 +13,12 @@ public class Order extends BaseEntity<Long> {
 
     private String code;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @ManyToOne(
+            junctionEntity = Order.class,
+            joinEntity = User.class,
+            foreignKeys = {@ForeignKey(name = "userId", referencedColumnName = "id")}
+    )
+    @ForeignKey(name = "user_id")
     private User user;
 
     public String getName() {

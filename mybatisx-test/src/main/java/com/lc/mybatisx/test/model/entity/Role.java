@@ -15,11 +15,11 @@ public class Role extends BaseEntity<Long> {
 
     private String code;
 
-    @ManyToMany
-    @JoinTable(
-            name = UserRole.class,
-            joinColumns = {@JoinColumn(name = "roleId", referencedColumnName = "id")},
-            inverseJoinColumns = {@JoinColumn(name = "userId", referencedColumnName = "id")}
+    @ManyToMany(
+            junctionEntity = UserRole.class,
+            joinEntity = User.class,
+            foreignKeys = {@ForeignKey(name = "roleId", referencedColumnName = "id")},
+            inverseForeignKeys = {@ForeignKey(name = "userId", referencedColumnName = "id")}
     )
     private List<User> userList;
 

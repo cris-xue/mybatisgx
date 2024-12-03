@@ -43,27 +43,35 @@ public class User extends BaseEntity<Long> {
      * where user.user_id = id
      * </select>
      */
-    @ManyToMany
-    @JoinTable(
-            name = UserRole.class,
-            joinColumns = {@JoinColumn(name = "userId", referencedColumnName = "id")},
-            inverseJoinColumns = {@JoinColumn(name = "roleId", referencedColumnName = "id")}
+    @ManyToMany(
+            junctionEntity = UserRole.class,
+            joinEntity = Role.class,
+            foreignKeys = {@ForeignKey(name = "userId", referencedColumnName = "id")},
+            inverseForeignKeys = {@ForeignKey(name = "roleId", referencedColumnName = "id")}
     )
     private List<Role> roleList;
 
-    @OneToMany
-    @JoinTable(
-            name = Order.class,
-            joinColumns = {@JoinColumn(name = "userId", referencedColumnName = "id")}
+    @OneToMany(
+            junctionEntity = Order.class,
+            joinEntity = Role.class,
+            foreignKeys = {@ForeignKey(name = "userId", referencedColumnName = "id")}
     )
     private List<Order> orderList;
 
-    @OneToOne
-    @JoinTable(
-            name = UserDetail.class,
-            joinColumns = {@JoinColumn(name = "userId", referencedColumnName = "id")}
+    @OneToOne(
+            junctionEntity = UserDetail.class,
+            joinEntity = Role.class,
+            foreignKeys = {@ForeignKey(name = "userId", referencedColumnName = "id")}
     )
     private List<UserDetail> userDetailList;
+
+    public Long getTenantId() {
+        return tenantId;
+    }
+
+    public void setTenantId(Long tenantId) {
+        this.tenantId = tenantId;
+    }
 
     public List<Long> getRoleIds() {
         return roleIds;
@@ -143,5 +151,21 @@ public class User extends BaseEntity<Long> {
 
     public void setRoleList(List<Role> roleList) {
         this.roleList = roleList;
+    }
+
+    public List<Order> getOrderList() {
+        return orderList;
+    }
+
+    public void setOrderList(List<Order> orderList) {
+        this.orderList = orderList;
+    }
+
+    public List<UserDetail> getUserDetailList() {
+        return userDetailList;
+    }
+
+    public void setUserDetailList(List<UserDetail> userDetailList) {
+        this.userDetailList = userDetailList;
     }
 }

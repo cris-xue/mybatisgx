@@ -15,8 +15,12 @@ public class UserDetail extends BaseEntity<Long> {
 
     private String phone;
 
-    @OneToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @OneToOne(
+            junctionEntity = UserDetail.class,
+            joinEntity = User.class,
+            foreignKeys = {@ForeignKey(name = "userId", referencedColumnName = "id")}
+    )
+    @ForeignKey(name = "user_id")
     private User user;
 
     public Long getTenantId() {

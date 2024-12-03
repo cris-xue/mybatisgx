@@ -1,9 +1,6 @@
 package com.lc.mybatisx.annotation;
 
-/**
- * 描述关联字段
- */
-public @interface JoinColumn {
+public @interface ForeignKey {
 
     String name() default "";
 

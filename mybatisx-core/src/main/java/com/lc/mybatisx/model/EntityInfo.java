@@ -3,7 +3,7 @@ package com.lc.mybatisx.model;
 import com.lc.mybatisx.annotation.*;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -29,7 +29,7 @@ public class EntityInfo {
     /**
      * java字段映射字段信息，userName={userName=1}
      */
-    private Map<String, ColumnInfo> columnInfoMap;
+    private Map<String, ColumnInfo> columnInfoMap = new LinkedHashMap<>();
     /**
      * id字段列表
      */
@@ -69,7 +69,6 @@ public class EntityInfo {
 
     public void setColumnInfoList(List<ColumnInfo> columnInfoList) {
         this.columnInfoList = columnInfoList;
-        Map<String, ColumnInfo> columnInfoMap = new HashMap<>();
         columnInfoList.forEach(columnInfo -> {
             Id id = columnInfo.getId();
             if (id != null) {
@@ -103,7 +102,6 @@ public class EntityInfo {
 
             columnInfoMap.put(columnInfo.getJavaColumnName(), columnInfo);
         });
-        this.columnInfoMap = columnInfoMap;
     }
 
     public Map<String, ColumnInfo> getColumnInfoMap() {

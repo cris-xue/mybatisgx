@@ -1,10 +1,8 @@
 package com.lc.mybatisx.model.handler;
 
 import com.lc.mybatisx.annotation.Table;
-import com.lc.mybatisx.model.AssociationTableInfo;
 import com.lc.mybatisx.model.ColumnInfo;
 import com.lc.mybatisx.model.TableInfo;
-import com.lc.mybatisx.model.TableInfoContextHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,12 +21,11 @@ public class TableInfoHandler {
 
     public TableInfo execute(Class<?> entityClass) {
         List<ColumnInfo> columnInfoList = columnInfoHandler.getColumnInfoList(entityClass);
-        List<AssociationTableInfo> associationTableInfoList = columnInfoHandler.getAssociationTableInfoList(entityClass);
+        // List<AssociationTableInfo> associationTableInfoList = columnInfoHandler.getAssociationTableInfoList(entityClass);
         TableInfo tableInfo = new TableInfo();
         tableInfo.setTableName(entityClass.getAnnotation(Table.class).name());
         tableInfo.setColumnInfoList(columnInfoList);
-        tableInfo.setAssociationTableInfoList(associationTableInfoList);
-        TableInfoContextHolder.set(entityClass, tableInfo);
+        // tableInfo.setAssociationTableInfoList(associationTableInfoList);
         return tableInfo;
     }
 

@@ -23,8 +23,14 @@ import java.util.Map;
 public class ResultMapInfo {
 
     private String id;
-
-    private String type;
+    /**
+     * 类型
+     */
+    private Class<?> type;
+    /**
+     * 类型名
+     */
+    private String typeName;
     /**
      * 字段信息列表
      */
@@ -46,12 +52,21 @@ public class ResultMapInfo {
         this.id = id;
     }
 
-    public String getType() {
+    public Class<?> getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(Class<?> type) {
         this.type = type;
+        this.typeName = type.getTypeName();
+    }
+
+    public String getTypeName() {
+        return typeName;
+    }
+
+    public void setTypeName(String typeName) {
+        this.typeName = typeName;
     }
 
     public List<ColumnInfo> getColumnInfoList() {

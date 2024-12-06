@@ -10,7 +10,7 @@ import java.lang.annotation.*;
 @Target(ElementType.FIELD)
 public @interface JoinTable {
 
-    Class<?> name();
+    String name();
 
     JoinColumn[] joinColumns() default {};
 

@@ -1,6 +1,8 @@
 package com.lc.mybatisx.model;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author ：薛承城
@@ -34,10 +36,9 @@ public class MapperInfo {
      */
     private List<MethodInfo> methodInfoList;
     /**
-     * 结果集信息
+     * 结果集信息列表
      */
-    @Deprecated
-    private ResultMapInfo resultMapInfo;
+    private Map<Class<?>, ResultMapInfo> resultMapInfoMap = new LinkedHashMap<>();
 
     public Class<?> getIdClass() {
         return idClass;
@@ -85,13 +86,24 @@ public class MapperInfo {
 
     public void setMethodInfoList(List<MethodInfo> methodInfoList) {
         this.methodInfoList = methodInfoList;
+        for (int i = 0; i < methodInfoList.size(); i++) {
+            MethodInfo methodInfo = methodInfoList.get(i);
+            ResultMapInfo resultMapInfo = methodInfo.getResultMapInfo();
+            if (resultMapInfo == null) {
+                continue;
+            }
+            if (resultMapInfoMap.containsKey(resultMapInfo.getId())) {
+                continue;
+            }
+            resultMapInfoMap.put(resultMapInfo.getType(), resultMapInfo);
+        }
     }
 
-    public ResultMapInfo getResultMapInfo() {
-        return resultMapInfo;
+    public Map<Class<?>, ResultMapInfo> getResultMapInfoMap() {
+        return resultMapInfoMap;
     }
 
-    public void setResultMapInfo(ResultMapInfo resultMapInfo) {
-        this.resultMapInfo = resultMapInfo;
+    public void setResultMapInfoMap(Map<Class<?>, ResultMapInfo> resultMapInfoMap) {
+        this.resultMapInfoMap = resultMapInfoMap;
     }
 }

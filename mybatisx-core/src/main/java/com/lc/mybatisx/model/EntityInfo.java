@@ -1,8 +1,8 @@
 package com.lc.mybatisx.model;
 
-import com.lc.mybatisx.annotation.Lock;
-import com.lc.mybatisx.annotation.LogicDelete;
+import com.lc.mybatisx.annotation.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,7 +12,7 @@ import java.util.Map;
  * @description：一句话描述
  * @date ：2021/7/9 17:34
  */
-public class TableInfo {
+public class EntityInfo {
 
     /**
      * 表名称
@@ -21,7 +21,7 @@ public class TableInfo {
     /**
      * 表实体类型
      */
-    private Class<?> tableEntity;
+    private Class<?> tableEntityClass;
     /**
      * 字段信息列表
      */
@@ -31,6 +31,10 @@ public class TableInfo {
      */
     private Map<String, ColumnInfo> columnInfoMap;
     /**
+     * id字段列表
+     */
+    private List<ColumnInfo> idColumnInfoList = new ArrayList<>();
+    /**
      * 逻辑删除
      */
     private ColumnInfo logicDeleteColumnInfo;
@@ -39,9 +43,9 @@ public class TableInfo {
      */
     private ColumnInfo lockColumnInfo;
     /**
-     * 表关联信息
+     * 关联字段信息
      */
-    private List<AssociationTableInfo> associationTableInfoList;
+    private List<ColumnInfo> associationColumnInfoList = new ArrayList<>();
 
     public String getTableName() {
         return tableName;
@@ -49,6 +53,14 @@ public class TableInfo {
 
     public void setTableName(String tableName) {
         this.tableName = tableName;
+    }
+
+    public Class<?> getTableEntityClass() {
+        return tableEntityClass;
+    }
+
+    public void setTableEntityClass(Class<?> tableEntityClass) {
+        this.tableEntityClass = tableEntityClass;
     }
 
     public List<ColumnInfo> getColumnInfoList() {
@@ -59,6 +71,10 @@ public class TableInfo {
         this.columnInfoList = columnInfoList;
         Map<String, ColumnInfo> columnInfoMap = new HashMap<>();
         columnInfoList.forEach(columnInfo -> {
+            Id id = columnInfo.getId();
+            if (id != null) {
+                idColumnInfoList.add(columnInfo);
+            }
             Lock lock = columnInfo.getLock();
             if (lock != null) {
                 lockColumnInfo = columnInfo;
@@ -67,6 +83,24 @@ public class TableInfo {
             if (logicDelete != null) {
                 logicDeleteColumnInfo = columnInfo;
             }
+
+            ManyToMany manyToMany = columnInfo.getManyToMany();
+            if (manyToMany != null) {
+                associationColumnInfoList.add(columnInfo);
+            }
+            ManyToOne manyToOne = columnInfo.getManyToOne();
+            if (manyToOne != null) {
+                associationColumnInfoList.add(columnInfo);
+            }
+            OneToOne oneToOne = columnInfo.getOneToOne();
+            if (oneToOne != null) {
+                associationColumnInfoList.add(columnInfo);
+            }
+            OneToMany oneToMany = columnInfo.getOneToMany();
+            if (oneToMany != null) {
+                associationColumnInfoList.add(columnInfo);
+            }
+
             columnInfoMap.put(columnInfo.getJavaColumnName(), columnInfo);
         });
         this.columnInfoMap = columnInfoMap;
@@ -80,8 +114,12 @@ public class TableInfo {
         this.columnInfoMap = columnInfoMap;
     }
 
-    public ColumnInfo getColumnInfo(String javaColumnName) {
-        return this.columnInfoMap.get(javaColumnName);
+    public List<ColumnInfo> getIdColumnInfoList() {
+        return idColumnInfoList;
+    }
+
+    public void setIdColumnInfoList(List<ColumnInfo> idColumnInfoList) {
+        this.idColumnInfoList = idColumnInfoList;
     }
 
     public ColumnInfo getLogicDeleteColumnInfo() {
@@ -100,11 +138,11 @@ public class TableInfo {
         this.lockColumnInfo = lockColumnInfo;
     }
 
-    public List<AssociationTableInfo> getAssociationTableInfoList() {
-        return associationTableInfoList;
+    public List<ColumnInfo> getAssociationColumnInfoList() {
+        return associationColumnInfoList;
     }
 
-    public void setAssociationTableInfoList(List<AssociationTableInfo> associationTableInfoList) {
-        this.associationTableInfoList = associationTableInfoList;
+    public void setAssociationColumnInfoList(List<ColumnInfo> associationColumnInfoList) {
+        this.associationColumnInfoList = associationColumnInfoList;
     }
 }

@@ -15,14 +15,14 @@ public @interface OneToOne {
      *
      * @return
      */
-    Class<?> junctionEntity();
+    Class<?> junctionEntity() default Void.class;
 
     /**
      * 连接的实体
      *
      * @return
      */
-    Class<?> joinEntity();
+    Class<?> joinEntity() default Void.class;
 
     /**
      * 外键字段
@@ -32,5 +32,7 @@ public @interface OneToOne {
     ForeignKey[] foreignKeys() default {};
 
     FetchType fetch() default LAZY;
+
+    String mappedBy() default "";
 
 }

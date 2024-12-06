@@ -38,7 +38,7 @@ public class DeleteTemplateHandler {
             deleteElement = update(mapperElement, tableInfo, methodInfo, logicDeleteColumnInfo);
 
         }
-        whereTemplateHandler.execute(deleteElement, mapperInfo.getTableInfo(), methodInfo);
+        whereTemplateHandler.execute(deleteElement, mapperInfo.getEntityInfo(), methodInfo);
 
         String insertXmlString = document.asXML();
         logger.info(insertXmlString);
@@ -56,7 +56,7 @@ public class DeleteTemplateHandler {
 
     private Element update(Element mapperElement, TableInfo tableInfo, MethodInfo methodInfo, ColumnInfo logicDeleteColumnInfo) {
         String dbColumnName = logicDeleteColumnInfo.getDbColumnName();
-        LogicDelete logicDelete = logicDeleteColumnInfo.getDelete();
+        LogicDelete logicDelete = logicDeleteColumnInfo.getLogicDelete();
 
         Element updateElement = mapperElement.addElement("update");
         updateElement.addAttribute("id", methodInfo.getMethodName());

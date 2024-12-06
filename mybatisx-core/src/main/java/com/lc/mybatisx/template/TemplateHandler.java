@@ -28,7 +28,7 @@ public class TemplateHandler {
         mergeMethod(builderAssistant, mapperInfo);
 
         this.mapperXNodeList = curdTemplateHandler.execute(mapperInfo);
-        this.resultMapXNodeList = resultMapTemplateHandler.execute(mapperInfo.getMethodInfoList());
+        this.resultMapXNodeList = resultMapTemplateHandler.execute(mapperInfo.getResultMapInfoMap());
         return this;
     }
 

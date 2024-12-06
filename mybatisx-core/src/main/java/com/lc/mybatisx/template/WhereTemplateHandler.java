@@ -9,14 +9,14 @@ import java.util.List;
 
 public class WhereTemplateHandler {
 
-    public void execute(Element parentElement, TableInfo tableInfo, MethodInfo methodInfo) {
+    public void execute(Element parentElement, EntityInfo entityInfo, MethodInfo methodInfo) {
         Element whereElement = parentElement.addElement("where");
         Element trimElement = whereElement.addElement("trim");
         trimElement.addAttribute("prefix", "");
         trimElement.addAttribute("suffix", "");
         trimElement.addAttribute("prefixOverrides", "AND|OR|and|or");
         methodInfo.getConditionInfoList().forEach(conditionInfo -> {
-            ColumnInfo columnInfo = tableInfo.getColumnInfo(conditionInfo.getJavaColumnName());
+            ColumnInfo columnInfo = entityInfo.getColumnInfo(conditionInfo.getJavaColumnName());
             if (methodInfo.getDynamic()) {
                 List<MethodParamInfo> methodParamInfoList = conditionInfo.getMethodParamInfoList();
                 Element ifElement = trimElement.addElement("if");
@@ -28,8 +28,8 @@ public class WhereTemplateHandler {
         });
 
         // 逻辑删除
-        tableInfo.getColumnInfoList().forEach(columnInfo -> {
-            LogicDelete logicDelete = columnInfo.getDelete();
+        entityInfo.getColumnInfoList().forEach(columnInfo -> {
+            LogicDelete logicDelete = columnInfo.getLogicDelete();
             if (logicDelete != null) {
                 trimElement.addText(String.format(" and %s = %s", columnInfo.getDbColumnName(), logicDelete.show()));
             }

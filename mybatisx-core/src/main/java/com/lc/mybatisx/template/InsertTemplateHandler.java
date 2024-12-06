@@ -70,7 +70,7 @@ public class InsertTemplateHandler {
                 String javaColumnName = columnInfo.getJavaColumnName();
                 String dbColumnName = columnInfo.getDbColumnName();
                 Lock lock = columnInfo.getLock();
-                LogicDelete delete = columnInfo.getDelete();
+                LogicDelete delete = columnInfo.getLogicDelete();
                 if (methodInfo.getDynamic()) {
                     Element javaTrimIfElement = dbTrimElement.addElement("if");
                     javaTrimIfElement.addAttribute("test", buildTestNotNull(javaColumnName));
@@ -95,7 +95,7 @@ public class InsertTemplateHandler {
                 String dbColumnName = columnInfo.getDbColumnName();
                 String typeHandler = columnInfo.getTypeHandler();
                 Lock lock = columnInfo.getLock();
-                LogicDelete delete = columnInfo.getDelete();
+                LogicDelete delete = columnInfo.getLogicDelete();
                 if (methodInfo.getDynamic()) {
                     Element javaTrimIfElement = javaTrimElement.addElement("if");
                     javaTrimIfElement.addAttribute("test", buildTestNotNull(javaColumnName));

@@ -1,5 +1,7 @@
 package com.lc.mybatisx.template;
 
+import com.lc.mybatisx.context.EntityInfoContextHolder;
+import com.lc.mybatisx.model.EntityInfo;
 import com.lc.mybatisx.model.MapperInfo;
 import com.lc.mybatisx.model.MethodInfo;
 import com.lc.mybatisx.utils.XmlUtils;
@@ -33,13 +35,16 @@ public class SelectTemplateHandler {
         dbTrimElement.addAttribute("prefix", "");
         dbTrimElement.addAttribute("suffix", "");
         dbTrimElement.addAttribute("suffixOverrides", ",");
-        methodInfo.getResultMapInfo().getColumnInfoList().forEach(columnInfo -> {
+
+        Class<?> methodReturnType = methodInfo.getMethodReturnInfo().getType();
+        EntityInfo entityInfo = EntityInfoContextHolder.get(methodReturnType);
+        entityInfo.getTableColumnInfoList().forEach(columnInfo -> {
             dbTrimElement.addText(String.format("%s, ", columnInfo.getDbColumnName()));
         });
 
-        selectElement.addText(String.format("from %s", mapperInfo.getTableInfo().getTableName()));
+        selectElement.addText(String.format("from %s", mapperInfo.getEntityInfo().getTableName()));
 
-        whereTemplateHandler.execute(selectElement, mapperInfo.getTableInfo(), methodInfo);
+        whereTemplateHandler.execute(selectElement, mapperInfo.getEntityInfo(), methodInfo);
 
         String insertXmlString = document.asXML();
         logger.info(insertXmlString);

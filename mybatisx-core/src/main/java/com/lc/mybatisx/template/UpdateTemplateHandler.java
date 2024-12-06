@@ -42,7 +42,7 @@ public class UpdateTemplateHandler {
         setTrimElement.addAttribute("suffixOverrides", ",");
 
         this.setValue(tableInfo, methodInfo, setTrimElement);
-        whereTemplateHandler.execute(updateElement, tableInfo, methodInfo);
+        whereTemplateHandler.execute(updateElement, mapperInfo.getEntityInfo(), methodInfo);
 
         String insertXmlString = document.asXML();
         logger.info(insertXmlString);
@@ -60,7 +60,7 @@ public class UpdateTemplateHandler {
             String dbColumnName = columnInfo.getDbColumnName();
             String typeHandler = columnInfo.getTypeHandler();
             Lock lock = columnInfo.getLock();
-            LogicDelete logicDelete = columnInfo.getDelete();
+            LogicDelete logicDelete = columnInfo.getLogicDelete();
 
             if (lock != null) {
                 String javaColumn = String.format("%s = #{%s} + %s, ", dbColumnName, javaColumnName, lock.increment());

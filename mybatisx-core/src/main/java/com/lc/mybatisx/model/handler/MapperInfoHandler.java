@@ -1,9 +1,11 @@
 package com.lc.mybatisx.model.handler;
 
+import com.lc.mybatisx.context.EntityInfoContextHolder;
 import com.lc.mybatisx.context.MapperInfoContextHolder;
 import com.lc.mybatisx.context.TableInfoContextHolder;
 import com.lc.mybatisx.dao.Dao;
 import com.lc.mybatisx.dao.SimpleDao;
+import com.lc.mybatisx.model.EntityInfo;
 import com.lc.mybatisx.model.MapperInfo;
 import com.lc.mybatisx.model.MethodInfo;
 import com.lc.mybatisx.model.TableInfo;
@@ -39,7 +41,9 @@ public class MapperInfoHandler extends BasicInfoHandler {
     public MapperInfo execute(Class<?> daoInterface) {
         MapperInfo mapperInfo = getMapperInfo(daoInterface);
         TableInfo tableInfo = TableInfoContextHolder.get(mapperInfo.getEntityClass());
+        EntityInfo entityInfo = EntityInfoContextHolder.get(mapperInfo.getEntityClass());
         mapperInfo.setTableInfo(tableInfo);
+        mapperInfo.setEntityInfo(entityInfo);
 
         List<MethodInfo> methodInfoList = methodInfoHandler.execute(mapperInfo, daoInterface);
         mapperInfo.setMethodInfoList(methodInfoList);

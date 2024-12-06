@@ -35,6 +35,10 @@ public class EntityInfo {
      */
     private List<ColumnInfo> idColumnInfoList = new ArrayList<>();
     /**
+     * 表字段信息
+     */
+    private List<ColumnInfo> tableColumnInfoList = new ArrayList<>();
+    /**
      * 逻辑删除
      */
     private ColumnInfo logicDeleteColumnInfo;
@@ -82,6 +86,10 @@ public class EntityInfo {
             if (logicDelete != null) {
                 logicDeleteColumnInfo = columnInfo;
             }
+            Boolean associationSelect = columnInfo.getAssociationSelect();
+            if (!associationSelect) {
+                tableColumnInfoList.add(columnInfo);
+            }
 
             ManyToMany manyToMany = columnInfo.getManyToMany();
             if (manyToMany != null) {
@@ -112,12 +120,24 @@ public class EntityInfo {
         this.columnInfoMap = columnInfoMap;
     }
 
+    public ColumnInfo getColumnInfo(String javaColumnName) {
+        return this.columnInfoMap.get(javaColumnName);
+    }
+
     public List<ColumnInfo> getIdColumnInfoList() {
         return idColumnInfoList;
     }
 
     public void setIdColumnInfoList(List<ColumnInfo> idColumnInfoList) {
         this.idColumnInfoList = idColumnInfoList;
+    }
+
+    public List<ColumnInfo> getTableColumnInfoList() {
+        return tableColumnInfoList;
+    }
+
+    public void setTableColumnInfoList(List<ColumnInfo> tableColumnInfoList) {
+        this.tableColumnInfoList = tableColumnInfoList;
     }
 
     public ColumnInfo getLogicDeleteColumnInfo() {

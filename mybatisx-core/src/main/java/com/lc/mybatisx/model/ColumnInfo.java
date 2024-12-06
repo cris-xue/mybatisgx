@@ -62,6 +62,10 @@ public class ColumnInfo {
      */
     private String mappedBy;
     /**
+     * 是否关联查询
+     */
+    private Boolean associationSelect = false;
+    /**
      * 关联字段
      */
     private JoinColumn joinColumn;
@@ -193,6 +197,14 @@ public class ColumnInfo {
         this.mappedBy = mappedBy;
     }
 
+    public Boolean getAssociationSelect() {
+        return associationSelect;
+    }
+
+    public void setAssociationSelect(Boolean associationSelect) {
+        this.associationSelect = associationSelect;
+    }
+
     public JoinColumn getJoinColumn() {
         return joinColumn;
     }
@@ -200,6 +212,7 @@ public class ColumnInfo {
     public void setJoinColumn(JoinColumn joinColumn) {
         this.joinColumn = joinColumn;
         if (joinColumn != null) {
+            this.dbColumnName = joinColumn.name();
             this.foreignKey = true;
         }
     }
@@ -220,6 +233,7 @@ public class ColumnInfo {
         this.manyToMany = manyToMany;
         if (manyToMany != null) {
             this.mappedBy = manyToMany.mappedBy();
+            this.associationSelect = true;
         }
     }
 
@@ -229,6 +243,9 @@ public class ColumnInfo {
 
     public void setManyToOne(ManyToOne manyToOne) {
         this.manyToOne = manyToOne;
+        if (manyToOne != null) {
+            this.associationSelect = true;
+        }
     }
 
     public OneToOne getOneToOne() {
@@ -239,6 +256,7 @@ public class ColumnInfo {
         this.oneToOne = oneToOne;
         if (oneToOne != null) {
             this.mappedBy = oneToOne.mappedBy();
+            this.associationSelect = true;
         }
     }
 
@@ -250,6 +268,7 @@ public class ColumnInfo {
         this.oneToMany = oneToMany;
         if (oneToMany != null) {
             this.mappedBy = oneToMany.mappedBy();
+            this.associationSelect = true;
         }
     }
 }

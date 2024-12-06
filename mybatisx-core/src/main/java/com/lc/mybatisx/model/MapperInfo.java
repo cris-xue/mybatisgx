@@ -32,6 +32,10 @@ public class MapperInfo {
      */
     private TableInfo tableInfo;
     /**
+     * 实体信息
+     */
+    private EntityInfo entityInfo;
+    /**
      * 方法信息列表
      */
     private List<MethodInfo> methodInfoList;
@@ -80,6 +84,14 @@ public class MapperInfo {
         this.tableInfo = tableInfo;
     }
 
+    public EntityInfo getEntityInfo() {
+        return entityInfo;
+    }
+
+    public void setEntityInfo(EntityInfo entityInfo) {
+        this.entityInfo = entityInfo;
+    }
+
     public List<MethodInfo> getMethodInfoList() {
         return methodInfoList;
     }
@@ -101,6 +113,10 @@ public class MapperInfo {
 
     public Map<Class<?>, ResultMapInfo> getResultMapInfoMap() {
         return resultMapInfoMap;
+    }
+
+    public ResultMapInfo getResultMapInfo(Class<?> clazz) {
+        return resultMapInfoMap.get(clazz);
     }
 
     public void setResultMapInfoMap(Map<Class<?>, ResultMapInfo> resultMapInfoMap) {

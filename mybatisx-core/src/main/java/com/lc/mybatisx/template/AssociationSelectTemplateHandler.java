@@ -1,6 +1,7 @@
 package com.lc.mybatisx.template;
 
 import com.lc.mybatisx.annotation.JoinColumn;
+import com.lc.mybatisx.annotation.OneToMany;
 import com.lc.mybatisx.annotation.OneToOne;
 import com.lc.mybatisx.context.EntityInfoContextHolder;
 import com.lc.mybatisx.model.*;
@@ -30,6 +31,10 @@ public class AssociationSelectTemplateHandler {
             if (oneToOne != null) {
                 xNode = buildOneToOne(mapperInfo, mapperInfo.getEntityInfo(), associationColumnInfo);
             }
+            OneToMany oneToMany = associationColumnInfo.getOneToMany();
+            if (oneToMany != null) {
+                // xNode = buildOneToMany(mapperInfo, mapperInfo.getEntityInfo(), associationColumnInfo);
+            }
             if (xNode != null) {
                 xNodeList.add(xNode);
             }
@@ -38,6 +43,44 @@ public class AssociationSelectTemplateHandler {
     }
 
     private XNode buildOneToOne(MapperInfo mapperInfo, EntityInfo entityInfo, ColumnInfo columnInfo) {
+        Document document = DocumentHelper.createDocument();
+        Element mapperElement = document.addElement("mapper");
+        Element selectElement = mapperElement.addElement("select");
+
+        ResultMapInfo resultMapInfo = mapperInfo.getResultMapInfo(entityInfo.getTableEntityClass());
+        String mappedBy = columnInfo.getMappedBy();
+        Boolean foreignKey = columnInfo.getForeignKey();
+        if (StringUtils.isNotBlank(mappedBy)) {
+            Class<?> javaType = columnInfo.getJavaType();
+            EntityInfo associationEntityInfo = EntityInfoContextHolder.get(javaType);
+            ColumnInfo mappedByColumnInfo = associationEntityInfo.getColumnInfo(mappedBy);
+            JoinColumn joinColumn = mappedByColumnInfo.getJoinColumn();
+            selectElement.addAttribute("id", String.format("find%sBy%s", entityInfo.getTableEntityClass().getSimpleName(), joinColumn.referencedColumnName()));
+            selectElement.addAttribute("resultMap", resultMapInfo.getId());
+            selectElement.addAttribute("fetchType", "lazy");
+            selectElement.addText(
+                    String.format(
+                            "select * from %s where %s = #{%s}", entityInfo.getTableName(), joinColumn.referencedColumnName(), joinColumn.name())
+            );
+        }
+        if (foreignKey) {
+            JoinColumn joinColumn = columnInfo.getJoinColumn();
+            selectElement.addAttribute("id", String.format("find%sBy%s", entityInfo.getTableEntityClass().getSimpleName(), joinColumn.name()));
+            selectElement.addAttribute("resultMap", resultMapInfo.getId());
+            selectElement.addAttribute("fetchType", "lazy");
+            selectElement.addText(
+                    String.format(
+                            "select * from %s where %s = #{%s}", entityInfo.getTableName(), joinColumn.name(), joinColumn.referencedColumnName())
+            );
+        }
+        String insertXmlString = document.asXML();
+        logger.info(insertXmlString);
+        XPathParser xPathParser = XmlUtils.processXml(insertXmlString);
+        XNode xNode = xPathParser.evalNode("/mapper/select");
+        return xNode;
+    }
+
+    private XNode buildOneToMany(MapperInfo mapperInfo, EntityInfo entityInfo, ColumnInfo columnInfo) {
         Document document = DocumentHelper.createDocument();
         Element mapperElement = document.addElement("mapper");
         Element selectElement = mapperElement.addElement("select");

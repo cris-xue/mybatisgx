@@ -1,7 +1,6 @@
 package com.lc.mybatisx.template;
 
-import com.lc.mybatisx.annotation.Id;
-import com.lc.mybatisx.annotation.JoinColumn;
+import com.lc.mybatisx.annotation.*;
 import com.lc.mybatisx.context.EntityInfoContextHolder;
 import com.lc.mybatisx.context.MapperInfoContextHolder;
 import com.lc.mybatisx.context.TableInfoContextHolder;
@@ -16,6 +15,7 @@ import org.dom4j.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.persistence.FetchType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +36,6 @@ public class ResultMapTemplateHandler {
             resultMapElement.addAttribute("id", resultMapInfo.getId());
             resultMapElement.addAttribute("type", resultMapInfo.getTypeName());
             addColumnElement(resultMapElement, entityInfo.getColumnInfoList());
-            // addAssociationElement(resultMapElement, resultMapInfo.getAssociationTableInfoList());
             String resultMapXmlString = XmlUtils.writeString(document);
             logger.info(resultMapXmlString);
 
@@ -61,12 +60,28 @@ public class ResultMapTemplateHandler {
             if (!associationSelect) {
                 resultColumnElement(resultMapElement, columnInfo);
             } else {
-                Class<?> containerType = columnInfo.getContainerType();
-                if (containerType != null) {
-                    // this.collectionColumnElement(resultMapElement, columnInfo);
-                } else {
+                /*OneToOne oneToOne = columnInfo.getOneToOne();
+                if (oneToOne != null) {
                     this.associationColumnElement(resultMapElement, columnInfo);
+                    continue;
                 }
+
+                OneToMany oneToMany = columnInfo.getOneToMany();
+                if (oneToMany != null) {
+                    this.oneToManyCollectionColumnElement(resultMapElement, columnInfo);
+                    continue;
+                }
+
+                ManyToOne manyToOne = columnInfo.getManyToOne();
+                if (manyToOne != null) {
+                    this.associationColumnElement(resultMapElement, columnInfo);
+                    continue;
+                }
+
+                ManyToMany manyToMany = columnInfo.getManyToMany();
+                if (manyToMany != null) {
+                    this.manyToManyCollectionColumnElement(resultMapElement, columnInfo);
+                }*/
             }
         }
     }
@@ -126,17 +141,99 @@ public class ResultMapTemplateHandler {
             );
             resultMapSelectElement.addAttribute("column", joinColumn.name());
         }
-        resultMapSelectElement.addAttribute("fetchType", "lazy");
+        resultMapSelectElement.addAttribute("fetchType", FetchType.LAZY.name());
     }
 
-    private void collectionColumnElement(Element resultMapElement, ColumnInfo columnInfo) {
+    private void oneToManyCollectionColumnElement(Element resultMapElement, ColumnInfo columnInfo) {
+        Class<?> javaType = columnInfo.getJavaType();
+        EntityInfo entityInfo = EntityInfoContextHolder.get(javaType);
+        MapperInfo mapperInfo = MapperInfoContextHolder.get(javaType);
+
+        String namespace = mapperInfo.getNamespace();
+        Boolean foreignKey = columnInfo.getForeignKey();
+        String mappedBy = columnInfo.getMappedBy();
+
         Element resultMapCollectionElement = resultMapElement.addElement("collection");
         resultMapCollectionElement.addAttribute("property", columnInfo.getJavaColumnName());
         resultMapCollectionElement.addAttribute("javaType", columnInfo.getContainerTypeName());
         resultMapCollectionElement.addAttribute("ofType", columnInfo.getJavaTypeName());
-        // resultMapCollectionElement.addAttribute("select", String.format("%s.find%sBy%s", namespace, joinEntity.getSimpleName(), associationTableInfo.getForeignKey()));
-        resultMapCollectionElement.addAttribute("column", "id");
-        // resultMapCollectionElement.addAttribute("fetchType", associationTableInfo.getFetch().name());
+
+        if (StringUtils.isNotBlank(mappedBy)) {
+            ColumnInfo mappedByColumnInfo = entityInfo.getColumnInfo(mappedBy);
+            JoinColumn joinColumn = mappedByColumnInfo.getJoinColumn();
+            resultMapCollectionElement.addAttribute("select",
+                    String.format(
+                            "%s.find%sBy%s",
+                            namespace,
+                            entityInfo.getTableEntityClass().getSimpleName(),
+                            joinColumn.name()
+                    )
+            );
+            resultMapCollectionElement.addAttribute("column", joinColumn.referencedColumnName());
+        }
+        if (foreignKey) {
+            JoinColumn joinColumn = columnInfo.getJoinColumn();
+            resultMapCollectionElement.addAttribute("select",
+                    String.format(
+                            "%s.find%sBy%s",
+                            namespace,
+                            entityInfo.getTableEntityClass().getSimpleName(),
+                            joinColumn.referencedColumnName()
+                    )
+            );
+            resultMapCollectionElement.addAttribute("column", joinColumn.name());
+        }
+        resultMapCollectionElement.addAttribute("fetchType", FetchType.LAZY.name());
+    }
+
+    private void manyToManyCollectionColumnElement(Element resultMapElement, ColumnInfo columnInfo) {
+        Class<?> javaType = columnInfo.getJavaType();
+        EntityInfo entityInfo = EntityInfoContextHolder.get(javaType);
+        MapperInfo mapperInfo = MapperInfoContextHolder.get(javaType);
+
+        String namespace = mapperInfo.getNamespace();
+        JoinTable joinTable = columnInfo.getJoinTable();
+
+        Element resultMapCollectionElement = resultMapElement.addElement("collection");
+        resultMapCollectionElement.addAttribute("property", columnInfo.getJavaColumnName());
+        resultMapCollectionElement.addAttribute("javaType", columnInfo.getContainerTypeName());
+        resultMapCollectionElement.addAttribute("ofType", columnInfo.getJavaTypeName());
+
+        if (joinTable == null) {
+            String mappedBy = columnInfo.getMappedBy();
+            ColumnInfo mappedByColumnInfo = entityInfo.getColumnInfo(mappedBy);
+            joinTable = mappedByColumnInfo.getJoinTable();
+
+            String tableName = joinTable.name();
+            JoinColumn[] joinColumnList = joinTable.joinColumns();
+            JoinColumn[] inverseJoinColumnList = joinTable.inverseJoinColumns();
+
+            resultMapCollectionElement.addAttribute("select",
+                    String.format(
+                            "%s.find_%s_join_%s_by_%s",
+                            namespace,
+                            tableName,
+                            entityInfo.getTableName(),
+                            joinColumnList[0].name()
+                    )
+            );
+            resultMapCollectionElement.addAttribute("column", joinColumnList[0].referencedColumnName());
+        } else {
+            String tableName = joinTable.name();
+            JoinColumn[] joinColumnList = joinTable.joinColumns();
+            JoinColumn[] inverseJoinColumnList = joinTable.inverseJoinColumns();
+            resultMapCollectionElement.addAttribute("select",
+                    String.format(
+                            "%s.find_%s_join_%s_by_%s",
+                            namespace,
+                            tableName,
+                            entityInfo.getTableName(),
+                            inverseJoinColumnList[0].name()
+                    )
+            );
+            resultMapCollectionElement.addAttribute("column", inverseJoinColumnList[0].referencedColumnName());
+        }
+        resultMapCollectionElement.addAttribute("fetchType", FetchType.LAZY.name());
     }
 
     private void addAssociationElement(Element resultMapElement, List<AssociationTableInfo> associationTableInfoList) {

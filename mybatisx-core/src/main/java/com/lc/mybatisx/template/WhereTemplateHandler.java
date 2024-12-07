@@ -1,5 +1,6 @@
 package com.lc.mybatisx.template;
 
+import com.lc.mybatisx.annotation.Id;
 import com.lc.mybatisx.annotation.LogicDelete;
 import com.lc.mybatisx.model.*;
 import org.apache.commons.lang3.StringUtils;
@@ -17,26 +18,36 @@ public class WhereTemplateHandler {
         trimElement.addAttribute("prefixOverrides", "AND|OR|and|or");
         methodInfo.getConditionInfoList().forEach(conditionInfo -> {
             ColumnInfo columnInfo = entityInfo.getColumnInfo(conditionInfo.getJavaColumnName());
+            Id id = columnInfo.getId();
+            if (id != null) {
+                processId(trimElement, entityInfo, methodInfo.getDynamic());
+                return;
+            }
+
             if (methodInfo.getDynamic()) {
                 List<MethodParamInfo> methodParamInfoList = conditionInfo.getMethodParamInfoList();
                 Element ifElement = trimElement.addElement("if");
                 ifElement.addAttribute("test", String.format("%s != null", methodParamInfoList.get(0).getParamName()));
-                buildCondition(ifElement, columnInfo, conditionInfo);
+                buildCondition(ifElement, entityInfo, columnInfo, conditionInfo);
             } else {
-                buildCondition(trimElement, columnInfo, conditionInfo);
+                buildCondition(trimElement, entityInfo, columnInfo, conditionInfo);
             }
         });
+
+        ColumnInfo lockColumnInfo = entityInfo.getLockColumnInfo();
+        if (lockColumnInfo != null) {
+            trimElement.addText(String.format(" and %s = #{%s}", lockColumnInfo.getDbColumnName(), lockColumnInfo.getJavaColumnName()));
+        }
 
         // 逻辑删除
-        entityInfo.getColumnInfoList().forEach(columnInfo -> {
-            LogicDelete logicDelete = columnInfo.getLogicDelete();
-            if (logicDelete != null) {
-                trimElement.addText(String.format(" and %s = %s", columnInfo.getDbColumnName(), logicDelete.show()));
-            }
-        });
+        ColumnInfo logicDeleteColumnInfo = entityInfo.getLogicDeleteColumnInfo();
+        if (logicDeleteColumnInfo != null) {
+            LogicDelete logicDelete = logicDeleteColumnInfo.getLogicDelete();
+            trimElement.addText(String.format(" and %s = %s", logicDeleteColumnInfo.getDbColumnName(), logicDelete.show()));
+        }
     }
 
-    public void buildCondition(Element parentElement, ColumnInfo columnInfo, ConditionInfo conditionInfo) {
+    public void buildCondition(Element parentElement, EntityInfo entityInfo, ColumnInfo columnInfo, ConditionInfo conditionInfo) {
         List<MethodParamInfo> methodParamInfoList = conditionInfo.getMethodParamInfoList();
         String op = conditionInfo.getOp();
         parentElement.addText(String.format(" %s %s %s ", conditionInfo.getLinkOp(), conditionInfo.getDbColumnName(), op));
@@ -59,6 +70,20 @@ public class WhereTemplateHandler {
                 typeHandlerTemplate = String.format(", typeHandler=%s", typeHandler);
             }
             parentElement.addText(String.format("#{%s%s}", methodParamInfoList.get(0).getParamName(), typeHandlerTemplate));
+        }
+    }
+
+    private void processId(Element trimElement, EntityInfo entityInfo, Boolean dynamic) {
+        List<ColumnInfo> idColumnInfoList = entityInfo.getIdColumnInfoList();
+        for (int i = 0; i < idColumnInfoList.size(); i++) {
+            ColumnInfo idColumnInfo = idColumnInfoList.get(i);
+            if (dynamic) {
+                Element ifElement = trimElement.addElement("if");
+                ifElement.addAttribute("test", String.format("%s != null", idColumnInfo.getJavaColumnName()));
+                ifElement.addText(String.format(" %s %s %s #{%s}", "and", idColumnInfo.getDbColumnName(), "=", idColumnInfo.getJavaColumnName()));
+            } else {
+                trimElement.addText(String.format(" %s %s %s #{%s}", "and", idColumnInfo.getDbColumnName(), "=", idColumnInfo.getJavaColumnName()));
+            }
         }
     }
 

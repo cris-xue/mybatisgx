@@ -1,5 +1,6 @@
 package com.lc.mybatisx.template;
 
+import com.lc.mybatisx.annotation.ConditionEntity;
 import com.lc.mybatisx.annotation.Id;
 import com.lc.mybatisx.annotation.LogicDelete;
 import com.lc.mybatisx.model.*;
@@ -21,6 +22,18 @@ public class WhereTemplateHandler {
             Id id = columnInfo.getId();
             if (id != null) {
                 processId(trimElement, entityInfo, methodInfo.getDynamic());
+                return;
+            }
+
+            ConditionEntity conditionEntity = conditionInfo.getConditionEntity();
+            if (conditionEntity != null) {
+                if (methodInfo.getDynamic()) {
+                    Element ifElement = trimElement.addElement("if");
+                    ifElement.addAttribute("test", String.format("%s != null", conditionInfo.getJavaColumnName()));
+                    ifElement.addText(String.format(" %s %s %s #{%s}", "and", conditionInfo.getDbColumnName(), conditionInfo.getOp(), conditionInfo.getJavaColumnName()));
+                } else {
+                    trimElement.addText(String.format(" %s %s %s #{%s}", "and", conditionInfo.getDbColumnName(), conditionInfo.getOp(), conditionInfo.getJavaColumnName()));
+                }
                 return;
             }
 

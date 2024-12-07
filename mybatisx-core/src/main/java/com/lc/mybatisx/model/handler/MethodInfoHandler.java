@@ -1,6 +1,7 @@
 package com.lc.mybatisx.model.handler;
 
 import com.google.common.base.CaseFormat;
+import com.lc.mybatisx.annotation.ConditionEntity;
 import com.lc.mybatisx.annotation.Dynamic;
 import com.lc.mybatisx.model.*;
 import com.lc.mybatisx.utils.GenericUtils;
@@ -61,7 +62,7 @@ public class MethodInfoHandler {
             methodInfo.setMethodReturnInfo(methodReturnInfo);
 
             // 方法名解析
-            methodNameParse(mapperInfo.getTableInfo(), methodInfo);
+            methodNameParse(mapperInfo.getEntityInfo(), methodInfo);
 
             ResultMapInfo resultMapInfo = resultMapInfoHandler.execute(methodInfo, methodReturnInfo);
             methodInfo.setResultMapInfo(resultMapInfo);
@@ -141,11 +142,29 @@ public class MethodInfoHandler {
         return methodReturnInfo;
     }
 
-    public void methodNameParse(TableInfo tableInfo, MethodInfo methodInfo) {
-        /*if (simpleMethodList.contains(methodInfo.getMethodName())) {
-            return;
-        }*/
-        methodNameAstHandler.execute(tableInfo, methodInfo);
+    public void methodNameParse(EntityInfo entityInfo, MethodInfo methodInfo) {
+        methodNameAstHandler.execute(entityInfo, methodInfo);
+
+        ConditionEntity conditionEntity = null;
+        StringBuilder stringBuilder = new StringBuilder(methodInfo.getAction()).append("By");
+        List<MethodParamInfo> methodParamInfoList = methodInfo.getMethodParamInfoList();
+        for (MethodParamInfo methodParamInfo : methodParamInfoList) {
+            conditionEntity = methodParamInfo.getType().getAnnotation(ConditionEntity.class);
+            if (conditionEntity != null) {
+                List<ColumnInfo> columnInfoList = methodParamInfo.getColumnInfoList();
+                columnInfoList.forEach(columnInfo -> {
+                    String javaColumnName = CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, columnInfo.getJavaColumnName());
+                    if (!stringBuilder.toString().endsWith("By")) {
+                        stringBuilder.append("And");
+                    }
+                    stringBuilder.append(javaColumnName);
+                });
+            }
+        }
+        System.out.println(stringBuilder.toString());
+        if (conditionEntity != null) {
+            methodNameAstHandler.execute(entityInfo, methodInfo, conditionEntity, stringBuilder.toString());
+        }
     }
 
     /**
@@ -171,7 +190,9 @@ public class MethodInfoHandler {
                 methodParamInfo = methodInfo.getMethodParamInfo(javaColumnName.toLowerCase());
             }
             if (methodParamInfo == null) {
-                throw new RuntimeException("查询条件没有对应的参数");
+                // TODO 这里还需校验条件实体的参数    暂时先不校验
+                // throw new RuntimeException("查询条件没有对应的参数");
+                continue;
             }
             conditionInfo.addMethodParamInfo(methodParamInfo);
         }

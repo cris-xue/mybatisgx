@@ -1,5 +1,7 @@
 package com.lc.mybatisx.model;
 
+import com.lc.mybatisx.annotation.ConditionEntity;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,6 +32,10 @@ public class ConditionInfo {
      */
     private String javaColumnName;
     /**
+     * 条件实体
+     */
+    private ConditionEntity conditionEntity;
+    /**
      * 方法参数信息列表
      */
     private List<MethodParamInfo> methodParamInfoList = new ArrayList<>();
@@ -37,6 +43,13 @@ public class ConditionInfo {
      * 条件对应的方法中的参数
      */
     private List<String> paramName = new ArrayList<>();
+
+    public ConditionInfo() {
+    }
+
+    public ConditionInfo(Integer index) {
+        this.index = index;
+    }
 
     public Integer getIndex() {
         return index;
@@ -84,6 +97,14 @@ public class ConditionInfo {
 
     public void setJavaColumnName(String javaColumnName) {
         this.javaColumnName = javaColumnName;
+    }
+
+    public ConditionEntity getConditionEntity() {
+        return conditionEntity;
+    }
+
+    public void setConditionEntity(ConditionEntity conditionEntity) {
+        this.conditionEntity = conditionEntity;
     }
 
     public List<MethodParamInfo> getMethodParamInfoList() {

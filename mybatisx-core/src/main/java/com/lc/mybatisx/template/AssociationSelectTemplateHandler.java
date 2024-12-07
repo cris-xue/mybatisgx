@@ -52,6 +52,7 @@ public class AssociationSelectTemplateHandler {
             JoinColumn joinColumn = mappedByColumnInfo.getJoinColumn();
             selectElement.addAttribute("id", String.format("find%sBy%s", entityInfo.getTableEntityClass().getSimpleName(), joinColumn.referencedColumnName()));
             selectElement.addAttribute("resultMap", resultMapInfo.getId());
+            selectElement.addAttribute("fetchType", "lazy");
             selectElement.addText(
                     String.format(
                             "select * from %s where %s = #{%s}", entityInfo.getTableName(), joinColumn.referencedColumnName(), joinColumn.name())
@@ -61,7 +62,7 @@ public class AssociationSelectTemplateHandler {
             JoinColumn joinColumn = columnInfo.getJoinColumn();
             selectElement.addAttribute("id", String.format("find%sBy%s", entityInfo.getTableEntityClass().getSimpleName(), joinColumn.name()));
             selectElement.addAttribute("resultMap", resultMapInfo.getId());
-            // selectElement.addAttribute("parameterType", "string");
+            selectElement.addAttribute("fetchType", "lazy");
             selectElement.addText(
                     String.format(
                             "select * from %s where %s = #{%s}", entityInfo.getTableName(), joinColumn.name(), joinColumn.referencedColumnName())

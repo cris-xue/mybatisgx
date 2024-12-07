@@ -16,7 +16,6 @@ import org.dom4j.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.FetchType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -127,7 +126,7 @@ public class ResultMapTemplateHandler {
             );
             resultMapSelectElement.addAttribute("column", joinColumn.name());
         }
-        resultMapSelectElement.addAttribute("fetchType", FetchType.LAZY.name());
+        resultMapSelectElement.addAttribute("fetchType", "lazy");
     }
 
     private void collectionColumnElement(Element resultMapElement, ColumnInfo columnInfo) {

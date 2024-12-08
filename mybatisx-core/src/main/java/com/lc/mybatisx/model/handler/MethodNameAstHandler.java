@@ -79,7 +79,8 @@ public class MethodNameAstHandler {
             } else if (parseTreeChild instanceof MethodNameParser.Select_clauseContext) {
                 methodInfo.setAction("select");
             } else if (parseTreeChild instanceof MethodNameParser.Dynamic_condition_clauseContext) {
-                methodInfo.setDynamic(true);
+                Integer dynamicConditionChildCount = parseTreeChild.getChildCount();
+                methodInfo.setDynamic(dynamicConditionChildCount != 0);
             } else if (parseTreeChild instanceof MethodNameParser.Where_clauseContext) {
                 List<ConditionInfo> conditionInfoList = new ArrayList<>();
                 parseCondition(entityInfo, conditionInfoList, conditionEntity, parseTreeChild);

@@ -18,7 +18,7 @@ public class MethodNameLexer extends Lexer {
 		new PredictionContextCache();
 	public static final int
 		INSERT_ACTION=1, DELETE_ACTION=2, UPDATE_ACTION=3, SELECT_ACTION=4, WHERE_LINK_OP=5, 
-		CONDITION_OP=6, DYNAMIC_PARAMETER=7, GROUP_OP=8, ORDER_OP=9, ORDER_OP_DIRECTION=10, 
+		CONDITION_OP=6, DYNAMIC_CONDITION=7, GROUP_OP=8, ORDER_OP=9, ORDER_OP_DIRECTION=10, 
 		AGGREGATE_FUNCTION=11, FIELD=12, WS=13;
 	public static String[] channelNames = {
 		"DEFAULT_TOKEN_CHANNEL", "HIDDEN"
@@ -31,7 +31,7 @@ public class MethodNameLexer extends Lexer {
 	private static String[] makeRuleNames() {
 		return new String[] {
 			"INSERT_ACTION", "DELETE_ACTION", "UPDATE_ACTION", "SELECT_ACTION", "WHERE_LINK_OP", 
-			"CONDITION_OP", "DYNAMIC_PARAMETER", "GROUP_OP", "ORDER_OP", "ORDER_OP_DIRECTION", 
+			"CONDITION_OP", "DYNAMIC_CONDITION", "GROUP_OP", "ORDER_OP", "ORDER_OP_DIRECTION", 
 			"AGGREGATE_FUNCTION", "FIELD", "WS"
 		};
 	}
@@ -47,7 +47,7 @@ public class MethodNameLexer extends Lexer {
 	private static String[] makeSymbolicNames() {
 		return new String[] {
 			null, "INSERT_ACTION", "DELETE_ACTION", "UPDATE_ACTION", "SELECT_ACTION", 
-			"WHERE_LINK_OP", "CONDITION_OP", "DYNAMIC_PARAMETER", "GROUP_OP", "ORDER_OP", 
+			"WHERE_LINK_OP", "CONDITION_OP", "DYNAMIC_CONDITION", "GROUP_OP", "ORDER_OP", 
 			"ORDER_OP_DIRECTION", "AGGREGATE_FUNCTION", "FIELD", "WS"
 		};
 	}

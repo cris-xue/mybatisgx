@@ -22,7 +22,7 @@ UPDATE_ACTION
 SELECT_ACTION
 WHERE_LINK_OP
 CONDITION_OP
-DYNAMIC_PARAMETER
+DYNAMIC_CONDITION
 GROUP_OP
 ORDER_OP
 ORDER_OP_DIRECTION
@@ -45,7 +45,7 @@ where_clause
 where_item
 where_link_op_clause
 condition_op_clause
-dynamic_parameter_clause
+dynamic_condition_clause
 group_clause
 group_op_clause
 order_clause

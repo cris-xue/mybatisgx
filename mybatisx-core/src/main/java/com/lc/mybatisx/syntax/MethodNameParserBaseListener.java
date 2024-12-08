@@ -185,13 +185,13 @@ public class MethodNameParserBaseListener implements MethodNameParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterDynamic_parameter_clause(MethodNameParser.Dynamic_parameter_clauseContext ctx) { }
+	@Override public void enterDynamic_condition_clause(MethodNameParser.Dynamic_condition_clauseContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitDynamic_parameter_clause(MethodNameParser.Dynamic_parameter_clauseContext ctx) { }
+	@Override public void exitDynamic_condition_clause(MethodNameParser.Dynamic_condition_clauseContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

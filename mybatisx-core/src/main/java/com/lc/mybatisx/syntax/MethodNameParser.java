@@ -18,14 +18,14 @@ public class MethodNameParser extends Parser {
 		new PredictionContextCache();
 	public static final int
 		INSERT_ACTION=1, DELETE_ACTION=2, UPDATE_ACTION=3, SELECT_ACTION=4, WHERE_LINK_OP=5, 
-		CONDITION_OP=6, DYNAMIC_PARAMETER=7, GROUP_OP=8, ORDER_OP=9, ORDER_OP_DIRECTION=10, 
+		CONDITION_OP=6, DYNAMIC_CONDITION=7, GROUP_OP=8, ORDER_OP=9, ORDER_OP_DIRECTION=10, 
 		AGGREGATE_FUNCTION=11, FIELD=12, WS=13;
 	public static final int
 		RULE_sql_statement = 0, RULE_end = 1, RULE_insert_statement = 2, RULE_insert_clause = 3, 
 		RULE_delete_statement = 4, RULE_delete_clause = 5, RULE_update_statement = 6, 
 		RULE_update_clause = 7, RULE_select_statement = 8, RULE_select_clause = 9, 
 		RULE_where_clause = 10, RULE_where_item = 11, RULE_where_link_op_clause = 12, 
-		RULE_condition_op_clause = 13, RULE_dynamic_parameter_clause = 14, RULE_group_clause = 15, 
+		RULE_condition_op_clause = 13, RULE_dynamic_condition_clause = 14, RULE_group_clause = 15, 
 		RULE_group_op_clause = 16, RULE_order_clause = 17, RULE_order_op_clause = 18, 
 		RULE_order_op_direction_clause = 19, RULE_aggregate_function_clause = 20, 
 		RULE_field_clause = 21;
@@ -34,7 +34,7 @@ public class MethodNameParser extends Parser {
 			"sql_statement", "end", "insert_statement", "insert_clause", "delete_statement", 
 			"delete_clause", "update_statement", "update_clause", "select_statement", 
 			"select_clause", "where_clause", "where_item", "where_link_op_clause", 
-			"condition_op_clause", "dynamic_parameter_clause", "group_clause", "group_op_clause", 
+			"condition_op_clause", "dynamic_condition_clause", "group_clause", "group_op_clause", 
 			"order_clause", "order_op_clause", "order_op_direction_clause", "aggregate_function_clause", 
 			"field_clause"
 		};
@@ -51,7 +51,7 @@ public class MethodNameParser extends Parser {
 	private static String[] makeSymbolicNames() {
 		return new String[] {
 			null, "INSERT_ACTION", "DELETE_ACTION", "UPDATE_ACTION", "SELECT_ACTION", 
-			"WHERE_LINK_OP", "CONDITION_OP", "DYNAMIC_PARAMETER", "GROUP_OP", "ORDER_OP", 
+			"WHERE_LINK_OP", "CONDITION_OP", "DYNAMIC_CONDITION", "GROUP_OP", "ORDER_OP", 
 			"ORDER_OP_DIRECTION", "AGGREGATE_FUNCTION", "FIELD", "WS"
 		};
 	}
@@ -241,8 +241,8 @@ public class MethodNameParser extends Parser {
 		public Insert_clauseContext insert_clause() {
 			return getRuleContext(Insert_clauseContext.class,0);
 		}
-		public Dynamic_parameter_clauseContext dynamic_parameter_clause() {
-			return getRuleContext(Dynamic_parameter_clauseContext.class,0);
+		public Dynamic_condition_clauseContext dynamic_condition_clause() {
+			return getRuleContext(Dynamic_condition_clauseContext.class,0);
 		}
 		public Insert_statementContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -272,7 +272,7 @@ public class MethodNameParser extends Parser {
 			setState(54);
 			insert_clause();
 			setState(55);
-			dynamic_parameter_clause();
+			dynamic_condition_clause();
 			}
 		}
 		catch (RecognitionException re) {
@@ -430,8 +430,8 @@ public class MethodNameParser extends Parser {
 		public Where_clauseContext where_clause() {
 			return getRuleContext(Where_clauseContext.class,0);
 		}
-		public Dynamic_parameter_clauseContext dynamic_parameter_clause() {
-			return getRuleContext(Dynamic_parameter_clauseContext.class,0);
+		public Dynamic_condition_clauseContext dynamic_condition_clause() {
+			return getRuleContext(Dynamic_condition_clauseContext.class,0);
 		}
 		public Update_statementContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -463,7 +463,7 @@ public class MethodNameParser extends Parser {
 			setState(65);
 			where_clause();
 			setState(66);
-			dynamic_parameter_clause();
+			dynamic_condition_clause();
 			}
 		}
 		catch (RecognitionException re) {
@@ -843,30 +843,30 @@ public class MethodNameParser extends Parser {
 	}
 
 	@SuppressWarnings("CheckReturnValue")
-	public static class Dynamic_parameter_clauseContext extends ParserRuleContext {
-		public TerminalNode DYNAMIC_PARAMETER() { return getToken(MethodNameParser.DYNAMIC_PARAMETER, 0); }
-		public Dynamic_parameter_clauseContext(ParserRuleContext parent, int invokingState) {
+	public static class Dynamic_condition_clauseContext extends ParserRuleContext {
+		public TerminalNode DYNAMIC_CONDITION() { return getToken(MethodNameParser.DYNAMIC_CONDITION, 0); }
+		public Dynamic_condition_clauseContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_dynamic_parameter_clause; }
+		@Override public int getRuleIndex() { return RULE_dynamic_condition_clause; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MethodNameParserListener ) ((MethodNameParserListener)listener).enterDynamic_parameter_clause(this);
+			if ( listener instanceof MethodNameParserListener ) ((MethodNameParserListener)listener).enterDynamic_condition_clause(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MethodNameParserListener ) ((MethodNameParserListener)listener).exitDynamic_parameter_clause(this);
+			if ( listener instanceof MethodNameParserListener ) ((MethodNameParserListener)listener).exitDynamic_condition_clause(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MethodNameParserVisitor ) return ((MethodNameParserVisitor<? extends T>)visitor).visitDynamic_parameter_clause(this);
+			if ( visitor instanceof MethodNameParserVisitor ) return ((MethodNameParserVisitor<? extends T>)visitor).visitDynamic_condition_clause(this);
 			else return visitor.visitChildren(this);
 		}
 	}
 
-	public final Dynamic_parameter_clauseContext dynamic_parameter_clause() throws RecognitionException {
-		Dynamic_parameter_clauseContext _localctx = new Dynamic_parameter_clauseContext(_ctx, getState());
-		enterRule(_localctx, 28, RULE_dynamic_parameter_clause);
+	public final Dynamic_condition_clauseContext dynamic_condition_clause() throws RecognitionException {
+		Dynamic_condition_clauseContext _localctx = new Dynamic_condition_clauseContext(_ctx, getState());
+		enterRule(_localctx, 28, RULE_dynamic_condition_clause);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
@@ -874,10 +874,10 @@ public class MethodNameParser extends Parser {
 			setState(94);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			if (_la==DYNAMIC_PARAMETER) {
+			if (_la==DYNAMIC_CONDITION) {
 				{
 				setState(93);
-				match(DYNAMIC_PARAMETER);
+				match(DYNAMIC_CONDITION);
 				}
 			}
 

@@ -11,13 +11,13 @@ sql_statement: (insert_statement | delete_statement | update_statement | select_
 // EOF(end of file)表示文件结束符，这个是Antlr中已经定义好的
 end: EOF ;
 
-insert_statement: insert_clause dynamic_parameter_clause ;
+insert_statement: insert_clause dynamic_condition_clause ;
 insert_clause: INSERT_ACTION ;
 
 delete_statement: delete_clause where_clause ;
 delete_clause: DELETE_ACTION ;
 
-update_statement: update_clause where_clause dynamic_parameter_clause ;
+update_statement: update_clause where_clause dynamic_condition_clause ;
 update_clause: UPDATE_ACTION ;
 
 select_statement: select_clause where_clause group_clause order_clause ;
@@ -29,7 +29,7 @@ where_link_op_clause: WHERE_LINK_OP ;
 condition_op_clause: CONDITION_OP ;
 
 // 动态参数
-dynamic_parameter_clause: (DYNAMIC_PARAMETER)? ;
+dynamic_condition_clause: (DYNAMIC_CONDITION)? ;
 
 // 分组
 group_clause: (group_op_clause field_clause)? ;

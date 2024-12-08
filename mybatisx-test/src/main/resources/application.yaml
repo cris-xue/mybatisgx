@@ -21,6 +21,9 @@ mybatis:
     # object-wrapper-factory: com.lc.mybatisx.converter.MybatisxObjectWrapperFactory
   configuration:
     meta-object-handler: com.lc.mybatisx.test.commons.TestMetaObjectHandler
+    lazy-loading-enabled: true
+    # lazy-load-trigger-methods: get
+    aggressive-lazy-loading: false
 
 logging:
   level:

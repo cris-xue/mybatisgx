@@ -1,6 +1,8 @@
 package com.lc.mybatisx.test.model.entity;
 
-import com.lc.mybatisx.annotation.*;
+import com.lc.mybatisx.annotation.Entity;
+import com.lc.mybatisx.annotation.Id;
+import com.lc.mybatisx.annotation.Table;
 
 @Entity
 @Table(name = "user_detail")
@@ -9,19 +11,11 @@ public class UserDetail extends BaseEntity<Long> {
     @Id
     private Long tenantId;
 
-    private String name;
+    private String code;
 
-    private Integer age;
-
-    private String phone;
-
-    @OneToOne(
-            junctionEntity = UserDetail.class,
-            joinEntity = User.class,
-            foreignKeys = {@ForeignKey(name = "userId", referencedColumnName = "id")}
-    )
-    @ForeignKey(name = "user_id")
-    private User user;
+    /*@OneToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "id")*/
+    private Long userId;
 
     public Long getTenantId() {
         return tenantId;
@@ -31,35 +25,19 @@ public class UserDetail extends BaseEntity<Long> {
         this.tenantId = tenantId;
     }
 
-    public String getName() {
-        return name;
+    public String getCode() {
+        return code;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setCode(String code) {
+        this.code = code;
     }
 
-    public Integer getAge() {
-        return age;
+    public Long getUserId() {
+        return userId;
     }
 
-    public void setAge(Integer age) {
-        this.age = age;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 }

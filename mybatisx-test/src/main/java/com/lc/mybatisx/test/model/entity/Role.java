@@ -1,8 +1,8 @@
 package com.lc.mybatisx.test.model.entity;
 
-import com.lc.mybatisx.annotation.*;
-
-import java.util.List;
+import com.lc.mybatisx.annotation.Entity;
+import com.lc.mybatisx.annotation.Id;
+import com.lc.mybatisx.annotation.Table;
 
 @Entity
 @Table(name = "role")
@@ -15,13 +15,22 @@ public class Role extends BaseEntity<Long> {
 
     private String code;
 
-    @ManyToMany(
-            junctionEntity = UserRole.class,
-            joinEntity = User.class,
-            foreignKeys = {@ForeignKey(name = "roleId", referencedColumnName = "id")},
-            inverseForeignKeys = {@ForeignKey(name = "userId", referencedColumnName = "id")}
+    // 多对多关系，学生可以选修多个课程
+    /*@ManyToMany
+    @JoinTable(
+            name = "user_role",  // 中间表的名称
+            joinColumns = @JoinColumn(name = "user_id"),  // 外键指向学生
+            inverseJoinColumns = @JoinColumn(name = "role_id")  // 外键指向课程
     )
-    private List<User> userList;
+    private List<User> userList;*/
+
+    public Long getTenantId() {
+        return tenantId;
+    }
+
+    public void setTenantId(Long tenantId) {
+        this.tenantId = tenantId;
+    }
 
     public String getName() {
         return name;
@@ -37,13 +46,5 @@ public class Role extends BaseEntity<Long> {
 
     public void setCode(String code) {
         this.code = code;
-    }
-
-    public List<User> getUserList() {
-        return userList;
-    }
-
-    public void setUserList(List<User> userList) {
-        this.userList = userList;
     }
 }

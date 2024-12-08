@@ -1,19 +1,13 @@
-package com.lc.mybatisx.test.model.entity;
+package com.lc.mybatisx.test.model.dto;
 
-import com.lc.mybatisx.annotation.*;
-import com.lc.mybatisx.test.commons.handler.ListLongTypeHandler;
+import com.lc.mybatisx.test.model.entity.BaseEntity;
 
 import java.util.List;
 
-@Entity
-@Table(name = "user")
-public class User extends BaseEntity<Long> {
+public class UserDto extends BaseEntity<Long> {
 
-    @Id
     private Long tenantId;
 
-    @Column(name = "role_ids", columnDefinition = "varchar")
-    @TypeHandler(value = ListLongTypeHandler.class)
     private List<Long> roleIds;
 
     private String name;
@@ -24,33 +18,14 @@ public class User extends BaseEntity<Long> {
 
     private String email;
 
-    @Column(name = "user_name")
     private String userName;
 
     private String password;
 
-    @LogicDelete
     private Integer status;
 
-    @Lock
     private Integer version;
 
-    /**
-     * 关联查询，有可能外键是联合外键，所以外键需要是数组
-     * <select id="aaaaa">
-     * select role.* form
-     * user_role.user_id left join role role on user_role.role_id = role.id
-     * where user.user_id = id
-     * </select>
-     */
-    /*@ManyToMany(mappedBy = "userList")
-    private List<Role> roleList;
-
-    @OneToMany(mappedBy = "user")
-    private List<Order> orderList;
-
-    @OneToOne(mappedBy = "user")
-    private UserDetail userDetail;*/
     public Long getTenantId() {
         return tenantId;
     }

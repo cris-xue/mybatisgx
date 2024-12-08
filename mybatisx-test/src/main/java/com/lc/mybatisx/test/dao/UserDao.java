@@ -3,6 +3,7 @@ package com.lc.mybatisx.test.dao;
 import com.lc.mybatisx.annotation.Dynamic;
 import com.lc.mybatisx.dao.SimpleDao;
 import com.lc.mybatisx.test.model.entity.User;
+import com.lc.mybatisx.test.model.entity.UserQuery;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
@@ -28,5 +29,7 @@ public interface UserDao extends SimpleDao<User, Long> {
 
     @Dynamic
     List<User> findByNameOrAgeOrRoleIds(String name, Integer age, List<Long> roleIds);
+
+    int update(UserQuery userQuery);
 
 }

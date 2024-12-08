@@ -1,7 +1,9 @@
 package com.lc.mybatisx.test.controller;
 
 import com.lc.mybatisx.test.dao.UserDao;
+import com.lc.mybatisx.test.model.dto.UserDto;
 import com.lc.mybatisx.test.model.entity.User;
+import com.lc.mybatisx.test.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +20,8 @@ public class UserController {
 
     @Autowired
     private UserDao userDao;
+    @Autowired
+    private UserService userService;
 
     @PostMapping
     public User add(@RequestBody User user) {
@@ -37,8 +41,9 @@ public class UserController {
     }
 
     @GetMapping
-    public User findById(Long id) {
-        return userDao.findById(id);
+    public UserDto findById(Long id) {
+        UserDto user = userService.findById(id);
+        return user;
     }
 
     @GetMapping(path = "/all")
@@ -53,7 +58,8 @@ public class UserController {
 
     @GetMapping(path = "/ids")
     public List<User> findByIdIn(@RequestParam("ids") List<Long> ids) {
-        return userDao.findByIdIn(ids);
+        List<User> userList = userDao.findByIdIn(ids);
+        return userList;
     }
 
     @GetMapping(path = "/role-ids")

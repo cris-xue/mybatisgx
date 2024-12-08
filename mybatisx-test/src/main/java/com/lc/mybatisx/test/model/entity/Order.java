@@ -1,25 +1,27 @@
 package com.lc.mybatisx.test.model.entity;
 
-import com.lc.mybatisx.annotation.Entity;
-import com.lc.mybatisx.annotation.ForeignKey;
-import com.lc.mybatisx.annotation.ManyToOne;
-import com.lc.mybatisx.annotation.Table;
+import com.lc.mybatisx.annotation.*;
 
 @Entity
 @Table(name = "order")
 public class Order extends BaseEntity<Long> {
 
+    @Id
+    private Long tenantId;
+
     private String name;
 
     private String code;
 
-    @ManyToOne(
-            junctionEntity = Order.class,
-            joinEntity = User.class,
-            foreignKeys = {@ForeignKey(name = "userId", referencedColumnName = "id")}
-    )
-    @ForeignKey(name = "user_id")
-    private User user;
+    /*@ManyToOne
+    @JoinColumn(name = "user_id")*/
+    private Long userId;
+
+    @LogicDelete
+    private Integer status;
+
+    @Lock
+    private Integer version;
 
     public String getName() {
         return name;
@@ -37,11 +39,35 @@ public class Order extends BaseEntity<Long> {
         this.code = code;
     }
 
-    public User getUser() {
-        return user;
+    public Long getUserId() {
+        return userId;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public Long getTenantId() {
+        return tenantId;
+    }
+
+    public void setTenantId(Long tenantId) {
+        this.tenantId = tenantId;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
+    public Integer getVersion() {
+        return version;
+    }
+
+    public void setVersion(Integer version) {
+        this.version = version;
     }
 }

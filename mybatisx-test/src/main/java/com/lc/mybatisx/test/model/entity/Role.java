@@ -1,15 +1,11 @@
 package com.lc.mybatisx.test.model.entity;
 
 import com.lc.mybatisx.annotation.Entity;
-import com.lc.mybatisx.annotation.Id;
 import com.lc.mybatisx.annotation.Table;
 
 @Entity
 @Table(name = "role")
 public class Role extends BaseEntity<Long> {
-
-    @Id
-    private Long tenantId;
 
     private String name;
 
@@ -23,14 +19,6 @@ public class Role extends BaseEntity<Long> {
             inverseJoinColumns = @JoinColumn(name = "role_id")  // 外键指向课程
     )
     private List<User> userList;*/
-
-    public Long getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(Long tenantId) {
-        this.tenantId = tenantId;
-    }
 
     public String getName() {
         return name;

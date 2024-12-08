@@ -8,6 +8,14 @@ import javax.persistence.Table;
 @Table(name = "user")
 public class UserQuery extends User {
 
-    private String nameLt;
+    private String nameLike;
+
+    public String getNameLike() {
+        return nameLike;
+    }
+
+    public void setNameLike(String nameLike) {
+        this.nameLike = nameLike;
+    }
 
 }

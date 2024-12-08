@@ -9,9 +9,6 @@ import java.util.List;
 @Table(name = "user")
 public class User extends BaseEntity<Long> {
 
-    @Id
-    private Long tenantId;
-
     @Column(name = "role_ids", columnDefinition = "varchar")
     @TypeHandler(value = ListLongTypeHandler.class)
     private List<Long> roleIds;
@@ -51,13 +48,6 @@ public class User extends BaseEntity<Long> {
 
     @OneToOne(mappedBy = "user")
     private UserDetail userDetail;*/
-    public Long getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(Long tenantId) {
-        this.tenantId = tenantId;
-    }
 
     public List<Long> getRoleIds() {
         return roleIds;

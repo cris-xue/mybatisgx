@@ -15,6 +15,9 @@ public abstract class BaseEntity<ID> {
     @Id
     private ID id;
 
+    @Column(name = "tenant_id", insertable = true)
+    private Long tenantId;
+
     @Column(name = "input_user_id", insertable = true)
     private Long inputUserId;
 
@@ -33,6 +36,14 @@ public abstract class BaseEntity<ID> {
 
     public void setId(ID id) {
         this.id = id;
+    }
+
+    public Long getTenantId() {
+        return tenantId;
+    }
+
+    public void setTenantId(Long tenantId) {
+        this.tenantId = tenantId;
     }
 
     public Long getInputUserId() {

@@ -1,13 +1,13 @@
 package com.lc.mybatisx.test.model.entity;
 
-import com.lc.mybatisx.annotation.*;
+import com.lc.mybatisx.annotation.Entity;
+import com.lc.mybatisx.annotation.Lock;
+import com.lc.mybatisx.annotation.LogicDelete;
+import com.lc.mybatisx.annotation.Table;
 
 @Entity
 @Table(name = "order")
 public class Order extends BaseEntity<Long> {
-
-    @Id
-    private Long tenantId;
 
     private String name;
 
@@ -45,14 +45,6 @@ public class Order extends BaseEntity<Long> {
 
     public void setUserId(Long userId) {
         this.userId = userId;
-    }
-
-    public Long getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(Long tenantId) {
-        this.tenantId = tenantId;
     }
 
     public Integer getStatus() {

@@ -53,8 +53,8 @@ public class UpdateTemplateHandler {
 
     private void setValue(EntityInfo entityInfo, MethodInfo methodInfo, Element setTrimElement) {
         List<ColumnInfo> columnInfoList = entityInfo.getColumnInfoList();
-        for (int j = 0; j < columnInfoList.size(); j++) {
-            ColumnInfo columnInfo = columnInfoList.get(j);
+        for (int i = 0; i < columnInfoList.size(); i++) {
+            ColumnInfo columnInfo = columnInfoList.get(i);
 
             String javaColumnName = columnInfo.getJavaColumnName();
             String dbColumnName = columnInfo.getDbColumnName();

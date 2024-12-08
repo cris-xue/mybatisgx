@@ -1,6 +1,7 @@
 package com.lc.mybatisx.template;
 
 import com.lc.mybatisx.annotation.Id;
+import com.lc.mybatisx.annotation.Lock;
 import com.lc.mybatisx.annotation.LogicDelete;
 import com.lc.mybatisx.model.*;
 import org.apache.commons.lang3.StringUtils;
@@ -19,8 +20,13 @@ public class WhereTemplateHandler {
         methodInfo.getConditionInfoList().forEach(conditionInfo -> {
             ColumnInfo columnInfo = entityInfo.getColumnInfo(conditionInfo.getJavaColumnName());
             Id id = columnInfo.getId();
+            Lock lock = columnInfo.getLock();
+            LogicDelete logicDelete = columnInfo.getLogicDelete();
             if (id != null) {
                 processId(trimElement, entityInfo, methodInfo.getDynamic());
+                return;
+            }
+            if (lock != null || logicDelete != null) {
                 return;
             }
 

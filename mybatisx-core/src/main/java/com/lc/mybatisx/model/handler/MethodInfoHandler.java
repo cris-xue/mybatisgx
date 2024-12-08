@@ -3,10 +3,13 @@ package com.lc.mybatisx.model.handler;
 import com.google.common.base.CaseFormat;
 import com.lc.mybatisx.annotation.ConditionEntity;
 import com.lc.mybatisx.annotation.Dynamic;
+import com.lc.mybatisx.annotation.Entity;
 import com.lc.mybatisx.model.*;
 import com.lc.mybatisx.utils.GenericUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.ibatis.annotations.Param;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.TypeUtils;
 
 import java.lang.reflect.Method;
@@ -20,6 +23,8 @@ import java.util.*;
  * @date ：2023/12/1
  */
 public class MethodInfoHandler {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MethodInfoHandler.class);
 
     private static final List<Class<?>> basicTypeList = new ArrayList<>();
 
@@ -145,12 +150,30 @@ public class MethodInfoHandler {
     public void methodNameParse(EntityInfo entityInfo, MethodInfo methodInfo) {
         methodNameAstHandler.execute(entityInfo, methodInfo);
 
-        ConditionEntity conditionEntity = null;
+        Boolean conditionEntity = false;
         StringBuilder stringBuilder = new StringBuilder(methodInfo.getAction()).append("By");
+        if ("findList".equals(methodInfo.getMethodName())) {
+            List<MethodParamInfo> methodParamInfoList = methodInfo.getMethodParamInfoList();
+            for (MethodParamInfo methodParamInfo : methodParamInfoList) {
+                Entity entity = methodParamInfo.getType().getAnnotation(Entity.class);
+                if (entity != null) {
+                    List<ColumnInfo> columnInfoList = methodParamInfo.getColumnInfoList();
+                    columnInfoList.forEach(columnInfo -> {
+                        String javaColumnName = CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, columnInfo.getJavaColumnName());
+                        if (!stringBuilder.toString().endsWith("By")) {
+                            stringBuilder.append("And");
+                        }
+                        stringBuilder.append(javaColumnName);
+                    });
+                }
+            }
+            conditionEntity = true;
+        }
+
         List<MethodParamInfo> methodParamInfoList = methodInfo.getMethodParamInfoList();
         for (MethodParamInfo methodParamInfo : methodParamInfoList) {
-            conditionEntity = methodParamInfo.getType().getAnnotation(ConditionEntity.class);
-            if (conditionEntity != null) {
+            ConditionEntity isConditionEntity = methodParamInfo.getType().getAnnotation(ConditionEntity.class);
+            if (isConditionEntity != null) {
                 List<ColumnInfo> columnInfoList = methodParamInfo.getColumnInfoList();
                 columnInfoList.forEach(columnInfo -> {
                     String javaColumnName = CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, columnInfo.getJavaColumnName());
@@ -159,10 +182,11 @@ public class MethodInfoHandler {
                     }
                     stringBuilder.append(javaColumnName);
                 });
+                conditionEntity = true;
             }
         }
-        System.out.println(stringBuilder.toString());
-        if (conditionEntity != null) {
+        LOGGER.debug(stringBuilder.toString());
+        if (conditionEntity) {
             methodNameAstHandler.execute(entityInfo, methodInfo, conditionEntity, stringBuilder.toString());
         }
     }

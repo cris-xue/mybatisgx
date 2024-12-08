@@ -1,7 +1,6 @@
 package com.lc.mybatisx.model.handler;
 
 import com.google.common.base.CaseFormat;
-import com.lc.mybatisx.annotation.ConditionEntity;
 import com.lc.mybatisx.model.ColumnInfo;
 import com.lc.mybatisx.model.ConditionInfo;
 import com.lc.mybatisx.model.EntityInfo;
@@ -45,10 +44,10 @@ public class MethodNameAstHandler {
         MethodNameParser methodNameParser = new MethodNameParser(commonStream);
         ParseTree sqlStatementContext = methodNameParser.sql_statement();
 
-        getTokens(entityInfo, methodInfo, null, sqlStatementContext);
+        getTokens(entityInfo, methodInfo, false, sqlStatementContext);
     }
 
-    public void execute(EntityInfo entityInfo, MethodInfo methodInfo, ConditionEntity conditionEntity, String methodName) {
+    public void execute(EntityInfo entityInfo, MethodInfo methodInfo, Boolean conditionEntity, String methodName) {
         CharStream charStream = CharStreams.fromString(methodName);
         MethodNameLexer methodNameLexer = new MethodNameLexer(charStream);
         CommonTokenStream commonStream = new CommonTokenStream(methodNameLexer);
@@ -58,7 +57,7 @@ public class MethodNameAstHandler {
         getTokens(entityInfo, methodInfo, conditionEntity, sqlStatementContext);
     }
 
-    private void getTokens(EntityInfo entityInfo, MethodInfo methodInfo, ConditionEntity conditionEntity, ParseTree parseTree) {
+    private void getTokens(EntityInfo entityInfo, MethodInfo methodInfo, Boolean conditionEntity, ParseTree parseTree) {
         int childCount = parseTree.getChildCount();
         for (int i = 0; i < childCount; i++) {
             ParseTree parseTreeChild = parseTree.getChild(i);
@@ -90,7 +89,7 @@ public class MethodNameAstHandler {
         }
     }
 
-    private void parseCondition(EntityInfo entityInfo, List<ConditionInfo> conditionInfoList, ConditionEntity conditionEntity, ParseTree parseTree) {
+    private void parseCondition(EntityInfo entityInfo, List<ConditionInfo> conditionInfoList, Boolean conditionEntity, ParseTree parseTree) {
         ConditionInfo conditionInfo = new ConditionInfo();
         int childCount = parseTree.getChildCount();
         for (int i = 0; i < childCount; i++) {

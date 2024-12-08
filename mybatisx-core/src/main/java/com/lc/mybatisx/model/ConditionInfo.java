@@ -1,7 +1,5 @@
 package com.lc.mybatisx.model;
 
-import com.lc.mybatisx.annotation.ConditionEntity;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,7 +32,7 @@ public class ConditionInfo {
     /**
      * 条件实体
      */
-    private ConditionEntity conditionEntity;
+    private Boolean conditionEntity;
     /**
      * 方法参数信息列表
      */
@@ -99,11 +97,11 @@ public class ConditionInfo {
         this.javaColumnName = javaColumnName;
     }
 
-    public ConditionEntity getConditionEntity() {
+    public Boolean getConditionEntity() {
         return conditionEntity;
     }
 
-    public void setConditionEntity(ConditionEntity conditionEntity) {
+    public void setConditionEntity(Boolean conditionEntity) {
         this.conditionEntity = conditionEntity;
     }
 

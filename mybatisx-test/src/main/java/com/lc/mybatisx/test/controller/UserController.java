@@ -3,6 +3,7 @@ package com.lc.mybatisx.test.controller;
 import com.lc.mybatisx.test.dao.UserDao;
 import com.lc.mybatisx.test.model.dto.UserDto;
 import com.lc.mybatisx.test.model.entity.User;
+import com.lc.mybatisx.test.model.entity.UserQuery;
 import com.lc.mybatisx.test.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -34,9 +35,15 @@ public class UserController {
         return userDao.deleteById(id);
     }
 
-    @PutMapping
+    @PutMapping(path = "/id")
     public User updateById(@RequestBody User user) {
         userDao.updateById(user);
+        return user;
+    }
+
+    @PutMapping
+    public User update(@RequestBody UserQuery user) {
+        userDao.update(user);
         return user;
     }
 

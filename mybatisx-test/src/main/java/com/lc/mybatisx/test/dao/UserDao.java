@@ -30,8 +30,10 @@ public interface UserDao extends SimpleDao<User, Long> {
     @Dynamic
     List<User> findByNameOrAgeOrRoleIds(String name, Integer age, List<Long> roleIds);
 
-    int update(User user, UserQuery userQuery);
+    @Dynamic
+    int update(UserQuery userQuery);
 
+    @Dynamic
     List<User> findList1(UserQuery userQuery);
 
 }

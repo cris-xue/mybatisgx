@@ -59,8 +59,9 @@ public class WhereTemplateHandler {
             }
         });
 
+        // 查询不需要乐观锁版本条件
         ColumnInfo lockColumnInfo = entityInfo.getLockColumnInfo();
-        if (lockColumnInfo != null) {
+        if (!"select".equals(methodInfo.getAction()) && lockColumnInfo != null) {
             trimElement.addText(String.format(" and %s = #{%s}", lockColumnInfo.getDbColumnName(), lockColumnInfo.getJavaColumnName()));
         }
 

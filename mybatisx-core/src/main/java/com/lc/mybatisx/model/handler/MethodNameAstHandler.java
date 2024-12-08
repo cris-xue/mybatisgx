@@ -35,6 +35,7 @@ public class MethodNameAstHandler {
         TOKEN_MAP.put("Is", "=");
         TOKEN_MAP.put("Eq", "=");
         TOKEN_MAP.put("Not", "<![CDATA[ <> ]]>");
+        TOKEN_MAP.put("Like", "like");
     }
 
     public void execute(EntityInfo entityInfo, MethodInfo methodInfo) {
@@ -77,6 +78,8 @@ public class MethodNameAstHandler {
                 methodInfo.setAction("update");
             } else if (parseTreeChild instanceof MethodNameParser.Select_clauseContext) {
                 methodInfo.setAction("select");
+            } else if (parseTreeChild instanceof MethodNameParser.Dynamic_condition_clauseContext) {
+                methodInfo.setDynamic(true);
             } else if (parseTreeChild instanceof MethodNameParser.Where_clauseContext) {
                 List<ConditionInfo> conditionInfoList = new ArrayList<>();
                 parseCondition(entityInfo, conditionInfoList, conditionEntity, parseTreeChild);

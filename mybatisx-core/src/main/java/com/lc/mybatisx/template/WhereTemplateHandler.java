@@ -26,12 +26,19 @@ public class WhereTemplateHandler {
 
             Boolean conditionEntity = conditionInfo.getConditionEntity();
             if (conditionEntity) {
+                String op;
+                if ("like".equals(conditionInfo.getOp())) {
+                    String like = new StringBuilder("%#{").append(conditionInfo.getJavaColumnName()).append("}%").toString();
+                    op = String.format(" %s %s %s %s", "and", conditionInfo.getDbColumnName(), conditionInfo.getOp(), like);
+                } else {
+                    op = String.format(" %s %s %s #{%s}", "and", conditionInfo.getDbColumnName(), conditionInfo.getOp(), conditionInfo.getJavaColumnName());
+                }
                 if (methodInfo.getDynamic()) {
                     Element ifElement = trimElement.addElement("if");
                     ifElement.addAttribute("test", String.format("%s != null", conditionInfo.getJavaColumnName()));
-                    ifElement.addText(String.format(" %s %s %s #{%s}", "and", conditionInfo.getDbColumnName(), conditionInfo.getOp(), conditionInfo.getJavaColumnName()));
+                    ifElement.addText(op);
                 } else {
-                    trimElement.addText(String.format(" %s %s %s #{%s}", "and", conditionInfo.getDbColumnName(), conditionInfo.getOp(), conditionInfo.getJavaColumnName()));
+                    trimElement.addText(op);
                 }
                 return;
             }

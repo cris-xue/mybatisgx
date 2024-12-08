@@ -3,13 +3,10 @@ package com.lc.mybatisx;
 import com.lc.mybatisx.annotation.Entity;
 import com.lc.mybatisx.context.EntityInfoContextHolder;
 import com.lc.mybatisx.context.MapperInfoContextHolder;
-import com.lc.mybatisx.context.TableInfoContextHolder;
 import com.lc.mybatisx.model.EntityInfo;
 import com.lc.mybatisx.model.MapperInfo;
-import com.lc.mybatisx.model.TableInfo;
 import com.lc.mybatisx.model.handler.EntityInfoHandler;
 import com.lc.mybatisx.model.handler.MapperInfoHandler;
-import com.lc.mybatisx.model.handler.TableInfoHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -83,10 +80,6 @@ public class MybatisxEntityRegistrar implements ImportBeanDefinitionRegistrar {
             if (entity == null) {
                 continue;
             }
-            TableInfoHandler tableInfoHandler = new TableInfoHandler();
-            TableInfo tableInfo = tableInfoHandler.execute(clazz);
-            TableInfoContextHolder.set(clazz, tableInfo);
-
             EntityInfoHandler entityInfoHandler = new EntityInfoHandler();
             EntityInfo entityInfo = entityInfoHandler.execute(clazz);
             EntityInfoContextHolder.set(clazz, entityInfo);

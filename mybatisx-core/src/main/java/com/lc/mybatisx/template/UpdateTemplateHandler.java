@@ -3,9 +3,9 @@ package com.lc.mybatisx.template;
 import com.lc.mybatisx.annotation.Lock;
 import com.lc.mybatisx.annotation.LogicDelete;
 import com.lc.mybatisx.model.ColumnInfo;
+import com.lc.mybatisx.model.EntityInfo;
 import com.lc.mybatisx.model.MapperInfo;
 import com.lc.mybatisx.model.MethodInfo;
-import com.lc.mybatisx.model.TableInfo;
 import com.lc.mybatisx.utils.XmlUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.parsing.XNode;
@@ -29,19 +29,19 @@ public class UpdateTemplateHandler {
     }
 
     private XNode buildUpdateXNode(MapperInfo mapperInfo, MethodInfo methodInfo) {
-        TableInfo tableInfo = mapperInfo.getTableInfo();
+        EntityInfo entityInfo = mapperInfo.getEntityInfo();
 
         Document document = DocumentHelper.createDocument();
         Element mapperElement = document.addElement("mapper");
         Element updateElement = mapperElement.addElement("update");
         updateElement.addAttribute("id", methodInfo.getMethodName());
-        updateElement.addText(String.format("update %s", tableInfo.getTableName()));
+        updateElement.addText(String.format("update %s", entityInfo.getTableName()));
 
         Element setElement = updateElement.addElement("set");
         Element setTrimElement = setElement.addElement("trim");
         setTrimElement.addAttribute("suffixOverrides", ",");
 
-        this.setValue(tableInfo, methodInfo, setTrimElement);
+        this.setValue(entityInfo, methodInfo, setTrimElement);
         whereTemplateHandler.execute(updateElement, mapperInfo.getEntityInfo(), methodInfo);
 
         String insertXmlString = document.asXML();
@@ -51,8 +51,8 @@ public class UpdateTemplateHandler {
         return xNode;
     }
 
-    private void setValue(TableInfo tableInfo, MethodInfo methodInfo, Element setTrimElement) {
-        List<ColumnInfo> columnInfoList = tableInfo.getColumnInfoList();
+    private void setValue(EntityInfo entityInfo, MethodInfo methodInfo, Element setTrimElement) {
+        List<ColumnInfo> columnInfoList = entityInfo.getColumnInfoList();
         for (int j = 0; j < columnInfoList.size(); j++) {
             ColumnInfo columnInfo = columnInfoList.get(j);
 

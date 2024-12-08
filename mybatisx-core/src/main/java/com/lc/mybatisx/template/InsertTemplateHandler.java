@@ -37,7 +37,7 @@ public class InsertTemplateHandler {
         insertElement.addAttribute("id", methodInfo.getMethodName());
         insertElement.addAttribute("keyProperty", "id");
         insertElement.addAttribute("useGeneratedKeys", "true");
-        insertElement.addText(String.format("insert into %s", mapperInfo.getTableInfo().getTableName()));
+        insertElement.addText(String.format("insert into %s", mapperInfo.getEntityInfo().getTableName()));
 
         Element dbTrimElement = insertElement.addElement("trim");
         dbTrimElement.addAttribute("prefix", "(");

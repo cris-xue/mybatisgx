@@ -10,7 +10,7 @@ UPDATE_ACTION: 'update' | 'modify' ;
 SELECT_ACTION: 'find' | 'get' | 'select' | 'query' ;
 // WHERE_OP: 'By' ;
 WHERE_LINK_OP: 'By' | 'And' | 'Or' ;
-CONDITION_OP: 'Lt' | 'Lteq' | 'Gt' | 'Gteq' | 'In' | 'Is' | 'Eq' | 'Not' ;
+CONDITION_OP: 'Lt' | 'Lteq' | 'Gt' | 'Gteq' | 'In' | 'Is' | 'Eq' | 'Not' | 'Like';
 DYNAMIC_PARAMETER: 'Selective' ;
 GROUP_OP: 'GroupBy' ;
 ORDER_OP: 'OrderBy' ;

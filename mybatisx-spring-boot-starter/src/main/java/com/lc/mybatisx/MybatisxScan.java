@@ -13,7 +13,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
-@Import({EnumEndpointRegistrar.class})
+@Import({MybatisxEntityRegistrar.class})
 public @interface MybatisxScan {
 
     String[] entityBasePackages();

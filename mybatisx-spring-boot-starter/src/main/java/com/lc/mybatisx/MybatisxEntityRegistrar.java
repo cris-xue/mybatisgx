@@ -1,10 +1,13 @@
 package com.lc.mybatisx;
 
 import com.lc.mybatisx.annotation.Entity;
+import com.lc.mybatisx.context.EntityInfoContextHolder;
 import com.lc.mybatisx.context.MapperInfoContextHolder;
 import com.lc.mybatisx.context.TableInfoContextHolder;
+import com.lc.mybatisx.model.EntityInfo;
 import com.lc.mybatisx.model.MapperInfo;
 import com.lc.mybatisx.model.TableInfo;
+import com.lc.mybatisx.model.handler.EntityInfoHandler;
 import com.lc.mybatisx.model.handler.MapperInfoHandler;
 import com.lc.mybatisx.model.handler.TableInfoHandler;
 import org.slf4j.Logger;
@@ -29,9 +32,9 @@ import java.io.IOException;
  * @description：一句话描述
  * @date ：2020/1/8 18:06
  */
-public class EnumEndpointRegistrar implements ImportBeanDefinitionRegistrar {
+public class MybatisxEntityRegistrar implements ImportBeanDefinitionRegistrar {
 
-    private static final Logger logger = LoggerFactory.getLogger(EnumEndpointRegistrar.class);
+    private static final Logger logger = LoggerFactory.getLogger(MybatisxEntityRegistrar.class);
 
     private static final ResourcePatternResolver RESOURCE_PATTERN_RESOLVER = new PathMatchingResourcePatternResolver();
     private static final MetadataReaderFactory METADATA_READER_FACTORY = new CachingMetadataReaderFactory();
@@ -83,6 +86,10 @@ public class EnumEndpointRegistrar implements ImportBeanDefinitionRegistrar {
             TableInfoHandler tableInfoHandler = new TableInfoHandler();
             TableInfo tableInfo = tableInfoHandler.execute(clazz);
             TableInfoContextHolder.set(clazz, tableInfo);
+
+            EntityInfoHandler entityInfoHandler = new EntityInfoHandler();
+            EntityInfo entityInfo = entityInfoHandler.execute(clazz);
+            EntityInfoContextHolder.set(clazz, entityInfo);
         }
     }
 

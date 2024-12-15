@@ -9,10 +9,10 @@ import com.lc.mybatisx.model.EntityInfo;
 import com.lc.mybatisx.model.MapperInfo;
 import com.lc.mybatisx.model.MethodInfo;
 import com.lc.mybatisx.model.TableInfo;
+import org.apache.commons.lang3.reflect.TypeUtils;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.TypeUtils;
 import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
 
 import java.lang.reflect.Type;
@@ -69,7 +69,7 @@ public class MapperInfoHandler extends BasicInfoHandler {
             Type daoSuperInterfaceType = daoSuperInterfaces[i];
             ParameterizedTypeImpl daoSuperInterfaceClass = (ParameterizedTypeImpl) daoSuperInterfaceType;
             Type[] daoInterfaceParams = daoSuperInterfaceClass.getActualTypeArguments();
-            if (TypeUtils.isAssignable(Dao.class, daoInterface)) {
+            if (TypeUtils.isAssignable(daoInterface, Dao.class)) {
                 return daoInterfaceParams;
             }
         }

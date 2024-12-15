@@ -10,6 +10,7 @@ import org.apache.commons.lang3.reflect.FieldUtils;
 
 import javax.persistence.FetchType;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +29,12 @@ public class ColumnInfoHandler {
         Field[] fields = FieldUtils.getAllFields(clazz);
         List<ColumnInfo> columnInfoList = new ArrayList<>();
         for (Field field : fields) {
+            int modifiers = field.getModifiers();
+            Boolean isStatic = Modifier.isStatic(modifiers);
+            if (isStatic) {
+                continue;
+            }
+
             String fieldName = field.getName();
             String dbColumnName = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, fieldName);
             Id id = field.getAnnotation(Id.class);

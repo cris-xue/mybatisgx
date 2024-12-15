@@ -7,10 +7,10 @@ import com.lc.mybatisx.annotation.Entity;
 import com.lc.mybatisx.model.*;
 import com.lc.mybatisx.utils.GenericUtils;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.reflect.TypeUtils;
 import org.apache.ibatis.annotations.Param;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.TypeUtils;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -274,9 +274,9 @@ public class MethodInfoHandler {
     }
 
     private Class<?> getContainerType(Type type) {
-        if (TypeUtils.isAssignable(Collection.class, type)) {
+        if (TypeUtils.isAssignable(type, Collection.class)) {
             return Collection.class;
-        } else if (TypeUtils.isAssignable(Map.class, type)) {
+        } else if (TypeUtils.isAssignable(type, Map.class)) {
             return Map.class;
         }
         return null;

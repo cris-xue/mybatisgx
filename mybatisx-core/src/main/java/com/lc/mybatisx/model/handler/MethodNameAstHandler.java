@@ -108,6 +108,11 @@ public class MethodNameAstHandler {
             } else if (parseTreeChild instanceof MethodNameParser.Field_clauseContext) {
                 String javaColumnName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, token);
                 ColumnInfo columnInfo = entityInfo.getColumnInfo(javaColumnName);
+                if (columnInfo == null) {
+                    conditionInfoList.remove(conditionInfo);
+                    i = childCount;
+                    continue;
+                }
                 conditionInfo.setDbColumnName(columnInfo.getDbColumnName());
                 conditionInfo.setJavaColumnName(columnInfo.getJavaColumnName());
             } else if (parseTreeChild instanceof MethodNameParser.Condition_op_clauseContext) {

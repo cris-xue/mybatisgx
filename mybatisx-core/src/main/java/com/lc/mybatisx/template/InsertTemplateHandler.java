@@ -74,10 +74,10 @@ public class InsertTemplateHandler {
                 if (methodInfo.getDynamic()) {
                     Element javaTrimIfElement = dbTrimElement.addElement("if");
                     javaTrimIfElement.addAttribute("test", buildTestNotNull(javaColumnName));
-                    String javaColumn = String.format("#{%s},", dbColumnName);
+                    String javaColumn = String.format("%s,", dbColumnName);
                     javaTrimIfElement.addText(javaColumn);
                 } else {
-                    String javaColumn = String.format("#{%s},", dbColumnName);
+                    String javaColumn = String.format("%s,", dbColumnName);
                     dbTrimElement.addText(javaColumn);
                 }
             }

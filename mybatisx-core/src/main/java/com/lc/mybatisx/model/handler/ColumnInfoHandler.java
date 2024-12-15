@@ -6,6 +6,7 @@ import com.lc.mybatisx.annotation.*;
 import com.lc.mybatisx.model.AssociationTableInfo;
 import com.lc.mybatisx.model.ColumnInfo;
 import com.lc.mybatisx.utils.GenericUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
 
 import javax.persistence.FetchType;
@@ -35,17 +36,19 @@ public class ColumnInfoHandler {
                 continue;
             }
 
-            String fieldName = field.getName();
-            String dbColumnName = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, fieldName);
             Id id = field.getAnnotation(Id.class);
             Column column = field.getAnnotation(Column.class);
             Lock lock = field.getAnnotation(Lock.class);
             LogicDelete logicDelete = field.getAnnotation(LogicDelete.class);
 
+            String fieldName = field.getName();
+            String dbColumnName = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, fieldName);
+            dbColumnName = (column != null && StringUtils.isNotBlank(column.name())) ? column.name() : dbColumnName;
+
             ColumnInfo columnInfo = new ColumnInfo();
             columnInfo.setJavaColumnName(fieldName);
             columnInfo.setDbTypeName(column != null ? column.columnDefinition() : null);
-            columnInfo.setDbColumnName(column != null ? column.name() : dbColumnName);
+            columnInfo.setDbColumnName(dbColumnName);
             columnInfo.setId(id);
 
             columnInfo.setLock(lock);

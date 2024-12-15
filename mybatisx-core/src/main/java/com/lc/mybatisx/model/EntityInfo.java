@@ -1,6 +1,7 @@
 package com.lc.mybatisx.model;
 
 import com.lc.mybatisx.annotation.*;
+import com.lc.mybatisx.annotation.handler.GenerateValueHandler;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -34,6 +35,10 @@ public class EntityInfo {
      * id字段列表
      */
     private List<ColumnInfo> idColumnInfoList = new ArrayList<>();
+    /**
+     * 生成值字段列表
+     */
+    private List<ColumnInfo> generateValueColumnInfoList = new ArrayList<>();
     /**
      * 表字段信息
      */
@@ -86,11 +91,15 @@ public class EntityInfo {
             if (logicDelete != null) {
                 logicDeleteColumnInfo = columnInfo;
             }
+            GenerateValueHandler generateValueHandler = columnInfo.getGenerateValueHandler();
+            if (generateValueHandler != null) {
+                generateValueColumnInfoList.add(columnInfo);
+            }
+
             Boolean associationSelect = columnInfo.getAssociationSelect();
             if (!associationSelect) {
                 tableColumnInfoList.add(columnInfo);
             }
-
             ManyToMany manyToMany = columnInfo.getManyToMany();
             if (manyToMany != null) {
                 associationColumnInfoList.add(columnInfo);
@@ -130,6 +139,14 @@ public class EntityInfo {
 
     public void setIdColumnInfoList(List<ColumnInfo> idColumnInfoList) {
         this.idColumnInfoList = idColumnInfoList;
+    }
+
+    public List<ColumnInfo> getGenerateValueColumnInfoList() {
+        return generateValueColumnInfoList;
+    }
+
+    public void setGenerateValueColumnInfoList(List<ColumnInfo> generateValueColumnInfoList) {
+        this.generateValueColumnInfoList = generateValueColumnInfoList;
     }
 
     public List<ColumnInfo> getTableColumnInfoList() {

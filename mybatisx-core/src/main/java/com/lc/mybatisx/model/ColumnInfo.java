@@ -1,6 +1,7 @@
 package com.lc.mybatisx.model;
 
 import com.lc.mybatisx.annotation.*;
+import com.lc.mybatisx.annotation.handler.GenerateValueHandler;
 
 import java.lang.reflect.Type;
 
@@ -89,6 +90,10 @@ public class ColumnInfo {
      * 一对多
      */
     private OneToMany oneToMany;
+    /**
+     * 字段值生成处理器
+     */
+    private GenerateValueHandler generateValueHandler;
 
     public Class<?> getJavaType() {
         return javaType;
@@ -270,5 +275,13 @@ public class ColumnInfo {
             this.mappedBy = oneToMany.mappedBy();
             this.associationSelect = true;
         }
+    }
+
+    public GenerateValueHandler getGenerateValueHandler() {
+        return generateValueHandler;
+    }
+
+    public void setGenerateValueHandler(GenerateValueHandler generateValueHandler) {
+        this.generateValueHandler = generateValueHandler;
     }
 }

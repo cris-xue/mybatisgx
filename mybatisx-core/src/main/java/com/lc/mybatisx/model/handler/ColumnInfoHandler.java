@@ -3,6 +3,7 @@ package com.lc.mybatisx.model.handler;
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.Maps;
 import com.lc.mybatisx.annotation.*;
+import com.lc.mybatisx.annotation.handler.GenerateValueHandler;
 import com.lc.mybatisx.model.AssociationTableInfo;
 import com.lc.mybatisx.model.ColumnInfo;
 import com.lc.mybatisx.utils.GenericUtils;
@@ -49,11 +50,12 @@ public class ColumnInfoHandler {
             columnInfo.setJavaColumnName(fieldName);
             columnInfo.setDbTypeName(column != null ? column.columnDefinition() : null);
             columnInfo.setDbColumnName(dbColumnName);
-            columnInfo.setId(id);
 
+            columnInfo.setId(id);
             columnInfo.setLock(lock);
             columnInfo.setLogicDelete(logicDelete);
 
+            this.setGenerateValueHandler(field, columnInfo);
             this.setType(field, columnInfo);
             this.setAssociationInfo(field, columnInfo);
 
@@ -75,6 +77,20 @@ public class ColumnInfoHandler {
         }
         if (typeHandler != null) {
             columnInfo.setTypeHandler(typeHandler.value().getTypeName());
+        }
+    }
+
+    private void setGenerateValueHandler(Field field, ColumnInfo columnInfo) {
+        try {
+            GenerateValue generateValue = field.getAnnotation(GenerateValue.class);
+            if (generateValue != null) {
+                GenerateValueHandler generateValueHandler = generateValue.handler().newInstance();
+                columnInfo.setGenerateValueHandler(generateValueHandler);
+            }
+        } catch (InstantiationException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
         }
     }
 

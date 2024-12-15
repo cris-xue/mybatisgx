@@ -9,7 +9,11 @@ import com.lc.mybatisx.model.handler.EntityInfoHandler;
 import com.lc.mybatisx.model.handler.MapperInfoHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.io.Resource;
@@ -36,10 +40,14 @@ public class MybatisxEntityRegistrar implements ImportBeanDefinitionRegistrar {
     private static final ResourcePatternResolver RESOURCE_PATTERN_RESOLVER = new PathMatchingResourcePatternResolver();
     private static final MetadataReaderFactory METADATA_READER_FACTORY = new CachingMetadataReaderFactory();
 
+    @Autowired
+    private BeanFactory beanFactory;
+
     @Override
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
         AnnotationAttributes annotationAttributes = AnnotationAttributes
                 .fromMap(importingClassMetadata.getAnnotationAttributes(MybatisxScan.class.getName()));
+
 
         if (annotationAttributes != null) {
             String[] entityBasePackages = (String[]) annotationAttributes.get("entityBasePackages");
@@ -63,6 +71,15 @@ public class MybatisxEntityRegistrar implements ImportBeanDefinitionRegistrar {
                     logger.error(e.getMessage(), e);
                 }
             }
+
+            // 注册bean
+            ConstructorArgumentValues constructorArgumentValues = new ConstructorArgumentValues();
+            constructorArgumentValues.addIndexedArgumentValue(0, daoBasePackages);
+
+            GenericBeanDefinition sqlSessionFactoryBeanPostProcessorBeanDefinition = new GenericBeanDefinition();
+            sqlSessionFactoryBeanPostProcessorBeanDefinition.setBeanClass(SqlSessionFactoryBeanPostProcessor.class);
+            sqlSessionFactoryBeanPostProcessorBeanDefinition.setConstructorArgumentValues(constructorArgumentValues);
+            registry.registerBeanDefinition("sqlSessionFactoryBeanPostProcessorBeanDefinition", sqlSessionFactoryBeanPostProcessorBeanDefinition);
         }
     }
 

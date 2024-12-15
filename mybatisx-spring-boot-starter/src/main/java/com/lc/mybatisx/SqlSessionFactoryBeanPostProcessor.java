@@ -9,7 +9,8 @@ import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.logging.Logger;
 import org.mybatis.logging.LoggerFactory;
-import org.mybatis.spring.SqlSessionFactoryBean;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -24,23 +25,39 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
-/**
- * create by: 薛承城
- * description: CustomSqlSessionFactoryBean完全使用spring mybatis源码，仅仅在494行替换了自己的CustomXMLMapperBuilder
- * create time: 2019/5/9 17:54
- */
-public class MybatisxSqlSessionFactoryBean extends SqlSessionFactoryBean {
+public class SqlSessionFactoryBeanPostProcessor implements BeanPostProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MybatisxSqlSessionFactoryBean.class);
 
     private static final ResourcePatternResolver RESOURCE_PATTERN_RESOLVER = new PathMatchingResourcePatternResolver();
     private static final MetadataReaderFactory METADATA_READER_FACTORY = new CachingMetadataReaderFactory();
 
-    private String[] daoPackages;
+    private String[] packagePatternArray;
 
-    /*public MybatisxSqlSessionFactoryBean(String[] daoPackages) {
-        this.daoPackages = daoPackages;
-    }*/
+    public SqlSessionFactoryBeanPostProcessor(String[] packagePatternArray) {
+        this.packagePatternArray = packagePatternArray;
+    }
+
+    @Override
+    public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+        if (bean instanceof SqlSessionFactory) {
+            System.out.println("SqlSessionFactoryBean 初始化前的逻辑");
+        }
+        return bean;
+    }
+
+    @Override
+    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+        if (bean instanceof SqlSessionFactory) {
+            SqlSessionFactory sqlSessionFactory = (SqlSessionFactory) bean;
+            Configuration configuration = sqlSessionFactory.getConfiguration();
+            curdMethod(configuration);
+        }
+        if (bean instanceof MybatisxProperties) {
+            System.out.printf(beanName);
+        }
+        return bean;
+    }
 
     private void curdMethod(Configuration configuration) {
         List<Resource> mapperResourceList;
@@ -69,7 +86,7 @@ public class MybatisxSqlSessionFactoryBean extends SqlSessionFactoryBean {
         List<Resource> mapperResourceList = new ArrayList<>();
 
         // 开始扫描dao
-        Set<Resource> daoResourceSet = scanClasses(daoPackages, Dao.class);
+        Set<Resource> daoResourceSet = scanClasses(Dao.class);
         for (Resource daoResource : daoResourceSet) {
             ByteArrayInputStream bais = null;
             try {
@@ -97,23 +114,10 @@ public class MybatisxSqlSessionFactoryBean extends SqlSessionFactoryBean {
         Map<String, Object> templateData = new HashMap<>();
         templateData.put("namespace", namespace);
         String baseXml = FreeMarkerUtils.processTemplate(templateData, template);
-
-        /*String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-        xml = xml.concat("<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">\n");
-        xml = xml.concat("<mapper namespace=\"" + namespace + "\">\n");
-        xml = xml.concat("</mapper>");*/
         return baseXml;
     }
 
-    @Override
-    public SqlSessionFactory getObject() throws Exception {
-        SqlSessionFactory sqlSessionFactory = super.getObject();
-        Configuration configuration = sqlSessionFactory.getConfiguration();
-        // curdMethod(configuration);
-        return sqlSessionFactory;
-    }
-
-    private Set<Resource> scanClasses(String[] packagePatternArray, Class<?> assignableType) throws IOException {
+    private Set<Resource> scanClasses(Class<?> assignableType) throws IOException {
         Set<Resource> classes = new HashSet<>();
         for (String packagePattern : packagePatternArray) {
             Resource[] resources = RESOURCE_PATTERN_RESOLVER.getResources(ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX

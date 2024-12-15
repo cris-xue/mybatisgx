@@ -1,10 +1,20 @@
 package com.lc.mybatisx.ext;
 
-import com.lc.mybatisx.scripting.MybatisxParameterHandler;
+import com.lc.mybatisx.annotation.Entity;
+import com.lc.mybatisx.annotation.handler.GenerateValueHandler;
+import com.lc.mybatisx.context.EntityInfoContextHolder;
+import com.lc.mybatisx.model.ColumnInfo;
+import com.lc.mybatisx.model.EntityInfo;
 import org.apache.ibatis.executor.parameter.ParameterHandler;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
+import org.apache.ibatis.mapping.SqlCommandType;
+import org.apache.ibatis.reflection.MetaObject;
+import org.apache.ibatis.scripting.defaults.DefaultParameterHandler;
 import org.apache.ibatis.scripting.xmltags.XMLLanguageDriver;
+import org.apache.ibatis.session.Configuration;
+
+import java.util.List;
 
 /**
  * @author ：薛承城
@@ -15,7 +25,29 @@ public class MybatisxXMLLanguageDriver extends XMLLanguageDriver {
 
     @Override
     public ParameterHandler createParameterHandler(MappedStatement mappedStatement, Object parameterObject, BoundSql boundSql) {
-        return new MybatisxParameterHandler(mappedStatement, parameterObject, boundSql);
+        parameterObject = this.fillParameterObject(mappedStatement, parameterObject);
+        return new DefaultParameterHandler(mappedStatement, parameterObject, boundSql);
+    }
+
+    protected Object fillParameterObject(MappedStatement mappedStatement, Object parameterObject) {
+        if (parameterObject == null) {
+            return null;
+        }
+        Configuration configuration = mappedStatement.getConfiguration();
+        MetaObject metaObject = configuration.newMetaObject(parameterObject);
+
+        SqlCommandType sqlCommandType = mappedStatement.getSqlCommandType();
+        Entity entity = parameterObject.getClass().getAnnotation(Entity.class);
+        boolean isFill = (SqlCommandType.INSERT == sqlCommandType || SqlCommandType.UPDATE == sqlCommandType) && entity != null;
+
+        EntityInfo entityInfo = EntityInfoContextHolder.get(parameterObject.getClass());
+        List<ColumnInfo> generateValueColumnInfoList = entityInfo.getGenerateValueColumnInfoList();
+        for (ColumnInfo generateValueColumnInfo : generateValueColumnInfoList) {
+            GenerateValueHandler generateValueHandler = generateValueColumnInfo.getGenerateValueHandler();
+            Object value = generateValueHandler.next();
+            metaObject.setValue(generateValueColumnInfo.getJavaColumnName(), value);
+        }
+        return metaObject.getOriginalObject();
     }
 
 }

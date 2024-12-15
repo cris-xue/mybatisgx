@@ -26,13 +26,13 @@ public class MybatisxParameterHandler extends DefaultParameterHandler {
 
     public MybatisxParameterHandler(MappedStatement mappedStatement, Object parameterObject, BoundSql boundSql) {
         super(mappedStatement, parameterObject, boundSql);
-        Configuration configuration = mappedStatement.getConfiguration();
-        this.parameterObject = this.fillParameterObject(configuration, mappedStatement, parameterObject);
+        // Configuration configuration = mappedStatement.getConfiguration();
+        // this.parameterObject = this.fillParameterObject(configuration, mappedStatement, parameterObject);
     }
 
     @Override
     public Object getParameterObject() {
-        return this.parameterObject;
+        return super.getParameterObject();
     }
 
     @Override

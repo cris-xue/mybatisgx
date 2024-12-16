@@ -54,7 +54,7 @@ public class MybatisxParameterHandler extends DefaultParameterHandler {
         List<ColumnInfo> generateValueColumnInfoList = entityInfo.getGenerateValueColumnInfoList();
         for (ColumnInfo generateValueColumnInfo : generateValueColumnInfoList) {
             GenerateValueHandler generateValueHandler = generateValueColumnInfo.getGenerateValueHandler();
-            Object value = generateValueHandler.next();
+            Object value = generateValueHandler.next(sqlCommandType);
             metaObject.setValue(generateValueColumnInfo.getJavaColumnName(), value);
         }
         return metaObject.getOriginalObject();

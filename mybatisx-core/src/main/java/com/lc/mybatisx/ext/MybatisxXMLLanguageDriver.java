@@ -1,6 +1,5 @@
 package com.lc.mybatisx.ext;
 
-import com.lc.mybatisx.annotation.Entity;
 import com.lc.mybatisx.annotation.handler.GenerateValueHandler;
 import com.lc.mybatisx.context.EntityInfoContextHolder;
 import com.lc.mybatisx.model.ColumnInfo;
@@ -33,18 +32,20 @@ public class MybatisxXMLLanguageDriver extends XMLLanguageDriver {
         if (parameterObject == null) {
             return null;
         }
-        Configuration configuration = mappedStatement.getConfiguration();
-        MetaObject metaObject = configuration.newMetaObject(parameterObject);
 
         SqlCommandType sqlCommandType = mappedStatement.getSqlCommandType();
-        Entity entity = parameterObject.getClass().getAnnotation(Entity.class);
-        boolean isFill = (SqlCommandType.INSERT == sqlCommandType || SqlCommandType.UPDATE == sqlCommandType) && entity != null;
-
         EntityInfo entityInfo = EntityInfoContextHolder.get(parameterObject.getClass());
+        boolean isFill = (SqlCommandType.INSERT == sqlCommandType || SqlCommandType.UPDATE == sqlCommandType) && entityInfo != null;
+        if (!isFill) {
+            return parameterObject;
+        }
+
+        Configuration configuration = mappedStatement.getConfiguration();
+        MetaObject metaObject = configuration.newMetaObject(parameterObject);
         List<ColumnInfo> generateValueColumnInfoList = entityInfo.getGenerateValueColumnInfoList();
         for (ColumnInfo generateValueColumnInfo : generateValueColumnInfoList) {
             GenerateValueHandler generateValueHandler = generateValueColumnInfo.getGenerateValueHandler();
-            Object value = generateValueHandler.next();
+            Object value = generateValueHandler.next(sqlCommandType);
             metaObject.setValue(generateValueColumnInfo.getJavaColumnName(), value);
         }
         return metaObject.getOriginalObject();

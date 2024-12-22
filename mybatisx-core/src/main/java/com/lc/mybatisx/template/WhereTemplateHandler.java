@@ -26,7 +26,7 @@ public class WhereTemplateHandler {
                 processId(trimElement, entityInfo, methodInfo.getDynamic());
                 return;
             }
-            if (lock != null || logicDelete != null) {
+            if (logicDelete != null) {
                 return;
             }
 
@@ -61,8 +61,11 @@ public class WhereTemplateHandler {
 
         // 查询不需要乐观锁版本条件
         ColumnInfo lockColumnInfo = entityInfo.getLockColumnInfo();
-        if (!"select".equals(methodInfo.getAction()) && lockColumnInfo != null) {
-            trimElement.addText(String.format(" and %s = #{%s}", lockColumnInfo.getDbColumnName(), lockColumnInfo.getJavaColumnName()));
+        if (lockColumnInfo != null) {
+            // 只有更新的场景才需要乐观锁，逻辑删除不需要乐观锁，因为逻辑删除直接改变逻辑删除字段，因为不管什么操作都一定需要逻辑删除字段
+            if ("update".equals(methodInfo.getAction())) {
+                trimElement.addText(String.format(" and %s = #{%s}", lockColumnInfo.getDbColumnName(), lockColumnInfo.getJavaColumnName()));
+            }
         }
 
         // 逻辑删除

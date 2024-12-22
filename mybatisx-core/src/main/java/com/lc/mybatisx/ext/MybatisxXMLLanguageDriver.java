@@ -44,9 +44,11 @@ public class MybatisxXMLLanguageDriver extends XMLLanguageDriver {
         MetaObject metaObject = configuration.newMetaObject(parameterObject);
         List<ColumnInfo> generateValueColumnInfoList = entityInfo.getGenerateValueColumnInfoList();
         for (ColumnInfo generateValueColumnInfo : generateValueColumnInfoList) {
+            String javaColumnName = generateValueColumnInfo.getJavaColumnName();
+            Object originalValue = metaObject.getValue(javaColumnName);
             GenerateValueHandler generateValueHandler = generateValueColumnInfo.getGenerateValueHandler();
-            Object value = generateValueHandler.next(sqlCommandType);
-            metaObject.setValue(generateValueColumnInfo.getJavaColumnName(), value);
+            Object value = generateValueHandler.next(sqlCommandType, generateValueColumnInfo, originalValue);
+            metaObject.setValue(javaColumnName, value);
         }
         return metaObject.getOriginalObject();
     }

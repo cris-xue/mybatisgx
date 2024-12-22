@@ -15,20 +15,26 @@ public class TemplateHandler {
     private CurdTemplateHandler curdTemplateHandler = new CurdTemplateHandler();
     private ResultMapTemplateHandler resultMapTemplateHandler = new ResultMapTemplateHandler();
 
-    private List<XNode> resultMapXNodeList = null;
-    private List<XNode> mapperXNodeList = null;
+    private MapperBuilderAssistant builderAssistant;
+    private List<XNode> originResultMapXNodeList = null;
+    private List<XNode> originMapperXNodeList = null;
 
-    public static TemplateHandler build() {
-        return new TemplateHandler();
+    private TemplateHandler(MapperBuilderAssistant builderAssistant) {
+        this.builderAssistant = builderAssistant;
     }
 
-    public TemplateHandler execute(MapperBuilderAssistant builderAssistant) {
+    public static TemplateHandler builder(MapperBuilderAssistant builderAssistant) {
+        return new TemplateHandler(builderAssistant);
+    }
+
+    public TemplateHandler build() {
         MapperInfoHandler mapperInfoHandler = new MapperInfoHandler();
         MapperInfo mapperInfo = mapperInfoHandler.execute(builderAssistant);
         mergeMethod(builderAssistant, mapperInfo);
 
-        this.mapperXNodeList = curdTemplateHandler.execute(mapperInfo);
-        this.resultMapXNodeList = resultMapTemplateHandler.execute(mapperInfo.getResultMapInfoMap());
+        List<XNode> mapperXNodeList = curdTemplateHandler.execute(mapperInfo);
+        List<XNode> resultMapXNodeList = resultMapTemplateHandler.execute(mapperInfo.getResultMapInfoMap());
+        merge(resultMapXNodeList, mapperXNodeList);
         return this;
     }
 
@@ -46,12 +52,19 @@ public class TemplateHandler {
         mapperInfo.setMethodInfoList(methodInfoList);
     }
 
-    public void mergeResultMap(List<XNode> resultMapXNode) {
-        resultMapXNode.addAll(this.resultMapXNodeList);
+    public TemplateHandler resultMap(List<XNode> resultMapXNodeList) {
+        this.originResultMapXNodeList = resultMapXNodeList;
+        return this;
     }
 
-    public void mergeMapper(List<XNode> curdXNode) {
-        curdXNode.addAll(this.mapperXNodeList);
+    public TemplateHandler mapper(List<XNode> curdXNodeList) {
+        this.originMapperXNodeList = curdXNodeList;
+        return this;
+    }
+
+    private void merge(List<XNode> resultMapXNodeList, List<XNode> mapperXNodeList) {
+        originResultMapXNodeList.addAll(resultMapXNodeList);
+        originMapperXNodeList.addAll(mapperXNodeList);
     }
 
 }

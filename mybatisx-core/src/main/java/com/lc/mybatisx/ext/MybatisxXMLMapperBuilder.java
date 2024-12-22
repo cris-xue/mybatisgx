@@ -73,15 +73,16 @@ public class MybatisxXMLMapperBuilder extends BaseBuilder {
             cacheElement(context.evalNode("cache"));
             parameterMapElement(context.evalNodes("/mapper/parameterMap"));
             sqlElement(context.evalNodes("/mapper/sql"));
-
-            TemplateHandler templateHandler = TemplateHandler.build().execute(builderAssistant);
-            // 增加自动处理的resultMap
             List<XNode> resultMapXNode = context.evalNodes("/mapper/resultMap");
-            templateHandler.mergeResultMap(resultMapXNode);
-            resultMapElements(resultMapXNode);
-            // 增加自动处理的增删改查sql
             List<XNode> curdXNode = context.evalNodes("select|insert|update|delete");
-            templateHandler.mergeMapper(curdXNode);
+
+            // 增加自动处理的resultMap   自动处理的增删改查sql
+            TemplateHandler.builder(builderAssistant)
+                    .resultMap(resultMapXNode)
+                    .mapper(curdXNode)
+                    .build();
+
+            resultMapElements(resultMapXNode);
             buildStatementFromContext(curdXNode);
         } catch (Exception e) {
             e.printStackTrace();

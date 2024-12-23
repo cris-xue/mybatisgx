@@ -82,8 +82,7 @@ public class MethodNameAstHandler {
                 Integer dynamicConditionChildCount = parseTreeChild.getChildCount();
                 // methodInfo.setDynamic(dynamicConditionChildCount != 0);
             } else if (parseTreeChild instanceof MethodNameParser.Where_clauseContext) {
-                List<ConditionInfo> conditionInfoList = new ArrayList<>();
-                parseCondition(entityInfo, conditionInfoList, conditionEntity, parseTreeChild);
+                List<ConditionInfo> conditionInfoList = parseWhereClause(entityInfo, conditionEntity, parseTreeChild);
                 methodInfo.setConditionInfoList(conditionInfoList);
             } else if (parseTreeChild instanceof MethodNameParser.EndContext) {
                 return;
@@ -93,32 +92,44 @@ public class MethodNameAstHandler {
         }
     }
 
-    private void parseCondition(EntityInfo entityInfo, List<ConditionInfo> conditionInfoList, Boolean conditionEntity, ParseTree parseTree) {
-        ConditionInfo conditionInfo = new ConditionInfo();
+    private List<ConditionInfo> parseWhereClause(EntityInfo entityInfo, Boolean conditionEntity, ParseTree whereClause) {
+        List<ConditionInfo> conditionInfoList = new ArrayList<>();
+        int childCount = whereClause.getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            ConditionInfo conditionInfo = new ConditionInfo();
+            ParseTree whereItem = whereClause.getChild(i);
+            parseWhereItem(entityInfo, conditionInfo, conditionEntity, whereItem);
+            conditionInfoList.add(conditionInfo);
+        }
+        return conditionInfoList;
+    }
+
+    private void parseWhereItem(EntityInfo entityInfo, ConditionInfo conditionInfo, Boolean conditionEntity, ParseTree parseTree) {
         int childCount = parseTree.getChildCount();
         for (int i = 0; i < childCount; i++) {
             ParseTree parseTreeChild = parseTree.getChild(i);
             String token = parseTreeChild.getText();
             if (parseTreeChild instanceof MethodNameParser.Where_link_op_clauseContext) {
-                conditionInfoList.add(conditionInfo);
                 conditionInfo.setConditionEntity(conditionEntity);
-                conditionInfo.setIndex(conditionInfoList.size() - 1);
-                conditionInfo.setOrigin(parseTree.getText());
+                // conditionInfo.setIndex(conditionInfoList.size() - 1);
+                conditionInfo.setOrigin(parseTreeChild.getText());
                 conditionInfo.setLinkOp(TOKEN_MAP.get(token));
+            } else if (parseTreeChild instanceof MethodNameParser.Field_condition_op_clauseContext) {
+                String javaColumnName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, token);
+                conditionInfo.setConditionEntityJavaColumnName(javaColumnName);
+                parseWhereItem(entityInfo, conditionInfo, conditionEntity, parseTreeChild);
             } else if (parseTreeChild instanceof MethodNameParser.Field_clauseContext) {
                 String javaColumnName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, token);
                 ColumnInfo columnInfo = entityInfo.getColumnInfo(javaColumnName);
-                if (columnInfo == null) {
-                    conditionInfoList.remove(conditionInfo);
-                    i = childCount;
-                    continue;
-                }
+            /*if (columnInfo == null) {
+                conditionInfoList.remove(conditionInfo);
+                i = childCount;
+                continue;
+            }*/
                 conditionInfo.setDbColumnName(columnInfo.getDbColumnName());
                 conditionInfo.setJavaColumnName(columnInfo.getJavaColumnName());
             } else if (parseTreeChild instanceof MethodNameParser.Condition_op_clauseContext) {
                 conditionInfo.setOp(TOKEN_MAP.get(token));
-            } else {
-                parseCondition(entityInfo, conditionInfoList, conditionEntity, parseTreeChild);
             }
         }
     }

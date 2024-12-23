@@ -30,33 +30,36 @@ public class WhereTemplateHandler {
                 return;
             }
 
-            Boolean conditionEntity = conditionInfo.getConditionEntity();
+            this.processEntityCondition(methodInfo, conditionInfo, trimElement);
+            /*Boolean conditionEntity = conditionInfo.getConditionEntity();
             if (conditionEntity) {
-                String op;
+                String conditionEntityJavaColumnName = conditionInfo.getConditionEntityJavaColumnName();
+                String conditionOp;
                 if ("like".equals(conditionInfo.getOp())) {
-                    String like = new StringBuilder("%#{").append(conditionInfo.getJavaColumnName()).append("}%").toString();
-                    op = String.format(" %s %s %s %s", "and", conditionInfo.getDbColumnName(), conditionInfo.getOp(), like);
+                    String like = new StringBuilder("%#{").append(conditionEntityJavaColumnName).append("}%").toString();
+                    conditionOp = String.format(" %s %s %s %s", "and", conditionInfo.getDbColumnName(), conditionInfo.getOp(), like);
                 } else {
-                    op = String.format(" %s %s %s #{%s}", "and", conditionInfo.getDbColumnName(), conditionInfo.getOp(), conditionInfo.getJavaColumnName());
+                    conditionOp = String.format(" %s %s %s #{%s}", "and", conditionInfo.getDbColumnName(), conditionInfo.getOp(), conditionEntityJavaColumnName);
                 }
                 if (methodInfo.getDynamic()) {
                     Element ifElement = trimElement.addElement("if");
                     ifElement.addAttribute("test", String.format("%s != null", conditionInfo.getJavaColumnName()));
-                    ifElement.addText(op);
+                    ifElement.addText(conditionOp);
                 } else {
-                    trimElement.addText(op);
+                    trimElement.addText(conditionOp);
                 }
                 return;
-            }
+            }*/
 
-            if (methodInfo.getDynamic()) {
+            this.processMethodCondition(entityInfo, methodInfo, columnInfo, conditionInfo, trimElement);
+            /*if (methodInfo.getDynamic()) {
                 List<MethodParamInfo> methodParamInfoList = conditionInfo.getMethodParamInfoList();
                 Element ifElement = trimElement.addElement("if");
                 ifElement.addAttribute("test", String.format("%s != null", methodParamInfoList.get(0).getParamName()));
                 buildCondition(ifElement, entityInfo, columnInfo, conditionInfo);
             } else {
                 buildCondition(trimElement, entityInfo, columnInfo, conditionInfo);
-            }
+            }*/
         });
 
         // 查询不需要乐观锁版本条件
@@ -76,7 +79,37 @@ public class WhereTemplateHandler {
         }
     }
 
-    public void buildCondition(Element parentElement, EntityInfo entityInfo, ColumnInfo columnInfo, ConditionInfo conditionInfo) {
+
+    private void processId(Element trimElement, EntityInfo entityInfo, Boolean dynamic) {
+        List<ColumnInfo> idColumnInfoList = entityInfo.getIdColumnInfoList();
+        for (int i = 0; i < idColumnInfoList.size(); i++) {
+            ColumnInfo idColumnInfo = idColumnInfoList.get(i);
+            if (dynamic) {
+                Element ifElement = trimElement.addElement("if");
+                ifElement.addAttribute("test", String.format("%s != null", idColumnInfo.getJavaColumnName()));
+                ifElement.addText(String.format(" %s %s %s #{%s}", "and", idColumnInfo.getDbColumnName(), "=", idColumnInfo.getJavaColumnName()));
+            } else {
+                trimElement.addText(String.format(" %s %s %s #{%s}", "and", idColumnInfo.getDbColumnName(), "=", idColumnInfo.getJavaColumnName()));
+            }
+        }
+    }
+
+    private void processMethodCondition(EntityInfo entityInfo, MethodInfo methodInfo, ColumnInfo columnInfo, ConditionInfo conditionInfo, Element trimElement) {
+        Boolean conditionEntity = conditionInfo.getConditionEntity();
+        if (conditionEntity) {
+            return;
+        }
+        if (methodInfo.getDynamic()) {
+            List<MethodParamInfo> methodParamInfoList = conditionInfo.getMethodParamInfoList();
+            Element ifElement = trimElement.addElement("if");
+            ifElement.addAttribute("test", String.format("%s != null", methodParamInfoList.get(0).getParamName()));
+            buildMethodCondition(ifElement, entityInfo, columnInfo, conditionInfo);
+        } else {
+            buildMethodCondition(trimElement, entityInfo, columnInfo, conditionInfo);
+        }
+    }
+
+    private void buildMethodCondition(Element parentElement, EntityInfo entityInfo, ColumnInfo columnInfo, ConditionInfo conditionInfo) {
         List<MethodParamInfo> methodParamInfoList = conditionInfo.getMethodParamInfoList();
         String op = conditionInfo.getOp();
         parentElement.addText(String.format(" %s %s %s ", conditionInfo.getLinkOp(), conditionInfo.getDbColumnName(), op));
@@ -102,17 +135,25 @@ public class WhereTemplateHandler {
         }
     }
 
-    private void processId(Element trimElement, EntityInfo entityInfo, Boolean dynamic) {
-        List<ColumnInfo> idColumnInfoList = entityInfo.getIdColumnInfoList();
-        for (int i = 0; i < idColumnInfoList.size(); i++) {
-            ColumnInfo idColumnInfo = idColumnInfoList.get(i);
-            if (dynamic) {
-                Element ifElement = trimElement.addElement("if");
-                ifElement.addAttribute("test", String.format("%s != null", idColumnInfo.getJavaColumnName()));
-                ifElement.addText(String.format(" %s %s %s #{%s}", "and", idColumnInfo.getDbColumnName(), "=", idColumnInfo.getJavaColumnName()));
-            } else {
-                trimElement.addText(String.format(" %s %s %s #{%s}", "and", idColumnInfo.getDbColumnName(), "=", idColumnInfo.getJavaColumnName()));
-            }
+    private void processEntityCondition(MethodInfo methodInfo, ConditionInfo conditionInfo, Element trimElement) {
+        Boolean conditionEntity = conditionInfo.getConditionEntity();
+        if (!conditionEntity) {
+            return;
+        }
+        String conditionEntityJavaColumnName = conditionInfo.getConditionEntityJavaColumnName();
+        String conditionOp;
+        if ("like".equals(conditionInfo.getOp())) {
+            String like = new StringBuilder("%#{").append(conditionEntityJavaColumnName).append("}%").toString();
+            conditionOp = String.format(" %s %s %s %s", "and", conditionInfo.getDbColumnName(), conditionInfo.getOp(), like);
+        } else {
+            conditionOp = String.format(" %s %s %s #{%s}", "and", conditionInfo.getDbColumnName(), conditionInfo.getOp(), conditionEntityJavaColumnName);
+        }
+        if (methodInfo.getDynamic()) {
+            Element ifElement = trimElement.addElement("if");
+            ifElement.addAttribute("test", String.format("%s != null", conditionInfo.getJavaColumnName()));
+            ifElement.addText(conditionOp);
+        } else {
+            trimElement.addText(conditionOp);
         }
     }
 

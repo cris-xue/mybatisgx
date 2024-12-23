@@ -32,7 +32,11 @@ public class ConditionInfo {
     /**
      * 条件实体
      */
-    private Boolean conditionEntity;
+    private Boolean conditionEntity = false;
+    /**
+     * 原始java字段
+     */
+    private String conditionEntityJavaColumnName;
     /**
      * 方法参数信息列表
      */
@@ -103,6 +107,14 @@ public class ConditionInfo {
 
     public void setConditionEntity(Boolean conditionEntity) {
         this.conditionEntity = conditionEntity;
+    }
+
+    public String getConditionEntityJavaColumnName() {
+        return conditionEntityJavaColumnName;
+    }
+
+    public void setConditionEntityJavaColumnName(String conditionEntityJavaColumnName) {
+        this.conditionEntityJavaColumnName = conditionEntityJavaColumnName;
     }
 
     public List<MethodParamInfo> getMethodParamInfoList() {

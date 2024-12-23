@@ -97,6 +97,7 @@ public class MethodNameAstHandler {
         int childCount = whereClause.getChildCount();
         for (int i = 0; i < childCount; i++) {
             ConditionInfo conditionInfo = new ConditionInfo();
+            conditionInfo.setIndex(i);
             ParseTree whereItem = whereClause.getChild(i);
             parseWhereItem(entityInfo, conditionInfo, conditionEntity, whereItem);
             conditionInfoList.add(conditionInfo);
@@ -111,7 +112,6 @@ public class MethodNameAstHandler {
             String token = parseTreeChild.getText();
             if (parseTreeChild instanceof MethodNameParser.Where_link_op_clauseContext) {
                 conditionInfo.setConditionEntity(conditionEntity);
-                // conditionInfo.setIndex(conditionInfoList.size() - 1);
                 conditionInfo.setOrigin(parseTreeChild.getText());
                 conditionInfo.setLinkOp(TOKEN_MAP.get(token));
             } else if (parseTreeChild instanceof MethodNameParser.Field_condition_op_clauseContext) {
@@ -121,11 +121,9 @@ public class MethodNameAstHandler {
             } else if (parseTreeChild instanceof MethodNameParser.Field_clauseContext) {
                 String javaColumnName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, token);
                 ColumnInfo columnInfo = entityInfo.getColumnInfo(javaColumnName);
-            /*if (columnInfo == null) {
-                conditionInfoList.remove(conditionInfo);
-                i = childCount;
-                continue;
-            }*/
+                if (columnInfo == null) {
+                    throw new RuntimeException("方法条件或者实体中条件与数据库库实体无法对应：" + javaColumnName);
+                }
                 conditionInfo.setDbColumnName(columnInfo.getDbColumnName());
                 conditionInfo.setJavaColumnName(columnInfo.getJavaColumnName());
             } else if (parseTreeChild instanceof MethodNameParser.Condition_op_clauseContext) {

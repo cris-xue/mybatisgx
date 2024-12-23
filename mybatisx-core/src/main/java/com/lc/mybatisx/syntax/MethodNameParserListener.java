@@ -138,6 +138,16 @@ public interface MethodNameParserListener extends ParseTreeListener {
 	 */
 	void exitWhere_link_op_clause(MethodNameParser.Where_link_op_clauseContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link MethodNameParser#field_condition_op_clause}.
+	 * @param ctx the parse tree
+	 */
+	void enterField_condition_op_clause(MethodNameParser.Field_condition_op_clauseContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MethodNameParser#field_condition_op_clause}.
+	 * @param ctx the parse tree
+	 */
+	void exitField_condition_op_clause(MethodNameParser.Field_condition_op_clauseContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link MethodNameParser#condition_op_clause}.
 	 * @param ctx the parse tree
 	 */

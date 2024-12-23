@@ -150,7 +150,7 @@ public class WhereTemplateHandler {
         }
         if (methodInfo.getDynamic()) {
             Element ifElement = trimElement.addElement("if");
-            ifElement.addAttribute("test", String.format("%s != null", conditionInfo.getJavaColumnName()));
+            ifElement.addAttribute("test", String.format("%s != null", conditionEntityJavaColumnName));
             ifElement.addText(conditionOp);
         } else {
             trimElement.addText(conditionOp);

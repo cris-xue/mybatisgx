@@ -1,15 +1,20 @@
 package com.lc.mybatisx;
 
+import com.lc.mybatisx.annotation.handler.GenerateValueChain;
+import com.lc.mybatisx.annotation.handler.IdGenerateValueHandler;
 import com.lc.mybatisx.dao.Dao;
+import com.lc.mybatisx.ext.MybatisxXMLLanguageDriver;
 import com.lc.mybatisx.ext.MybatisxXMLMapperBuilder;
 import com.lc.mybatisx.utils.FreeMarkerUtils;
 import freemarker.template.Template;
 import org.apache.ibatis.io.Resources;
+import org.apache.ibatis.scripting.LanguageDriver;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSessionFactory;
-import org.mybatis.logging.Logger;
-import org.mybatis.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
@@ -27,12 +32,15 @@ import java.util.*;
 
 public class SqlSessionFactoryBeanPostProcessor implements BeanPostProcessor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MybatisxSqlSessionFactoryBean.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SqlSessionFactoryBeanPostProcessor.class);
 
     private static final ResourcePatternResolver RESOURCE_PATTERN_RESOLVER = new PathMatchingResourcePatternResolver();
     private static final MetadataReaderFactory METADATA_READER_FACTORY = new CachingMetadataReaderFactory();
 
     private String[] packagePatternArray;
+
+    @Autowired
+    private IdGenerateValueHandler<?> idGenerateValueHandler;
 
     public SqlSessionFactoryBeanPostProcessor(String[] packagePatternArray) {
         this.packagePatternArray = packagePatternArray;
@@ -41,7 +49,7 @@ public class SqlSessionFactoryBeanPostProcessor implements BeanPostProcessor {
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
         if (bean instanceof SqlSessionFactory) {
-            System.out.println("SqlSessionFactoryBean 初始化前的逻辑");
+            LOGGER.info("SqlSessionFactoryBean 初始化前的逻辑");
         }
         return bean;
     }
@@ -49,12 +57,15 @@ public class SqlSessionFactoryBeanPostProcessor implements BeanPostProcessor {
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         if (bean instanceof SqlSessionFactory) {
+            LOGGER.info("SqlSessionFactoryBean 初始化完成");
             SqlSessionFactory sqlSessionFactory = (SqlSessionFactory) bean;
             Configuration configuration = sqlSessionFactory.getConfiguration();
             curdMethod(configuration);
-        }
-        if (bean instanceof MybatisxProperties) {
-            System.out.printf(beanName);
+            LanguageDriver languageDriver = configuration.getDefaultScriptingLanguageInstance();
+            if (languageDriver.getClass() == MybatisxXMLLanguageDriver.class) {
+                MybatisxXMLLanguageDriver mybatisxXMLLanguageDriver = (MybatisxXMLLanguageDriver) languageDriver;
+                mybatisxXMLLanguageDriver.setIdGenerateValueHandler(new GenerateValueChain(idGenerateValueHandler));
+            }
         }
         return bean;
     }
@@ -130,7 +141,7 @@ public class SqlSessionFactoryBeanPostProcessor implements BeanPostProcessor {
                         classes.add(resource);
                     }
                 } catch (Throwable e) {
-                    LOGGER.warn(() -> "Cannot load the '" + resource + "'. Cause by " + e.toString());
+                    LOGGER.warn("Cannot load the '" + resource + "'. Cause by " + e.toString());
                 }
             }
         }

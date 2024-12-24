@@ -92,7 +92,7 @@ public class EntityInfo {
                 logicDeleteColumnInfo = columnInfo;
             }
             GenerateValueHandler generateValueHandler = columnInfo.getGenerateValueHandler();
-            if (generateValueHandler != null) {
+            if (id != null || generateValueHandler != null) {
                 generateValueColumnInfoList.add(columnInfo);
             }
 

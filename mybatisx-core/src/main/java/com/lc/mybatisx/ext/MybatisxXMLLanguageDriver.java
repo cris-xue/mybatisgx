@@ -1,6 +1,6 @@
 package com.lc.mybatisx.ext;
 
-import com.lc.mybatisx.annotation.handler.GenerateValueHandler;
+import com.lc.mybatisx.annotation.handler.GenerateValueChain;
 import com.lc.mybatisx.context.EntityInfoContextHolder;
 import com.lc.mybatisx.model.ColumnInfo;
 import com.lc.mybatisx.model.EntityInfo;
@@ -21,6 +21,8 @@ import java.util.List;
  * @date ：2020/8/17 17:48
  */
 public class MybatisxXMLLanguageDriver extends XMLLanguageDriver {
+
+    private GenerateValueChain generateValueChain;
 
     @Override
     public ParameterHandler createParameterHandler(MappedStatement mappedStatement, Object parameterObject, BoundSql boundSql) {
@@ -46,11 +48,14 @@ public class MybatisxXMLLanguageDriver extends XMLLanguageDriver {
         for (ColumnInfo generateValueColumnInfo : generateValueColumnInfoList) {
             String javaColumnName = generateValueColumnInfo.getJavaColumnName();
             Object originalValue = metaObject.getValue(javaColumnName);
-            GenerateValueHandler generateValueHandler = generateValueColumnInfo.getGenerateValueHandler();
-            Object value = generateValueHandler.next(sqlCommandType, generateValueColumnInfo, originalValue);
+            Object value = this.generateValueChain.next(sqlCommandType, generateValueColumnInfo, originalValue);
             metaObject.setValue(javaColumnName, value);
         }
         return metaObject.getOriginalObject();
+    }
+
+    public void setIdGenerateValueHandler(GenerateValueChain generateValueChain) {
+        this.generateValueChain = generateValueChain;
     }
 
 }

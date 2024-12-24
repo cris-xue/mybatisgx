@@ -22,7 +22,7 @@ public class MybatisxExcludeAutoConfigFilter implements AutoConfigurationImportF
     private static Logger logger = LoggerFactory.getLogger(MybatisxExcludeAutoConfigFilter.class);
 
     private final Set<String> EXCLUDE_AUTOCONFIG = new HashSet<>(
-            Arrays.asList(MybatisAutoConfiguration.class.getName())
+            // Arrays.asList(MybatisAutoConfiguration.class.getName())
     );
 
     @Override

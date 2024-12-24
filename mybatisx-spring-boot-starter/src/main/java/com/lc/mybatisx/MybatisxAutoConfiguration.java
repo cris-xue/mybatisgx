@@ -27,11 +27,11 @@ import java.util.List;
  * description: CustomMybatisAutoConfiguration是完全使用的spring boot mybatis的源码，仅仅只在98行替换了自定义CustomSqlSessionFactoryBean
  * create time: 2019/5/9 17:54
  */
-@Import({MetaObjectHandlerConverter.class})
-@ConditionalOnClass({SqlSessionFactory.class, MybatisxSqlSessionFactoryBean.class})
+// @Import({MetaObjectHandlerConverter.class})
+/*@ConditionalOnClass({SqlSessionFactory.class, MybatisxSqlSessionFactoryBean.class})
 @ConditionalOnSingleCandidate(DataSource.class)
 @EnableConfigurationProperties(MybatisxProperties.class)
-@AutoConfigureAfter(DataSourceAutoConfiguration.class)
+@AutoConfigureAfter(DataSourceAutoConfiguration.class)*/
 public class MybatisxAutoConfiguration extends MybatisAutoConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(MybatisxAutoConfiguration.class);

@@ -70,7 +70,14 @@ public class InsertTemplateHandler {
                 String javaColumnName = columnInfo.getJavaColumnName();
                 String dbColumnName = columnInfo.getDbColumnName();
                 Lock lock = columnInfo.getLock();
-                LogicDelete delete = columnInfo.getLogicDelete();
+
+                LogicDelete logicDelete = columnInfo.getLogicDelete();
+                if (logicDelete != null) {
+                    String javaColumn = String.format("%s,", dbColumnName);
+                    dbTrimElement.addText(javaColumn);
+                    continue;
+                }
+
                 if (methodInfo.getDynamic()) {
                     Element javaTrimIfElement = dbTrimElement.addElement("if");
                     javaTrimIfElement.addAttribute("test", buildTestNotNull(javaColumnName));
@@ -92,10 +99,16 @@ public class InsertTemplateHandler {
             for (int j = 0; j < columnInfoList.size(); j++) {
                 ColumnInfo columnInfo = columnInfoList.get(j);
                 String javaColumnName = columnInfo.getJavaColumnName();
-                String dbColumnName = columnInfo.getDbColumnName();
                 String typeHandler = columnInfo.getTypeHandler();
                 Lock lock = columnInfo.getLock();
-                LogicDelete delete = columnInfo.getLogicDelete();
+
+                LogicDelete logicDelete = columnInfo.getLogicDelete();
+                if (logicDelete != null) {
+                    String javaColumn = String.format("%s%s,", logicDelete.show(), buildTypeHandler(typeHandler));
+                    javaTrimElement.addText(javaColumn);
+                    continue;
+                }
+
                 if (methodInfo.getDynamic()) {
                     Element javaTrimIfElement = javaTrimElement.addElement("if");
                     javaTrimIfElement.addAttribute("test", buildTestNotNull(javaColumnName));

@@ -13,12 +13,12 @@ public class GenerateValueChain {
     }
 
     public Object next(SqlCommandType sqlCommandType, ColumnInfo columnInfo, Object originalValue) {
+        GenerateValueHandler<?> generateValueHandler = columnInfo.getGenerateValueHandler();
+        if (generateValueHandler != null) {
+            return generateValueHandler.next(sqlCommandType, columnInfo, originalValue);
+        }
         Id id = columnInfo.getId();
         if (id != null) {
-            GenerateValueHandler<?> generateValueHandler = columnInfo.getGenerateValueHandler();
-            if (generateValueHandler != null) {
-                return generateValueHandler.next(sqlCommandType, columnInfo, originalValue);
-            }
             return this.idGenerateValueHandler.next(sqlCommandType, columnInfo, originalValue);
         }
         return originalValue;

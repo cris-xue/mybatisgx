@@ -61,6 +61,8 @@ public class SqlSessionFactoryBeanPostProcessor implements BeanPostProcessor {
             SqlSessionFactory sqlSessionFactory = (SqlSessionFactory) bean;
             Configuration configuration = sqlSessionFactory.getConfiguration();
             curdMethod(configuration);
+
+            configuration.setDefaultScriptingLanguage(MybatisxXMLLanguageDriver.class);
             LanguageDriver languageDriver = configuration.getDefaultScriptingLanguageInstance();
             if (languageDriver.getClass() == MybatisxXMLLanguageDriver.class) {
                 MybatisxXMLLanguageDriver mybatisxXMLLanguageDriver = (MybatisxXMLLanguageDriver) languageDriver;

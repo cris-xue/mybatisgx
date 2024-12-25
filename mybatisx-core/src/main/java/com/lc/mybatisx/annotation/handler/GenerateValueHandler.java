@@ -7,4 +7,12 @@ public interface GenerateValueHandler<T> {
 
     T next(SqlCommandType sqlCommandType, ColumnInfo columnInfo, Object originalValue);
 
+    default T insert(SqlCommandType sqlCommandType, ColumnInfo columnInfo, Object originalValue) {
+        return null;
+    }
+
+    default T update(SqlCommandType sqlCommandType, ColumnInfo columnInfo, Object originalValue) {
+        return null;
+    }
+
 }

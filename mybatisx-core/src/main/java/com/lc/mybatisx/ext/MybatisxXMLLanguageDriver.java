@@ -1,5 +1,6 @@
 package com.lc.mybatisx.ext;
 
+import com.lc.mybatisx.annotation.GenerateValue;
 import com.lc.mybatisx.annotation.Id;
 import com.lc.mybatisx.annotation.handler.GenerateValueHandler;
 import com.lc.mybatisx.annotation.handler.IdGenerateValueHandler;
@@ -68,14 +69,23 @@ public class MybatisxXMLLanguageDriver extends XMLLanguageDriver {
         javaColumnInfo.setId(columnInfo.getId());
         javaColumnInfo.setLock(columnInfo.getLock());
         javaColumnInfo.setLogicDelete(columnInfo.getLogicDelete());
+        javaColumnInfo.setGenerateValue(columnInfo.getGenerateValue());
 
-        GenerateValueHandler<?> generateValueHandler = columnInfo.getGenerateValueHandler();
-        if (generateValueHandler != null) {
-            return generateValueHandler.next(sqlCommandType, javaColumnInfo, originalValue);
+        GenerateValue generateValue = columnInfo.getGenerateValue();
+        if (generateValue != null) {
+            GenerateValueHandler generateValueHandler = columnInfo.getGenerateValueHandler();
+            Boolean insert = generateValue.insert();
+            if (insert && sqlCommandType == SqlCommandType.INSERT) {
+                return generateValueHandler.insert(javaColumnInfo, originalValue);
+            }
+            Boolean update = generateValue.update();
+            if (update && sqlCommandType == SqlCommandType.UPDATE) {
+                return generateValueHandler.update(javaColumnInfo, originalValue);
+            }
         }
         Id id = columnInfo.getId();
-        if (id != null) {
-            return this.idGenerateValueHandler.next(sqlCommandType, javaColumnInfo, originalValue);
+        if (id != null && sqlCommandType == SqlCommandType.INSERT) {
+            return this.idGenerateValueHandler.insert(javaColumnInfo, originalValue);
         }
         return originalValue;
     }

@@ -86,6 +86,7 @@ public class ColumnInfoHandler {
             GenerateValue generateValue = field.getAnnotation(GenerateValue.class);
             if (generateValue != null) {
                 GenerateValueHandler generateValueHandler = generateValue.handler().newInstance();
+                columnInfo.setGenerateValue(generateValue);
                 columnInfo.setGenerateValueHandler(generateValueHandler);
             }
         } catch (InstantiationException e) {

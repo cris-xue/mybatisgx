@@ -1,5 +1,6 @@
 package com.lc.mybatisx.annotation.handler;
 
+import com.lc.mybatisx.annotation.GenerateValue;
 import com.lc.mybatisx.annotation.Id;
 import com.lc.mybatisx.annotation.Lock;
 import com.lc.mybatisx.annotation.LogicDelete;
@@ -26,6 +27,10 @@ public class JavaColumnInfo {
      * 是否是逻辑删除字段
      */
     private LogicDelete logicDelete;
+    /**
+     * 生成值注解
+     */
+    private GenerateValue generateValue;
 
     public Class<?> getType() {
         return type;
@@ -65,5 +70,13 @@ public class JavaColumnInfo {
 
     public void setLogicDelete(LogicDelete logicDelete) {
         this.logicDelete = logicDelete;
+    }
+
+    public GenerateValue getGenerateValue() {
+        return generateValue;
+    }
+
+    public void setGenerateValue(GenerateValue generateValue) {
+        this.generateValue = generateValue;
     }
 }

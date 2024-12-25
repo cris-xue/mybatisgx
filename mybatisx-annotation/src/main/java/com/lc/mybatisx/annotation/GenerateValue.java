@@ -14,4 +14,8 @@ public @interface GenerateValue {
 
     Class<? extends GenerateValueHandler<?>> handler();
 
+    boolean insert() default false;
+
+    boolean update() default false;
+
 }

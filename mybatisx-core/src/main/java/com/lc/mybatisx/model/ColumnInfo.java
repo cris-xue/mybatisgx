@@ -91,6 +91,10 @@ public class ColumnInfo {
      */
     private OneToMany oneToMany;
     /**
+     * 生成值注解
+     */
+    private GenerateValue generateValue;
+    /**
      * 字段值生成处理器
      */
     private GenerateValueHandler generateValueHandler;
@@ -275,6 +279,14 @@ public class ColumnInfo {
             this.mappedBy = oneToMany.mappedBy();
             this.associationSelect = true;
         }
+    }
+
+    public GenerateValue getGenerateValue() {
+        return generateValue;
+    }
+
+    public void setGenerateValue(GenerateValue generateValue) {
+        this.generateValue = generateValue;
     }
 
     public GenerateValueHandler getGenerateValueHandler() {

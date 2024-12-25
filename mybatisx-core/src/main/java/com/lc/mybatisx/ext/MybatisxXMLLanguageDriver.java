@@ -1,6 +1,9 @@
 package com.lc.mybatisx.ext;
 
-import com.lc.mybatisx.annotation.handler.GenerateValueChain;
+import com.lc.mybatisx.annotation.Id;
+import com.lc.mybatisx.annotation.handler.GenerateValueHandler;
+import com.lc.mybatisx.annotation.handler.IdGenerateValueHandler;
+import com.lc.mybatisx.annotation.handler.JavaColumnInfo;
 import com.lc.mybatisx.context.EntityInfoContextHolder;
 import com.lc.mybatisx.model.ColumnInfo;
 import com.lc.mybatisx.model.EntityInfo;
@@ -22,7 +25,7 @@ import java.util.List;
  */
 public class MybatisxXMLLanguageDriver extends XMLLanguageDriver {
 
-    private GenerateValueChain generateValueChain;
+    private IdGenerateValueHandler<?> idGenerateValueHandler;
 
     @Override
     public ParameterHandler createParameterHandler(MappedStatement mappedStatement, Object parameterObject, BoundSql boundSql) {
@@ -50,15 +53,35 @@ public class MybatisxXMLLanguageDriver extends XMLLanguageDriver {
             String javaColumnName = generateValueColumnInfo.getJavaColumnName();
             Class<?> javaColumnType = metaObject.getSetterType(javaColumnName);
             Object originalValue = metaObject.getValue(javaColumnName);
-            Object value = this.generateValueChain.next(sqlCommandType, generateValueColumnInfo, originalValue);
+
+            Object value = this.next(sqlCommandType, generateValueColumnInfo, javaColumnType, originalValue);
             // Object castValue = javaColumnType.cast(value);
             metaObject.setValue(javaColumnName, value);
         }
         return metaObject.getOriginalObject();
     }
 
-    public void setIdGenerateValueHandler(GenerateValueChain generateValueChain) {
-        this.generateValueChain = generateValueChain;
+    private Object next(SqlCommandType sqlCommandType, ColumnInfo columnInfo, Class<?> javaColumnType, Object originalValue) {
+        JavaColumnInfo javaColumnInfo = new JavaColumnInfo();
+        javaColumnInfo.setType(javaColumnType);
+        javaColumnInfo.setColumnName(columnInfo.getJavaColumnName());
+        javaColumnInfo.setId(columnInfo.getId());
+        javaColumnInfo.setLock(columnInfo.getLock());
+        javaColumnInfo.setLogicDelete(columnInfo.getLogicDelete());
+
+        GenerateValueHandler<?> generateValueHandler = columnInfo.getGenerateValueHandler();
+        if (generateValueHandler != null) {
+            return generateValueHandler.next(sqlCommandType, javaColumnInfo, originalValue);
+        }
+        Id id = columnInfo.getId();
+        if (id != null) {
+            return this.idGenerateValueHandler.next(sqlCommandType, javaColumnInfo, originalValue);
+        }
+        return originalValue;
+    }
+
+    public void setIdGenerateValueHandler(IdGenerateValueHandler<?> idGenerateValueHandler) {
+        this.idGenerateValueHandler = idGenerateValueHandler;
     }
 
 }

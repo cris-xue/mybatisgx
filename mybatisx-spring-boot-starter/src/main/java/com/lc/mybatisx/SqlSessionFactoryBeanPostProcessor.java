@@ -1,6 +1,5 @@
 package com.lc.mybatisx;
 
-import com.lc.mybatisx.annotation.handler.GenerateValueChain;
 import com.lc.mybatisx.annotation.handler.IdGenerateValueHandler;
 import com.lc.mybatisx.dao.Dao;
 import com.lc.mybatisx.ext.MybatisxXMLLanguageDriver;
@@ -66,7 +65,7 @@ public class SqlSessionFactoryBeanPostProcessor implements BeanPostProcessor {
             LanguageDriver languageDriver = configuration.getDefaultScriptingLanguageInstance();
             if (languageDriver.getClass() == MybatisxXMLLanguageDriver.class) {
                 MybatisxXMLLanguageDriver mybatisxXMLLanguageDriver = (MybatisxXMLLanguageDriver) languageDriver;
-                mybatisxXMLLanguageDriver.setIdGenerateValueHandler(new GenerateValueChain(idGenerateValueHandler));
+                mybatisxXMLLanguageDriver.setIdGenerateValueHandler(idGenerateValueHandler);
             }
         }
         return bean;

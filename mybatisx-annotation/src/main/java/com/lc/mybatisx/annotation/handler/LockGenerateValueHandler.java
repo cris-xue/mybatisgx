@@ -1,7 +1,6 @@
 package com.lc.mybatisx.annotation.handler;
 
 import com.lc.mybatisx.annotation.Lock;
-import com.lc.mybatisx.model.ColumnInfo;
 import org.apache.ibatis.mapping.SqlCommandType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,11 +10,8 @@ public class LockGenerateValueHandler implements GenerateValueHandler<Object> {
     private static final Logger LOGGER = LoggerFactory.getLogger(LockGenerateValueHandler.class);
 
     @Override
-    public Object next(SqlCommandType sqlCommandType, ColumnInfo columnInfo, Object originalValue) {
-        Lock lock = columnInfo.getLock();
-        if (lock == null) {
-            return originalValue;
-        }
+    public Object next(SqlCommandType sqlCommandType, JavaColumnInfo javaColumnInfo, Object originalValue) {
+        Lock lock = javaColumnInfo.getLock();
         if (sqlCommandType == SqlCommandType.INSERT) {
             return lock.initValue();
         }

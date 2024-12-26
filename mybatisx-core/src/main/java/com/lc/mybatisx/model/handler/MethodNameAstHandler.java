@@ -27,14 +27,14 @@ public class MethodNameAstHandler {
         TOKEN_MAP.put("And", "and");
         TOKEN_MAP.put("Or", "or");
 
-        TOKEN_MAP.put("Lt", "<![CDATA[ < ]]>");
-        TOKEN_MAP.put("Lteq", "<![CDATA[ <= ]]>");
-        TOKEN_MAP.put("Gt", "<![CDATA[ > ]]>");
-        TOKEN_MAP.put("Gteq", "<![CDATA[ >= ]]>");
+        TOKEN_MAP.put("Lt", "<");
+        TOKEN_MAP.put("Lteq", "<=");
+        TOKEN_MAP.put("Gt", ">");
+        TOKEN_MAP.put("Gteq", ">=");
         TOKEN_MAP.put("In", "in");
         TOKEN_MAP.put("Is", "=");
         TOKEN_MAP.put("Eq", "=");
-        TOKEN_MAP.put("Not", "<![CDATA[ <> ]]>");
+        TOKEN_MAP.put("Not", "<>");
         TOKEN_MAP.put("Like", "like");
     }
 

@@ -30,8 +30,7 @@ public class WhereTemplateHandler {
                 return;
             }
 
-            this.processEntityCondition(methodInfo, conditionInfo, whereElement, trimElement);
-            // this.processMethodCondition(entityInfo, methodInfo, columnInfo, conditionInfo, trimElement);
+            this.processCondition(methodInfo, conditionInfo, whereElement, trimElement);
         });
 
         // 查询不需要乐观锁版本条件
@@ -107,12 +106,7 @@ public class WhereTemplateHandler {
         }
     }
 
-    private void processEntityCondition(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement, Element trimElement) {
-        /*Boolean conditionEntity = conditionInfo.getConditionEntity();
-        if (!conditionEntity) {
-            return;
-        }*/
-
+    private void processCondition(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement, Element trimElement) {
         if ("like".equals(conditionInfo.getOp())) {
             whereLike(whereElement, trimElement, methodInfo, conditionInfo);
         } else if ("in".equals(conditionInfo.getOp())) {
@@ -120,15 +114,6 @@ public class WhereTemplateHandler {
         } else {
             whereCommon(whereElement, trimElement, methodInfo, conditionInfo);
         }
-
-        /*String conditionEntityJavaColumnName = conditionInfo.getConditionEntityJavaColumnName();
-        if (methodInfo.getDynamic()) {
-            Element ifElement = trimElement.addElement("if");
-            ifElement.addAttribute("test", String.format("%s != null", conditionEntityJavaColumnName));
-            ifElement.addText(conditionOp);
-        } else {
-            trimElement.addText(conditionOp);
-        }*/
     }
 
     private void whereCommon(Element whereElement, Element trimElement, MethodInfo methodInfo, ConditionInfo conditionInfo) {

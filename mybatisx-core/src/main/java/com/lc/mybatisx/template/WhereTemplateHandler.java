@@ -1,13 +1,14 @@
 package com.lc.mybatisx.template;
 
 import com.lc.mybatisx.annotation.Id;
-import com.lc.mybatisx.annotation.Lock;
 import com.lc.mybatisx.annotation.LogicDelete;
 import com.lc.mybatisx.model.*;
+import com.lc.mybatisx.utils.PropertyPlaceholderUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Element;
 
 import java.util.List;
+import java.util.Properties;
 
 public class WhereTemplateHandler {
 
@@ -20,7 +21,6 @@ public class WhereTemplateHandler {
         methodInfo.getConditionInfoList().forEach(conditionInfo -> {
             ColumnInfo columnInfo = entityInfo.getColumnInfo(conditionInfo.getJavaColumnName());
             Id id = columnInfo.getId();
-            Lock lock = columnInfo.getLock();
             LogicDelete logicDelete = columnInfo.getLogicDelete();
             if (id != null) {
                 processId(trimElement, entityInfo, methodInfo.getDynamic());
@@ -30,36 +30,8 @@ public class WhereTemplateHandler {
                 return;
             }
 
-            this.processEntityCondition(methodInfo, conditionInfo, trimElement);
-            /*Boolean conditionEntity = conditionInfo.getConditionEntity();
-            if (conditionEntity) {
-                String conditionEntityJavaColumnName = conditionInfo.getConditionEntityJavaColumnName();
-                String conditionOp;
-                if ("like".equals(conditionInfo.getOp())) {
-                    String like = new StringBuilder("%#{").append(conditionEntityJavaColumnName).append("}%").toString();
-                    conditionOp = String.format(" %s %s %s %s", "and", conditionInfo.getDbColumnName(), conditionInfo.getOp(), like);
-                } else {
-                    conditionOp = String.format(" %s %s %s #{%s}", "and", conditionInfo.getDbColumnName(), conditionInfo.getOp(), conditionEntityJavaColumnName);
-                }
-                if (methodInfo.getDynamic()) {
-                    Element ifElement = trimElement.addElement("if");
-                    ifElement.addAttribute("test", String.format("%s != null", conditionInfo.getJavaColumnName()));
-                    ifElement.addText(conditionOp);
-                } else {
-                    trimElement.addText(conditionOp);
-                }
-                return;
-            }*/
-
-            this.processMethodCondition(entityInfo, methodInfo, columnInfo, conditionInfo, trimElement);
-            /*if (methodInfo.getDynamic()) {
-                List<MethodParamInfo> methodParamInfoList = conditionInfo.getMethodParamInfoList();
-                Element ifElement = trimElement.addElement("if");
-                ifElement.addAttribute("test", String.format("%s != null", methodParamInfoList.get(0).getParamName()));
-                buildCondition(ifElement, entityInfo, columnInfo, conditionInfo);
-            } else {
-                buildCondition(trimElement, entityInfo, columnInfo, conditionInfo);
-            }*/
+            this.processEntityCondition(methodInfo, conditionInfo, whereElement, trimElement);
+            // this.processMethodCondition(entityInfo, methodInfo, columnInfo, conditionInfo, trimElement);
         });
 
         // 查询不需要乐观锁版本条件
@@ -135,26 +107,108 @@ public class WhereTemplateHandler {
         }
     }
 
-    private void processEntityCondition(MethodInfo methodInfo, ConditionInfo conditionInfo, Element trimElement) {
-        Boolean conditionEntity = conditionInfo.getConditionEntity();
+    private void processEntityCondition(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement, Element trimElement) {
+        /*Boolean conditionEntity = conditionInfo.getConditionEntity();
         if (!conditionEntity) {
             return;
-        }
-        String conditionEntityJavaColumnName = conditionInfo.getConditionEntityJavaColumnName();
-        String conditionOp;
+        }*/
+
         if ("like".equals(conditionInfo.getOp())) {
-            String like = new StringBuilder("%#{").append(conditionEntityJavaColumnName).append("}%").toString();
-            conditionOp = String.format(" %s %s %s %s", "and", conditionInfo.getDbColumnName(), conditionInfo.getOp(), like);
+            whereLike(whereElement, trimElement, methodInfo, conditionInfo);
+        } else if ("in".equals(conditionInfo.getOp())) {
+            whereIn(whereElement, trimElement, methodInfo, conditionInfo);
         } else {
-            conditionOp = String.format(" %s %s %s #{%s}", "and", conditionInfo.getDbColumnName(), conditionInfo.getOp(), conditionEntityJavaColumnName);
+            whereCommon(whereElement, trimElement, methodInfo, conditionInfo);
         }
+
+        /*String conditionEntityJavaColumnName = conditionInfo.getConditionEntityJavaColumnName();
         if (methodInfo.getDynamic()) {
             Element ifElement = trimElement.addElement("if");
             ifElement.addAttribute("test", String.format("%s != null", conditionEntityJavaColumnName));
             ifElement.addText(conditionOp);
         } else {
             trimElement.addText(conditionOp);
+        }*/
+    }
+
+    private void whereCommon(Element whereElement, Element trimElement, MethodInfo methodInfo, ConditionInfo conditionInfo) {
+        String javaColumnName = conditionInfo.getConditionEntity() ? conditionInfo.getConditionEntityJavaColumnName() : conditionInfo.getJavaColumnName();
+        Element trimOrIfElement = whereOpDynamic(methodInfo.getDynamic(), trimElement, javaColumnName);
+        String conditionOp = String.format(" %s %s %s #{%s}", "and", conditionInfo.getDbColumnName(), conditionInfo.getOp(), javaColumnName);
+        trimOrIfElement.addText(conditionOp);
+    }
+
+    /**
+     * <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(likeClientCode)">
+     * <bind name="likeClientCode" value="'%' + likeClientCode + '%'"/>
+     * and act.client_code like #{likeClientCode}
+     * </if>
+     */
+    private void whereLike(Element whereElement, Element trimElement, MethodInfo methodInfo, ConditionInfo conditionInfo) {
+        String javaColumnName = conditionInfo.getConditionEntity() ? conditionInfo.getConditionEntityJavaColumnName() : conditionInfo.getJavaColumnName();
+
+        String likeValueTemplate = "'%' + ${like} + '%'";
+        Properties properties = new Properties();
+        properties.setProperty("like", javaColumnName);
+        String likeValue = PropertyPlaceholderUtils.replace(likeValueTemplate, properties);
+
+        Element whereOrIfElement = whereBindDynamic(methodInfo.getDynamic(), whereElement, javaColumnName);
+        Element bindElement = whereOrIfElement.addElement("bind");
+        bindElement.addAttribute("name", javaColumnName);
+        bindElement.addAttribute("value", likeValue);
+
+        Element trimOrIfElement = whereOpDynamic(methodInfo.getDynamic(), trimElement, javaColumnName);
+        String conditionOp = String.format(" %s %s %s #{%s}", "and", conditionInfo.getDbColumnName(), conditionInfo.getOp(), javaColumnName);
+        trimOrIfElement.addText(conditionOp);
+    }
+
+    private void whereIn(Element whereElement, Element trimElement, MethodInfo methodInfo, ConditionInfo conditionInfo) {
+        String javaColumnName = conditionInfo.getConditionEntity() ? conditionInfo.getConditionEntityJavaColumnName() : conditionInfo.getJavaColumnName();
+
+        Element trimOrIfElement = whereOpDynamic(methodInfo.getDynamic(), trimElement, javaColumnName);
+
+        List<MethodParamInfo> methodParamInfoList = conditionInfo.getMethodParamInfoList();
+        String op = conditionInfo.getOp();
+        trimOrIfElement.addText(String.format(" %s %s %s ", conditionInfo.getLinkOp(), conditionInfo.getDbColumnName(), op));
+
+        Element foreachElement = trimOrIfElement.addElement("foreach");
+        foreachElement.addAttribute("index", "index");
+        foreachElement.addAttribute("item", "item");
+        foreachElement.addAttribute("collection", javaColumnName);
+        foreachElement.addAttribute("open", "(");
+        foreachElement.addAttribute("close", ")");
+        foreachElement.addAttribute("separator", ",");
+        foreachElement.addText("#{item}");
+    }
+
+    private Element whereOpDynamic(Boolean dynamic, Element trimElement, String javaColumnName) {
+        Element dynamicElement = trimElement;
+        if (dynamic) {
+            String testTemplate = "${test} != null";
+            Properties properties = new Properties();
+            properties.setProperty("test", javaColumnName);
+            String testValue = PropertyPlaceholderUtils.replace(testTemplate, properties);
+
+            Element ifElement = trimElement.addElement("if");
+            ifElement.addAttribute("test", testValue);
+            dynamicElement = ifElement;
         }
+        return dynamicElement;
+    }
+
+    private Element whereBindDynamic(Boolean dynamic, Element whereElement, String javaColumnName) {
+        Element dynamicElement = whereElement;
+        if (dynamic) {
+            String testTemplate = "${test} != null";
+            Properties properties = new Properties();
+            properties.setProperty("test", javaColumnName);
+            String testValue = PropertyPlaceholderUtils.replace(testTemplate, properties);
+
+            Element ifElement = whereElement.addElement("if");
+            ifElement.addAttribute("test", testValue);
+            dynamicElement = ifElement;
+        }
+        return dynamicElement;
     }
 
 }

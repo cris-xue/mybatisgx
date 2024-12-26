@@ -2,12 +2,11 @@ package com.lc.mybatisx;
 
 import com.lc.mybatisx.annotation.handler.IdGenerateValueHandler;
 import com.lc.mybatisx.dao.Dao;
-import com.lc.mybatisx.ext.MybatisxXMLLanguageDriver;
+import com.lc.mybatisx.ext.MybatisxConfiguration;
 import com.lc.mybatisx.ext.MybatisxXMLMapperBuilder;
 import com.lc.mybatisx.utils.FreeMarkerUtils;
 import freemarker.template.Template;
 import org.apache.ibatis.io.Resources;
-import org.apache.ibatis.scripting.LanguageDriver;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.slf4j.Logger;
@@ -61,12 +60,16 @@ public class SqlSessionFactoryBeanPostProcessor implements BeanPostProcessor {
             Configuration configuration = sqlSessionFactory.getConfiguration();
             curdMethod(configuration);
 
-            configuration.setDefaultScriptingLanguage(MybatisxXMLLanguageDriver.class);
-            LanguageDriver languageDriver = configuration.getDefaultScriptingLanguageInstance();
-            if (languageDriver.getClass() == MybatisxXMLLanguageDriver.class) {
-                MybatisxXMLLanguageDriver mybatisxXMLLanguageDriver = (MybatisxXMLLanguageDriver) languageDriver;
-                mybatisxXMLLanguageDriver.setIdGenerateValueHandler(idGenerateValueHandler);
+            if (configuration instanceof MybatisxConfiguration) {
+                MybatisxConfiguration mybatisxConfiguration = (MybatisxConfiguration) configuration;
+                mybatisxConfiguration.setIdGenerateValueHandler(idGenerateValueHandler);
             }
+        }
+        if (bean instanceof MybatisxProperties) {
+            MybatisxProperties mybatisxProperties = (MybatisxProperties) bean;
+        }
+        if (bean instanceof MybatisxConfiguration) {
+            MybatisxConfiguration mybatisxConfiguration = (MybatisxConfiguration) bean;
         }
         return bean;
     }

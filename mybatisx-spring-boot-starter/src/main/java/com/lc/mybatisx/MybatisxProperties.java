@@ -14,7 +14,7 @@ public class MybatisxProperties extends MybatisProperties {
     public static final String MYBATIS_PREFIX = "mybatisx";
 
     @NestedConfigurationProperty
-    private MybatisxConfiguration configuration;
+    private MybatisxConfiguration configuration = new MybatisxConfiguration();
 
     @Override
     public MybatisxConfiguration getConfiguration() {

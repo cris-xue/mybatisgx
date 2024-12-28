@@ -4,8 +4,11 @@ import com.google.common.base.CaseFormat;
 import com.lc.mybatisx.annotation.ConditionEntity;
 import com.lc.mybatisx.annotation.Dynamic;
 import com.lc.mybatisx.annotation.Entity;
+import com.lc.mybatisx.dao.Dao;
+import com.lc.mybatisx.dao.SimpleDao;
 import com.lc.mybatisx.model.*;
 import com.lc.mybatisx.utils.GenericUtils;
+import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.reflect.TypeUtils;
 import org.apache.ibatis.annotations.Param;
@@ -14,8 +17,10 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author ：薛承城
@@ -51,10 +56,13 @@ public class MethodInfoHandler {
     private ResultMapInfoHandler resultMapInfoHandler = new ResultMapInfoHandler();
 
     public List<MethodInfo> execute(MapperInfo mapperInfo, Class<?> interfaceClass) {
-        Method[] methods = interfaceClass.getMethods();
+        Map<String, MethodInfo> methodInfoMap = new LinkedHashMap<>();
 
-        List<MethodInfo> methodInfoList = new ArrayList<>();
-        for (Method method : methods) {
+        this.daoClass(interfaceClass, mapperInfo, methodInfoMap);
+
+        /*Method[] declaredMethods = interfaceClass.getDeclaredMethods();
+        processMethod(declaredMethods, mapperInfo, methodInfoMap);*/
+        /*for (Method method : declaredMethods) {
             String methodName = method.getName();
             List<MethodParamInfo> methodParamInfoList = getMethodParam(mapperInfo, method);
             MethodReturnInfo methodReturnInfo = getMethodReturn(mapperInfo, method);
@@ -76,9 +84,61 @@ public class MethodInfoHandler {
             // check(resultMapInfo, methodInfo);
 
             methodInfoList.add(methodInfo);
-        }
+        }*/
 
-        return methodInfoList;
+        /*Method[] methods = interfaceClass.getMethods();
+        processMethod(methods, mapperInfo, methodInfoMap);*/
+
+        return methodInfoMap.values().stream().collect(Collectors.toList());
+    }
+
+    private void daoClass(Class<?> daoClass, MapperInfo mapperInfo, Map<String, MethodInfo> methodInfoMap) {
+        Method[] declaredMethods = daoClass.getDeclaredMethods();
+        processMethod(declaredMethods, mapperInfo, methodInfoMap);
+
+        Type[] superInterfaces = daoClass.getGenericInterfaces();
+        for (int i = 0; i < superInterfaces.length; i++) {
+            Type type = superInterfaces[i];
+            if (type instanceof ParameterizedType) {
+                ParameterizedType parameterizedType = (ParameterizedType) type;
+                Class<?> superInterface = (Class<?>) parameterizedType.getRawType();
+                if (ClassUtils.isAssignable(superInterface, Dao.class)) {
+                    this.daoClass(superInterface, mapperInfo, methodInfoMap);
+                }
+            }
+        }
+    }
+
+    private void processMethod(Method[] methods, MapperInfo mapperInfo, Map<String, MethodInfo> methodInfoMap) {
+        for (Method method : methods) {
+            Class<?> methodDeclaringClass = method.getDeclaringClass();
+            String methodName = method.getName();
+            if (methodInfoMap.containsKey(methodName)) {
+                LOGGER.error("方法名{}已存在，请修改方法名！", methodName);
+                continue;
+            }
+
+            List<MethodParamInfo> methodParamInfoList = getMethodParam(mapperInfo, method);
+            MethodReturnInfo methodReturnInfo = getMethodReturn(mapperInfo, method);
+
+            MethodInfo methodInfo = new MethodInfo();
+            methodInfo.setMethod(method);
+            methodInfo.setMethodName(methodName);
+            methodInfo.setDynamic(method.getAnnotation(Dynamic.class) != null);
+            methodInfo.setMethodParamInfoList(methodParamInfoList);
+            methodInfo.setMethodReturnInfo(methodReturnInfo);
+
+            // 方法名解析
+            methodNameParse(mapperInfo.getEntityInfo(), methodInfo, methodDeclaringClass);
+
+            ResultMapInfo resultMapInfo = resultMapInfoHandler.execute(methodInfo, methodReturnInfo);
+            methodInfo.setResultMapInfo(resultMapInfo);
+
+            handleConditionParamInfo(methodInfo);
+            // check(resultMapInfo, methodInfo);
+
+            methodInfoMap.put(methodName, methodInfo);
+        }
     }
 
     /**
@@ -147,48 +207,46 @@ public class MethodInfoHandler {
         return methodReturnInfo;
     }
 
-    public void methodNameParse(EntityInfo entityInfo, MethodInfo methodInfo) {
+    public void methodNameParse(EntityInfo entityInfo, MethodInfo methodInfo, Class<?> methodDeclaringClass) {
         methodNameAstHandler.execute(entityInfo, methodInfo);
 
-        Boolean conditionEntity = false;
-        StringBuilder stringBuilder = new StringBuilder(methodInfo.getAction()).append("By");
-        if ("findList".equals(methodInfo.getMethodName())) {
-            List<MethodParamInfo> methodParamInfoList = methodInfo.getMethodParamInfoList();
-            for (MethodParamInfo methodParamInfo : methodParamInfoList) {
-                Entity entity = methodParamInfo.getType().getAnnotation(Entity.class);
-                if (entity != null) {
-                    List<ColumnInfo> columnInfoList = methodParamInfo.getColumnInfoList();
-                    columnInfoList.forEach(columnInfo -> {
-                        String javaColumnName = CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, columnInfo.getJavaColumnName());
-                        if (!stringBuilder.toString().endsWith("By")) {
-                            stringBuilder.append("And");
-                        }
-                        stringBuilder.append(javaColumnName);
-                    });
+        // 条件实体只有非SimpleDao方法才会处理，SimpleDao只有findList会特殊处理
+        if (methodDeclaringClass == SimpleDao.class) {
+            String methodName = methodInfo.getMethodName();
+            if ("findOne".equals(methodName) || "findList".equals(methodName)) {
+                List<MethodParamInfo> methodParamInfoList = methodInfo.getMethodParamInfoList();
+                for (MethodParamInfo methodParamInfo : methodParamInfoList) {
+                    Entity entity = methodParamInfo.getType().getAnnotation(Entity.class);
+                    if (entity != null) {
+                        String entityCondition = entityCondition(methodInfo, methodParamInfo);
+                        methodNameAstHandler.execute(entityInfo, methodInfo, true, entityCondition);
+                    }
                 }
             }
-            conditionEntity = true;
-        }
-
-        List<MethodParamInfo> methodParamInfoList = methodInfo.getMethodParamInfoList();
-        for (MethodParamInfo methodParamInfo : methodParamInfoList) {
-            ConditionEntity isConditionEntity = methodParamInfo.getType().getAnnotation(ConditionEntity.class);
-            if (isConditionEntity != null) {
-                List<ColumnInfo> columnInfoList = methodParamInfo.getColumnInfoList();
-                columnInfoList.forEach(columnInfo -> {
-                    String javaColumnName = CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, columnInfo.getJavaColumnName());
-                    if (!stringBuilder.toString().endsWith("By")) {
-                        stringBuilder.append("And");
-                    }
-                    stringBuilder.append(javaColumnName);
-                });
-                conditionEntity = true;
+        } else {
+            List<MethodParamInfo> methodParamInfoList = methodInfo.getMethodParamInfoList();
+            for (MethodParamInfo methodParamInfo : methodParamInfoList) {
+                ConditionEntity isConditionEntity = methodParamInfo.getType().getAnnotation(ConditionEntity.class);
+                if (isConditionEntity != null) {
+                    String entityCondition = entityCondition(methodInfo, methodParamInfo);
+                    methodNameAstHandler.execute(entityInfo, methodInfo, true, entityCondition);
+                }
             }
         }
+    }
+
+    private String entityCondition(MethodInfo methodInfo, MethodParamInfo methodParamInfo) {
+        StringBuilder stringBuilder = new StringBuilder(methodInfo.getAction()).append("By");
+        List<ColumnInfo> columnInfoList = methodParamInfo.getColumnInfoList();
+        columnInfoList.forEach(columnInfo -> {
+            String javaColumnName = CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, columnInfo.getJavaColumnName());
+            if (!stringBuilder.toString().endsWith("By")) {
+                stringBuilder.append("And");
+            }
+            stringBuilder.append(javaColumnName);
+        });
         LOGGER.debug(stringBuilder.toString());
-        if (conditionEntity) {
-            methodNameAstHandler.execute(entityInfo, methodInfo, conditionEntity, stringBuilder.toString());
-        }
+        return stringBuilder.toString();
     }
 
     /**

@@ -111,6 +111,8 @@ public class WhereTemplateHandler {
             whereLike(whereElement, trimElement, methodInfo, conditionInfo);
         } else if ("in".equals(conditionInfo.getOp())) {
             whereIn(whereElement, trimElement, methodInfo, conditionInfo);
+        } else if ("between".equals(conditionInfo.getOp())) {
+            whereBetween(whereElement, trimElement, methodInfo, conditionInfo);
         } else {
             whereCommon(whereElement, trimElement, methodInfo, conditionInfo);
         }
@@ -164,6 +166,13 @@ public class WhereTemplateHandler {
         foreachElement.addAttribute("close", ")");
         foreachElement.addAttribute("separator", ",");
         foreachElement.addText("#{item}");
+    }
+
+    private void whereBetween(Element whereElement, Element trimElement, MethodInfo methodInfo, ConditionInfo conditionInfo) {
+        String javaColumnName = conditionInfo.getConditionEntity() ? conditionInfo.getConditionEntityJavaColumnName() : conditionInfo.getJavaColumnName();
+        Element trimOrIfElement = whereOpDynamic(methodInfo.getDynamic(), trimElement, javaColumnName);
+        String conditionOp = String.format(" %s %s %s #{%s[0]} and #{%s[1]}", "and", conditionInfo.getDbColumnName(), conditionInfo.getOp(), javaColumnName, javaColumnName);
+        trimOrIfElement.addText(conditionOp);
     }
 
     private Element whereOpDynamic(Boolean dynamic, Element trimElement, String javaColumnName) {

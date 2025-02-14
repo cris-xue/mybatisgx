@@ -36,6 +36,7 @@ public class MethodNameAstHandler {
         TOKEN_MAP.put("Eq", "=");
         TOKEN_MAP.put("Not", "<>");
         TOKEN_MAP.put("Like", "like");
+        TOKEN_MAP.put("Between", "between");
     }
 
     public void execute(EntityInfo entityInfo, MethodInfo methodInfo) {

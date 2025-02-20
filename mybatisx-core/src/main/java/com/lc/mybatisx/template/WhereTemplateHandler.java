@@ -46,7 +46,7 @@ public class WhereTemplateHandler {
         ColumnInfo logicDeleteColumnInfo = entityInfo.getLogicDeleteColumnInfo();
         if (logicDeleteColumnInfo != null) {
             LogicDelete logicDelete = logicDeleteColumnInfo.getLogicDelete();
-            trimElement.addText(String.format(" and %s = %s", logicDeleteColumnInfo.getDbColumnName(), logicDelete.show()));
+            trimElement.addText(String.format(" and %s = '%s'", logicDeleteColumnInfo.getDbColumnName(), logicDelete.show()));
         }
     }
 

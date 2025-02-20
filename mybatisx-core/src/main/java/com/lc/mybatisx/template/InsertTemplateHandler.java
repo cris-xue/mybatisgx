@@ -104,7 +104,7 @@ public class InsertTemplateHandler {
 
                 LogicDelete logicDelete = columnInfo.getLogicDelete();
                 if (logicDelete != null) {
-                    String javaColumn = String.format("%s%s,", logicDelete.show(), buildTypeHandler(typeHandler));
+                    String javaColumn = String.format("'%s'%s,", logicDelete.show(), buildTypeHandler(typeHandler));
                     javaTrimElement.addText(javaColumn);
                     continue;
                 }

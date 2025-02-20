@@ -69,7 +69,7 @@ public class UpdateTemplateHandler {
             }
 
             if (logicDelete != null) {
-                String javaColumn = String.format("%s = %s, ", dbColumnName, logicDelete.show());
+                String javaColumn = String.format("%s = '%s', ", dbColumnName, logicDelete.show());
                 setTrimElement.addText(javaColumn);
                 continue;
             }

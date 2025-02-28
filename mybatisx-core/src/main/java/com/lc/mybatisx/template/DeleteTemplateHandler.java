@@ -36,7 +36,6 @@ public class DeleteTemplateHandler {
             deleteElement = delete(mapperElement, entityInfo, methodInfo);
         } else {
             deleteElement = update(mapperElement, entityInfo, methodInfo, logicDeleteColumnInfo);
-
         }
         whereTemplateHandler.execute(deleteElement, mapperInfo.getEntityInfo(), methodInfo);
 
@@ -62,7 +61,7 @@ public class DeleteTemplateHandler {
         updateElement.addAttribute("id", methodInfo.getMethodName());
         updateElement.addText(String.format("update %s", entityInfo.getTableName()));
         Element setElement = updateElement.addElement("set");
-        String javaColumn = String.format("%s = %s", dbColumnName, logicDelete.hide());
+        String javaColumn = String.format("%s = '%s'", dbColumnName, logicDelete.hide());
         setElement.addText(javaColumn);
         return updateElement;
     }

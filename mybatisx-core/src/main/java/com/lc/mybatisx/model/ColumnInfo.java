@@ -55,6 +55,10 @@ public class ColumnInfo {
      */
     private LogicDelete logicDelete;
     /**
+     * 是否是租户字段
+     */
+    private TenantId tenantId;
+    /**
      * 是否是外键
      */
     private Boolean foreignKey = false;
@@ -188,6 +192,14 @@ public class ColumnInfo {
 
     public void setLogicDelete(LogicDelete logicDelete) {
         this.logicDelete = logicDelete;
+    }
+
+    public TenantId getTenantId() {
+        return tenantId;
+    }
+
+    public void setTenantId(TenantId tenantId) {
+        this.tenantId = tenantId;
     }
 
     public Boolean getForeignKey() {

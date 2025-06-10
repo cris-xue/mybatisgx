@@ -15,5 +15,5 @@ public @interface ConditionGroup {
 
     String name();
 
-    ConditionGroup[] value();
+    // ConditionGroup[] value();
 }

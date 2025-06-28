@@ -45,7 +45,7 @@ public class UpdateTemplateHandler {
         whereTemplateHandler.execute(updateElement, mapperInfo.getEntityInfo(), methodInfo);
 
         String insertXmlString = document.asXML();
-        logger.info(insertXmlString);
+        logger.debug(insertXmlString);
         XPathParser xPathParser = XmlUtils.processXml(insertXmlString);
         XNode xNode = xPathParser.evalNode("/mapper/update");
         return xNode;

@@ -40,9 +40,9 @@ public class ResultMapInfo {
      */
     private Map<String, ColumnInfo> columnInfoMap;
     /**
-     * 表关联信息
+     * 关联信息
      */
-    private List<AssociationTableInfo> associationTableInfoList;
+    private List<ResultMapAssociationInfo> resultMapAssociationInfoList;
 
     public String getId() {
         return id;
@@ -88,11 +88,11 @@ public class ResultMapInfo {
         this.columnInfoMap = columnInfoMap;
     }
 
-    public List<AssociationTableInfo> getAssociationTableInfoList() {
-        return associationTableInfoList;
+    public List<ResultMapAssociationInfo> getResultMapAssociationInfoList() {
+        return resultMapAssociationInfoList;
     }
 
-    public void setAssociationTableInfoList(List<AssociationTableInfo> associationTableInfoList) {
-        this.associationTableInfoList = associationTableInfoList;
+    public void setResultMapAssociationInfoList(List<ResultMapAssociationInfo> resultMapAssociationInfoList) {
+        this.resultMapAssociationInfoList = resultMapAssociationInfoList;
     }
 }

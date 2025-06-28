@@ -11,7 +11,6 @@ import org.apache.ibatis.parsing.XPathParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,24 +21,25 @@ public class CurdTemplateHandler {
 
     private AssociationSelectTemplateHandler associationSelectTemplateHandler = new AssociationSelectTemplateHandler();
 
-    public List<XNode> execute(MapperInfo mapperInfo) {
+    public Map<String, XNode> execute(MapperInfo mapperInfo) {
         List<MethodInfo> methodInfoList = mapperInfo.getMethodInfoList();
-        List<XNode> xNodeList = new ArrayList<>(15);
+        Map<String, XNode> xNodeMap = new HashMap(15);
         for (int i = 0; i < methodInfoList.size(); i++) {
             MethodInfo methodInfo = methodInfoList.get(i);
             String action = methodInfo.getAction();
             if (StringUtils.isBlank(action)) {
+                logger.error("错误的逻辑处理");
                 XNode xNode = simpleTemplateHandle(mapperInfo, methodInfo);
-                xNodeList.add(xNode);
+                xNodeMap.put(methodInfo.getMethodName(), xNode);
             } else {
                 XNode xNode = complexTemplateHandle(mapperInfo, methodInfo);
-                xNodeList.add(xNode);
+                xNodeMap.put(methodInfo.getMethodName(), xNode);
             }
         }
 
-        List<XNode> associationSelectXNodeList = associationSelectTemplateHandler.execute(mapperInfo, methodInfoList);
-        xNodeList.addAll(associationSelectXNodeList);
-        return xNodeList;
+        /*List<XNode> associationSelectXNodeList = associationSelectTemplateHandler.execute(mapperInfo, methodInfoList);
+        xNodeList.addAll(associationSelectXNodeList);*/
+        return xNodeMap;
     }
 
     private XNode simpleTemplateHandle(MapperInfo mapperInfo, MethodInfo methodInfo) {
@@ -81,7 +81,7 @@ public class CurdTemplateHandler {
         Map<String, Object> templateData = new HashMap<>();
         templateData.put("mapperInfo", mapperInfo);
         templateData.put("methodInfo", methodInfo);
-        templateData.put("resultMapInfo", methodInfo.getResultMapInfo());
+        // templateData.put("resultMapInfo", methodInfo.getResultMapInfo());
 
         String methodXml = FreeMarkerUtils.processTemplate(templateData, template);
         XPathParser xPathParser = XmlUtils.processXml(methodXml);

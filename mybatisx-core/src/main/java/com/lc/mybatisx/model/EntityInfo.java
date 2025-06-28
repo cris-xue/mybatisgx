@@ -1,6 +1,8 @@
 package com.lc.mybatisx.model;
 
-import com.lc.mybatisx.annotation.*;
+import com.lc.mybatisx.annotation.Id;
+import com.lc.mybatisx.annotation.Lock;
+import com.lc.mybatisx.annotation.LogicDelete;
 import com.lc.mybatisx.annotation.handler.GenerateValueHandler;
 
 import java.util.ArrayList;
@@ -96,27 +98,15 @@ public class EntityInfo {
                 generateValueColumnInfoList.add(columnInfo);
             }
 
-            Boolean associationSelect = columnInfo.getAssociationSelect();
-            if (!associationSelect) {
-                tableColumnInfoList.add(columnInfo);
-            }
-            ManyToMany manyToMany = columnInfo.getManyToMany();
-            if (manyToMany != null) {
-                associationColumnInfoList.add(columnInfo);
-            }
-            ManyToOne manyToOne = columnInfo.getManyToOne();
-            if (manyToOne != null) {
-                associationColumnInfoList.add(columnInfo);
-            }
-            OneToOne oneToOne = columnInfo.getOneToOne();
-            if (oneToOne != null) {
-                associationColumnInfoList.add(columnInfo);
-            }
-            OneToMany oneToMany = columnInfo.getOneToMany();
-            if (oneToMany != null) {
+            AssociationEntityInfo associationEntityInfo = columnInfo.getAssociationEntityInfo();
+            if (associationEntityInfo != null) {
                 associationColumnInfoList.add(columnInfo);
             }
 
+            // 字段不存在关联实体或者存在关联实体并且存在外键的才是表字段
+            if (associationEntityInfo == null || associationEntityInfo.getJoinColumn() != null) {
+                tableColumnInfoList.add(columnInfo);
+            }
             columnInfoMap.put(columnInfo.getJavaColumnName(), columnInfo);
         });
     }

@@ -2,6 +2,8 @@ package com.lc.mybatisx.context;
 
 import com.lc.mybatisx.model.EntityInfo;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -17,4 +19,7 @@ public class EntityInfoContextHolder {
         return entityInfoMap.get(clazz);
     }
 
+    public static List<Class<?>> getEntityClassList() {
+        return new ArrayList(entityInfoMap.keySet());
+    }
 }

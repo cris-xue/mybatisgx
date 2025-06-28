@@ -1,5 +1,6 @@
 package com.lc.mybatisx.model;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -98,7 +99,7 @@ public class MapperInfo {
 
     public void setMethodInfoList(List<MethodInfo> methodInfoList) {
         this.methodInfoList = methodInfoList;
-        for (int i = 0; i < methodInfoList.size(); i++) {
+        /*for (int i = 0; i < methodInfoList.size(); i++) {
             MethodInfo methodInfo = methodInfoList.get(i);
             ResultMapInfo resultMapInfo = methodInfo.getResultMapInfo();
             if (resultMapInfo == null) {
@@ -108,18 +109,18 @@ public class MapperInfo {
                 continue;
             }
             resultMapInfoMap.put(resultMapInfo.getType(), resultMapInfo);
-        }
+        }*/
     }
 
-    public Map<Class<?>, ResultMapInfo> getResultMapInfoMap() {
-        return resultMapInfoMap;
+    public List<ResultMapInfo> getResultMapInfoList() {
+        return new ArrayList<>(resultMapInfoMap.values());
     }
 
     public ResultMapInfo getResultMapInfo(Class<?> clazz) {
         return resultMapInfoMap.get(clazz);
     }
 
-    public void setResultMapInfoMap(Map<Class<?>, ResultMapInfo> resultMapInfoMap) {
-        this.resultMapInfoMap = resultMapInfoMap;
+    public void setResultMapInfo(ResultMapInfo resultMapInfo) {
+        this.resultMapInfoMap.put(resultMapInfo.getType(), resultMapInfo);
     }
 }

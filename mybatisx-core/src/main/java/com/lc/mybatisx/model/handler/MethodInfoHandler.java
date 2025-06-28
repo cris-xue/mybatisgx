@@ -131,8 +131,8 @@ public class MethodInfoHandler {
             // 方法名解析
             methodNameParse(mapperInfo.getEntityInfo(), methodInfo, methodDeclaringClass);
 
-            ResultMapInfo resultMapInfo = resultMapInfoHandler.execute(methodInfo, methodReturnInfo);
-            methodInfo.setResultMapInfo(resultMapInfo);
+            String resultMapId = resultMapInfoHandler.execute(mapperInfo, methodInfo);
+            methodInfo.setResultMapId(resultMapId);
 
             handleConditionParamInfo(methodInfo);
             // check(resultMapInfo, methodInfo);

@@ -2,19 +2,24 @@ package com.lc.mybatisx.context;
 
 import com.lc.mybatisx.model.MapperInfo;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MapperInfoContextHolder {
 
-    private static Map<Class<?>, MapperInfo> mapperInfoMap = new ConcurrentHashMap<>();
+    private static final Map<Class<?>, MapperInfo> DAO_CLASS_MAPPER_INFO_MAP = new ConcurrentHashMap<>();
 
     public static void set(Class<?> clazz, MapperInfo mapperInfo) {
-        mapperInfoMap.put(clazz, mapperInfo);
+        DAO_CLASS_MAPPER_INFO_MAP.put(clazz, mapperInfo);
     }
 
     public static MapperInfo get(Class<?> clazz) {
-        return mapperInfoMap.get(clazz);
+        return DAO_CLASS_MAPPER_INFO_MAP.get(clazz);
     }
 
+    public static List<MapperInfo> getMapperInfoList() {
+        return new ArrayList<>(DAO_CLASS_MAPPER_INFO_MAP.values());
+    }
 }

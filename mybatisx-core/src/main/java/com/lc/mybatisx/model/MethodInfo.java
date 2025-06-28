@@ -43,9 +43,9 @@ public class MethodInfo {
      */
     private MethodReturnInfo methodReturnInfo;
     /**
-     * 结果集信息
+     * 结果集信息id
      */
-    private ResultMapInfo resultMapInfo;
+    private String resultMapId;
 
     public Method getMethod() {
         return method;
@@ -120,11 +120,11 @@ public class MethodInfo {
         this.methodReturnInfo = methodReturnInfo;
     }
 
-    public ResultMapInfo getResultMapInfo() {
-        return resultMapInfo;
+    public String getResultMapId() {
+        return resultMapId;
     }
 
-    public void setResultMapInfo(ResultMapInfo resultMapInfo) {
-        this.resultMapInfo = resultMapInfo;
+    public void setResultMapId(String resultMapId) {
+        this.resultMapId = resultMapId;
     }
 }

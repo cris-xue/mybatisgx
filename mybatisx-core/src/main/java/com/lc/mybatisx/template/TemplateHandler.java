@@ -1,11 +1,10 @@
 package com.lc.mybatisx.template;
 
-import com.lc.mybatisx.model.MapperInfo;
-import com.lc.mybatisx.model.MethodInfo;
-import com.lc.mybatisx.model.handler.MapperInfoHandler;
+import com.lc.mybatisx.context.MapperTemplateContextHolder;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.apache.ibatis.parsing.XNode;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,13 +27,25 @@ public class TemplateHandler {
     }
 
     public TemplateHandler build() {
-        MapperInfoHandler mapperInfoHandler = new MapperInfoHandler();
-        MapperInfo mapperInfo = mapperInfoHandler.execute(builderAssistant);
-        mergeMethod(builderAssistant, mapperInfo);
+        /*MapperInfoHandler mapperInfoHandler = new MapperInfoHandler();
+        MapperInfo mapperInfo = mapperInfoHandler.execute(builderAssistant);*/
+        List<String> actionIdList = mergeMethod(builderAssistant);
+        List<XNode> actionXNodeList = new ArrayList();
+        actionIdList.forEach(actionId -> {
+            XNode xNode = MapperTemplateContextHolder.getCurdTemplate(builderAssistant.getCurrentNamespace(), actionId);
+            actionXNodeList.add(xNode);
+        });
 
-        List<XNode> mapperXNodeList = curdTemplateHandler.execute(mapperInfo);
-        List<XNode> resultMapXNodeList = resultMapTemplateHandler.execute(mapperInfo.getResultMapInfoMap());
-        merge(resultMapXNodeList, mapperXNodeList);
+        List<String> resultMapIdList = mergeResultMap(builderAssistant);
+        List<XNode> resultMapXNodeList = new ArrayList();
+        resultMapIdList.forEach(resultMapId -> {
+            XNode xNode = MapperTemplateContextHolder.getResultMapTemplate(builderAssistant.getCurrentNamespace(), resultMapId);
+            resultMapXNodeList.add(xNode);
+        });
+
+        /*List<XNode> mapperXNodeList = curdTemplateHandler.execute(mapperInfo);
+        List<XNode> resultMapXNodeList = resultMapTemplateHandler.execute(mapperInfo.getResultMapInfoList());*/
+        merge(resultMapXNodeList, actionXNodeList);
         return this;
     }
 
@@ -42,14 +53,23 @@ public class TemplateHandler {
      * 已经自定义的方法从解析中移除掉
      *
      * @param builderAssistant
-     * @param mapperInfo
      */
-    private void mergeMethod(MapperBuilderAssistant builderAssistant, MapperInfo mapperInfo) {
+    private List<String> mergeMethod(MapperBuilderAssistant builderAssistant) {
+        String namespace = builderAssistant.getCurrentNamespace();
+        List<String> actionIdList = MapperTemplateContextHolder.getActionIdList(namespace);
         Collection<String> mappedStatementNames = builderAssistant.getConfiguration().getMappedStatementNames();
-        List<MethodInfo> methodInfoList = mapperInfo.getMethodInfoList().stream()
-                .filter(o -> !mappedStatementNames.contains(String.format("%s.%s", mapperInfo.getNamespace(), o.getMethodName())))
+        return actionIdList.stream()
+                .filter(actionId -> !mappedStatementNames.contains(String.format("%s.%s", namespace, actionId)))
                 .collect(Collectors.toList());
-        mapperInfo.setMethodInfoList(methodInfoList);
+    }
+
+    private List<String> mergeResultMap(MapperBuilderAssistant builderAssistant) {
+        String namespace = builderAssistant.getCurrentNamespace();
+        List<String> resultMapIdList = MapperTemplateContextHolder.getResultMapIdList(namespace);
+        Collection<String> mappedStatementNames = builderAssistant.getConfiguration().getResultMapNames();
+        return resultMapIdList.stream()
+                .filter(resultMapId -> !mappedStatementNames.contains(String.format("%s.%s", namespace, resultMapId)))
+                .collect(Collectors.toList());
     }
 
     public TemplateHandler resultMap(List<XNode> resultMapXNodeList) {

@@ -2,6 +2,7 @@ package com.lc.mybatisx.ext;
 
 import com.lc.mybatisx.annotation.GenerateValue;
 import com.lc.mybatisx.annotation.Id;
+import com.lc.mybatisx.annotation.TenantId;
 import com.lc.mybatisx.annotation.handler.GenerateValueHandler;
 import com.lc.mybatisx.annotation.handler.IdGenerateValueHandler;
 import com.lc.mybatisx.annotation.handler.JavaColumnInfo;
@@ -82,6 +83,10 @@ public class MybatisxConfiguration extends Configuration {
         }
         Id id = columnInfo.getId();
         if (id != null && sqlCommandType == SqlCommandType.INSERT) {
+            return this.idGenerateValueHandler.insert(javaColumnInfo, originalValue);
+        }
+        TenantId tenantId = columnInfo.getTenantId();
+        if (tenantId != null) {
             return this.idGenerateValueHandler.insert(javaColumnInfo, originalValue);
         }
         return originalValue;

@@ -31,7 +31,6 @@ public class AssociationTableInfo {
      * @return
      */
     private String foreignKey;
-
     /**
      * 另一张表外键字段
      *

@@ -4,8 +4,11 @@ import com.google.common.base.CaseFormat;
 import com.google.common.collect.Maps;
 import com.lc.mybatisx.annotation.*;
 import com.lc.mybatisx.annotation.handler.GenerateValueHandler;
+import com.lc.mybatisx.context.EntityInfoContextHolder;
+import com.lc.mybatisx.model.AssociationEntityInfo;
 import com.lc.mybatisx.model.AssociationTableInfo;
 import com.lc.mybatisx.model.ColumnInfo;
+import com.lc.mybatisx.model.EntityInfo;
 import com.lc.mybatisx.utils.GenericUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -57,7 +60,7 @@ public class ColumnInfoHandler {
 
             this.setGenerateValueHandler(field, columnInfo);
             this.setType(field, columnInfo);
-            this.setAssociationInfo(field, columnInfo);
+            this.setAssociationEntityInfo(field, columnInfo);
 
             columnInfoList.add(columnInfo);
         }
@@ -96,20 +99,69 @@ public class ColumnInfoHandler {
         }
     }
 
-    private void setAssociationInfo(Field field, ColumnInfo columnInfo) {
-        ManyToMany manyToMany = field.getAnnotation(ManyToMany.class);
-        ManyToOne manyToOne = field.getAnnotation(ManyToOne.class);
+    private void setAssociationEntityInfo(Field field, ColumnInfo columnInfo) {
         OneToOne oneToOne = field.getAnnotation(OneToOne.class);
         OneToMany oneToMany = field.getAnnotation(OneToMany.class);
+        ManyToOne manyToOne = field.getAnnotation(ManyToOne.class);
+        ManyToMany manyToMany = field.getAnnotation(ManyToMany.class);
+        if (!(oneToOne != null || oneToMany != null || manyToOne != null || manyToMany != null)) {
+            return;
+        }
         JoinColumn joinColumn = field.getAnnotation(JoinColumn.class);
         JoinTable joinTable = field.getAnnotation(JoinTable.class);
 
-        columnInfo.setManyToMany(manyToMany);
-        columnInfo.setManyToOne(manyToOne);
-        columnInfo.setOneToOne(oneToOne);
-        columnInfo.setOneToMany(oneToMany);
-        columnInfo.setJoinColumn(joinColumn);
-        columnInfo.setJoinTable(joinTable);
+        List<ColumnInfo> foreignKeyColumnInfoList = new ArrayList(5);
+        if (joinColumn != null) {
+            String joinColumnName = joinColumn.name();
+            ColumnInfo joinColumnInfo = new ColumnInfo();
+            joinColumnInfo.setJavaColumnName(joinColumnName);
+            joinColumnInfo.setDbColumnName(joinColumnName);
+            foreignKeyColumnInfoList.add(joinColumnInfo);
+        }
+
+        AssociationEntityInfo associationEntityInfo = new AssociationEntityInfo();
+        associationEntityInfo.setOneToOne(oneToOne);
+        associationEntityInfo.setOneToMany(oneToMany);
+        associationEntityInfo.setManyToOne(manyToOne);
+        associationEntityInfo.setManyToMany(manyToMany);
+        associationEntityInfo.setJoinColumn(joinColumn);
+        associationEntityInfo.setJoinTable(joinTable);
+        associationEntityInfo.setForeignKeyColumnInfoList(foreignKeyColumnInfoList);
+        columnInfo.setAssociationEntityInfo(associationEntityInfo);
+    }
+
+    public List<AssociationTableInfo> getAssociationTableInfoList(ColumnInfo columnInfo) {
+        List<AssociationTableInfo> associationTableInfoList = new ArrayList();
+        AssociationTableInfo associationTableInfo = null;
+        AssociationEntityInfo associationEntityInfo = columnInfo.getAssociationEntityInfo();
+        OneToOne oneToOne = associationEntityInfo.getOneToOne();
+        if (oneToOne != null) {
+            String mappedBy = oneToOne.mappedBy();
+            if (StringUtils.isNotBlank(mappedBy)) {
+                EntityInfo targetEntityInfo = EntityInfoContextHolder.get(columnInfo.getJavaType());
+                ColumnInfo targetColumnInfo = targetEntityInfo.getColumnInfoMap().get(mappedBy);
+                associationTableInfo = this.buildAssociationTableInfo(targetColumnInfo, targetColumnInfo.getJavaType(), columnInfo.getJavaType());
+                JoinColumn joinColumn = targetColumnInfo.getAssociationEntityInfo().getJoinColumn();
+                String name = joinColumn.name();
+                String referencedColumnName = joinColumn.referencedColumnName();
+                associationTableInfo.setForeignKey(name);
+                associationTableInfo.setInverseForeignKey(referencedColumnName);
+            } else {
+                JoinColumn joinColumn = associationEntityInfo.getJoinColumn();
+                if (joinColumn == null) {
+                    throw new RuntimeException("关系维护方类：" + columnInfo.getJavaTypeName() + "字段：" + columnInfo.getJavaColumnName() + "不存在JoinColumn");
+                }
+                String name = joinColumn.name();
+                String referencedColumnName = joinColumn.referencedColumnName();
+                associationTableInfo = this.buildAssociationTableInfo(columnInfo, columnInfo.getJavaType(), columnInfo.getJavaType());
+                associationTableInfo.setForeignKey(name);
+                associationTableInfo.setInverseForeignKey(referencedColumnName);
+            }
+        }
+        if (associationTableInfo != null) {
+            associationTableInfoList.add(associationTableInfo);
+        }
+        return associationTableInfoList;
     }
 
     public List<AssociationTableInfo> getAssociationTableInfoList(Type type) {
@@ -118,7 +170,20 @@ public class ColumnInfoHandler {
         for (Field field : fields) {
             AssociationTableInfo associationTableInfo = null;
             ManyToMany manyToMany = field.getAnnotation(ManyToMany.class);
-            if (manyToMany != null) {
+            JoinTable joinTable = field.getAnnotation(JoinTable.class);
+            /*if (manyToMany != null) {
+                if (joinTable == null) {
+
+                } else {
+
+                }
+                Class<?> target = manyToMany.target();
+                EntityInfo targetEntityInfo = EntityInfoContextHolder.get(target);
+                ColumnInfo columnInfo = targetEntityInfo.getColumnInfoMap().get(manyToMany.mappedBy());
+                JoinTable joinTable1 = columnInfo.getJoinTable();
+                joinTable1.joinColumns();
+                joinTable1.inverseJoinColumns();
+
                 associationTableInfo = this.buildAssociationTableInfo(field, manyToMany.junctionEntity(), manyToMany.joinEntity());
                 associationTableInfo.setForeignKey(manyToMany.foreignKeys()[0].name());
                 associationTableInfo.setInverseForeignKey(manyToMany.inverseForeignKeys()[0].name());
@@ -134,12 +199,30 @@ public class ColumnInfoHandler {
             if (oneToMany != null) {
                 associationTableInfo = this.buildAssociationTableInfo(field, oneToMany.junctionEntity(), oneToMany.joinEntity());
                 associationTableInfo.setForeignKey(oneToMany.foreignKeys()[0].name());
-            }
+            }*/
 
             OneToOne oneToOne = field.getAnnotation(OneToOne.class);
             if (oneToOne != null) {
-                associationTableInfo = this.buildAssociationTableInfo(field, oneToOne.junctionEntity(), oneToOne.joinEntity());
-                associationTableInfo.setForeignKey(oneToOne.foreignKeys()[0].name());
+                String mappedBy = oneToOne.mappedBy();
+                if (StringUtils.isNotBlank(mappedBy)) {
+                    EntityInfo targetEntityInfo = EntityInfoContextHolder.get(null);
+                    ColumnInfo columnInfo = targetEntityInfo.getColumnInfoMap().get(mappedBy);
+                    JoinColumn joinColumn = null; // columnInfo.getJoinColumn();
+                    String name = joinColumn.name();
+                    String referencedColumnName = joinColumn.referencedColumnName();
+                    associationTableInfo = this.buildAssociationTableInfo(field, columnInfo.getJavaType(), null);
+                } else {
+                    JoinColumn joinColumn = field.getAnnotation(JoinColumn.class);
+                    String name = joinColumn.name();
+                    String referencedColumnName = joinColumn.referencedColumnName();
+                    associationTableInfo = this.buildAssociationTableInfo(field, (Class<?>) type, null);
+                    associationTableInfo.setForeignKey(name);
+                    associationTableInfo.setInverseForeignKey(referencedColumnName);
+                }
+
+
+                /*associationTableInfo = this.buildAssociationTableInfo(field, oneToOne.junctionEntity(), oneToOne.joinEntity());
+                associationTableInfo.setForeignKey(oneToOne.foreignKeys()[0].name());*/
             }
 
             if (associationTableInfo != null) {
@@ -159,4 +242,13 @@ public class ColumnInfoHandler {
         return associationTableInfo;
     }
 
+    private AssociationTableInfo buildAssociationTableInfo(ColumnInfo columnInfo, Class<?> junctionEntity, Class<?> joinEntity) {
+        AssociationTableInfo associationTableInfo = new AssociationTableInfo();
+        associationTableInfo.setJavaColumnName(columnInfo.getJavaColumnName());
+        associationTableInfo.setJunctionEntity(junctionEntity);
+        associationTableInfo.setJoinEntity(joinEntity);
+        associationTableInfo.setJoinContainerType(columnInfo.getJavaType());
+        associationTableInfo.setFetch(FetchType.LAZY);
+        return associationTableInfo;
+    }
 }

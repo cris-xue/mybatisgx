@@ -59,41 +59,9 @@ public class ColumnInfo {
      */
     private TenantId tenantId;
     /**
-     * 是否是外键
+     * 关联信息
      */
-    private Boolean foreignKey = false;
-    /**
-     * 关系维护方
-     */
-    private String mappedBy;
-    /**
-     * 是否关联查询
-     */
-    private Boolean associationSelect = false;
-    /**
-     * 关联字段
-     */
-    private JoinColumn joinColumn;
-    /**
-     * 关联表
-     */
-    private JoinTable joinTable;
-    /**
-     * 多对多
-     */
-    private ManyToMany manyToMany;
-    /**
-     * 多对一
-     */
-    private ManyToOne manyToOne;
-    /**
-     * 一对一
-     */
-    private OneToOne oneToOne;
-    /**
-     * 一对多
-     */
-    private OneToMany oneToMany;
+    private AssociationEntityInfo associationEntityInfo;
     /**
      * 生成值注解
      */
@@ -202,95 +170,12 @@ public class ColumnInfo {
         this.tenantId = tenantId;
     }
 
-    public Boolean getForeignKey() {
-        return foreignKey;
+    public AssociationEntityInfo getAssociationEntityInfo() {
+        return associationEntityInfo;
     }
 
-    public void setForeignKey(Boolean foreignKey) {
-        this.foreignKey = foreignKey;
-    }
-
-    public String getMappedBy() {
-        return mappedBy;
-    }
-
-    public void setMappedBy(String mappedBy) {
-        this.mappedBy = mappedBy;
-    }
-
-    public Boolean getAssociationSelect() {
-        return associationSelect;
-    }
-
-    public void setAssociationSelect(Boolean associationSelect) {
-        this.associationSelect = associationSelect;
-    }
-
-    public JoinColumn getJoinColumn() {
-        return joinColumn;
-    }
-
-    public void setJoinColumn(JoinColumn joinColumn) {
-        this.joinColumn = joinColumn;
-        if (joinColumn != null) {
-            this.dbColumnName = joinColumn.name();
-            this.foreignKey = true;
-        }
-    }
-
-    public JoinTable getJoinTable() {
-        return joinTable;
-    }
-
-    public void setJoinTable(JoinTable joinTable) {
-        this.joinTable = joinTable;
-    }
-
-    public ManyToMany getManyToMany() {
-        return manyToMany;
-    }
-
-    public void setManyToMany(ManyToMany manyToMany) {
-        this.manyToMany = manyToMany;
-        if (manyToMany != null) {
-            this.mappedBy = manyToMany.mappedBy();
-            this.associationSelect = true;
-        }
-    }
-
-    public ManyToOne getManyToOne() {
-        return manyToOne;
-    }
-
-    public void setManyToOne(ManyToOne manyToOne) {
-        this.manyToOne = manyToOne;
-        if (manyToOne != null) {
-            this.associationSelect = true;
-        }
-    }
-
-    public OneToOne getOneToOne() {
-        return oneToOne;
-    }
-
-    public void setOneToOne(OneToOne oneToOne) {
-        this.oneToOne = oneToOne;
-        if (oneToOne != null) {
-            this.mappedBy = oneToOne.mappedBy();
-            this.associationSelect = true;
-        }
-    }
-
-    public OneToMany getOneToMany() {
-        return oneToMany;
-    }
-
-    public void setOneToMany(OneToMany oneToMany) {
-        this.oneToMany = oneToMany;
-        if (oneToMany != null) {
-            this.mappedBy = oneToMany.mappedBy();
-            this.associationSelect = true;
-        }
+    public void setAssociationEntityInfo(AssociationEntityInfo associationEntityInfo) {
+        this.associationEntityInfo = associationEntityInfo;
     }
 
     public GenerateValue getGenerateValue() {

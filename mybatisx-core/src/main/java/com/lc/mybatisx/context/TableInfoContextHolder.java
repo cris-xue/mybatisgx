@@ -5,6 +5,7 @@ import com.lc.mybatisx.model.TableInfo;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Deprecated
 public class TableInfoContextHolder {
 
     private static Map<Class<?>, TableInfo> tableInfoMap = new ConcurrentHashMap<>();

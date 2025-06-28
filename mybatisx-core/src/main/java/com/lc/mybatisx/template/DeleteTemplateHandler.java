@@ -40,7 +40,7 @@ public class DeleteTemplateHandler {
         whereTemplateHandler.execute(deleteElement, mapperInfo.getEntityInfo(), methodInfo);
 
         String insertXmlString = document.asXML();
-        logger.info(insertXmlString);
+        logger.debug(insertXmlString);
         XPathParser xPathParser = XmlUtils.processXml(insertXmlString);
         XNode xNode = xPathParser.evalNode(String.format("/mapper/%s", deleteElement.getName()));
         return xNode;

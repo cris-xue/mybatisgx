@@ -13,33 +13,7 @@ import static javax.persistence.FetchType.LAZY;
 @Target(ElementType.FIELD)
 public @interface ManyToMany {
 
-    /**
-     * 关系维护实体类型，外键在那个实体，那个实体就是关系维护实体
-     *
-     * @return
-     */
-    Class<?> junctionEntity() default Void.class;
-
-    /**
-     * 连接的实体
-     *
-     * @return
-     */
-    Class<?> joinEntity() default Void.class;
-
-    /**
-     * 外键字段
-     *
-     * @return
-     */
-    ForeignKey[] foreignKeys() default {};
-
-    /**
-     * 另一张表外键字段
-     *
-     * @return
-     */
-    ForeignKey[] inverseForeignKeys() default {};
+    Class<?> target() default Void.class;
 
     /**
      * 抓取策略
@@ -48,6 +22,10 @@ public @interface ManyToMany {
      */
     FetchType fetch() default LAZY;
 
+    /**
+     * 关系维护方
+     *
+     * @return
+     */
     String mappedBy() default "";
-
 }

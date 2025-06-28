@@ -15,5 +15,4 @@ public @interface JoinTable {
     JoinColumn[] joinColumns() default {};
 
     JoinColumn[] inverseJoinColumns() default {};
-
 }

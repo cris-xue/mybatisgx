@@ -12,4 +12,11 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface TenantId {
+
+    /**
+     * 是否开启
+     *
+     * @return
+     */
+    boolean value() default true;
 }

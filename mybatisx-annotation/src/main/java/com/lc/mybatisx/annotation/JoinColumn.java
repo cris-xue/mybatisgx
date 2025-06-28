@@ -15,5 +15,4 @@ public @interface JoinColumn {
     String referencedColumnName() default "id";
 
     Class<?> table() default Void.class;
-
 }

@@ -13,7 +13,12 @@ import java.lang.annotation.*;
 @Target({ElementType.TYPE, ElementType.METHOD})
 public @interface ConditionGroup {
 
-    String name();
+    /**
+     * aaaAnd(bbbOrCcc)
+     *
+     * @return
+     */
+    String value();
 
     // ConditionGroup[] value();
 }

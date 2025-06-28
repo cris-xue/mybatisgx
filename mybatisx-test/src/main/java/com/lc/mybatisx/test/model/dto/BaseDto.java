@@ -1,8 +1,4 @@
-package com.lc.mybatisx.test.model.entity;
-
-import com.lc.mybatisx.annotation.Column;
-import com.lc.mybatisx.annotation.Id;
-import com.lc.mybatisx.annotation.TenantId;
+package com.lc.mybatisx.test.model.dto;
 
 import java.time.LocalDateTime;
 
@@ -11,25 +7,18 @@ import java.time.LocalDateTime;
  * @description：一句话描述
  * @date ：2020/7/31 15:18
  */
-public abstract class BaseEntity<ID> {
+public abstract class BaseDto<ID> {
 
-    @Id
     private ID id;
 
-    @TenantId
-    @Column(name = "tenant_id", insertable = true)
     private Long tenantId;
 
-    @Column(name = "input_user_id", insertable = true)
     private Long inputUserId;
 
-    @Column(name = "input_time", insertable = true)
     private LocalDateTime inputTime;
 
-    @Column(name = "update_user_id", updatable = true)
     private Long updateUserId;
 
-    @Column(name = "update_time", updatable = true)
     private LocalDateTime updateTime;
 
     public ID getId() {

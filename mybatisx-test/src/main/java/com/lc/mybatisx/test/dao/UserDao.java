@@ -1,5 +1,6 @@
 package com.lc.mybatisx.test.dao;
 
+import com.lc.mybatisx.annotation.ConditionGroup;
 import com.lc.mybatisx.annotation.Dynamic;
 import com.lc.mybatisx.dao.SimpleDao;
 import com.lc.mybatisx.test.model.entity.User;
@@ -28,6 +29,7 @@ public interface UserDao extends SimpleDao<User, Long> {
     List<User> findByNameAndAge(String name, Integer age);
 
     @Dynamic
+    @ConditionGroup("NameOr(AgeOrRoleIds)")
     List<User> findByNameOrAgeOrRoleIds(String name, Integer age, List<Long> roleIds);
 
     @Dynamic

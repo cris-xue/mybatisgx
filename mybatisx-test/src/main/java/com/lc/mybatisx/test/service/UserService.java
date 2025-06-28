@@ -19,7 +19,7 @@ public class UserService {
     @Transactional
     public UserDto findById(Long id) {
         User user = userDao.findById(id);
-        return userConverter.toDto(user);
+        UserDto userDto = userConverter.toDto(user);
+        return userDto;
     }
-
 }

@@ -1,6 +1,8 @@
 package com.lc.mybatisx.test.model.entity;
 
 import com.lc.mybatisx.annotation.Entity;
+import com.lc.mybatisx.annotation.JoinColumn;
+import com.lc.mybatisx.annotation.OneToOne;
 import com.lc.mybatisx.annotation.Table;
 
 @Entity
@@ -9,9 +11,15 @@ public class UserDetail extends BaseEntity<Long> {
 
     private String code;
 
-    /*@OneToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id")*/
-    private Long userId;
+    @OneToOne
+    /*@JoinColumns(
+            value = {
+                    @JoinColumn(name = "user_code", referencedColumnName = "code"),
+                    @JoinColumn(name = "user_status", referencedColumnName = "status"),
+            }
+    )*/
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    private User user;
 
     public String getCode() {
         return code;
@@ -21,11 +29,11 @@ public class UserDetail extends BaseEntity<Long> {
         this.code = code;
     }
 
-    public Long getUserId() {
-        return userId;
+    public User getUser() {
+        return user;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public void setUser(User user) {
+        this.user = user;
     }
 }

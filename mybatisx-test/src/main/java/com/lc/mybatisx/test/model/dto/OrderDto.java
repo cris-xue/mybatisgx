@@ -1,23 +1,15 @@
-package com.lc.mybatisx.test.model.entity;
+package com.lc.mybatisx.test.model.dto;
 
-import com.lc.mybatisx.annotation.*;
-
-@Entity
-@Table(name = "order_test")
-public class Order extends BaseEntity<Long> {
+public class OrderDto extends BaseDto<Long> {
 
     private String name;
 
     private String code;
 
-    @OneToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    private UserDto user;
 
-    @LogicDelete
     private Integer status;
 
-    @Lock
     private Integer version;
 
     public String getName() {
@@ -36,11 +28,11 @@ public class Order extends BaseEntity<Long> {
         this.code = code;
     }
 
-    public User getUser() {
+    public UserDto getUser() {
         return user;
     }
 
-    public void setUser(User user) {
+    public void setUser(UserDto user) {
         this.user = user;
     }
 

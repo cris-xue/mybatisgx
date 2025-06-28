@@ -1,20 +1,10 @@
 package com.lc.mybatisx.test.model.dto;
 
-import com.lc.mybatisx.test.model.entity.BaseEntity;
-
-public class UserDetailDto extends BaseEntity<Long> {
-
-    private Long tenantId;
+public class UserDetailDto extends BaseDto<Long> {
 
     private String code;
 
-    public Long getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(Long tenantId) {
-        this.tenantId = tenantId;
-    }
+    private UserDto user;
 
     public String getCode() {
         return code;
@@ -24,4 +14,11 @@ public class UserDetailDto extends BaseEntity<Long> {
         this.code = code;
     }
 
+    public UserDto getUser() {
+        return user;
+    }
+
+    public void setUser(UserDto user) {
+        this.user = user;
+    }
 }

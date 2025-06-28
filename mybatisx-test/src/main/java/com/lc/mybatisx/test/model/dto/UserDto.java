@@ -1,12 +1,8 @@
 package com.lc.mybatisx.test.model.dto;
 
-import com.lc.mybatisx.test.model.entity.BaseEntity;
-
 import java.util.List;
 
-public class UserDto extends BaseEntity<Long> {
-
-    private Long tenantId;
+public class UserDto extends BaseDto<Long> {
 
     private List<Long> roleIds;
 
@@ -26,13 +22,9 @@ public class UserDto extends BaseEntity<Long> {
 
     private Integer version;
 
-    public Long getTenantId() {
-        return tenantId;
-    }
+    private UserDetailDto userDetail;
 
-    public void setTenantId(Long tenantId) {
-        this.tenantId = tenantId;
-    }
+    private List<OrderDto> orderList;
 
     public List<Long> getRoleIds() {
         return roleIds;
@@ -106,4 +98,19 @@ public class UserDto extends BaseEntity<Long> {
         this.version = version;
     }
 
+    public UserDetailDto getUserDetail() {
+        return userDetail;
+    }
+
+    public void setUserDetail(UserDetailDto userDetail) {
+        this.userDetail = userDetail;
+    }
+
+    public List<OrderDto> getOrderList() {
+        return orderList;
+    }
+
+    public void setOrderList(List<OrderDto> orderList) {
+        this.orderList = orderList;
+    }
 }

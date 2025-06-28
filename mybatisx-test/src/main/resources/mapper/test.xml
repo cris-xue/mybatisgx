@@ -22,4 +22,59 @@
         select * from student where mid = #{mid}
     </select>
 
+
+
+
+
+
+
+
+    <resultMap type="com.lc.mybatisx.test.model.entity.UserDetail" id="com_lc_mybatisx_test_model_entity_UserDetailResultMap">
+        <result column="code" property="code"/>
+        <id column="id" property="id"/>
+        <result column="tenant_id" property="tenantId"/>
+        <result column="input_user_id" property="inputUserId"/>
+        <result column="input_time" property="inputTime"/>
+        <result column="update_user_id" property="updateUserId"/>
+        <result column="update_time" property="updateTime"/>
+        <association select="findUser" fetchType="lazy" column="user_id" property="user" javaType="com.lc.mybatisx.test.model.entity.User">
+            <association select="findOrderList" fetchType="lazy" column="id" property="orderList" javaType="com.lc.mybatisx.test.model.entity.Order"/>
+        </association>
+    </resultMap>
+    <resultMap type="com.lc.mybatisx.test.model.entity.User" id="com_lc_mybatisx_test_model_entity_UserResultMap">
+        <result jdbcType="VARCHAR" column="role_ids" property="roleIds" typeHandler="com.lc.mybatisx.test.commons.handler.ListLongTypeHandler"/>
+        <result column="name" property="name"/>
+        <result column="age" property="age"/>
+        <result column="phone" property="phone"/>
+        <result column="email" property="email"/>
+        <result column="user_name" property="userName"/>
+        <result column="password" property="password"/>
+        <result column="status" property="status"/>
+        <result column="version" property="version"/>
+        <id column="id" property="id"/>
+        <result column="tenant_id" property="tenantId"/>
+        <result column="input_user_id" property="inputUserId"/>
+        <result column="input_time" property="inputTime"/>
+        <result column="update_user_id" property="updateUserId"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+    <resultMap type="com.lc.mybatisx.test.model.entity.Order" id="com_lc_mybatisx_test_model_entity_OrderResultMap">
+        <result column="name" property="name"/>
+        <result column="code" property="code"/>
+        <result column="status" property="status"/>
+        <result column="version" property="version"/>
+        <id column="id" property="id"/>
+        <result column="tenant_id" property="tenantId"/>
+        <result column="input_user_id" property="inputUserId"/>
+        <result column="input_time" property="inputTime"/>
+        <result column="update_user_id" property="updateUserId"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <select resultMap="com_lc_mybatisx_test_model_entity_UserResultMap" id="findUser">
+        select * from user where id = #{user_id}
+    </select>
+    <select resultMap="com_lc_mybatisx_test_model_entity_OrderResultMap" id="findOrderList">
+        select * from order_test where user_id = #{id}
+    </select>
 </mapper>

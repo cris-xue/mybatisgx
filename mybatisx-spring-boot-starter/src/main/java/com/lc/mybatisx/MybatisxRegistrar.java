@@ -3,10 +3,15 @@ package com.lc.mybatisx;
 import com.lc.mybatisx.annotation.Entity;
 import com.lc.mybatisx.context.EntityInfoContextHolder;
 import com.lc.mybatisx.context.MapperInfoContextHolder;
-import com.lc.mybatisx.model.EntityInfo;
-import com.lc.mybatisx.model.MapperInfo;
+import com.lc.mybatisx.context.MapperTemplateContextHolder;
+import com.lc.mybatisx.model.*;
+import com.lc.mybatisx.model.handler.ColumnInfoHandler;
 import com.lc.mybatisx.model.handler.EntityInfoHandler;
 import com.lc.mybatisx.model.handler.MapperInfoHandler;
+import com.lc.mybatisx.template.AssociationSelectTemplateHandler;
+import com.lc.mybatisx.template.CurdTemplateHandler;
+import com.lc.mybatisx.template.ResultMapSubQueryTemplateHandler;
+import org.apache.ibatis.parsing.XNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
@@ -25,6 +30,8 @@ import org.springframework.stereotype.Repository;
 import org.springframework.util.ClassUtils;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author ：薛承城
@@ -56,6 +63,8 @@ public class MybatisxRegistrar implements ImportBeanDefinitionRegistrar {
                 }
             }
 
+            // processEntityAssociation();
+
             String[] daoBasePackages = (String[]) annotationAttributes.get("daoBasePackages");
             for (String daoBasePackage : daoBasePackages) {
                 try {
@@ -66,6 +75,8 @@ public class MybatisxRegistrar implements ImportBeanDefinitionRegistrar {
                     logger.error(e.getMessage(), e);
                 }
             }
+
+            processTemplate();
 
             // 注册bean
             ConstructorArgumentValues constructorArgumentValues = new ConstructorArgumentValues();
@@ -98,6 +109,19 @@ public class MybatisxRegistrar implements ImportBeanDefinitionRegistrar {
         }
     }
 
+    private void processEntityAssociation() {
+        ColumnInfoHandler columnInfoHandler = new ColumnInfoHandler();
+        List<Class<?>> entityClassList = EntityInfoContextHolder.getEntityClassList();
+        for (Class<?> entityClass : entityClassList) {
+            EntityInfo entityInfo = EntityInfoContextHolder.get(entityClass);
+            List<ColumnInfo> associationColumnInfoList = entityInfo.getAssociationColumnInfoList();
+            associationColumnInfoList.forEach(associationColumnInfo -> {
+                List<AssociationTableInfo> associationTableInfoList = columnInfoHandler.getAssociationTableInfoList(associationColumnInfo);
+                // entityInfo.setAssociationTableInfoList(associationTableInfoList);
+            });
+        }
+    }
+
     private void processDao(String basePackage) throws IOException, ClassNotFoundException {
         basePackage = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + basePackage.replace('.', '/') + "/**.class";
         // classpath*:/com/iss/dtg/ftc/dao/**.class
@@ -118,4 +142,41 @@ public class MybatisxRegistrar implements ImportBeanDefinitionRegistrar {
         }
     }
 
+    private void processTemplate() {
+        CurdTemplateHandler curdTemplateHandler = new CurdTemplateHandler();
+        ResultMapSubQueryTemplateHandler resultMapSubQueryTemplateHandler = new ResultMapSubQueryTemplateHandler();
+        AssociationSelectTemplateHandler associationSelectTemplateHandler = new AssociationSelectTemplateHandler();
+        List<MapperInfo> mapperInfoList = MapperInfoContextHolder.getMapperInfoList();
+        mapperInfoList.forEach(mapperInfo -> {
+            Map<String, XNode> curdXNodeMap = curdTemplateHandler.execute(mapperInfo);
+            Map<String, XNode> resultMapXNodeMap = resultMapSubQueryTemplateHandler.execute(mapperInfo.getResultMapInfoList());
+            Map<String, XNode> associationSelectXNodeMap = associationSelectTemplateHandler.execute(mapperInfo);
+
+            MapperTemplateInfo mappingTemplateInfo = new MapperTemplateInfo();
+            mappingTemplateInfo.setNamespace(mapperInfo.getNamespace());
+            mappingTemplateInfo.setCurdTemplateMap(curdXNodeMap);
+            mappingTemplateInfo.setResultMapTemplateMap(resultMapXNodeMap);
+            mappingTemplateInfo.setAssociationSelectTemplateMap(associationSelectXNodeMap);
+            MapperTemplateContextHolder.set(mappingTemplateInfo);
+            logger.info("dao: {} all db operate template: {}", mapperInfo.getNamespace(), mappingTemplateInfo);
+        });
+    }
+
+    private Map<String, XNode> processAssociationTemplate(MapperInfo mapperInfo) {
+        AssociationSelectTemplateHandler associationSelectTemplateHandler = new AssociationSelectTemplateHandler();
+        Map<String, XNode> associationSelectXNodeMap = associationSelectTemplateHandler.execute(mapperInfo);
+        return associationSelectXNodeMap;
+
+        /*List<AssociationTableInfo> associationTableInfoList = mapperInfo.getEntityInfo().getAssociationColumnInfoList();
+        associationTableInfoList.forEach(associationTableInfo -> {
+            MapperInfo associationEntityMapperInfo = entityMapperInfoMap.get(associationTableInfo.getJoinEntity());
+            List<XNode> xNodeList = daoTemaplteMap.get(associationEntityMapperInfo.getNamespace());
+            if (ObjectUtils.isEmpty(xNodeList)) {
+                xNodeList = new ArrayList<>();
+            }
+            List<XNode> associationSelectXNodeList = associationSelectTemplateHandler.execute(associationEntityMapperInfo, null);
+            xNodeList.addAll(associationSelectXNodeList);
+            daoTemaplteMap.put(associationEntityMapperInfo.getNamespace(), xNodeList);
+        });*/
+    }
 }

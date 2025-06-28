@@ -37,7 +37,7 @@ public class SqlSessionFactoryBeanPostProcessor implements BeanPostProcessor {
 
     private String[] packagePatternArray;
 
-    @Autowired
+    // @Autowired
     private IdGenerateValueHandler<?> idGenerateValueHandler;
 
     public SqlSessionFactoryBeanPostProcessor(String[] packagePatternArray) {

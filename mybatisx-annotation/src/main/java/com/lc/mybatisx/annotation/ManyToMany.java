@@ -13,14 +13,19 @@ import static javax.persistence.FetchType.LAZY;
 @Target(ElementType.FIELD)
 public @interface ManyToMany {
 
-    Class<?> target() default Void.class;
-
     /**
      * 抓取策略
      *
      * @return
      */
     FetchType fetch() default LAZY;
+
+    /**
+     * 抓取数量
+     *
+     * @return
+     */
+    int fetchSize() default 0;
 
     /**
      * 关系维护方

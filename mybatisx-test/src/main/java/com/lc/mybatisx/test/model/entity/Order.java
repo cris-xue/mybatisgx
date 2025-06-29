@@ -10,7 +10,7 @@ public class Order extends BaseEntity<Long> {
 
     private String code;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 

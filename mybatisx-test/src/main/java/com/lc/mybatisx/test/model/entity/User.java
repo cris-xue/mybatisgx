@@ -43,7 +43,7 @@ public class User extends BaseEntity<Long> {
     /*@ManyToMany(mappedBy = "userList")
     private List<Role> roleList;*/
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", fetchSize = 100)
     private List<Order> orderList;
 
     @OneToOne(mappedBy = "user")

@@ -3,10 +3,17 @@ package com.lc.mybatisx.model.handler;
 import com.lc.mybatisx.context.EntityInfoContextHolder;
 import com.lc.mybatisx.model.*;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.RandomUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class ResultMapInfoHandler extends BasicInfoHandler {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResultMapInfoHandler.class);
 
     private static ColumnInfoHandler columnInfoHandler = new ColumnInfoHandler();
 
@@ -34,9 +41,9 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
         if (resultMapInfo != null) {
             return resultMapInfo.getId();
         }
-        Set<Class<?>> associationDependencySet = new HashSet();
-        associationDependencySet.add(resultClass);
-        List<ResultMapAssociationInfo> resultMapAssociationInfoList = this.processAssociationColumnInfoList(associationDependencySet, associationColumnInfoList);
+        // 解决循环引用问题
+        ResultMapDependencyTree resultMapDependencyTree = new ResultMapDependencyTree(null, resultClass);
+        List<ResultMapAssociationInfo> resultMapAssociationInfoList = this.processAssociationColumnInfoList(resultMapDependencyTree, associationColumnInfoList);
         resultMapInfo = new ResultMapInfo();
         resultMapInfo.setId(resultMapId);
         resultMapInfo.setType(resultClass);
@@ -46,14 +53,16 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
         return resultMapInfo.getId();
     }
 
-    private List<ResultMapAssociationInfo> processAssociationColumnInfoList(Set<Class<?>> associationDependencySet, List<ColumnInfo> associationColumnInfoList) {
+    private List<ResultMapAssociationInfo> processAssociationColumnInfoList(ResultMapDependencyTree resultMapDependencyTree, List<ColumnInfo> associationColumnInfoList) {
         List<ResultMapAssociationInfo> resultMapAssociationInfoList = new ArrayList();
         associationColumnInfoList.forEach(associationColumnInfo -> {
             Class<?> javaType = associationColumnInfo.getJavaType();
-            if (associationDependencySet.contains(javaType)) {
+            Boolean isCycleRef = resultMapDependencyTree.cycleRefCheck(javaType);
+            if (isCycleRef) {
+                LOGGER.debug("{}存在循环引用，消除循环引用防止无线循环", javaType);
                 return;
             }
-            associationDependencySet.add(javaType);
+            ResultMapDependencyTree childrenResultMapDependencyTree = new ResultMapDependencyTree(resultMapDependencyTree, javaType);
             EntityInfo entityInfo = EntityInfoContextHolder.get(javaType);
 
             ResultMapAssociationInfo resultMapAssociationInfo = new ResultMapAssociationInfo();
@@ -65,7 +74,7 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
 
             List<ColumnInfo> subAssociationColumnInfoList = entityInfo.getAssociationColumnInfoList();
             if (ObjectUtils.isNotEmpty(subAssociationColumnInfoList)) {
-                List<ResultMapAssociationInfo> subResultMapAssociationInfoList = this.processAssociationColumnInfoList(associationDependencySet, subAssociationColumnInfoList);
+                List<ResultMapAssociationInfo> subResultMapAssociationInfoList = this.processAssociationColumnInfoList(childrenResultMapDependencyTree, subAssociationColumnInfoList);
                 resultMapAssociationInfo.setResultMapAssociationInfoList(subResultMapAssociationInfoList);
             }
             resultMapAssociationInfoList.add(resultMapAssociationInfo);
@@ -74,7 +83,8 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
     }
 
     protected String getResultMapId(Class<?> entityClass) {
-        return String.format("%sResultMap", entityClass.getTypeName().replaceAll("\\.", "_"));
+        Integer resultMapIdIndex = RandomUtils.nextInt(10000, 99999);
+        return String.format("%sResultMap%s", entityClass.getTypeName().replaceAll("\\.", "_"), resultMapIdIndex);
     }
 
     private String getSelect(Class<?> entityClass, Class<?> containerType) {

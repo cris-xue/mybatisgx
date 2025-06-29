@@ -1,6 +1,7 @@
 package com.lc.mybatisx.template;
 
 import com.lc.mybatisx.annotation.JoinColumn;
+import com.lc.mybatisx.annotation.ManyToOne;
 import com.lc.mybatisx.annotation.OneToMany;
 import com.lc.mybatisx.annotation.OneToOne;
 import com.lc.mybatisx.context.EntityInfoContextHolder;
@@ -117,6 +118,10 @@ public class AssociationSelectTemplateHandler {
             }
             OneToMany oneToMany = associationEntityInfo.getOneToMany();
             if (oneToMany != null) {
+                xNode = this.buildOneToOne(resultMapAssociationInfo);
+            }
+            ManyToOne manyToOne = associationEntityInfo.getManyToOne();
+            if (manyToOne != null) {
                 xNode = this.buildOneToOne(resultMapAssociationInfo);
             }
             if (xNode != null) {

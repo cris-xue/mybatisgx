@@ -115,10 +115,10 @@ public class AssociationEntityInfo {
 
     public void setOneToOne(OneToOne oneToOne) {
         this.oneToOne = oneToOne;
-        if (this.oneToOne != null) {
-            this.mappedBy = this.oneToOne.mappedBy();
-            this.fetch = this.oneToOne.fetch().name();
-            this.fetchSize = this.oneToOne.fetchSize();
+        if (oneToOne != null) {
+            this.mappedBy = oneToOne.mappedBy();
+            this.fetch = oneToOne.fetch().name();
+            this.fetchSize = oneToOne.fetchSize();
         }
     }
 
@@ -128,10 +128,10 @@ public class AssociationEntityInfo {
 
     public void setOneToMany(OneToMany oneToMany) {
         this.oneToMany = oneToMany;
-        if (this.oneToMany != null) {
-            this.mappedBy = this.oneToMany.mappedBy();
-            this.fetch = this.oneToMany.fetch().name();
-            this.fetchSize = this.oneToMany.fetchSize();
+        if (oneToMany != null) {
+            this.mappedBy = oneToMany.mappedBy();
+            this.fetch = oneToMany.fetch().name();
+            this.fetchSize = oneToMany.fetchSize();
         }
     }
 
@@ -141,8 +141,10 @@ public class AssociationEntityInfo {
 
     public void setManyToOne(ManyToOne manyToOne) {
         this.manyToOne = manyToOne;
-        if (this.manyToOne != null) {
-            this.fetch = this.manyToOne.fetch().name();
+        if (manyToOne != null) {
+            this.mappedBy = manyToOne.mappedBy();
+            this.fetch = manyToOne.fetch().name();
+            this.fetchSize = manyToOne.fetchSize();
         }
     }
 
@@ -152,9 +154,10 @@ public class AssociationEntityInfo {
 
     public void setManyToMany(ManyToMany manyToMany) {
         this.manyToMany = manyToMany;
-        if (this.manyToMany != null) {
-            this.mappedBy = this.manyToMany.mappedBy();
-            this.fetch = this.manyToMany.fetch().name();
+        if (manyToMany != null) {
+            this.mappedBy = manyToMany.mappedBy();
+            this.fetch = manyToMany.fetch().name();
+            this.fetchSize = manyToMany.fetchSize();
         }
     }
 

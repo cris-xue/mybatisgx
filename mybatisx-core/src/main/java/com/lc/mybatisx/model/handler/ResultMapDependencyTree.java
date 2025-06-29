@@ -1,6 +1,6 @@
 package com.lc.mybatisx.model.handler;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
@@ -37,7 +37,7 @@ public class ResultMapDependencyTree {
     /**
      * 树路径
      */
-    private Set<Class<?>> path = new HashSet<>(10);
+    private Set<Class<?>> path = new LinkedHashSet<>(10);
 
     public ResultMapDependencyTree(ResultMapDependencyTree resultMapDependencyTree, Class<?> clazz) {
         this.clazz = clazz;

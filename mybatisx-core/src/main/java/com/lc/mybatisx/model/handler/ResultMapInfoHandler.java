@@ -3,7 +3,7 @@ package com.lc.mybatisx.model.handler;
 import com.lc.mybatisx.context.EntityInfoContextHolder;
 import com.lc.mybatisx.model.*;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.RandomUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +25,6 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
 
         MethodReturnInfo methodReturnInfo = methodInfo.getMethodReturnInfo();
         Class<?> resultClass = methodReturnInfo.getType();
-        String resultMapId = getResultMapId(resultClass);
         EntityInfo entityInfo = EntityInfoContextHolder.get(resultClass);
 
         List<ColumnInfo> tableColumnInfoList;
@@ -45,7 +44,7 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
         ResultMapDependencyTree resultMapDependencyTree = new ResultMapDependencyTree(null, resultClass);
         List<ResultMapAssociationInfo> resultMapAssociationInfoList = this.processAssociationColumnInfoList(resultMapDependencyTree, associationColumnInfoList);
         resultMapInfo = new ResultMapInfo();
-        resultMapInfo.setId(resultMapId);
+        resultMapInfo.setId(this.getResultMapId(resultClass));
         resultMapInfo.setType(resultClass);
         resultMapInfo.setColumnInfoList(tableColumnInfoList);
         resultMapInfo.setResultMapAssociationInfoList(resultMapAssociationInfoList);
@@ -59,7 +58,8 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
             Class<?> javaType = associationColumnInfo.getJavaType();
             Boolean isCycleRef = resultMapDependencyTree.cycleRefCheck(javaType);
             if (isCycleRef) {
-                LOGGER.debug("{}存在循环引用，消除循环引用防止无线循环", javaType);
+                String pathString = StringUtils.join(resultMapDependencyTree.getPath(), "->");
+                LOGGER.info("{}->{}存在循环引用，消除循环引用防止无限循环", pathString, javaType);
                 return;
             }
             ResultMapDependencyTree childrenResultMapDependencyTree = new ResultMapDependencyTree(resultMapDependencyTree, javaType);
@@ -67,7 +67,7 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
 
             ResultMapAssociationInfo resultMapAssociationInfo = new ResultMapAssociationInfo();
             resultMapAssociationInfo.setSelect(this.getSelect(javaType, associationColumnInfo.getContainerType()));
-            resultMapAssociationInfo.setResultMapId(this.getResultMapId(javaType));
+            resultMapAssociationInfo.setResultMapId(this.getSubQueryResultMapId(javaType, associationColumnInfo));
             resultMapAssociationInfo.setType(javaType);
             resultMapAssociationInfo.setColumnInfoList(entityInfo.getTableColumnInfoList());
             resultMapAssociationInfo.setColumnInfo(associationColumnInfo);
@@ -83,8 +83,18 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
     }
 
     protected String getResultMapId(Class<?> entityClass) {
-        Integer resultMapIdIndex = RandomUtils.nextInt(10000, 99999);
-        return String.format("%sResultMap%s", entityClass.getTypeName().replaceAll("\\.", "_"), resultMapIdIndex);
+        return String.format("%sResultMap", entityClass.getTypeName().replaceAll("\\.", "_"));
+    }
+
+    protected String getSubQueryResultMapId(Class<?> entityClass, ColumnInfo columnInfo) {
+        Class<?> containerType = columnInfo.getContainerType();
+        String resultMapId;
+        if (containerType == null) {
+            resultMapId = String.format("%sResultMap%s", entityClass.getTypeName().replaceAll("\\.", "_"), "Association");
+        } else {
+            resultMapId = String.format("%sResultMap%s", entityClass.getTypeName().replaceAll("\\.", "_"), "Collection");
+        }
+        return resultMapId;
     }
 
     private String getSelect(Class<?> entityClass, Class<?> containerType) {

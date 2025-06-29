@@ -1,7 +1,7 @@
 package com.lc.mybatisx.test.controller;
 
-import com.lc.mybatisx.test.model.dto.OrderDto;
-import com.lc.mybatisx.test.service.OrderService;
+import com.lc.mybatisx.test.model.dto.OrgDto;
+import com.lc.mybatisx.test.service.OrgService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,21 +15,19 @@ import java.util.List;
  * @date ：2020/8/11 17:53
  */
 @RestController
-@RequestMapping(path = "/api/v1/order")
-public class OrderController {
+@RequestMapping(path = "/api/v1/org")
+public class OrgController {
 
     @Autowired
-    private OrderService orderService;
+    private OrgService orgService;
 
     @GetMapping
-    public OrderDto findById(Long id) {
-        OrderDto orderDto = orderService.findById(id);
-        return orderDto;
+    public OrgDto findById(Long id) {
+        return orgService.findById(id);
     }
 
     @GetMapping(path = "/list")
-    public List<OrderDto> list(OrderDto orderDto) {
-        List<OrderDto> orderDtoList = orderService.list(orderDto);
-        return orderDtoList;
+    public List<OrgDto> list(OrgDto orgDto) {
+        return orgService.list(orgDto);
     }
 }

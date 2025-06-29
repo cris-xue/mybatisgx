@@ -10,9 +10,6 @@ import static javax.persistence.FetchType.LAZY;
 @Target(ElementType.FIELD)
 public @interface OneToMany {
 
-    @Deprecated
-    Class<?> target() default Void.class;
-
     /**
      * 抓取策略
      *

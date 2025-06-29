@@ -11,26 +11,23 @@ import static javax.persistence.FetchType.LAZY;
 public @interface ManyToOne {
 
     /**
-     * 关系维护实体类型，外键在那个实体，那个实体就是关系维护实体
+     * 抓取策略
      *
      * @return
      */
-    Class<?> junctionEntity() default Void.class;
-
-    /**
-     * 连接的实体
-     *
-     * @return
-     */
-    Class<?> joinEntity() default Void.class;
-
-    /**
-     * 外键字段
-     *
-     * @return
-     */
-    ForeignKey[] foreignKeys() default {};
-
     FetchType fetch() default LAZY;
 
+    /**
+     * 抓取数量
+     *
+     * @return
+     */
+    int fetchSize() default 0;
+
+    /**
+     * 关系维护方
+     *
+     * @return
+     */
+    String mappedBy() default "";
 }

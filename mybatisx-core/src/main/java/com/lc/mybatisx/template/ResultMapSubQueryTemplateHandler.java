@@ -1,6 +1,6 @@
 package com.lc.mybatisx.template;
 
-import com.lc.mybatisx.annotation.Id;
+import com.lc.mybatisx.annotation.*;
 import com.lc.mybatisx.context.EntityInfoContextHolder;
 import com.lc.mybatisx.model.*;
 import com.lc.mybatisx.utils.XmlUtils;
@@ -62,29 +62,6 @@ public class ResultMapSubQueryTemplateHandler {
         return resultMapElement;
     }
 
-    private Element addResultMapAssociationElement(Element resultMapElement, ResultMapAssociationInfo resultMapAssociationInfo) {
-        ColumnInfo columnInfo = resultMapAssociationInfo.getColumnInfo();
-        AssociationEntityInfo associationEntityInfo = columnInfo.getAssociationEntityInfo();
-        String mappedBy = associationEntityInfo.getMappedBy();
-        String column;
-        if (StringUtils.isNotBlank(mappedBy)) {
-            EntityInfo entityInfo = EntityInfoContextHolder.get(columnInfo.getJavaType());
-            ColumnInfo mappedByColumnInfo = entityInfo.getColumnInfo(mappedBy);
-            AssociationEntityInfo mappedByAssociationEntityInfo = mappedByColumnInfo.getAssociationEntityInfo();
-            column = mappedByAssociationEntityInfo.getReferencedColumnName();
-        } else {
-            column = associationEntityInfo.getName();
-        }
-
-        Element resultMapAssociationElement = resultMapElement.addElement("association");
-        resultMapAssociationElement.addAttribute("property", columnInfo.getJavaColumnName());
-        resultMapAssociationElement.addAttribute("column", column);
-        resultMapAssociationElement.addAttribute("javaType", columnInfo.getJavaTypeName());
-        resultMapAssociationElement.addAttribute("fetchType", associationEntityInfo.getFetch().toLowerCase());
-        resultMapAssociationElement.addAttribute("select", resultMapAssociationInfo.getSelect());
-        // resultMapAssociationElement.addAttribute("resultMap", resultMapAssociationInfo.getResultMapId());
-        return resultMapAssociationElement;
-    }
 
     private void addColumnElement(Element resultMapElement, List<ColumnInfo> columnInfoList) {
         for (int i = 0; i < columnInfoList.size(); i++) {
@@ -124,33 +101,125 @@ public class ResultMapSubQueryTemplateHandler {
         resultMapAssociationInfoList.forEach(resultMapAssociationInfo -> {
             ColumnInfo columnInfo = resultMapAssociationInfo.getColumnInfo();
             AssociationEntityInfo associationEntityInfo = columnInfo.getAssociationEntityInfo();
-            String mappedBy = associationEntityInfo.getMappedBy();
-            if (StringUtils.isBlank(mappedBy)) {
-                // 在resultMap下增加外键字段
-                /*List<ColumnInfo> foreignKeyColumnInfoList = associationEntityInfo.getForeignKeyColumnInfoList();
-                for (ColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
-                    resultColumnElement(resultMapElement, foreignKeyColumnInfo);
-                }*/
-            }
-            Element resultMapAssociationElement = this.addResultMapAssociationElement(resultMapElement, resultMapAssociationInfo);
-
-            Document document = DocumentHelper.createDocument();
-            Element refResultMapElement = this.addResultMapElement(document, resultMapAssociationInfo);
-            this.addColumnElement(refResultMapElement, resultMapAssociationInfo.getColumnInfoList());
-            String resultMapXmlString = XmlUtils.writeString(document);
-            XPathParser xPathParser = XmlUtils.processXml(resultMapXmlString);
-            XNode xNode = xPathParser.evalNode("/mapper/resultMap");
-            refResultMapXNodeMap.put(resultMapAssociationInfo.getResultMapId(), xNode);
-
-            List<ResultMapAssociationInfo> subResultMapAssociationInfoList = resultMapAssociationInfo.getResultMapAssociationInfoList();
-            if (ObjectUtils.isNotEmpty(subResultMapAssociationInfoList)) {
-                Map<String, XNode> subXNodeMap = this.addAssociationElement(resultMapAssociationElement, subResultMapAssociationInfoList);
-                if (ObjectUtils.isNotEmpty(subXNodeMap)) {
-                    refResultMapXNodeMap.putAll(subXNodeMap);
+            Integer associationType = this.getAssociationType(associationEntityInfo);
+            if (associationType == 1) {
+                String mappedBy = associationEntityInfo.getMappedBy();
+                if (StringUtils.isBlank(mappedBy)) {
+                    // 在resultMap下增加外键字段
+                    /*List<ColumnInfo> foreignKeyColumnInfoList = associationEntityInfo.getForeignKeyColumnInfoList();
+                    for (ColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
+                        resultColumnElement(resultMapElement, foreignKeyColumnInfo);
+                    }*/
                 }
+                Element associationColumnElement = this.associationColumnElement(resultMapElement, resultMapAssociationInfo);
+
+                Document document = DocumentHelper.createDocument();
+                Element refResultMapElement = this.addResultMapElement(document, resultMapAssociationInfo);
+                this.addColumnElement(refResultMapElement, resultMapAssociationInfo.getColumnInfoList());
+                String resultMapXmlString = XmlUtils.writeString(document);
+                XPathParser xPathParser = XmlUtils.processXml(resultMapXmlString);
+                XNode xNode = xPathParser.evalNode("/mapper/resultMap");
+                refResultMapXNodeMap.put(resultMapAssociationInfo.getResultMapId(), xNode);
+
+                List<ResultMapAssociationInfo> subResultMapAssociationInfoList = resultMapAssociationInfo.getResultMapAssociationInfoList();
+                if (ObjectUtils.isNotEmpty(subResultMapAssociationInfoList)) {
+                    Map<String, XNode> subXNodeMap = this.addAssociationElement(associationColumnElement, subResultMapAssociationInfoList);
+                    if (ObjectUtils.isNotEmpty(subXNodeMap)) {
+                        refResultMapXNodeMap.putAll(subXNodeMap);
+                    }
+                }
+            } else if (associationType == 2) {
+                Element collectionColumnElement = this.collectionColumnElement(resultMapElement, resultMapAssociationInfo);
+
+                Document document = DocumentHelper.createDocument();
+                Element refResultMapElement = this.addResultMapElement(document, resultMapAssociationInfo);
+                this.addColumnElement(refResultMapElement, resultMapAssociationInfo.getColumnInfoList());
+                String resultMapXmlString = XmlUtils.writeString(document);
+                XPathParser xPathParser = XmlUtils.processXml(resultMapXmlString);
+                XNode xNode = xPathParser.evalNode("/mapper/resultMap");
+                refResultMapXNodeMap.put(resultMapAssociationInfo.getResultMapId(), xNode);
+
+                List<ResultMapAssociationInfo> subResultMapAssociationInfoList = resultMapAssociationInfo.getResultMapAssociationInfoList();
+                if (ObjectUtils.isNotEmpty(subResultMapAssociationInfoList)) {
+                    Map<String, XNode> subXNodeMap = this.addAssociationElement(collectionColumnElement, subResultMapAssociationInfoList);
+                    if (ObjectUtils.isNotEmpty(subXNodeMap)) {
+                        refResultMapXNodeMap.putAll(subXNodeMap);
+                    }
+                }
+            } else {
+                throw new RuntimeException(columnInfo.getJavaType() + "没有关联注解");
             }
         });
         return refResultMapXNodeMap;
+    }
+
+    private Element associationColumnElement(Element resultMapElement, ResultMapAssociationInfo resultMapAssociationInfo) {
+        ColumnInfo columnInfo = resultMapAssociationInfo.getColumnInfo();
+        AssociationEntityInfo associationEntityInfo = columnInfo.getAssociationEntityInfo();
+        String mappedBy = associationEntityInfo.getMappedBy();
+        String column;
+        if (StringUtils.isNotBlank(mappedBy)) {
+            EntityInfo entityInfo = EntityInfoContextHolder.get(columnInfo.getJavaType());
+            ColumnInfo mappedByColumnInfo = entityInfo.getColumnInfo(mappedBy);
+            AssociationEntityInfo mappedByAssociationEntityInfo = mappedByColumnInfo.getAssociationEntityInfo();
+            column = mappedByAssociationEntityInfo.getReferencedColumnName();
+        } else {
+            column = associationEntityInfo.getName();
+        }
+
+        Element resultMapAssociationElement = resultMapElement.addElement("association");
+        resultMapAssociationElement.addAttribute("property", columnInfo.getJavaColumnName());
+        resultMapAssociationElement.addAttribute("column", column);
+        resultMapAssociationElement.addAttribute("javaType", columnInfo.getJavaTypeName());
+        resultMapAssociationElement.addAttribute("fetchType", associationEntityInfo.getFetch().toLowerCase());
+        resultMapAssociationElement.addAttribute("select", resultMapAssociationInfo.getSelect());
+        // resultMapAssociationElement.addAttribute("resultMap", resultMapAssociationInfo.getResultMapId());
+        return resultMapAssociationElement;
+    }
+
+    private Element collectionColumnElement(Element resultMapElement, ResultMapAssociationInfo resultMapAssociationInfo) {
+        ColumnInfo columnInfo = resultMapAssociationInfo.getColumnInfo();
+        AssociationEntityInfo associationEntityInfo = columnInfo.getAssociationEntityInfo();
+        String mappedBy = associationEntityInfo.getMappedBy();
+        String column;
+        if (StringUtils.isNotBlank(mappedBy)) {
+            EntityInfo entityInfo = EntityInfoContextHolder.get(columnInfo.getJavaType());
+            ColumnInfo mappedByColumnInfo = entityInfo.getColumnInfo(mappedBy);
+            AssociationEntityInfo mappedByAssociationEntityInfo = mappedByColumnInfo.getAssociationEntityInfo();
+            column = mappedByAssociationEntityInfo.getReferencedColumnName();
+        } else {
+            column = associationEntityInfo.getName();
+        }
+
+        Element resultMapAssociationElement = resultMapElement.addElement("collection");
+        resultMapAssociationElement.addAttribute("property", columnInfo.getJavaColumnName());
+        resultMapAssociationElement.addAttribute("column", column);
+        resultMapAssociationElement.addAttribute("javaType", columnInfo.getContainerTypeName());
+        resultMapAssociationElement.addAttribute("ofType", columnInfo.getJavaTypeName());
+        resultMapAssociationElement.addAttribute("fetchType", associationEntityInfo.getFetch().toLowerCase());
+        resultMapAssociationElement.addAttribute("select", resultMapAssociationInfo.getSelect());
+        // resultMapAssociationElement.addAttribute("resultMap", resultMapAssociationInfo.getResultMapId());
+        return resultMapAssociationElement;
+    }
+
+    private Integer getAssociationType(AssociationEntityInfo associationEntityInfo) {
+        OneToOne oneToOne = associationEntityInfo.getOneToOne();
+        OneToMany oneToMany = associationEntityInfo.getOneToMany();
+        ManyToOne manyToOne = associationEntityInfo.getManyToOne();
+        ManyToMany manyToMany = associationEntityInfo.getManyToMany();
+        if (oneToOne != null) {
+            return 1;
+        }
+        if (oneToMany != null) {
+            return 2;
+        }
+        if (manyToOne != null) {
+            return 1;
+        }
+        if (manyToMany != null) {
+            return 2;
+        }
+        return null;
     }
 
     /*private void oneToManyCollectionColumnElement(Element resultMapElement, ColumnInfo columnInfo) {

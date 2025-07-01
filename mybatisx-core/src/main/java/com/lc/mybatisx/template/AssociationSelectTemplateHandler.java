@@ -1,9 +1,6 @@
 package com.lc.mybatisx.template;
 
-import com.lc.mybatisx.annotation.JoinColumn;
-import com.lc.mybatisx.annotation.ManyToOne;
-import com.lc.mybatisx.annotation.OneToMany;
-import com.lc.mybatisx.annotation.OneToOne;
+import com.lc.mybatisx.annotation.*;
 import com.lc.mybatisx.context.EntityInfoContextHolder;
 import com.lc.mybatisx.model.*;
 import com.lc.mybatisx.utils.XmlUtils;
@@ -124,6 +121,10 @@ public class AssociationSelectTemplateHandler {
             if (manyToOne != null) {
                 xNode = this.buildOneToOne(resultMapAssociationInfo);
             }
+            ManyToMany manyToMany = associationEntityInfo.getManyToMany();
+            if (manyToMany != null) {
+                xNode = this.buildManyToMany(resultMapAssociationInfo);
+            }
             if (xNode != null) {
                 xNodeMap.put(resultMapAssociationInfo.getSelect(), xNode);
             }
@@ -142,30 +143,99 @@ public class AssociationSelectTemplateHandler {
             Class<?> javaType = columnInfo.getJavaType();
             EntityInfo associationEntityInfo = EntityInfoContextHolder.get(javaType);
             ColumnInfo mappedByColumnInfo = associationEntityInfo.getColumnInfo(mappedBy);
-            JoinColumn joinColumn = mappedByColumnInfo.getAssociationEntityInfo().getJoinColumn();
+            List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = mappedByColumnInfo.getAssociationEntityInfo().getForeignKeyColumnInfoList();
             selectElement.addAttribute("id", resultMapAssociationInfo.getSelect());
             selectElement.addAttribute("resultMap", resultMapAssociationInfo.getResultMapId());
-            Integer fetchSize = columnInfo.getAssociationEntityInfo().getFetchSize();
-            if (fetchSize > 0) {
-                selectElement.addAttribute("fetchSize", fetchSize.toString());
+            String fetchSize = columnInfo.getAssociationEntityInfo().getFetchSize();
+            if (StringUtils.isNotBlank(fetchSize)) {
+                selectElement.addAttribute("fetchSize", fetchSize);
             }
             selectElement.addText(
                     String.format(
-                            "select * from %s where %s = #{%s}", associationEntityInfo.getTableName(), joinColumn.name(), joinColumn.referencedColumnName())
+                            "select * from %s where %s = #{%s}", associationEntityInfo.getTableName(), foreignKeyColumnInfoList.get(0).getName(), foreignKeyColumnInfoList.get(0).getReferencedColumnName())
             );
         } else {
             Class<?> javaType = columnInfo.getJavaType();
             EntityInfo associationEntityInfo = EntityInfoContextHolder.get(javaType);
-            JoinColumn joinColumn = columnInfo.getAssociationEntityInfo().getJoinColumn();
+            List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = columnInfo.getAssociationEntityInfo().getForeignKeyColumnInfoList();
             selectElement.addAttribute("id", resultMapAssociationInfo.getSelect());
             selectElement.addAttribute("resultMap", resultMapAssociationInfo.getResultMapId());
-            Integer fetchSize = columnInfo.getAssociationEntityInfo().getFetchSize();
-            if (fetchSize > 0) {
-                selectElement.addAttribute("fetchSize", fetchSize.toString());
+            String fetchSize = columnInfo.getAssociationEntityInfo().getFetchSize();
+            if (StringUtils.isNotBlank(fetchSize)) {
+                selectElement.addAttribute("fetchSize", fetchSize);
             }
             selectElement.addText(
                     String.format(
-                            "select * from %s where %s = #{%s}", associationEntityInfo.getTableName(), joinColumn.referencedColumnName(), joinColumn.name())
+                            "select * from %s where %s = #{%s}", associationEntityInfo.getTableName(), foreignKeyColumnInfoList.get(0).getReferencedColumnName(), foreignKeyColumnInfoList.get(0).getName())
+            );
+        }
+
+        String selectXmlString = document.asXML();
+        logger.debug("select: {}", selectXmlString);
+        XPathParser xPathParser = XmlUtils.processXml(selectXmlString);
+        XNode xNode = xPathParser.evalNode("/mapper/select");
+        return xNode;
+    }
+
+    private XNode buildManyToMany(ResultMapAssociationInfo resultMapAssociationInfo) {
+        Document document = DocumentHelper.createDocument();
+        Element mapperElement = document.addElement("mapper");
+        Element selectElement = mapperElement.addElement("select");
+
+        ColumnInfo columnInfo = resultMapAssociationInfo.getColumnInfo();
+        String mappedBy = columnInfo.getAssociationEntityInfo().getMappedBy();
+        if (StringUtils.isNotBlank(mappedBy)) {
+            Class<?> javaType = columnInfo.getJavaType();
+            EntityInfo associationEntityInfo = EntityInfoContextHolder.get(javaType);
+            ColumnInfo mappedByColumnInfo = associationEntityInfo.getColumnInfo(mappedBy);
+            JoinTable joinTable = mappedByColumnInfo.getAssociationEntityInfo().getJoinTable();
+            selectElement.addAttribute("id", resultMapAssociationInfo.getSelect());
+            selectElement.addAttribute("resultMap", resultMapAssociationInfo.getResultMapId());
+            String fetchSize = columnInfo.getAssociationEntityInfo().getFetchSize();
+            if (StringUtils.isNotBlank(fetchSize)) {
+                selectElement.addAttribute("fetchSize", fetchSize);
+            }
+            List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = mappedByColumnInfo.getAssociationEntityInfo().getForeignKeyColumnInfoList();
+            List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedByColumnInfo.getAssociationEntityInfo().getInverseForeignKeyColumnInfoList();
+            // select role.* from user_role left join role on user_role.role_id = role.id where user_role.user_id = #{userId}
+            selectElement.addText(
+                    String.format(
+                            "select * from %s left join %s on(%s.%s=%s.%s) where %s = #{%s}",
+                            joinTable.name(),
+                            associationEntityInfo.getTableName(),
+                            joinTable.name(),
+                            foreignKeyColumnInfoList.get(0).getName(),
+                            associationEntityInfo.getTableName(),
+                            inverseForeignKeyColumnInfoList.get(0).getName(),
+                            joinTable.name(),
+                            foreignKeyColumnInfoList.get(0).getName()
+                    )
+            );
+        } else {
+            Class<?> javaType = columnInfo.getJavaType();
+            EntityInfo associationEntityInfo = EntityInfoContextHolder.get(javaType);
+            JoinTable joinTable = columnInfo.getAssociationEntityInfo().getJoinTable();
+            selectElement.addAttribute("id", resultMapAssociationInfo.getSelect());
+            selectElement.addAttribute("resultMap", resultMapAssociationInfo.getResultMapId());
+            String fetchSize = columnInfo.getAssociationEntityInfo().getFetchSize();
+            if (StringUtils.isNotBlank(fetchSize)) {
+                selectElement.addAttribute("fetchSize", fetchSize);
+            }
+            List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = columnInfo.getAssociationEntityInfo().getForeignKeyColumnInfoList();
+            List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnInfo.getAssociationEntityInfo().getInverseForeignKeyColumnInfoList();
+            // select user.* from user_role left join user on user_role.user_id = user.id where user_role.role_id = ?
+            selectElement.addText(
+                    String.format(
+                            "select * from %s left join %s on(%s.%s=%s.%s) where %s = #{%s}",
+                            joinTable.name(),
+                            associationEntityInfo.getTableName(),
+                            joinTable.name(),
+                            foreignKeyColumnInfoList.get(0).getName(),
+                            associationEntityInfo.getTableName(),
+                            inverseForeignKeyColumnInfoList.get(0).getName(),
+                            joinTable.name(),
+                            foreignKeyColumnInfoList.get(0).getName()
+                    )
             );
         }
 
@@ -320,5 +390,4 @@ public class AssociationSelectTemplateHandler {
         XNode xNode = xPathParser.evalNode("/mapper/select");
         return xNode;
     }
-
 }

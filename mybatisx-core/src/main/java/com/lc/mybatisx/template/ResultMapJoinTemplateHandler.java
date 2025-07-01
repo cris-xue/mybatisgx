@@ -2,8 +2,10 @@ package com.lc.mybatisx.template;
 
 import com.lc.mybatisx.annotation.Id;
 import com.lc.mybatisx.annotation.OneToOne;
-import com.lc.mybatisx.context.EntityInfoContextHolder;
-import com.lc.mybatisx.model.*;
+import com.lc.mybatisx.model.AssociationEntityInfo;
+import com.lc.mybatisx.model.ColumnInfo;
+import com.lc.mybatisx.model.ResultMapAssociationInfo;
+import com.lc.mybatisx.model.ResultMapInfo;
 import com.lc.mybatisx.utils.XmlUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -106,8 +108,8 @@ public class ResultMapJoinTemplateHandler {
             ColumnInfo columnInfo = resultMapAssociationInfo.getColumnInfo();
             AssociationEntityInfo associationEntityInfo = columnInfo.getAssociationEntityInfo();
             String mappedBy = associationEntityInfo.getMappedBy();
-            String column;
-            if (StringUtils.isNotBlank(mappedBy)) {
+            String column = null;
+            /*if (StringUtils.isNotBlank(mappedBy)) {
                 EntityInfo entityInfo = EntityInfoContextHolder.get(columnInfo.getJavaType());
                 ColumnInfo mappedByColumnInfo = entityInfo.getColumnInfo(mappedBy);
                 AssociationEntityInfo mappedByAssociationEntityInfo = mappedByColumnInfo.getAssociationEntityInfo();
@@ -118,7 +120,7 @@ public class ResultMapJoinTemplateHandler {
                 for (ColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
                     resultColumnElement(resultMapElement, foreignKeyColumnInfo);
                 }
-            }
+            }*/
 
             Element resultMapAssociationElement = resultMapElement.addElement("association");
             resultMapAssociationElement.addAttribute("property", columnInfo.getJavaColumnName());

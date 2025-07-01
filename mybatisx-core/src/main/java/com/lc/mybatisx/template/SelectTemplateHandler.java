@@ -46,7 +46,7 @@ public class SelectTemplateHandler {
                 dbTrimElement.addText(String.format("%s, ", columnInfo.getDbColumnName()));
             } else {
                 associationEntityInfo.getForeignKeyColumnInfoList().forEach(foreignKeyColumnInfo -> {
-                    dbTrimElement.addText(String.format("%s, ", foreignKeyColumnInfo.getDbColumnName()));
+                    dbTrimElement.addText(String.format("%s, ", foreignKeyColumnInfo.getName()));
                 });
             }
         });

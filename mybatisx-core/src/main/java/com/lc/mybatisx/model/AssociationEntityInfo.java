@@ -23,19 +23,15 @@ public class AssociationEntityInfo {
     /**
      * 数据抓取大小
      */
-    private Integer fetchSize;
-    /**
-     * 关联字段
-     */
-    private String name;
-    /**
-     * 关联字段
-     */
-    private String referencedColumnName;
+    private String fetchSize;
     /**
      * 外键字段列表
      */
-    private List<ColumnInfo> foreignKeyColumnInfoList = new ArrayList();
+    private List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = new ArrayList();
+    /**
+     * 多对多关联另一个实体的外键字段列表
+     */
+    private List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = new ArrayList();
     /**
      * 一对一
      */
@@ -57,6 +53,10 @@ public class AssociationEntityInfo {
      */
     private JoinColumn joinColumn;
     /**
+     * 多关联字段
+     */
+    private JoinColumns joinColumns;
+    /**
      * 关联表
      */
     private JoinTable joinTable;
@@ -77,36 +77,28 @@ public class AssociationEntityInfo {
         this.fetch = fetch;
     }
 
-    public Integer getFetchSize() {
+    public String getFetchSize() {
         return fetchSize;
     }
 
-    public void setFetchSize(Integer fetchSize) {
+    public void setFetchSize(String fetchSize) {
         this.fetchSize = fetchSize;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getReferencedColumnName() {
-        return referencedColumnName;
-    }
-
-    public void setReferencedColumnName(String referencedColumnName) {
-        this.referencedColumnName = referencedColumnName;
-    }
-
-    public List<ColumnInfo> getForeignKeyColumnInfoList() {
+    public List<ForeignKeyColumnInfo> getForeignKeyColumnInfoList() {
         return foreignKeyColumnInfoList;
     }
 
-    public void setForeignKeyColumnInfoList(List<ColumnInfo> foreignKeyColumnInfoList) {
+    public void setForeignKeyColumnInfoList(List<ForeignKeyColumnInfo> foreignKeyColumnInfoList) {
         this.foreignKeyColumnInfoList = foreignKeyColumnInfoList;
+    }
+
+    public List<ForeignKeyColumnInfo> getInverseForeignKeyColumnInfoList() {
+        return inverseForeignKeyColumnInfoList;
+    }
+
+    public void setInverseForeignKeyColumnInfoList(List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList) {
+        this.inverseForeignKeyColumnInfoList = inverseForeignKeyColumnInfoList;
     }
 
     public OneToOne getOneToOne() {
@@ -118,7 +110,7 @@ public class AssociationEntityInfo {
         if (oneToOne != null) {
             this.mappedBy = oneToOne.mappedBy();
             this.fetch = oneToOne.fetch().name();
-            this.fetchSize = oneToOne.fetchSize();
+            this.fetchSize = oneToOne.fetchSize() == 0 ? null : Integer.valueOf(oneToOne.fetchSize()).toString();
         }
     }
 
@@ -131,7 +123,7 @@ public class AssociationEntityInfo {
         if (oneToMany != null) {
             this.mappedBy = oneToMany.mappedBy();
             this.fetch = oneToMany.fetch().name();
-            this.fetchSize = oneToMany.fetchSize();
+            this.fetchSize = oneToMany.fetchSize() == 0 ? null : Integer.valueOf(oneToMany.fetchSize()).toString();
         }
     }
 
@@ -144,7 +136,7 @@ public class AssociationEntityInfo {
         if (manyToOne != null) {
             this.mappedBy = manyToOne.mappedBy();
             this.fetch = manyToOne.fetch().name();
-            this.fetchSize = manyToOne.fetchSize();
+            this.fetchSize = manyToOne.fetchSize() == 0 ? null : Integer.valueOf(manyToOne.fetchSize()).toString();
         }
     }
 
@@ -157,7 +149,7 @@ public class AssociationEntityInfo {
         if (manyToMany != null) {
             this.mappedBy = manyToMany.mappedBy();
             this.fetch = manyToMany.fetch().name();
-            this.fetchSize = manyToMany.fetchSize();
+            this.fetchSize = manyToMany.fetchSize() == 0 ? null : Integer.valueOf(manyToMany.fetchSize()).toString();
         }
     }
 
@@ -167,10 +159,14 @@ public class AssociationEntityInfo {
 
     public void setJoinColumn(JoinColumn joinColumn) {
         this.joinColumn = joinColumn;
-        if (this.joinColumn != null) {
-            this.name = this.joinColumn.name();
-            this.referencedColumnName = this.joinColumn.referencedColumnName();
-        }
+    }
+
+    public JoinColumns getJoinColumns() {
+        return joinColumns;
+    }
+
+    public void setJoinColumns(JoinColumns joinColumns) {
+        this.joinColumns = joinColumns;
     }
 
     public JoinTable getJoinTable() {

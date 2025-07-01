@@ -106,18 +106,18 @@ public class ResultMapTemplateHandler {
             ColumnInfo columnInfo = resultMapAssociationInfo.getColumnInfo();
             AssociationEntityInfo associationEntityInfo = columnInfo.getAssociationEntityInfo();
             String mappedBy = associationEntityInfo.getMappedBy();
-            String column;
+            String column = null;
             if (StringUtils.isNotBlank(mappedBy)) {
                 EntityInfo entityInfo = EntityInfoContextHolder.get(columnInfo.getJavaType());
                 ColumnInfo mappedByColumnInfo = entityInfo.getColumnInfo(mappedBy);
                 AssociationEntityInfo mappedByAssociationEntityInfo = mappedByColumnInfo.getAssociationEntityInfo();
-                column = mappedByAssociationEntityInfo.getReferencedColumnName();
+                // column = mappedByAssociationEntityInfo.getReferencedColumnName();
             } else {
-                column = associationEntityInfo.getName();
-                List<ColumnInfo> foreignKeyColumnInfoList = associationEntityInfo.getForeignKeyColumnInfoList();
-                for (ColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
+                /*column = associationEntityInfo.getName();
+                List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = associationEntityInfo.getForeignKeyColumnInfoList();
+                for (ForeignKeyColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
                     resultColumnElement(resultMapElement, foreignKeyColumnInfo);
-                }
+                }*/
             }
 
             Element resultMapAssociationElement = resultMapElement.addElement("association");

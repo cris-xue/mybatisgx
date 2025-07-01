@@ -5,10 +5,7 @@ import com.google.common.collect.Maps;
 import com.lc.mybatisx.annotation.*;
 import com.lc.mybatisx.annotation.handler.GenerateValueHandler;
 import com.lc.mybatisx.context.EntityInfoContextHolder;
-import com.lc.mybatisx.model.AssociationEntityInfo;
-import com.lc.mybatisx.model.AssociationTableInfo;
-import com.lc.mybatisx.model.ColumnInfo;
-import com.lc.mybatisx.model.EntityInfo;
+import com.lc.mybatisx.model.*;
 import com.lc.mybatisx.utils.GenericUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -107,16 +104,25 @@ public class ColumnInfoHandler {
         if (!(oneToOne != null || oneToMany != null || manyToOne != null || manyToMany != null)) {
             return;
         }
-        JoinColumn joinColumn = field.getAnnotation(JoinColumn.class);
-        JoinTable joinTable = field.getAnnotation(JoinTable.class);
 
-        List<ColumnInfo> foreignKeyColumnInfoList = new ArrayList(5);
+        JoinColumn joinColumn = field.getAnnotation(JoinColumn.class);
+        JoinColumns joinColumns = field.getAnnotation(JoinColumns.class);
+        JoinTable joinTable = field.getAnnotation(JoinTable.class);
+        List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = null;
+        List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = null;
         if (joinColumn != null) {
-            String joinColumnName = joinColumn.name();
-            ColumnInfo joinColumnInfo = new ColumnInfo();
-            joinColumnInfo.setJavaColumnName(joinColumnName);
-            joinColumnInfo.setDbColumnName(joinColumnName);
-            foreignKeyColumnInfoList.add(joinColumnInfo);
+            JoinColumn[] joinColumnList = new JoinColumn[]{joinColumn};
+            foreignKeyColumnInfoList = this.getForeignKeyList(joinColumnList);
+        }
+        if (joinColumns != null) {
+            JoinColumn[] joinColumnList = joinColumns.value();
+            foreignKeyColumnInfoList = this.getForeignKeyList(joinColumnList);
+        }
+        if (joinTable != null) {
+            JoinColumn[] joinColumnList = joinTable.joinColumns();
+            foreignKeyColumnInfoList = this.getForeignKeyList(joinColumnList);
+            JoinColumn[] inverseJoinColumnList = joinTable.inverseJoinColumns();
+            inverseForeignKeyColumnInfoList = this.getForeignKeyList(inverseJoinColumnList);
         }
 
         AssociationEntityInfo associationEntityInfo = new AssociationEntityInfo();
@@ -125,9 +131,27 @@ public class ColumnInfoHandler {
         associationEntityInfo.setManyToOne(manyToOne);
         associationEntityInfo.setManyToMany(manyToMany);
         associationEntityInfo.setJoinColumn(joinColumn);
+        associationEntityInfo.setJoinColumns(joinColumns);
         associationEntityInfo.setJoinTable(joinTable);
         associationEntityInfo.setForeignKeyColumnInfoList(foreignKeyColumnInfoList);
+        associationEntityInfo.setInverseForeignKeyColumnInfoList(inverseForeignKeyColumnInfoList);
         columnInfo.setAssociationEntityInfo(associationEntityInfo);
+    }
+
+    private List<ForeignKeyColumnInfo> getForeignKeyList(JoinColumn[] joinColumnList) {
+        List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = new ArrayList(5);
+        for (JoinColumn joinColumn : joinColumnList) {
+            Class<?> table = joinColumn.table();
+            String name = joinColumn.name();
+            String referencedColumnName = joinColumn.referencedColumnName();
+            ForeignKeyColumnInfo foreignKeyColumnInfo = new ForeignKeyColumnInfo();
+            foreignKeyColumnInfo.setName(name);
+            foreignKeyColumnInfo.setReferencedColumnName(referencedColumnName);
+            if (foreignKeyColumnInfo != null) {
+                foreignKeyColumnInfoList.add(foreignKeyColumnInfo);
+            }
+        }
+        return foreignKeyColumnInfoList;
     }
 
     public List<AssociationTableInfo> getAssociationTableInfoList(ColumnInfo columnInfo) {

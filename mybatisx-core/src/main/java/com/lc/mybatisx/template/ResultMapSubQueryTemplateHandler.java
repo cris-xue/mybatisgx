@@ -210,12 +210,12 @@ public class ResultMapSubQueryTemplateHandler {
             AssociationEntityInfo mappedByAssociationEntityInfo = mappedByColumnInfo.getAssociationEntityInfo();
             List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = mappedByAssociationEntityInfo.getForeignKeyColumnInfoList();
             for (ForeignKeyColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
-                column.put(foreignKeyColumnInfo.getReferencedColumnName(), foreignKeyColumnInfo.getReferencedColumnName());
+                column.put(foreignKeyColumnInfo.getName(), foreignKeyColumnInfo.getReferencedColumnName());
             }
         } else {
             List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = associationEntityInfo.getForeignKeyColumnInfoList();
             for (ForeignKeyColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
-                column.put(foreignKeyColumnInfo.getName(), foreignKeyColumnInfo.getName());
+                column.put(foreignKeyColumnInfo.getReferencedColumnName(), foreignKeyColumnInfo.getName());
             }
         }
         return column;

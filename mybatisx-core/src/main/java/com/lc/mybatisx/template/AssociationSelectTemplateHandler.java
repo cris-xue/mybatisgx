@@ -30,77 +30,14 @@ public class AssociationSelectTemplateHandler {
             if (ObjectUtils.isNotEmpty(xNodeMap)) {
                 totalXNodeMap.putAll(xNodeMap);
             }
-            /*resultMapAssociationInfoList.forEach(resultMapAssociationInfo -> {
-                ColumnInfo columnInfo = resultMapAssociationInfo.getColumnInfo();
-                List<XNode> xNodeList = null;
-                OneToOne oneToOne = columnInfo.getAssociationEntityInfo().getOneToOne();
-                if (oneToOne != null) {
-                    xNodeList = buildOneToOne(mapperInfo, resultMapInfo, mapperInfo.getEntityInfo(), columnInfo);
-                }
-            });*/
         });
-
-
-        /*List<ColumnInfo> associationColumnInfoList = mapperInfo.getEntityInfo().getAssociationColumnInfoList();
-        associationColumnInfoList.forEach(associationColumnInfo -> {
-            XNode xNode = null;
-            OneToOne oneToOne = associationColumnInfo.getAssociationEntityInfo().getOneToOne();
-            if (oneToOne != null) {
-                xNode = buildOneToOne(mapperInfo, mapperInfo.getEntityInfo(), associationColumnInfo);
-            }
-            OneToMany oneToMany = associationColumnInfo.getAssociationEntityInfo().getOneToMany();
-            if (oneToMany != null) {
-                // xNode = buildOneToMany(mapperInfo, mapperInfo.getEntityInfo(), associationColumnInfo);
-            }
-            if (xNode != null) {
-                xNodeList.add(xNode);
-            }
-        });*/
         return totalXNodeMap;
-    }
-
-    private Map<String, XNode> buildOneToOne(MapperInfo mapperInfo, ResultMapInfo resultMapInfo, EntityInfo entityInfo, ColumnInfo columnInfo) {
-        Map<String, XNode> xNodeMap = this.buildOneToOne(resultMapInfo.getResultMapAssociationInfoList());
-        return xNodeMap;
-        /*Document document = DocumentHelper.createDocument();
-        Element mapperElement = document.addElement("mapper");
-        Element selectElement = mapperElement.addElement("select");
-
-        String mappedBy = columnInfo.getAssociationEntityInfo().getMappedBy();
-        if (StringUtils.isNotBlank(mappedBy)) {
-            Class<?> javaType = columnInfo.getJavaType();
-            EntityInfo associationEntityInfo = EntityInfoContextHolder.get(javaType);
-            ColumnInfo mappedByColumnInfo = associationEntityInfo.getColumnInfo(mappedBy);
-            JoinColumn joinColumn = mappedByColumnInfo.getAssociationEntityInfo().getJoinColumn();
-            selectElement.addAttribute("id", String.format("find%sBy%s", entityInfo.getTableEntityClass().getSimpleName(), joinColumn.referencedColumnName()));
-            selectElement.addAttribute("resultMap", resultMapInfo.getId());
-            selectElement.addAttribute("fetchType", "lazy");
-            selectElement.addText(
-                    String.format(
-                            "select * from %s where %s = #{%s}", entityInfo.getTableName(), joinColumn.referencedColumnName(), joinColumn.name())
-            );
-        } else {
-            JoinColumn joinColumn = columnInfo.getAssociationEntityInfo().getJoinColumn();
-            selectElement.addAttribute("id", String.format("find%sBy%s", entityInfo.getTableEntityClass().getSimpleName(), joinColumn.name()));
-            selectElement.addAttribute("resultMap", resultMapInfo.getId());
-            selectElement.addAttribute("fetchType", "lazy");
-            selectElement.addText(
-                    String.format(
-                            "select * from %s where %s = #{%s}", entityInfo.getTableName(), joinColumn.name(), joinColumn.referencedColumnName())
-            );
-        }
-        String insertXmlString = document.asXML();
-        logger.info(insertXmlString);
-        XPathParser xPathParser = XmlUtils.processXml(insertXmlString);
-        XNode xNode = xPathParser.evalNode("/mapper/select");
-        return xNode;*/
     }
 
     private Map<String, XNode> buildOneToOne(List<ResultMapAssociationInfo> resultMapAssociationInfoList) {
         Map<String, XNode> xNodeMap = new HashMap();
         for (int i = 0; i < resultMapAssociationInfoList.size(); i++) {
             ResultMapAssociationInfo resultMapAssociationInfo = resultMapAssociationInfoList.get(i);
-            AssociationEntityInfo associationEntityInfo = resultMapAssociationInfo.getColumnInfo().getAssociationEntityInfo();
             List<ResultMapAssociationInfo> subResultMapAssociationInfoList = resultMapAssociationInfo.getResultMapAssociationInfoList();
             if (ObjectUtils.isNotEmpty(subResultMapAssociationInfoList)) {
                 Map<String, XNode> subXNodeMap = this.buildOneToOne(subResultMapAssociationInfoList);
@@ -108,6 +45,7 @@ public class AssociationSelectTemplateHandler {
                     xNodeMap.putAll(subXNodeMap);
                 }
             }
+            AssociationEntityInfo associationEntityInfo = resultMapAssociationInfo.getColumnInfo().getAssociationEntityInfo();
             OneToOne oneToOne = associationEntityInfo.getOneToOne();
             XNode xNode = null;
             if (oneToOne != null) {
@@ -138,36 +76,32 @@ public class AssociationSelectTemplateHandler {
         Element selectElement = mapperElement.addElement("select");
 
         ColumnInfo columnInfo = resultMapAssociationInfo.getColumnInfo();
-        String mappedBy = columnInfo.getAssociationEntityInfo().getMappedBy();
+        AssociationEntityInfo associationEntityInfo = columnInfo.getAssociationEntityInfo();
+        String mappedBy = associationEntityInfo.getMappedBy();
         if (StringUtils.isNotBlank(mappedBy)) {
-            Class<?> javaType = columnInfo.getJavaType();
-            EntityInfo associationEntityInfo = EntityInfoContextHolder.get(javaType);
-            ColumnInfo mappedByColumnInfo = associationEntityInfo.getColumnInfo(mappedBy);
-            List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = mappedByColumnInfo.getAssociationEntityInfo().getForeignKeyColumnInfoList();
             selectElement.addAttribute("id", resultMapAssociationInfo.getSelect());
             selectElement.addAttribute("resultMap", resultMapAssociationInfo.getResultMapId());
             String fetchSize = columnInfo.getAssociationEntityInfo().getFetchSize();
             if (StringUtils.isNotBlank(fetchSize)) {
                 selectElement.addAttribute("fetchSize", fetchSize);
             }
-            selectElement.addText(
-                    String.format(
-                            "select * from %s where %s = #{%s}", associationEntityInfo.getTableName(), foreignKeyColumnInfoList.get(0).getName(), foreignKeyColumnInfoList.get(0).getReferencedColumnName())
-            );
+
+            Class<?> javaType = columnInfo.getJavaType();
+            EntityInfo targetEntityInfo = EntityInfoContextHolder.get(javaType);
+            ColumnInfo targetColumnInfo = targetEntityInfo.getColumnInfo(mappedBy);
+            AssociationEntityInfo targetAssociationEntityInfo = targetColumnInfo.getAssociationEntityInfo();
+            this.buildSelectSqlXNode(selectElement, mappedBy, targetEntityInfo, targetAssociationEntityInfo);
         } else {
-            Class<?> javaType = columnInfo.getJavaType();
-            EntityInfo associationEntityInfo = EntityInfoContextHolder.get(javaType);
-            List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = columnInfo.getAssociationEntityInfo().getForeignKeyColumnInfoList();
             selectElement.addAttribute("id", resultMapAssociationInfo.getSelect());
             selectElement.addAttribute("resultMap", resultMapAssociationInfo.getResultMapId());
             String fetchSize = columnInfo.getAssociationEntityInfo().getFetchSize();
             if (StringUtils.isNotBlank(fetchSize)) {
                 selectElement.addAttribute("fetchSize", fetchSize);
             }
-            selectElement.addText(
-                    String.format(
-                            "select * from %s where %s = #{%s}", associationEntityInfo.getTableName(), foreignKeyColumnInfoList.get(0).getReferencedColumnName(), foreignKeyColumnInfoList.get(0).getName())
-            );
+
+            Class<?> javaType = columnInfo.getJavaType();
+            EntityInfo targetEntityInfo = EntityInfoContextHolder.get(javaType);
+            this.buildSelectSqlXNode(selectElement, mappedBy, targetEntityInfo, associationEntityInfo);
         }
 
         String selectXmlString = document.asXML();
@@ -246,148 +180,59 @@ public class AssociationSelectTemplateHandler {
         return xNode;
     }
 
-    private XNode buildOneToMany(ResultMapAssociationInfo resultMapAssociationInfo) {
+    private XNode buildSelectXNode(MapperInfo mapperInfo, MethodInfo methodInfo) {
         Document document = DocumentHelper.createDocument();
         Element mapperElement = document.addElement("mapper");
         Element selectElement = mapperElement.addElement("select");
+        selectElement.addAttribute("id", methodInfo.getMethodName());
+        selectElement.addAttribute("resultMap", methodInfo.getResultMapId());
 
-        ColumnInfo columnInfo = resultMapAssociationInfo.getColumnInfo();
-        String mappedBy = columnInfo.getAssociationEntityInfo().getMappedBy();
-        if (StringUtils.isNotBlank(mappedBy)) {
-            Class<?> javaType = columnInfo.getJavaType();
-            EntityInfo associationEntityInfo = EntityInfoContextHolder.get(javaType);
-            ColumnInfo mappedByColumnInfo = associationEntityInfo.getColumnInfo(mappedBy);
-            JoinColumn joinColumn = mappedByColumnInfo.getAssociationEntityInfo().getJoinColumn();
-            selectElement.addAttribute("id", resultMapAssociationInfo.getSelect());
-            // selectElement.addAttribute("resultMap", resultMapAssociationInfo.getId());
-            selectElement.addAttribute("fetchType", "lazy");
-            selectElement.addText(
-                    String.format(
-                            "select * from %s where %s = #{%s}", associationEntityInfo.getTableName(), joinColumn.referencedColumnName(), joinColumn.name())
-            );
-        } else {
-            Class<?> javaType = columnInfo.getJavaType();
-            EntityInfo associationEntityInfo = EntityInfoContextHolder.get(javaType);
-            JoinColumn joinColumn = columnInfo.getAssociationEntityInfo().getJoinColumn();
-            selectElement.addAttribute("id", resultMapAssociationInfo.getSelect());
-            // selectElement.addAttribute("resultMap", resultMapInfo.getId());
-            selectElement.addAttribute("fetchType", "lazy");
-            selectElement.addText(
-                    String.format(
-                            "select * from %s where %s = #{%s}", associationEntityInfo.getTableName(), joinColumn.name(), joinColumn.referencedColumnName())
-            );
-        }
+        // this.buildSelectSqlXNode(selectElement, mapperInfo, methodInfo);
+
         String insertXmlString = document.asXML();
-        logger.info(insertXmlString);
+        logger.debug(insertXmlString);
         XPathParser xPathParser = XmlUtils.processXml(insertXmlString);
-        XNode xNode = xPathParser.evalNode("/mapper/select");
-        return xNode;
+        return xPathParser.evalNode("/mapper/select");
     }
 
-    /*private XNode buildOneToMany(MapperInfo mapperInfo, EntityInfo entityInfo, ColumnInfo columnInfo) {
-        Document document = DocumentHelper.createDocument();
-        Element mapperElement = document.addElement("mapper");
-        Element selectElement = mapperElement.addElement("select");
+    private void buildSelectSqlXNode(Element selectElement, String mappedBy, EntityInfo queryEntityInfo, AssociationEntityInfo associationEntityInfo) {
+        selectElement.addText("select");
+        Element dbTrimElement = selectElement.addElement("trim");
+        dbTrimElement.addAttribute("prefix", "");
+        dbTrimElement.addAttribute("suffix", "");
+        dbTrimElement.addAttribute("suffixOverrides", ",");
 
-        ResultMapInfo resultMapInfo = mapperInfo.getResultMapInfo(entityInfo.getTableEntityClass());
-        String mappedBy = columnInfo.getMappedBy();
-        Boolean foreignKey = columnInfo.getForeignKey();
+        queryEntityInfo.getTableColumnInfoList().forEach(queryColumnInfo -> {
+            // 外键不存在，只需要添加字段。外键存在，则需要添加字段和外键
+            AssociationEntityInfo queryAssociationEntityInfo = queryColumnInfo.getAssociationEntityInfo();
+            if (queryAssociationEntityInfo == null) {
+                dbTrimElement.addText(String.format("%s, ", queryColumnInfo.getDbColumnName()));
+            } else {
+                queryAssociationEntityInfo.getForeignKeyColumnInfoList().forEach(foreignKeyColumnInfo -> {
+                    dbTrimElement.addText(String.format("%s, ", foreignKeyColumnInfo.getName()));
+                });
+            }
+        });
+
+        selectElement.addText(String.format("from %s", queryEntityInfo.getTableName()));
+
+        Element whereElement = selectElement.addElement("where");
+        Element trimElement = whereElement.addElement("trim");
+        trimElement.addAttribute("prefix", "");
+        trimElement.addAttribute("suffix", "");
+        trimElement.addAttribute("prefixOverrides", "AND|OR|and|or");
+
+        List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = associationEntityInfo.getForeignKeyColumnInfoList();
         if (StringUtils.isNotBlank(mappedBy)) {
-            Class<?> javaType = columnInfo.getJavaType();
-            EntityInfo associationEntityInfo = EntityInfoContextHolder.get(javaType);
-            ColumnInfo mappedByColumnInfo = associationEntityInfo.getColumnInfo(mappedBy);
-            JoinColumn joinColumn = mappedByColumnInfo.getJoinColumn();
-            selectElement.addAttribute("id", String.format("find%sBy%s", entityInfo.getTableEntityClass().getSimpleName(), joinColumn.referencedColumnName()));
-            selectElement.addAttribute("resultMap", resultMapInfo.getId());
-            selectElement.addAttribute("fetchType", "lazy");
-            selectElement.addText(
-                    String.format(
-                            "select * from %s where %s = #{%s}", entityInfo.getTableName(), joinColumn.referencedColumnName(), joinColumn.name())
-            );
-        }
-        if (foreignKey) {
-            JoinColumn joinColumn = columnInfo.getJoinColumn();
-            selectElement.addAttribute("id", String.format("find%sBy%s", entityInfo.getTableEntityClass().getSimpleName(), joinColumn.name()));
-            selectElement.addAttribute("resultMap", resultMapInfo.getId());
-            selectElement.addAttribute("fetchType", "lazy");
-            selectElement.addText(
-                    String.format(
-                            "select * from %s where %s = #{%s}", entityInfo.getTableName(), joinColumn.name(), joinColumn.referencedColumnName())
-            );
-        }
-        String insertXmlString = document.asXML();
-        logger.info(insertXmlString);
-        XPathParser xPathParser = XmlUtils.processXml(insertXmlString);
-        XNode xNode = xPathParser.evalNode("/mapper/select");
-        return xNode;
-    }*/
-
-    private XNode buildSelectXNode(MapperInfo mapperInfo, TableInfo tableInfo, ColumnInfo columnInfo) {
-        Document document = DocumentHelper.createDocument();
-        Element mapperElement = document.addElement("mapper");
-        Element selectElement = mapperElement.addElement("select");
-
-        // findUserByRoleId   findUserByOrderId    findUserByUserDetailId
-        /*String inverseForeignKey = associationTableInfo.getInverseForeignKey();
-        if (StringUtils.isBlank(inverseForeignKey)) {
-            selectElement.addAttribute("id", String.format("find%sJoin%sBy%s", mapperInfo.getEntityClass().getSimpleName(), associationTableInfo.getJoinEntity().getSimpleName(), associationTableInfo.getForeignKey()));
-            selectElement.addAttribute("resultType", mapperInfo.getEntityClass().getTypeName());
-            selectElement.addText(
-                    String.format(
-                            "select %s.* from %s %s left join %s %s on %s.%s = %s.%s where %s.%s = #{id}",
-                            associationTableInfo.getJoinEntity().getSimpleName(),
-
-                            tableInfo.getTableName(),
-                            tableInfo.getTableName(),
-                            associationTableInfo.getJoinEntity().getSimpleName(),
-                            associationTableInfo.getJoinEntity().getSimpleName(),
-
-                            tableInfo.getTableName(),
-                            associationTableInfo.getForeignKey(),
-
-                            associationTableInfo.getJoinEntity().getSimpleName(),
-                            "id",
-
-                            tableInfo.getTableName(),
-                            "aaa"
-                    )
-            );
+            foreignKeyColumnInfoList.forEach(foreignKeyColumnInfo -> {
+                String conditionOp = String.format(" %s %s %s #{%s}", "and", foreignKeyColumnInfo.getName(), "=", foreignKeyColumnInfo.getName());
+                trimElement.addText(conditionOp);
+            });
         } else {
-            // 多对多
-            selectElement.addAttribute("id", String.format("find%sJoin%sBy%s", mapperInfo.getEntityClass().getSimpleName(), associationTableInfo.getJoinEntity().getSimpleName(), associationTableInfo.getInverseForeignKey()));
-            selectElement.addAttribute("resultType", mapperInfo.getEntityClass().getTypeName());
-            selectElement.addText(String.format("%s---%s", mapperInfo.getEntityClass().getSimpleName(), associationTableInfo.getJoinEntity().getSimpleName()));
-        }*/
-
-        /**
-         *      * select role.* from
-         *      * user_role user_role left join role role on user_role.role_id = role.id
-         *      * where user.user_id = id
-         */
-        /*selectElement.addText(
-                String.format(
-                        "select %s.* from %s %s left join %s %s on %s.%s = %s.%s where %s.%s = #{id}",
-                        targetTableInfo.getTableName(),
-                        tableInfo.getTableName(),
-                        tableInfo.getTableName(),
-                        targetTableInfo.getTableName(),
-                        targetTableInfo.getTableName(),
-
-                        tableInfo.getTableName(),
-                        associationTableInfo.getTargetForeignKey()[0],
-
-                        targetTableInfo.getTableName(),
-                        targetTableInfo.getColumnInfo("id").getDbColumnName(),
-
-                        tableInfo.getTableName(),
-                        associationTableInfo.getForeignKey()[0]
-                )
-        );*/
-
-        String insertXmlString = document.asXML();
-        logger.info(insertXmlString);
-        XPathParser xPathParser = XmlUtils.processXml(insertXmlString);
-        XNode xNode = xPathParser.evalNode("/mapper/select");
-        return xNode;
+            foreignKeyColumnInfoList.forEach(foreignKeyColumnInfo -> {
+                String conditionOp = String.format(" %s %s %s #{%s}", "and", foreignKeyColumnInfo.getReferencedColumnName(), "=", foreignKeyColumnInfo.getReferencedColumnName());
+                trimElement.addText(conditionOp);
+            });
+        }
     }
 }

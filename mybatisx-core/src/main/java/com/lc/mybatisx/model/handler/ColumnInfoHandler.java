@@ -108,8 +108,8 @@ public class ColumnInfoHandler {
         JoinColumn joinColumn = field.getAnnotation(JoinColumn.class);
         JoinColumns joinColumns = field.getAnnotation(JoinColumns.class);
         JoinTable joinTable = field.getAnnotation(JoinTable.class);
-        List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = null;
-        List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = null;
+        List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = new ArrayList();
+        List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = new ArrayList();
         if (joinColumn != null) {
             JoinColumn[] joinColumnList = new JoinColumn[]{joinColumn};
             foreignKeyColumnInfoList = this.getForeignKeyList(joinColumnList);

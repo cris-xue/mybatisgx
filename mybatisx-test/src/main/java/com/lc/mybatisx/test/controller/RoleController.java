@@ -1,9 +1,11 @@
 package com.lc.mybatisx.test.controller;
 
-import com.lc.mybatisx.test.dao.RoleDao;
-import com.lc.mybatisx.test.model.entity.Role;
+import com.lc.mybatisx.test.model.dto.RoleDto;
+import com.lc.mybatisx.test.service.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -17,38 +19,16 @@ import java.util.List;
 public class RoleController {
 
     @Autowired
-    private RoleDao roleDao;
-
-    @PostMapping
-    public Role add(@RequestBody Role role) {
-        roleDao.insert(role);
-        return role;
-    }
-
-    @DeleteMapping
-    public int deleteById(Long id) {
-        return roleDao.deleteById(id);
-    }
-
-    @PutMapping
-    public Role updateById(@RequestBody Role role) {
-        roleDao.updateById(role);
-        return role;
-    }
+    private RoleService roleService;
 
     @GetMapping
-    public Role findById(Long id) {
-        return roleDao.findById(id);
+    public RoleDto findById(Long id) {
+        RoleDto roleDto = roleService.findById(id);
+        return roleDto;
     }
 
     @GetMapping(path = "/list")
-    public List<Role> findList(Role role) {
-        return roleDao.findList(role);
+    public List<RoleDto> findList(RoleDto roleDto) {
+        return roleService.list(roleDto);
     }
-
-    /*@GetMapping(path = "/ids")
-    public List<Role> findByIdIn(@RequestParam("ids") List<Long> ids) {
-        return roleDao.findByIds(ids);
-    }*/
-
 }

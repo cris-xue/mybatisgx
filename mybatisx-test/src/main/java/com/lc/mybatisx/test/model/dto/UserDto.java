@@ -22,6 +22,8 @@ public class UserDto extends BaseDto<Long> {
 
     private Integer version;
 
+    private List<RoleDto> roleList;
+
     private UserDetailDto userDetail;
 
     private List<OrderDto> orderList;
@@ -96,6 +98,14 @@ public class UserDto extends BaseDto<Long> {
 
     public void setVersion(Integer version) {
         this.version = version;
+    }
+
+    public List<RoleDto> getRoleList() {
+        return roleList;
+    }
+
+    public void setRoleList(List<RoleDto> roleList) {
+        this.roleList = roleList;
     }
 
     public UserDetailDto getUserDetail() {

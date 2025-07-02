@@ -40,8 +40,8 @@ public class User extends BaseEntity<Long> {
      * where user.user_id = id
      * </select>
      */
-    /*@ManyToMany(mappedBy = "userList")
-    private List<Role> roleList;*/
+    @ManyToMany(mappedBy = "userList")
+    private List<Role> roleList;
 
     @OneToMany(mappedBy = "user", fetchSize = 100)
     private List<Order> orderList;
@@ -121,13 +121,13 @@ public class User extends BaseEntity<Long> {
         this.version = version;
     }
 
-    /*public List<Role> getRoleList() {
+    public List<Role> getRoleList() {
         return roleList;
     }
 
     public void setRoleList(List<Role> roleList) {
         this.roleList = roleList;
-    }*/
+    }
 
     public List<Order> getOrderList() {
         return orderList;

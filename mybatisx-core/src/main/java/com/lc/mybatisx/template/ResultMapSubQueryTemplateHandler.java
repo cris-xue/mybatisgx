@@ -103,15 +103,7 @@ public class ResultMapSubQueryTemplateHandler {
             AssociationEntityInfo associationEntityInfo = columnInfo.getAssociationEntityInfo();
             Integer associationType = this.getAssociationType(associationEntityInfo);
             if (associationType == 1) {
-                String mappedBy = associationEntityInfo.getMappedBy();
-                if (StringUtils.isBlank(mappedBy)) {
-                    // 在resultMap下增加外键字段
-                    /*List<ColumnInfo> foreignKeyColumnInfoList = associationEntityInfo.getForeignKeyColumnInfoList();
-                    for (ColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
-                        resultColumnElement(resultMapElement, foreignKeyColumnInfo);
-                    }*/
-                }
-                Element associationColumnElement = this.associationColumnElement(resultMapElement, resultMapAssociationInfo);
+                this.associationColumnElement(resultMapElement, resultMapAssociationInfo);
 
                 Document document = DocumentHelper.createDocument();
                 Element refResultMapElement = this.addResultMapElement(document, resultMapAssociationInfo);
@@ -129,7 +121,7 @@ public class ResultMapSubQueryTemplateHandler {
                 XNode xNode = xPathParser.evalNode("/mapper/resultMap");
                 refResultMapXNodeMap.put(resultMapAssociationInfo.getResultMapId(), xNode);
             } else if (associationType == 2) {
-                Element collectionColumnElement = this.collectionColumnElement(resultMapElement, resultMapAssociationInfo);
+                this.collectionColumnElement(resultMapElement, resultMapAssociationInfo);
 
                 Document document = DocumentHelper.createDocument();
                 Element refResultMapElement = this.addResultMapElement(document, resultMapAssociationInfo);
@@ -202,155 +194,43 @@ public class ResultMapSubQueryTemplateHandler {
 
     private Map<String, String> getColumn(ColumnInfo columnInfo) {
         AssociationEntityInfo associationEntityInfo = columnInfo.getAssociationEntityInfo();
-        String mappedBy = associationEntityInfo.getMappedBy();
-        Map<String, String> column = new HashMap();
-        if (StringUtils.isNotBlank(mappedBy)) {
-            EntityInfo entityInfo = EntityInfoContextHolder.get(columnInfo.getJavaType());
-            ColumnInfo mappedByColumnInfo = entityInfo.getColumnInfo(mappedBy);
-            AssociationEntityInfo mappedByAssociationEntityInfo = mappedByColumnInfo.getAssociationEntityInfo();
-            List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = mappedByAssociationEntityInfo.getForeignKeyColumnInfoList();
-            for (ForeignKeyColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
-                column.put(foreignKeyColumnInfo.getName(), foreignKeyColumnInfo.getReferencedColumnName());
-            }
-        } else {
-            List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = associationEntityInfo.getForeignKeyColumnInfoList();
-            for (ForeignKeyColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
-                column.put(foreignKeyColumnInfo.getReferencedColumnName(), foreignKeyColumnInfo.getName());
-            }
-        }
-        return column;
-    }
-
-    /*private void oneToManyCollectionColumnElement(Element resultMapElement, ColumnInfo columnInfo) {
-        Class<?> javaType = columnInfo.getJavaType();
-        EntityInfo entityInfo = EntityInfoContextHolder.get(javaType);
-        MapperInfo mapperInfo = MapperInfoContextHolder.get(javaType);
-
-        String namespace = mapperInfo.getNamespace();
-        Boolean foreignKey = columnInfo.getForeignKey();
-        String mappedBy = columnInfo.getMappedBy();
-
-        Element resultMapCollectionElement = resultMapElement.addElement("collection");
-        resultMapCollectionElement.addAttribute("property", columnInfo.getJavaColumnName());
-        resultMapCollectionElement.addAttribute("javaType", columnInfo.getContainerTypeName());
-        resultMapCollectionElement.addAttribute("ofType", columnInfo.getJavaTypeName());
-
-        if (StringUtils.isNotBlank(mappedBy)) {
-            ColumnInfo mappedByColumnInfo = entityInfo.getColumnInfo(mappedBy);
-            JoinColumn joinColumn = mappedByColumnInfo.getJoinColumn();
-            resultMapCollectionElement.addAttribute("select",
-                    String.format(
-                            "%s.find%sBy%s",
-                            namespace,
-                            entityInfo.getTableEntityClass().getSimpleName(),
-                            joinColumn.name()
-                    )
-            );
-            resultMapCollectionElement.addAttribute("column", joinColumn.referencedColumnName());
-        }
-        if (foreignKey) {
-            JoinColumn joinColumn = columnInfo.getJoinColumn();
-            resultMapCollectionElement.addAttribute("select",
-                    String.format(
-                            "%s.find%sBy%s",
-                            namespace,
-                            entityInfo.getTableEntityClass().getSimpleName(),
-                            joinColumn.referencedColumnName()
-                    )
-            );
-            resultMapCollectionElement.addAttribute("column", joinColumn.name());
-        }
-        resultMapCollectionElement.addAttribute("fetchType", FetchType.LAZY.name());
-    }
-
-    private void manyToManyCollectionColumnElement(Element resultMapElement, ColumnInfo columnInfo) {
-        Class<?> javaType = columnInfo.getJavaType();
-        EntityInfo entityInfo = EntityInfoContextHolder.get(javaType);
-        MapperInfo mapperInfo = MapperInfoContextHolder.get(javaType);
-
-        String namespace = mapperInfo.getNamespace();
-        JoinTable joinTable = columnInfo.getJoinTable();
-
-        Element resultMapCollectionElement = resultMapElement.addElement("collection");
-        resultMapCollectionElement.addAttribute("property", columnInfo.getJavaColumnName());
-        resultMapCollectionElement.addAttribute("javaType", columnInfo.getContainerTypeName());
-        resultMapCollectionElement.addAttribute("ofType", columnInfo.getJavaTypeName());
-
-        if (joinTable == null) {
-            String mappedBy = columnInfo.getMappedBy();
-            ColumnInfo mappedByColumnInfo = entityInfo.getColumnInfo(mappedBy);
-            joinTable = mappedByColumnInfo.getJoinTable();
-
-            String tableName = joinTable.name();
-            JoinColumn[] joinColumnList = joinTable.joinColumns();
-            JoinColumn[] inverseJoinColumnList = joinTable.inverseJoinColumns();
-
-            resultMapCollectionElement.addAttribute("select",
-                    String.format(
-                            "%s.find_%s_join_%s_by_%s",
-                            namespace,
-                            tableName,
-                            entityInfo.getTableName(),
-                            joinColumnList[0].name()
-                    )
-            );
-            resultMapCollectionElement.addAttribute("column", joinColumnList[0].referencedColumnName());
-        } else {
-            String tableName = joinTable.name();
-            JoinColumn[] joinColumnList = joinTable.joinColumns();
-            JoinColumn[] inverseJoinColumnList = joinTable.inverseJoinColumns();
-            resultMapCollectionElement.addAttribute("select",
-                    String.format(
-                            "%s.find_%s_join_%s_by_%s",
-                            namespace,
-                            tableName,
-                            entityInfo.getTableName(),
-                            inverseJoinColumnList[0].name()
-                    )
-            );
-            resultMapCollectionElement.addAttribute("column", inverseJoinColumnList[0].referencedColumnName());
-        }
-        resultMapCollectionElement.addAttribute("fetchType", FetchType.LAZY.name());
-    }*/
-
-    /*private void addAssociationElement(Element resultMapElement, List<AssociationTableInfo> associationTableInfoList) {
-        associationTableInfoList.forEach(associationTableInfo -> {
-            Class<?> joinEntity = associationTableInfo.getJoinEntity();
-            TableInfo tableInfo = TableInfoContextHolder.get(joinEntity);
-            MapperInfo mapperInfo = MapperInfoContextHolder.get(joinEntity);
-            String namespace = mapperInfo.getNamespace();
-
-            Class<?> joinContainerType = associationTableInfo.getJoinContainerType();
-            String inverseForeignKey = associationTableInfo.getInverseForeignKey();
-            if (StringUtils.isBlank(inverseForeignKey)) {
-                if (joinContainerType == associationTableInfo.getJoinEntity()) {
-                    // 一对一
-                    Element resultMapSelectElement = resultMapElement.addElement("association");
-                    resultMapSelectElement.addAttribute("property", associationTableInfo.getJavaColumnName());
-                    resultMapSelectElement.addAttribute("javaType", associationTableInfo.getJoinEntity().getName());
-                    resultMapSelectElement.addAttribute("select", String.format("%s.find%sBy%s", namespace, joinEntity.getSimpleName(), associationTableInfo.getForeignKey()));
-                    resultMapSelectElement.addAttribute("column", "id");
-                    resultMapSelectElement.addAttribute("fetchType", associationTableInfo.getFetch().name());
-                } else {
-                    Element resultMapCollectionElement = resultMapElement.addElement("collection");
-                    resultMapCollectionElement.addAttribute("property", associationTableInfo.getJavaColumnName());
-                    resultMapCollectionElement.addAttribute("javaType", associationTableInfo.getJoinContainerType().getSimpleName());
-                    resultMapCollectionElement.addAttribute("ofType", associationTableInfo.getJoinEntity().getName());
-                    resultMapCollectionElement.addAttribute("select", String.format("%s.find%sBy%s", namespace, joinEntity.getSimpleName(), associationTableInfo.getForeignKey()));
-                    resultMapCollectionElement.addAttribute("column", "id");
-                    resultMapCollectionElement.addAttribute("fetchType", associationTableInfo.getFetch().name());
+        ManyToMany manyToMany = associationEntityInfo.getManyToMany();
+        if (manyToMany == null) {
+            String mappedBy = associationEntityInfo.getMappedBy();
+            Map<String, String> column = new HashMap();
+            if (StringUtils.isNotBlank(mappedBy)) {
+                EntityInfo entityInfo = EntityInfoContextHolder.get(columnInfo.getJavaType());
+                ColumnInfo mappedByColumnInfo = entityInfo.getColumnInfo(mappedBy);
+                AssociationEntityInfo mappedByAssociationEntityInfo = mappedByColumnInfo.getAssociationEntityInfo();
+                List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = mappedByAssociationEntityInfo.getForeignKeyColumnInfoList();
+                for (ForeignKeyColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
+                    column.put(foreignKeyColumnInfo.getName(), foreignKeyColumnInfo.getReferencedColumnName());
                 }
             } else {
-                // 多对多
-                // <collection property="roleList" javaType="ArrayList" ofType="com.lc.mybatisx.test.model.entity.Role" column="id"/>
-                Element resultMapCollectionElement = resultMapElement.addElement("collection");
-                resultMapCollectionElement.addAttribute("property", associationTableInfo.getJavaColumnName());
-                resultMapCollectionElement.addAttribute("javaType", associationTableInfo.getJoinContainerType().getSimpleName());
-                resultMapCollectionElement.addAttribute("ofType", associationTableInfo.getJoinEntity().getName());
-                resultMapCollectionElement.addAttribute("select", String.format("%s.find%sBy%s", namespace, joinEntity.getSimpleName(), inverseForeignKey));
-                resultMapCollectionElement.addAttribute("column", "id");
-                resultMapCollectionElement.addAttribute("fetchType", associationTableInfo.getFetch().name());
+                List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = associationEntityInfo.getForeignKeyColumnInfoList();
+                for (ForeignKeyColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
+                    column.put(foreignKeyColumnInfo.getReferencedColumnName(), foreignKeyColumnInfo.getName());
+                }
             }
-        });
-    }*/
+            return column;
+        } else {
+            String mappedBy = associationEntityInfo.getMappedBy();
+            Map<String, String> column = new HashMap();
+            if (StringUtils.isNotBlank(mappedBy)) {
+                EntityInfo entityInfo = EntityInfoContextHolder.get(columnInfo.getJavaType());
+                ColumnInfo mappedByColumnInfo = entityInfo.getColumnInfo(mappedBy);
+                AssociationEntityInfo mappedByAssociationEntityInfo = mappedByColumnInfo.getAssociationEntityInfo();
+                List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = mappedByAssociationEntityInfo.getForeignKeyColumnInfoList();
+                for (ForeignKeyColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
+                    column.put(foreignKeyColumnInfo.getName(), foreignKeyColumnInfo.getReferencedColumnName());
+                }
+            } else {
+                List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = associationEntityInfo.getInverseForeignKeyColumnInfoList();
+                for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
+                    column.put(inverseForeignKeyColumnInfo.getName(), inverseForeignKeyColumnInfo.getReferencedColumnName());
+                }
+            }
+            return column;
+        }
+    }
 }

@@ -76,33 +76,17 @@ public class AssociationSelectTemplateHandler {
         Element selectElement = mapperElement.addElement("select");
 
         ColumnInfo columnInfo = resultMapAssociationInfo.getColumnInfo();
-        AssociationEntityInfo associationEntityInfo = columnInfo.getAssociationEntityInfo();
-        String mappedBy = associationEntityInfo.getMappedBy();
-        if (StringUtils.isNotBlank(mappedBy)) {
-            selectElement.addAttribute("id", resultMapAssociationInfo.getSelect());
-            selectElement.addAttribute("resultMap", resultMapAssociationInfo.getResultMapId());
-            String fetchSize = columnInfo.getAssociationEntityInfo().getFetchSize();
-            if (StringUtils.isNotBlank(fetchSize)) {
-                selectElement.addAttribute("fetchSize", fetchSize);
-            }
-
-            Class<?> javaType = columnInfo.getJavaType();
-            EntityInfo targetEntityInfo = EntityInfoContextHolder.get(javaType);
-            ColumnInfo targetColumnInfo = targetEntityInfo.getColumnInfo(mappedBy);
-            AssociationEntityInfo targetAssociationEntityInfo = targetColumnInfo.getAssociationEntityInfo();
-            this.buildSelectSqlXNode(selectElement, mappedBy, targetEntityInfo, targetAssociationEntityInfo);
-        } else {
-            selectElement.addAttribute("id", resultMapAssociationInfo.getSelect());
-            selectElement.addAttribute("resultMap", resultMapAssociationInfo.getResultMapId());
-            String fetchSize = columnInfo.getAssociationEntityInfo().getFetchSize();
-            if (StringUtils.isNotBlank(fetchSize)) {
-                selectElement.addAttribute("fetchSize", fetchSize);
-            }
-
-            Class<?> javaType = columnInfo.getJavaType();
-            EntityInfo targetEntityInfo = EntityInfoContextHolder.get(javaType);
-            this.buildSelectSqlXNode(selectElement, mappedBy, targetEntityInfo, associationEntityInfo);
+        selectElement.addAttribute("id", resultMapAssociationInfo.getSelect());
+        selectElement.addAttribute("resultMap", resultMapAssociationInfo.getResultMapId());
+        String fetchSize = columnInfo.getAssociationEntityInfo().getFetchSize();
+        if (StringUtils.isNotBlank(fetchSize)) {
+            selectElement.addAttribute("fetchSize", fetchSize);
         }
+
+        Class<?> javaType = columnInfo.getJavaType();
+        AssociationEntityInfo associationEntityInfo = columnInfo.getAssociationEntityInfo();
+        EntityInfo targetEntityInfo = EntityInfoContextHolder.get(javaType);
+        this.buildSelectSqlXNode(selectElement, targetEntityInfo, associationEntityInfo);
 
         String selectXmlString = document.asXML();
         logger.debug("select: {}", selectXmlString);
@@ -195,7 +179,7 @@ public class AssociationSelectTemplateHandler {
         return xPathParser.evalNode("/mapper/select");
     }
 
-    private void buildSelectSqlXNode(Element selectElement, String mappedBy, EntityInfo queryEntityInfo, AssociationEntityInfo associationEntityInfo) {
+    private void buildSelectSqlXNode(Element selectElement, EntityInfo queryEntityInfo, AssociationEntityInfo associationEntityInfo) {
         selectElement.addText("select");
         Element dbTrimElement = selectElement.addElement("trim");
         dbTrimElement.addAttribute("prefix", "");
@@ -222,13 +206,17 @@ public class AssociationSelectTemplateHandler {
         trimElement.addAttribute("suffix", "");
         trimElement.addAttribute("prefixOverrides", "AND|OR|and|or");
 
-        List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = associationEntityInfo.getForeignKeyColumnInfoList();
+        String mappedBy = associationEntityInfo.getMappedBy();
         if (StringUtils.isNotBlank(mappedBy)) {
+            ColumnInfo targetColumnInfo = queryEntityInfo.getColumnInfo(mappedBy);
+            AssociationEntityInfo targetAssociationEntityInfo = targetColumnInfo.getAssociationEntityInfo();
+            List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = targetAssociationEntityInfo.getForeignKeyColumnInfoList();
             foreignKeyColumnInfoList.forEach(foreignKeyColumnInfo -> {
                 String conditionOp = String.format(" %s %s %s #{%s}", "and", foreignKeyColumnInfo.getName(), "=", foreignKeyColumnInfo.getName());
                 trimElement.addText(conditionOp);
             });
         } else {
+            List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = associationEntityInfo.getForeignKeyColumnInfoList();
             foreignKeyColumnInfoList.forEach(foreignKeyColumnInfo -> {
                 String conditionOp = String.format(" %s %s %s #{%s}", "and", foreignKeyColumnInfo.getReferencedColumnName(), "=", foreignKeyColumnInfo.getReferencedColumnName());
                 trimElement.addText(conditionOp);

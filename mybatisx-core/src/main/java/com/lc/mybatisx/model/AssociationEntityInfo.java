@@ -25,6 +25,10 @@ public class AssociationEntityInfo {
      */
     private String fetchSize;
     /**
+     * 加载策略
+     */
+    private LoadStrategy loadStrategy;
+    /**
      * 外键字段列表
      */
     private List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = new ArrayList();
@@ -85,6 +89,14 @@ public class AssociationEntityInfo {
         this.fetchSize = fetchSize;
     }
 
+    public LoadStrategy getLoadStrategy() {
+        return loadStrategy;
+    }
+
+    public void setLoadStrategy(LoadStrategy loadStrategy) {
+        this.loadStrategy = loadStrategy;
+    }
+
     public List<ForeignKeyColumnInfo> getForeignKeyColumnInfoList() {
         return foreignKeyColumnInfoList;
     }
@@ -111,6 +123,7 @@ public class AssociationEntityInfo {
             this.mappedBy = oneToOne.mappedBy();
             this.fetch = oneToOne.fetch().name();
             this.fetchSize = oneToOne.fetchSize() == 0 ? null : Integer.valueOf(oneToOne.fetchSize()).toString();
+            this.loadStrategy = oneToOne.loadStrategy();
         }
     }
 

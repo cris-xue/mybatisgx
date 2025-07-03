@@ -5,6 +5,7 @@ import com.lc.mybatisx.context.EntityInfoContextHolder;
 import com.lc.mybatisx.context.MapperInfoContextHolder;
 import com.lc.mybatisx.context.MapperTemplateContextHolder;
 import com.lc.mybatisx.context.MybatisxContextLoader;
+import com.lc.mybatisx.dao.Dao;
 import com.lc.mybatisx.model.*;
 import com.lc.mybatisx.model.handler.ColumnInfoHandler;
 import com.lc.mybatisx.model.handler.EntityInfoHandler;
@@ -138,11 +139,11 @@ public class MybatisxRegistrar implements ImportBeanDefinitionRegistrar {
                 for (Resource resource : resources) {
                     ClassMetadata classMetadata = METADATA_READER_FACTORY.getMetadataReader(resource).getClassMetadata();
                     Class<?> clazz = Class.forName(classMetadata.getClassName());
+                    Class<?> daoType = Dao.class;
                     Repository repository = clazz.getAnnotation(Repository.class);
-                    if (repository == null) {
-                        continue;
+                    if (daoType.isAssignableFrom(clazz) && repository != null) {
+                        resourceList.add(resource);
                     }
-                    resourceList.add(resource);
                 }
             }
         } catch (IOException e) {

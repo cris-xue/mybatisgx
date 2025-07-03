@@ -12,7 +12,6 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
@@ -58,7 +57,7 @@ public class SqlSessionFactoryBeanPostProcessor implements BeanPostProcessor {
             LOGGER.info("SqlSessionFactoryBean 初始化完成");
             SqlSessionFactory sqlSessionFactory = (SqlSessionFactory) bean;
             Configuration configuration = sqlSessionFactory.getConfiguration();
-            curdMethod(configuration);
+            // curdMethod(configuration);
 
             if (configuration instanceof MybatisxConfiguration) {
                 MybatisxConfiguration mybatisxConfiguration = (MybatisxConfiguration) configuration;

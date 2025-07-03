@@ -4,6 +4,7 @@ import com.lc.mybatisx.annotation.Entity;
 import com.lc.mybatisx.context.EntityInfoContextHolder;
 import com.lc.mybatisx.context.MapperInfoContextHolder;
 import com.lc.mybatisx.context.MapperTemplateContextHolder;
+import com.lc.mybatisx.context.MybatisxContextLoader;
 import com.lc.mybatisx.model.*;
 import com.lc.mybatisx.model.handler.ColumnInfoHandler;
 import com.lc.mybatisx.model.handler.EntityInfoHandler;
@@ -30,6 +31,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.util.ClassUtils;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -51,9 +53,13 @@ public class MybatisxRegistrar implements ImportBeanDefinitionRegistrar {
                 .fromMap(importingClassMetadata.getAnnotationAttributes(MybatisxScan.class.getName()));
 
 
+        MybatisxContextLoader mybatisxContextLoader = new MybatisxContextLoader();
         if (annotationAttributes != null) {
             String[] entityBasePackages = (String[]) annotationAttributes.get("entityBasePackages");
-            for (String entityBasePackage : entityBasePackages) {
+            String[] daoBasePackages = (String[]) annotationAttributes.get("daoBasePackages");
+            List<Resource> resourceList = this.getDaoResourceList(daoBasePackages);
+            mybatisxContextLoader.load(entityBasePackages, daoBasePackages, resourceList);
+            /*for (String entityBasePackage : entityBasePackages) {
                 try {
                     this.processEntity(entityBasePackage);
                 } catch (IOException e) {
@@ -76,15 +82,15 @@ public class MybatisxRegistrar implements ImportBeanDefinitionRegistrar {
                 }
             }
 
-            processTemplate();
+            processTemplate();*/
 
             // 注册bean
             ConstructorArgumentValues constructorArgumentValues = new ConstructorArgumentValues();
-            constructorArgumentValues.addIndexedArgumentValue(0, daoBasePackages);
+            // constructorArgumentValues.addIndexedArgumentValue(0, daoBasePackages);
 
             GenericBeanDefinition sqlSessionFactoryBeanPostProcessorBeanDefinition = new GenericBeanDefinition();
             sqlSessionFactoryBeanPostProcessorBeanDefinition.setBeanClass(SqlSessionFactoryBeanPostProcessor.class);
-            sqlSessionFactoryBeanPostProcessorBeanDefinition.setConstructorArgumentValues(constructorArgumentValues);
+            // sqlSessionFactoryBeanPostProcessorBeanDefinition.setConstructorArgumentValues(constructorArgumentValues);
             registry.registerBeanDefinition("sqlSessionFactoryBeanPostProcessorBeanDefinition", sqlSessionFactoryBeanPostProcessorBeanDefinition);
         }
     }
@@ -120,6 +126,31 @@ public class MybatisxRegistrar implements ImportBeanDefinitionRegistrar {
                 // entityInfo.setAssociationTableInfoList(associationTableInfoList);
             });
         }
+    }
+
+    private List<Resource> getDaoResourceList(String[] basePackages) {
+        List<Resource> resourceList = new ArrayList();
+        try {
+            for (String basePackage : basePackages) {
+                basePackage = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + basePackage.replace('.', '/') + "/**.class";
+                ClassUtils.convertClassNameToResourcePath(basePackage).concat("/**.class");
+                Resource[] resources = RESOURCE_PATTERN_RESOLVER.getResources(basePackage);
+                for (Resource resource : resources) {
+                    ClassMetadata classMetadata = METADATA_READER_FACTORY.getMetadataReader(resource).getClassMetadata();
+                    Class<?> clazz = Class.forName(classMetadata.getClassName());
+                    Repository repository = clazz.getAnnotation(Repository.class);
+                    if (repository == null) {
+                        continue;
+                    }
+                    resourceList.add(resource);
+                }
+            }
+        } catch (IOException e) {
+            logger.error(e.getMessage(), e);
+        } catch (ClassNotFoundException e) {
+            logger.error(e.getMessage(), e);
+        }
+        return resourceList;
     }
 
     private void processDao(String basePackage) throws IOException, ClassNotFoundException {

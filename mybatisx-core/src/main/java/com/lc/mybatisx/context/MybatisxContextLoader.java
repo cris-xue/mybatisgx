@@ -1,6 +1,7 @@
 package com.lc.mybatisx.context;
 
 import com.lc.mybatisx.annotation.Entity;
+import com.lc.mybatisx.dao.Dao;
 import com.lc.mybatisx.model.EntityInfo;
 import com.lc.mybatisx.model.MapperInfo;
 import com.lc.mybatisx.model.MapperTemplateInfo;
@@ -77,11 +78,11 @@ public class MybatisxContextLoader {
         List<Resource> resourceList = new ArrayList();
         for (Resource resource : resources) {
             Class<?> clazz = this.getResourceClass(resource);
-            Mapper repository = clazz.getAnnotation(Mapper.class);
-            if (repository == null) {
-                continue;
+            Class<?> daoType = Dao.class;
+            Mapper mapper = clazz.getAnnotation(Mapper.class);
+            if (daoType.isAssignableFrom(clazz) && mapper != null) {
+                resourceList.add(resource);
             }
-            resourceList.add(resource);
         }
         return resourceList;
     }

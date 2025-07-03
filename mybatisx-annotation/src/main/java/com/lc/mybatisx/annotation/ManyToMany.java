@@ -3,8 +3,6 @@ package com.lc.mybatisx.annotation;
 import javax.persistence.FetchType;
 import java.lang.annotation.*;
 
-import static javax.persistence.FetchType.LAZY;
-
 /**
  * 描述实体和实体之间的关系
  */
@@ -18,7 +16,7 @@ public @interface ManyToMany {
      *
      * @return
      */
-    FetchType fetch() default LAZY;
+    FetchType fetch() default FetchType.LAZY;
 
     /**
      * 抓取数量

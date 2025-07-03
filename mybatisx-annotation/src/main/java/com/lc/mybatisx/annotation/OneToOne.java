@@ -3,8 +3,6 @@ package com.lc.mybatisx.annotation;
 import javax.persistence.FetchType;
 import java.lang.annotation.*;
 
-import static javax.persistence.FetchType.LAZY;
-
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
@@ -15,7 +13,7 @@ public @interface OneToOne {
      *
      * @return
      */
-    FetchType fetch() default LAZY;
+    FetchType fetch() default FetchType.LAZY;
 
     /**
      * 抓取数量
@@ -30,4 +28,11 @@ public @interface OneToOne {
      * @return
      */
     String mappedBy() default "";
+
+    /**
+     * 加载策略
+     *
+     * @return
+     */
+    LoadStrategy loadStrategy() default LoadStrategy.SUB;
 }

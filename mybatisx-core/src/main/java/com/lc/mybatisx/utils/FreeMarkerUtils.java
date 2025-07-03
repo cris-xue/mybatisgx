@@ -57,7 +57,7 @@ public class FreeMarkerUtils {
             stringWriter = new StringWriter();
             template.process(model, stringWriter);
             String ftlText = stringWriter.toString();
-            logger.info(ftlText);
+            logger.debug(ftlText);
             return ftlText;
         } catch (TemplateException e) {
             throw new RuntimeException(e.getMessage(), e);

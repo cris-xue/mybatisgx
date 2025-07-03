@@ -25,5 +25,4 @@ public class MybatisxProperties extends MybatisProperties {
         this.configuration = configuration;
         super.setConfiguration(configuration);
     }
-
 }

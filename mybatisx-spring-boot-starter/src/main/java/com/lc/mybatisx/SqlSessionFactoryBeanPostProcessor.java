@@ -15,10 +15,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.core.io.support.ResourcePatternResolver;
-import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
-import org.springframework.core.type.classreading.MetadataReaderFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -32,17 +28,8 @@ public class SqlSessionFactoryBeanPostProcessor implements BeanPostProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SqlSessionFactoryBeanPostProcessor.class);
 
-    private static final ResourcePatternResolver RESOURCE_PATTERN_RESOLVER = new PathMatchingResourcePatternResolver();
-    private static final MetadataReaderFactory METADATA_READER_FACTORY = new CachingMetadataReaderFactory();
-
-    private String[] packagePatternArray;
-
     // @Autowired
     private IdGenerateValueHandler<?> idGenerateValueHandler;
-
-    public SqlSessionFactoryBeanPostProcessor(String[] packagePatternArray) {
-        this.packagePatternArray = packagePatternArray;
-    }
 
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {

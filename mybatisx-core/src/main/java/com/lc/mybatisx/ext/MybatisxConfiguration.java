@@ -35,7 +35,7 @@ public class MybatisxConfiguration extends Configuration {
         return super.newStatementHandler(executor, mappedStatement, parameterObject, rowBounds, resultHandler, boundSql);
     }
 
-    protected Object fillParameterObject(MappedStatement mappedStatement, Object parameterObject) {
+    private Object fillParameterObject(MappedStatement mappedStatement, Object parameterObject) {
         if (parameterObject == null) {
             return null;
         }

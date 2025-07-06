@@ -84,6 +84,11 @@
 		</dependency>
 
 		<dependency>
+			<groupId>com.github.jsqlparser</groupId>
+			<artifactId>jsqlparser</artifactId>
+			<version>4.9</version>
+		</dependency>
+		<dependency>
 			<groupId>org.hibernate.hql</groupId>
 			<artifactId>hibernate-hql-parser</artifactId>
 			<version>1.5.0.Final</version>

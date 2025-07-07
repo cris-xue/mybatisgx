@@ -9,6 +9,8 @@ import com.lc.mybatisx.annotation.handler.JavaColumnInfo;
 import com.lc.mybatisx.context.EntityInfoContextHolder;
 import com.lc.mybatisx.model.ColumnInfo;
 import com.lc.mybatisx.model.EntityInfo;
+import com.lc.mybatisx.scripting.MybatisxParameterHandler;
+import com.lc.mybatisx.sql.SqlHandler;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.statement.StatementHandler;
 import org.apache.ibatis.mapping.BoundSql;
@@ -31,8 +33,12 @@ public class MybatisxConfiguration extends Configuration {
 
     @Override
     public StatementHandler newStatementHandler(Executor executor, MappedStatement mappedStatement, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
-        parameterObject = this.fillParameterObject(mappedStatement, parameterObject);
-        return super.newStatementHandler(executor, mappedStatement, parameterObject, rowBounds, resultHandler, boundSql);
+        MybatisxParameterHandler mybatisxParameterHandler = new MybatisxParameterHandler(this.idGenerateValueHandler);
+        parameterObject = mybatisxParameterHandler.fillParameterObject(mappedStatement, parameterObject);
+        SqlHandler sqlHandler = new SqlHandler();
+        BoundSql newBoundSql = sqlHandler.process(mappedStatement, parameterObject);
+        // mappedStatement参数不能直接修改，这个参数都是从【MybatisxConfiguration.getMappedStatement();】中获取的。直接修改等于把元数据进行了修改
+        return super.newStatementHandler(executor, mappedStatement, parameterObject, rowBounds, resultHandler, newBoundSql);
     }
 
     private Object fillParameterObject(MappedStatement mappedStatement, Object parameterObject) {
@@ -91,5 +97,4 @@ public class MybatisxConfiguration extends Configuration {
         }
         return originalValue;
     }
-
 }

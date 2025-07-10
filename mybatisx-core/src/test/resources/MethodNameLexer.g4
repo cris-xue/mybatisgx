@@ -4,9 +4,9 @@ lexer grammar MethodNameLexer;
 // | 表示或的关系
 // * 表示有0或者多个
 // fragment 定义不被直接解析的规则
-INSERT_ACTION: 'insert' ;
+INSERT_ACTION: 'insert' | 'insertBatch' ;
 DELETE_ACTION: 'delete' | 'remove' ;
-UPDATE_ACTION: 'update' | 'modify' ;
+UPDATE_ACTION: 'update' | 'updateBatch' | 'modify' ;
 SELECT_ACTION: 'find' | 'get' | 'select' | 'query' ;
 // WHERE_OP: 'By' ;
 WHERE_LINK_OP: 'By' | 'And' | 'Or' ;

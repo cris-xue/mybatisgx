@@ -11,7 +11,6 @@ ORDER_OP_DIRECTION=10
 AGGREGATE_FUNCTION=11
 FIELD=12
 WS=13
-'insert'=1
 'Selective'=7
 'GroupBy'=8
 'OrderBy'=9

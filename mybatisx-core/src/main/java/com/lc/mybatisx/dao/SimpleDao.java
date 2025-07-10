@@ -36,4 +36,6 @@ public interface SimpleDao<ENTITY, ID extends Serializable> extends Dao {
     @Dynamic
     List<ENTITY> findList(ENTITY entity);
 
+    @Dynamic
+    Page<ENTITY> findListPage(ENTITY entity, Pageable pageable);
 }

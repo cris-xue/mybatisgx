@@ -1,30 +1,30 @@
 package com.lc.mybatisx.sql;
 
-import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
-import net.sf.jsqlparser.statement.Statement;
-import net.sf.jsqlparser.statement.delete.Delete;
-import net.sf.jsqlparser.statement.insert.Insert;
-import net.sf.jsqlparser.statement.select.Select;
-import net.sf.jsqlparser.statement.update.Update;
+import com.lc.mybatisx.annotation.handler.IdGenerateValueHandler;
+import com.lc.mybatisx.dao.Pageable;
+import com.lc.mybatisx.handler.PageHandler;
+import com.lc.mybatisx.scripting.MybatisxParameterHandler;
+import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.executor.Executor;
-import org.apache.ibatis.executor.resultset.ResultSetHandler;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.SqlSource;
 import org.apache.ibatis.plugin.Interceptor;
 import org.apache.ibatis.plugin.Intercepts;
 import org.apache.ibatis.plugin.Invocation;
-import org.apache.ibatis.reflection.MetaObject;
-import org.apache.ibatis.reflection.SystemMetaObject;
+import org.apache.ibatis.plugin.Signature;
+import org.apache.ibatis.session.ResultHandler;
+import org.apache.ibatis.session.RowBounds;
+
+import java.lang.reflect.Method;
 
 @Intercepts({
-        /*@Signature(
+        @Signature(
                 type = Executor.class,
                 method = "update",
                 args = {MappedStatement.class, Object.class}
-        ),*/
-        /*@Signature(
+        ),
+        @Signature(
                 type = Executor.class,
                 method = "query",
                 args = {MappedStatement.class, Object.class, RowBounds.class, ResultHandler.class}
@@ -32,36 +32,67 @@ import org.apache.ibatis.reflection.SystemMetaObject;
         @Signature(
                 type = Executor.class,
                 method = "query",
-                // MappedStatement ms, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, CacheKey key, BoundSql boundSql
                 args = {MappedStatement.class, Object.class, RowBounds.class, ResultHandler.class, CacheKey.class, BoundSql.class}
-        ),*/
-
-        // 2. 拦截嵌套查询
-        /*@Signature(
-                type = ResultSetHandler.class,
-                method = "handleResultSets",
-                args = {java.sql.Statement.class}
-        ),
-        @Signature(
-                type = StatementHandler.class,
-                method = "getBoundSql",
-                args = {}
-        )*/
+        )
 })
-public class ExecutorInterceptor implements Interceptor {
+public class MybatisxExecutorInterceptor implements Interceptor {
+
+    private IdGenerateValueHandler idGenerateValueHandler;
+
+    public MybatisxExecutorInterceptor(IdGenerateValueHandler idGenerateValueHandler) {
+        this.idGenerateValueHandler = idGenerateValueHandler;
+    }
 
     @Override
     public Object intercept(Invocation invocation) throws Throwable {
-        // 判断当前拦截点
-        if (invocation.getTarget() instanceof Executor) {
-            processExecutor(invocation);
-        } else if (invocation.getTarget() instanceof ResultSetHandler) {
-            processResultSet(invocation);
+        Executor executor = (Executor) invocation.getTarget();
+        Object[] args = invocation.getArgs();
+        MappedStatement mappedStatement = (MappedStatement) args[0];
+        Object parameterObject = args[1];
+        RowBounds rowBounds;
+        ResultHandler resultHandler;
+        CacheKey cacheKey;
+        BoundSql boundSql = null;
+        if (args.length == 4) {
+            rowBounds = (RowBounds) args[2];
+            resultHandler = (ResultHandler) args[3];
+            // cacheKey = executor.createCacheKey(mappedStatement, parameterObject, rowBounds, boundSql);
+            // boundSql = mappedStatement.getBoundSql(parameterObject);
+        } else if (args.length == 6) {
+            rowBounds = (RowBounds) args[2];
+            resultHandler = (ResultHandler) args[3];
+            cacheKey = (CacheKey) args[4];
+            boundSql = (BoundSql) args[5];
+        } else {
+            throw new RuntimeException("不支持的方法");
+        }
+
+        MybatisxParameterHandler mybatisxParameterHandler = new MybatisxParameterHandler(this.idGenerateValueHandler);
+        parameterObject = mybatisxParameterHandler.fillParameterObject(mappedStatement, parameterObject);
+
+        SqlHandler sqlHandler = new SqlHandler();
+        BoundSql newBoundSql = sqlHandler.process(mappedStatement, parameterObject);
+        Method method = invocation.getMethod();
+        String methodName = method.getName();
+        if (MybatisxSqlCommandType.QUERY.equalsIgnoreCase(methodName)) {
+            PageHandler pageHandler = new PageHandler();
+            Pageable pageable = pageHandler.getPageable(parameterObject);
+            if (pageable != null) {
+                return pageHandler.execute(executor, mappedStatement, parameterObject, rowBounds, resultHandler, newBoundSql);
+            }
+        }
+
+        MappedStatement newMappedStatement = copyMappedStatement(mappedStatement, new BoundSqlSqlSource(newBoundSql));
+        // 替换原MappedStatement和parameterObject。
+        args[0] = newMappedStatement;
+        args[1] = parameterObject;
+        if (args.length == 6) {
+            args[5] = newBoundSql;
         }
         return invocation.proceed();
     }
 
-    public void processExecutor(Invocation invocation) throws JSQLParserException {
+    /*public void processExecutor(Invocation invocation) throws JSQLParserException {
         String tenantId = TenantContextHolder.get();
         Object[] args = invocation.getArgs();
         MappedStatement ms = (MappedStatement) args[0];
@@ -144,7 +175,7 @@ public class ExecutorInterceptor implements Interceptor {
             return deleteHandler.processDelete((Delete) statement, tenantId);
         }
         return sql;
-    }
+    }*/
 
     private MappedStatement copyMappedStatement(MappedStatement ms, SqlSource newSqlSource) {
         // 1. 获取原始MappedStatement的构建器

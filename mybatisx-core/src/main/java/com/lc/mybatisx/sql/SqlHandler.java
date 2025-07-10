@@ -16,6 +16,13 @@ import java.util.List;
 
 public class SqlHandler {
 
+    /**
+     * mappedStatement参数不能直接修改，这个参数都是从【MybatisxConfiguration.getMappedStatement();】中获取的。直接修改等于把元数据进行了修改
+     *
+     * @param mappedStatement
+     * @param parameter
+     * @return
+     */
     public BoundSql process(MappedStatement mappedStatement, Object parameter) {
         try {
             String tenantId = TenantContextHolder.get();

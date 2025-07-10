@@ -93,6 +93,11 @@
 			<artifactId>hibernate-hql-parser</artifactId>
 			<version>1.5.0.Final</version>
 		</dependency>
+		<dependency>
+			<groupId>com.github.pagehelper</groupId>
+			<artifactId>pagehelper</artifactId>
+			<version>6.1.1</version>
+		</dependency>
 
 		<dependency>
 			<groupId>junit</groupId>

@@ -7,19 +7,24 @@ import com.lc.mybatisx.annotation.handler.GenerateValueHandler;
 import com.lc.mybatisx.annotation.handler.IdGenerateValueHandler;
 import com.lc.mybatisx.annotation.handler.JavaColumnInfo;
 import com.lc.mybatisx.context.EntityInfoContextHolder;
+import com.lc.mybatisx.handler.PageHandler;
 import com.lc.mybatisx.model.ColumnInfo;
 import com.lc.mybatisx.model.EntityInfo;
 import com.lc.mybatisx.scripting.MybatisxParameterHandler;
 import com.lc.mybatisx.sql.SqlHandler;
 import org.apache.ibatis.executor.Executor;
+import org.apache.ibatis.executor.parameter.ParameterHandler;
+import org.apache.ibatis.executor.resultset.ResultSetHandler;
 import org.apache.ibatis.executor.statement.StatementHandler;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.session.Configuration;
+import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
+import org.apache.ibatis.transaction.Transaction;
 
 import java.util.List;
 
@@ -32,13 +37,31 @@ public class MybatisxConfiguration extends Configuration {
     }
 
     @Override
+    public Executor newExecutor(Transaction transaction, ExecutorType executorType) {
+        Executor executor = super.newExecutor(transaction, executorType);
+        return executor;
+    }
+
+    @Override
     public StatementHandler newStatementHandler(Executor executor, MappedStatement mappedStatement, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
-        MybatisxParameterHandler mybatisxParameterHandler = new MybatisxParameterHandler(this.idGenerateValueHandler);
+        /*MybatisxParameterHandler mybatisxParameterHandler = new MybatisxParameterHandler(this.idGenerateValueHandler);
         parameterObject = mybatisxParameterHandler.fillParameterObject(mappedStatement, parameterObject);
         SqlHandler sqlHandler = new SqlHandler();
-        BoundSql newBoundSql = sqlHandler.process(mappedStatement, parameterObject);
-        // mappedStatement参数不能直接修改，这个参数都是从【MybatisxConfiguration.getMappedStatement();】中获取的。直接修改等于把元数据进行了修改
-        return super.newStatementHandler(executor, mappedStatement, parameterObject, rowBounds, resultHandler, newBoundSql);
+        BoundSql newBoundSql = sqlHandler.process(mappedStatement, parameterObject);*/
+        if (true) {
+            return super.newStatementHandler(executor, mappedStatement, parameterObject, rowBounds, resultHandler, boundSql);
+        } else {
+            PageHandler pageHandler = new PageHandler();
+            pageHandler.execute(executor, mappedStatement, parameterObject, rowBounds, resultHandler, boundSql);
+            return super.newStatementHandler(executor, mappedStatement, parameterObject, rowBounds, resultHandler, boundSql);
+        }
+    }
+
+    @Override
+    public ResultSetHandler newResultSetHandler(Executor executor, MappedStatement mappedStatement, RowBounds rowBounds, ParameterHandler parameterHandler, ResultHandler resultHandler, BoundSql boundSql) {
+        executor = (Executor) interceptorChain.pluginAll(executor);
+        ResultSetHandler resultSetHandler = super.newResultSetHandler(executor, mappedStatement, rowBounds, parameterHandler, resultHandler, boundSql);
+        return resultSetHandler;
     }
 
     private Object fillParameterObject(MappedStatement mappedStatement, Object parameterObject) {

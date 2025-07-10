@@ -1,5 +1,7 @@
 package com.lc.mybatisx.utils;
 
+import com.lc.mybatisx.dao.Page;
+
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
@@ -21,8 +23,10 @@ public class GenericUtils {
             ParameterizedType parameterizedType = (ParameterizedType) type;
             Type[] actualTypes = parameterizedType.getActualTypeArguments();
             Class<?> rawType = (Class<?>) parameterizedType.getRawType();
-
             if (rawType == List.class) {
+                Type actualType = actualTypes[0];
+                return getGenericType(actualType);
+            } else if (rawType == Page.class) {
                 Type actualType = actualTypes[0];
                 return getGenericType(actualType);
             } else if (rawType == Map.class) {
@@ -32,8 +36,6 @@ public class GenericUtils {
             Class<?> clazz = (Class<?>) type;
             return clazz;
         }
-
         return null;
     }
-
 }

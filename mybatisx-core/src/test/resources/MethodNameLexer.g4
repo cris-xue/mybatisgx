@@ -4,10 +4,11 @@ lexer grammar MethodNameLexer;
 // | 表示或的关系
 // * 表示有0或者多个
 // fragment 定义不被直接解析的规则
-INSERT_ACTION: 'insert' | 'insertBatch' ;
+INSERT_ACTION: 'insert' | 'insert' ;
 DELETE_ACTION: 'delete' | 'remove' ;
-UPDATE_ACTION: 'update' | 'updateBatch' | 'modify' ;
+UPDATE_ACTION: 'update' | 'update' | 'modify' ;
 SELECT_ACTION: 'find' | 'get' | 'select' | 'query' ;
+BATCH_ACTION: 'Batch' | 'batch' ;
 // WHERE_OP: 'By' ;
 WHERE_LINK_OP: 'By' | 'And' | 'Or' ;
 CONDITION_OP: 'Lt' | 'Lteq' | 'Gt' | 'Gteq' | 'In' | 'Is' | 'Eq' | 'Not' | 'Like' | 'Between';

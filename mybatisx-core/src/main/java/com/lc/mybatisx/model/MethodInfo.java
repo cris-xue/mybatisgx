@@ -27,6 +27,10 @@ public class MethodInfo {
      */
     private Boolean isDynamic;
     /**
+     * 是否批量操作
+     */
+    private Boolean isBatch;
+    /**
      * 方法名查询信息
      */
     private List<ConditionInfo> conditionInfoList = new ArrayList<>();
@@ -85,6 +89,14 @@ public class MethodInfo {
 
     public void setDynamic(Boolean dynamic) {
         isDynamic = dynamic;
+    }
+
+    public Boolean getBatch() {
+        return isBatch;
+    }
+
+    public void setBatch(Boolean batch) {
+        isBatch = batch;
     }
 
     public List<MethodParamInfo> getMethodParamInfoList() {

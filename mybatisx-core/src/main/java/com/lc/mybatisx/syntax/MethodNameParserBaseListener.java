@@ -197,6 +197,18 @@ public class MethodNameParserBaseListener implements MethodNameParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterBatch_clause(MethodNameParser.Batch_clauseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitBatch_clause(MethodNameParser.Batch_clauseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterDynamic_condition_clause(MethodNameParser.Dynamic_condition_clauseContext ctx) { }
 	/**
 	 * {@inheritDoc}

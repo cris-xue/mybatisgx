@@ -101,6 +101,12 @@ public interface MethodNameParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitCondition_op_clause(MethodNameParser.Condition_op_clauseContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link MethodNameParser#batch_clause}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBatch_clause(MethodNameParser.Batch_clauseContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link MethodNameParser#dynamic_condition_clause}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

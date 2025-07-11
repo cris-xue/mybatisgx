@@ -158,6 +158,16 @@ public interface MethodNameParserListener extends ParseTreeListener {
 	 */
 	void exitCondition_op_clause(MethodNameParser.Condition_op_clauseContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link MethodNameParser#batch_clause}.
+	 * @param ctx the parse tree
+	 */
+	void enterBatch_clause(MethodNameParser.Batch_clauseContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MethodNameParser#batch_clause}.
+	 * @param ctx the parse tree
+	 */
+	void exitBatch_clause(MethodNameParser.Batch_clauseContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link MethodNameParser#dynamic_condition_clause}.
 	 * @param ctx the parse tree
 	 */

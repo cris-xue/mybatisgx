@@ -123,6 +123,13 @@ public class MethodNameParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> 
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
+	@Override public T visitBatch_clause(MethodNameParser.Batch_clauseContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
 	@Override public T visitDynamic_condition_clause(MethodNameParser.Dynamic_condition_clauseContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}

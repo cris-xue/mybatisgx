@@ -38,6 +38,10 @@ public class MethodParamInfo {
      */
     private Boolean isCollectionType = false;
     /**
+     * Collection类型名
+     */
+    private String collectionTypeName;
+    /**
      * 字段信息
      */
     private List<ColumnInfo> columnInfoList;
@@ -112,6 +116,14 @@ public class MethodParamInfo {
 
     public void setCollectionType(Boolean collectionType) {
         isCollectionType = collectionType;
+    }
+
+    public String getCollectionTypeName() {
+        return collectionTypeName;
+    }
+
+    public void setCollectionTypeName(String collectionTypeName) {
+        this.collectionTypeName = collectionTypeName;
     }
 
     public List<ColumnInfo> getColumnInfoList() {

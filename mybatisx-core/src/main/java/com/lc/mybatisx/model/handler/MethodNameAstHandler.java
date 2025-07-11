@@ -79,9 +79,12 @@ public class MethodNameAstHandler {
                 methodInfo.setAction("update");
             } else if (parseTreeChild instanceof MethodNameParser.Select_clauseContext) {
                 methodInfo.setAction("select");
+            } else if (parseTreeChild instanceof MethodNameParser.Batch_clauseContext) {
+                Integer batchChildCount = parseTreeChild.getChildCount();
+                methodInfo.setBatch(batchChildCount != 0);
             } else if (parseTreeChild instanceof MethodNameParser.Dynamic_condition_clauseContext) {
-                Integer dynamicConditionChildCount = parseTreeChild.getChildCount();
-                // methodInfo.setDynamic(dynamicConditionChildCount != 0);
+                Integer dynamicChildCount = parseTreeChild.getChildCount();
+                methodInfo.setDynamic(dynamicChildCount != 0);
             } else if (parseTreeChild instanceof MethodNameParser.Where_clauseContext) {
                 List<ConditionInfo> conditionInfoList = parseWhereClause(entityInfo, conditionEntity, parseTreeChild);
                 methodInfo.setConditionInfoList(conditionInfoList);

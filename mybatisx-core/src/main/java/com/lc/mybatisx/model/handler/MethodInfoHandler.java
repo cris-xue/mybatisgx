@@ -166,17 +166,16 @@ public class MethodInfoHandler {
             }
             methodParamInfo.setParamName(paramName);
 
-            Boolean basicType = isBasicType(clazz);
+            Boolean basicType = getBasicType(clazz);
             methodParamInfo.setBasicType(basicType);
             if (!basicType) {
                 List<ColumnInfo> columnInfoList = columnInfoHandler.getColumnInfoList(clazz);
                 methodParamInfo.setColumnInfoList(columnInfoList);
             }
-            Class<?> containerType = getContainerType(parameter.getType());
-            if (containerType != null) {
-                methodParamInfo.setIsContainerType(true);
-                methodParamInfo.setContainerType(containerType);
-                methodParamInfo.setContainerTypeName(containerType.getTypeName());
+            Class<?> collectionType = getCollectionType(parameter.getType());
+            if (collectionType != null) {
+                methodParamInfo.setCollectionType(true);
+                methodParamInfo.setCollectionTypeName(collectionType.getTypeName());
             }
 
             methodParamInfoList.add(methodParamInfo);
@@ -187,7 +186,7 @@ public class MethodInfoHandler {
 
     private MethodReturnInfo getMethodReturn(MapperInfo mapperInfo, Method method) {
         Class<?> clazz = getMethodReturnType(mapperInfo, method);
-        Boolean basicType = isBasicType(clazz);
+        Boolean basicType = getBasicType(clazz);
 
         MethodReturnInfo methodReturnInfo = new MethodReturnInfo();
         methodReturnInfo.setBasicType(basicType);
@@ -197,7 +196,7 @@ public class MethodInfoHandler {
             List<ColumnInfo> columnInfoList = columnInfoHandler.getColumnInfoList(clazz);
             methodReturnInfo.setColumnInfoList(columnInfoList);
         }
-        Class<?> containerType = getContainerType(clazz);
+        Class<?> collectionType = getCollectionType(clazz);
         if (containerType != null) {
             methodReturnInfo.setIsContainerType(true);
             methodReturnInfo.setContainerType(containerType);
@@ -331,22 +330,19 @@ public class MethodInfoHandler {
         }
     }
 
-    private Class<?> getContainerType(Type type) {
+    private Class<?> getCollectionType(Type type) {
         if (TypeUtils.isAssignable(type, Collection.class)) {
             return Collection.class;
-        } else if (TypeUtils.isAssignable(type, Map.class)) {
-            return Map.class;
         }
         return null;
     }
 
-    public Boolean isBasicType(Type type) {
-        for (Class<?> bt : basicTypeList) {
-            if (type == bt) {
+    public Boolean getBasicType(Type type) {
+        for (Class<?> basicType : basicTypeList) {
+            if (type == basicType) {
                 return true;
             }
         }
         return false;
     }
-
 }

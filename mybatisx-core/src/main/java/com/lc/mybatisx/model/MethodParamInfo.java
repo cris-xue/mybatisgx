@@ -38,6 +38,10 @@ public class MethodParamInfo {
      */
     private Boolean isCollectionType = false;
     /**
+     * 容器类型，List
+     */
+    private Class<?> collectionType;
+    /**
      * Collection类型名
      */
     private String collectionTypeName;
@@ -45,18 +49,6 @@ public class MethodParamInfo {
      * 字段信息
      */
     private List<ColumnInfo> columnInfoList;
-    /**
-     * 是否容器类型
-     */
-    private Boolean isContainerType = false;
-    /**
-     * 容器类型，List、Map
-     */
-    private Class<?> containerType;
-    /**
-     * 容器类型名
-     */
-    private String containerTypeName;
     /**
      * 是否批量参数
      */
@@ -134,31 +126,11 @@ public class MethodParamInfo {
         this.columnInfoList = columnInfoList;
     }
 
-    public Boolean getContainerType() {
-        return isContainerType;
-    }
-
-    public void setContainerType(Class<?> containerType) {
-        this.containerType = containerType;
-    }
-
-    public String getContainerTypeName() {
-        return containerTypeName;
-    }
-
-    public void setContainerTypeName(String containerTypeName) {
-        this.containerTypeName = containerTypeName;
-    }
-
     public Boolean getBatchSize() {
         return isBatchSize;
     }
 
     public void setBatchSize(Boolean batchSize) {
         isBatchSize = batchSize;
-    }
-
-    public void setContainerType(Boolean containerType) {
-        isContainerType = containerType;
     }
 }

@@ -25,11 +25,11 @@ public class MethodInfo {
     /**
      * 是否动态参数
      */
-    private Boolean isDynamic;
+    private Boolean isDynamic = false;
     /**
      * 是否批量操作
      */
-    private Boolean isBatch;
+    private Boolean isBatch = false;
     /**
      * 方法名查询信息
      */

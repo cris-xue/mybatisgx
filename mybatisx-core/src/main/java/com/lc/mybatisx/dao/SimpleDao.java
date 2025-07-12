@@ -1,5 +1,6 @@
 package com.lc.mybatisx.dao;
 
+import com.lc.mybatisx.annotation.BatchOperation;
 import com.lc.mybatisx.annotation.BatchSize;
 import com.lc.mybatisx.annotation.Dynamic;
 import org.apache.ibatis.annotations.Param;
@@ -16,6 +17,7 @@ public interface SimpleDao<ENTITY, ID extends Serializable> extends Dao {
 
     int insert(ENTITY entity);
 
+    @BatchOperation
     int insertBatch(List<ENTITY> entityList, @BatchSize int batchSize);
 
     @Dynamic
@@ -28,6 +30,7 @@ public interface SimpleDao<ENTITY, ID extends Serializable> extends Dao {
 
     int updateById(ENTITY entity);
 
+    @BatchOperation
     int updateBatchById(List<ENTITY> entityList, @BatchSize int batchSize);
 
     @Dynamic

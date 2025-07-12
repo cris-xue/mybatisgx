@@ -1,10 +1,7 @@
 package com.lc.mybatisx.model.handler;
 
 import com.google.common.base.CaseFormat;
-import com.lc.mybatisx.annotation.BatchSize;
-import com.lc.mybatisx.annotation.ConditionEntity;
-import com.lc.mybatisx.annotation.Dynamic;
-import com.lc.mybatisx.annotation.Entity;
+import com.lc.mybatisx.annotation.*;
 import com.lc.mybatisx.dao.Dao;
 import com.lc.mybatisx.dao.SimpleDao;
 import com.lc.mybatisx.model.*;
@@ -84,6 +81,7 @@ public class MethodInfoHandler {
             methodInfo.setMethod(method);
             methodInfo.setMethodName(methodName);
             methodInfo.setDynamic(method.getAnnotation(Dynamic.class) != null);
+            methodInfo.setBatch(method.getAnnotation(BatchOperation.class) != null);
             methodInfo.setMethodParamInfoList(methodParamInfoList);
             methodInfo.setMethodReturnInfo(methodReturnInfo);
 

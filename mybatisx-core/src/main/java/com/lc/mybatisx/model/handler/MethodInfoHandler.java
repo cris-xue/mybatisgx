@@ -1,6 +1,7 @@
 package com.lc.mybatisx.model.handler;
 
 import com.google.common.base.CaseFormat;
+import com.lc.mybatisx.annotation.BatchSize;
 import com.lc.mybatisx.annotation.ConditionEntity;
 import com.lc.mybatisx.annotation.Dynamic;
 import com.lc.mybatisx.annotation.Entity;
@@ -40,55 +41,13 @@ public class MethodInfoHandler {
         basicTypeList.add(String.class);
     }
 
-    private static List<String> simpleMethodList = Arrays.asList(
-            "insert",
-            "insertSelective",
-            "deleteById",
-            "updateById",
-            "updateByIdSelective",
-            "findById",
-            "findAll",
-            "findList"
-    );
-
     private ColumnInfoHandler columnInfoHandler = new ColumnInfoHandler();
     private MethodNameAstHandler methodNameAstHandler = new MethodNameAstHandler();
     private ResultMapInfoHandler resultMapInfoHandler = new ResultMapInfoHandler();
 
     public List<MethodInfo> execute(MapperInfo mapperInfo, Class<?> interfaceClass) {
         Map<String, MethodInfo> methodInfoMap = new LinkedHashMap<>();
-
         this.daoClass(interfaceClass, mapperInfo, methodInfoMap);
-
-        /*Method[] declaredMethods = interfaceClass.getDeclaredMethods();
-        processMethod(declaredMethods, mapperInfo, methodInfoMap);*/
-        /*for (Method method : declaredMethods) {
-            String methodName = method.getName();
-            List<MethodParamInfo> methodParamInfoList = getMethodParam(mapperInfo, method);
-            MethodReturnInfo methodReturnInfo = getMethodReturn(mapperInfo, method);
-
-            MethodInfo methodInfo = new MethodInfo();
-            methodInfo.setMethod(method);
-            methodInfo.setMethodName(methodName);
-            methodInfo.setDynamic(method.getAnnotation(Dynamic.class) != null);
-            methodInfo.setMethodParamInfoList(methodParamInfoList);
-            methodInfo.setMethodReturnInfo(methodReturnInfo);
-
-            // 方法名解析
-            methodNameParse(mapperInfo.getEntityInfo(), methodInfo);
-
-            ResultMapInfo resultMapInfo = resultMapInfoHandler.execute(methodInfo, methodReturnInfo);
-            methodInfo.setResultMapInfo(resultMapInfo);
-
-            handleConditionParamInfo(methodInfo);
-            // check(resultMapInfo, methodInfo);
-
-            methodInfoList.add(methodInfo);
-        }*/
-
-        /*Method[] methods = interfaceClass.getMethods();
-        processMethod(methods, mapperInfo, methodInfoMap);*/
-
         return methodInfoMap.values().stream().collect(Collectors.toList());
     }
 
@@ -153,26 +112,25 @@ public class MethodInfoHandler {
         List<MethodParamInfo> methodParamInfoList = new ArrayList<>();
         for (int i = 0; i < parameters.length; i++) {
             Parameter parameter = parameters[i];
-            Class<?> clazz = getMethodParamType(mapperInfo, parameter);
+            Class<?> methodParamType = this.getMethodParamType(mapperInfo, parameter);
 
             MethodParamInfo methodParamInfo = new MethodParamInfo();
-            methodParamInfo.setType(clazz);
-            methodParamInfo.setTypeName(clazz.getName());
-
-            String paramName = parameter.getName();
-            Param param = parameter.getAnnotation(Param.class);
-            if (param != null) {
-                paramName = param.value();
+            methodParamInfo.setIndex(i);
+            methodParamInfo.setType(methodParamType);
+            methodParamInfo.setTypeName(methodParamType.getName());
+            this.getMethodParamName(methodParamInfo, parameter);
+            BatchSize batchSize = parameter.getAnnotation(BatchSize.class);
+            if (batchSize != null) {
+                methodParamInfo.setBatchSize(true);
             }
-            methodParamInfo.setParamName(paramName);
 
-            Boolean basicType = getBasicType(clazz);
+            Boolean basicType = this.getBasicType(methodParamType);
             methodParamInfo.setBasicType(basicType);
-            if (!basicType) {
-                List<ColumnInfo> columnInfoList = columnInfoHandler.getColumnInfoList(clazz);
+            if (!basicType && methodParamType != Map.class) {
+                List<ColumnInfo> columnInfoList = columnInfoHandler.getColumnInfoList(methodParamType);
                 methodParamInfo.setColumnInfoList(columnInfoList);
             }
-            Class<?> collectionType = getCollectionType(parameter.getType());
+            Class<?> collectionType = this.getCollectionType(parameter.getType());
             if (collectionType != null) {
                 methodParamInfo.setCollectionType(true);
                 methodParamInfo.setCollectionTypeName(collectionType.getTypeName());
@@ -180,23 +138,22 @@ public class MethodInfoHandler {
 
             methodParamInfoList.add(methodParamInfo);
         }
-
         return methodParamInfoList;
     }
 
     private MethodReturnInfo getMethodReturn(MapperInfo mapperInfo, Method method) {
-        Class<?> clazz = getMethodReturnType(mapperInfo, method);
-        Boolean basicType = getBasicType(clazz);
+        Class<?> methodReturnType = this.getMethodReturnType(mapperInfo, method);
+        Boolean basicType = this.getBasicType(methodReturnType);
 
         MethodReturnInfo methodReturnInfo = new MethodReturnInfo();
         methodReturnInfo.setBasicType(basicType);
-        methodReturnInfo.setType(clazz);
-        methodReturnInfo.setTypeName(clazz.getName());
-        if (!basicType) {
-            List<ColumnInfo> columnInfoList = columnInfoHandler.getColumnInfoList(clazz);
+        methodReturnInfo.setType(methodReturnType);
+        methodReturnInfo.setTypeName(methodReturnType.getName());
+        if (!basicType && methodReturnType != Map.class) {
+            List<ColumnInfo> columnInfoList = columnInfoHandler.getColumnInfoList(methodReturnType);
             methodReturnInfo.setColumnInfoList(columnInfoList);
         }
-        Class<?> collectionType = getCollectionType(clazz);
+        Class<?> collectionType = this.getCollectionType(methodReturnType);
         if (collectionType != null) {
             methodReturnInfo.setCollectionType(true);
             methodReturnInfo.setCollectionType(collectionType);
@@ -309,11 +266,27 @@ public class MethodInfoHandler {
     }
 
     private Class<?> getMethodParamType(MapperInfo mapperInfo, Parameter parameter) {
+        if (TypeUtils.isAssignable(parameter.getType(), Map.class)) {
+            return Map.class;
+        }
         Type type = parameter.getParameterizedType();
         return getMethodType(mapperInfo, type);
     }
 
+    private void getMethodParamName(MethodParamInfo methodParamInfo, Parameter parameter) {
+        String argName = parameter.getName();
+        Param param = parameter.getAnnotation(Param.class);
+        if (param != null) {
+            argName = param.value();
+        }
+        methodParamInfo.setArgName(argName);
+        methodParamInfo.setParamName("param" + (methodParamInfo.getIndex() + 1));
+    }
+
     private Class<?> getMethodReturnType(MapperInfo mapperInfo, Method method) {
+        if (TypeUtils.isAssignable(method.getReturnType(), Map.class)) {
+            return Map.class;
+        }
         Type type = method.getGenericReturnType();
         return getMethodType(mapperInfo, type);
     }

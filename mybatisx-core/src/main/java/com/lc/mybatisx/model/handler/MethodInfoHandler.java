@@ -197,10 +197,10 @@ public class MethodInfoHandler {
             methodReturnInfo.setColumnInfoList(columnInfoList);
         }
         Class<?> collectionType = getCollectionType(clazz);
-        if (containerType != null) {
-            methodReturnInfo.setIsContainerType(true);
-            methodReturnInfo.setContainerType(containerType);
-            methodReturnInfo.setContainerTypeName(containerType.getTypeName());
+        if (collectionType != null) {
+            methodReturnInfo.setCollectionType(true);
+            methodReturnInfo.setCollectionType(collectionType);
+            methodReturnInfo.setCollectionTypeName(collectionType.getTypeName());
         }
 
         return methodReturnInfo;

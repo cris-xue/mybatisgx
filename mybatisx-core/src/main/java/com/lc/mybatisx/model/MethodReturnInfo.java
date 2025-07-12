@@ -22,21 +22,21 @@ public class MethodReturnInfo {
      */
     private String typeName;
     /**
+     * 是否Collection类型
+     */
+    private Boolean isCollectionType = false;
+    /**
+     * 容器类型，List
+     */
+    private Class<?> collectionType;
+    /**
+     * Collection类型名
+     */
+    private String collectionTypeName;
+    /**
      * 字段信息
      */
     List<ColumnInfo> columnInfoList;
-    /**
-     * 是否容器类型
-     */
-    private Boolean isContainerType = false;
-    /**
-     * 容器类型，List、Map
-     */
-    private Class<?> containerType;
-    /**
-     * 容器类型名
-     */
-    private String containerTypeName;
 
     public Boolean getBasicType() {
         return isBasicType;
@@ -62,6 +62,22 @@ public class MethodReturnInfo {
         this.typeName = typeName;
     }
 
+    public Boolean getCollectionType() {
+        return isCollectionType;
+    }
+
+    public void setCollectionType(Class<?> collectionType) {
+        this.collectionType = collectionType;
+    }
+
+    public String getCollectionTypeName() {
+        return collectionTypeName;
+    }
+
+    public void setCollectionTypeName(String collectionTypeName) {
+        this.collectionTypeName = collectionTypeName;
+    }
+
     public List<ColumnInfo> getColumnInfoList() {
         return columnInfoList;
     }
@@ -70,28 +86,7 @@ public class MethodReturnInfo {
         this.columnInfoList = columnInfoList;
     }
 
-    public Boolean getIsContainerType() {
-        return this.isContainerType;
+    public void setCollectionType(Boolean collectionType) {
+        isCollectionType = collectionType;
     }
-
-    public void setIsContainerType(Boolean isContainerType) {
-        this.isContainerType = isContainerType;
-    }
-
-    public Class<?> getContainerType() {
-        return this.containerType;
-    }
-
-    public void setContainerType(Class<?> containerType) {
-        this.containerType = containerType;
-    }
-
-    public String getContainerTypeName() {
-        return containerTypeName;
-    }
-
-    public void setContainerTypeName(String containerTypeName) {
-        this.containerTypeName = containerTypeName;
-    }
-
 }

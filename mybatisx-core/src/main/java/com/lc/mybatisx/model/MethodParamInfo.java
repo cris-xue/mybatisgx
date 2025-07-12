@@ -1,5 +1,7 @@
 package com.lc.mybatisx.model;
 
+import org.apache.ibatis.annotations.Param;
+
 import java.util.List;
 
 /**
@@ -25,6 +27,10 @@ public class MethodParamInfo {
      * 类型名称：java.lang.Long、java.lang.Object、java.util.Map
      */
     private String typeName;
+    /**
+     * 参数注解
+     */
+    private Param param;
     /**
      * 参数名，userName。有@Param则使用@Param中的值，如果没有则使用param1、param2这种方式
      */
@@ -53,6 +59,10 @@ public class MethodParamInfo {
      * 是否批量参数
      */
     private Boolean isBatchSize = false;
+    /**
+     * 批量节点参数名称
+     */
+    private String batchItemName;
 
     public Integer getIndex() {
         return index;
@@ -84,6 +94,14 @@ public class MethodParamInfo {
 
     public void setTypeName(String typeName) {
         this.typeName = typeName;
+    }
+
+    public Param getParam() {
+        return param;
+    }
+
+    public void setParam(Param param) {
+        this.param = param;
     }
 
     public String getParamName() {
@@ -132,5 +150,13 @@ public class MethodParamInfo {
 
     public void setBatchSize(Boolean batchSize) {
         isBatchSize = batchSize;
+    }
+
+    public String getBatchItemName() {
+        return batchItemName;
+    }
+
+    public void setBatchItemName(String batchItemName) {
+        this.batchItemName = batchItemName;
     }
 }

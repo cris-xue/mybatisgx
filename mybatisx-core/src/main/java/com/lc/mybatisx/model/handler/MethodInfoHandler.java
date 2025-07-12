@@ -2,6 +2,7 @@ package com.lc.mybatisx.model.handler;
 
 import com.google.common.base.CaseFormat;
 import com.lc.mybatisx.annotation.*;
+import com.lc.mybatisx.context.MethodInfoContextHolder;
 import com.lc.mybatisx.dao.Dao;
 import com.lc.mybatisx.dao.SimpleDao;
 import com.lc.mybatisx.model.*;
@@ -18,7 +19,6 @@ import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author ：薛承城
@@ -45,7 +45,13 @@ public class MethodInfoHandler {
     public List<MethodInfo> execute(MapperInfo mapperInfo, Class<?> interfaceClass) {
         Map<String, MethodInfo> methodInfoMap = new LinkedHashMap<>();
         this.daoClass(interfaceClass, mapperInfo, methodInfoMap);
-        return methodInfoMap.values().stream().collect(Collectors.toList());
+        List<MethodInfo> methodInfoList = new ArrayList(20);
+        methodInfoMap.forEach((methodName, methodInfo) -> {
+            String namespaceMethodName = String.format("%s.%s", mapperInfo.getNamespace(), methodName);
+            MethodInfoContextHolder.set(namespaceMethodName, methodInfo);
+            methodInfoList.add(methodInfo);
+        });
+        return methodInfoList;
     }
 
     private void daoClass(Class<?> daoClass, MapperInfo mapperInfo, Map<String, MethodInfo> methodInfoMap) {
@@ -120,6 +126,11 @@ public class MethodInfoHandler {
             BatchSize batchSize = parameter.getAnnotation(BatchSize.class);
             if (batchSize != null) {
                 methodParamInfo.setBatchSize(true);
+            } else {
+                BatchOperation batchOperation = method.getAnnotation(BatchOperation.class);
+                if (batchOperation != null) {
+                    methodParamInfo.setBatchItemName(String.format("%s_batch_item", methodParamInfo.getParamName()));
+                }
             }
 
             Boolean basicType = this.getBasicType(methodParamType);

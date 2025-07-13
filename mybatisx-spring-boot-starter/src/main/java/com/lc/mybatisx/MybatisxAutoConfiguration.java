@@ -4,7 +4,9 @@ import com.lc.mybatisx.converter.MetaObjectHandlerConverter;
 import org.apache.ibatis.mapping.DatabaseIdProvider;
 import org.apache.ibatis.plugin.Interceptor;
 import org.apache.ibatis.scripting.LanguageDriver;
+import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.type.TypeHandler;
+import org.mybatis.spring.SqlSessionTemplate;
 import org.mybatis.spring.boot.autoconfigure.ConfigurationCustomizer;
 import org.mybatis.spring.boot.autoconfigure.MybatisAutoConfiguration;
 import org.slf4j.Logger;
@@ -21,12 +23,7 @@ import java.util.List;
  * description: CustomMybatisAutoConfiguration是完全使用的spring boot mybatis的源码，仅仅只在98行替换了自定义CustomSqlSessionFactoryBean
  * create time: 2019/5/9 17:54
  */
-// @Import({MetaObjectHandlerConverter.class})
-/*@ConditionalOnClass({SqlSessionFactory.class, MybatisxSqlSessionFactoryBean.class})
-@ConditionalOnSingleCandidate(DataSource.class)
-@EnableConfigurationProperties(MybatisxProperties.class)
-@AutoConfigureAfter(DataSourceAutoConfiguration.class)*/
-@Import({MetaObjectHandlerConverter.class})
+@Import({MetaObjectHandlerConverter.class, MybatisgxConfiguration.class})
 @EnableConfigurationProperties(MybatisxProperties.class)
 public class MybatisxAutoConfiguration extends MybatisAutoConfiguration {
 
@@ -34,5 +31,10 @@ public class MybatisxAutoConfiguration extends MybatisAutoConfiguration {
 
     public MybatisxAutoConfiguration(MybatisxProperties properties, ObjectProvider<Interceptor[]> interceptorsProvider, ObjectProvider<TypeHandler[]> typeHandlersProvider, ObjectProvider<LanguageDriver[]> languageDriversProvider, ResourceLoader resourceLoader, ObjectProvider<DatabaseIdProvider> databaseIdProvider, ObjectProvider<List<ConfigurationCustomizer>> configurationCustomizersProvider) {
         super(properties, interceptorsProvider, typeHandlersProvider, languageDriversProvider, resourceLoader, databaseIdProvider, configurationCustomizersProvider);
+    }
+
+    @Override
+    public SqlSessionTemplate sqlSessionTemplate(SqlSessionFactory sqlSessionFactory) {
+        return new MybatisxSqlSessionTemplate(sqlSessionFactory);
     }
 }

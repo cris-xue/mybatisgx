@@ -49,11 +49,13 @@ public class MybatisxExecutorInterceptor implements Interceptor {
         Object[] args = invocation.getArgs();
         MappedStatement mappedStatement = (MappedStatement) args[0];
         Object parameterObject = args[1];
-        RowBounds rowBounds;
-        ResultHandler resultHandler;
+        RowBounds rowBounds = null;
+        ResultHandler resultHandler = null;
         CacheKey cacheKey;
         BoundSql boundSql = null;
-        if (args.length == 4) {
+        if (args.length == 2) {
+
+        } else if (args.length == 4) {
             rowBounds = (RowBounds) args[2];
             resultHandler = (ResultHandler) args[3];
             // cacheKey = executor.createCacheKey(mappedStatement, parameterObject, rowBounds, boundSql);
@@ -72,6 +74,7 @@ public class MybatisxExecutorInterceptor implements Interceptor {
 
         SqlHandler sqlHandler = new SqlHandler();
         BoundSql newBoundSql = sqlHandler.process(mappedStatement, parameterObject);
+
         Method method = invocation.getMethod();
         String methodName = method.getName();
         if (MybatisxSqlCommandType.QUERY.equalsIgnoreCase(methodName)) {

@@ -7,11 +7,9 @@ import com.lc.mybatisx.annotation.handler.GenerateValueHandler;
 import com.lc.mybatisx.annotation.handler.IdGenerateValueHandler;
 import com.lc.mybatisx.annotation.handler.JavaColumnInfo;
 import com.lc.mybatisx.context.EntityInfoContextHolder;
-import com.lc.mybatisx.handler.PageHandler;
+import com.lc.mybatisx.ext.executor.MybatisgxBatchExecutor;
 import com.lc.mybatisx.model.ColumnInfo;
 import com.lc.mybatisx.model.EntityInfo;
-import com.lc.mybatisx.scripting.MybatisxParameterHandler;
-import com.lc.mybatisx.sql.SqlHandler;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.parameter.ParameterHandler;
 import org.apache.ibatis.executor.resultset.ResultSetHandler;
@@ -39,22 +37,15 @@ public class MybatisxConfiguration extends Configuration {
     @Override
     public Executor newExecutor(Transaction transaction, ExecutorType executorType) {
         Executor executor = super.newExecutor(transaction, executorType);
+        if (executorType == ExecutorType.BATCH) {
+            return new MybatisgxBatchExecutor(executor);
+        }
         return executor;
     }
 
     @Override
     public StatementHandler newStatementHandler(Executor executor, MappedStatement mappedStatement, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
-        /*MybatisxParameterHandler mybatisxParameterHandler = new MybatisxParameterHandler(this.idGenerateValueHandler);
-        parameterObject = mybatisxParameterHandler.fillParameterObject(mappedStatement, parameterObject);
-        SqlHandler sqlHandler = new SqlHandler();
-        BoundSql newBoundSql = sqlHandler.process(mappedStatement, parameterObject);*/
-        if (true) {
-            return super.newStatementHandler(executor, mappedStatement, parameterObject, rowBounds, resultHandler, boundSql);
-        } else {
-            PageHandler pageHandler = new PageHandler();
-            pageHandler.execute(executor, mappedStatement, parameterObject, rowBounds, resultHandler, boundSql);
-            return super.newStatementHandler(executor, mappedStatement, parameterObject, rowBounds, resultHandler, boundSql);
-        }
+        return super.newStatementHandler(executor, mappedStatement, parameterObject, rowBounds, resultHandler, boundSql);
     }
 
     @Override

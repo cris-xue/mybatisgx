@@ -1,4 +1,4 @@
-package com.lc.mybatisx.handler;
+package com.lc.mybatisx.sql;
 
 import com.github.pagehelper.BoundSqlInterceptor;
 import com.github.pagehelper.Dialect;
@@ -6,7 +6,6 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.cache.Cache;
 import com.github.pagehelper.util.ExecutorUtil;
 import com.github.pagehelper.util.MSUtils;
-import com.lc.mybatisx.dao.Page;
 import com.lc.mybatisx.dao.Pageable;
 import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.executor.Executor;
@@ -16,7 +15,9 @@ import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 
 import java.sql.SQLException;
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Properties;
 
 public class PageHandler {
 
@@ -44,15 +45,12 @@ public class PageHandler {
         return this.pageable;
     }
 
-    public Object execute(Executor executor, MappedStatement mappedStatement, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
+    public MybatisgxPageInfo execute(Executor executor, MappedStatement mappedStatement, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
         try {
             CacheKey cacheKey = executor.createCacheKey(mappedStatement, parameterObject, rowBounds, boundSql);
             PageHelper.startPage(pageable.getPageNo(), pageable.getPageSize());
-            Object result = execute(executor, mappedStatement, parameterObject, rowBounds, resultHandler, boundSql, cacheKey);
-            Page page = new Page(10, (List) result);
-            List<Page> pageList = new ArrayList(1);
-            pageList.add(page);
-            return pageList;
+            MybatisgxPageInfo mybatisgxPageInfo = this.execute(executor, mappedStatement, parameterObject, rowBounds, resultHandler, boundSql, cacheKey);
+            return mybatisgxPageInfo;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } catch (Throwable e) {
@@ -60,31 +58,34 @@ public class PageHandler {
         }
     }
 
-    public Object execute(Executor executor, MappedStatement mappedStatement, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql, CacheKey cacheKey) throws Throwable {
+    public MybatisgxPageInfo execute(Executor executor, MappedStatement mappedStatement, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql, CacheKey cacheKey) throws Throwable {
         try {
             //对 boundSql 的拦截处理
             if (dialect instanceof BoundSqlInterceptor.Chain) {
                 boundSql = ((BoundSqlInterceptor.Chain) dialect).doBoundSql(BoundSqlInterceptor.Type.ORIGINAL, boundSql, cacheKey);
             }
-            List resultList;
             //调用方法判断是否需要进行分页，如果不需要，直接返回结果
+            Long count = null;
             if (!dialect.skip(mappedStatement, parameterObject, rowBounds)) {
                 //判断是否需要进行 count 查询
                 if (dialect.beforeCount(mappedStatement, parameterObject, rowBounds)) {
                     //查询总数
-                    Long count = count(executor, mappedStatement, parameterObject, rowBounds, null, boundSql);
+                    count = count(executor, mappedStatement, parameterObject, rowBounds, null, boundSql);
                     //处理查询总数，返回 true 时继续分页查询，false 时直接返回
-                    if (!dialect.afterCount(count, parameterObject, rowBounds)) {
+                    /*if (!dialect.afterCount(count, parameterObject, rowBounds)) {
                         //当查询总数为 0 时，直接返回空的结果
                         return dialect.afterPage(new ArrayList(), parameterObject, rowBounds);
-                    }
+                    }*/
                 }
-                resultList = ExecutorUtil.pageQuery(dialect, executor, mappedStatement, parameterObject, rowBounds, resultHandler, boundSql, cacheKey);
+                MybatisgxPageInfo mybatisgxPageInfo = MybatisgxExecutorUtil.getPageInfo(dialect, executor, mappedStatement, parameterObject, rowBounds, resultHandler, boundSql, cacheKey);
+                mybatisgxPageInfo.setCount(count);
+                return mybatisgxPageInfo;
             } else {
-                //rowBounds用参数值，不使用分页插件处理时，仍然支持默认的内存分页
-                resultList = executor.query(mappedStatement, parameterObject, rowBounds, resultHandler, cacheKey, boundSql);
+                // rowBounds用参数值，不使用分页插件处理时，仍然支持默认的内存分页
+                // resultList = executor.query(mappedStatement, parameterObject, rowBounds, resultHandler, cacheKey, boundSql);
             }
-            return dialect.afterPage(resultList, parameterObject, rowBounds);
+            return null;
+            // return dialect.afterPage(resultList, parameterObject, rowBounds);
         } finally {
             if (dialect != null) {
                 dialect.afterAll();
@@ -98,7 +99,7 @@ public class PageHandler {
         //先判断是否存在手写的 count 查询
         MappedStatement countMs = ExecutorUtil.getExistedMappedStatement(ms.getConfiguration(), countMsId);
         if (countMs != null) {
-            count = ExecutorUtil.executeManualCount(executor, countMs, parameter, boundSql, resultHandler);
+            count = MybatisgxExecutorUtil.executeManualCount(executor, countMs, parameter, boundSql, resultHandler);
         } else {
             if (msCountMap != null) {
                 countMs = msCountMap.get(countMsId);

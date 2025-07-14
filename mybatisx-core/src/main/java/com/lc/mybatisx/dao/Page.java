@@ -10,23 +10,23 @@ import java.util.List;
  */
 public class Page<T> {
 
-    private int total;
+    private long total;
 
     private List<T> list;
 
     public Page() {
     }
 
-    public Page(int total, List<T> list) {
+    public Page(long total, List<T> list) {
         this.total = total;
         this.list = list;
     }
 
-    public int getTotal() {
+    public long getTotal() {
         return total;
     }
 
-    public void setTotal(int total) {
+    public void setTotal(long total) {
         this.total = total;
     }
 

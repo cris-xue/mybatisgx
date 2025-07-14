@@ -19,6 +19,7 @@ public class MybatisgxExecutorInfo {
 
     private Boolean isCache = false;
 
+    private Object[] args;
     private MappedStatement mappedStatement;
     private Object parameterObject;
     private RowBounds rowBounds;
@@ -28,6 +29,7 @@ public class MybatisgxExecutorInfo {
 
     public MybatisgxExecutorInfo(Object[] args) {
         this.count = args.length;
+        this.args = args;
         this.mappedStatement = (MappedStatement) args[0];
         this.parameterObject = args[1];
         if (args.length == 4 || args.length == 6) {
@@ -113,5 +115,19 @@ public class MybatisgxExecutorInfo {
 
     public void setBoundSql(BoundSql boundSql) {
         this.boundSql = boundSql;
+    }
+
+    public Object[] restArgs(MappedStatement mappedStatement, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, CacheKey cacheKey, BoundSql boundSql) {
+        this.args[0] = mappedStatement;
+        this.args[1] = parameterObject;
+        if (count == 4) {
+            this.args[2] = rowBounds;
+            this.args[3] = resultHandler;
+        }
+        if (count == 6) {
+            this.args[4] = cacheKey;
+            this.args[5] = boundSql;
+        }
+        return this.args;
     }
 }

@@ -70,13 +70,8 @@ public class MybatisxExecutorInterceptor implements Interceptor {
             Pageable pageable = pageHandler.getPageable(parameterObject);
             if (pageable != null) {
                 MybatisgxPageInfo mybatisgxPageInfo = pageHandler.execute(executor, mappedStatement, parameterObject, rowBounds, resultHandler, newBoundSql);
-                if (mybatisgxExecutorInfo.getCache()) {
-                    args[5] = mybatisgxPageInfo.getBoundSql();
-                } else {
-                    MappedStatement newMappedStatement = this.copyMappedStatement(mappedStatement, new BoundSqlSqlSource(mybatisgxPageInfo.getBoundSql()));
-                    args[0] = newMappedStatement;
-                    args[1] = mybatisgxPageInfo.getParameterObject();
-                }
+                MappedStatement newMappedStatement = MappedStatementHelper.copy(mappedStatement, mybatisgxPageInfo.getBoundSql(), "Page");
+                mybatisgxExecutorInfo.restArgs(newMappedStatement, mybatisgxPageInfo.getParameterObject(), mybatisgxPageInfo.getRowBounds(), mybatisgxPageInfo.getResultHandler(), mybatisgxPageInfo.getCacheKey(), mybatisgxPageInfo.getBoundSql());
                 Object result = invocation.proceed();
                 Page page = new Page(mybatisgxPageInfo.getCount(), (List) result);
                 List<Page> pageList = new ArrayList(1);
@@ -85,13 +80,14 @@ public class MybatisxExecutorInterceptor implements Interceptor {
             }
         }
 
-        MappedStatement newMappedStatement = copyMappedStatement(mappedStatement, new BoundSqlSqlSource(newBoundSql));
+        MappedStatement newMappedStatement = MappedStatementHelper.copy(mappedStatement, newBoundSql, "TenantId");
         // 替换原MappedStatement和parameterObject。
-        args[0] = newMappedStatement;
+        mybatisgxExecutorInfo.restArgs(newMappedStatement, parameterObject, rowBounds, resultHandler, cacheKey, newBoundSql);
+        /*args[0] = newMappedStatement;
         args[1] = parameterObject;
         if (args.length == 6) {
             args[5] = newBoundSql;
-        }
+        }*/
         return invocation.proceed();
     }
 

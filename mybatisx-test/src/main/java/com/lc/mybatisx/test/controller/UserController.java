@@ -1,5 +1,6 @@
 package com.lc.mybatisx.test.controller;
 
+import com.lc.mybatisx.dao.Page;
 import com.lc.mybatisx.test.dao.UserDao;
 import com.lc.mybatisx.test.model.dto.UserDto;
 import com.lc.mybatisx.test.model.entity.User;
@@ -30,6 +31,11 @@ public class UserController {
         return user;
     }
 
+    @PostMapping(path = "/batch")
+    public int addBatch(@RequestBody List<UserDto> userDtoList) {
+        return userService.addBatch(userDtoList);
+    }
+
     @DeleteMapping
     public int deleteById(Long id) {
         return userDao.deleteById(id);
@@ -53,9 +59,9 @@ public class UserController {
         return user;
     }
 
-    @GetMapping(path = "/all")
-    public List<User> findByAll(User user) {
-        return userDao.findList(user);
+    @GetMapping(path = "/list")
+    public Page<UserDto> list(User user) {
+        return userService.list(user);
     }
 
     @GetMapping(path = "/name")
@@ -89,4 +95,8 @@ public class UserController {
         return userDao.findByNameOrAgeOrRoleIds(name, age, roleIds);
     }
 
+    @GetMapping(path = "/test-param")
+    public List<UserDto> findTestParam(Long id) {
+        return userService.findTestParam(id);
+    }
 }

@@ -10,9 +10,5 @@ import org.mapstruct.Mapper;
  * @date ：2019/12/30 16:17
  */
 @Mapper(componentModel = "spring")
-public interface UserConverter {
-
-    // @Mapping(source = "userDetail", target = "userDetailDto")
-    UserDto toDto(User user);
-
+public interface UserConverter extends BaseConverter<User, UserDto> {
 }

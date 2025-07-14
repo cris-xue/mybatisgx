@@ -1,5 +1,6 @@
 package com.lc.mybatisx.test.model.converter;
 
+import com.lc.mybatisx.dao.Page;
 import com.lc.mybatisx.test.model.dto.BaseDto;
 import com.lc.mybatisx.test.model.entity.BaseEntity;
 
@@ -19,4 +20,6 @@ public interface BaseConverter<ENTITY extends BaseEntity, DTO extends BaseDto> {
     ENTITY toEntity(DTO dto);
 
     List<ENTITY> toEntityList(List<DTO> dtoList);
+
+    Page<DTO> toPage(Page<ENTITY> page);
 }

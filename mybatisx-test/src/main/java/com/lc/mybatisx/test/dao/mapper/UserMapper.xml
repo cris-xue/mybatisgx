@@ -1,27 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.lc.mybatisx.test.dao.UserDao">
 
-    <!--<resultMap id="TeacherStuden2" type="Teacher">
-        <collection property="students" javaType="ArrayList" ofType="Student" select="getByTidOfStudents" column="id" fetchType="lazy"/>
-    </resultMap>
-
-    <select id="getByTidOfStudents" resultType="Student">
-        select  * from xsgl2.student where  tid=#{tid}
-    </select>-->
-
     <select id="findByNameOrAgeOrRoleIds" resultType="com.lc.mybatisx.test.model.entity.User">
+        select * from user where id = #{id}
+    </select>
+
+    <!--<select id="findByNameOrAgeOrRoleIds" resultType="com.lc.mybatisx.test.model.entity.User">
         select
         <trim prefix="" suffix="" suffixOverrides=",">
             role_ids, name, age, phone, email, user_name, password, status, version, id
         </trim>
         from user
-        <where>
+        where
+            id = #{id}
             <trim prefix="(" suffix=")" prefixOverrides="AND|OR|and|or">
-                <if test="arg0 != null">  name = #{arg0}</if>
+                <if test="arg0 != null"> or  name = #{arg0}</if>
                 <if test="arg1 != null"> or age = #{arg1}</if>
                 <if test="arg2 != null"> or role_ids = #{arg2, typeHandler=com.lc.mybatisx.test.commons.handler.ListLongTypeHandler}</if>
             </trim>
+    </select>-->
+
+    <select id="findTestParam" resultType="com.lc.mybatisx.test.model.entity.User">
+        select
+            <trim prefix="" suffix="" suffixOverrides=",">
+                user.role_ids, user.name, user.age, user.phone, user.email, user.user_name, user.password, user.status, user.version, user.id
+            </trim>
+        from user user left join user_detail user_detail on user.id = user_detail.user_id
+        <where>
+            <trim prefix="(" suffix=")" prefixOverrides="AND|OR|and|or">
+                user.id = #{id}
+                <if test="arg0 != null"> or user.name = #{arg0}</if>
+                <if test="arg1 != null"> or user.age = #{arg1}</if>
+                <if test="arg2 != null"> or user.role_ids = #{arg2, typeHandler=com.lc.mybatisx.test.commons.handler.ListLongTypeHandler}</if>
+            </trim>
         </where>
     </select>
-
 </mapper>

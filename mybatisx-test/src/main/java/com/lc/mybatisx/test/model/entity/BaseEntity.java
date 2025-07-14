@@ -2,7 +2,6 @@ package com.lc.mybatisx.test.model.entity;
 
 import com.lc.mybatisx.annotation.Column;
 import com.lc.mybatisx.annotation.Id;
-import com.lc.mybatisx.annotation.TenantId;
 
 import java.time.LocalDateTime;
 
@@ -15,10 +14,6 @@ public abstract class BaseEntity<ID> {
 
     @Id
     private ID id;
-
-    @TenantId
-    @Column(name = "tenant_id", insertable = true)
-    private Long tenantId;
 
     @Column(name = "input_user_id", insertable = true)
     private Long inputUserId;
@@ -38,14 +33,6 @@ public abstract class BaseEntity<ID> {
 
     public void setId(ID id) {
         this.id = id;
-    }
-
-    public Long getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(Long tenantId) {
-        this.tenantId = tenantId;
     }
 
     public Long getInputUserId() {

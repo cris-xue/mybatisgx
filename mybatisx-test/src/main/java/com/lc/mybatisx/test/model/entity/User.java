@@ -46,7 +46,7 @@ public class User extends BaseEntity<Long> {
     @OneToMany(mappedBy = "user", fetchSize = 100)
     private List<Order> orderList;
 
-    @OneToOne(mappedBy = "user")
+    @OneToOne(mappedBy = "user", loadStrategy = LoadStrategy.JOIN)
     private UserDetail userDetail;
 
     public List<Long> getRoleIds() {

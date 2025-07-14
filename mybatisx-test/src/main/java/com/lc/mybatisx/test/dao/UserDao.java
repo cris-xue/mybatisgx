@@ -38,4 +38,7 @@ public interface UserDao extends SimpleDao<User, Long> {
     @Dynamic
     List<User> findList1(UserQuery userQuery);
 
+    // List<User> findTestParam(UserQuery userQuery);
+
+    List<User> findTestParam(String name, Integer age, List<Long> roleIds, @Param("id") Long id);
 }

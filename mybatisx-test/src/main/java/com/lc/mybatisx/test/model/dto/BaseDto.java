@@ -11,8 +11,6 @@ public abstract class BaseDto<ID> {
 
     private ID id;
 
-    private Long tenantId;
-
     private Long inputUserId;
 
     private LocalDateTime inputTime;
@@ -27,14 +25,6 @@ public abstract class BaseDto<ID> {
 
     public void setId(ID id) {
         this.id = id;
-    }
-
-    public Long getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(Long tenantId) {
-        this.tenantId = tenantId;
     }
 
     public Long getInputUserId() {

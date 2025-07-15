@@ -25,7 +25,7 @@ select_clause: SELECT_ACTION ;
 
 where_clause: ((where_item)+)? ;
 where_item: where_link_op_clause field_condition_op_clause ;
-where_link_op_clause: WHERE_LINK_OP ;
+where_link_op_clause: BY | AND | OR ;
 field_condition_op_clause: field_clause (condition_op_clause)? ;
 condition_op_clause: CONDITION_OP ;
 

@@ -2,7 +2,7 @@
 parser grammar MethodNameParser ;
 
 options {
-    // 表示解析token的词法解析器使用SearchLexer
+    // 表示解析token的词法解析器使用MethodNameLexer
     tokenVocab = MethodNameLexer ;
 }
 
@@ -11,29 +11,24 @@ sql_statement: (insert_statement | delete_statement | update_statement | select_
 // EOF(end of file)表示文件结束符，这个是Antlr中已经定义好的
 end: EOF ;
 
-insert_statement: insert_clause batch_clause dynamic_condition_clause ;
+insert_statement: insert_clause ;
 insert_clause: INSERT_ACTION ;
 
-delete_statement: delete_clause batch_clause where_clause ;
+delete_statement: delete_clause where_clause ;
 delete_clause: DELETE_ACTION ;
 
-update_statement: update_clause batch_clause where_clause dynamic_condition_clause ;
+update_statement: update_clause where_clause ;
 update_clause: UPDATE_ACTION ;
 
 select_statement: select_clause where_clause group_clause order_clause ;
 select_clause: SELECT_ACTION ;
 
-where_clause: ((where_item)+)? ;
-where_item: where_link_op_clause field_condition_op_clause ;
-where_link_op_clause: BY | AND | OR ;
-field_condition_op_clause: field_clause (condition_op_clause)? ;
-condition_op_clause: CONDITION_OP ;
-
-// 批量操作
-batch_clause: (BATCH_ACTION)? ;
-
-// 动态参数
-dynamic_condition_clause: (DYNAMIC_CONDITION)? ;
+// 条件语法
+where_clause: BY (condition_item_clause)* ;
+condition_item_clause: field_condition_op_clause (logic_op_clause field_condition_op_clause)* ;
+logic_op_clause: AND | OR ;
+field_condition_op_clause: field_clause (comparison_op_clause)? ;
+comparison_op_clause: CONDITION_OP ;
 
 // 分组
 group_clause: (group_op_clause field_clause)? ;

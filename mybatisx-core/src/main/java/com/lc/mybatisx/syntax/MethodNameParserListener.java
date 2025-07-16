@@ -1,4 +1,4 @@
-// Generated from F:/devops/mybatisx/mybatisx-core/src/test/resources/MethodNameParser.g4 by ANTLR 4.13.2
+// Generated from F:/devops/mybatisx/mybatisx-core/src/main/resources/antlr/MethodNameParser.g4 by ANTLR 4.13.2
 package com.lc.mybatisx.syntax;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
@@ -118,25 +118,25 @@ public interface MethodNameParserListener extends ParseTreeListener {
 	 */
 	void exitWhere_clause(MethodNameParser.Where_clauseContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#where_item}.
+	 * Enter a parse tree produced by {@link MethodNameParser#condition_item_clause}.
 	 * @param ctx the parse tree
 	 */
-	void enterWhere_item(MethodNameParser.Where_itemContext ctx);
+	void enterCondition_item_clause(MethodNameParser.Condition_item_clauseContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#where_item}.
+	 * Exit a parse tree produced by {@link MethodNameParser#condition_item_clause}.
 	 * @param ctx the parse tree
 	 */
-	void exitWhere_item(MethodNameParser.Where_itemContext ctx);
+	void exitCondition_item_clause(MethodNameParser.Condition_item_clauseContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#where_link_op_clause}.
+	 * Enter a parse tree produced by {@link MethodNameParser#logic_op_clause}.
 	 * @param ctx the parse tree
 	 */
-	void enterWhere_link_op_clause(MethodNameParser.Where_link_op_clauseContext ctx);
+	void enterLogic_op_clause(MethodNameParser.Logic_op_clauseContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#where_link_op_clause}.
+	 * Exit a parse tree produced by {@link MethodNameParser#logic_op_clause}.
 	 * @param ctx the parse tree
 	 */
-	void exitWhere_link_op_clause(MethodNameParser.Where_link_op_clauseContext ctx);
+	void exitLogic_op_clause(MethodNameParser.Logic_op_clauseContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MethodNameParser#field_condition_op_clause}.
 	 * @param ctx the parse tree
@@ -148,35 +148,15 @@ public interface MethodNameParserListener extends ParseTreeListener {
 	 */
 	void exitField_condition_op_clause(MethodNameParser.Field_condition_op_clauseContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#condition_op_clause}.
+	 * Enter a parse tree produced by {@link MethodNameParser#comparison_op_clause}.
 	 * @param ctx the parse tree
 	 */
-	void enterCondition_op_clause(MethodNameParser.Condition_op_clauseContext ctx);
+	void enterComparison_op_clause(MethodNameParser.Comparison_op_clauseContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#condition_op_clause}.
+	 * Exit a parse tree produced by {@link MethodNameParser#comparison_op_clause}.
 	 * @param ctx the parse tree
 	 */
-	void exitCondition_op_clause(MethodNameParser.Condition_op_clauseContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#batch_clause}.
-	 * @param ctx the parse tree
-	 */
-	void enterBatch_clause(MethodNameParser.Batch_clauseContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#batch_clause}.
-	 * @param ctx the parse tree
-	 */
-	void exitBatch_clause(MethodNameParser.Batch_clauseContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#dynamic_condition_clause}.
-	 * @param ctx the parse tree
-	 */
-	void enterDynamic_condition_clause(MethodNameParser.Dynamic_condition_clauseContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#dynamic_condition_clause}.
-	 * @param ctx the parse tree
-	 */
-	void exitDynamic_condition_clause(MethodNameParser.Dynamic_condition_clauseContext ctx);
+	void exitComparison_op_clause(MethodNameParser.Comparison_op_clauseContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MethodNameParser#group_clause}.
 	 * @param ctx the parse tree

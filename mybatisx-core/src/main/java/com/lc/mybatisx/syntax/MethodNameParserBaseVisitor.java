@@ -1,4 +1,4 @@
-// Generated from F:/devops/mybatisx/mybatisx-core/src/test/resources/MethodNameParser.g4 by ANTLR 4.13.2
+// Generated from F:/devops/mybatisx/mybatisx-core/src/main/resources/antlr/MethodNameParser.g4 by ANTLR 4.13.2
 package com.lc.mybatisx.syntax;
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 
@@ -95,14 +95,14 @@ public class MethodNameParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> 
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitWhere_item(MethodNameParser.Where_itemContext ctx) { return visitChildren(ctx); }
+	@Override public T visitCondition_item_clause(MethodNameParser.Condition_item_clauseContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitWhere_link_op_clause(MethodNameParser.Where_link_op_clauseContext ctx) { return visitChildren(ctx); }
+	@Override public T visitLogic_op_clause(MethodNameParser.Logic_op_clauseContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -116,21 +116,7 @@ public class MethodNameParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> 
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitCondition_op_clause(MethodNameParser.Condition_op_clauseContext ctx) { return visitChildren(ctx); }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.</p>
-	 */
-	@Override public T visitBatch_clause(MethodNameParser.Batch_clauseContext ctx) { return visitChildren(ctx); }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.</p>
-	 */
-	@Override public T visitDynamic_condition_clause(MethodNameParser.Dynamic_condition_clauseContext ctx) { return visitChildren(ctx); }
+	@Override public T visitComparison_op_clause(MethodNameParser.Comparison_op_clauseContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *

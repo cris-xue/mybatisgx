@@ -1,4 +1,4 @@
-// Generated from F:/devops/mybatisx/mybatisx-core/src/test/resources/MethodNameParser.g4 by ANTLR 4.13.2
+// Generated from F:/devops/mybatisx/mybatisx-core/src/main/resources/antlr/MethodNameParser.g4 by ANTLR 4.13.2
 package com.lc.mybatisx.syntax;
 
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -149,25 +149,25 @@ public class MethodNameParserBaseListener implements MethodNameParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterWhere_item(MethodNameParser.Where_itemContext ctx) { }
+	@Override public void enterCondition_item_clause(MethodNameParser.Condition_item_clauseContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitWhere_item(MethodNameParser.Where_itemContext ctx) { }
+	@Override public void exitCondition_item_clause(MethodNameParser.Condition_item_clauseContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterWhere_link_op_clause(MethodNameParser.Where_link_op_clauseContext ctx) { }
+	@Override public void enterLogic_op_clause(MethodNameParser.Logic_op_clauseContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitWhere_link_op_clause(MethodNameParser.Where_link_op_clauseContext ctx) { }
+	@Override public void exitLogic_op_clause(MethodNameParser.Logic_op_clauseContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -185,37 +185,13 @@ public class MethodNameParserBaseListener implements MethodNameParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterCondition_op_clause(MethodNameParser.Condition_op_clauseContext ctx) { }
+	@Override public void enterComparison_op_clause(MethodNameParser.Comparison_op_clauseContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitCondition_op_clause(MethodNameParser.Condition_op_clauseContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterBatch_clause(MethodNameParser.Batch_clauseContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitBatch_clause(MethodNameParser.Batch_clauseContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterDynamic_condition_clause(MethodNameParser.Dynamic_condition_clauseContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitDynamic_condition_clause(MethodNameParser.Dynamic_condition_clauseContext ctx) { }
+	@Override public void exitComparison_op_clause(MethodNameParser.Comparison_op_clauseContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

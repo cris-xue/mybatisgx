@@ -1,4 +1,4 @@
-// Generated from F:/devops/mybatisx/mybatisx-core/src/test/resources/MethodNameParser.g4 by ANTLR 4.13.2
+// Generated from F:/devops/mybatisx/mybatisx-core/src/main/resources/antlr/MethodNameParser.g4 by ANTLR 4.13.2
 package com.lc.mybatisx.syntax;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
@@ -77,17 +77,17 @@ public interface MethodNameParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitWhere_clause(MethodNameParser.Where_clauseContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MethodNameParser#where_item}.
+	 * Visit a parse tree produced by {@link MethodNameParser#condition_item_clause}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitWhere_item(MethodNameParser.Where_itemContext ctx);
+	T visitCondition_item_clause(MethodNameParser.Condition_item_clauseContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MethodNameParser#where_link_op_clause}.
+	 * Visit a parse tree produced by {@link MethodNameParser#logic_op_clause}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitWhere_link_op_clause(MethodNameParser.Where_link_op_clauseContext ctx);
+	T visitLogic_op_clause(MethodNameParser.Logic_op_clauseContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MethodNameParser#field_condition_op_clause}.
 	 * @param ctx the parse tree
@@ -95,23 +95,11 @@ public interface MethodNameParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitField_condition_op_clause(MethodNameParser.Field_condition_op_clauseContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MethodNameParser#condition_op_clause}.
+	 * Visit a parse tree produced by {@link MethodNameParser#comparison_op_clause}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitCondition_op_clause(MethodNameParser.Condition_op_clauseContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link MethodNameParser#batch_clause}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitBatch_clause(MethodNameParser.Batch_clauseContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link MethodNameParser#dynamic_condition_clause}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitDynamic_condition_clause(MethodNameParser.Dynamic_condition_clauseContext ctx);
+	T visitComparison_op_clause(MethodNameParser.Comparison_op_clauseContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MethodNameParser#group_clause}.
 	 * @param ctx the parse tree

@@ -8,24 +8,23 @@ options {
 
 sql_condition_statement: condition_group_clause end ;
 
-// EOF(end of file)表示文件结束符，这个是Antlr中已经定义好的
-end: EOF ;
-
 // 条件组：由多个条件单元和逻辑运算符组成
-condition_group_clause: conditionUnit* (logic_op conditionUnit)* ;
+condition_group_clause: condition_unit_clause* (logic_op_clause condition_unit_clause)* ;
 // 条件单元：单个条件 或 括号内的子组
-conditionUnit: where_clause | (LEFT_BRACKET condition_group_clause RIGHT_BRACKET) ;
+condition_unit_clause: condition_clause | (LEFT_BRACKET condition_group_clause RIGHT_BRACKET) ;
 
 // NameLikeAndAgeEq
-where_clause: (where_item)+ ;
+condition_clause: (condition_item_clause)+ ;
 // NameLikeAnd
-where_item:  field_condition_op_clause (logic_op field_condition_op_clause)* ;
+condition_item_clause:  field_condition_op_clause (logic_op_clause field_condition_op_clause)* ;
 // NameLike
-field_condition_op_clause: field_clause (condition_op_clause)? ;
-condition_op_clause: CONDITION_OP ;
+field_condition_op_clause: field_clause (comparison_op_clause)? ;
+comparison_op_clause: COMPARISON_OP ;
 
 // 逻辑运算符
-logic_op: AND | OR ;
+logic_op_clause: AND | OR ;
 field_clause: FIELD+ ;
 left_bracket_clause: LEFT_BRACKET ;
 right_bracket_clause: RIGHT_BRACKET ;
+// EOF(end of file)表示文件结束符，这个是Antlr中已经定义好的
+end: EOF ;

@@ -149,6 +149,18 @@ public class MethodNameParserBaseListener implements MethodNameParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterWhere_start_clause(MethodNameParser.Where_start_clauseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitWhere_start_clause(MethodNameParser.Where_start_clauseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterCondition_clause(MethodNameParser.Condition_clauseContext ctx) { }
 	/**
 	 * {@inheritDoc}

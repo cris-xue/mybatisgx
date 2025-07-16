@@ -11,7 +11,8 @@ SELECT_ACTION: 'find' | 'get' | 'select' | 'query' ;
 BY: 'By' ;
 AND: 'And' ;
 OR: 'Or' ;
-CONDITION_OP: 'Lt' | 'Lteq' | 'Gt' | 'Gteq' | 'In' | 'Is' | 'Eq' | 'Not' | 'Like' | 'Between';
+// 比较运算符
+COMPARISON_OP: 'Lt' | 'Lteq' | 'Gt' | 'Gteq' | 'In' | 'Is' | 'Eq' | 'Not' | 'Like' | 'Between';
 GROUP_OP: 'GroupBy' ;
 ORDER_OP: 'OrderBy' ;
 ORDER_OP_DIRECTION: 'Desc' | 'Asc' ;

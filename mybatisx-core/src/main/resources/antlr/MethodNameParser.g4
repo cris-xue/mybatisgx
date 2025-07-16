@@ -28,7 +28,7 @@ where_clause: BY (condition_item_clause)* ;
 condition_item_clause: field_condition_op_clause (logic_op_clause field_condition_op_clause)* ;
 logic_op_clause: AND | OR ;
 field_condition_op_clause: field_clause (comparison_op_clause)? ;
-comparison_op_clause: CONDITION_OP ;
+comparison_op_clause: COMPARISON_OP ;
 
 // 分组
 group_clause: (group_op_clause field_clause)? ;

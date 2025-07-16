@@ -23,11 +23,13 @@ update_clause: UPDATE_ACTION ;
 select_statement: select_clause where_clause group_clause order_clause ;
 select_clause: SELECT_ACTION ;
 
-// 条件语法
-where_clause: BY (condition_item_clause)* ;
-condition_item_clause: field_condition_op_clause (logic_op_clause field_condition_op_clause)* ;
+// 条件语法   ByNameLikeAndAgeEq
+where_clause: BY (condition_clause)* ;
+// NameLikeAndAgeEq
+condition_clause: condition_item_clause (logic_op_clause condition_item_clause)* ;
 logic_op_clause: AND | OR ;
-field_condition_op_clause: field_clause (comparison_op_clause)? ;
+// NameLike
+condition_item_clause: field_clause (comparison_op_clause)? ;
 comparison_op_clause: COMPARISON_OP ;
 
 // 分组

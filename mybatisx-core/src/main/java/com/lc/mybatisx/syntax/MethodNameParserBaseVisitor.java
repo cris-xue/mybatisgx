@@ -95,7 +95,7 @@ public class MethodNameParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> 
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitCondition_item_clause(MethodNameParser.Condition_item_clauseContext ctx) { return visitChildren(ctx); }
+	@Override public T visitCondition_clause(MethodNameParser.Condition_clauseContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -109,7 +109,7 @@ public class MethodNameParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> 
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitField_condition_op_clause(MethodNameParser.Field_condition_op_clauseContext ctx) { return visitChildren(ctx); }
+	@Override public T visitCondition_item_clause(MethodNameParser.Condition_item_clauseContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *

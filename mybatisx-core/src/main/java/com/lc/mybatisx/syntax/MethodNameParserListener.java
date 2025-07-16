@@ -118,15 +118,15 @@ public interface MethodNameParserListener extends ParseTreeListener {
 	 */
 	void exitWhere_clause(MethodNameParser.Where_clauseContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#condition_item_clause}.
+	 * Enter a parse tree produced by {@link MethodNameParser#condition_clause}.
 	 * @param ctx the parse tree
 	 */
-	void enterCondition_item_clause(MethodNameParser.Condition_item_clauseContext ctx);
+	void enterCondition_clause(MethodNameParser.Condition_clauseContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#condition_item_clause}.
+	 * Exit a parse tree produced by {@link MethodNameParser#condition_clause}.
 	 * @param ctx the parse tree
 	 */
-	void exitCondition_item_clause(MethodNameParser.Condition_item_clauseContext ctx);
+	void exitCondition_clause(MethodNameParser.Condition_clauseContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MethodNameParser#logic_op_clause}.
 	 * @param ctx the parse tree
@@ -138,15 +138,15 @@ public interface MethodNameParserListener extends ParseTreeListener {
 	 */
 	void exitLogic_op_clause(MethodNameParser.Logic_op_clauseContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#field_condition_op_clause}.
+	 * Enter a parse tree produced by {@link MethodNameParser#condition_item_clause}.
 	 * @param ctx the parse tree
 	 */
-	void enterField_condition_op_clause(MethodNameParser.Field_condition_op_clauseContext ctx);
+	void enterCondition_item_clause(MethodNameParser.Condition_item_clauseContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#field_condition_op_clause}.
+	 * Exit a parse tree produced by {@link MethodNameParser#condition_item_clause}.
 	 * @param ctx the parse tree
 	 */
-	void exitField_condition_op_clause(MethodNameParser.Field_condition_op_clauseContext ctx);
+	void exitCondition_item_clause(MethodNameParser.Condition_item_clauseContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MethodNameParser#comparison_op_clause}.
 	 * @param ctx the parse tree

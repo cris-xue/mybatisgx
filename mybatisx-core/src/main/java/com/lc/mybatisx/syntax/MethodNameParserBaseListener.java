@@ -149,13 +149,13 @@ public class MethodNameParserBaseListener implements MethodNameParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterCondition_item_clause(MethodNameParser.Condition_item_clauseContext ctx) { }
+	@Override public void enterCondition_clause(MethodNameParser.Condition_clauseContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitCondition_item_clause(MethodNameParser.Condition_item_clauseContext ctx) { }
+	@Override public void exitCondition_clause(MethodNameParser.Condition_clauseContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -173,13 +173,13 @@ public class MethodNameParserBaseListener implements MethodNameParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterField_condition_op_clause(MethodNameParser.Field_condition_op_clauseContext ctx) { }
+	@Override public void enterCondition_item_clause(MethodNameParser.Condition_item_clauseContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitField_condition_op_clause(MethodNameParser.Field_condition_op_clauseContext ctx) { }
+	@Override public void exitCondition_item_clause(MethodNameParser.Condition_item_clauseContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

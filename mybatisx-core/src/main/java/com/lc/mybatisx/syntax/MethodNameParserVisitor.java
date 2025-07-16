@@ -77,11 +77,11 @@ public interface MethodNameParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitWhere_clause(MethodNameParser.Where_clauseContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MethodNameParser#condition_item_clause}.
+	 * Visit a parse tree produced by {@link MethodNameParser#condition_clause}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitCondition_item_clause(MethodNameParser.Condition_item_clauseContext ctx);
+	T visitCondition_clause(MethodNameParser.Condition_clauseContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MethodNameParser#logic_op_clause}.
 	 * @param ctx the parse tree
@@ -89,11 +89,11 @@ public interface MethodNameParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitLogic_op_clause(MethodNameParser.Logic_op_clauseContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MethodNameParser#field_condition_op_clause}.
+	 * Visit a parse tree produced by {@link MethodNameParser#condition_item_clause}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitField_condition_op_clause(MethodNameParser.Field_condition_op_clauseContext ctx);
+	T visitCondition_item_clause(MethodNameParser.Condition_item_clauseContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MethodNameParser#comparison_op_clause}.
 	 * @param ctx the parse tree

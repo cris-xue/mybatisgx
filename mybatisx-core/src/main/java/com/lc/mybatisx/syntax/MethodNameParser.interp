@@ -44,9 +44,9 @@ update_clause
 select_statement
 select_clause
 where_clause
-condition_item_clause
+condition_clause
 logic_op_clause
-field_condition_op_clause
+condition_item_clause
 comparison_op_clause
 group_clause
 group_op_clause

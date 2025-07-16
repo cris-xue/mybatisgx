@@ -24,8 +24,8 @@ public class MethodNameParser extends Parser {
 		RULE_sql_statement = 0, RULE_end = 1, RULE_insert_statement = 2, RULE_insert_clause = 3, 
 		RULE_delete_statement = 4, RULE_delete_clause = 5, RULE_update_statement = 6, 
 		RULE_update_clause = 7, RULE_select_statement = 8, RULE_select_clause = 9, 
-		RULE_where_clause = 10, RULE_condition_item_clause = 11, RULE_logic_op_clause = 12, 
-		RULE_field_condition_op_clause = 13, RULE_comparison_op_clause = 14, RULE_group_clause = 15, 
+		RULE_where_clause = 10, RULE_condition_clause = 11, RULE_logic_op_clause = 12, 
+		RULE_condition_item_clause = 13, RULE_comparison_op_clause = 14, RULE_group_clause = 15, 
 		RULE_group_op_clause = 16, RULE_order_clause = 17, RULE_order_op_clause = 18, 
 		RULE_order_op_direction_clause = 19, RULE_aggregate_function_clause = 20, 
 		RULE_field_clause = 21;
@@ -33,10 +33,10 @@ public class MethodNameParser extends Parser {
 		return new String[] {
 			"sql_statement", "end", "insert_statement", "insert_clause", "delete_statement", 
 			"delete_clause", "update_statement", "update_clause", "select_statement", 
-			"select_clause", "where_clause", "condition_item_clause", "logic_op_clause", 
-			"field_condition_op_clause", "comparison_op_clause", "group_clause", 
-			"group_op_clause", "order_clause", "order_op_clause", "order_op_direction_clause", 
-			"aggregate_function_clause", "field_clause"
+			"select_clause", "where_clause", "condition_clause", "logic_op_clause", 
+			"condition_item_clause", "comparison_op_clause", "group_clause", "group_op_clause", 
+			"order_clause", "order_op_clause", "order_op_direction_clause", "aggregate_function_clause", 
+			"field_clause"
 		};
 	}
 	public static final String[] ruleNames = makeRuleNames();
@@ -616,11 +616,11 @@ public class MethodNameParser extends Parser {
 	@SuppressWarnings("CheckReturnValue")
 	public static class Where_clauseContext extends ParserRuleContext {
 		public TerminalNode BY() { return getToken(MethodNameParser.BY, 0); }
-		public List<Condition_item_clauseContext> condition_item_clause() {
-			return getRuleContexts(Condition_item_clauseContext.class);
+		public List<Condition_clauseContext> condition_clause() {
+			return getRuleContexts(Condition_clauseContext.class);
 		}
-		public Condition_item_clauseContext condition_item_clause(int i) {
-			return getRuleContext(Condition_item_clauseContext.class,i);
+		public Condition_clauseContext condition_clause(int i) {
+			return getRuleContext(Condition_clauseContext.class,i);
 		}
 		public Where_clauseContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -657,7 +657,7 @@ public class MethodNameParser extends Parser {
 				{
 				{
 				setState(76);
-				condition_item_clause();
+				condition_clause();
 				}
 				}
 				setState(81);
@@ -678,12 +678,12 @@ public class MethodNameParser extends Parser {
 	}
 
 	@SuppressWarnings("CheckReturnValue")
-	public static class Condition_item_clauseContext extends ParserRuleContext {
-		public List<Field_condition_op_clauseContext> field_condition_op_clause() {
-			return getRuleContexts(Field_condition_op_clauseContext.class);
+	public static class Condition_clauseContext extends ParserRuleContext {
+		public List<Condition_item_clauseContext> condition_item_clause() {
+			return getRuleContexts(Condition_item_clauseContext.class);
 		}
-		public Field_condition_op_clauseContext field_condition_op_clause(int i) {
-			return getRuleContext(Field_condition_op_clauseContext.class,i);
+		public Condition_item_clauseContext condition_item_clause(int i) {
+			return getRuleContext(Condition_item_clauseContext.class,i);
 		}
 		public List<Logic_op_clauseContext> logic_op_clause() {
 			return getRuleContexts(Logic_op_clauseContext.class);
@@ -691,34 +691,34 @@ public class MethodNameParser extends Parser {
 		public Logic_op_clauseContext logic_op_clause(int i) {
 			return getRuleContext(Logic_op_clauseContext.class,i);
 		}
-		public Condition_item_clauseContext(ParserRuleContext parent, int invokingState) {
+		public Condition_clauseContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_condition_item_clause; }
+		@Override public int getRuleIndex() { return RULE_condition_clause; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MethodNameParserListener ) ((MethodNameParserListener)listener).enterCondition_item_clause(this);
+			if ( listener instanceof MethodNameParserListener ) ((MethodNameParserListener)listener).enterCondition_clause(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MethodNameParserListener ) ((MethodNameParserListener)listener).exitCondition_item_clause(this);
+			if ( listener instanceof MethodNameParserListener ) ((MethodNameParserListener)listener).exitCondition_clause(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MethodNameParserVisitor ) return ((MethodNameParserVisitor<? extends T>)visitor).visitCondition_item_clause(this);
+			if ( visitor instanceof MethodNameParserVisitor ) return ((MethodNameParserVisitor<? extends T>)visitor).visitCondition_clause(this);
 			else return visitor.visitChildren(this);
 		}
 	}
 
-	public final Condition_item_clauseContext condition_item_clause() throws RecognitionException {
-		Condition_item_clauseContext _localctx = new Condition_item_clauseContext(_ctx, getState());
-		enterRule(_localctx, 22, RULE_condition_item_clause);
+	public final Condition_clauseContext condition_clause() throws RecognitionException {
+		Condition_clauseContext _localctx = new Condition_clauseContext(_ctx, getState());
+		enterRule(_localctx, 22, RULE_condition_clause);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
 			setState(82);
-			field_condition_op_clause();
+			condition_item_clause();
 			setState(88);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
@@ -728,7 +728,7 @@ public class MethodNameParser extends Parser {
 				setState(83);
 				logic_op_clause();
 				setState(84);
-				field_condition_op_clause();
+				condition_item_clause();
 				}
 				}
 				setState(90);
@@ -802,35 +802,35 @@ public class MethodNameParser extends Parser {
 	}
 
 	@SuppressWarnings("CheckReturnValue")
-	public static class Field_condition_op_clauseContext extends ParserRuleContext {
+	public static class Condition_item_clauseContext extends ParserRuleContext {
 		public Field_clauseContext field_clause() {
 			return getRuleContext(Field_clauseContext.class,0);
 		}
 		public Comparison_op_clauseContext comparison_op_clause() {
 			return getRuleContext(Comparison_op_clauseContext.class,0);
 		}
-		public Field_condition_op_clauseContext(ParserRuleContext parent, int invokingState) {
+		public Condition_item_clauseContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_field_condition_op_clause; }
+		@Override public int getRuleIndex() { return RULE_condition_item_clause; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MethodNameParserListener ) ((MethodNameParserListener)listener).enterField_condition_op_clause(this);
+			if ( listener instanceof MethodNameParserListener ) ((MethodNameParserListener)listener).enterCondition_item_clause(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MethodNameParserListener ) ((MethodNameParserListener)listener).exitField_condition_op_clause(this);
+			if ( listener instanceof MethodNameParserListener ) ((MethodNameParserListener)listener).exitCondition_item_clause(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MethodNameParserVisitor ) return ((MethodNameParserVisitor<? extends T>)visitor).visitField_condition_op_clause(this);
+			if ( visitor instanceof MethodNameParserVisitor ) return ((MethodNameParserVisitor<? extends T>)visitor).visitCondition_item_clause(this);
 			else return visitor.visitChildren(this);
 		}
 	}
 
-	public final Field_condition_op_clauseContext field_condition_op_clause() throws RecognitionException {
-		Field_condition_op_clauseContext _localctx = new Field_condition_op_clauseContext(_ctx, getState());
-		enterRule(_localctx, 26, RULE_field_condition_op_clause);
+	public final Condition_item_clauseContext condition_item_clause() throws RecognitionException {
+		Condition_item_clauseContext _localctx = new Condition_item_clauseContext(_ctx, getState());
+		enterRule(_localctx, 26, RULE_condition_item_clause);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);

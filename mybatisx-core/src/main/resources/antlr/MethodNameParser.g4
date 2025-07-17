@@ -21,10 +21,10 @@ update_statement: update_clause where_clause ;
 update_clause: UPDATE_ACTION ;
 
 select_statement: select_clause where_clause group_clause order_clause ;
-select_clause: SELECT_ACTION ;
+select_clause: SELECT_ACTION (IGNORED_LIST)* ;
 
 // 条件语法   ByNameLikeAndAgeEq
-where_clause: where_start_clause (condition_clause)* ;
+where_clause: (where_start_clause (condition_clause)*)? ;
 where_start_clause: BY ;
 // NameLikeAndAgeEq
 condition_clause: condition_item_clause (logic_op_clause condition_item_clause)* ;

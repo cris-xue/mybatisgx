@@ -12,13 +12,13 @@ sql_statement: (insert_statement | delete_statement | update_statement | select_
 end: EOF ;
 
 insert_statement: insert_clause ;
-insert_clause: INSERT_ACTION ;
+insert_clause: INSERT_ACTION IGNORED_LIST* ;
 
 delete_statement: delete_clause where_clause ;
-delete_clause: DELETE_ACTION ;
+delete_clause: DELETE_ACTION IGNORED_LIST* ;
 
 update_statement: update_clause where_clause ;
-update_clause: UPDATE_ACTION ;
+update_clause: UPDATE_ACTION IGNORED_LIST* ;
 
 select_statement: select_clause where_clause group_clause order_clause ;
 select_clause: SELECT_ACTION IGNORED_LIST* ;

@@ -21,7 +21,7 @@ update_statement: update_clause where_clause ;
 update_clause: UPDATE_ACTION ;
 
 select_statement: select_clause where_clause group_clause order_clause ;
-select_clause: SELECT_ACTION (IGNORED_LIST)* ;
+select_clause: SELECT_ACTION IGNORED_LIST* ;
 
 // 条件语法   ByNameLikeAndAgeEq
 where_clause: (where_start_clause (condition_clause)*)? ;
@@ -45,4 +45,4 @@ order_op_direction_clause: ORDER_OP_DIRECTION ;
 // 聚合函数
 aggregate_function_clause: AGGREGATE_FUNCTION ;
 
-field_clause: FIELD+ ;
+field_clause: (FIELD | IGNORED_LIST)+ ;

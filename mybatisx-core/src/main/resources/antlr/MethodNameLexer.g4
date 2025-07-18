@@ -15,7 +15,8 @@ GROUP_OP: 'GroupBy' ;
 ORDER_OP: 'OrderBy' ;
 ORDER_OP_DIRECTION: 'Desc' | 'Asc' ;
 AGGREGATE_FUNCTION: 'Sum' | 'Count' | 'Avg' | 'Max' | 'Min' |'top' | 'last' | 'first' ;
-IGNORED_LIST: ('List' | 'One' | 'Page' | 'Selective' | 'Batch') { shouldIgnoreList() }? { skip(); } ;
+DYNAMIC_CONDITION: 'Selective' ;
+IGNORED_LIST: ('List' | 'One' | 'Page' | 'Batch') { shouldIgnoreList() }? { skip(); } ;
 // antlr是从上向下解析的，常量一定要放在正则的上面
 FIELD: [A-Z]+[a-z0-9]+ ;
 // 忽略空白符

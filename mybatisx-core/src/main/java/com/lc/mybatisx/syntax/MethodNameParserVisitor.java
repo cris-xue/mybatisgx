@@ -71,6 +71,18 @@ public interface MethodNameParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitSelect_clause(MethodNameParser.Select_clauseContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link MethodNameParser#ignore_reserved_word_clause}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIgnore_reserved_word_clause(MethodNameParser.Ignore_reserved_word_clauseContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MethodNameParser#dynamic_condition_clause}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDynamic_condition_clause(MethodNameParser.Dynamic_condition_clauseContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link MethodNameParser#where_clause}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -89,17 +101,17 @@ public interface MethodNameParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitCondition_clause(MethodNameParser.Condition_clauseContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MethodNameParser#logic_op_clause}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitLogic_op_clause(MethodNameParser.Logic_op_clauseContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link MethodNameParser#condition_item_clause}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitCondition_item_clause(MethodNameParser.Condition_item_clauseContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MethodNameParser#logic_op_clause}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLogic_op_clause(MethodNameParser.Logic_op_clauseContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MethodNameParser#comparison_op_clause}.
 	 * @param ctx the parse tree

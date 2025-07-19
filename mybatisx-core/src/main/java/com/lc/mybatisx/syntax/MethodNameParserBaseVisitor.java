@@ -88,6 +88,20 @@ public class MethodNameParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> 
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
+	@Override public T visitIgnore_reserved_word_clause(MethodNameParser.Ignore_reserved_word_clauseContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitDynamic_condition_clause(MethodNameParser.Dynamic_condition_clauseContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
 	@Override public T visitWhere_clause(MethodNameParser.Where_clauseContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
@@ -109,14 +123,14 @@ public class MethodNameParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> 
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitLogic_op_clause(MethodNameParser.Logic_op_clauseContext ctx) { return visitChildren(ctx); }
+	@Override public T visitCondition_item_clause(MethodNameParser.Condition_item_clauseContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitCondition_item_clause(MethodNameParser.Condition_item_clauseContext ctx) { return visitChildren(ctx); }
+	@Override public T visitLogic_op_clause(MethodNameParser.Logic_op_clauseContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *

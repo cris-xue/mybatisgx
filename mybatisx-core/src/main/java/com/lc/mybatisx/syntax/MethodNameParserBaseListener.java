@@ -137,6 +137,30 @@ public class MethodNameParserBaseListener implements MethodNameParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterIgnore_reserved_word_clause(MethodNameParser.Ignore_reserved_word_clauseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitIgnore_reserved_word_clause(MethodNameParser.Ignore_reserved_word_clauseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterDynamic_condition_clause(MethodNameParser.Dynamic_condition_clauseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitDynamic_condition_clause(MethodNameParser.Dynamic_condition_clauseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterWhere_clause(MethodNameParser.Where_clauseContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -173,18 +197,6 @@ public class MethodNameParserBaseListener implements MethodNameParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterLogic_op_clause(MethodNameParser.Logic_op_clauseContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitLogic_op_clause(MethodNameParser.Logic_op_clauseContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterCondition_item_clause(MethodNameParser.Condition_item_clauseContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -192,6 +204,18 @@ public class MethodNameParserBaseListener implements MethodNameParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitCondition_item_clause(MethodNameParser.Condition_item_clauseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterLogic_op_clause(MethodNameParser.Logic_op_clauseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitLogic_op_clause(MethodNameParser.Logic_op_clauseContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

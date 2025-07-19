@@ -108,6 +108,26 @@ public interface MethodNameParserListener extends ParseTreeListener {
 	 */
 	void exitSelect_clause(MethodNameParser.Select_clauseContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link MethodNameParser#ignore_reserved_word_clause}.
+	 * @param ctx the parse tree
+	 */
+	void enterIgnore_reserved_word_clause(MethodNameParser.Ignore_reserved_word_clauseContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MethodNameParser#ignore_reserved_word_clause}.
+	 * @param ctx the parse tree
+	 */
+	void exitIgnore_reserved_word_clause(MethodNameParser.Ignore_reserved_word_clauseContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MethodNameParser#dynamic_condition_clause}.
+	 * @param ctx the parse tree
+	 */
+	void enterDynamic_condition_clause(MethodNameParser.Dynamic_condition_clauseContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MethodNameParser#dynamic_condition_clause}.
+	 * @param ctx the parse tree
+	 */
+	void exitDynamic_condition_clause(MethodNameParser.Dynamic_condition_clauseContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link MethodNameParser#where_clause}.
 	 * @param ctx the parse tree
 	 */
@@ -138,16 +158,6 @@ public interface MethodNameParserListener extends ParseTreeListener {
 	 */
 	void exitCondition_clause(MethodNameParser.Condition_clauseContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#logic_op_clause}.
-	 * @param ctx the parse tree
-	 */
-	void enterLogic_op_clause(MethodNameParser.Logic_op_clauseContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#logic_op_clause}.
-	 * @param ctx the parse tree
-	 */
-	void exitLogic_op_clause(MethodNameParser.Logic_op_clauseContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link MethodNameParser#condition_item_clause}.
 	 * @param ctx the parse tree
 	 */
@@ -157,6 +167,16 @@ public interface MethodNameParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitCondition_item_clause(MethodNameParser.Condition_item_clauseContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MethodNameParser#logic_op_clause}.
+	 * @param ctx the parse tree
+	 */
+	void enterLogic_op_clause(MethodNameParser.Logic_op_clauseContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MethodNameParser#logic_op_clause}.
+	 * @param ctx the parse tree
+	 */
+	void exitLogic_op_clause(MethodNameParser.Logic_op_clauseContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MethodNameParser#comparison_op_clause}.
 	 * @param ctx the parse tree

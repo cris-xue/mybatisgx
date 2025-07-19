@@ -137,6 +137,13 @@ public class MethodNameParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> 
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
+	@Override public T visitField_condition_op_clause(MethodNameParser.Field_condition_op_clauseContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
 	@Override public T visitComparison_op_clause(MethodNameParser.Comparison_op_clauseContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}

@@ -178,7 +178,6 @@ public class MethodInfoHandler {
 
     public void methodNameParse(EntityInfo entityInfo, MethodInfo methodInfo, Class<?> methodDeclaringClass) {
         methodNameAstHandler.execute(entityInfo, methodInfo);
-
         // 条件实体只有非SimpleDao方法才会处理，SimpleDao只有findList会特殊处理
         if (methodDeclaringClass == SimpleDao.class) {
             String methodName = methodInfo.getMethodName();
@@ -187,7 +186,7 @@ public class MethodInfoHandler {
                 for (MethodParamInfo methodParamInfo : methodParamInfoList) {
                     Entity entity = methodParamInfo.getType().getAnnotation(Entity.class);
                     if (entity != null) {
-                        String entityCondition = entityCondition(methodInfo, methodParamInfo);
+                        String entityCondition = this.entityCondition(methodInfo, methodParamInfo);
                         methodNameAstHandler.execute(entityInfo, methodInfo, true, entityCondition);
                     }
                 }
@@ -195,15 +194,22 @@ public class MethodInfoHandler {
         } else {
             List<MethodParamInfo> methodParamInfoList = methodInfo.getMethodParamInfoList();
             for (MethodParamInfo methodParamInfo : methodParamInfoList) {
-                ConditionEntity isConditionEntity = methodParamInfo.getType().getAnnotation(ConditionEntity.class);
-                if (isConditionEntity != null) {
-                    String entityCondition = entityCondition(methodInfo, methodParamInfo);
-                    methodNameAstHandler.execute(entityInfo, methodInfo, true, entityCondition);
+                QueryEntity isQueryEntity = methodParamInfo.getType().getAnnotation(QueryEntity.class);
+                if (isQueryEntity != null) {
+                    String queryEntityCondition = this.entityCondition(methodInfo, methodParamInfo);
+                    methodNameAstHandler.execute(entityInfo, methodInfo, true, queryEntityCondition);
                 }
             }
         }
     }
 
+    /**
+     * 把实体字段转换成方法名
+     *
+     * @param methodInfo
+     * @param methodParamInfo
+     * @return
+     */
     private String entityCondition(MethodInfo methodInfo, MethodParamInfo methodParamInfo) {
         StringBuilder stringBuilder = new StringBuilder(methodInfo.getAction()).append("By");
         List<ColumnInfo> columnInfoList = methodParamInfo.getColumnInfoList();

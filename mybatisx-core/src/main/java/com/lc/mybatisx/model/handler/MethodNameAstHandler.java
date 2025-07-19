@@ -94,15 +94,15 @@ public class MethodNameAstHandler {
         List<ConditionInfo> conditionInfoList = new ArrayList<>();
         int childCount = whereClause.getChildCount();
         for (int i = 0; i < childCount; i++) {
-            ParseTree whereItem = whereClause.getChild(i);
-            if (whereItem instanceof MethodNameParser.Where_start_clauseContext) {
+            ParseTree whereChildItem = whereClause.getChild(i);
+            if (whereChildItem instanceof MethodNameParser.Where_start_clauseContext) {
                 if (i != 0) {
                     throw new RuntimeException("语法错误，条件必须以By开头");
                 }
-            } else if (whereItem instanceof MethodNameParser.Condition_clauseContext) {
+            } else if (whereChildItem instanceof MethodNameParser.Condition_clauseContext) {
                 ConditionInfo conditionInfo = new ConditionInfo();
                 conditionInfo.setIndex(i);
-                this.parseCondition(entityInfo, conditionInfo, conditionEntity, whereItem);
+                this.parseCondition(entityInfo, conditionInfo, conditionEntity, whereChildItem);
                 conditionInfoList.add(conditionInfo);
             } else {
                 throw new RuntimeException("不支持的语法");
@@ -130,6 +130,10 @@ public class MethodNameAstHandler {
                 conditionInfo.setConditionEntity(conditionEntity);
                 conditionInfo.setOrigin(parseTreeChild.getText());
                 conditionInfo.setLinkOp(TOKEN_MAP.get(token));
+            } else if (parseTreeChild instanceof MethodNameParser.Field_condition_op_clauseContext) {
+                String javaColumnName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, token);
+                conditionInfo.setConditionEntityJavaColumnName(javaColumnName);
+                parseConditionItem(entityInfo, conditionInfo, conditionEntity, parseTreeChild);
             } else if (parseTreeChild instanceof MethodNameParser.Field_clauseContext) {
                 String javaColumnName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, token);
                 ColumnInfo columnInfo = entityInfo.getColumnInfo(javaColumnName);

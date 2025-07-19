@@ -33,10 +33,10 @@ dynamic_condition_clause: (DYNAMIC_CONDITION)? ;
 where_clause: (where_start_clause (condition_clause)*)? ;
 where_start_clause: BY ;
 // NameLikeAndAgeEq
-condition_clause: condition_item_clause (logic_op_clause condition_item_clause)* ;
-logic_op_clause: AND | OR ;
+condition_clause: condition_item_clause ;
 // NameLike
-condition_item_clause: field_clause (comparison_op_clause)? ;
+condition_item_clause: logic_op_clause? field_clause comparison_op_clause? ;
+logic_op_clause: AND | OR ;
 comparison_op_clause: COMPARISON_OP ;
 
 // 分组

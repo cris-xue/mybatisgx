@@ -35,8 +35,10 @@ where_start_clause: BY ;
 // NameLikeAndAgeEq
 condition_clause: condition_item_clause ;
 // NameLike
-condition_item_clause: logic_op_clause? field_clause comparison_op_clause? ;
+condition_item_clause: logic_op_clause? field_condition_op_clause ;
 logic_op_clause: AND | OR ;
+// 解析方法名和实体字段
+field_condition_op_clause: field_clause comparison_op_clause? ;
 comparison_op_clause: COMPARISON_OP ;
 
 // 分组

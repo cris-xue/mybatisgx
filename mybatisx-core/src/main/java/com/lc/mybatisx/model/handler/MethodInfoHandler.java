@@ -86,6 +86,10 @@ public class MethodInfoHandler {
             MethodInfo methodInfo = new MethodInfo();
             methodInfo.setMethod(method);
             methodInfo.setMethodName(methodName);
+            QueryCondition queryCondition = method.getAnnotation(QueryCondition.class);
+            if (queryCondition != null) {
+                methodInfo.setQueryCondition(queryCondition.value());
+            }
             methodInfo.setDynamic(method.getAnnotation(Dynamic.class) != null);
             methodInfo.setBatch(method.getAnnotation(BatchOperation.class) != null);
             methodInfo.setMethodParamInfoList(methodParamInfoList);

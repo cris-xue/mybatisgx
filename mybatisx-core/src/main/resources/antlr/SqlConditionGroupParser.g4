@@ -14,16 +14,17 @@ condition_group_clause: condition_unit_clause* (logic_op_clause condition_unit_c
 condition_unit_clause: condition_clause | (LEFT_BRACKET condition_group_clause RIGHT_BRACKET) ;
 
 // NameLikeAndAgeEq
-condition_clause: (condition_item_clause)+ ;
+condition_clause: condition_item_clause ;
 // NameLikeAnd
-condition_item_clause:  field_condition_op_clause (logic_op_clause field_condition_op_clause)* ;
+condition_item_clause: logic_op_clause? field_condition_op_clause ;
 // NameLike
-field_condition_op_clause: field_clause (comparison_op_clause)? ;
-comparison_op_clause: COMPARISON_OP ;
+field_condition_op_clause: field_clause comparison_op_clause? ;
 
+where_start_clause: BY ;
 // 逻辑运算符
 logic_op_clause: AND | OR ;
-field_clause: FIELD+ ;
+field_clause: (FIELD | RESERVED_WORD)+ ;
+comparison_op_clause: COMPARISON_OP ;
 left_bracket_clause: LEFT_BRACKET ;
 right_bracket_clause: RIGHT_BRACKET ;
 // EOF(end of file)表示文件结束符，这个是Antlr中已经定义好的

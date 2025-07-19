@@ -14,7 +14,7 @@ end: EOF ;
 insert_statement: insert_clause dynamic_condition_clause ;
 insert_clause: INSERT_ACTION ignore_reserved_word_clause ;
 
-delete_statement: delete_clause where_clause ;
+delete_statement: delete_clause where_clause dynamic_condition_clause ;
 delete_clause: DELETE_ACTION ignore_reserved_word_clause ;
 
 update_statement: update_clause where_clause dynamic_condition_clause ;

@@ -23,6 +23,10 @@ public class MethodInfo {
      */
     private String methodName;
     /**
+     * 查询条件
+     */
+    private String queryCondition;
+    /**
      * 是否动态参数
      */
     private Boolean isDynamic = false;
@@ -73,6 +77,14 @@ public class MethodInfo {
 
     public void setMethodName(String methodName) {
         this.methodName = methodName;
+    }
+
+    public String getQueryCondition() {
+        return queryCondition;
+    }
+
+    public void setQueryCondition(String queryCondition) {
+        this.queryCondition = queryCondition;
     }
 
     public List<ConditionInfo> getConditionInfoList() {

@@ -20,7 +20,6 @@ condition_item_clause: logic_op_clause? field_condition_op_clause ;
 // NameLike
 field_condition_op_clause: field_clause comparison_op_clause? ;
 
-where_start_clause: BY ;
 // 逻辑运算符
 logic_op_clause: AND | OR ;
 field_clause: (FIELD | RESERVED_WORD)+ ;

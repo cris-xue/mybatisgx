@@ -9,14 +9,9 @@ options {
 sql_condition_statement: condition_group_clause end ;
 
 // 条件组：由多个条件单元和逻辑运算符组成
-condition_group_clause: condition_unit_clause* (logic_op_clause condition_unit_clause)* ;
+condition_group_clause: condition_clause* condition_clause* ;
 // 条件单元：单个条件 或 括号内的子组
-condition_unit_clause: condition_clause | (LEFT_BRACKET condition_group_clause RIGHT_BRACKET) ;
-
-// NameLikeAndAgeEq
-condition_clause: condition_item_clause ;
-// NameLikeAnd
-condition_item_clause: logic_op_clause? field_condition_op_clause ;
+condition_clause: logic_op_clause? (field_condition_op_clause | (LEFT_BRACKET condition_group_clause RIGHT_BRACKET)) ;
 // NameLike
 field_condition_op_clause: field_clause comparison_op_clause? ;
 

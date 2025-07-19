@@ -12,16 +12,19 @@ sql_statement: (insert_statement | delete_statement | update_statement | select_
 end: EOF ;
 
 insert_statement: insert_clause dynamic_condition_clause ;
-insert_clause: INSERT_ACTION IGNORED_LIST* ;
+insert_clause: INSERT_ACTION ignore_reserved_word_clause ;
 
 delete_statement: delete_clause where_clause ;
-delete_clause: DELETE_ACTION IGNORED_LIST* ;
+delete_clause: DELETE_ACTION ignore_reserved_word_clause ;
 
 update_statement: update_clause where_clause dynamic_condition_clause ;
-update_clause: UPDATE_ACTION IGNORED_LIST* ;
+update_clause: UPDATE_ACTION ignore_reserved_word_clause ;
 
 select_statement: select_clause where_clause group_clause order_clause ;
-select_clause: SELECT_ACTION IGNORED_LIST* ;
+select_clause: SELECT_ACTION ignore_reserved_word_clause ;
+
+// 忽略保留关键字
+ignore_reserved_word_clause: (RESERVED_WORD)*;
 
 // 动态条件
 dynamic_condition_clause: (DYNAMIC_CONDITION)? ;
@@ -48,4 +51,4 @@ order_op_direction_clause: ORDER_OP_DIRECTION ;
 // 聚合函数
 aggregate_function_clause: AGGREGATE_FUNCTION ;
 
-field_clause: (FIELD | IGNORED_LIST)+ ;
+field_clause: (FIELD | RESERVED_WORD)+ ;

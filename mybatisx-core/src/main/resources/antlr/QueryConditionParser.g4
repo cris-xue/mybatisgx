@@ -11,7 +11,7 @@ query_condition_statement: condition_group_clause end ;
 // 条件组：由多个条件单元和逻辑运算符组成
 condition_group_clause: condition_clause* ;
 // 条件单元：单个条件 或 括号内的子组
-condition_clause: logic_op_clause? (field_condition_op_clause | (LEFT_BRACKET condition_group_clause RIGHT_BRACKET)) ;
+condition_clause: logic_op_clause? (field_condition_op_clause | (left_bracket_clause condition_group_clause right_bracket_clause)) ;
 // NameLike
 field_condition_op_clause: field_clause comparison_op_clause? ;
 

@@ -14,17 +14,17 @@ public class ConditionInfo {
      */
     private String origin;
     /**
-     * By、And、Or
+     * 逻辑操作符【And、Or】
      */
-    private String linkOp;
+    private String logicOp;
     /**
      * user_name
      */
     private String dbColumnName;
     /**
-     * =、<=、!=
+     * 比较操作符【=、<=、!=】
      */
-    private String op = "=";
+    private String comparisonOp = "=";
     /**
      * [userName、Name]
      */
@@ -45,6 +45,18 @@ public class ConditionInfo {
      * 条件对应的方法中的参数
      */
     private List<String> paramName = new ArrayList<>();
+    /**
+     * 左括号
+     */
+    private String leftBracket;
+    /**
+     * 右括号
+     */
+    private String rightBracket;
+    /**
+     * 条件组信息，一个条件组包含多个条件，一个条件可能由一个条件组或者一个条件字段组成
+     */
+    private ConditionGroupInfo conditionGroupInfo;
 
     public ConditionInfo() {
     }
@@ -69,12 +81,12 @@ public class ConditionInfo {
         this.origin = origin;
     }
 
-    public String getLinkOp() {
-        return linkOp;
+    public String getLogicOp() {
+        return logicOp;
     }
 
-    public void setLinkOp(String linkOp) {
-        this.linkOp = linkOp;
+    public void setLogicOp(String logicOp) {
+        this.logicOp = logicOp;
     }
 
     public String getDbColumnName() {
@@ -85,12 +97,12 @@ public class ConditionInfo {
         this.dbColumnName = dbColumnName;
     }
 
-    public String getOp() {
-        return op;
+    public String getComparisonOp() {
+        return comparisonOp;
     }
 
-    public void setOp(String op) {
-        this.op = op;
+    public void setComparisonOp(String comparisonOp) {
+        this.comparisonOp = comparisonOp;
     }
 
     public String getJavaColumnName() {
@@ -139,5 +151,29 @@ public class ConditionInfo {
 
     public void setParamName(List<String> paramName) {
         this.paramName = paramName;
+    }
+
+    public String getLeftBracket() {
+        return leftBracket;
+    }
+
+    public void setLeftBracket(String leftBracket) {
+        this.leftBracket = leftBracket;
+    }
+
+    public String getRightBracket() {
+        return rightBracket;
+    }
+
+    public void setRightBracket(String rightBracket) {
+        this.rightBracket = rightBracket;
+    }
+
+    public ConditionGroupInfo getConditionGroupInfo() {
+        return conditionGroupInfo;
+    }
+
+    public void setConditionGroupInfo(ConditionGroupInfo conditionGroupInfo) {
+        this.conditionGroupInfo = conditionGroupInfo;
     }
 }

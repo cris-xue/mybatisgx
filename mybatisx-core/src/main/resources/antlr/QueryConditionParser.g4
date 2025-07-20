@@ -6,7 +6,7 @@ options {
     tokenVocab = QueryConditionLexer ;
 }
 
-sql_condition_statement: condition_group_clause end ;
+query_condition_statement: condition_group_clause end ;
 
 // 条件组：由多个条件单元和逻辑运算符组成
 condition_group_clause: condition_clause* ;

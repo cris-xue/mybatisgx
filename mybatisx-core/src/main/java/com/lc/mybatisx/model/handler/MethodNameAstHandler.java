@@ -40,13 +40,7 @@ public class MethodNameAstHandler {
     }
 
     public void execute(EntityInfo entityInfo, MethodInfo methodInfo) {
-        CharStream charStream = CharStreams.fromString(methodInfo.getMethodName());
-        MethodNameLexer methodNameLexer = new MethodNameLexer(charStream);
-        CommonTokenStream commonStream = new CommonTokenStream(methodNameLexer);
-        MethodNameParser methodNameParser = new MethodNameParser(commonStream);
-        ParseTree sqlStatementContext = methodNameParser.sql_statement();
-
-        getTokens(entityInfo, methodInfo, false, sqlStatementContext);
+        this.execute(entityInfo, methodInfo, false, methodInfo.getMethodName());
     }
 
     public void execute(EntityInfo entityInfo, MethodInfo methodInfo, Boolean conditionEntity, String methodName) {
@@ -55,8 +49,7 @@ public class MethodNameAstHandler {
         CommonTokenStream commonStream = new CommonTokenStream(methodNameLexer);
         MethodNameParser methodNameParser = new MethodNameParser(commonStream);
         ParseTree sqlStatementContext = methodNameParser.sql_statement();
-
-        getTokens(entityInfo, methodInfo, conditionEntity, sqlStatementContext);
+        this.getTokens(entityInfo, methodInfo, conditionEntity, sqlStatementContext);
     }
 
     private void getTokens(EntityInfo entityInfo, MethodInfo methodInfo, Boolean conditionEntity, ParseTree parseTree) {
@@ -129,11 +122,11 @@ public class MethodNameAstHandler {
             if (parseTreeChild instanceof MethodNameParser.Logic_op_clauseContext) {
                 conditionInfo.setConditionEntity(conditionEntity);
                 conditionInfo.setOrigin(parseTreeChild.getText());
-                conditionInfo.setLinkOp(TOKEN_MAP.get(token));
+                conditionInfo.setLogicOp(TOKEN_MAP.get(token));
             } else if (parseTreeChild instanceof MethodNameParser.Field_condition_op_clauseContext) {
                 String javaColumnName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, token);
                 conditionInfo.setConditionEntityJavaColumnName(javaColumnName);
-                parseConditionItem(entityInfo, conditionInfo, conditionEntity, parseTreeChild);
+                this.parseConditionItem(entityInfo, conditionInfo, conditionEntity, parseTreeChild);
             } else if (parseTreeChild instanceof MethodNameParser.Field_clauseContext) {
                 String javaColumnName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, token);
                 ColumnInfo columnInfo = entityInfo.getColumnInfo(javaColumnName);
@@ -143,7 +136,9 @@ public class MethodNameAstHandler {
                 conditionInfo.setDbColumnName(columnInfo.getDbColumnName());
                 conditionInfo.setJavaColumnName(columnInfo.getJavaColumnName());
             } else if (parseTreeChild instanceof MethodNameParser.Comparison_op_clauseContext) {
-                conditionInfo.setOp(TOKEN_MAP.get(token));
+                conditionInfo.setComparisonOp(TOKEN_MAP.get(token));
+            } else {
+                throw new RuntimeException("不支持的语法");
             }
         }
     }

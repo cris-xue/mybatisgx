@@ -24,7 +24,7 @@ import java.util.Map;
  * @author ccxuef
  * @date 2025/7/19 20:42
  */
-public class ConditionAstHandler {
+public class QueryConditionAstHandler {
 
     private static final Map<String, String> TOKEN_MAP = new HashMap<>();
 

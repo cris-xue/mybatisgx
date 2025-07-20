@@ -69,7 +69,11 @@ public class WhereTemplateHandler {
             ConditionInfo conditionInfo = conditionInfoList.get(i);
             ConditionGroupInfo conditionGroupInfo = conditionInfo.getConditionGroupInfo();
             if (conditionGroupInfo != null) {
+                // 处理分组的括号
+                trimElement.addText(conditionInfo.getLogicOp());
+                trimElement.addText(conditionInfo.getLeftBracket());
                 this.handleConditionGroup(entityInfo, methodInfo, whereElement, trimElement, conditionGroupInfo.getConditionInfoList());
+                trimElement.addText(conditionInfo.getRightBracket());
             } else {
                 ColumnInfo columnInfo = entityInfo.getColumnInfo(conditionInfo.getJavaColumnName());
                 Id id = columnInfo.getId();
@@ -155,10 +159,12 @@ public class WhereTemplateHandler {
     }
 
     private void whereCommon(Element whereElement, Element trimElement, MethodInfo methodInfo, ConditionInfo conditionInfo) {
+        String dbColumnName = conditionInfo.getDbColumnName();
         String javaColumnName = conditionInfo.getConditionEntity() ? conditionInfo.getConditionEntityJavaColumnName() : conditionInfo.getJavaColumnName();
+        String logicOp = conditionInfo.getLogicOp();
         String comparisonOp = conditionInfo.getComparisonOp();
         Element trimOrIfElement = whereOpDynamic(methodInfo.getDynamic(), trimElement, javaColumnName);
-        String conditionOp = String.format(" %s %s %s #{%s}", "and", conditionInfo.getDbColumnName(), comparisonOp, javaColumnName);
+        String conditionOp = String.format(" %s %s %s #{%s}", logicOp, dbColumnName, comparisonOp, javaColumnName);
         trimOrIfElement.addText(conditionOp);
     }
 
@@ -182,7 +188,7 @@ public class WhereTemplateHandler {
         bindElement.addAttribute("value", likeValue);
 
         Element trimOrIfElement = whereOpDynamic(methodInfo.getDynamic(), trimElement, javaColumnName);
-        String conditionOp = String.format(" %s %s %s #{%s}", "and", conditionInfo.getDbColumnName(), conditionInfo.getComparisonOp(), javaColumnName);
+        String conditionOp = String.format(" %s %s %s #{%s}", conditionInfo.getLogicOp(), conditionInfo.getDbColumnName(), conditionInfo.getComparisonOp(), javaColumnName);
         trimOrIfElement.addText(conditionOp);
     }
 
@@ -208,7 +214,7 @@ public class WhereTemplateHandler {
     private void whereBetween(Element whereElement, Element trimElement, MethodInfo methodInfo, ConditionInfo conditionInfo) {
         String javaColumnName = conditionInfo.getConditionEntity() ? conditionInfo.getConditionEntityJavaColumnName() : conditionInfo.getJavaColumnName();
         Element trimOrIfElement = whereOpDynamic(methodInfo.getDynamic(), trimElement, javaColumnName);
-        String conditionOp = String.format(" %s %s %s #{%s[0]} and #{%s[1]}", "and", conditionInfo.getDbColumnName(), conditionInfo.getComparisonOp(), javaColumnName, javaColumnName);
+        String conditionOp = String.format(" %s %s %s #{%s[0]} and #{%s[1]}", conditionInfo.getLogicOp(), conditionInfo.getDbColumnName(), conditionInfo.getComparisonOp(), javaColumnName, javaColumnName);
         trimOrIfElement.addText(conditionOp);
     }
 

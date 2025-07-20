@@ -220,11 +220,15 @@ public class QueryConditionParser extends Parser {
 		public Logic_op_clauseContext logic_op_clause() {
 			return getRuleContext(Logic_op_clauseContext.class,0);
 		}
-		public TerminalNode LEFT_BRACKET() { return getToken(QueryConditionParser.LEFT_BRACKET, 0); }
+		public Left_bracket_clauseContext left_bracket_clause() {
+			return getRuleContext(Left_bracket_clauseContext.class,0);
+		}
 		public Condition_group_clauseContext condition_group_clause() {
 			return getRuleContext(Condition_group_clauseContext.class,0);
 		}
-		public TerminalNode RIGHT_BRACKET() { return getToken(QueryConditionParser.RIGHT_BRACKET, 0); }
+		public Right_bracket_clauseContext right_bracket_clause() {
+			return getRuleContext(Right_bracket_clauseContext.class,0);
+		}
 		public Condition_clauseContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -275,11 +279,11 @@ public class QueryConditionParser extends Parser {
 				{
 				{
 				setState(33);
-				match(LEFT_BRACKET);
+				left_bracket_clause();
 				setState(34);
 				condition_group_clause();
 				setState(35);
-				match(RIGHT_BRACKET);
+				right_bracket_clause();
 				}
 				}
 				break;
@@ -684,18 +688,18 @@ public class QueryConditionParser extends Parser {
 		"\u0000\u0000\u0000\u001b\u0003\u0001\u0000\u0000\u0000\u001c\u001a\u0001"+
 		"\u0000\u0000\u0000\u001d\u001f\u0003\b\u0004\u0000\u001e\u001d\u0001\u0000"+
 		"\u0000\u0000\u001e\u001f\u0001\u0000\u0000\u0000\u001f%\u0001\u0000\u0000"+
-		"\u0000 &\u0003\u0006\u0003\u0000!\"\u0005\u0001\u0000\u0000\"#\u0003\u0002"+
-		"\u0001\u0000#$\u0005\u0002\u0000\u0000$&\u0001\u0000\u0000\u0000% \u0001"+
-		"\u0000\u0000\u0000%!\u0001\u0000\u0000\u0000&\u0005\u0001\u0000\u0000"+
-		"\u0000\')\u0003\n\u0005\u0000(*\u0003\f\u0006\u0000)(\u0001\u0000\u0000"+
-		"\u0000)*\u0001\u0000\u0000\u0000*\u0007\u0001\u0000\u0000\u0000+,\u0007"+
-		"\u0000\u0000\u0000,\t\u0001\u0000\u0000\u0000-/\u0007\u0001\u0000\u0000"+
-		".-\u0001\u0000\u0000\u0000/0\u0001\u0000\u0000\u00000.\u0001\u0000\u0000"+
-		"\u000001\u0001\u0000\u0000\u00001\u000b\u0001\u0000\u0000\u000023\u0005"+
-		"\n\u0000\u00003\r\u0001\u0000\u0000\u000045\u0005\u0001\u0000\u00005\u000f"+
-		"\u0001\u0000\u0000\u000067\u0005\u0002\u0000\u00007\u0011\u0001\u0000"+
-		"\u0000\u000089\u0005\u0000\u0000\u00019\u0013\u0001\u0000\u0000\u0000"+
-		"\u0005\u001a\u001e%)0";
+		"\u0000 &\u0003\u0006\u0003\u0000!\"\u0003\u000e\u0007\u0000\"#\u0003\u0002"+
+		"\u0001\u0000#$\u0003\u0010\b\u0000$&\u0001\u0000\u0000\u0000% \u0001\u0000"+
+		"\u0000\u0000%!\u0001\u0000\u0000\u0000&\u0005\u0001\u0000\u0000\u0000"+
+		"\')\u0003\n\u0005\u0000(*\u0003\f\u0006\u0000)(\u0001\u0000\u0000\u0000"+
+		")*\u0001\u0000\u0000\u0000*\u0007\u0001\u0000\u0000\u0000+,\u0007\u0000"+
+		"\u0000\u0000,\t\u0001\u0000\u0000\u0000-/\u0007\u0001\u0000\u0000.-\u0001"+
+		"\u0000\u0000\u0000/0\u0001\u0000\u0000\u00000.\u0001\u0000\u0000\u0000"+
+		"01\u0001\u0000\u0000\u00001\u000b\u0001\u0000\u0000\u000023\u0005\n\u0000"+
+		"\u00003\r\u0001\u0000\u0000\u000045\u0005\u0001\u0000\u00005\u000f\u0001"+
+		"\u0000\u0000\u000067\u0005\u0002\u0000\u00007\u0011\u0001\u0000\u0000"+
+		"\u000089\u0005\u0000\u0000\u00019\u0013\u0001\u0000\u0000\u0000\u0005"+
+		"\u001a\u001e%)0";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {

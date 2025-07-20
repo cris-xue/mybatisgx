@@ -22,13 +22,13 @@ public class QueryConditionParser extends Parser {
 		ORDER_OP_DIRECTION=13, AGGREGATE_FUNCTION=14, DYNAMIC_CONDITION=15, RESERVED_WORD=16, 
 		FIELD=17, WS=18;
 	public static final int
-		RULE_sql_condition_statement = 0, RULE_condition_group_clause = 1, RULE_condition_clause = 2, 
+		RULE_query_condition_statement = 0, RULE_condition_group_clause = 1, RULE_condition_clause = 2, 
 		RULE_field_condition_op_clause = 3, RULE_logic_op_clause = 4, RULE_field_clause = 5, 
 		RULE_comparison_op_clause = 6, RULE_left_bracket_clause = 7, RULE_right_bracket_clause = 8, 
 		RULE_end = 9;
 	private static String[] makeRuleNames() {
 		return new String[] {
-			"sql_condition_statement", "condition_group_clause", "condition_clause", 
+			"query_condition_statement", "condition_group_clause", "condition_clause", 
 			"field_condition_op_clause", "logic_op_clause", "field_clause", "comparison_op_clause", 
 			"left_bracket_clause", "right_bracket_clause", "end"
 		};
@@ -102,35 +102,35 @@ public class QueryConditionParser extends Parser {
 	}
 
 	@SuppressWarnings("CheckReturnValue")
-	public static class Sql_condition_statementContext extends ParserRuleContext {
+	public static class Query_condition_statementContext extends ParserRuleContext {
 		public Condition_group_clauseContext condition_group_clause() {
 			return getRuleContext(Condition_group_clauseContext.class,0);
 		}
 		public EndContext end() {
 			return getRuleContext(EndContext.class,0);
 		}
-		public Sql_condition_statementContext(ParserRuleContext parent, int invokingState) {
+		public Query_condition_statementContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_sql_condition_statement; }
+		@Override public int getRuleIndex() { return RULE_query_condition_statement; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof QueryConditionParserListener ) ((QueryConditionParserListener)listener).enterSql_condition_statement(this);
+			if ( listener instanceof QueryConditionParserListener ) ((QueryConditionParserListener)listener).enterQuery_condition_statement(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof QueryConditionParserListener ) ((QueryConditionParserListener)listener).exitSql_condition_statement(this);
+			if ( listener instanceof QueryConditionParserListener ) ((QueryConditionParserListener)listener).exitQuery_condition_statement(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof QueryConditionParserVisitor ) return ((QueryConditionParserVisitor<? extends T>)visitor).visitSql_condition_statement(this);
+			if ( visitor instanceof QueryConditionParserVisitor ) return ((QueryConditionParserVisitor<? extends T>)visitor).visitQuery_condition_statement(this);
 			else return visitor.visitChildren(this);
 		}
 	}
 
-	public final Sql_condition_statementContext sql_condition_statement() throws RecognitionException {
-		Sql_condition_statementContext _localctx = new Sql_condition_statementContext(_ctx, getState());
-		enterRule(_localctx, 0, RULE_sql_condition_statement);
+	public final Query_condition_statementContext query_condition_statement() throws RecognitionException {
+		Query_condition_statementContext _localctx = new Query_condition_statementContext(_ctx, getState());
+		enterRule(_localctx, 0, RULE_query_condition_statement);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{

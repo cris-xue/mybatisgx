@@ -17,13 +17,13 @@ public class QueryConditionParserBaseListener implements QueryConditionParserLis
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterSql_condition_statement(QueryConditionParser.Sql_condition_statementContext ctx) { }
+	@Override public void enterQuery_condition_statement(QueryConditionParser.Query_condition_statementContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitSql_condition_statement(QueryConditionParser.Sql_condition_statementContext ctx) { }
+	@Override public void exitQuery_condition_statement(QueryConditionParser.Query_condition_statementContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

@@ -41,7 +41,7 @@ FIELD
 WS
 
 rule names:
-sql_condition_statement
+query_condition_statement
 condition_group_clause
 condition_clause
 field_condition_op_clause

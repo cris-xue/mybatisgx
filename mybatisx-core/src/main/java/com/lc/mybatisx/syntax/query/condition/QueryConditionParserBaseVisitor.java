@@ -18,7 +18,7 @@ public class QueryConditionParserBaseVisitor<T> extends AbstractParseTreeVisitor
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitSql_condition_statement(QueryConditionParser.Sql_condition_statementContext ctx) { return visitChildren(ctx); }
+	@Override public T visitQuery_condition_statement(QueryConditionParser.Query_condition_statementContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *

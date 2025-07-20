@@ -8,15 +8,15 @@ import org.antlr.v4.runtime.tree.ParseTreeListener;
  */
 public interface QueryConditionParserListener extends ParseTreeListener {
 	/**
-	 * Enter a parse tree produced by {@link QueryConditionParser#sql_condition_statement}.
+	 * Enter a parse tree produced by {@link QueryConditionParser#query_condition_statement}.
 	 * @param ctx the parse tree
 	 */
-	void enterSql_condition_statement(QueryConditionParser.Sql_condition_statementContext ctx);
+	void enterQuery_condition_statement(QueryConditionParser.Query_condition_statementContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link QueryConditionParser#sql_condition_statement}.
+	 * Exit a parse tree produced by {@link QueryConditionParser#query_condition_statement}.
 	 * @param ctx the parse tree
 	 */
-	void exitSql_condition_statement(QueryConditionParser.Sql_condition_statementContext ctx);
+	void exitQuery_condition_statement(QueryConditionParser.Query_condition_statementContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link QueryConditionParser#condition_group_clause}.
 	 * @param ctx the parse tree

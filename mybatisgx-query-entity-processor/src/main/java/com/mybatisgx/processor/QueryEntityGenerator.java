@@ -27,17 +27,16 @@ public class QueryEntityGenerator {
 
         // 获取实体类信息
         String entityName = entityElement.getSimpleName().toString();
-        String packageName = processingEnv.getElementUtils()
-                .getPackageOf(entityElement).getQualifiedName().toString();
+        String packageName = processingEnv.getElementUtils().getPackageOf(entityElement).getQualifiedName().toString();
         String queryClassName = entityName + "Query";
-        String queryPackageName = packageName + ".query";
+        String queryPackageName = packageName;
 
         // 创建类构建器
         TypeSpec.Builder classBuilder = TypeSpec.classBuilder(queryClassName)
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(ClassName.get(
-                        "com.mybatisgx.core.annotation",
-                        "ConditionEntity"
+                        "com.lc.mybatisx.annotation",
+                        "QueryEntity"
                 )).build());
 
         // 添加Lombok注解
@@ -59,14 +58,10 @@ public class QueryEntityGenerator {
         TypeSpec queryEntity = classBuilder.build();
 
         // 写入文件
-        JavaFile javaFile = JavaFile.builder(queryPackageName, queryEntity)
-                .indent("    ")
-                .build();
+        JavaFile javaFile = JavaFile.builder(queryPackageName, queryEntity).indent("    ").build();
 
         // 写入生成的源码
-        JavaFileObject sourceFile = processingEnv.getFiler().createSourceFile(
-                queryPackageName + "." + queryClassName
-        );
+        JavaFileObject sourceFile = processingEnv.getFiler().createSourceFile(queryPackageName + "." + queryClassName);
 
         try (Writer writer = sourceFile.openWriter()) {
             javaFile.writeTo(writer);
@@ -82,18 +77,18 @@ public class QueryEntityGenerator {
             String queryFieldName = fieldName + suffix;
             String operator = suffixToOperator(suffix);
 
-            AnnotationSpec.Builder annotationBuilder = AnnotationSpec.builder(
+            /*AnnotationSpec.Builder annotationBuilder = AnnotationSpec.builder(
                     ClassName.get("com.mybatisgx.core.annotation", "QueryField")
-            ).addMember("operator", "$S", operator);
+            ).addMember("operator", "$S", operator);*/
 
             // 特殊处理空值检查
             if (suffix.equals("IsNull") || suffix.equals("IsNotNull")) {
-                annotationBuilder.addMember("ignoreNull", "false");
+                // annotationBuilder.addMember("ignoreNull", "false");
             }
 
             FieldSpec fieldSpec = FieldSpec.builder(fieldType, queryFieldName)
                     .addModifiers(Modifier.PRIVATE)
-                    .addAnnotation(annotationBuilder.build())
+                    // .addAnnotation(annotationBuilder.build())
                     .build();
 
             builder.addField(fieldSpec);

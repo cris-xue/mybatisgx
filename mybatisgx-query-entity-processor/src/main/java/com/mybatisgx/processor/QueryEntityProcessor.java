@@ -32,16 +32,12 @@ public class QueryEntityProcessor extends AbstractProcessor {
                     TypeElement typeElement = (TypeElement) element;
 
                     // 2. 生成查询实体
-                    QueryEntityGenerator.generateQueryEntity(
-                            typeElement,
-                            processingEnv
-                    );
+                    QueryEntityGenerator.generateQueryEntity(typeElement, processingEnv);
                 }
             }
             return true;
         } catch (Exception e) {
-            messager.printMessage(Diagnostic.Kind.ERROR,
-                    "Query entity generation failed: " + e.getMessage());
+            messager.printMessage(Diagnostic.Kind.ERROR, "Query entity generation failed: " + e.getMessage());
             return false;
         }
     }

@@ -70,8 +70,7 @@ public class WhereTemplateHandler {
             ConditionGroupInfo conditionGroupInfo = conditionInfo.getConditionGroupInfo();
             if (conditionGroupInfo != null) {
                 // 处理分组的括号
-                trimElement.addText(conditionInfo.getLogicOp());
-                trimElement.addText(conditionInfo.getLeftBracket());
+                trimElement.addText(String.format(" %s %s", this.getLogicOp(conditionInfo), conditionInfo.getLeftBracket()));
                 this.handleConditionGroup(entityInfo, methodInfo, whereElement, trimElement, conditionGroupInfo.getConditionInfoList());
                 trimElement.addText(conditionInfo.getRightBracket());
             } else {
@@ -161,7 +160,7 @@ public class WhereTemplateHandler {
     private void whereCommon(Element whereElement, Element trimElement, MethodInfo methodInfo, ConditionInfo conditionInfo) {
         String dbColumnName = conditionInfo.getDbColumnName();
         String javaColumnName = conditionInfo.getConditionEntity() ? conditionInfo.getConditionEntityJavaColumnName() : conditionInfo.getJavaColumnName();
-        String logicOp = conditionInfo.getLogicOp();
+        String logicOp = this.getLogicOp(conditionInfo);
         String comparisonOp = conditionInfo.getComparisonOp();
         Element trimOrIfElement = whereOpDynamic(methodInfo.getDynamic(), trimElement, javaColumnName);
         String conditionOp = String.format(" %s %s %s #{%s}", logicOp, dbColumnName, comparisonOp, javaColumnName);
@@ -188,7 +187,7 @@ public class WhereTemplateHandler {
         bindElement.addAttribute("value", likeValue);
 
         Element trimOrIfElement = whereOpDynamic(methodInfo.getDynamic(), trimElement, javaColumnName);
-        String conditionOp = String.format(" %s %s %s #{%s}", conditionInfo.getLogicOp(), conditionInfo.getDbColumnName(), conditionInfo.getComparisonOp(), javaColumnName);
+        String conditionOp = String.format(" %s %s %s #{%s}", this.getLogicOp(conditionInfo), conditionInfo.getDbColumnName(), conditionInfo.getComparisonOp(), javaColumnName);
         trimOrIfElement.addText(conditionOp);
     }
 
@@ -199,7 +198,7 @@ public class WhereTemplateHandler {
 
         List<MethodParamInfo> methodParamInfoList = conditionInfo.getMethodParamInfoList();
         String comparisonOp = conditionInfo.getComparisonOp();
-        trimOrIfElement.addText(String.format(" %s %s %s ", conditionInfo.getLogicOp(), conditionInfo.getDbColumnName(), comparisonOp));
+        trimOrIfElement.addText(String.format(" %s %s %s ", this.getLogicOp(conditionInfo), conditionInfo.getDbColumnName(), comparisonOp));
 
         Element foreachElement = trimOrIfElement.addElement("foreach");
         foreachElement.addAttribute("index", "index");
@@ -214,7 +213,7 @@ public class WhereTemplateHandler {
     private void whereBetween(Element whereElement, Element trimElement, MethodInfo methodInfo, ConditionInfo conditionInfo) {
         String javaColumnName = conditionInfo.getConditionEntity() ? conditionInfo.getConditionEntityJavaColumnName() : conditionInfo.getJavaColumnName();
         Element trimOrIfElement = whereOpDynamic(methodInfo.getDynamic(), trimElement, javaColumnName);
-        String conditionOp = String.format(" %s %s %s #{%s[0]} and #{%s[1]}", conditionInfo.getLogicOp(), conditionInfo.getDbColumnName(), conditionInfo.getComparisonOp(), javaColumnName, javaColumnName);
+        String conditionOp = String.format(" %s %s %s #{%s[0]} and #{%s[1]}", this.getLogicOp(conditionInfo), conditionInfo.getDbColumnName(), conditionInfo.getComparisonOp(), javaColumnName, javaColumnName);
         trimOrIfElement.addText(conditionOp);
     }
 
@@ -246,5 +245,19 @@ public class WhereTemplateHandler {
             dynamicElement = ifElement;
         }
         return dynamicElement;
+    }
+
+    /**
+     * 获取逻辑运算符
+     *
+     * @param conditionInfo
+     * @return
+     */
+    private String getLogicOp(ConditionInfo conditionInfo) {
+        String logicOp = conditionInfo.getLogicOp();
+        if (StringUtils.isBlank(logicOp)) {
+            return "";
+        }
+        return logicOp;
     }
 }

@@ -237,7 +237,7 @@ public class MethodInfoHandler {
             // 处理查询条件和参数之间的关系，需要对特殊操作符进行处理，如between
             Integer index = conditionInfo.getIndex();
             String javaColumnName = conditionInfo.getJavaColumnName();
-            String op = conditionInfo.getOp();
+            String comparisonOp = conditionInfo.getComparisonOp();
 
             MethodParamInfo methodParamInfo = methodInfo.getMethodParamInfo("arg" + index);
             if (methodParamInfo == null) {

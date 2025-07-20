@@ -30,9 +30,9 @@ public class ConditionInfo {
      */
     private String javaColumnName;
     /**
-     * 条件实体
+     * 是否是查询实体
      */
-    private Boolean conditionEntity = false;
+    private Boolean queryEntity = false;
     /**
      * 原始java字段
      */
@@ -113,12 +113,12 @@ public class ConditionInfo {
         this.javaColumnName = javaColumnName;
     }
 
-    public Boolean getConditionEntity() {
-        return conditionEntity;
+    public Boolean getQueryEntity() {
+        return queryEntity;
     }
 
-    public void setConditionEntity(Boolean conditionEntity) {
-        this.conditionEntity = conditionEntity;
+    public void setQueryEntity(Boolean queryEntity) {
+        this.queryEntity = queryEntity;
     }
 
     public String getConditionEntityJavaColumnName() {

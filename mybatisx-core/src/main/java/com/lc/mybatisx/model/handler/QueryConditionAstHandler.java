@@ -1,16 +1,15 @@
 package com.lc.mybatisx.model.handler;
 
 import com.google.common.base.CaseFormat;
-import com.lc.mybatisx.model.ColumnInfo;
-import com.lc.mybatisx.model.ConditionInfo;
-import com.lc.mybatisx.model.EntityInfo;
-import com.lc.mybatisx.model.MethodInfo;
+import com.lc.mybatisx.model.*;
 import com.lc.mybatisx.syntax.query.condition.QueryConditionLexer;
 import com.lc.mybatisx.syntax.query.condition.QueryConditionParser;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,6 +24,7 @@ import java.util.Map;
  */
 public class QueryConditionAstHandler {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(QueryConditionAstHandler.class);
     private static final Map<String, String> TOKEN_MAP = new HashMap<>();
 
     static {
@@ -45,11 +45,11 @@ public class QueryConditionAstHandler {
     }
 
     public void execute(EntityInfo entityInfo, MethodInfo methodInfo) {
-        this.execute(entityInfo, methodInfo, false, methodInfo.getMethodName());
+        this.execute(entityInfo, methodInfo, false, methodInfo.getQueryCondition());
     }
 
-    public void execute(EntityInfo entityInfo, MethodInfo methodInfo, Boolean conditionEntity, String methodName) {
-        CharStream charStream = CharStreams.fromString(methodName);
+    public void execute(EntityInfo entityInfo, MethodInfo methodInfo, Boolean conditionEntity, String queryCondition) {
+        CharStream charStream = CharStreams.fromString(queryCondition);
         QueryConditionLexer methodNameLexer = new QueryConditionLexer(charStream);
         CommonTokenStream commonStream = new CommonTokenStream(methodNameLexer);
         QueryConditionParser methodNameParser = new QueryConditionParser(commonStream);
@@ -101,7 +101,7 @@ public class QueryConditionAstHandler {
             } else if (parseTreeChild instanceof QueryConditionParser.Left_bracket_clauseContext) {
                 conditionInfo.setLeftBracket("(");
             } else if (parseTreeChild instanceof QueryConditionParser.Right_bracket_clauseContext) {
-                conditionInfo.setLeftBracket(")");
+                conditionInfo.setRightBracket(")");
             } else if (parseTreeChild instanceof QueryConditionParser.Field_condition_op_clauseContext) {
                 String javaColumnName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, token);
                 conditionInfo.setConditionEntityJavaColumnName(javaColumnName);
@@ -117,8 +117,12 @@ public class QueryConditionAstHandler {
             } else if (parseTreeChild instanceof QueryConditionParser.Comparison_op_clauseContext) {
                 conditionInfo.setComparisonOp(TOKEN_MAP.get(token));
             } else if (parseTreeChild instanceof QueryConditionParser.Condition_group_clauseContext) {
-                this.parseConditionGroupClause(entityInfo, conditionEntity, parseTreeChild);
+                List<ConditionInfo> conditionInfoList = this.parseConditionGroupClause(entityInfo, conditionEntity, parseTreeChild);
+                ConditionGroupInfo conditionGroupInfo = new ConditionGroupInfo();
+                conditionGroupInfo.setConditionInfoList(conditionInfoList);
+                conditionInfo.setConditionGroupInfo(conditionGroupInfo);
             } else {
+                LOGGER.error("不支持的语法:{} -- {}", parseTree.getText(), token);
                 throw new RuntimeException("不支持的语法");
             }
         }

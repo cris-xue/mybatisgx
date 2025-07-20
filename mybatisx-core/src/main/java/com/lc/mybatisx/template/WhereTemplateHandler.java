@@ -18,20 +18,25 @@ public class WhereTemplateHandler {
         trimElement.addAttribute("prefix", "");
         trimElement.addAttribute("suffix", "");
         trimElement.addAttribute("prefixOverrides", "AND|OR|and|or");
-        methodInfo.getConditionInfoList().forEach(conditionInfo -> {
-            ColumnInfo columnInfo = entityInfo.getColumnInfo(conditionInfo.getJavaColumnName());
-            Id id = columnInfo.getId();
-            LogicDelete logicDelete = columnInfo.getLogicDelete();
-            if (id != null) {
-                processId(trimElement, entityInfo, methodInfo.getDynamic());
-                return;
+        this.handleConditionGroup(entityInfo, methodInfo, whereElement, trimElement, methodInfo.getConditionInfoList());
+        /*methodInfo.getConditionInfoList().forEach(conditionInfo -> {
+            ConditionGroupInfo conditionGroupInfo = conditionInfo.getConditionGroupInfo();
+            if (conditionGroupInfo != null) {
+                List<ConditionInfo> conditionInfoList = conditionGroupInfo.getConditionInfoList();
+            } else {
+                ColumnInfo columnInfo = entityInfo.getColumnInfo(conditionInfo.getJavaColumnName());
+                Id id = columnInfo.getId();
+                LogicDelete logicDelete = columnInfo.getLogicDelete();
+                if (id != null) {
+                    processId(trimElement, entityInfo, methodInfo.getDynamic());
+                    return;
+                }
+                if (logicDelete != null) {
+                    return;
+                }
+                this.processCondition(methodInfo, conditionInfo, whereElement, trimElement);
             }
-            if (logicDelete != null) {
-                return;
-            }
-
-            this.processCondition(methodInfo, conditionInfo, whereElement, trimElement);
-        });
+        });*/
 
         // 查询不需要乐观锁版本条件
         ColumnInfo lockColumnInfo = entityInfo.getLockColumnInfo();
@@ -50,6 +55,36 @@ public class WhereTemplateHandler {
         }
     }
 
+    /**
+     * 处理条件组
+     *
+     * @param entityInfo
+     * @param methodInfo
+     * @param whereElement
+     * @param trimElement
+     * @param conditionInfoList
+     */
+    private void handleConditionGroup(EntityInfo entityInfo, MethodInfo methodInfo, Element whereElement, Element trimElement, List<ConditionInfo> conditionInfoList) {
+        for (int i = 0; i < conditionInfoList.size(); i++) {
+            ConditionInfo conditionInfo = conditionInfoList.get(i);
+            ConditionGroupInfo conditionGroupInfo = conditionInfo.getConditionGroupInfo();
+            if (conditionGroupInfo != null) {
+                this.handleConditionGroup(entityInfo, methodInfo, whereElement, trimElement, conditionGroupInfo.getConditionInfoList());
+            } else {
+                ColumnInfo columnInfo = entityInfo.getColumnInfo(conditionInfo.getJavaColumnName());
+                Id id = columnInfo.getId();
+                LogicDelete logicDelete = columnInfo.getLogicDelete();
+                if (id != null) {
+                    processId(trimElement, entityInfo, methodInfo.getDynamic());
+                    return;
+                }
+                if (logicDelete != null) {
+                    return;
+                }
+                this.processCondition(methodInfo, conditionInfo, whereElement, trimElement);
+            }
+        }
+    }
 
     private void processId(Element trimElement, EntityInfo entityInfo, Boolean dynamic) {
         List<ColumnInfo> idColumnInfoList = entityInfo.getIdColumnInfoList();

@@ -40,6 +40,7 @@ public class MethodInfoHandler {
 
     private ColumnInfoHandler columnInfoHandler = new ColumnInfoHandler();
     private MethodNameAstHandler methodNameAstHandler = new MethodNameAstHandler();
+    private QueryConditionAstHandler queryConditionAstHandler = new QueryConditionAstHandler();
     private ResultMapInfoHandler resultMapInfoHandler = new ResultMapInfoHandler();
 
     public List<MethodInfo> execute(MapperInfo mapperInfo, Class<?> interfaceClass) {
@@ -86,17 +87,19 @@ public class MethodInfoHandler {
             MethodInfo methodInfo = new MethodInfo();
             methodInfo.setMethod(method);
             methodInfo.setMethodName(methodName);
-            QueryCondition queryCondition = method.getAnnotation(QueryCondition.class);
-            if (queryCondition != null) {
-                methodInfo.setQueryCondition(queryCondition.value());
-            }
             methodInfo.setDynamic(method.getAnnotation(Dynamic.class) != null);
             methodInfo.setBatch(method.getAnnotation(BatchOperation.class) != null);
             methodInfo.setMethodParamInfoList(methodParamInfoList);
             methodInfo.setMethodReturnInfo(methodReturnInfo);
 
             // 方法名解析
-            methodNameParse(mapperInfo.getEntityInfo(), methodInfo, methodDeclaringClass);
+            this.methodNameParse(mapperInfo.getEntityInfo(), methodInfo, methodDeclaringClass);
+            // 方法条件解析
+            QueryCondition queryCondition = method.getAnnotation(QueryCondition.class);
+            if (queryCondition != null) {
+                methodInfo.setQueryCondition(queryCondition.value());
+                this.queryConditionParse(mapperInfo.getEntityInfo(), methodInfo);
+            }
 
             String resultMapId = resultMapInfoHandler.execute(mapperInfo, methodInfo);
             methodInfo.setResultMapId(resultMapId);
@@ -203,6 +206,11 @@ public class MethodInfoHandler {
         }
     }
 
+    public void queryConditionParse(EntityInfo entityInfo, MethodInfo methodInfo) {
+        methodInfo.setConditionInfoList(new ArrayList());
+        this.queryConditionAstHandler.execute(entityInfo, methodInfo);
+    }
+
     /**
      * 把实体字段转换成方法名
      *
@@ -231,27 +239,35 @@ public class MethodInfoHandler {
      */
     public void handleConditionParamInfo(MethodInfo methodInfo) {
         List<ConditionInfo> conditionInfoList = methodInfo.getConditionInfoList();
+        this.handleConditionInfo(methodInfo, conditionInfoList);
+    }
+
+    private void handleConditionInfo(MethodInfo methodInfo, List<ConditionInfo> conditionInfoList) {
         for (int i = 0; i < conditionInfoList.size(); i++) {
             ConditionInfo conditionInfo = conditionInfoList.get(i);
+            ConditionGroupInfo conditionGroupInfo = conditionInfo.getConditionGroupInfo();
+            if (conditionGroupInfo != null) {
+                this.handleConditionInfo(methodInfo, conditionGroupInfo.getConditionInfoList());
+            } else {
+                // 处理查询条件和参数之间的关系，需要对特殊操作符进行处理，如between
+                Integer index = conditionInfo.getIndex();
+                String javaColumnName = conditionInfo.getJavaColumnName();
+                String comparisonOp = conditionInfo.getComparisonOp();
 
-            // 处理查询条件和参数之间的关系，需要对特殊操作符进行处理，如between
-            Integer index = conditionInfo.getIndex();
-            String javaColumnName = conditionInfo.getJavaColumnName();
-            String comparisonOp = conditionInfo.getComparisonOp();
-
-            MethodParamInfo methodParamInfo = methodInfo.getMethodParamInfo("arg" + index);
-            if (methodParamInfo == null) {
-                methodParamInfo = methodInfo.getMethodParamInfo(javaColumnName);
+                MethodParamInfo methodParamInfo = methodInfo.getMethodParamInfo("arg" + index);
+                if (methodParamInfo == null) {
+                    methodParamInfo = methodInfo.getMethodParamInfo(javaColumnName);
+                }
+                if (methodParamInfo == null) {
+                    methodParamInfo = methodInfo.getMethodParamInfo(javaColumnName.toLowerCase());
+                }
+                if (methodParamInfo == null) {
+                    // TODO 这里还需校验条件实体的参数    暂时先不校验
+                    // throw new RuntimeException("查询条件没有对应的参数");
+                    continue;
+                }
+                conditionInfo.addMethodParamInfo(methodParamInfo);
             }
-            if (methodParamInfo == null) {
-                methodParamInfo = methodInfo.getMethodParamInfo(javaColumnName.toLowerCase());
-            }
-            if (methodParamInfo == null) {
-                // TODO 这里还需校验条件实体的参数    暂时先不校验
-                // throw new RuntimeException("查询条件没有对应的参数");
-                continue;
-            }
-            conditionInfo.addMethodParamInfo(methodParamInfo);
         }
     }
 

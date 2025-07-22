@@ -105,6 +105,8 @@ public class ResultMapSubQueryTemplateHandler {
                 this.subQuery(resultMapAssociationInfo, resultMapElement, refResultMapXNodeMap);
             } else if (associationEntityInfo.getLoadStrategy() == LoadStrategy.JOIN) {
                 this.joinQuery(resultMapAssociationInfo, resultMapElement, refResultMapXNodeMap);
+            } else {
+                throw new RuntimeException("LoadStrategy is error");
             }
         });
         return refResultMapXNodeMap;
@@ -167,7 +169,12 @@ public class ResultMapSubQueryTemplateHandler {
                 refResultMapXNodeMap.putAll(subXNodeMap);
             }
         } else if (associationType == 2) {
-
+            Element resultMapCollectionElement = this.joinCollectionColumnElement(resultMapElement, resultMapAssociationInfo);
+            this.addColumnElement(resultMapCollectionElement, resultMapAssociationInfo.getColumnInfoList());
+            Map<String, XNode> subXNodeMap = this.addAssociationElement(resultMapCollectionElement, resultMapAssociationInfo.getResultMapAssociationInfoList());
+            if (ObjectUtils.isNotEmpty(subXNodeMap)) {
+                refResultMapXNodeMap.putAll(subXNodeMap);
+            }
         } else {
             throw new RuntimeException(columnInfo.getJavaType() + "没有关联注解");
         }
@@ -205,6 +212,15 @@ public class ResultMapSubQueryTemplateHandler {
         resultMapAssociationElement.addAttribute("fetchType", associationEntityInfo.getFetch().toLowerCase());
         resultMapAssociationElement.addAttribute("select", resultMapAssociationInfo.getSelect());
         // resultMapAssociationElement.addAttribute("resultMap", resultMapAssociationInfo.getResultMapId());
+        return resultMapAssociationElement;
+    }
+
+    private Element joinCollectionColumnElement(Element resultMapElement, ResultMapAssociationInfo resultMapAssociationInfo) {
+        ColumnInfo columnInfo = resultMapAssociationInfo.getColumnInfo();
+        Element resultMapAssociationElement = resultMapElement.addElement("collection");
+        resultMapAssociationElement.addAttribute("property", columnInfo.getJavaColumnName());
+        resultMapAssociationElement.addAttribute("javaType", columnInfo.getContainerTypeName());
+        resultMapAssociationElement.addAttribute("ofType", columnInfo.getJavaTypeName());
         return resultMapAssociationElement;
     }
 

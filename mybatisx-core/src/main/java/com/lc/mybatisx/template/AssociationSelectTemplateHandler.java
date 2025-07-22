@@ -29,7 +29,7 @@ public class AssociationSelectTemplateHandler {
         Map<String, XNode> totalXNodeMap = new HashMap();
         List<ResultMapInfo> resultMapInfoList = mapperInfo.getResultMapInfoList();
         resultMapInfoList.forEach(resultMapInfo -> {
-            Map<String, XNode> xNodeMap = this.buildOneToOne(resultMapInfo.getResultMapAssociationInfoList());
+            Map<String, XNode> xNodeMap = this.buildSelect(resultMapInfo.getResultMapAssociationInfoList());
             if (ObjectUtils.isNotEmpty(xNodeMap)) {
                 totalXNodeMap.putAll(xNodeMap);
             }
@@ -37,13 +37,13 @@ public class AssociationSelectTemplateHandler {
         return totalXNodeMap;
     }
 
-    private Map<String, XNode> buildOneToOne(List<ResultMapAssociationInfo> resultMapAssociationInfoList) {
+    private Map<String, XNode> buildSelect(List<ResultMapAssociationInfo> resultMapAssociationInfoList) {
         Map<String, XNode> xNodeMap = new HashMap();
         for (int i = 0; i < resultMapAssociationInfoList.size(); i++) {
             ResultMapAssociationInfo resultMapAssociationInfo = resultMapAssociationInfoList.get(i);
             List<ResultMapAssociationInfo> subResultMapAssociationInfoList = resultMapAssociationInfo.getResultMapAssociationInfoList();
             if (ObjectUtils.isNotEmpty(subResultMapAssociationInfoList)) {
-                Map<String, XNode> subXNodeMap = this.buildOneToOne(subResultMapAssociationInfoList);
+                Map<String, XNode> subXNodeMap = this.buildSelect(subResultMapAssociationInfoList);
                 if (ObjectUtils.isNotEmpty(subXNodeMap)) {
                     xNodeMap.putAll(subXNodeMap);
                 }

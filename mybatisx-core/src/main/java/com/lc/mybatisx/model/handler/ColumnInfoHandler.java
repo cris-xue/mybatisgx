@@ -108,6 +108,11 @@ public class ColumnInfoHandler {
         JoinColumn joinColumn = field.getAnnotation(JoinColumn.class);
         JoinColumns joinColumns = field.getAnnotation(JoinColumns.class);
         JoinTable joinTable = field.getAnnotation(JoinTable.class);
+
+        if (StringUtils.isBlank(manyToMany.mappedBy()) && joinTable == null) {
+            throw new RuntimeException("many to many association must have mappedBy or joinTable");
+        }
+
         List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = new ArrayList();
         List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = new ArrayList();
         if (joinColumn != null) {

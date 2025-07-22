@@ -28,4 +28,11 @@ public @interface OneToMany {
      * @return
      */
     String mappedBy() default "";
+
+    /**
+     * 加载策略
+     *
+     * @return
+     */
+    LoadStrategy loadStrategy() default LoadStrategy.SUB;
 }

@@ -160,41 +160,14 @@ public class ResultMapSubQueryTemplateHandler {
         AssociationEntityInfo associationEntityInfo = columnInfo.getAssociationEntityInfo();
         Integer associationType = this.getAssociationType(associationEntityInfo);
         if (associationType == 1) {
-            this.associationColumnElement(resultMapElement, resultMapAssociationInfo);
-
-            Document document = DocumentHelper.createDocument();
-            Element refResultMapElement = this.addResultMapElement(document, resultMapAssociationInfo);
-            this.addColumnElement(refResultMapElement, resultMapAssociationInfo.getColumnInfoList());
-            List<ResultMapAssociationInfo> subResultMapAssociationInfoList = resultMapAssociationInfo.getResultMapAssociationInfoList();
-            if (ObjectUtils.isNotEmpty(subResultMapAssociationInfoList)) {
-                Map<String, XNode> subXNodeMap = this.addAssociationElement(refResultMapElement, subResultMapAssociationInfoList);
-                if (ObjectUtils.isNotEmpty(subXNodeMap)) {
-                    refResultMapXNodeMap.putAll(subXNodeMap);
-                }
+            Element resultMapAssociationElement = this.joinAssociationColumnElement(resultMapElement, resultMapAssociationInfo);
+            this.addColumnElement(resultMapAssociationElement, resultMapAssociationInfo.getColumnInfoList());
+            Map<String, XNode> subXNodeMap = this.addAssociationElement(resultMapAssociationElement, resultMapAssociationInfo.getResultMapAssociationInfoList());
+            if (ObjectUtils.isNotEmpty(subXNodeMap)) {
+                refResultMapXNodeMap.putAll(subXNodeMap);
             }
-
-            String resultMapXmlString = XmlUtils.writeString(document);
-            XPathParser xPathParser = XmlUtils.processXml(resultMapXmlString);
-            XNode xNode = xPathParser.evalNode("/mapper/resultMap");
-            refResultMapXNodeMap.put(resultMapAssociationInfo.getResultMapId(), xNode);
         } else if (associationType == 2) {
-            this.collectionColumnElement(resultMapElement, resultMapAssociationInfo);
 
-            Document document = DocumentHelper.createDocument();
-            Element refResultMapElement = this.addResultMapElement(document, resultMapAssociationInfo);
-            this.addColumnElement(refResultMapElement, resultMapAssociationInfo.getColumnInfoList());
-            List<ResultMapAssociationInfo> subResultMapAssociationInfoList = resultMapAssociationInfo.getResultMapAssociationInfoList();
-            if (ObjectUtils.isNotEmpty(subResultMapAssociationInfoList)) {
-                Map<String, XNode> subXNodeMap = this.addAssociationElement(refResultMapElement, subResultMapAssociationInfoList);
-                if (ObjectUtils.isNotEmpty(subXNodeMap)) {
-                    refResultMapXNodeMap.putAll(subXNodeMap);
-                }
-            }
-
-            String resultMapXmlString = XmlUtils.writeString(document);
-            XPathParser xPathParser = XmlUtils.processXml(resultMapXmlString);
-            XNode xNode = xPathParser.evalNode("/mapper/resultMap");
-            refResultMapXNodeMap.put(resultMapAssociationInfo.getResultMapId(), xNode);
         } else {
             throw new RuntimeException(columnInfo.getJavaType() + "没有关联注解");
         }
@@ -210,6 +183,14 @@ public class ResultMapSubQueryTemplateHandler {
         resultMapAssociationElement.addAttribute("fetchType", associationEntityInfo.getFetch().toLowerCase());
         resultMapAssociationElement.addAttribute("select", resultMapAssociationInfo.getSelect());
         // resultMapAssociationElement.addAttribute("resultMap", resultMapAssociationInfo.getResultMapId());
+        return resultMapAssociationElement;
+    }
+
+    private Element joinAssociationColumnElement(Element resultMapElement, ResultMapAssociationInfo resultMapAssociationInfo) {
+        ColumnInfo columnInfo = resultMapAssociationInfo.getColumnInfo();
+        Element resultMapAssociationElement = resultMapElement.addElement("association");
+        resultMapAssociationElement.addAttribute("property", columnInfo.getJavaColumnName());
+        resultMapAssociationElement.addAttribute("javaType", columnInfo.getJavaTypeName());
         return resultMapAssociationElement;
     }
 

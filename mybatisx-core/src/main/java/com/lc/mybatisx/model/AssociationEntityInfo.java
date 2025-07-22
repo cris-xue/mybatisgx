@@ -137,6 +137,7 @@ public class AssociationEntityInfo {
             this.mappedBy = oneToMany.mappedBy();
             this.fetch = oneToMany.fetch().name();
             this.fetchSize = oneToMany.fetchSize() == 0 ? null : Integer.valueOf(oneToMany.fetchSize()).toString();
+            this.loadStrategy = oneToMany.loadStrategy();
         }
     }
 
@@ -150,6 +151,7 @@ public class AssociationEntityInfo {
             this.mappedBy = manyToOne.mappedBy();
             this.fetch = manyToOne.fetch().name();
             this.fetchSize = manyToOne.fetchSize() == 0 ? null : Integer.valueOf(manyToOne.fetchSize()).toString();
+            this.loadStrategy = manyToOne.loadStrategy();
         }
     }
 
@@ -163,6 +165,7 @@ public class AssociationEntityInfo {
             this.mappedBy = manyToMany.mappedBy();
             this.fetch = manyToMany.fetch().name();
             this.fetchSize = manyToMany.fetchSize() == 0 ? null : Integer.valueOf(manyToMany.fetchSize()).toString();
+            this.loadStrategy = manyToMany.loadStrategy();
         }
     }
 

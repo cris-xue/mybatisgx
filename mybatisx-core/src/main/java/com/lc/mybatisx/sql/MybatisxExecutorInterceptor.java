@@ -4,6 +4,7 @@ import com.lc.mybatisx.annotation.handler.IdGenerateValueHandler;
 import com.lc.mybatisx.dao.Page;
 import com.lc.mybatisx.dao.Pageable;
 import com.lc.mybatisx.scripting.MybatisxParameterHandler;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.mapping.BoundSql;
@@ -40,6 +41,7 @@ import java.util.List;
 public class MybatisxExecutorInterceptor implements Interceptor {
 
     private IdGenerateValueHandler idGenerateValueHandler;
+    private String tenantId = "";
 
     public MybatisxExecutorInterceptor(IdGenerateValueHandler idGenerateValueHandler) {
         this.idGenerateValueHandler = idGenerateValueHandler;
@@ -60,8 +62,14 @@ public class MybatisxExecutorInterceptor implements Interceptor {
         MybatisxParameterHandler mybatisxParameterHandler = new MybatisxParameterHandler(this.idGenerateValueHandler);
         parameterObject = mybatisxParameterHandler.fillParameterObject(mappedStatement, parameterObject);
 
-        SqlHandler sqlHandler = new SqlHandler();
-        BoundSql newBoundSql = sqlHandler.process(mappedStatement, parameterObject);
+        // 租户功能会改变sql
+        if (StringUtils.isNotBlank(tenantId)) {
+            SqlHandler sqlHandler = new SqlHandler();
+            boundSql = sqlHandler.process(mappedStatement, parameterObject);
+            // 替换原MappedStatement和parameterObject。
+            MappedStatement newMappedStatement = MappedStatementHelper.copy(mappedStatement, boundSql, "TenantId");
+            mybatisgxExecutorInfo.restArgs(newMappedStatement, parameterObject, rowBounds, resultHandler, cacheKey, boundSql);
+        }
 
         Method method = invocation.getMethod();
         String methodName = method.getName();
@@ -69,13 +77,9 @@ public class MybatisxExecutorInterceptor implements Interceptor {
             PageHandler pageHandler = new PageHandler();
             Pageable pageable = pageHandler.getPageable(parameterObject);
             if (pageable != null) {
-                return this.processPage(executor, newBoundSql, pageHandler, invocation, mybatisgxExecutorInfo);
+                return this.processPage(executor, boundSql, pageHandler, invocation, mybatisgxExecutorInfo);
             }
         }
-
-        // 替换原MappedStatement和parameterObject。
-        MappedStatement newMappedStatement = MappedStatementHelper.copy(mappedStatement, newBoundSql, "TenantId");
-        mybatisgxExecutorInfo.restArgs(newMappedStatement, parameterObject, rowBounds, resultHandler, cacheKey, newBoundSql);
         return invocation.proceed();
     }
 

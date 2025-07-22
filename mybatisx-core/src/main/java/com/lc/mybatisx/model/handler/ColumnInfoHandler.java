@@ -109,7 +109,7 @@ public class ColumnInfoHandler {
         JoinColumns joinColumns = field.getAnnotation(JoinColumns.class);
         JoinTable joinTable = field.getAnnotation(JoinTable.class);
 
-        if (StringUtils.isBlank(manyToMany.mappedBy()) && joinTable == null) {
+        if (manyToMany != null && (StringUtils.isBlank(manyToMany.mappedBy()) && joinTable == null)) {
             throw new RuntimeException("many to many association must have mappedBy or joinTable");
         }
 

@@ -22,6 +22,10 @@ public class ResultMapAssociationInfo {
      */
     private String resultMapId;
     /**
+     * 关联结果集的层级
+     */
+    private Integer level;
+    /**
      * 类型
      */
     private Class<?> type;
@@ -72,6 +76,14 @@ public class ResultMapAssociationInfo {
 
     public void setResultMapId(String resultMapId) {
         this.resultMapId = resultMapId;
+    }
+
+    public Integer getLevel() {
+        return level;
+    }
+
+    public void setLevel(Integer level) {
+        this.level = level;
     }
 
     public Class<?> getType() {

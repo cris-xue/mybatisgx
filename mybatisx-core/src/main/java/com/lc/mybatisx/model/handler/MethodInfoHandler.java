@@ -119,6 +119,8 @@ public class MethodInfoHandler {
      * @return
      */
     private List<MethodParamInfo> getMethodParam(MapperInfo mapperInfo, Method method) {
+        // TODO 方法参数处理，批量操作的参数处理需要单独逻辑
+        BatchOperation batchOperation = method.getAnnotation(BatchOperation.class);
         Parameter[] parameters = method.getParameters();
         List<MethodParamInfo> methodParamInfoList = new ArrayList<>();
         for (int i = 0; i < parameters.length; i++) {
@@ -134,7 +136,6 @@ public class MethodInfoHandler {
             if (batchSize != null) {
                 methodParamInfo.setBatchSize(true);
             } else {
-                BatchOperation batchOperation = method.getAnnotation(BatchOperation.class);
                 if (batchOperation != null) {
                     methodParamInfo.setBatchItemName(String.format("%s_batch_item", methodParamInfo.getParamName()));
                 }

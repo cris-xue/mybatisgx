@@ -68,13 +68,12 @@ public class ColumnInfoHandler {
         Type genericType = field.getGenericType();
         Type fieldType = GenericUtils.getGenericType(genericType);
         Class<?> containerType = field.getType();
-
-        columnInfo.setJavaType(fieldType);
-        columnInfo.setJavaTypeName(fieldType.getTypeName());
-        if (containerType == List.class || containerType == Set.class) {
-            columnInfo.setContainerType(containerType);
+        if (fieldType instanceof Class) {
+            columnInfo.setJavaType((Class<?>) fieldType);
         }
-
+        if (containerType == List.class || containerType == Set.class) {
+            columnInfo.setCollectionType(containerType);
+        }
         TypeHandler typeHandler = field.getAnnotation(TypeHandler.class);
         if (typeHandler != null) {
             columnInfo.setTypeHandler(typeHandler.value().getTypeName());

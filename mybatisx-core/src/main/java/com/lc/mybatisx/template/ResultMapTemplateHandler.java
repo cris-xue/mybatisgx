@@ -18,9 +18,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ResultMapSubQueryTemplateHandler {
+public class ResultMapTemplateHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(ResultMapSubQueryTemplateHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(ResultMapTemplateHandler.class);
 
     public Map<String, XNode> execute(List<ResultMapInfo> resultMapInfoList) {
         Map<String, XNode> xNodeMap = new HashMap();

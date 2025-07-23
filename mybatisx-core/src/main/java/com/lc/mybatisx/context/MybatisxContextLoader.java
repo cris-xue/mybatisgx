@@ -9,7 +9,7 @@ import com.lc.mybatisx.model.handler.EntityInfoHandler;
 import com.lc.mybatisx.model.handler.MapperInfoHandler;
 import com.lc.mybatisx.template.AssociationSelectTemplateHandler;
 import com.lc.mybatisx.template.CurdTemplateHandler;
-import com.lc.mybatisx.template.ResultMapSubQueryTemplateHandler;
+import com.lc.mybatisx.template.ResultMapTemplateHandler;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.parsing.XNode;
@@ -99,12 +99,12 @@ public class MybatisxContextLoader {
 
     private void processTemplate() {
         CurdTemplateHandler curdTemplateHandler = new CurdTemplateHandler();
-        ResultMapSubQueryTemplateHandler resultMapSubQueryTemplateHandler = new ResultMapSubQueryTemplateHandler();
+        ResultMapTemplateHandler resultMapTemplateHandler = new ResultMapTemplateHandler();
         AssociationSelectTemplateHandler associationSelectTemplateHandler = new AssociationSelectTemplateHandler();
         List<MapperInfo> mapperInfoList = MapperInfoContextHolder.getMapperInfoList();
         mapperInfoList.forEach(mapperInfo -> {
             Map<String, XNode> curdXNodeMap = curdTemplateHandler.execute(mapperInfo);
-            Map<String, XNode> resultMapXNodeMap = resultMapSubQueryTemplateHandler.execute(mapperInfo.getResultMapInfoList());
+            Map<String, XNode> resultMapXNodeMap = resultMapTemplateHandler.execute(mapperInfo.getResultMapInfoList());
             Map<String, XNode> associationSelectXNodeMap = associationSelectTemplateHandler.execute(mapperInfo);
 
             MapperTemplateInfo mappingTemplateInfo = new MapperTemplateInfo();

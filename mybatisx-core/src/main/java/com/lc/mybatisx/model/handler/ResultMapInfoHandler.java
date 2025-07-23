@@ -42,7 +42,7 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
         }
         // 解决循环引用问题
         ResultMapDependencyTree resultMapDependencyTree = new ResultMapDependencyTree(null, resultClass);
-        List<ResultMapAssociationInfo> resultMapAssociationInfoList = this.processAssociationColumnInfoList(resultMapDependencyTree, associationColumnInfoList);
+        List<ResultMapAssociationInfo> resultMapAssociationInfoList = this.processAssociationColumnInfoList(1, resultMapDependencyTree, associationColumnInfoList);
         resultMapInfo = new ResultMapInfo();
         resultMapInfo.setId(this.getResultMapId(resultClass));
         resultMapInfo.setType(resultClass);
@@ -52,15 +52,15 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
         return resultMapInfo.getId();
     }
 
-    private List<ResultMapAssociationInfo> processAssociationColumnInfoList(ResultMapDependencyTree resultMapDependencyTree, List<ColumnInfo> associationColumnInfoList) {
+    private List<ResultMapAssociationInfo> processAssociationColumnInfoList(int level, ResultMapDependencyTree resultMapDependencyTree, List<ColumnInfo> associationColumnInfoList) {
         List<ResultMapAssociationInfo> resultMapAssociationInfoList = new ArrayList();
-        associationColumnInfoList.forEach(associationColumnInfo -> {
+        for (ColumnInfo associationColumnInfo : associationColumnInfoList) {
             Class<?> javaType = associationColumnInfo.getJavaType();
             Boolean isCycleRef = resultMapDependencyTree.cycleRefCheck(javaType);
             if (isCycleRef) {
                 String pathString = StringUtils.join(resultMapDependencyTree.getPath(), "->");
                 LOGGER.info("{}->{}存在循环引用，消除循环引用防止无限循环", pathString, javaType);
-                return;
+                continue;
             }
             ResultMapDependencyTree childrenResultMapDependencyTree = new ResultMapDependencyTree(resultMapDependencyTree, javaType);
             EntityInfo entityInfo = EntityInfoContextHolder.get(javaType);
@@ -68,17 +68,18 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
             ResultMapAssociationInfo resultMapAssociationInfo = new ResultMapAssociationInfo();
             resultMapAssociationInfo.setSelect(this.getSelect(javaType, associationColumnInfo.getCollectionType()));
             resultMapAssociationInfo.setResultMapId(this.getSubQueryResultMapId(javaType, associationColumnInfo));
+            resultMapAssociationInfo.setLevel(level);
             resultMapAssociationInfo.setType(javaType);
             resultMapAssociationInfo.setColumnInfoList(entityInfo.getTableColumnInfoList());
             resultMapAssociationInfo.setColumnInfo(associationColumnInfo);
 
             List<ColumnInfo> subAssociationColumnInfoList = entityInfo.getAssociationColumnInfoList();
             if (ObjectUtils.isNotEmpty(subAssociationColumnInfoList)) {
-                List<ResultMapAssociationInfo> subResultMapAssociationInfoList = this.processAssociationColumnInfoList(childrenResultMapDependencyTree, subAssociationColumnInfoList);
+                List<ResultMapAssociationInfo> subResultMapAssociationInfoList = this.processAssociationColumnInfoList(level + 1, childrenResultMapDependencyTree, subAssociationColumnInfoList);
                 resultMapAssociationInfo.setResultMapAssociationInfoList(subResultMapAssociationInfoList);
             }
             resultMapAssociationInfoList.add(resultMapAssociationInfo);
-        });
+        }
         return resultMapAssociationInfoList;
     }
 

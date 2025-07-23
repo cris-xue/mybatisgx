@@ -62,7 +62,6 @@ public class ResultMapTemplateHandler {
         return resultMapElement;
     }
 
-
     private void addColumnElement(Element resultMapElement, List<ColumnInfo> columnInfoList) {
         for (int i = 0; i < columnInfoList.size(); i++) {
             ColumnInfo columnInfo = columnInfoList.get(i);
@@ -98,17 +97,19 @@ public class ResultMapTemplateHandler {
 
     private Map<String, XNode> addAssociationElement(Element resultMapElement, List<ResultMapAssociationInfo> resultMapAssociationInfoList) {
         Map<String, XNode> refResultMapXNodeMap = new HashMap();
-        resultMapAssociationInfoList.forEach(resultMapAssociationInfo -> {
+        for (ResultMapAssociationInfo resultMapAssociationInfo : resultMapAssociationInfoList) {
+            int level = resultMapAssociationInfo.getLevel();
             ColumnInfo columnInfo = resultMapAssociationInfo.getColumnInfo();
             AssociationEntityInfo associationEntityInfo = columnInfo.getAssociationEntityInfo();
-            if (associationEntityInfo.getLoadStrategy() == LoadStrategy.SUB) {
+            LoadStrategy loadStrategy = associationEntityInfo.getLoadStrategy();
+            if (loadStrategy == LoadStrategy.SUB || (loadStrategy == LoadStrategy.JOIN && level == 1)) {
                 this.subQuery(resultMapAssociationInfo, resultMapElement, refResultMapXNodeMap);
-            } else if (associationEntityInfo.getLoadStrategy() == LoadStrategy.JOIN) {
+            } else if (loadStrategy == LoadStrategy.JOIN && level >= 2) {
                 this.joinQuery(resultMapAssociationInfo, resultMapElement, refResultMapXNodeMap);
             } else {
                 throw new RuntimeException("LoadStrategy is error");
             }
-        });
+        }
         return refResultMapXNodeMap;
     }
 

@@ -19,8 +19,6 @@ public class CurdTemplateHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(CurdTemplateHandler.class);
 
-    private AssociationSelectTemplateHandler associationSelectTemplateHandler = new AssociationSelectTemplateHandler();
-
     public Map<String, XNode> execute(MapperInfo mapperInfo) {
         List<MethodInfo> methodInfoList = mapperInfo.getMethodInfoList();
         Map<String, XNode> xNodeMap = new HashMap(15);
@@ -36,9 +34,6 @@ public class CurdTemplateHandler {
                 xNodeMap.put(methodInfo.getMethodName(), xNode);
             }
         }
-
-        /*List<XNode> associationSelectXNodeList = associationSelectTemplateHandler.execute(mapperInfo, methodInfoList);
-        xNodeList.addAll(associationSelectXNodeList);*/
         return xNodeMap;
     }
 
@@ -81,12 +76,10 @@ public class CurdTemplateHandler {
         Map<String, Object> templateData = new HashMap<>();
         templateData.put("mapperInfo", mapperInfo);
         templateData.put("methodInfo", methodInfo);
-        // templateData.put("resultMapInfo", methodInfo.getResultMapInfo());
 
         String methodXml = FreeMarkerUtils.processTemplate(templateData, template);
         XPathParser xPathParser = XmlUtils.processXml(methodXml);
         XNode xNode = xPathParser.evalNode("/mapper/*");
         return xNode;
     }
-
 }

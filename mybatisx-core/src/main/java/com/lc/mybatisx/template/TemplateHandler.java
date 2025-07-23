@@ -11,9 +11,6 @@ import java.util.stream.Collectors;
 
 public class TemplateHandler {
 
-    private CurdTemplateHandler curdTemplateHandler = new CurdTemplateHandler();
-    private ResultMapTemplateHandler resultMapTemplateHandler = new ResultMapTemplateHandler();
-
     private MapperBuilderAssistant builderAssistant;
     private List<XNode> originResultMapXNodeList = null;
     private List<XNode> originMapperXNodeList = null;
@@ -27,8 +24,6 @@ public class TemplateHandler {
     }
 
     public TemplateHandler build() {
-        /*MapperInfoHandler mapperInfoHandler = new MapperInfoHandler();
-        MapperInfo mapperInfo = mapperInfoHandler.execute(builderAssistant);*/
         List<String> actionIdList = mergeMethod(builderAssistant);
         List<XNode> actionXNodeList = new ArrayList();
         actionIdList.forEach(actionId -> {
@@ -43,8 +38,6 @@ public class TemplateHandler {
             resultMapXNodeList.add(xNode);
         });
 
-        /*List<XNode> mapperXNodeList = curdTemplateHandler.execute(mapperInfo);
-        List<XNode> resultMapXNodeList = resultMapTemplateHandler.execute(mapperInfo.getResultMapInfoList());*/
         merge(resultMapXNodeList, actionXNodeList);
         return this;
     }
@@ -86,5 +79,4 @@ public class TemplateHandler {
         originResultMapXNodeList.addAll(resultMapXNodeList);
         originMapperXNodeList.addAll(mapperXNodeList);
     }
-
 }

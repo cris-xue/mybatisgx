@@ -3,15 +3,13 @@ package com.lc.mybatisx.model;
 import com.lc.mybatisx.annotation.*;
 import com.lc.mybatisx.annotation.handler.GenerateValueHandler;
 
-import java.lang.reflect.Type;
-
 /**
  * 列信息
  */
 public class ColumnInfo {
 
     /**
-     *
+     * Map、基础类型、业务类型
      */
     private Class<?> javaType;
     /**
@@ -25,11 +23,11 @@ public class ColumnInfo {
     /**
      * 容器类型，List、Set
      */
-    private Class<?> containerType;
+    private Class<?> collectionType;
     /**
      * 容器类型名
      */
-    private String containerTypeName;
+    private String collectionTypeName;
     /**
      *
      */
@@ -75,10 +73,8 @@ public class ColumnInfo {
         return javaType;
     }
 
-    public void setJavaType(Type javaType) {
-        if (javaType instanceof Class) {
-            this.javaType = (Class<?>) javaType;
-        }
+    public void setJavaType(Class<?> javaType) {
+        this.javaType = javaType;
     }
 
     public String getJavaTypeName() {
@@ -97,21 +93,21 @@ public class ColumnInfo {
         this.javaColumnName = javaColumnName;
     }
 
-    public Class<?> getContainerType() {
-        return containerType;
+    public Class<?> getCollectionType() {
+        return collectionType;
     }
 
-    public void setContainerType(Class<?> containerType) {
-        this.containerType = containerType;
-        this.containerTypeName = containerType.getName();
+    public void setCollectionType(Class<?> collectionType) {
+        this.collectionType = collectionType;
+        this.collectionTypeName = collectionType.getName();
     }
 
-    public String getContainerTypeName() {
-        return containerTypeName;
+    public String getCollectionTypeName() {
+        return collectionTypeName;
     }
 
-    public void setContainerTypeName(String containerTypeName) {
-        this.containerTypeName = containerTypeName;
+    public void setCollectionTypeName(String collectionTypeName) {
+        this.collectionTypeName = collectionTypeName;
     }
 
     public String getDbTypeName() {

@@ -1,12 +1,10 @@
 package com.lc.mybatisx.template;
 
-import com.lc.mybatisx.annotation.ManyToMany;
-import com.lc.mybatisx.annotation.ManyToOne;
-import com.lc.mybatisx.annotation.OneToMany;
-import com.lc.mybatisx.annotation.OneToOne;
+import com.lc.mybatisx.annotation.*;
 import com.lc.mybatisx.context.EntityInfoContextHolder;
 import com.lc.mybatisx.model.*;
 import com.lc.mybatisx.utils.XmlUtils;
+import net.sf.jsqlparser.JSQLParserException;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.parsing.XNode;
@@ -29,6 +27,7 @@ public class AssociationSelectTemplateHandler {
         Map<String, XNode> totalXNodeMap = new HashMap();
         List<ResultMapInfo> resultMapInfoList = mapperInfo.getResultMapInfoList();
         resultMapInfoList.forEach(resultMapInfo -> {
+            this.buildJoinSelect(resultMapInfo);
             Map<String, XNode> xNodeMap = this.buildSelect(resultMapInfo.getResultMapAssociationInfoList());
             if (ObjectUtils.isNotEmpty(xNodeMap)) {
                 totalXNodeMap.putAll(xNodeMap);
@@ -49,6 +48,10 @@ public class AssociationSelectTemplateHandler {
                 }
             }
             AssociationEntityInfo associationEntityInfo = resultMapAssociationInfo.getColumnInfo().getAssociationEntityInfo();
+            LoadStrategy loadStrategy = associationEntityInfo.getLoadStrategy();
+            if (loadStrategy == LoadStrategy.JOIN) {
+                continue;
+            }
             OneToOne oneToOne = associationEntityInfo.getOneToOne();
             XNode xNode = null;
             if (oneToOne != null) {
@@ -71,6 +74,22 @@ public class AssociationSelectTemplateHandler {
             }
         }
         return xNodeMap;
+    }
+
+    /**
+     * select * from user left join user_detail left join user_role left join role where id = #{id}
+     *
+     * @param resultMapInfo
+     * @return
+     */
+    private Map<String, XNode> buildJoinSelect(ResultMapInfo resultMapInfo) {
+        AssociationJoinSelectTemplateHandler associationJoinSelectTemplateHandler = new AssociationJoinSelectTemplateHandler();
+        try {
+            associationJoinSelectTemplateHandler.buildSql(resultMapInfo);
+        } catch (JSQLParserException e) {
+            throw new RuntimeException(e);
+        }
+        return null;
     }
 
     private XNode buildOneToOne(ResultMapAssociationInfo resultMapAssociationInfo) {

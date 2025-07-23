@@ -66,7 +66,7 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
             EntityInfo entityInfo = EntityInfoContextHolder.get(javaType);
 
             ResultMapAssociationInfo resultMapAssociationInfo = new ResultMapAssociationInfo();
-            resultMapAssociationInfo.setSelect(this.getSelect(javaType, associationColumnInfo.getContainerType()));
+            resultMapAssociationInfo.setSelect(this.getSelect(javaType, associationColumnInfo.getCollectionType()));
             resultMapAssociationInfo.setResultMapId(this.getSubQueryResultMapId(javaType, associationColumnInfo));
             resultMapAssociationInfo.setType(javaType);
             resultMapAssociationInfo.setColumnInfoList(entityInfo.getTableColumnInfoList());
@@ -87,9 +87,9 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
     }
 
     protected String getSubQueryResultMapId(Class<?> entityClass, ColumnInfo columnInfo) {
-        Class<?> containerType = columnInfo.getContainerType();
+        Class<?> collectionType = columnInfo.getCollectionType();
         String resultMapId;
-        if (containerType == null) {
+        if (collectionType == null) {
             resultMapId = String.format("%sResultMap%s", entityClass.getTypeName().replaceAll("\\.", "_"), "Association");
         } else {
             resultMapId = String.format("%sResultMap%s", entityClass.getTypeName().replaceAll("\\.", "_"), "Collection");

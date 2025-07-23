@@ -207,7 +207,7 @@ public class ResultMapSubQueryTemplateHandler {
         Element resultMapAssociationElement = resultMapElement.addElement("collection");
         resultMapAssociationElement.addAttribute("property", columnInfo.getJavaColumnName());
         resultMapAssociationElement.addAttribute("column", this.getColumn(columnInfo).toString());
-        resultMapAssociationElement.addAttribute("javaType", columnInfo.getContainerTypeName());
+        resultMapAssociationElement.addAttribute("javaType", columnInfo.getCollectionTypeName());
         resultMapAssociationElement.addAttribute("ofType", columnInfo.getJavaTypeName());
         resultMapAssociationElement.addAttribute("fetchType", associationEntityInfo.getFetch().toLowerCase());
         resultMapAssociationElement.addAttribute("select", resultMapAssociationInfo.getSelect());
@@ -219,7 +219,7 @@ public class ResultMapSubQueryTemplateHandler {
         ColumnInfo columnInfo = resultMapAssociationInfo.getColumnInfo();
         Element resultMapAssociationElement = resultMapElement.addElement("collection");
         resultMapAssociationElement.addAttribute("property", columnInfo.getJavaColumnName());
-        resultMapAssociationElement.addAttribute("javaType", columnInfo.getContainerTypeName());
+        resultMapAssociationElement.addAttribute("javaType", columnInfo.getCollectionTypeName());
         resultMapAssociationElement.addAttribute("ofType", columnInfo.getJavaTypeName());
         return resultMapAssociationElement;
     }

@@ -8,6 +8,7 @@ import com.lc.mybatisx.annotation.handler.IdGenerateValueHandler;
 import com.lc.mybatisx.annotation.handler.JavaColumnInfo;
 import com.lc.mybatisx.context.EntityInfoContextHolder;
 import com.lc.mybatisx.ext.executor.MybatisgxBatchExecutor;
+import com.lc.mybatisx.ext.executor.MybatisgxMixExecutor;
 import com.lc.mybatisx.model.ColumnInfo;
 import com.lc.mybatisx.model.EntityInfo;
 import org.apache.ibatis.executor.Executor;
@@ -36,11 +37,7 @@ public class MybatisxConfiguration extends Configuration {
 
     @Override
     public Executor newExecutor(Transaction transaction, ExecutorType executorType) {
-        Executor executor = super.newExecutor(transaction, executorType);
-        if (executorType == ExecutorType.BATCH) {
-            return new MybatisgxBatchExecutor(executor);
-        }
-        return executor;
+        return new MybatisgxMixExecutor(this, transaction, executorType);
     }
 
     @Override
@@ -110,5 +107,13 @@ public class MybatisxConfiguration extends Configuration {
             return this.idGenerateValueHandler.insert(javaColumnInfo, originalValue);
         }
         return originalValue;
+    }
+
+    public Executor getExecutor(Transaction transaction, ExecutorType executorType) {
+        Executor executor = super.newExecutor(transaction, executorType);
+        if (executorType == ExecutorType.BATCH) {
+            return new MybatisgxBatchExecutor(executor);
+        }
+        return executor;
     }
 }

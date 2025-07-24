@@ -4,9 +4,7 @@ import com.lc.mybatisx.converter.MetaObjectHandlerConverter;
 import org.apache.ibatis.mapping.DatabaseIdProvider;
 import org.apache.ibatis.plugin.Interceptor;
 import org.apache.ibatis.scripting.LanguageDriver;
-import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.type.TypeHandler;
-import org.mybatis.spring.SqlSessionTemplate;
 import org.mybatis.spring.boot.autoconfigure.ConfigurationCustomizer;
 import org.mybatis.spring.boot.autoconfigure.MybatisAutoConfiguration;
 import org.slf4j.Logger;
@@ -33,8 +31,14 @@ public class MybatisxAutoConfiguration extends MybatisAutoConfiguration {
         super(properties, interceptorsProvider, typeHandlersProvider, languageDriversProvider, resourceLoader, databaseIdProvider, configurationCustomizersProvider);
     }
 
-    @Override
+    /*@Override
+    public SqlSessionFactory sqlSessionFactory(DataSource dataSource) throws Exception {
+        SqlSessionFactory sqlSessionFactory = super.sqlSessionFactory(dataSource);
+        return new MybatisgxSqlSessionFactory(sqlSessionFactory);
+    }*/
+
+    /*@Override
     public SqlSessionTemplate sqlSessionTemplate(SqlSessionFactory sqlSessionFactory) {
         return new MybatisxSqlSessionTemplate(sqlSessionFactory);
-    }
+    }*/
 }

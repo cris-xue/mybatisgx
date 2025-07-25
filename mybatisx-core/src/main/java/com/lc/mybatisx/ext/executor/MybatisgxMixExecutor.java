@@ -1,7 +1,6 @@
 package com.lc.mybatisx.ext.executor;
 
 import com.lc.mybatisx.context.MethodInfoContextHolder;
-import com.lc.mybatisx.ext.MybatisxConfiguration;
 import com.lc.mybatisx.model.MethodInfo;
 import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.cursor.Cursor;
@@ -10,7 +9,6 @@ import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.reflection.MetaObject;
-import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.transaction.Transaction;
@@ -26,15 +24,13 @@ import java.util.List;
  */
 public class MybatisgxMixExecutor implements Executor {
 
-    private MybatisxConfiguration configuration;
-    private Transaction transaction;
-    private ExecutorType executorType;
     private Executor delegate;
+    private Executor defaultExecutor;
+    private Executor batchExecutor;
 
-    public MybatisgxMixExecutor(MybatisxConfiguration configuration, Transaction transaction, ExecutorType executorType) {
-        this.configuration = configuration;
-        this.transaction = transaction;
-        this.executorType = executorType;
+    public MybatisgxMixExecutor(Executor defaultExecutor, Executor batchExecutor) {
+        this.defaultExecutor = defaultExecutor;
+        this.batchExecutor = batchExecutor;
     }
 
     @Override
@@ -131,11 +127,7 @@ public class MybatisgxMixExecutor implements Executor {
     }
 
     void newExecutor(MappedStatement mappedStatement) {
-        if (this.delegate != null) {
-            return;
-        }
         MethodInfo methodInfo = MethodInfoContextHolder.get(mappedStatement.getId());
-        ExecutorType executorType = methodInfo != null && methodInfo.getBatch() ? ExecutorType.BATCH : this.executorType;
-        this.delegate = this.configuration.getExecutor(this.transaction, executorType);
+        this.delegate = methodInfo != null && methodInfo.getBatch() ? batchExecutor : defaultExecutor;
     }
 }

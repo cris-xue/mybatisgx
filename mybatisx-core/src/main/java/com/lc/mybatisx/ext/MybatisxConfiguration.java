@@ -37,7 +37,9 @@ public class MybatisxConfiguration extends Configuration {
 
     @Override
     public Executor newExecutor(Transaction transaction, ExecutorType executorType) {
-        return new MybatisgxMixExecutor(this, transaction, executorType);
+        Executor defaultExecutor = super.newExecutor(transaction, executorType);
+        Executor batchExecutor = super.newExecutor(transaction, ExecutorType.BATCH);
+        return new MybatisgxMixExecutor(defaultExecutor, new MybatisgxBatchExecutor(batchExecutor));
     }
 
     @Override

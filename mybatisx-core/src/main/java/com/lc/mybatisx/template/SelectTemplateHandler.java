@@ -1,7 +1,7 @@
 package com.lc.mybatisx.template;
 
 import com.lc.mybatisx.context.EntityInfoContextHolder;
-import com.lc.mybatisx.model.AssociationEntityInfo;
+import com.lc.mybatisx.model.ColumnInfoAnnotationInfo;
 import com.lc.mybatisx.model.EntityInfo;
 import com.lc.mybatisx.model.MapperInfo;
 import com.lc.mybatisx.model.MethodInfo;
@@ -41,7 +41,7 @@ public class SelectTemplateHandler {
         EntityInfo entityInfo = EntityInfoContextHolder.get(methodReturnType);
         entityInfo.getTableColumnInfoList().forEach(columnInfo -> {
             // 外键不存在，只需要添加字段。外键存在，则需要添加字段和外键
-            AssociationEntityInfo associationEntityInfo = columnInfo.getAssociationEntityInfo();
+            ColumnInfoAnnotationInfo associationEntityInfo = columnInfo.getColumnInfoAnnotationInfo();
             if (associationEntityInfo == null) {
                 dbTrimElement.addText(String.format("%s, ", columnInfo.getDbColumnName()));
             } else {

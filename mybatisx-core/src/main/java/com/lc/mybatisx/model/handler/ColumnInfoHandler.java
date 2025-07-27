@@ -4,13 +4,13 @@ import com.google.common.base.CaseFormat;
 import com.google.common.collect.Maps;
 import com.lc.mybatisx.annotation.*;
 import com.lc.mybatisx.annotation.handler.GenerateValueHandler;
-import com.lc.mybatisx.context.EntityInfoContextHolder;
-import com.lc.mybatisx.model.*;
+import com.lc.mybatisx.model.ColumnInfo;
+import com.lc.mybatisx.model.ColumnInfoAnnotationInfo;
+import com.lc.mybatisx.model.ForeignKeyColumnInfo;
 import com.lc.mybatisx.utils.GenericUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
 
-import javax.persistence.FetchType;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
@@ -129,17 +129,17 @@ public class ColumnInfoHandler {
             inverseForeignKeyColumnInfoList = this.getForeignKeyList(inverseJoinColumnList);
         }
 
-        AssociationEntityInfo associationEntityInfo = new AssociationEntityInfo();
-        associationEntityInfo.setOneToOne(oneToOne);
-        associationEntityInfo.setOneToMany(oneToMany);
-        associationEntityInfo.setManyToOne(manyToOne);
-        associationEntityInfo.setManyToMany(manyToMany);
-        associationEntityInfo.setJoinColumn(joinColumn);
-        associationEntityInfo.setJoinColumns(joinColumns);
-        associationEntityInfo.setJoinTable(joinTable);
-        associationEntityInfo.setForeignKeyColumnInfoList(foreignKeyColumnInfoList);
-        associationEntityInfo.setInverseForeignKeyColumnInfoList(inverseForeignKeyColumnInfoList);
-        columnInfo.setAssociationEntityInfo(associationEntityInfo);
+        ColumnInfoAnnotationInfo columnInfoAnnotationInfo = new ColumnInfoAnnotationInfo();
+        columnInfoAnnotationInfo.setOneToOne(oneToOne);
+        columnInfoAnnotationInfo.setOneToMany(oneToMany);
+        columnInfoAnnotationInfo.setManyToOne(manyToOne);
+        columnInfoAnnotationInfo.setManyToMany(manyToMany);
+        columnInfoAnnotationInfo.setJoinColumn(joinColumn);
+        columnInfoAnnotationInfo.setJoinColumns(joinColumns);
+        columnInfoAnnotationInfo.setJoinTable(joinTable);
+        columnInfoAnnotationInfo.setForeignKeyColumnInfoList(foreignKeyColumnInfoList);
+        columnInfoAnnotationInfo.setInverseForeignKeyColumnInfoList(inverseForeignKeyColumnInfoList);
+        columnInfo.setColumnInfoAnnotationInfo(columnInfoAnnotationInfo);
     }
 
     private List<ForeignKeyColumnInfo> getForeignKeyList(JoinColumn[] joinColumnList) {
@@ -156,49 +156,5 @@ public class ColumnInfoHandler {
             }
         }
         return foreignKeyColumnInfoList;
-    }
-
-    public List<AssociationTableInfo> getAssociationTableInfoList(ColumnInfo columnInfo) {
-        List<AssociationTableInfo> associationTableInfoList = new ArrayList();
-        AssociationTableInfo associationTableInfo = null;
-        AssociationEntityInfo associationEntityInfo = columnInfo.getAssociationEntityInfo();
-        OneToOne oneToOne = associationEntityInfo.getOneToOne();
-        if (oneToOne != null) {
-            String mappedBy = oneToOne.mappedBy();
-            if (StringUtils.isNotBlank(mappedBy)) {
-                EntityInfo targetEntityInfo = EntityInfoContextHolder.get(columnInfo.getJavaType());
-                ColumnInfo targetColumnInfo = targetEntityInfo.getColumnInfoMap().get(mappedBy);
-                associationTableInfo = this.buildAssociationTableInfo(targetColumnInfo, targetColumnInfo.getJavaType(), columnInfo.getJavaType());
-                JoinColumn joinColumn = targetColumnInfo.getAssociationEntityInfo().getJoinColumn();
-                String name = joinColumn.name();
-                String referencedColumnName = joinColumn.referencedColumnName();
-                associationTableInfo.setForeignKey(name);
-                associationTableInfo.setInverseForeignKey(referencedColumnName);
-            } else {
-                JoinColumn joinColumn = associationEntityInfo.getJoinColumn();
-                if (joinColumn == null) {
-                    throw new RuntimeException("关系维护方类：" + columnInfo.getJavaTypeName() + "字段：" + columnInfo.getJavaColumnName() + "不存在JoinColumn");
-                }
-                String name = joinColumn.name();
-                String referencedColumnName = joinColumn.referencedColumnName();
-                associationTableInfo = this.buildAssociationTableInfo(columnInfo, columnInfo.getJavaType(), columnInfo.getJavaType());
-                associationTableInfo.setForeignKey(name);
-                associationTableInfo.setInverseForeignKey(referencedColumnName);
-            }
-        }
-        if (associationTableInfo != null) {
-            associationTableInfoList.add(associationTableInfo);
-        }
-        return associationTableInfoList;
-    }
-
-    private AssociationTableInfo buildAssociationTableInfo(ColumnInfo columnInfo, Class<?> junctionEntity, Class<?> joinEntity) {
-        AssociationTableInfo associationTableInfo = new AssociationTableInfo();
-        associationTableInfo.setJavaColumnName(columnInfo.getJavaColumnName());
-        associationTableInfo.setJunctionEntity(junctionEntity);
-        associationTableInfo.setJoinEntity(joinEntity);
-        associationTableInfo.setJoinContainerType(columnInfo.getJavaType());
-        associationTableInfo.setFetch(FetchType.LAZY);
-        return associationTableInfo;
     }
 }

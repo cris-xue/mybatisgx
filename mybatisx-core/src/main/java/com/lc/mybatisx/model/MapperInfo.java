@@ -41,9 +41,21 @@ public class MapperInfo {
      */
     private List<MethodInfo> methodInfoList;
     /**
+     * 实体关系信息
+     */
+    private EntityRelationInfo entityRelationInfo;
+    /**
      * 结果集信息列表
      */
-    private Map<Class<?>, ResultMapInfo> resultMapInfoMap = new LinkedHashMap<>();
+    private Map<Class<?>, ResultMapInfo> resultMapInfoMap = new LinkedHashMap();
+    /**
+     * 子查询结果集
+     */
+    private Map<Class<?>, ResultMapInfo> subResultMapInfoMap = new LinkedHashMap();
+    /**
+     * join查询结果集
+     */
+    private Map<String, ResultMapInfo> joinResultMapInfoMap = new LinkedHashMap();
 
     public Class<?> getIdClass() {
         return idClass;
@@ -99,17 +111,14 @@ public class MapperInfo {
 
     public void setMethodInfoList(List<MethodInfo> methodInfoList) {
         this.methodInfoList = methodInfoList;
-        /*for (int i = 0; i < methodInfoList.size(); i++) {
-            MethodInfo methodInfo = methodInfoList.get(i);
-            ResultMapInfo resultMapInfo = methodInfo.getResultMapInfo();
-            if (resultMapInfo == null) {
-                continue;
-            }
-            if (resultMapInfoMap.containsKey(resultMapInfo.getId())) {
-                continue;
-            }
-            resultMapInfoMap.put(resultMapInfo.getType(), resultMapInfo);
-        }*/
+    }
+
+    public EntityRelationInfo getEntityRelationInfo() {
+        return entityRelationInfo;
+    }
+
+    public void setEntityRelationInfo(EntityRelationInfo entityRelationInfo) {
+        this.entityRelationInfo = entityRelationInfo;
     }
 
     public List<ResultMapInfo> getResultMapInfoList() {
@@ -120,7 +129,23 @@ public class MapperInfo {
         return resultMapInfoMap.get(clazz);
     }
 
-    public void setResultMapInfo(ResultMapInfo resultMapInfo) {
+    public void addResultMapInfo(ResultMapInfo resultMapInfo) {
         this.resultMapInfoMap.put(resultMapInfo.getType(), resultMapInfo);
+    }
+
+    public Map<Class<?>, ResultMapInfo> getSubResultMapInfoMap() {
+        return subResultMapInfoMap;
+    }
+
+    public void setSubResultMapInfoMap(Map<Class<?>, ResultMapInfo> subResultMapInfoMap) {
+        this.subResultMapInfoMap = subResultMapInfoMap;
+    }
+
+    public Map<String, ResultMapInfo> getJoinResultMapInfoMap() {
+        return joinResultMapInfoMap;
+    }
+
+    public void setJoinResultMapInfoMap(Map<String, ResultMapInfo> joinResultMapInfoMap) {
+        this.joinResultMapInfoMap = joinResultMapInfoMap;
     }
 }

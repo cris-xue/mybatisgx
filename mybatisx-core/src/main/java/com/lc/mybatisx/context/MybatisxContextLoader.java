@@ -104,7 +104,7 @@ public class MybatisxContextLoader {
         List<MapperInfo> mapperInfoList = MapperInfoContextHolder.getMapperInfoList();
         mapperInfoList.forEach(mapperInfo -> {
             Map<String, XNode> curdXNodeMap = curdTemplateHandler.execute(mapperInfo);
-            Map<String, XNode> resultMapXNodeMap = resultMapTemplateHandler.execute(mapperInfo.getResultMapInfoList());
+            Map<String, XNode> resultMapXNodeMap = resultMapTemplateHandler.execute(mapperInfo);
             Map<String, XNode> associationSelectXNodeMap = associationSelectTemplateHandler.execute(mapperInfo);
 
             MapperTemplateInfo mappingTemplateInfo = new MapperTemplateInfo();

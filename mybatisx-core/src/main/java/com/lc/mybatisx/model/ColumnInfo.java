@@ -57,9 +57,9 @@ public class ColumnInfo {
      */
     private TenantId tenantId;
     /**
-     * 关联信息
+     * 字段注解信息 TODO 字段所有的注解信息需要放在注解中
      */
-    private AssociationEntityInfo associationEntityInfo;
+    private ColumnInfoAnnotationInfo columnInfoAnnotationInfo;
     /**
      * 生成值注解
      */
@@ -167,12 +167,12 @@ public class ColumnInfo {
         this.tenantId = tenantId;
     }
 
-    public AssociationEntityInfo getAssociationEntityInfo() {
-        return associationEntityInfo;
+    public ColumnInfoAnnotationInfo getColumnInfoAnnotationInfo() {
+        return columnInfoAnnotationInfo;
     }
 
-    public void setAssociationEntityInfo(AssociationEntityInfo associationEntityInfo) {
-        this.associationEntityInfo = associationEntityInfo;
+    public void setColumnInfoAnnotationInfo(ColumnInfoAnnotationInfo columnInfoAnnotationInfo) {
+        this.columnInfoAnnotationInfo = columnInfoAnnotationInfo;
     }
 
     public GenerateValue getGenerateValue() {

@@ -140,6 +140,10 @@ public class MapperInfo {
         this.resultMapInfoMap.put(resultMapInfo.getType(), resultMapInfo);
     }
 
+    public void addResultMapInfoList(List<ResultMapInfo> resultMapInfoList) {
+        resultMapInfoList.forEach(resultMapInfo -> this.addResultMapInfo(resultMapInfo));
+    }
+
     public Map<Class<?>, ResultMapInfo> getSubResultMapInfoMap() {
         return subResultMapInfoMap;
     }

@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 public class ResultMapInfoHandler extends BasicInfoHandler {
@@ -31,49 +30,33 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
         }
 
         EntityRelationInfo entityRelationInfo = mapperInfo.getEntityRelationInfo(resultClass);
-
-        List<ResultMapInfo> resultMapInfoList = this.buildResultMapInfo(entityRelationInfo);
-        mapperInfo.addResultMapInfo(resultMapInfo);
-        return resultMapInfo.getId();
+        List<ResultMapInfo> resultMapInfoList = new ArrayList();
+        mapperInfo.addResultMapInfoList(resultMapInfoList);
+        ResultMapInfo rootResultMapInfo = this.buildResultMapInfo(resultMapInfoList, entityRelationInfo);
+        return rootResultMapInfo.getId();
     }
 
-    private void processLoadStrategy(EntityRelationInfo entityRelationInfo) {
-        ColumnInfo columnInfo = entityRelationInfo.getColumnInfo();
-        LoadStrategy loadStrategy = columnInfo.getColumnInfoAnnotationInfo().getLoadStrategy();
-        if (loadStrategy == LoadStrategy.SUB) {
-            this.buildResultMapInfo(entityRelationInfo);
-        } else if (loadStrategy == LoadStrategy.JOIN) {
-
-        } else {
-            throw new RuntimeException("未知的加载策略");
-        }
-    }
-
-    private List<ResultMapInfo> buildResultMapInfo(EntityRelationInfo entityRelationInfo) {
-        int level = entityRelationInfo.getLevel();
-        ColumnInfo columnInfo = entityRelationInfo.getColumnInfo();
+    private ResultMapInfo buildResultMapInfo(List<ResultMapInfo> resultMapInfoList, EntityRelationInfo entityRelationInfo) {
         EntityInfo entityInfo = entityRelationInfo.getEntityInfo();
-        List<EntityRelationInfo> entityRelationInfoList = entityRelationInfo.getEntityRelationList();
         Class<?> targetEntityClass = entityInfo.getTableEntityClass();
-
-        Class<?> collectionType = columnInfo.getCollectionType();
-        List<ResultMapAssociationInfo> resultMapAssociationInfoList;
-        if (collectionType == Collection.class) {
-            resultMapAssociationInfoList = this.buildResultMapAssociationInfo(entityRelationInfoList);
-        } else {
-            resultMapAssociationInfoList = this.buildResultMapAssociationInfo(entityRelationInfoList);
-        }
-
         ResultMapInfo resultMapInfo = new ResultMapInfo();
         resultMapInfo.setId(this.getResultMapId(targetEntityClass));
         resultMapInfo.setType(targetEntityClass);
         resultMapInfo.setColumnInfoList(entityInfo.getTableColumnInfoList());
-        resultMapInfo.setResultMapAssociationInfoList(resultMapAssociationInfoList);
+        resultMapInfo.setResultMapAssociationInfoList(this.getResultMapAssociationInfoList(resultMapInfoList, entityRelationInfo));
 
-        return null;
+        resultMapInfoList.add(resultMapInfo);
+        return resultMapInfo;
     }
 
-    private List<ResultMapAssociationInfo> buildResultMapAssociationInfo(List<EntityRelationInfo> entityRelationInfoList) {
+    private List<ResultMapAssociationInfo> getResultMapAssociationInfoList(List<ResultMapInfo> resultMapInfoList, EntityRelationInfo entityRelationInfo) {
+        int level = entityRelationInfo.getLevel();
+        List<EntityRelationInfo> entityRelationInfoList = entityRelationInfo.getEntityRelationList();
+        List<ResultMapAssociationInfo> resultMapAssociationInfoList = this.buildResultMapAssociationInfo(resultMapInfoList, entityRelationInfoList);
+        return resultMapAssociationInfoList;
+    }
+
+    private List<ResultMapAssociationInfo> buildResultMapAssociationInfo(List<ResultMapInfo> resultMapInfoList, List<EntityRelationInfo> entityRelationInfoList) {
         List<ResultMapAssociationInfo> resultMapAssociationInfoList = new ArrayList();
         for (EntityRelationInfo entityRelationInfo : entityRelationInfoList) {
             ColumnInfo columnInfo = entityRelationInfo.getColumnInfo();
@@ -86,12 +69,19 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
             resultMapAssociationInfo.setColumnInfoList(entityInfo.getTableColumnInfoList());
             resultMapAssociationInfo.setColumnInfo(columnInfo);
 
-            List<EntityRelationInfo> subEntityRelationInfoList = entityRelationInfo.getEntityRelationList();
-            if (ObjectUtils.isNotEmpty(subEntityRelationInfoList)) {
-                List<ResultMapAssociationInfo> subResultMapAssociationInfoList = this.buildResultMapAssociationInfo(subEntityRelationInfoList);
-                resultMapAssociationInfo.setResultMapAssociationInfoList(subResultMapAssociationInfoList);
-                resultMapAssociationInfoList.add(resultMapAssociationInfo);
+            LoadStrategy loadStrategy = columnInfo.getColumnInfoAnnotationInfo().getLoadStrategy();
+            if (loadStrategy == LoadStrategy.SUB) {
+                this.buildResultMapInfo(resultMapInfoList, entityRelationInfo);
+            } else if (loadStrategy == LoadStrategy.JOIN) {
+                List<EntityRelationInfo> subEntityRelationInfoList = entityRelationInfo.getEntityRelationList();
+                if (ObjectUtils.isNotEmpty(subEntityRelationInfoList)) {
+                    List<ResultMapAssociationInfo> subResultMapAssociationInfoList = this.buildResultMapAssociationInfo(resultMapInfoList, subEntityRelationInfoList);
+                    resultMapAssociationInfo.setResultMapAssociationInfoList(subResultMapAssociationInfoList);
+                }
+            } else {
+                throw new RuntimeException("未知的加载策略");
             }
+            resultMapAssociationInfoList.add(resultMapAssociationInfo);
         }
         return resultMapAssociationInfoList;
     }

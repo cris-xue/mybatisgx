@@ -70,7 +70,7 @@ public class ResultMapTemplateHandler {
                 idColumnElement(resultMapElement, columnInfo);
                 continue;
             }
-            AssociationEntityInfo associationEntityInfo = columnInfo.getAssociationEntityInfo();
+            ColumnInfoAnnotationInfo associationEntityInfo = columnInfo.getColumnInfoAnnotationInfo();
             if (associationEntityInfo == null) {
                 resultColumnElement(resultMapElement, columnInfo);
             }
@@ -100,7 +100,7 @@ public class ResultMapTemplateHandler {
         for (ResultMapAssociationInfo resultMapAssociationInfo : resultMapAssociationInfoList) {
             int level = resultMapAssociationInfo.getLevel();
             ColumnInfo columnInfo = resultMapAssociationInfo.getColumnInfo();
-            AssociationEntityInfo associationEntityInfo = columnInfo.getAssociationEntityInfo();
+            ColumnInfoAnnotationInfo associationEntityInfo = columnInfo.getColumnInfoAnnotationInfo();
             LoadStrategy loadStrategy = associationEntityInfo.getLoadStrategy();
             if (loadStrategy == LoadStrategy.SUB || (loadStrategy == LoadStrategy.JOIN && level == 1)) {
                 this.subQuery(resultMapAssociationInfo, resultMapElement, refResultMapXNodeMap);
@@ -115,7 +115,7 @@ public class ResultMapTemplateHandler {
 
     private void subQuery(ResultMapAssociationInfo resultMapAssociationInfo, Element resultMapElement, Map<String, XNode> refResultMapXNodeMap) {
         ColumnInfo columnInfo = resultMapAssociationInfo.getColumnInfo();
-        AssociationEntityInfo associationEntityInfo = columnInfo.getAssociationEntityInfo();
+        ColumnInfoAnnotationInfo associationEntityInfo = columnInfo.getColumnInfoAnnotationInfo();
         Integer associationType = this.getAssociationType(associationEntityInfo);
         if (associationType == 1) {
             this.associationColumnElement(resultMapElement, resultMapAssociationInfo);
@@ -160,7 +160,7 @@ public class ResultMapTemplateHandler {
 
     private void joinQuery(ResultMapAssociationInfo resultMapAssociationInfo, Element resultMapElement, Map<String, XNode> refResultMapXNodeMap) {
         ColumnInfo columnInfo = resultMapAssociationInfo.getColumnInfo();
-        AssociationEntityInfo associationEntityInfo = columnInfo.getAssociationEntityInfo();
+        ColumnInfoAnnotationInfo associationEntityInfo = columnInfo.getColumnInfoAnnotationInfo();
         Integer associationType = this.getAssociationType(associationEntityInfo);
         if (associationType == 1) {
             Element resultMapAssociationElement = this.joinAssociationColumnElement(resultMapElement, resultMapAssociationInfo);
@@ -183,7 +183,7 @@ public class ResultMapTemplateHandler {
 
     private Element associationColumnElement(Element resultMapElement, ResultMapAssociationInfo resultMapAssociationInfo) {
         ColumnInfo columnInfo = resultMapAssociationInfo.getColumnInfo();
-        AssociationEntityInfo associationEntityInfo = columnInfo.getAssociationEntityInfo();
+        ColumnInfoAnnotationInfo associationEntityInfo = columnInfo.getColumnInfoAnnotationInfo();
         Element resultMapAssociationElement = resultMapElement.addElement("association");
         resultMapAssociationElement.addAttribute("property", columnInfo.getJavaColumnName());
         resultMapAssociationElement.addAttribute("column", this.getColumn(columnInfo).toString());
@@ -204,7 +204,7 @@ public class ResultMapTemplateHandler {
 
     private Element collectionColumnElement(Element resultMapElement, ResultMapAssociationInfo resultMapAssociationInfo) {
         ColumnInfo columnInfo = resultMapAssociationInfo.getColumnInfo();
-        AssociationEntityInfo associationEntityInfo = columnInfo.getAssociationEntityInfo();
+        ColumnInfoAnnotationInfo associationEntityInfo = columnInfo.getColumnInfoAnnotationInfo();
         Element resultMapAssociationElement = resultMapElement.addElement("collection");
         resultMapAssociationElement.addAttribute("property", columnInfo.getJavaColumnName());
         resultMapAssociationElement.addAttribute("column", this.getColumn(columnInfo).toString());
@@ -225,7 +225,7 @@ public class ResultMapTemplateHandler {
         return resultMapAssociationElement;
     }
 
-    private Integer getAssociationType(AssociationEntityInfo associationEntityInfo) {
+    private Integer getAssociationType(ColumnInfoAnnotationInfo associationEntityInfo) {
         OneToOne oneToOne = associationEntityInfo.getOneToOne();
         OneToMany oneToMany = associationEntityInfo.getOneToMany();
         ManyToOne manyToOne = associationEntityInfo.getManyToOne();
@@ -246,7 +246,7 @@ public class ResultMapTemplateHandler {
     }
 
     private Map<String, String> getColumn(ColumnInfo columnInfo) {
-        AssociationEntityInfo associationEntityInfo = columnInfo.getAssociationEntityInfo();
+        ColumnInfoAnnotationInfo associationEntityInfo = columnInfo.getColumnInfoAnnotationInfo();
         ManyToMany manyToMany = associationEntityInfo.getManyToMany();
         if (manyToMany == null) {
             String mappedBy = associationEntityInfo.getMappedBy();
@@ -254,7 +254,7 @@ public class ResultMapTemplateHandler {
             if (StringUtils.isNotBlank(mappedBy)) {
                 EntityInfo entityInfo = EntityInfoContextHolder.get(columnInfo.getJavaType());
                 ColumnInfo mappedByColumnInfo = entityInfo.getColumnInfo(mappedBy);
-                AssociationEntityInfo mappedByAssociationEntityInfo = mappedByColumnInfo.getAssociationEntityInfo();
+                ColumnInfoAnnotationInfo mappedByAssociationEntityInfo = mappedByColumnInfo.getColumnInfoAnnotationInfo();
                 List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = mappedByAssociationEntityInfo.getForeignKeyColumnInfoList();
                 for (ForeignKeyColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
                     column.put(foreignKeyColumnInfo.getName(), foreignKeyColumnInfo.getReferencedColumnName());
@@ -272,7 +272,7 @@ public class ResultMapTemplateHandler {
             if (StringUtils.isNotBlank(mappedBy)) {
                 EntityInfo entityInfo = EntityInfoContextHolder.get(columnInfo.getJavaType());
                 ColumnInfo mappedByColumnInfo = entityInfo.getColumnInfo(mappedBy);
-                AssociationEntityInfo mappedByAssociationEntityInfo = mappedByColumnInfo.getAssociationEntityInfo();
+                ColumnInfoAnnotationInfo mappedByAssociationEntityInfo = mappedByColumnInfo.getColumnInfoAnnotationInfo();
                 List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = mappedByAssociationEntityInfo.getForeignKeyColumnInfoList();
                 for (ForeignKeyColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
                     column.put(foreignKeyColumnInfo.getName(), foreignKeyColumnInfo.getReferencedColumnName());

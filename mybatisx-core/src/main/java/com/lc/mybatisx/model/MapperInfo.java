@@ -57,7 +57,7 @@ public class MapperInfo {
     /**
      * join查询结果集
      */
-    private Map<String, ResultMapInfo> joinResultMapInfoMap = new LinkedHashMap();
+    private Map<Class<?>, ResultMapInfo> joinResultMapInfoMap = new LinkedHashMap();
 
     public Class<?> getIdClass() {
         return idClass;
@@ -148,11 +148,11 @@ public class MapperInfo {
         this.subResultMapInfoMap = subResultMapInfoMap;
     }
 
-    public Map<String, ResultMapInfo> getJoinResultMapInfoMap() {
+    public Map<Class<?>, ResultMapInfo> getJoinResultMapInfoMap() {
         return joinResultMapInfoMap;
     }
 
-    public void setJoinResultMapInfoMap(Map<String, ResultMapInfo> joinResultMapInfoMap) {
+    public void setJoinResultMapInfoMap(Map<Class<?>, ResultMapInfo> joinResultMapInfoMap) {
         this.joinResultMapInfoMap = joinResultMapInfoMap;
     }
 }

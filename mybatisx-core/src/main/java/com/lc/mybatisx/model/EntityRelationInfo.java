@@ -5,7 +5,7 @@ import java.util.List;
 
 /**
  * @author ：薛承城
- * @description：实体关系信息
+ * @description：实体关系信息【user: {roleList: [], orderList: []}】
  * @date ：2021/7/9 17:34
  */
 public class EntityRelationInfo {
@@ -13,7 +13,11 @@ public class EntityRelationInfo {
     /**
      * 关系层级
      */
-    private Integer level;
+    private int level;
+    /**
+     * 字段信息
+     */
+    private ColumnInfo columnInfo;
     /**
      * 实体信息
      */
@@ -23,12 +27,20 @@ public class EntityRelationInfo {
      */
     private List<EntityRelationInfo> entityRelationList = new ArrayList();
 
-    public Integer getLevel() {
+    public int getLevel() {
         return level;
     }
 
-    public void setLevel(Integer level) {
+    public void setLevel(int level) {
         this.level = level;
+    }
+
+    public ColumnInfo getColumnInfo() {
+        return columnInfo;
+    }
+
+    public void setColumnInfo(ColumnInfo columnInfo) {
+        this.columnInfo = columnInfo;
     }
 
     public EntityInfo getEntityInfo() {

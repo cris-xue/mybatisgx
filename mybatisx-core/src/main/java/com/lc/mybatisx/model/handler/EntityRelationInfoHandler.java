@@ -2,7 +2,6 @@ package com.lc.mybatisx.model.handler;
 
 import com.lc.mybatisx.context.EntityInfoContextHolder;
 import com.lc.mybatisx.model.*;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,11 +56,9 @@ public class EntityRelationInfoHandler {
             }
             EntityRelationDependencyTree childrenResultMapDependencyTree = new EntityRelationDependencyTree(entityRelationDependencyTree, javaType);
             EntityInfo relationColumnEntityInfo = EntityInfoContextHolder.get(javaType);
-            List<ColumnInfo> subRelationColumnInfoList = entityInfo.getRelationColumnInfoList();
-            if (ObjectUtils.isNotEmpty(subRelationColumnInfoList)) {
-                EntityRelationInfo subEntityRelationInfo = this.processRelationColumnInfoList(level + 1, childrenResultMapDependencyTree, relationColumnEntityInfo);
-                entityRelationInfo.addEntityRelation(subEntityRelationInfo);
-            }
+            EntityRelationInfo subEntityRelationInfo = this.processRelationColumnInfoList(level + 1, childrenResultMapDependencyTree, relationColumnEntityInfo);
+            entityRelationInfo.setColumnInfo(relationColumnInfo);
+            entityRelationInfo.addEntityRelation(subEntityRelationInfo);
         }
         return entityRelationInfo;
     }

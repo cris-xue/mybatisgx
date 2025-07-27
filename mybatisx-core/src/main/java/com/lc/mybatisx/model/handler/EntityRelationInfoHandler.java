@@ -31,18 +31,21 @@ public class EntityRelationInfoHandler {
 
         // 解决循环引用问题
         EntityRelationDependencyTree entityRelationDependencyTree = new EntityRelationDependencyTree(null, resultClass);
-        EntityRelationInfo entityRelationInfo = this.processRelationColumnInfoList(1, entityRelationDependencyTree, entityInfo);
+        EntityRelationInfo entityRelationInfo = this.processRelationColumnInfo(1, entityRelationDependencyTree, entityInfo, null);
 
         mapperInfo.addEntityRelationInfo(entityRelationInfo);
         return entityRelationInfo;
     }
 
-    private EntityRelationInfo processRelationColumnInfoList(int level, EntityRelationDependencyTree entityRelationDependencyTree, EntityInfo entityInfo) {
+    private EntityRelationInfo processRelationColumnInfo(
+            int level, EntityRelationDependencyTree entityRelationDependencyTree, EntityInfo entityInfo, ColumnInfo columnInfo
+    ) {
         if (entityInfo == null) {
             return null;
         }
         EntityRelationInfo entityRelationInfo = new EntityRelationInfo();
         entityRelationInfo.setLevel(level);
+        entityRelationInfo.setColumnInfo(columnInfo);
         entityRelationInfo.setEntityInfo(entityInfo);
 
         List<ColumnInfo> relationColumnInfoList = entityInfo.getRelationColumnInfoList();
@@ -56,8 +59,7 @@ public class EntityRelationInfoHandler {
             }
             EntityRelationDependencyTree childrenResultMapDependencyTree = new EntityRelationDependencyTree(entityRelationDependencyTree, javaType);
             EntityInfo relationColumnEntityInfo = EntityInfoContextHolder.get(javaType);
-            EntityRelationInfo subEntityRelationInfo = this.processRelationColumnInfoList(level + 1, childrenResultMapDependencyTree, relationColumnEntityInfo);
-            entityRelationInfo.setColumnInfo(relationColumnInfo);
+            EntityRelationInfo subEntityRelationInfo = this.processRelationColumnInfo(level + 1, childrenResultMapDependencyTree, relationColumnEntityInfo, relationColumnInfo);
             entityRelationInfo.addEntityRelation(subEntityRelationInfo);
         }
         return entityRelationInfo;

@@ -44,7 +44,7 @@ public class MapperInfo {
     /**
      * 实体关系信息，使用map是因为自定义方法可能使用非实体类
      */
-    private Map<Class<?>, EntityRelationInfo> entityRelationInfoMap;
+    private Map<Class<?>, EntityRelationInfo> entityRelationInfoMap = new LinkedHashMap();
     /**
      * 结果集信息列表
      */

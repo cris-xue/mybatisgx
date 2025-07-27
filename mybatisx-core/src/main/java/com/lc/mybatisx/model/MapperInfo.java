@@ -48,16 +48,11 @@ public class MapperInfo {
     /**
      * 结果集信息列表
      */
-    @Deprecated
     private Map<Class<?>, ResultMapInfo> resultMapInfoMap = new LinkedHashMap();
     /**
-     * 子查询结果集
+     * 实体关联查询方法
      */
-    private Map<Class<?>, ResultMapInfo> subResultMapInfoMap = new LinkedHashMap();
-    /**
-     * join查询结果集
-     */
-    private Map<Class<?>, ResultMapInfo> joinResultMapInfoMap = new LinkedHashMap();
+    private Map<String, ResultMapAssociationInfo> entityRelationQueryMethodMap = new LinkedHashMap();
 
     public Class<?> getIdClass() {
         return idClass;
@@ -144,19 +139,13 @@ public class MapperInfo {
         resultMapInfoList.forEach(resultMapInfo -> this.addResultMapInfo(resultMapInfo));
     }
 
-    public Map<Class<?>, ResultMapInfo> getSubResultMapInfoMap() {
-        return subResultMapInfoMap;
+    public List<ResultMapAssociationInfo> getEntityRelationQueryMethodList() {
+        return new ArrayList(entityRelationQueryMethodMap.values());
     }
 
-    public void setSubResultMapInfoMap(Map<Class<?>, ResultMapInfo> subResultMapInfoMap) {
-        this.subResultMapInfoMap = subResultMapInfoMap;
-    }
-
-    public Map<Class<?>, ResultMapInfo> getJoinResultMapInfoMap() {
-        return joinResultMapInfoMap;
-    }
-
-    public void setJoinResultMapInfoMap(Map<Class<?>, ResultMapInfo> joinResultMapInfoMap) {
-        this.joinResultMapInfoMap = joinResultMapInfoMap;
+    public void setEntityRelationQueryMethodList(List<ResultMapAssociationInfo> resultMapAssociationInfoList) {
+        resultMapAssociationInfoList.forEach(resultMapAssociationInfo ->
+                this.entityRelationQueryMethodMap.put(resultMapAssociationInfo.getSelect(), resultMapAssociationInfo)
+        );
     }
 }

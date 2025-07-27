@@ -14,8 +14,6 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResultMapInfoHandler.class);
 
-    private static ColumnInfoHandler columnInfoHandler = new ColumnInfoHandler();
-
     public String execute(MapperInfo mapperInfo, MethodInfo methodInfo) {
         String action = methodInfo.getAction();
         if (Arrays.asList("insert", "delete", "update").contains(action)) {
@@ -29,34 +27,37 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
             return resultMapInfo.getId();
         }
 
-        EntityRelationInfo entityRelationInfo = mapperInfo.getEntityRelationInfo(resultClass);
         List<ResultMapInfo> resultMapInfoList = new ArrayList();
+        List<ResultMapAssociationInfo> entityRelationQueryMethodList = new ArrayList();
+        EntityRelationInfo entityRelationInfo = mapperInfo.getEntityRelationInfo(resultClass);
+        ResultMapInfo rootResultMapInfo = this.buildResultMapInfo(resultMapInfoList, entityRelationQueryMethodList, entityRelationInfo);
+
         mapperInfo.addResultMapInfoList(resultMapInfoList);
-        ResultMapInfo rootResultMapInfo = this.buildResultMapInfo(resultMapInfoList, entityRelationInfo);
+        mapperInfo.setEntityRelationQueryMethodList(entityRelationQueryMethodList);
         return rootResultMapInfo.getId();
     }
 
-    private ResultMapInfo buildResultMapInfo(List<ResultMapInfo> resultMapInfoList, EntityRelationInfo entityRelationInfo) {
+    private ResultMapInfo buildResultMapInfo(List<ResultMapInfo> resultMapInfoList, List<ResultMapAssociationInfo> entityRelationQueryMethodList, EntityRelationInfo entityRelationInfo) {
         EntityInfo entityInfo = entityRelationInfo.getEntityInfo();
         Class<?> targetEntityClass = entityInfo.getTableEntityClass();
         ResultMapInfo resultMapInfo = new ResultMapInfo();
         resultMapInfo.setId(this.getResultMapId(targetEntityClass));
         resultMapInfo.setType(targetEntityClass);
         resultMapInfo.setColumnInfoList(entityInfo.getTableColumnInfoList());
-        resultMapInfo.setResultMapAssociationInfoList(this.getResultMapAssociationInfoList(resultMapInfoList, entityRelationInfo));
+        resultMapInfo.setResultMapAssociationInfoList(this.getResultMapAssociationInfoList(resultMapInfoList, entityRelationQueryMethodList, entityRelationInfo));
 
         resultMapInfoList.add(resultMapInfo);
         return resultMapInfo;
     }
 
-    private List<ResultMapAssociationInfo> getResultMapAssociationInfoList(List<ResultMapInfo> resultMapInfoList, EntityRelationInfo entityRelationInfo) {
+    private List<ResultMapAssociationInfo> getResultMapAssociationInfoList(List<ResultMapInfo> resultMapInfoList, List<ResultMapAssociationInfo> entityRelationQueryMethodList, EntityRelationInfo entityRelationInfo) {
         int level = entityRelationInfo.getLevel();
         List<EntityRelationInfo> entityRelationInfoList = entityRelationInfo.getEntityRelationList();
-        List<ResultMapAssociationInfo> resultMapAssociationInfoList = this.buildResultMapAssociationInfo(resultMapInfoList, entityRelationInfoList);
+        List<ResultMapAssociationInfo> resultMapAssociationInfoList = this.buildResultMapAssociationInfo(resultMapInfoList, entityRelationQueryMethodList, entityRelationInfoList);
         return resultMapAssociationInfoList;
     }
 
-    private List<ResultMapAssociationInfo> buildResultMapAssociationInfo(List<ResultMapInfo> resultMapInfoList, List<EntityRelationInfo> entityRelationInfoList) {
+    private List<ResultMapAssociationInfo> buildResultMapAssociationInfo(List<ResultMapInfo> resultMapInfoList, List<ResultMapAssociationInfo> entityRelationQueryMethodList, List<EntityRelationInfo> entityRelationInfoList) {
         List<ResultMapAssociationInfo> resultMapAssociationInfoList = new ArrayList();
         for (EntityRelationInfo entityRelationInfo : entityRelationInfoList) {
             ColumnInfo columnInfo = entityRelationInfo.getColumnInfo();
@@ -68,20 +69,21 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
             resultMapAssociationInfo.setType(columnInfo.getJavaType());
             resultMapAssociationInfo.setColumnInfoList(entityInfo.getTableColumnInfoList());
             resultMapAssociationInfo.setColumnInfo(columnInfo);
+            resultMapAssociationInfoList.add(resultMapAssociationInfo);
 
             LoadStrategy loadStrategy = columnInfo.getColumnInfoAnnotationInfo().getLoadStrategy();
             if (loadStrategy == LoadStrategy.SUB) {
-                this.buildResultMapInfo(resultMapInfoList, entityRelationInfo);
+                entityRelationQueryMethodList.add(resultMapAssociationInfo);
+                this.buildResultMapInfo(resultMapInfoList, entityRelationQueryMethodList, entityRelationInfo);
             } else if (loadStrategy == LoadStrategy.JOIN) {
                 List<EntityRelationInfo> subEntityRelationInfoList = entityRelationInfo.getEntityRelationList();
                 if (ObjectUtils.isNotEmpty(subEntityRelationInfoList)) {
-                    List<ResultMapAssociationInfo> subResultMapAssociationInfoList = this.buildResultMapAssociationInfo(resultMapInfoList, subEntityRelationInfoList);
+                    List<ResultMapAssociationInfo> subResultMapAssociationInfoList = this.buildResultMapAssociationInfo(resultMapInfoList, entityRelationQueryMethodList, subEntityRelationInfoList);
                     resultMapAssociationInfo.setResultMapAssociationInfoList(subResultMapAssociationInfoList);
                 }
             } else {
                 throw new RuntimeException("未知的加载策略");
             }
-            resultMapAssociationInfoList.add(resultMapAssociationInfo);
         }
         return resultMapAssociationInfoList;
     }

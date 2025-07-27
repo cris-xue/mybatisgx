@@ -98,13 +98,13 @@ public class EntityInfo {
                 generateValueColumnInfoList.add(columnInfo);
             }
 
-            AssociationEntityInfo associationEntityInfo = columnInfo.getAssociationEntityInfo();
-            if (associationEntityInfo != null) {
+            ColumnInfoAnnotationInfo columnInfoAnnotationInfo = columnInfo.getColumnInfoAnnotationInfo();
+            if (columnInfoAnnotationInfo != null) {
                 associationColumnInfoList.add(columnInfo);
             }
 
             // 字段不存在关联实体或者存在关联实体并且存在外键的才是表字段
-            if (associationEntityInfo == null || associationEntityInfo.getJoinColumn() != null) {
+            if (columnInfoAnnotationInfo == null || columnInfoAnnotationInfo.getJoinColumn() != null) {
                 tableColumnInfoList.add(columnInfo);
             }
             columnInfoMap.put(columnInfo.getJavaColumnName(), columnInfo);

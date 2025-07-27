@@ -51,7 +51,6 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
     }
 
     private List<ResultMapAssociationInfo> getResultMapAssociationInfoList(List<ResultMapInfo> resultMapInfoList, List<ResultMapAssociationInfo> entityRelationQueryMethodList, EntityRelationInfo entityRelationInfo) {
-        int level = entityRelationInfo.getLevel();
         List<EntityRelationInfo> entityRelationInfoList = entityRelationInfo.getEntityRelationList();
         List<ResultMapAssociationInfo> resultMapAssociationInfoList = this.buildResultMapAssociationInfo(resultMapInfoList, entityRelationQueryMethodList, entityRelationInfoList);
         return resultMapAssociationInfoList;
@@ -70,14 +69,13 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
             resultMapAssociationInfo.setType(columnInfo.getJavaType());
             resultMapAssociationInfo.setColumnInfoList(entityInfo.getTableColumnInfoList());
             resultMapAssociationInfo.setColumnInfo(columnInfo);
-            resultMapAssociationInfoList.add(resultMapAssociationInfo);
 
             LoadStrategy loadStrategy = columnInfo.getColumnInfoAnnotationInfo().getLoadStrategy();
             if (loadStrategy == LoadStrategy.SUB || (loadStrategy == LoadStrategy.JOIN && level <= 2)) {
                 // 子查询和join的第一级都无法生成join查询，第一级join会造成结果膨胀问题，第二级采用in查询或者批量查询，解决N+1问题，把N+1变成1+1
                 entityRelationQueryMethodList.add(resultMapAssociationInfo);
                 this.buildResultMapInfo(resultMapInfoList, entityRelationQueryMethodList, entityRelationInfo);
-            } else if (loadStrategy == LoadStrategy.JOIN) {
+            } else if (loadStrategy == LoadStrategy.JOIN && level > 2) {
                 List<EntityRelationInfo> subEntityRelationInfoList = entityRelationInfo.getEntityRelationList();
                 if (ObjectUtils.isNotEmpty(subEntityRelationInfoList)) {
                     List<ResultMapAssociationInfo> subResultMapAssociationInfoList = this.buildResultMapAssociationInfo(resultMapInfoList, entityRelationQueryMethodList, subEntityRelationInfoList);
@@ -86,6 +84,7 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
             } else {
                 throw new RuntimeException("未知的加载策略");
             }
+            resultMapAssociationInfoList.add(resultMapAssociationInfo);
         }
         return resultMapAssociationInfoList;
     }

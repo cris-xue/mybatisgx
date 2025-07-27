@@ -60,6 +60,7 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
     private List<ResultMapAssociationInfo> buildResultMapAssociationInfo(List<ResultMapInfo> resultMapInfoList, List<ResultMapAssociationInfo> entityRelationQueryMethodList, List<EntityRelationInfo> entityRelationInfoList) {
         List<ResultMapAssociationInfo> resultMapAssociationInfoList = new ArrayList();
         for (EntityRelationInfo entityRelationInfo : entityRelationInfoList) {
+            int level = entityRelationInfo.getLevel();
             ColumnInfo columnInfo = entityRelationInfo.getColumnInfo();
             EntityInfo entityInfo = entityRelationInfo.getEntityInfo();
 
@@ -72,7 +73,8 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
             resultMapAssociationInfoList.add(resultMapAssociationInfo);
 
             LoadStrategy loadStrategy = columnInfo.getColumnInfoAnnotationInfo().getLoadStrategy();
-            if (loadStrategy == LoadStrategy.SUB) {
+            if (loadStrategy == LoadStrategy.SUB || (loadStrategy == LoadStrategy.JOIN && level <= 2)) {
+                // 子查询和join的第一级都无法生成join查询，第一级join会造成结果膨胀问题，第二级采用in查询或者批量查询，解决N+1问题，把N+1变成1+1
                 entityRelationQueryMethodList.add(resultMapAssociationInfo);
                 this.buildResultMapInfo(resultMapInfoList, entityRelationQueryMethodList, entityRelationInfo);
             } else if (loadStrategy == LoadStrategy.JOIN) {

@@ -54,9 +54,9 @@ public class EntityInfo {
      */
     private ColumnInfo lockColumnInfo;
     /**
-     * 关联字段信息
+     * 关系字段信息
      */
-    private List<ColumnInfo> associationColumnInfoList = new ArrayList<>();
+    private List<ColumnInfo> relationColumnInfoList = new ArrayList<>();
 
     public String getTableName() {
         return tableName;
@@ -100,7 +100,7 @@ public class EntityInfo {
 
             ColumnInfoAnnotationInfo columnInfoAnnotationInfo = columnInfo.getColumnInfoAnnotationInfo();
             if (columnInfoAnnotationInfo != null) {
-                associationColumnInfoList.add(columnInfo);
+                relationColumnInfoList.add(columnInfo);
             }
 
             // 字段不存在关联实体或者存在关联实体并且存在外键的才是表字段
@@ -163,11 +163,11 @@ public class EntityInfo {
         this.lockColumnInfo = lockColumnInfo;
     }
 
-    public List<ColumnInfo> getAssociationColumnInfoList() {
-        return associationColumnInfoList;
+    public List<ColumnInfo> getRelationColumnInfoList() {
+        return relationColumnInfoList;
     }
 
-    public void setAssociationColumnInfoList(List<ColumnInfo> associationColumnInfoList) {
-        this.associationColumnInfoList = associationColumnInfoList;
+    public void setRelationColumnInfoList(List<ColumnInfo> relationColumnInfoList) {
+        this.relationColumnInfoList = relationColumnInfoList;
     }
 }

@@ -28,10 +28,10 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
         EntityInfo entityInfo = EntityInfoContextHolder.get(resultClass);
 
         List<ColumnInfo> tableColumnInfoList;
-        List<ColumnInfo> associationColumnInfoList = null;
+        List<ColumnInfo> relationColumnInfoList = null;
         if (entityInfo != null) {
             tableColumnInfoList = entityInfo.getTableColumnInfoList();
-            associationColumnInfoList = entityInfo.getAssociationColumnInfoList();
+            relationColumnInfoList = entityInfo.getRelationColumnInfoList();
         } else {
             tableColumnInfoList = columnInfoHandler.getColumnInfoList(resultClass);
         }
@@ -42,17 +42,17 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
         }
         // 解决循环引用问题
         ResultMapDependencyTree resultMapDependencyTree = new ResultMapDependencyTree(null, resultClass);
-        List<ResultMapAssociationInfo> resultMapAssociationInfoList = this.processAssociationColumnInfoList(1, resultMapDependencyTree, associationColumnInfoList);
+        List<ResultMapAssociationInfo> resultMapAssociationInfoList = this.processRelationColumnInfoList(1, resultMapDependencyTree, relationColumnInfoList);
         resultMapInfo = new ResultMapInfo();
         resultMapInfo.setId(this.getResultMapId(resultClass));
         resultMapInfo.setType(resultClass);
         resultMapInfo.setColumnInfoList(tableColumnInfoList);
         resultMapInfo.setResultMapAssociationInfoList(resultMapAssociationInfoList);
-        mapperInfo.setResultMapInfo(resultMapInfo);
+        mapperInfo.addResultMapInfo(resultMapInfo);
         return resultMapInfo.getId();
     }
 
-    private List<ResultMapAssociationInfo> processAssociationColumnInfoList(int level, ResultMapDependencyTree resultMapDependencyTree, List<ColumnInfo> associationColumnInfoList) {
+    private List<ResultMapAssociationInfo> processRelationColumnInfoList(int level, ResultMapDependencyTree resultMapDependencyTree, List<ColumnInfo> associationColumnInfoList) {
         List<ResultMapAssociationInfo> resultMapAssociationInfoList = new ArrayList();
         for (ColumnInfo associationColumnInfo : associationColumnInfoList) {
             Class<?> javaType = associationColumnInfo.getJavaType();
@@ -73,9 +73,9 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
             resultMapAssociationInfo.setColumnInfoList(entityInfo.getTableColumnInfoList());
             resultMapAssociationInfo.setColumnInfo(associationColumnInfo);
 
-            List<ColumnInfo> subAssociationColumnInfoList = entityInfo.getAssociationColumnInfoList();
-            if (ObjectUtils.isNotEmpty(subAssociationColumnInfoList)) {
-                List<ResultMapAssociationInfo> subResultMapAssociationInfoList = this.processAssociationColumnInfoList(level + 1, childrenResultMapDependencyTree, subAssociationColumnInfoList);
+            List<ColumnInfo> subRelationColumnInfoList = entityInfo.getRelationColumnInfoList();
+            if (ObjectUtils.isNotEmpty(subRelationColumnInfoList)) {
+                List<ResultMapAssociationInfo> subResultMapAssociationInfoList = this.processRelationColumnInfoList(level + 1, childrenResultMapDependencyTree, subRelationColumnInfoList);
                 resultMapAssociationInfo.setResultMapAssociationInfoList(subResultMapAssociationInfoList);
             }
             resultMapAssociationInfoList.add(resultMapAssociationInfo);

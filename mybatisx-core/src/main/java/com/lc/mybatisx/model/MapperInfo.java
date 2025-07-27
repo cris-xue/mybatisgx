@@ -31,6 +31,7 @@ public class MapperInfo {
     /**
      * 表信息
      */
+    @Deprecated
     private TableInfo tableInfo;
     /**
      * 实体信息
@@ -41,12 +42,13 @@ public class MapperInfo {
      */
     private List<MethodInfo> methodInfoList;
     /**
-     * 实体关系信息
+     * 实体关系信息，使用map是因为自定义方法可能使用非实体类
      */
-    private EntityRelationInfo entityRelationInfo;
+    private Map<Class<?>, EntityRelationInfo> entityRelationInfoMap;
     /**
      * 结果集信息列表
      */
+    @Deprecated
     private Map<Class<?>, ResultMapInfo> resultMapInfoMap = new LinkedHashMap();
     /**
      * 子查询结果集
@@ -113,12 +115,17 @@ public class MapperInfo {
         this.methodInfoList = methodInfoList;
     }
 
-    public EntityRelationInfo getEntityRelationInfo() {
-        return entityRelationInfo;
+    public List<EntityRelationInfo> getEntityRelationInfoList() {
+        return new ArrayList<>(entityRelationInfoMap.values());
     }
 
-    public void setEntityRelationInfo(EntityRelationInfo entityRelationInfo) {
-        this.entityRelationInfo = entityRelationInfo;
+    public EntityRelationInfo getEntityRelationInfo(Class<?> clazz) {
+        return entityRelationInfoMap.get(clazz);
+    }
+
+    public void addEntityRelationInfo(EntityRelationInfo entityRelationInfo) {
+        EntityInfo entityInfo = entityRelationInfo.getEntityInfo();
+        this.entityRelationInfoMap.put(entityInfo.getTableEntityClass(), entityRelationInfo);
     }
 
     public List<ResultMapInfo> getResultMapInfoList() {

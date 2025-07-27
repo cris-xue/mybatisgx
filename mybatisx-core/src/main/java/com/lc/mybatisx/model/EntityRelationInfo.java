@@ -1,5 +1,6 @@
 package com.lc.mybatisx.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -20,7 +21,7 @@ public class EntityRelationInfo {
     /**
      * 实体关系列表
      */
-    private List<EntityInfo> relationList;
+    private List<EntityRelationInfo> entityRelationList = new ArrayList();
 
     public Integer getLevel() {
         return level;
@@ -38,11 +39,15 @@ public class EntityRelationInfo {
         this.entityInfo = entityInfo;
     }
 
-    public List<EntityInfo> getRelationList() {
-        return relationList;
+    public List<EntityRelationInfo> getEntityRelationList() {
+        return entityRelationList;
     }
 
-    public void setRelationList(List<EntityInfo> relationList) {
-        this.relationList = relationList;
+    public void setEntityRelationList(List<EntityRelationInfo> entityRelationList) {
+        this.entityRelationList = entityRelationList;
+    }
+
+    public void addEntityRelation(EntityRelationInfo entityRelationInfo) {
+        this.entityRelationList.add(entityRelationInfo);
     }
 }

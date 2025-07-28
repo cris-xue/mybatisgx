@@ -139,6 +139,10 @@ public class MapperInfo {
         resultMapInfoList.forEach(resultMapInfo -> this.addResultMapInfo(resultMapInfo));
     }
 
+    public Map<String, ResultMapAssociationInfo> getEntityRelationQueryMethodMap() {
+        return entityRelationQueryMethodMap;
+    }
+
     public List<ResultMapAssociationInfo> getEntityRelationQueryMethodList() {
         return new ArrayList(entityRelationQueryMethodMap.values());
     }

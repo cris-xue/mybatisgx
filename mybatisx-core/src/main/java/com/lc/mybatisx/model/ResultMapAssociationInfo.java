@@ -1,5 +1,6 @@
 package com.lc.mybatisx.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -52,7 +53,7 @@ public class ResultMapAssociationInfo {
     /**
      * 关联信息
      */
-    private List<ResultMapAssociationInfo> resultMapAssociationInfoList;
+    private List<ResultMapAssociationInfo> resultMapAssociationInfoList = new ArrayList();
 
     public String getSelect() {
         return select;
@@ -141,5 +142,9 @@ public class ResultMapAssociationInfo {
 
     public void setResultMapAssociationInfoList(List<ResultMapAssociationInfo> resultMapAssociationInfoList) {
         this.resultMapAssociationInfoList = resultMapAssociationInfoList;
+    }
+
+    public void addResultMapAssociationInfo(ResultMapAssociationInfo resultMapAssociationInfo) {
+        this.resultMapAssociationInfoList.add(resultMapAssociationInfo);
     }
 }

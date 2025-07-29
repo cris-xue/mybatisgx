@@ -29,11 +29,6 @@ public class MapperInfo {
      */
     private String namespace;
     /**
-     * 表信息
-     */
-    @Deprecated
-    private TableInfo tableInfo;
-    /**
      * 实体信息
      */
     private EntityInfo entityInfo;
@@ -84,14 +79,6 @@ public class MapperInfo {
 
     public void setNamespace(String namespace) {
         this.namespace = namespace;
-    }
-
-    public TableInfo getTableInfo() {
-        return tableInfo;
-    }
-
-    public void setTableInfo(TableInfo tableInfo) {
-        this.tableInfo = tableInfo;
     }
 
     public EntityInfo getEntityInfo() {

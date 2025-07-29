@@ -42,7 +42,12 @@ public class ResultMapInfo {
     /**
      * 关联信息
      */
+    @Deprecated
     private List<ResultMapAssociationInfo> resultMapAssociationInfoList;
+    /**
+     * resultMap关系信息列表
+     */
+    private List<ResultMapRelationInfo> resultMapRelationInfoList;
 
     public String getId() {
         return id;
@@ -94,5 +99,13 @@ public class ResultMapInfo {
 
     public void setResultMapAssociationInfoList(List<ResultMapAssociationInfo> resultMapAssociationInfoList) {
         this.resultMapAssociationInfoList = resultMapAssociationInfoList;
+    }
+
+    public List<ResultMapRelationInfo> getResultMapRelationInfoList() {
+        return resultMapRelationInfoList;
+    }
+
+    public void setResultMapRelationInfoList(List<ResultMapRelationInfo> resultMapRelationInfoList) {
+        this.resultMapRelationInfoList = resultMapRelationInfoList;
     }
 }

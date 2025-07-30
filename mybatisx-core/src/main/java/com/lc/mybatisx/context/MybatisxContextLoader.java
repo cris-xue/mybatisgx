@@ -7,8 +7,8 @@ import com.lc.mybatisx.model.MapperInfo;
 import com.lc.mybatisx.model.MapperTemplateInfo;
 import com.lc.mybatisx.model.handler.EntityInfoHandler;
 import com.lc.mybatisx.model.handler.MapperInfoHandler;
-import com.lc.mybatisx.template.AssociationSelectTemplateHandler;
 import com.lc.mybatisx.template.CurdTemplateHandler;
+import com.lc.mybatisx.template.RelationSelectTemplateHandler;
 import com.lc.mybatisx.template.ResultMapTemplateHandler;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.ibatis.annotations.Mapper;
@@ -100,18 +100,18 @@ public class MybatisxContextLoader {
     private void processTemplate() {
         CurdTemplateHandler curdTemplateHandler = new CurdTemplateHandler();
         ResultMapTemplateHandler resultMapTemplateHandler = new ResultMapTemplateHandler();
-        AssociationSelectTemplateHandler associationSelectTemplateHandler = new AssociationSelectTemplateHandler();
+        RelationSelectTemplateHandler relationSelectTemplateHandler = new RelationSelectTemplateHandler();
         List<MapperInfo> mapperInfoList = MapperInfoContextHolder.getMapperInfoList();
         mapperInfoList.forEach(mapperInfo -> {
             Map<String, XNode> curdXNodeMap = curdTemplateHandler.execute(mapperInfo);
             Map<String, XNode> resultMapXNodeMap = resultMapTemplateHandler.execute(mapperInfo);
-            Map<String, XNode> associationSelectXNodeMap = associationSelectTemplateHandler.execute(mapperInfo);
+            Map<String, XNode> relationSelectXNodeMap = relationSelectTemplateHandler.execute(mapperInfo);
 
             MapperTemplateInfo mappingTemplateInfo = new MapperTemplateInfo();
             mappingTemplateInfo.setNamespace(mapperInfo.getNamespace());
             mappingTemplateInfo.setCurdTemplateMap(curdXNodeMap);
             mappingTemplateInfo.setResultMapTemplateMap(resultMapXNodeMap);
-            mappingTemplateInfo.setAssociationSelectTemplateMap(associationSelectXNodeMap);
+            mappingTemplateInfo.setAssociationSelectTemplateMap(relationSelectXNodeMap);
             MapperTemplateContextHolder.set(mappingTemplateInfo);
             logger.info("dao: {} all db operate template: {}", mapperInfo.getNamespace(), mappingTemplateInfo);
         });

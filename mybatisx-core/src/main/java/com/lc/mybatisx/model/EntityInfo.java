@@ -22,9 +22,13 @@ public class EntityInfo {
      */
     private String tableName;
     /**
-     * 表实体类型
+     * 实体类型
      */
-    private Class<?> tableEntityClass;
+    private Class<?> entityClass;
+    /**
+     * 实体类型名称
+     */
+    private String entityClassName;
     /**
      * 字段信息列表
      */
@@ -66,12 +70,20 @@ public class EntityInfo {
         this.tableName = tableName;
     }
 
-    public Class<?> getTableEntityClass() {
-        return tableEntityClass;
+    public Class<?> getEntityClass() {
+        return entityClass;
     }
 
-    public void setTableEntityClass(Class<?> tableEntityClass) {
-        this.tableEntityClass = tableEntityClass;
+    public void setEntityClass(Class<?> entityClass) {
+        this.entityClass = entityClass;
+    }
+
+    public String getEntityClassName() {
+        return entityClassName;
+    }
+
+    public void setEntityClassName(String entityClassName) {
+        this.entityClassName = entityClassName;
     }
 
     public List<ColumnInfo> getColumnInfoList() {

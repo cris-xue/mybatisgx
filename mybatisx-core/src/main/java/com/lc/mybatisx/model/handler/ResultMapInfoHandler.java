@@ -46,6 +46,7 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
         Class<?> clazz = entityInfo.getClazz();
         ResultMapInfo resultMapInfo = new ResultMapInfo();
         resultMapInfo.setId(this.getResultMapId(clazz));
+        resultMapInfo.setEntityInfo(entityInfo);
         resultMapInfo.setResultMapRelationInfoList(resultMapRelationInfoList);
         resultMapInfoList.add(resultMapInfo);
         return resultMapInfo;

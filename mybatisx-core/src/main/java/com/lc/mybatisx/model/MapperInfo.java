@@ -13,17 +13,13 @@ import java.util.Map;
 public class MapperInfo {
 
     /**
-     * id类型
+     * id类型【SimpleDao的id类型，不能和实体中的id合并，在启动阶段需要使用两者进行对比，如果不一致表示写错了，需要提示】
      */
     private Class<?> idClass;
     /**
-     * 实体类型
+     * 实体类型【SimpleDao的entity类型，不能和实体中的entity合并，在启动阶段需要使用两者进行对比，如果不一致表示写错了，需要提示】
      */
     private Class<?> entityClass;
-    /**
-     * 表名称
-     */
-    private String tableName;
     /**
      * 命名空间
      */
@@ -66,11 +62,7 @@ public class MapperInfo {
     }
 
     public String getTableName() {
-        return tableName;
-    }
-
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
+        return this.entityInfo.getTableName();
     }
 
     public String getNamespace() {
@@ -119,7 +111,7 @@ public class MapperInfo {
     }
 
     public void addResultMapInfo(ResultMapInfo resultMapInfo) {
-        this.resultMapInfoMap.put(resultMapInfo.getType(), resultMapInfo);
+        this.resultMapInfoMap.put(resultMapInfo.getEntityInfo().getTableEntityClass(), resultMapInfo);
     }
 
     public void addResultMapInfoList(List<ResultMapInfo> resultMapInfoList) {

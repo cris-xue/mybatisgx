@@ -1,8 +1,6 @@
 package com.lc.mybatisx.model;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * https://blog.csdn.net/wangruoao/article/details/83147374/
@@ -22,28 +20,14 @@ import java.util.Map;
  */
 public class ResultMapInfo {
 
+    /**
+     * resultMap id
+     */
     private String id;
     /**
-     * 类型
+     * 实体信息
      */
-    private Class<?> type;
-    /**
-     * 类型名
-     */
-    private String typeName;
-    /**
-     * 字段信息列表
-     */
-    private List<ColumnInfo> columnInfoList;
-    /**
-     * java字段映射字段信息，userName={userName=user_name}
-     */
-    private Map<String, ColumnInfo> columnInfoMap;
-    /**
-     * 关联信息
-     */
-    @Deprecated
-    private List<ResultMapAssociationInfo> resultMapAssociationInfoList;
+    private EntityInfo entityInfo;
     /**
      * resultMap关系信息列表
      */
@@ -57,48 +41,12 @@ public class ResultMapInfo {
         this.id = id;
     }
 
-    public Class<?> getType() {
-        return type;
+    public EntityInfo getEntityInfo() {
+        return entityInfo;
     }
 
-    public void setType(Class<?> type) {
-        this.type = type;
-        this.typeName = type.getTypeName();
-    }
-
-    public String getTypeName() {
-        return typeName;
-    }
-
-    public void setTypeName(String typeName) {
-        this.typeName = typeName;
-    }
-
-    public List<ColumnInfo> getColumnInfoList() {
-        return columnInfoList;
-    }
-
-    public void setColumnInfoList(List<ColumnInfo> columnInfoList) {
-        this.columnInfoList = columnInfoList;
-        Map<String, ColumnInfo> columnInfoMap = new HashMap<>();
-        columnInfoList.forEach(columnInfo -> columnInfoMap.put(columnInfo.getJavaColumnName(), columnInfo));
-        this.columnInfoMap = columnInfoMap;
-    }
-
-    public Map<String, ColumnInfo> getColumnInfoMap() {
-        return columnInfoMap;
-    }
-
-    public void setColumnInfoMap(Map<String, ColumnInfo> columnInfoMap) {
-        this.columnInfoMap = columnInfoMap;
-    }
-
-    public List<ResultMapAssociationInfo> getResultMapAssociationInfoList() {
-        return resultMapAssociationInfoList;
-    }
-
-    public void setResultMapAssociationInfoList(List<ResultMapAssociationInfo> resultMapAssociationInfoList) {
-        this.resultMapAssociationInfoList = resultMapAssociationInfoList;
+    public void setEntityInfo(EntityInfo entityInfo) {
+        this.entityInfo = entityInfo;
     }
 
     public List<ResultMapRelationInfo> getResultMapRelationInfoList() {

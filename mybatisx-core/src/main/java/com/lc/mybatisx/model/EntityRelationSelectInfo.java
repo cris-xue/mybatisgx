@@ -15,41 +15,59 @@ public class EntityRelationSelectInfo {
      */
     private String id;
     /**
-     * 查询方法名
-     */
-    private String select;
-    /**
      * 映射到一个外部的标签中，然后通过 id 进行引入
      */
     private String resultMapId;
-    /**
-     * 类型
-     */
-    private Class<?> type;
-    /**
-     * 类型名
-     */
-    private String typeName;
-    /**
-     * 容器类型
-     */
-    private Class<?> ofType;
-    /**
-     * 容器类型名
-     */
-    private String ofTypeName;
     /**
      * 关联字段对应的字段信息
      */
     private ColumnInfo columnInfo;
     /**
-     * 字段信息列表
+     * 实体信息
      */
-    private List<ColumnInfo> columnInfoList;
+    private EntityInfo entityInfo;
     /**
      * 关联信息
      */
     private List<EntityRelationSelectInfo> entityRelationSelectInfoList = new ArrayList();
 
+    public String getId() {
+        return id;
+    }
 
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getResultMapId() {
+        return resultMapId;
+    }
+
+    public void setResultMapId(String resultMapId) {
+        this.resultMapId = resultMapId;
+    }
+
+    public ColumnInfo getColumnInfo() {
+        return columnInfo;
+    }
+
+    public void setColumnInfo(ColumnInfo columnInfo) {
+        this.columnInfo = columnInfo;
+    }
+
+    public EntityInfo getEntityInfo() {
+        return entityInfo;
+    }
+
+    public void setEntityInfo(EntityInfo entityInfo) {
+        this.entityInfo = entityInfo;
+    }
+
+    public List<EntityRelationSelectInfo> getEntityRelationSelectInfoList() {
+        return entityRelationSelectInfoList;
+    }
+
+    public void setEntityRelationSelectInfoList(List<EntityRelationSelectInfo> entityRelationSelectInfoList) {
+        this.entityRelationSelectInfoList = entityRelationSelectInfoList;
+    }
 }

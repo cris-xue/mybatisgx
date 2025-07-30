@@ -47,7 +47,7 @@ public class MapperInfo {
     /**
      * 实体关联查询方法
      */
-    private Map<String, ResultMapAssociationInfo> entityRelationQueryMethodMap = new LinkedHashMap();
+    private Map<String, EntityRelationSelectInfo> entityRelationSelectInfoMap = new LinkedHashMap();
 
     public Class<?> getIdClass() {
         return idClass;
@@ -126,17 +126,17 @@ public class MapperInfo {
         resultMapInfoList.forEach(resultMapInfo -> this.addResultMapInfo(resultMapInfo));
     }
 
-    public Map<String, ResultMapAssociationInfo> getEntityRelationQueryMethodMap() {
-        return entityRelationQueryMethodMap;
+    public Map<String, EntityRelationSelectInfo> getEntityRelationSelectInfoMap() {
+        return entityRelationSelectInfoMap;
     }
 
-    public List<ResultMapAssociationInfo> getEntityRelationQueryMethodList() {
-        return new ArrayList(entityRelationQueryMethodMap.values());
+    public List<EntityRelationSelectInfo> getEntityRelationSelectInfoList() {
+        return new ArrayList(entityRelationSelectInfoMap.values());
     }
 
-    public void setEntityRelationQueryMethodList(List<ResultMapAssociationInfo> resultMapAssociationInfoList) {
-        resultMapAssociationInfoList.forEach(resultMapAssociationInfo ->
-                this.entityRelationQueryMethodMap.put(resultMapAssociationInfo.getSelect(), resultMapAssociationInfo)
+    public void setEntityRelationSelectInfoList(List<EntityRelationSelectInfo> entityRelationSelectInfoList) {
+        entityRelationSelectInfoList.forEach(entityRelationSelectInfo ->
+                this.entityRelationSelectInfoMap.put(entityRelationSelectInfo.getId(), entityRelationSelectInfo)
         );
     }
 }

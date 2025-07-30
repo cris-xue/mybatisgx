@@ -5,7 +5,7 @@ import java.util.List;
 
 /**
  * @author ：薛承城
- * @description：实体关系查询
+ * @description：实体关系查询 <select id="" resultMap=""></select>
  * @date ：2021/7/9 17:14
  */
 public class EntityRelationSelectInfo {

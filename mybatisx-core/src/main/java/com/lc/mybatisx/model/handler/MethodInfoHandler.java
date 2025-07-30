@@ -294,7 +294,7 @@ public class MethodInfoHandler {
 
             String javaColumnName = conditionInfo.getJavaColumnName();
             javaColumnName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, javaColumnName);
-            ColumnInfo columnInfo = resultMapInfo.getColumnInfoMap().get(javaColumnName);
+            ColumnInfo columnInfo = resultMapInfo.getColumnInfo(javaColumnName);
             if (columnInfo == null) {
                 throw new RuntimeException("方法名中的字段在实体类中不存在: " + javaColumnName);
             }

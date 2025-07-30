@@ -41,6 +41,10 @@ public class ResultMapInfo {
         this.id = id;
     }
 
+    public ColumnInfo getColumnInfo(String javaColumnName) {
+        return this.entityInfo.getColumnInfo(javaColumnName);
+    }
+
     public EntityInfo getEntityInfo() {
         return entityInfo;
     }

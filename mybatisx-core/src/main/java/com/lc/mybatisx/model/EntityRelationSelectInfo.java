@@ -70,4 +70,8 @@ public class EntityRelationSelectInfo {
     public void setEntityRelationSelectInfoList(List<EntityRelationSelectInfo> entityRelationSelectInfoList) {
         this.entityRelationSelectInfoList = entityRelationSelectInfoList;
     }
+
+    public void addEntityRelationSelectInfo(EntityRelationSelectInfo entityRelationSelectInfo) {
+        this.entityRelationSelectInfoList.add(entityRelationSelectInfo);
+    }
 }

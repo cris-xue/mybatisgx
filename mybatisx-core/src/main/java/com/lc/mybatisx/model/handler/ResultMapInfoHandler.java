@@ -27,18 +27,18 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
         }
 
         List<ResultMapInfo> resultMapInfoList = new ArrayList();
-        List<ResultMapAssociationInfo> entityRelationQueryMethodList = new ArrayList();
+        List<EntityRelationSelectInfo> entityRelationSelectInfoList = new ArrayList();
         EntityRelationInfo entityRelationInfo = mapperInfo.getEntityRelationInfo(resultClass);
         ResultMapInfo rootResultMapInfo = this.buildResultMapInfo(resultMapInfoList, entityRelationInfo);
-        this.buildEntityRelationQueryMethod(entityRelationQueryMethodList, entityRelationInfo, null);
+        this.buildEntityRelationSelect(entityRelationSelectInfoList, entityRelationInfo, null);
 
         mapperInfo.addResultMapInfoList(resultMapInfoList);
-        mapperInfo.setEntityRelationQueryMethodList(entityRelationQueryMethodList);
+        mapperInfo.setEntityRelationSelectInfoList(entityRelationSelectInfoList);
         return rootResultMapInfo.getId();
     }
 
     private ResultMapInfo buildResultMapInfo(List<ResultMapInfo> resultMapInfoList, EntityRelationInfo entityRelationInfo) {
-        List<ResultMapAssociationInfo> resultMapAssociationInfoList = this.buildResultMapRelationInfo(
+        List<ResultMapRelationInfo> resultMapAssociationInfoList = this.buildResultMapRelationInfo(
                 resultMapInfoList,
                 entityRelationInfo.getEntityRelationList()
         );
@@ -46,9 +46,7 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
         Class<?> targetEntityClass = entityInfo.getTableEntityClass();
         ResultMapInfo resultMapInfo = new ResultMapInfo();
         resultMapInfo.setId(this.getResultMapId(targetEntityClass));
-        resultMapInfo.setType(targetEntityClass);
-        resultMapInfo.setColumnInfoList(entityInfo.getTableColumnInfoList());
-        resultMapInfo.setResultMapAssociationInfoList(resultMapAssociationInfoList);
+        resultMapInfo.setResultMapRelationInfoList(resultMapAssociationInfoList);
         resultMapInfoList.add(resultMapInfo);
         return resultMapInfo;
     }
@@ -60,44 +58,42 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
      * @param childrenEntityRelationInfoList
      * @return
      */
-    private List<ResultMapAssociationInfo> buildResultMapRelationInfo(List<ResultMapInfo> resultMapInfoList, List<EntityRelationInfo> childrenEntityRelationInfoList) {
-        List<ResultMapAssociationInfo> resultMapAssociationInfoList = new ArrayList();
+    private List<ResultMapRelationInfo> buildResultMapRelationInfo(List<ResultMapInfo> resultMapInfoList, List<EntityRelationInfo> childrenEntityRelationInfoList) {
+        List<ResultMapRelationInfo> resultMapRelationInfoList = new ArrayList();
         for (EntityRelationInfo childrenEntityRelationInfo : childrenEntityRelationInfoList) {
             int level = childrenEntityRelationInfo.getLevel();
             ColumnInfo columnInfo = childrenEntityRelationInfo.getColumnInfo();
             EntityInfo entityInfo = childrenEntityRelationInfo.getEntityInfo();
 
-            ResultMapAssociationInfo resultMapAssociationInfo = new ResultMapAssociationInfo();
-            resultMapAssociationInfo.setSelect(this.getSelect(columnInfo.getJavaType(), columnInfo.getCollectionType()));
-            resultMapAssociationInfo.setResultMapId(this.getSubQueryResultMapId(columnInfo.getJavaType(), columnInfo));
-            resultMapAssociationInfo.setType(columnInfo.getJavaType());
-            resultMapAssociationInfo.setColumnInfoList(entityInfo.getTableColumnInfoList());
-            resultMapAssociationInfo.setColumnInfo(columnInfo);
+            ResultMapRelationInfo resultMapRelationInfo = new ResultMapRelationInfo();
+            resultMapRelationInfo.setSelect(this.getSelect(columnInfo.getJavaType(), columnInfo.getCollectionType()));
+            resultMapRelationInfo.setColumnInfo(columnInfo);
+            resultMapRelationInfo.setEntityInfo(entityInfo);
 
             LoadStrategy loadStrategy = columnInfo.getColumnInfoAnnotationInfo().getLoadStrategy();
             if (loadStrategy == LoadStrategy.SUB || (loadStrategy == LoadStrategy.JOIN && level <= 2)) {
                 this.buildResultMapInfo(resultMapInfoList, childrenEntityRelationInfo);
             } else if (loadStrategy == LoadStrategy.JOIN && level > 2) {
-                List<ResultMapAssociationInfo> subResultMapAssociationInfoList = this.buildResultMapRelationInfo(resultMapInfoList, childrenEntityRelationInfo.getEntityRelationList());
-                resultMapAssociationInfo.setResultMapAssociationInfoList(subResultMapAssociationInfoList);
+                List<ResultMapRelationInfo> subResultMapAssociationInfoList = this.buildResultMapRelationInfo(resultMapInfoList, childrenEntityRelationInfo.getEntityRelationList());
+                resultMapRelationInfo.setResultMapAssociationInfoList(subResultMapAssociationInfoList);
             } else {
                 throw new RuntimeException("未知的加载策略");
             }
-            resultMapAssociationInfoList.add(resultMapAssociationInfo);
+            resultMapRelationInfoList.add(resultMapRelationInfo);
         }
-        return resultMapAssociationInfoList;
+        return resultMapRelationInfoList;
     }
 
     /**
      * 子查询和join的第一级都无法生成join查询，第一级join会造成结果膨胀问题，第二级采用in查询或者批量查询，解决N+1问题，把N+1变成1+1
      *
-     * @param entityRelationQueryMethodList
+     * @param entityRelationSelectInfoList
      * @param entityRelationInfo
      */
-    private void buildEntityRelationQueryMethod(
-            List<ResultMapAssociationInfo> entityRelationQueryMethodList,
+    private void buildEntityRelationSelect(
+            List<EntityRelationSelectInfo> entityRelationSelectInfoList,
             EntityRelationInfo entityRelationInfo,
-            ResultMapAssociationInfo parentResultMapAssociationInfo
+            EntityRelationSelectInfo parentEntityRelationSelectInfo
     ) {
         List<EntityRelationInfo> childrenEntityRelationInfoList = entityRelationInfo.getEntityRelationList();
         for (EntityRelationInfo childrenEntityRelationInfo : childrenEntityRelationInfoList) {
@@ -105,23 +101,22 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
             ColumnInfo columnInfo = childrenEntityRelationInfo.getColumnInfo();
             EntityInfo entityInfo = childrenEntityRelationInfo.getEntityInfo();
 
-            ResultMapAssociationInfo resultMapAssociationInfo = new ResultMapAssociationInfo();
-            resultMapAssociationInfo.setSelect(this.getSelect(columnInfo.getJavaType(), columnInfo.getCollectionType()));
-            resultMapAssociationInfo.setResultMapId(this.getSubQueryResultMapId(columnInfo.getJavaType(), columnInfo));
-            resultMapAssociationInfo.setType(columnInfo.getJavaType());
-            resultMapAssociationInfo.setColumnInfoList(entityInfo.getTableColumnInfoList());
-            resultMapAssociationInfo.setColumnInfo(columnInfo);
+            EntityRelationSelectInfo entityRelationSelectInfo = new EntityRelationSelectInfo();
+            entityRelationSelectInfo.setId(this.getSelect(columnInfo.getJavaType(), columnInfo.getCollectionType()));
+            entityRelationSelectInfo.setResultMapId(this.getSubQueryResultMapId(columnInfo.getJavaType(), columnInfo));
+            entityRelationSelectInfo.setColumnInfo(columnInfo);
+            entityRelationSelectInfo.setEntityInfo(entityInfo);
 
             LoadStrategy loadStrategy = columnInfo.getColumnInfoAnnotationInfo().getLoadStrategy();
             if (loadStrategy == LoadStrategy.SUB || (loadStrategy == LoadStrategy.JOIN && level <= 2)) {
                 // 子查询和join的第一级都无法生成join查询，第一级join会造成结果膨胀问题，第二级采用in查询或者批量查询，解决N+1问题，把N+1变成1+1
-                entityRelationQueryMethodList.add(resultMapAssociationInfo);
+                entityRelationSelectInfoList.add(entityRelationSelectInfo);
             } else if (loadStrategy == LoadStrategy.JOIN && level > 2) {
-                parentResultMapAssociationInfo.addResultMapAssociationInfo(resultMapAssociationInfo);
+                parentEntityRelationSelectInfo.addEntityRelationSelectInfo(entityRelationSelectInfo);
             } else {
                 throw new RuntimeException("未知的加载策略");
             }
-            this.buildEntityRelationQueryMethod(entityRelationQueryMethodList, childrenEntityRelationInfo, resultMapAssociationInfo);
+            this.buildEntityRelationSelect(entityRelationSelectInfoList, childrenEntityRelationInfo, entityRelationSelectInfo);
         }
     }
 

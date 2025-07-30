@@ -75,4 +75,20 @@ public class ResultMapRelationInfo {
     public void setResultMapAssociationInfoList(List<ResultMapRelationInfo> resultMapAssociationInfoList) {
         this.resultMapAssociationInfoList = resultMapAssociationInfoList;
     }
+
+    public ColumnInfo getColumnInfo(String javaColumnName) {
+        return this.entityInfo.getColumnInfo(javaColumnName);
+    }
+
+    public Class<?> getEntityClazz() {
+        return this.entityInfo.getClazz();
+    }
+
+    public String getEntityClazzName() {
+        return this.entityInfo.getClazzName();
+    }
+
+    public List<ColumnInfo> getTableColumnInfoList() {
+        return this.entityInfo.getTableColumnInfoList();
+    }
 }

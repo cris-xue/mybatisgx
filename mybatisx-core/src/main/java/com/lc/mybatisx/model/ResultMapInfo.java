@@ -41,14 +41,6 @@ public class ResultMapInfo {
         this.id = id;
     }
 
-    public ColumnInfo getColumnInfo(String javaColumnName) {
-        return this.entityInfo.getColumnInfo(javaColumnName);
-    }
-
-    public String getEntityClazzName() {
-        return this.entityInfo.getClazzName();
-    }
-
     public EntityInfo getEntityInfo() {
         return entityInfo;
     }
@@ -63,5 +55,17 @@ public class ResultMapInfo {
 
     public void setResultMapRelationInfoList(List<ResultMapRelationInfo> resultMapRelationInfoList) {
         this.resultMapRelationInfoList = resultMapRelationInfoList;
+    }
+
+    public ColumnInfo getColumnInfo(String javaColumnName) {
+        return this.entityInfo.getColumnInfo(javaColumnName);
+    }
+
+    public String getEntityClazzName() {
+        return this.entityInfo.getClazzName();
+    }
+
+    public List<ColumnInfo> getTableColumnInfoList() {
+        return this.entityInfo.getTableColumnInfoList();
     }
 }

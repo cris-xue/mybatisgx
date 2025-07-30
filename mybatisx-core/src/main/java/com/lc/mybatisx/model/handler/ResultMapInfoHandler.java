@@ -38,15 +38,15 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
     }
 
     private ResultMapInfo buildResultMapInfo(List<ResultMapInfo> resultMapInfoList, EntityRelationInfo entityRelationInfo) {
-        List<ResultMapRelationInfo> resultMapAssociationInfoList = this.buildResultMapRelationInfo(
+        List<ResultMapRelationInfo> resultMapRelationInfoList = this.buildResultMapRelationInfo(
                 resultMapInfoList,
                 entityRelationInfo.getEntityRelationList()
         );
         EntityInfo entityInfo = entityRelationInfo.getEntityInfo();
-        Class<?> targetEntityClass = entityInfo.getTableEntityClass();
+        Class<?> clazz = entityInfo.getClazz();
         ResultMapInfo resultMapInfo = new ResultMapInfo();
-        resultMapInfo.setId(this.getResultMapId(targetEntityClass));
-        resultMapInfo.setResultMapRelationInfoList(resultMapAssociationInfoList);
+        resultMapInfo.setId(this.getResultMapId(clazz));
+        resultMapInfo.setResultMapRelationInfoList(resultMapRelationInfoList);
         resultMapInfoList.add(resultMapInfo);
         return resultMapInfo;
     }

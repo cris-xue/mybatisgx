@@ -99,7 +99,7 @@ public class MapperInfo {
 
     public void addEntityRelationInfo(EntityRelationInfo entityRelationInfo) {
         EntityInfo entityInfo = entityRelationInfo.getEntityInfo();
-        this.entityRelationInfoMap.put(entityInfo.getTableEntityClass(), entityRelationInfo);
+        this.entityRelationInfoMap.put(entityInfo.getClazz(), entityRelationInfo);
     }
 
     public List<ResultMapInfo> getResultMapInfoList() {
@@ -111,7 +111,7 @@ public class MapperInfo {
     }
 
     public void addResultMapInfo(ResultMapInfo resultMapInfo) {
-        this.resultMapInfoMap.put(resultMapInfo.getEntityInfo().getTableEntityClass(), resultMapInfo);
+        this.resultMapInfoMap.put(resultMapInfo.getEntityInfo().getClazz(), resultMapInfo);
     }
 
     public void addResultMapInfoList(List<ResultMapInfo> resultMapInfoList) {

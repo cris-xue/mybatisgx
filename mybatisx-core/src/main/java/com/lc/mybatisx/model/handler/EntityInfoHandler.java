@@ -23,8 +23,8 @@ public class EntityInfoHandler {
         List<ColumnInfo> columnInfoList = columnInfoHandler.getColumnInfoList(entityClass);
         EntityInfo entityInfo = new EntityInfo();
         entityInfo.setTableName(entityClass.getAnnotation(Table.class).name());
-        entityInfo.setEntityClass(entityClass);
-        entityInfo.setEntityClassName(entityClass.getName());
+        entityInfo.setClazz(entityClass);
+        entityInfo.setClazzName(entityClass.getName());
         entityInfo.setColumnInfoList(columnInfoList);
         return entityInfo;
     }

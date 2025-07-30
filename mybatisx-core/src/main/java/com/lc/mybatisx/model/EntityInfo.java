@@ -24,11 +24,11 @@ public class EntityInfo {
     /**
      * 实体类型
      */
-    private Class<?> entityClass;
+    private Class<?> clazz;
     /**
      * 实体类型名称
      */
-    private String entityClassName;
+    private String clazzName;
     /**
      * 字段信息列表
      */
@@ -70,20 +70,20 @@ public class EntityInfo {
         this.tableName = tableName;
     }
 
-    public Class<?> getEntityClass() {
-        return entityClass;
+    public Class<?> getClazz() {
+        return clazz;
     }
 
-    public void setEntityClass(Class<?> entityClass) {
-        this.entityClass = entityClass;
+    public void setClazz(Class<?> clazz) {
+        this.clazz = clazz;
     }
 
-    public String getEntityClassName() {
-        return entityClassName;
+    public String getClazzName() {
+        return clazzName;
     }
 
-    public void setEntityClassName(String entityClassName) {
-        this.entityClassName = entityClassName;
+    public void setClazzName(String clazzName) {
+        this.clazzName = clazzName;
     }
 
     public List<ColumnInfo> getColumnInfoList() {

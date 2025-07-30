@@ -45,8 +45,8 @@ public class ResultMapInfo {
         return this.entityInfo.getColumnInfo(javaColumnName);
     }
 
-    public String getEntityClassName() {
-        return this.entityInfo.getEntityClassName();
+    public String getEntityClazzName() {
+        return this.entityInfo.getClazzName();
     }
 
     public EntityInfo getEntityInfo() {

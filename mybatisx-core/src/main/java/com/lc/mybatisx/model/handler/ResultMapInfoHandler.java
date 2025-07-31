@@ -29,12 +29,12 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
         List<ResultMapInfo> resultMapInfoList = new ArrayList();
         List<EntityRelationSelectInfo> entityRelationSelectInfoList = new ArrayList();
         EntityRelationInfo entityRelationInfo = mapperInfo.getEntityRelationInfo(resultClass);
-        ResultMapInfo rootResultMapInfo = this.buildResultMapInfo(resultMapInfoList, entityRelationInfo);
-        this.buildEntityRelationSelect(entityRelationSelectInfoList, entityRelationInfo, null);
+        resultMapInfo = this.buildResultMapInfo(resultMapInfoList, entityRelationInfo);
+        this.buildEntityRelationSelect(resultMapInfo, entityRelationSelectInfoList, entityRelationInfo, null);
 
         mapperInfo.addResultMapInfoList(resultMapInfoList);
         mapperInfo.setEntityRelationSelectInfoList(entityRelationSelectInfoList);
-        return rootResultMapInfo.getId();
+        return resultMapInfo.getId();
     }
 
     private ResultMapInfo buildResultMapInfo(List<ResultMapInfo> resultMapInfoList, EntityRelationInfo entityRelationInfo) {
@@ -44,7 +44,7 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
         );
         EntityInfo entityInfo = entityRelationInfo.getEntityInfo();
         ResultMapInfo resultMapInfo = new ResultMapInfo();
-        resultMapInfo.setId(this.getResultMapId(entityRelationInfo));
+        resultMapInfo.setId(this.getResultMapId(null, entityRelationInfo));
         resultMapInfo.setEntityInfo(entityInfo);
         resultMapInfo.setResultMapRelationInfoList(resultMapRelationInfoList);
         resultMapInfoList.add(resultMapInfo);
@@ -91,6 +91,7 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
      * @param entityRelationInfo
      */
     private void buildEntityRelationSelect(
+            ResultMapInfo resultMapInfo,
             List<EntityRelationSelectInfo> entityRelationSelectInfoList,
             EntityRelationInfo entityRelationInfo,
             EntityRelationSelectInfo parentEntityRelationSelectInfo
@@ -103,7 +104,7 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
 
             EntityRelationSelectInfo entityRelationSelectInfo = new EntityRelationSelectInfo();
             entityRelationSelectInfo.setId(this.getSelect(columnInfo.getJavaType(), columnInfo.getCollectionType()));
-            entityRelationSelectInfo.setResultMapId(this.getSubQueryResultMapId(childrenEntityRelationInfo.getEntityInfo().getClazzName(), columnInfo));
+            entityRelationSelectInfo.setResultMapId(this.getResultMapId(resultMapInfo, childrenEntityRelationInfo));
             entityRelationSelectInfo.setColumnInfo(columnInfo);
             entityRelationSelectInfo.setEntityInfo(entityInfo);
 
@@ -116,14 +117,16 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
             } else {
                 throw new RuntimeException("未知的加载策略");
             }
-            this.buildEntityRelationSelect(entityRelationSelectInfoList, childrenEntityRelationInfo, entityRelationSelectInfo);
+            this.buildEntityRelationSelect(resultMapInfo, entityRelationSelectInfoList, childrenEntityRelationInfo, entityRelationSelectInfo);
         }
     }
 
-    protected String getResultMapId(EntityRelationInfo entityRelationInfo) {
+    protected String getResultMapId(ResultMapInfo resultMapInfo, EntityRelationInfo entityRelationInfo) {
+        Class<?> resultMapClazz = resultMapInfo != null ? resultMapInfo.getEntityInfo().getClazz() : null;
+        Class<?> entityRelationClazz = entityRelationInfo.getEntityInfo().getClazz();
         int level = entityRelationInfo.getLevel();
         String className = entityRelationInfo.getEntityInfo().getClazzName();
-        if (level == 1) {
+        if (level == 1 || entityRelationClazz == resultMapClazz) {
             return String.format("%sResultMap", className.replaceAll("\\.", "_"));
         } else {
             return this.getSubQueryResultMapId(className, entityRelationInfo.getColumnInfo());

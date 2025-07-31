@@ -92,7 +92,11 @@ public class ResultMapTemplateHandler {
             if (resultMapInfo != null) {
                 this.subQuery(resultMapRelationInfo, mapperInfo, resultMapElement, refResultMapXNodeMap);
             } else {
-                this.joinQuery(resultMapRelationInfo, mapperInfo, resultMapElement, refResultMapXNodeMap);
+                Element resultMapRelationElement = this.joinQuery(resultMapRelationInfo, mapperInfo, resultMapElement, refResultMapXNodeMap);
+                List<ResultMapRelationInfo> childrenResultMapRelationInfoList = resultMapRelationInfo.getResultMapRelationInfoList();
+                if (ObjectUtils.isNotEmpty(childrenResultMapRelationInfoList)) {
+                    this.addQueryElement(resultMapRelationElement, mapperInfo, childrenResultMapRelationInfoList);
+                }
             }
         }
         return refResultMapXNodeMap;
@@ -104,63 +108,25 @@ public class ResultMapTemplateHandler {
         Integer associationType = this.getAssociationType(associationEntityInfo);
         if (associationType == 1) {
             this.associationColumnElement(resultMapElement, resultMapRelationInfo);
-
-            // Document document = DocumentHelper.createDocument();
-            // Element refResultMapElement = this.addResultMapElement(document, resultMapAssociationInfo);
-            // this.addColumnElement(refResultMapElement, resultMapAssociationInfo.getColumnInfoList());
-            // List<ResultMapAssociationInfo> subResultMapAssociationInfoList = resultMapAssociationInfo.getResultMapAssociationInfoList();
-            /*if (ObjectUtils.isNotEmpty(subResultMapAssociationInfoList)) {
-                Map<String, XNode> subXNodeMap = this.addQueryElement(refResultMapElement, mapperInfo, subResultMapAssociationInfoList);
-                if (ObjectUtils.isNotEmpty(subXNodeMap)) {
-                    refResultMapXNodeMap.putAll(subXNodeMap);
-                }
-            }
-
-            String resultMapXmlString = XmlUtils.writeString(document);
-            XPathParser xPathParser = XmlUtils.processXml(resultMapXmlString);
-            XNode xNode = xPathParser.evalNode("/mapper/resultMap");
-            refResultMapXNodeMap.put(resultMapAssociationInfo.getResultMapId(), xNode);*/
         } else if (associationType == 2) {
             this.collectionColumnElement(resultMapElement, resultMapRelationInfo);
-
-            /*Document document = DocumentHelper.createDocument();
-            Element refResultMapElement = this.addResultMapElement(document, resultMapAssociationInfo);
-            this.addColumnElement(refResultMapElement, resultMapAssociationInfo.getColumnInfoList());
-            List<ResultMapAssociationInfo> subResultMapAssociationInfoList = resultMapAssociationInfo.getResultMapAssociationInfoList();
-            if (ObjectUtils.isNotEmpty(subResultMapAssociationInfoList)) {
-                Map<String, XNode> subXNodeMap = this.addQueryElement(refResultMapElement, mapperInfo, subResultMapAssociationInfoList);
-                if (ObjectUtils.isNotEmpty(subXNodeMap)) {
-                    refResultMapXNodeMap.putAll(subXNodeMap);
-                }
-            }
-
-            String resultMapXmlString = XmlUtils.writeString(document);
-            XPathParser xPathParser = XmlUtils.processXml(resultMapXmlString);
-            XNode xNode = xPathParser.evalNode("/mapper/resultMap");
-            refResultMapXNodeMap.put(resultMapAssociationInfo.getResultMapId(), xNode);*/
         } else {
             throw new RuntimeException(columnInfo.getJavaType() + "没有关联注解");
         }
     }
 
-    private void joinQuery(ResultMapRelationInfo resultMapRelationInfo, MapperInfo mapperInfo, Element resultMapElement, Map<String, XNode> refResultMapXNodeMap) {
+    private Element joinQuery(ResultMapRelationInfo resultMapRelationInfo, MapperInfo mapperInfo, Element resultMapElement, Map<String, XNode> refResultMapXNodeMap) {
         ColumnInfo columnInfo = resultMapRelationInfo.getColumnInfo();
         ColumnInfoAnnotationInfo associationEntityInfo = columnInfo.getColumnInfoAnnotationInfo();
         Integer associationType = this.getAssociationType(associationEntityInfo);
         if (associationType == 1) {
             Element resultMapAssociationElement = this.joinAssociationColumnElement(resultMapElement, resultMapRelationInfo);
             this.addColumnElement(resultMapAssociationElement, resultMapRelationInfo.getTableColumnInfoList());
-            /*Map<String, XNode> subXNodeMap = this.addQueryElement(resultMapAssociationElement, mapperInfo, resultMapAssociationInfo.getResultMapAssociationInfoList());
-            if (ObjectUtils.isNotEmpty(subXNodeMap)) {
-                refResultMapXNodeMap.putAll(subXNodeMap);
-            }*/
+            return resultMapAssociationElement;
         } else if (associationType == 2) {
             Element resultMapCollectionElement = this.joinCollectionColumnElement(resultMapElement, resultMapRelationInfo);
             this.addColumnElement(resultMapCollectionElement, resultMapRelationInfo.getTableColumnInfoList());
-            /*Map<String, XNode> subXNodeMap = this.addQueryElement(resultMapCollectionElement, mapperInfo, resultMapAssociationInfo.getResultMapAssociationInfoList());
-            if (ObjectUtils.isNotEmpty(subXNodeMap)) {
-                refResultMapXNodeMap.putAll(subXNodeMap);
-            }*/
+            return resultMapCollectionElement;
         } else {
             throw new RuntimeException(columnInfo.getJavaType() + "没有关联注解");
         }

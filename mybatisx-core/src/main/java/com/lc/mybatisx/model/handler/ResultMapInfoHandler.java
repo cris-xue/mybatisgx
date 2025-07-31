@@ -43,9 +43,8 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
                 entityRelationInfo.getEntityRelationList()
         );
         EntityInfo entityInfo = entityRelationInfo.getEntityInfo();
-        Class<?> clazz = entityInfo.getClazz();
         ResultMapInfo resultMapInfo = new ResultMapInfo();
-        resultMapInfo.setId(this.getResultMapId(clazz));
+        resultMapInfo.setId(this.getResultMapId(entityRelationInfo));
         resultMapInfo.setEntityInfo(entityInfo);
         resultMapInfo.setResultMapRelationInfoList(resultMapRelationInfoList);
         resultMapInfoList.add(resultMapInfo);
@@ -104,7 +103,7 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
 
             EntityRelationSelectInfo entityRelationSelectInfo = new EntityRelationSelectInfo();
             entityRelationSelectInfo.setId(this.getSelect(columnInfo.getJavaType(), columnInfo.getCollectionType()));
-            entityRelationSelectInfo.setResultMapId(this.getSubQueryResultMapId(columnInfo.getJavaType(), columnInfo));
+            entityRelationSelectInfo.setResultMapId(this.getSubQueryResultMapId(childrenEntityRelationInfo.getEntityInfo().getClazzName(), columnInfo));
             entityRelationSelectInfo.setColumnInfo(columnInfo);
             entityRelationSelectInfo.setEntityInfo(entityInfo);
 
@@ -121,17 +120,23 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
         }
     }
 
-    protected String getResultMapId(Class<?> entityClass) {
-        return String.format("%sResultMap", entityClass.getTypeName().replaceAll("\\.", "_"));
+    protected String getResultMapId(EntityRelationInfo entityRelationInfo) {
+        int level = entityRelationInfo.getLevel();
+        String className = entityRelationInfo.getEntityInfo().getClazzName();
+        if (level == 1) {
+            return String.format("%sResultMap", className.replaceAll("\\.", "_"));
+        } else {
+            return this.getSubQueryResultMapId(className, entityRelationInfo.getColumnInfo());
+        }
     }
 
-    protected String getSubQueryResultMapId(Class<?> entityClass, ColumnInfo columnInfo) {
+    protected String getSubQueryResultMapId(String className, ColumnInfo columnInfo) {
         Class<?> collectionType = columnInfo.getCollectionType();
         String resultMapId;
         if (collectionType == null) {
-            resultMapId = String.format("%sResultMap%s", entityClass.getTypeName().replaceAll("\\.", "_"), "Association");
+            resultMapId = String.format("%sResultMap%s", className.replaceAll("\\.", "_"), "Association");
         } else {
-            resultMapId = String.format("%sResultMap%s", entityClass.getTypeName().replaceAll("\\.", "_"), "Collection");
+            resultMapId = String.format("%sResultMap%s", className.replaceAll("\\.", "_"), "Collection");
         }
         return resultMapId;
     }

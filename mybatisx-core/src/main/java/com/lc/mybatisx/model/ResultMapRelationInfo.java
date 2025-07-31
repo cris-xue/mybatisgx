@@ -42,7 +42,7 @@ public class ResultMapRelationInfo {
     /**
      * 关联信息
      */
-    private List<ResultMapRelationInfo> resultMapAssociationInfoList = new ArrayList();
+    private List<ResultMapRelationInfo> resultMapRelationInfoList = new ArrayList();
 
     public String getSelect() {
         return select;
@@ -68,12 +68,12 @@ public class ResultMapRelationInfo {
         this.entityInfo = entityInfo;
     }
 
-    public List<ResultMapRelationInfo> getResultMapAssociationInfoList() {
-        return resultMapAssociationInfoList;
+    public List<ResultMapRelationInfo> getResultMapRelationInfoList() {
+        return resultMapRelationInfoList;
     }
 
-    public void setResultMapAssociationInfoList(List<ResultMapRelationInfo> resultMapAssociationInfoList) {
-        this.resultMapAssociationInfoList = resultMapAssociationInfoList;
+    public void setResultMapRelationInfoList(List<ResultMapRelationInfo> resultMapRelationInfoList) {
+        this.resultMapRelationInfoList = resultMapRelationInfoList;
     }
 
     public ColumnInfo getColumnInfo(String javaColumnName) {

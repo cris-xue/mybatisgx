@@ -74,8 +74,8 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
             if (loadStrategy == LoadStrategy.SUB || (loadStrategy == LoadStrategy.JOIN && level <= 2)) {
                 this.buildResultMapInfo(resultMapInfoList, childrenEntityRelationInfo);
             } else if (loadStrategy == LoadStrategy.JOIN && level > 2) {
-                List<ResultMapRelationInfo> subResultMapAssociationInfoList = this.buildResultMapRelationInfo(resultMapInfoList, childrenEntityRelationInfo.getEntityRelationList());
-                resultMapRelationInfo.setResultMapAssociationInfoList(subResultMapAssociationInfoList);
+                List<ResultMapRelationInfo> subResultMapRelationInfoList = this.buildResultMapRelationInfo(resultMapInfoList, childrenEntityRelationInfo.getEntityRelationList());
+                resultMapRelationInfo.setResultMapRelationInfoList(subResultMapRelationInfoList);
             } else {
                 throw new RuntimeException("未知的加载策略");
             }

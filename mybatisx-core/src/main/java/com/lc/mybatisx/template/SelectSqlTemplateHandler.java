@@ -45,43 +45,43 @@ public class SelectSqlTemplateHandler {
         plainSelect.setFromItem(mainTable);
     }
 
-    private void buildSelectSql(PlainSelect plainSelect, EntityRelationSelectInfo prevEntityRelationSelectInfo, List<EntityRelationSelectInfo> childrenEntityRelationSelectInfoList) throws JSQLParserException {
-        Boolean isMiddleTable = prevEntityRelationSelectInfo.getExistMiddleTable();
+    private void buildSelectSql(PlainSelect plainSelect, EntityRelationSelectInfo leftEntityRelationSelectInfo, List<EntityRelationSelectInfo> rightEntityRelationSelectInfoList) throws JSQLParserException {
+        Boolean isMiddleTable = leftEntityRelationSelectInfo.getExistMiddleTable();
         if (isMiddleTable) {
             // user_role
             // left join role on user_role.user_id = role.id
-            String middleTableName = prevEntityRelationSelectInfo.getMiddleTableName();
-            String entityTableName = prevEntityRelationSelectInfo.getEntityTableName();
+            String middleTableName = leftEntityRelationSelectInfo.getMiddleTableName();
+            String entityTableName = leftEntityRelationSelectInfo.getEntityTableName();
             Join join = this.buildLeftJoin(entityTableName);
 
-            List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = prevEntityRelationSelectInfo.getForeignKeyColumnInfoList(entityTableName);
+            List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = leftEntityRelationSelectInfo.getForeignKeyColumnInfoList(entityTableName);
             this.buildMiddleTableOnEntityTable(middleTableName, entityTableName, foreignKeyColumnInfoList, join);
             plainSelect.addJoins(join);
         }
-        for (EntityRelationSelectInfo childrenEntityRelationSelectInfo : childrenEntityRelationSelectInfoList) {
-            Boolean isChildrenMiddleTable = childrenEntityRelationSelectInfo.getExistMiddleTable();
+        for (EntityRelationSelectInfo rightEntityRelationSelectInfo : rightEntityRelationSelectInfoList) {
+            Boolean isChildrenMiddleTable = rightEntityRelationSelectInfo.getExistMiddleTable();
             if (isChildrenMiddleTable) {
                 // left join role_menu on role.id = role_menu.role_id
-                String entityTableName = prevEntityRelationSelectInfo.getEntityTableName();
-                String middleTableName = childrenEntityRelationSelectInfo.getMiddleTableName();
+                String entityTableName = leftEntityRelationSelectInfo.getEntityTableName();
+                String middleTableName = rightEntityRelationSelectInfo.getMiddleTableName();
                 Join join = this.buildLeftJoin(middleTableName);
 
-                List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = prevEntityRelationSelectInfo.getForeignKeyColumnInfoList(entityTableName);
+                List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = leftEntityRelationSelectInfo.getForeignKeyColumnInfoList(entityTableName);
                 this.buildEntityTableOnMiddleTable(entityTableName, middleTableName, foreignKeyColumnInfoList, join);
                 plainSelect.addJoins(join);
             } else {
                 // user_detail
                 // left join user on user.id = user_detail.user_id
                 // left join order on user.id = order.user_id
-                String prevEntityTableName = prevEntityRelationSelectInfo.getEntityTableName();
-                String entityTableName = childrenEntityRelationSelectInfo.getEntityTableName();
-                Join join = this.buildLeftJoin(entityTableName);
+                String leftEntityTableName = leftEntityRelationSelectInfo.getEntityTableName();
+                String rightEntityTableName = rightEntityRelationSelectInfo.getEntityTableName();
+                Join join = this.buildLeftJoin(rightEntityTableName);
 
-                List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = childrenEntityRelationSelectInfo.getForeignKeyColumnInfoList(entityTableName);
-                this.buildEntityTableOnEntityTable(prevEntityTableName, entityTableName, foreignKeyColumnInfoList, join);
+                List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = rightEntityRelationSelectInfo.getForeignKeyColumnInfoList(rightEntityTableName);
+                this.buildEntityTableOnEntityTable(leftEntityTableName, rightEntityTableName, foreignKeyColumnInfoList, join);
                 plainSelect.addJoins(join);
             }
-            this.buildSelectSql(plainSelect, childrenEntityRelationSelectInfo, childrenEntityRelationSelectInfo.getEntityRelationSelectInfoList());
+            this.buildSelectSql(plainSelect, rightEntityRelationSelectInfo, rightEntityRelationSelectInfo.getEntityRelationSelectInfoList());
         }
     }
 

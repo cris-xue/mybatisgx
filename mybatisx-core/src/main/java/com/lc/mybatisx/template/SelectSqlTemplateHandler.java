@@ -1,6 +1,9 @@
 package com.lc.mybatisx.template;
 
-import com.lc.mybatisx.model.*;
+import com.lc.mybatisx.model.ColumnInfoAnnotationInfo;
+import com.lc.mybatisx.model.EntityInfo;
+import com.lc.mybatisx.model.EntityRelationSelectInfo;
+import com.lc.mybatisx.model.ForeignKeyColumnInfo;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
@@ -35,52 +38,47 @@ public class SelectSqlTemplateHandler {
     }
 
     private void buildMainSelect(PlainSelect plainSelect, EntityRelationSelectInfo entityRelationSelectInfo, EntityInfo entityInfo) {
-        MiddleTableInfo middleTableInfo = entityRelationSelectInfo.getMiddleTableInfo();
-        String mainTableName;
-        if (middleTableInfo != null) {
-            mainTableName = middleTableInfo.getTableName();
-        } else {
-            mainTableName = entityRelationSelectInfo.getTableName();
-        }
+        Boolean isMiddleTable = entityRelationSelectInfo.getExistMiddleTable();
+        String mainTableName = isMiddleTable ? entityRelationSelectInfo.getMiddleTableName() : entityRelationSelectInfo.getEntityTableName();
         plainSelect.addSelectItems(this.getSelectItemList(entityInfo));
         Table mainTable = new Table(mainTableName);
         plainSelect.setFromItem(mainTable);
     }
 
     private void buildSelectSql(PlainSelect plainSelect, EntityRelationSelectInfo prevEntityRelationSelectInfo, List<EntityRelationSelectInfo> childrenEntityRelationSelectInfoList) throws JSQLParserException {
-        MiddleTableInfo middleTableInfo = prevEntityRelationSelectInfo.getMiddleTableInfo();
-        if (middleTableInfo != null) {
+        Boolean isMiddleTable = prevEntityRelationSelectInfo.getExistMiddleTable();
+        if (isMiddleTable) {
             // user_role
             // left join role on user_role.user_id = role.id
-            // left join role_menu on role.id = role_menu.role_id
-            String middleTableName = middleTableInfo.getTableName();
-            String entityTableName = prevEntityRelationSelectInfo.getTableName();
-            List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = prevEntityRelationSelectInfo.getForeignKeyColumnInfoList();
-
+            String middleTableName = prevEntityRelationSelectInfo.getMiddleTableName();
+            String entityTableName = prevEntityRelationSelectInfo.getEntityTableName();
             Join join = this.buildLeftJoin(entityTableName);
-            this.buildLeftJoinOn(middleTableName, entityTableName, foreignKeyColumnInfoList, join);
+
+            List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = prevEntityRelationSelectInfo.getForeignKeyColumnInfoList(entityTableName);
+            this.buildMiddleTableOnEntityTable(middleTableName, entityTableName, foreignKeyColumnInfoList, join);
             plainSelect.addJoins(join);
         }
         for (EntityRelationSelectInfo childrenEntityRelationSelectInfo : childrenEntityRelationSelectInfoList) {
-            MiddleTableInfo childrenMiddleTableInfo = childrenEntityRelationSelectInfo.getMiddleTableInfo();
-            if (childrenMiddleTableInfo != null) {
-                String entityTableName = prevEntityRelationSelectInfo.getTableName();
-                String middleTableName = childrenMiddleTableInfo.getTableName();
-                List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = childrenMiddleTableInfo.getForeignKeyColumnInfoList();
-
+            Boolean isChildrenMiddleTable = childrenEntityRelationSelectInfo.getExistMiddleTable();
+            if (isChildrenMiddleTable) {
+                // left join role_menu on role.id = role_menu.role_id
+                String entityTableName = prevEntityRelationSelectInfo.getEntityTableName();
+                String middleTableName = childrenEntityRelationSelectInfo.getMiddleTableName();
                 Join join = this.buildLeftJoin(middleTableName);
-                this.buildLeftJoinOn(entityTableName, middleTableName, foreignKeyColumnInfoList, join);
+
+                List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = prevEntityRelationSelectInfo.getForeignKeyColumnInfoList(entityTableName);
+                this.buildEntityTableOnMiddleTable(entityTableName, middleTableName, foreignKeyColumnInfoList, join);
                 plainSelect.addJoins(join);
             } else {
                 // user_detail
                 // left join user on user.id = user_detail.user_id
                 // left join order on user.id = order.user_id
-                String prevEntityTableName = prevEntityRelationSelectInfo.getTableName();
-                String entityTableName = childrenEntityRelationSelectInfo.getTableName();
-                List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = childrenEntityRelationSelectInfo.getForeignKeyColumnInfoList();
-
+                String prevEntityTableName = prevEntityRelationSelectInfo.getEntityTableName();
+                String entityTableName = childrenEntityRelationSelectInfo.getEntityTableName();
                 Join join = this.buildLeftJoin(entityTableName);
-                this.buildLeftJoinOn(prevEntityTableName, entityTableName, foreignKeyColumnInfoList, join);
+
+                List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = childrenEntityRelationSelectInfo.getForeignKeyColumnInfoList(entityTableName);
+                this.buildEntityTableOnEntityTable(prevEntityTableName, entityTableName, foreignKeyColumnInfoList, join);
                 plainSelect.addJoins(join);
             }
             this.buildSelectSql(plainSelect, childrenEntityRelationSelectInfo, childrenEntityRelationSelectInfo.getEntityRelationSelectInfoList());
@@ -94,22 +92,48 @@ public class SelectSqlTemplateHandler {
         return join;
     }
 
-    /**
-     * user
-     * left join user_role on user.id = user_role.user_id
-     * left join role on user_role.role_id = role.id
-     * left join role_menu on role.id = role_menu.role_id
-     * @param rightTableName
-     * @return
-     * @throws JSQLParserException
-     */
-    private void buildLeftJoinOn(String leftTableName, String rightTableName, List<ForeignKeyColumnInfo> foreignKeyColumnInfoList, Join join) throws JSQLParserException {
+    private void buildEntityTableOnEntityTable(String leftTableName, String rightTableName, List<ForeignKeyColumnInfo> foreignKeyColumnInfoList, Join join) throws JSQLParserException {
         List<Expression> onExpressionList = new ArrayList<>();
         for (int i = 0; i < foreignKeyColumnInfoList.size(); i++) {
             ForeignKeyColumnInfo foreignKeyColumnInfo = foreignKeyColumnInfoList.get(i);
             EqualsTo onCondition = new EqualsTo(
                     CCJSqlParserUtil.parseExpression(leftTableName + "." + foreignKeyColumnInfo.getReferencedColumnName()),
                     CCJSqlParserUtil.parseExpression(rightTableName + "." + foreignKeyColumnInfo.getName())
+            );
+            onExpressionList.add(onCondition);
+        }
+        join.setOnExpressions(onExpressionList);
+    }
+
+    /**
+     * user
+     * left join user_role on user.id = user_role.user_id
+     * left join role on user_role.role_id = role.id
+     * left join role_menu on role.id = role_menu.role_id
+     * @param entityTableName
+     * @return
+     * @throws JSQLParserException
+     */
+    private void buildEntityTableOnMiddleTable(String entityTableName, String middleTableName, List<ForeignKeyColumnInfo> foreignKeyColumnInfoList, Join join) throws JSQLParserException {
+        List<Expression> onExpressionList = new ArrayList<>();
+        for (int i = 0; i < foreignKeyColumnInfoList.size(); i++) {
+            ForeignKeyColumnInfo foreignKeyColumnInfo = foreignKeyColumnInfoList.get(i);
+            EqualsTo onCondition = new EqualsTo(
+                    CCJSqlParserUtil.parseExpression(entityTableName + "." + foreignKeyColumnInfo.getReferencedColumnName()),
+                    CCJSqlParserUtil.parseExpression(middleTableName + "." + foreignKeyColumnInfo.getName())
+            );
+            onExpressionList.add(onCondition);
+        }
+        join.setOnExpressions(onExpressionList);
+    }
+
+    private void buildMiddleTableOnEntityTable(String middleTableName, String entityTableName, List<ForeignKeyColumnInfo> foreignKeyColumnInfoList, Join join) throws JSQLParserException {
+        List<Expression> onExpressionList = new ArrayList<>();
+        for (int i = 0; i < foreignKeyColumnInfoList.size(); i++) {
+            ForeignKeyColumnInfo foreignKeyColumnInfo = foreignKeyColumnInfoList.get(i);
+            EqualsTo onCondition = new EqualsTo(
+                    CCJSqlParserUtil.parseExpression(middleTableName + "." + foreignKeyColumnInfo.getName()),
+                    CCJSqlParserUtil.parseExpression(entityTableName + "." + foreignKeyColumnInfo.getReferencedColumnName())
             );
             onExpressionList.add(onCondition);
         }

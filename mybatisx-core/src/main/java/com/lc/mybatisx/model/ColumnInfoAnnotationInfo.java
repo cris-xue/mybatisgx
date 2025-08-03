@@ -30,11 +30,11 @@ public class ColumnInfoAnnotationInfo {
      */
     private LoadStrategy loadStrategy;
     /**
-     * 外键字段列表
+     * 当前实体外键字段列表
      */
     private List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = new ArrayList();
     /**
-     * 多对多关联另一个实体的外键字段列表
+     * 关联实体外键字段列表
      */
     private List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = new ArrayList();
     /**

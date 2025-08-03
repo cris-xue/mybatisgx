@@ -1,7 +1,9 @@
 package com.lc.mybatisx.model.handler;
 
 import com.lc.mybatisx.annotation.LoadStrategy;
+import com.lc.mybatisx.annotation.ManyToMany;
 import com.lc.mybatisx.model.*;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -101,12 +103,22 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
             int level = childrenEntityRelationInfo.getLevel();
             ColumnInfo columnInfo = childrenEntityRelationInfo.getColumnInfo();
             EntityInfo entityInfo = childrenEntityRelationInfo.getEntityInfo();
-
-            EntityRelationSelectInfo entityRelationSelectInfo = new EntityRelationSelectInfo();
-            entityRelationSelectInfo.setId(this.getSelect(columnInfo.getJavaType(), columnInfo.getCollectionType()));
-            entityRelationSelectInfo.setResultMapId(this.getResultMapId(resultMapInfo, childrenEntityRelationInfo));
-            entityRelationSelectInfo.setColumnInfo(columnInfo);
-            entityRelationSelectInfo.setEntityInfo(entityInfo);
+            EntityRelationSelectInfo entityRelationSelectInfo = this.buildEntityRelationSelect(resultMapInfo, childrenEntityRelationInfo);
+            ManyToMany manyToMany = columnInfo.getColumnInfoAnnotationInfo().getManyToMany();
+            if (manyToMany != null) {
+                ColumnInfoAnnotationInfo columnInfoAnnotationInfo = columnInfo.getColumnInfoAnnotationInfo();
+                String mappedBy = columnInfoAnnotationInfo.getMappedBy();
+                // user user_role role role_menu menu
+                // user user_order order
+                if (StringUtils.isNotBlank(mappedBy)) {
+                    columnInfoAnnotationInfo = entityInfo.getColumnInfo(mappedBy).getColumnInfoAnnotationInfo();
+                }
+                MiddleTableInfo middleTableInfo = new MiddleTableInfo();
+                middleTableInfo.setTableName(columnInfoAnnotationInfo.getJoinTable().name());
+                middleTableInfo.setForeignKeyColumnInfoList(columnInfoAnnotationInfo.getForeignKeyColumnInfoList());
+                middleTableInfo.setInverseForeignKeyColumnInfoList(columnInfoAnnotationInfo.getInverseForeignKeyColumnInfoList());
+                entityRelationSelectInfo.setMiddleTableInfo(middleTableInfo);
+            }
 
             LoadStrategy loadStrategy = columnInfo.getColumnInfoAnnotationInfo().getLoadStrategy();
             if (loadStrategy == LoadStrategy.SUB || (loadStrategy == LoadStrategy.JOIN && level <= 2)) {
@@ -119,6 +131,17 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
             }
             this.buildEntityRelationSelect(resultMapInfo, entityRelationSelectInfoList, childrenEntityRelationInfo, entityRelationSelectInfo);
         }
+    }
+
+    private EntityRelationSelectInfo buildEntityRelationSelect(ResultMapInfo resultMapInfo, EntityRelationInfo entityRelationInfo) {
+        ColumnInfo columnInfo = entityRelationInfo.getColumnInfo();
+        EntityInfo entityInfo = entityRelationInfo.getEntityInfo();
+        EntityRelationSelectInfo entityRelationSelectInfo = new EntityRelationSelectInfo();
+        entityRelationSelectInfo.setId(this.getSelect(columnInfo.getJavaType(), columnInfo.getCollectionType()));
+        entityRelationSelectInfo.setResultMapId(this.getResultMapId(resultMapInfo, entityRelationInfo));
+        entityRelationSelectInfo.setColumnInfo(columnInfo);
+        entityRelationSelectInfo.setEntityInfo(entityInfo);
+        return entityRelationSelectInfo;
     }
 
     protected String getResultMapId(ResultMapInfo resultMapInfo, EntityRelationInfo entityRelationInfo) {
@@ -144,7 +167,7 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
         return resultMapId;
     }
 
-    private String getSelect(Class<?> entityClass, Class<?> containerType) {
-        return String.format("find%s%s", entityClass.getSimpleName(), containerType != null ? containerType.getSimpleName() : "");
+    private String getSelect(Class<?> entityClass, Class<?> collectionType) {
+        return String.format("find%s%s", entityClass.getSimpleName(), collectionType != null ? collectionType.getSimpleName() : "");
     }
 }

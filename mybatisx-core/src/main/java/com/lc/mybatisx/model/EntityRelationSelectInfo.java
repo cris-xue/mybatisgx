@@ -1,11 +1,14 @@
 package com.lc.mybatisx.model;
 
+import com.lc.mybatisx.annotation.JoinTable;
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author ：薛承城
- * @description：实体关系查询 <select id="" resultMap=""></select>
+ * @description：实体关系查询，只支持左链接
  * @date ：2021/7/9 17:14
  */
 public class EntityRelationSelectInfo {
@@ -19,15 +22,19 @@ public class EntityRelationSelectInfo {
      */
     private String resultMapId;
     /**
-     * 关联字段对应的字段信息
+     * 关联字段的信息
      */
     private ColumnInfo columnInfo;
     /**
-     * 实体信息
+     * 关联字段对应的实体信息
      */
     private EntityInfo entityInfo;
     /**
-     * 关联信息
+     * 中间表信息
+     */
+    private MiddleTableInfo middleTableInfo;
+    /**
+     * 直接关联查询
      */
     private List<EntityRelationSelectInfo> entityRelationSelectInfoList = new ArrayList();
 
@@ -63,6 +70,14 @@ public class EntityRelationSelectInfo {
         this.entityInfo = entityInfo;
     }
 
+    public MiddleTableInfo getMiddleTableInfo() {
+        return middleTableInfo;
+    }
+
+    public void setMiddleTableInfo(MiddleTableInfo middleTableInfo) {
+        this.middleTableInfo = middleTableInfo;
+    }
+
     public List<EntityRelationSelectInfo> getEntityRelationSelectInfoList() {
         return entityRelationSelectInfoList;
     }
@@ -89,5 +104,43 @@ public class EntityRelationSelectInfo {
 
     public List<ColumnInfo> getTableColumnInfoList() {
         return this.entityInfo.getTableColumnInfoList();
+    }
+
+    public String getTableName() {
+        return this.entityInfo.getTableName();
+    }
+
+    public String getMiddleTableName() {
+        ColumnInfoAnnotationInfo columnInfoAnnotationInfo = this.columnInfo.getColumnInfoAnnotationInfo();
+        String mappedBy = columnInfoAnnotationInfo.getMappedBy();
+        if (StringUtils.isBlank(mappedBy)) {
+            JoinTable joinTable = columnInfoAnnotationInfo.getJoinTable();
+            return joinTable.name();
+        } else {
+            JoinTable joinTable = this.entityInfo.getColumnInfo(mappedBy).getColumnInfoAnnotationInfo().getJoinTable();
+            return joinTable.name();
+        }
+    }
+
+    public List<ForeignKeyColumnInfo> getForeignKeyColumnInfoList() {
+        ColumnInfoAnnotationInfo columnInfoAnnotationInfo = this.columnInfo.getColumnInfoAnnotationInfo();
+        String mappedBy = columnInfoAnnotationInfo.getMappedBy();
+        if (StringUtils.isNotBlank(mappedBy)) {
+            ColumnInfoAnnotationInfo mappedByColumnInfoAnnotationInfo = this.entityInfo.getColumnInfo(mappedBy).getColumnInfoAnnotationInfo();
+            return mappedByColumnInfoAnnotationInfo.getForeignKeyColumnInfoList();
+        } else {
+            return columnInfoAnnotationInfo.getForeignKeyColumnInfoList();
+        }
+    }
+
+    public List<ForeignKeyColumnInfo> getInverseForeignKeyColumnInfoList() {
+        ColumnInfoAnnotationInfo columnInfoAnnotationInfo = this.columnInfo.getColumnInfoAnnotationInfo();
+        String mappedBy = columnInfoAnnotationInfo.getMappedBy();
+        if (StringUtils.isNotBlank(mappedBy)) {
+            ColumnInfoAnnotationInfo mappedByColumnInfoAnnotationInfo = this.entityInfo.getColumnInfo(mappedBy).getColumnInfoAnnotationInfo();
+            return mappedByColumnInfoAnnotationInfo.getInverseForeignKeyColumnInfoList();
+        } else {
+            return columnInfoAnnotationInfo.getInverseForeignKeyColumnInfoList();
+        }
     }
 }

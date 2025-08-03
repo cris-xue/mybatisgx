@@ -116,11 +116,11 @@ public class ColumnInfoHandler {
         List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = new ArrayList();
         if (joinColumn != null) {
             JoinColumn[] joinColumnList = new JoinColumn[]{joinColumn};
-            foreignKeyColumnInfoList = this.getForeignKeyList(joinColumnList);
+            inverseForeignKeyColumnInfoList = this.getForeignKeyList(joinColumnList);
         }
         if (joinColumns != null) {
             JoinColumn[] joinColumnList = joinColumns.value();
-            foreignKeyColumnInfoList = this.getForeignKeyList(joinColumnList);
+            inverseForeignKeyColumnInfoList = this.getForeignKeyList(joinColumnList);
         }
         if (joinTable != null) {
             JoinColumn[] joinColumnList = joinTable.joinColumns();

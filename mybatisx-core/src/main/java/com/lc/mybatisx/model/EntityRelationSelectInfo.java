@@ -4,7 +4,9 @@ import com.lc.mybatisx.annotation.JoinTable;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author ：薛承城
@@ -30,9 +32,13 @@ public class EntityRelationSelectInfo {
      */
     private EntityInfo entityInfo;
     /**
-     * 中间表信息
+     * 是否存在中间表
      */
-    private MiddleTableInfo middleTableInfo;
+    private Boolean isExistMiddleTable = false;
+    /**
+     * 主外键映射
+     */
+    private Map<String, List<ForeignKeyColumnInfo>> foreignKeyColumnInfoMap = new HashMap();
     /**
      * 直接关联查询
      */
@@ -70,12 +76,20 @@ public class EntityRelationSelectInfo {
         this.entityInfo = entityInfo;
     }
 
-    public MiddleTableInfo getMiddleTableInfo() {
-        return middleTableInfo;
+    public Boolean getExistMiddleTable() {
+        return isExistMiddleTable;
     }
 
-    public void setMiddleTableInfo(MiddleTableInfo middleTableInfo) {
-        this.middleTableInfo = middleTableInfo;
+    public void setExistMiddleTable(Boolean existMiddleTable) {
+        isExistMiddleTable = existMiddleTable;
+    }
+
+    public List<ForeignKeyColumnInfo> getForeignKeyColumnInfoList(String entityTableName) {
+        return foreignKeyColumnInfoMap.get(entityTableName);
+    }
+
+    public void addForeignKeyColumnInfo(String entityTableName, List<ForeignKeyColumnInfo> foreignKeyColumnInfoList) {
+        this.foreignKeyColumnInfoMap.put(entityTableName, foreignKeyColumnInfoList);
     }
 
     public List<EntityRelationSelectInfo> getEntityRelationSelectInfoList() {
@@ -106,7 +120,7 @@ public class EntityRelationSelectInfo {
         return this.entityInfo.getTableColumnInfoList();
     }
 
-    public String getTableName() {
+    public String getEntityTableName() {
         return this.entityInfo.getTableName();
     }
 
@@ -119,28 +133,6 @@ public class EntityRelationSelectInfo {
         } else {
             JoinTable joinTable = this.entityInfo.getColumnInfo(mappedBy).getColumnInfoAnnotationInfo().getJoinTable();
             return joinTable.name();
-        }
-    }
-
-    public List<ForeignKeyColumnInfo> getForeignKeyColumnInfoList() {
-        ColumnInfoAnnotationInfo columnInfoAnnotationInfo = this.columnInfo.getColumnInfoAnnotationInfo();
-        String mappedBy = columnInfoAnnotationInfo.getMappedBy();
-        if (StringUtils.isNotBlank(mappedBy)) {
-            ColumnInfoAnnotationInfo mappedByColumnInfoAnnotationInfo = this.entityInfo.getColumnInfo(mappedBy).getColumnInfoAnnotationInfo();
-            return mappedByColumnInfoAnnotationInfo.getForeignKeyColumnInfoList();
-        } else {
-            return columnInfoAnnotationInfo.getForeignKeyColumnInfoList();
-        }
-    }
-
-    public List<ForeignKeyColumnInfo> getInverseForeignKeyColumnInfoList() {
-        ColumnInfoAnnotationInfo columnInfoAnnotationInfo = this.columnInfo.getColumnInfoAnnotationInfo();
-        String mappedBy = columnInfoAnnotationInfo.getMappedBy();
-        if (StringUtils.isNotBlank(mappedBy)) {
-            ColumnInfoAnnotationInfo mappedByColumnInfoAnnotationInfo = this.entityInfo.getColumnInfo(mappedBy).getColumnInfoAnnotationInfo();
-            return mappedByColumnInfoAnnotationInfo.getInverseForeignKeyColumnInfoList();
-        } else {
-            return columnInfoAnnotationInfo.getInverseForeignKeyColumnInfoList();
         }
     }
 }

@@ -1,7 +1,6 @@
 package com.lc.mybatisx.model.handler;
 
 import com.lc.mybatisx.annotation.LoadStrategy;
-import com.lc.mybatisx.annotation.ManyToMany;
 import com.lc.mybatisx.model.*;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -102,23 +101,7 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
         for (EntityRelationInfo childrenEntityRelationInfo : childrenEntityRelationInfoList) {
             int level = childrenEntityRelationInfo.getLevel();
             ColumnInfo columnInfo = childrenEntityRelationInfo.getColumnInfo();
-            EntityInfo entityInfo = childrenEntityRelationInfo.getEntityInfo();
             EntityRelationSelectInfo entityRelationSelectInfo = this.buildEntityRelationSelect(resultMapInfo, childrenEntityRelationInfo);
-            ManyToMany manyToMany = columnInfo.getColumnInfoAnnotationInfo().getManyToMany();
-            if (manyToMany != null) {
-                ColumnInfoAnnotationInfo columnInfoAnnotationInfo = columnInfo.getColumnInfoAnnotationInfo();
-                String mappedBy = columnInfoAnnotationInfo.getMappedBy();
-                // user user_role role role_menu menu
-                // user user_order order
-                if (StringUtils.isNotBlank(mappedBy)) {
-                    columnInfoAnnotationInfo = entityInfo.getColumnInfo(mappedBy).getColumnInfoAnnotationInfo();
-                }
-                MiddleTableInfo middleTableInfo = new MiddleTableInfo();
-                middleTableInfo.setTableName(columnInfoAnnotationInfo.getJoinTable().name());
-                middleTableInfo.setForeignKeyColumnInfoList(columnInfoAnnotationInfo.getForeignKeyColumnInfoList());
-                middleTableInfo.setInverseForeignKeyColumnInfoList(columnInfoAnnotationInfo.getInverseForeignKeyColumnInfoList());
-                entityRelationSelectInfo.setMiddleTableInfo(middleTableInfo);
-            }
 
             LoadStrategy loadStrategy = columnInfo.getColumnInfoAnnotationInfo().getLoadStrategy();
             if (loadStrategy == LoadStrategy.SUB || (loadStrategy == LoadStrategy.JOIN && level <= 2)) {
@@ -141,6 +124,27 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
         entityRelationSelectInfo.setResultMapId(this.getResultMapId(resultMapInfo, entityRelationInfo));
         entityRelationSelectInfo.setColumnInfo(columnInfo);
         entityRelationSelectInfo.setEntityInfo(entityInfo);
+        Boolean isExistMiddleTable = columnInfo.getColumnInfoAnnotationInfo().getManyToMany() != null;
+        entityRelationSelectInfo.setExistMiddleTable(isExistMiddleTable);
+
+        // 处理关联查询主外键映射，方便模型处理
+        ColumnInfoAnnotationInfo columnInfoAnnotationInfo = columnInfo.getColumnInfoAnnotationInfo();
+        String mappedBy = columnInfoAnnotationInfo.getMappedBy();
+        if (isExistMiddleTable) {
+            if (StringUtils.isBlank(mappedBy)) {
+                entityRelationSelectInfo.addForeignKeyColumnInfo(entityInfo.getTableName(), columnInfoAnnotationInfo.getInverseForeignKeyColumnInfoList());
+            } else {
+                ColumnInfoAnnotationInfo mappedByColumnInfoAnnotationInfo = entityInfo.getColumnInfo(mappedBy).getColumnInfoAnnotationInfo();
+                entityRelationSelectInfo.addForeignKeyColumnInfo(entityInfo.getTableName(), mappedByColumnInfoAnnotationInfo.getForeignKeyColumnInfoList());
+            }
+        } else {
+            if (StringUtils.isBlank(mappedBy)) {
+                entityRelationSelectInfo.addForeignKeyColumnInfo(entityInfo.getTableName(), columnInfoAnnotationInfo.getInverseForeignKeyColumnInfoList());
+            } else {
+                ColumnInfoAnnotationInfo mappedByColumnInfoAnnotationInfo = entityInfo.getColumnInfo(mappedBy).getColumnInfoAnnotationInfo();
+                entityRelationSelectInfo.addForeignKeyColumnInfo(entityInfo.getTableName(), mappedByColumnInfoAnnotationInfo.getInverseForeignKeyColumnInfoList());
+            }
+        }
         return entityRelationSelectInfo;
     }
 

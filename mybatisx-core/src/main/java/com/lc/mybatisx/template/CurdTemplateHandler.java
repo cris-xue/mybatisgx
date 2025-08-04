@@ -2,12 +2,8 @@ package com.lc.mybatisx.template;
 
 import com.lc.mybatisx.model.MapperInfo;
 import com.lc.mybatisx.model.MethodInfo;
-import com.lc.mybatisx.utils.FreeMarkerUtils;
-import com.lc.mybatisx.utils.XmlUtils;
-import freemarker.template.Template;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.parsing.XNode;
-import org.apache.ibatis.parsing.XPathParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,31 +21,12 @@ public class CurdTemplateHandler {
         for (int i = 0; i < methodInfoList.size(); i++) {
             MethodInfo methodInfo = methodInfoList.get(i);
             String action = methodInfo.getAction();
-            if (StringUtils.isBlank(action)) {
-                logger.error("错误的逻辑处理");
-                XNode xNode = simpleTemplateHandle(mapperInfo, methodInfo);
-                xNodeMap.put(methodInfo.getMethodName(), xNode);
-            } else {
+            if (StringUtils.isNotBlank(action)) {
                 XNode xNode = complexTemplateHandle(mapperInfo, methodInfo);
                 xNodeMap.put(methodInfo.getMethodName(), xNode);
             }
         }
         return xNodeMap;
-    }
-
-    private XNode simpleTemplateHandle(MapperInfo mapperInfo, MethodInfo methodInfo) {
-        String methodName = methodInfo.getMethodName();
-        if ("insert".equals(methodName) || "insertSelective".equals(methodName)) {
-            InsertTemplateHandler insertTemplateHandler = new InsertTemplateHandler();
-            return insertTemplateHandler.execute(mapperInfo, methodInfo);
-        } else if ("updateById".equals(methodName) || "updateByIdSelective".equals(methodName)) {
-            UpdateTemplateHandler updateTemplateHandler = new UpdateTemplateHandler();
-            return updateTemplateHandler.execute(mapperInfo, methodInfo);
-        } else {
-            String templatePath = String.format("mapper/mysql/simple_mapper/%s.ftl", methodInfo.getMethodName());
-            Template template = FreeMarkerUtils.getTemplate(templatePath);
-            return generateSql(template, mapperInfo, methodInfo);
-        }
     }
 
     private XNode complexTemplateHandle(MapperInfo mapperInfo, MethodInfo methodInfo) {
@@ -70,16 +47,5 @@ public class CurdTemplateHandler {
             return updateTemplateHandler.execute(mapperInfo, methodInfo);
         }
         throw new RuntimeException("不存在的操作方式");
-    }
-
-    private XNode generateSql(Template template, MapperInfo mapperInfo, MethodInfo methodInfo) {
-        Map<String, Object> templateData = new HashMap<>();
-        templateData.put("mapperInfo", mapperInfo);
-        templateData.put("methodInfo", methodInfo);
-
-        String methodXml = FreeMarkerUtils.processTemplate(templateData, template);
-        XPathParser xPathParser = XmlUtils.processXml(methodXml);
-        XNode xNode = xPathParser.evalNode("/mapper/*");
-        return xNode;
     }
 }

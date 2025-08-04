@@ -113,7 +113,6 @@ public class MybatisxContextLoader {
             mappingTemplateInfo.setResultMapTemplateMap(resultMapXNodeMap);
             mappingTemplateInfo.setAssociationSelectTemplateMap(relationSelectXNodeMap);
             MapperTemplateContextHolder.set(mappingTemplateInfo);
-            logger.info("dao: {} all db operate template: {}", mapperInfo.getNamespace(), mappingTemplateInfo);
         });
     }
 

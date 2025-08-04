@@ -54,7 +54,7 @@ public class EntityRelationInfoHandler {
             Boolean isCycleRef = entityRelationDependencyTree.cycleRefCheck(javaType);
             if (isCycleRef) {
                 String pathString = StringUtils.join(entityRelationDependencyTree.getPath(), "->");
-                LOGGER.info("{}->{}存在循环引用，消除循环引用防止无限循环", pathString, javaType);
+                LOGGER.debug("{}->{}存在循环引用，消除循环引用防止无限循环", pathString, javaType);
                 continue;
             }
             EntityRelationDependencyTree childrenResultMapDependencyTree = new EntityRelationDependencyTree(entityRelationDependencyTree, javaType);

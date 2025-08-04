@@ -123,8 +123,8 @@ public class RelationSelectTemplateHandler {
             List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = entityRelationSelectInfo.getForeignKeyColumnInfoList(queryEntityInfo.getTableName());
             Expression whereCondition = null;
             for (ForeignKeyColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
-                String leftEq = queryEntityInfo.getTableName() + "." + foreignKeyColumnInfo.getName();
-                String rightEq = queryEntityInfo.getTableName() + "." + foreignKeyColumnInfo.getName();
+                String leftEq = String.format("%s.%s", queryEntityInfo.getTableName(), foreignKeyColumnInfo.getName());
+                String rightEq = foreignKeyColumnInfo.getName();
                 EqualsTo eqCondition = ConditionBuilder.eq(leftEq, String.format("#{%s}", rightEq));
                 // 将表达式添加到条件树
                 if (whereCondition == null) {
@@ -132,18 +132,14 @@ public class RelationSelectTemplateHandler {
                 } else {
                     whereCondition = new AndExpression(whereCondition, eqCondition);
                 }
-                // String conditionOp = String.format(" %s %s %s #{%s}", "and", foreignKeyColumnInfo.getName(), "=", foreignKeyColumnInfo.getName());
             }
             trimElement.addText(whereCondition.toString());
         } else {
-            // List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = columnInfoAnnotationInfo.getForeignKeyColumnInfoList();
             List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = entityRelationSelectInfo.getForeignKeyColumnInfoList(queryEntityInfo.getTableName());
             Expression whereCondition = null;
             for (ForeignKeyColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
-                // String conditionOp = String.format(" %s %s %s #{%s}", "and", foreignKeyColumnInfo.getReferencedColumnName(), "=", foreignKeyColumnInfo.getReferencedColumnName());
-                // trimElement.addText(conditionOp);
-                String leftEq = queryEntityInfo.getTableName() + "." + foreignKeyColumnInfo.getName();
-                String rightEq = queryEntityInfo.getTableName() + "." + foreignKeyColumnInfo.getName();
+                String leftEq = String.format("%s.%s", queryEntityInfo.getTableName(), foreignKeyColumnInfo.getName());
+                String rightEq = foreignKeyColumnInfo.getName();
                 EqualsTo eqCondition = ConditionBuilder.eq(leftEq, String.format("#{%s}", rightEq));
                 // 将表达式添加到条件树
                 if (whereCondition == null) {
@@ -156,9 +152,71 @@ public class RelationSelectTemplateHandler {
         }
     }
 
-    private void buildManyToManySelectSqlXNode(Element selectElement, EntityInfo queryEntityInfo, ColumnInfoAnnotationInfo associationEntityInfo, String sql) {
+    private void buildManyToManySelectSqlXNode(Element selectElement, EntityInfo queryEntityInfo, ColumnInfoAnnotationInfo columnInfoAnnotationInfo, String sql) {
         selectElement.addText(sql);
-        this.where(selectElement, associationEntityInfo, queryEntityInfo);
+        Element whereElement = selectElement.addElement("where");
+        Element whereTrimElement = whereElement.addElement("trim");
+        whereTrimElement.addAttribute("prefix", "");
+        whereTrimElement.addAttribute("suffix", "");
+        whereTrimElement.addAttribute("prefixOverrides", "AND|OR|and|or");
+
+        String mappedBy = columnInfoAnnotationInfo.getMappedBy();
+        if (StringUtils.isNotBlank(mappedBy)) {
+            ColumnInfo targetColumnInfo = queryEntityInfo.getColumnInfo(mappedBy);
+            ColumnInfoAnnotationInfo targetAssociationEntityInfo = targetColumnInfo.getColumnInfoAnnotationInfo();
+            List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = targetAssociationEntityInfo.getForeignKeyColumnInfoList();
+            // user_role left join role on() user_role.role_id = role.id where user_role.user_id = user.id
+            Expression whereCondition = null;
+            for (ForeignKeyColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
+                String leftEq = String.format("%s.%s", queryEntityInfo.getTableName(), foreignKeyColumnInfo.getName());
+                String rightEq = foreignKeyColumnInfo.getName();
+                EqualsTo eqCondition = ConditionBuilder.eq(leftEq, String.format("#{%s}", rightEq));
+                // 将表达式添加到条件树
+                if (whereCondition == null) {
+                    whereCondition = eqCondition;
+                } else {
+                    whereCondition = new AndExpression(whereCondition, eqCondition);
+                }
+
+
+                /*String conditionOp = String.format(
+                        " %s %s.%s %s #{%s}",
+                        "and",
+                        targetAssociationEntityInfo.getJoinTable().name(),
+                        foreignKeyColumnInfo.getName(),
+                        "=",
+                        foreignKeyColumnInfo.getName()
+                );*/
+            }
+            whereTrimElement.addText(whereCondition.toString());
+        } else {
+            List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnInfoAnnotationInfo.getInverseForeignKeyColumnInfoList();
+            // user_role left join user on() user_role.user_id = user.id where user_role.role_id = role.id
+            Expression whereCondition = null;
+            for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
+                String leftEq = String.format("%s.%s", queryEntityInfo.getTableName(), inverseForeignKeyColumnInfo.getName());
+                String rightEq = inverseForeignKeyColumnInfo.getName();
+                EqualsTo eqCondition = ConditionBuilder.eq(leftEq, String.format("#{%s}", rightEq));
+                // 将表达式添加到条件树
+                if (whereCondition == null) {
+                    whereCondition = eqCondition;
+                } else {
+                    whereCondition = new AndExpression(whereCondition, eqCondition);
+                }
+
+
+                /*String conditionOp = String.format(
+                        " %s %s.%s %s #{%s}",
+                        "and",
+                        columnInfoAnnotationInfo.getJoinTable().name(),
+                        inverseForeignKeyColumnInfo.getName(),
+                        "=",
+                        inverseForeignKeyColumnInfo.getName()
+                );
+                whereTrimElement.addText(conditionOp);*/
+            }
+            whereTrimElement.addText(whereCondition.toString());
+        }
     }
 
     private void where(Element selectElement, ColumnInfoAnnotationInfo columnInfoAnnotationInfo, EntityInfo queryEntityInfo) {

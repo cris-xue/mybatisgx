@@ -33,7 +33,6 @@ public class SelectSqlTemplateHandler {
         EntityInfo entityInfo = entityRelationSelectInfo.getEntityInfo();
         this.buildMainSelect(plainSelect, entityRelationSelectInfo, entityInfo);
         this.buildSelectSql(plainSelect, entityRelationSelectInfo, entityRelationSelectInfo.getEntityRelationSelectInfoList());
-        logger.info("build select sql: \n{}", plainSelect);
         return plainSelect.toString();
     }
 

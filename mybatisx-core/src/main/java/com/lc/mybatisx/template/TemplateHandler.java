@@ -26,17 +26,17 @@ public class TemplateHandler {
     public TemplateHandler build() {
         List<String> actionIdList = mergeMethod(builderAssistant);
         List<XNode> actionXNodeList = new ArrayList();
-        actionIdList.forEach(actionId -> {
+        for (String actionId : actionIdList) {
             XNode xNode = MapperTemplateContextHolder.getCurdTemplate(builderAssistant.getCurrentNamespace(), actionId);
             actionXNodeList.add(xNode);
-        });
+        }
 
         List<String> resultMapIdList = mergeResultMap(builderAssistant);
         List<XNode> resultMapXNodeList = new ArrayList();
-        resultMapIdList.forEach(resultMapId -> {
+        for (String resultMapId : resultMapIdList) {
             XNode xNode = MapperTemplateContextHolder.getResultMapTemplate(builderAssistant.getCurrentNamespace(), resultMapId);
             resultMapXNodeList.add(xNode);
-        });
+        }
 
         merge(resultMapXNodeList, actionXNodeList);
         return this;

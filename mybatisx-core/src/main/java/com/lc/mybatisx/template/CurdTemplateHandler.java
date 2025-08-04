@@ -32,34 +32,24 @@ public class CurdTemplateHandler {
     }
 
     private XNode complexTemplateHandle(MapperInfo mapperInfo, MethodInfo methodInfo) {
+        String xmlString;
         if ("select".equals(methodInfo.getAction())) {
             SelectTemplateHandler selectTemplateHandler = new SelectTemplateHandler();
-            String xmlString = selectTemplateHandler.execute(mapperInfo, methodInfo);
-            logger.info("{}:\n{}", methodInfo.getMethodName(), xmlString);
-            XPathParser xPathParser = XmlUtils.processXml(xmlString);
-            return xPathParser.evalNode("/mapper/select");
-        }
-        if ("insert".equals(methodInfo.getAction())) {
+            xmlString = selectTemplateHandler.execute(mapperInfo, methodInfo);
+        } else if ("insert".equals(methodInfo.getAction())) {
             InsertTemplateHandler insertTemplateHandler = new InsertTemplateHandler();
-            String xmlString = insertTemplateHandler.execute(mapperInfo, methodInfo);
-            logger.info("{}:\n{}", methodInfo.getMethodName(), xmlString);
-            XPathParser xPathParser = XmlUtils.processXml(xmlString);
-            return xPathParser.evalNode("/mapper/insert");
-        }
-        if ("delete".equals(methodInfo.getAction())) {
+            xmlString = insertTemplateHandler.execute(mapperInfo, methodInfo);
+        } else if ("delete".equals(methodInfo.getAction())) {
             DeleteTemplateHandler deleteTemplateHandler = new DeleteTemplateHandler();
-            String xmlString = deleteTemplateHandler.execute(mapperInfo, methodInfo);
-            logger.info("{}:\n{}", methodInfo.getMethodName(), xmlString);
-            XPathParser xPathParser = XmlUtils.processXml(xmlString);
-            return xPathParser.evalNode("/mapper/delete");
-        }
-        if ("update".equals(methodInfo.getAction())) {
+            xmlString = deleteTemplateHandler.execute(mapperInfo, methodInfo);
+        } else if ("update".equals(methodInfo.getAction())) {
             UpdateTemplateHandler updateTemplateHandler = new UpdateTemplateHandler();
-            String xmlString = updateTemplateHandler.execute(mapperInfo, methodInfo);
-            logger.info("{}:\n{}", methodInfo.getMethodName(), xmlString);
-            XPathParser xPathParser = XmlUtils.processXml(xmlString);
-            return xPathParser.evalNode("/mapper/update");
+            xmlString = updateTemplateHandler.execute(mapperInfo, methodInfo);
+        } else {
+            throw new RuntimeException("不存在的操作方式");
         }
-        throw new RuntimeException("不存在的操作方式");
+        logger.info("{}:\n{}", methodInfo.getMethodName(), xmlString);
+        XPathParser xPathParser = XmlUtils.processXml(xmlString);
+        return xPathParser.evalNode("/mapper/select|/mapper/insert|/mapper/delete|/mapper/update");
     }
 }

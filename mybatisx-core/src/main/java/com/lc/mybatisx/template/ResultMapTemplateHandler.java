@@ -31,7 +31,7 @@ public class ResultMapTemplateHandler {
             this.addColumnElement(resultMapElement, resultMapInfo.getTableColumnInfoList());
             Map<String, XNode> refResultMapXNodeMap = this.addResultMapRelationElement(resultMapElement, mapperInfo, resultMapInfo.getResultMapRelationInfoList());
             String resultMapXmlString = XmlUtils.writeString(document);
-            logger.debug(resultMapXmlString);
+            logger.info("select resultMap: \n{}", resultMapXmlString);
 
             XPathParser xPathParser = XmlUtils.processXml(resultMapXmlString);
             XNode xNode = xPathParser.evalNode("/mapper/resultMap");

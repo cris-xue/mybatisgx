@@ -1,13 +1,13 @@
 package com.lc.mybatisx.template;
 
 import com.lc.mybatisx.annotation.ManyToMany;
-import com.lc.mybatisx.annotation.ManyToOne;
-import com.lc.mybatisx.annotation.OneToMany;
-import com.lc.mybatisx.annotation.OneToOne;
 import com.lc.mybatisx.context.EntityInfoContextHolder;
 import com.lc.mybatisx.model.*;
 import com.lc.mybatisx.utils.XmlUtils;
 import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
+import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.parsing.XNode;
@@ -31,92 +31,31 @@ public class RelationSelectTemplateHandler {
         Map<String, EntityRelationSelectInfo> entityRelationSelectInfoMap = mapperInfo.getEntityRelationSelectInfoMap();
         entityRelationSelectInfoMap.forEach((select, entityRelationSelectInfo) -> {
             String sql = this.buildJoinSelect(entityRelationSelectInfo);
-            Map<String, XNode> xNodeMap = this.buildSelect(entityRelationSelectInfo, sql);
-            if (ObjectUtils.isNotEmpty(xNodeMap)) {
-                totalXNodeMap.putAll(xNodeMap);
+            Map<String, XNode> entityRelationSelectXNodeMap = this.buildSelect(entityRelationSelectInfo, sql);
+            if (ObjectUtils.isNotEmpty(entityRelationSelectXNodeMap)) {
+                totalXNodeMap.putAll(entityRelationSelectXNodeMap);
             }
         });
         return totalXNodeMap;
     }
 
     private Map<String, XNode> buildSelect(EntityRelationSelectInfo entityRelationSelectInfo, String sql) {
-        Map<String, XNode> xNodeMap = new HashMap();
-        // entityRelationSelectInfoList.forEach((entityRelationSelectInfo) -> {
-            /*List<ResultMapAssociationInfo> subResultMapAssociationInfoList = resultMapAssociationInfo.getResultMapAssociationInfoList();
-            if (ObjectUtils.isNotEmpty(subResultMapAssociationInfoList)) {
-                Map<String, XNode> subXNodeMap = this.buildSelect(subResultMapAssociationInfoList, sqlMap);
-                if (ObjectUtils.isNotEmpty(subXNodeMap)) {
-                    xNodeMap.putAll(subXNodeMap);
-                }
-            }*/
-        ColumnInfoAnnotationInfo associationEntityInfo = entityRelationSelectInfo.getColumnInfo().getColumnInfoAnnotationInfo();
-
-        OneToOne oneToOne = associationEntityInfo.getOneToOne();
-        String selectXmlString = null;
-        if (oneToOne != null) {
+        ColumnInfoAnnotationInfo columnInfoAnnotationInfo = entityRelationSelectInfo.getColumnInfo().getColumnInfoAnnotationInfo();
+        String selectXmlString;
+        ManyToMany manyToMany = columnInfoAnnotationInfo.getManyToMany();
+        if (manyToMany == null) {
             selectXmlString = this.buildOneToOne(entityRelationSelectInfo, sql);
-        }
-        OneToMany oneToMany = associationEntityInfo.getOneToMany();
-        if (oneToMany != null) {
-            selectXmlString = this.buildOneToOne(entityRelationSelectInfo, sql);
-        }
-        ManyToOne manyToOne = associationEntityInfo.getManyToOne();
-        if (manyToOne != null) {
-            selectXmlString = this.buildOneToOne(entityRelationSelectInfo, sql);
-        }
-        ManyToMany manyToMany = associationEntityInfo.getManyToMany();
-        if (manyToMany != null) {
+        } else {
             selectXmlString = this.buildManyToMany(entityRelationSelectInfo, sql);
         }
+        Map<String, XNode> entityRelationSelectXNodeMap = new HashMap();
         if (StringUtils.isNotBlank(selectXmlString)) {
-            logger.info("auto relation select sql: {}", selectXmlString);
+            logger.info("auto relation select sql: \n{}", selectXmlString);
             XPathParser xPathParser = XmlUtils.processXml(selectXmlString);
             XNode xNode = xPathParser.evalNode("/mapper/select");
-            xNodeMap.put(entityRelationSelectInfo.getId(), xNode);
+            entityRelationSelectXNodeMap.put(entityRelationSelectInfo.getId(), xNode);
         }
-        // });
-        /*for (int i = 0; i < resultMapAssociationInfoList.size(); i++) {
-            ResultMapAssociationInfo resultMapAssociationInfo = resultMapAssociationInfoList.get(i);
-            List<ResultMapAssociationInfo> subResultMapAssociationInfoList = resultMapAssociationInfo.getResultMapAssociationInfoList();
-            if (ObjectUtils.isNotEmpty(subResultMapAssociationInfoList)) {
-                Map<String, XNode> subXNodeMap = this.buildSelect(subResultMapAssociationInfoList, sqlMap);
-                if (ObjectUtils.isNotEmpty(subXNodeMap)) {
-                    xNodeMap.putAll(subXNodeMap);
-                }
-            }
-            AssociationEntityInfo associationEntityInfo = resultMapAssociationInfo.getColumnInfo().getAssociationEntityInfo();
-            LoadStrategy loadStrategy = associationEntityInfo.getLoadStrategy();
-            // 关联表的第一层无法采用关联查询，因为分页没办法处理，在第一层把分页处理之后，后续就可以采用关联查询了
-            if (loadStrategy == LoadStrategy.JOIN && resultMapAssociationInfo.getLevel() >= 2) {
-                continue;
-            }
-
-            SelectSqlTemplateHandler.SelectTable sql = sqlMap.get(resultMapAssociationInfo.getSelect());
-            OneToOne oneToOne = associationEntityInfo.getOneToOne();
-            String selectXmlString = null;
-            if (oneToOne != null) {
-                selectXmlString = this.buildOneToOne(resultMapAssociationInfo, sql);
-            }
-            OneToMany oneToMany = associationEntityInfo.getOneToMany();
-            if (oneToMany != null) {
-                selectXmlString = this.buildOneToOne(resultMapAssociationInfo, sql);
-            }
-            ManyToOne manyToOne = associationEntityInfo.getManyToOne();
-            if (manyToOne != null) {
-                selectXmlString = this.buildOneToOne(resultMapAssociationInfo, sql);
-            }
-            ManyToMany manyToMany = associationEntityInfo.getManyToMany();
-            if (manyToMany != null) {
-                selectXmlString = this.buildManyToMany(resultMapAssociationInfo, sql);
-            }
-            if (StringUtils.isNotBlank(selectXmlString)) {
-                logger.info("auto association select sql: {}", selectXmlString);
-                XPathParser xPathParser = XmlUtils.processXml(selectXmlString);
-                XNode xNode = xPathParser.evalNode("/mapper/select");
-                xNodeMap.put(resultMapAssociationInfo.getSelect(), xNode);
-            }
-        }*/
-        return xNodeMap;
+        return entityRelationSelectXNodeMap;
     }
 
     /**
@@ -138,25 +77,15 @@ public class RelationSelectTemplateHandler {
         Document document = DocumentHelper.createDocument();
         Element mapperElement = document.addElement("mapper");
         Element selectElement = mapperElement.addElement("select");
-
-        EntityInfo queryEntityInfo = entityRelationSelectInfo.getEntityInfo();
-        ColumnInfo columnInfo = entityRelationSelectInfo.getColumnInfo();
-        ColumnInfoAnnotationInfo columnInfoAnnotationInfo = columnInfo.getColumnInfoAnnotationInfo();
-
         selectElement.addAttribute("id", entityRelationSelectInfo.getId());
         selectElement.addAttribute("resultMap", entityRelationSelectInfo.getResultMapId());
+        ColumnInfo columnInfo = entityRelationSelectInfo.getColumnInfo();
         String fetchSize = columnInfo.getColumnInfoAnnotationInfo().getFetchSize();
         if (StringUtils.isNotBlank(fetchSize)) {
             selectElement.addAttribute("fetchSize", fetchSize);
         }
-
-        this.buildSelectSqlXNode(selectElement, queryEntityInfo, columnInfoAnnotationInfo, sql);
-
-        String selectXmlString = document.asXML();
-        logger.debug("select: {}", selectXmlString);
-        XPathParser xPathParser = XmlUtils.processXml(selectXmlString);
-        XNode xNode = xPathParser.evalNode("/mapper/select");
-        return selectXmlString;
+        this.buildSelectSqlXNode(selectElement, entityRelationSelectInfo, sql);
+        return document.asXML();
     }
 
     private String buildManyToMany(EntityRelationSelectInfo entityRelationSelectInfo, String sql) {
@@ -173,143 +102,73 @@ public class RelationSelectTemplateHandler {
         }
 
         Class<?> javaType = columnInfo.getJavaType();
-        ColumnInfoAnnotationInfo associationEntityInfo = columnInfo.getColumnInfoAnnotationInfo();
+        ColumnInfoAnnotationInfo columnInfoAnnotationInfo = columnInfo.getColumnInfoAnnotationInfo();
         EntityInfo queryEntityInfo = EntityInfoContextHolder.get(javaType);
-        this.buildManyToManySelectSqlXNode(selectElement, queryEntityInfo, associationEntityInfo, sql);
-
-        String selectXmlString = document.asXML();
-        logger.debug("select: {}", selectXmlString);
-        XPathParser xPathParser = XmlUtils.processXml(selectXmlString);
-        XNode xNode = xPathParser.evalNode("/mapper/select");
-        return selectXmlString;
+        this.buildManyToManySelectSqlXNode(selectElement, queryEntityInfo, columnInfoAnnotationInfo, sql);
+        return document.asXML();
     }
 
-    private void buildSelectSqlXNode(Element selectElement, EntityInfo queryEntityInfo, ColumnInfoAnnotationInfo columnInfoAnnotationInfo, String sql) {
-        /*selectElement.addText("select");
-        Element dbTrimElement = selectElement.addElement("trim");
-        dbTrimElement.addAttribute("prefix", "");
-        dbTrimElement.addAttribute("suffix", "");
-        dbTrimElement.addAttribute("suffixOverrides", ",");
-
-        queryEntityInfo.getTableColumnInfoList().forEach(queryColumnInfo -> {
-            // 外键不存在，只需要添加字段。外键存在，则需要添加字段和外键
-            AssociationEntityInfo queryAssociationEntityInfo = queryColumnInfo.getAssociationEntityInfo();
-            if (queryAssociationEntityInfo == null) {
-                dbTrimElement.addText(String.format("%s, ", queryColumnInfo.getDbColumnName()));
-            } else {
-                queryAssociationEntityInfo.getForeignKeyColumnInfoList().forEach(foreignKeyColumnInfo -> {
-                    dbTrimElement.addText(String.format("%s, ", foreignKeyColumnInfo.getName()));
-                });
-            }
-        });
-
-        selectElement.addText(String.format("from %s", queryEntityInfo.getTableName()));*/
-
+    private void buildSelectSqlXNode(Element selectElement, EntityRelationSelectInfo entityRelationSelectInfo, String sql) {
         selectElement.addText(sql);
-
         Element whereElement = selectElement.addElement("where");
         Element trimElement = whereElement.addElement("trim");
         trimElement.addAttribute("prefix", "");
         trimElement.addAttribute("suffix", "");
         trimElement.addAttribute("prefixOverrides", "AND|OR|and|or");
 
+        EntityInfo queryEntityInfo = entityRelationSelectInfo.getEntityInfo();
+        ColumnInfoAnnotationInfo columnInfoAnnotationInfo = entityRelationSelectInfo.getColumnInfo().getColumnInfoAnnotationInfo();
         String mappedBy = columnInfoAnnotationInfo.getMappedBy();
         if (StringUtils.isNotBlank(mappedBy)) {
-            ColumnInfo targetColumnInfo = queryEntityInfo.getColumnInfo(mappedBy);
-            ColumnInfoAnnotationInfo targetAssociationEntityInfo = targetColumnInfo.getColumnInfoAnnotationInfo();
-            List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = targetAssociationEntityInfo.getForeignKeyColumnInfoList();
-            foreignKeyColumnInfoList.forEach(foreignKeyColumnInfo -> {
-                String conditionOp = String.format(" %s %s %s #{%s}", "and", foreignKeyColumnInfo.getName(), "=", foreignKeyColumnInfo.getName());
-                trimElement.addText(conditionOp);
-            });
+            List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = entityRelationSelectInfo.getForeignKeyColumnInfoList(queryEntityInfo.getTableName());
+            Expression whereCondition = null;
+            for (ForeignKeyColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
+                String leftEq = queryEntityInfo.getTableName() + "." + foreignKeyColumnInfo.getName();
+                String rightEq = queryEntityInfo.getTableName() + "." + foreignKeyColumnInfo.getName();
+                EqualsTo eqCondition = ConditionBuilder.eq(leftEq, String.format("#{%s}", rightEq));
+                // 将表达式添加到条件树
+                if (whereCondition == null) {
+                    whereCondition = eqCondition;
+                } else {
+                    whereCondition = new AndExpression(whereCondition, eqCondition);
+                }
+                // String conditionOp = String.format(" %s %s %s #{%s}", "and", foreignKeyColumnInfo.getName(), "=", foreignKeyColumnInfo.getName());
+            }
+            trimElement.addText(whereCondition.toString());
         } else {
-            List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = columnInfoAnnotationInfo.getForeignKeyColumnInfoList();
-            foreignKeyColumnInfoList.forEach(foreignKeyColumnInfo -> {
-                String conditionOp = String.format(" %s %s %s #{%s}", "and", foreignKeyColumnInfo.getReferencedColumnName(), "=", foreignKeyColumnInfo.getReferencedColumnName());
-                trimElement.addText(conditionOp);
-            });
+            // List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = columnInfoAnnotationInfo.getForeignKeyColumnInfoList();
+            List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = entityRelationSelectInfo.getForeignKeyColumnInfoList(queryEntityInfo.getTableName());
+            Expression whereCondition = null;
+            for (ForeignKeyColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
+                // String conditionOp = String.format(" %s %s %s #{%s}", "and", foreignKeyColumnInfo.getReferencedColumnName(), "=", foreignKeyColumnInfo.getReferencedColumnName());
+                // trimElement.addText(conditionOp);
+                String leftEq = queryEntityInfo.getTableName() + "." + foreignKeyColumnInfo.getName();
+                String rightEq = queryEntityInfo.getTableName() + "." + foreignKeyColumnInfo.getName();
+                EqualsTo eqCondition = ConditionBuilder.eq(leftEq, String.format("#{%s}", rightEq));
+                // 将表达式添加到条件树
+                if (whereCondition == null) {
+                    whereCondition = eqCondition;
+                } else {
+                    whereCondition = new AndExpression(whereCondition, eqCondition);
+                }
+            }
+            trimElement.addText(whereCondition.toString());
         }
     }
 
     private void buildManyToManySelectSqlXNode(Element selectElement, EntityInfo queryEntityInfo, ColumnInfoAnnotationInfo associationEntityInfo, String sql) {
-        /*selectElement.addText("select");
-        Element dbTrimElement = selectElement.addElement("trim");
-        dbTrimElement.addAttribute("prefix", "");
-        dbTrimElement.addAttribute("suffix", "");
-        dbTrimElement.addAttribute("suffixOverrides", ",");
-
-        queryEntityInfo.getTableColumnInfoList().forEach(queryColumnInfo -> {
-            // 外键不存在，只需要添加字段。外键存在，则需要添加字段和外键
-            AssociationEntityInfo queryAssociationEntityInfo = queryColumnInfo.getAssociationEntityInfo();
-            if (queryAssociationEntityInfo == null) {
-                dbTrimElement.addText(String.format("%s.%s, ", queryEntityInfo.getTableName(), queryColumnInfo.getDbColumnName()));
-            } else {
-                queryAssociationEntityInfo.getForeignKeyColumnInfoList().forEach(foreignKeyColumnInfo -> {
-                    dbTrimElement.addText(String.format("%s.%s, ", queryEntityInfo.getTableName(), foreignKeyColumnInfo.getName()));
-                });
-            }
-        });
-
-        this.fromLeftJoin(selectElement, associationEntityInfo, queryEntityInfo, sql);*/
-
         selectElement.addText(sql);
         this.where(selectElement, associationEntityInfo, queryEntityInfo);
     }
 
-    private void fromLeftJoin(Element selectElement, AssociationEntityInfo associationEntityInfo, EntityInfo queryEntityInfo, String sql) {
-        String mappedBy = associationEntityInfo.getMappedBy();
-        if (StringUtils.isNotBlank(mappedBy)) {
-            ColumnInfo targetColumnInfo = queryEntityInfo.getColumnInfo(mappedBy);
-            ColumnInfoAnnotationInfo targetAssociationEntityInfo = targetColumnInfo.getColumnInfoAnnotationInfo();
-            List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = targetAssociationEntityInfo.getInverseForeignKeyColumnInfoList();
-
-            if (StringUtils.isNotBlank(sql)) {
-                selectElement.addText(sql);
-            } else {
-                selectElement.addText(String.format("from "));
-                selectElement.addText(String.format("%s left join %s on ", targetAssociationEntityInfo.getJoinTable().name(), queryEntityInfo.getTableName()));
-                inverseForeignKeyColumnInfoList.forEach(foreignKeyColumnInfo -> {
-                    selectElement.addText(
-                            String.format(
-                                    "%s.%s = %s.%s",
-                                    targetAssociationEntityInfo.getJoinTable().name(),
-                                    foreignKeyColumnInfo.getName(),
-                                    queryEntityInfo.getTableName(),
-                                    foreignKeyColumnInfo.getReferencedColumnName()
-                            )
-                    );
-                });
-            }
-        } else {
-            List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = associationEntityInfo.getForeignKeyColumnInfoList();
-            if (StringUtils.isNotBlank(sql)) {
-                selectElement.addText(sql);
-            } else {
-                selectElement.addText(String.format("from "));
-                selectElement.addText(String.format("%s left join %s on ", associationEntityInfo.getJoinTable().name(), queryEntityInfo.getTableName()));
-                foreignKeyColumnInfoList.forEach(foreignKeyColumnInfo -> {
-                    selectElement.addText(
-                            String.format(
-                                    "%s.%s = %s.%s",
-                                    associationEntityInfo.getJoinTable().name(),
-                                    foreignKeyColumnInfo.getName(),
-                                    queryEntityInfo.getTableName(),
-                                    foreignKeyColumnInfo.getReferencedColumnName()
-                            )
-                    );
-                });
-            }
-        }
-    }
-
-    private void where(Element selectElement, ColumnInfoAnnotationInfo associationEntityInfo, EntityInfo queryEntityInfo) {
+    private void where(Element selectElement, ColumnInfoAnnotationInfo columnInfoAnnotationInfo, EntityInfo queryEntityInfo) {
         Element whereElement = selectElement.addElement("where");
         Element whereTrimElement = whereElement.addElement("trim");
         whereTrimElement.addAttribute("prefix", "");
         whereTrimElement.addAttribute("suffix", "");
         whereTrimElement.addAttribute("prefixOverrides", "AND|OR|and|or");
 
-        String mappedBy = associationEntityInfo.getMappedBy();
+        String mappedBy = columnInfoAnnotationInfo.getMappedBy();
         if (StringUtils.isNotBlank(mappedBy)) {
             ColumnInfo targetColumnInfo = queryEntityInfo.getColumnInfo(mappedBy);
             ColumnInfoAnnotationInfo targetAssociationEntityInfo = targetColumnInfo.getColumnInfoAnnotationInfo();
@@ -327,13 +186,13 @@ public class RelationSelectTemplateHandler {
                 whereTrimElement.addText(conditionOp);
             });
         } else {
-            List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = associationEntityInfo.getInverseForeignKeyColumnInfoList();
+            List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnInfoAnnotationInfo.getInverseForeignKeyColumnInfoList();
             // user_role left join user on() user_role.user_id = user.id where user_role.role_id = role.id
             inverseForeignKeyColumnInfoList.forEach(inverseForeignKeyColumnInfo -> {
                 String conditionOp = String.format(
                         " %s %s.%s %s #{%s}",
                         "and",
-                        associationEntityInfo.getJoinTable().name(),
+                        columnInfoAnnotationInfo.getJoinTable().name(),
                         inverseForeignKeyColumnInfo.getName(),
                         "=",
                         inverseForeignKeyColumnInfo.getName()

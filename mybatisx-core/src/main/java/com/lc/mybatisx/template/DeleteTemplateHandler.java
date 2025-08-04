@@ -5,9 +5,6 @@ import com.lc.mybatisx.model.ColumnInfo;
 import com.lc.mybatisx.model.EntityInfo;
 import com.lc.mybatisx.model.MapperInfo;
 import com.lc.mybatisx.model.MethodInfo;
-import com.lc.mybatisx.utils.XmlUtils;
-import org.apache.ibatis.parsing.XNode;
-import org.apache.ibatis.parsing.XPathParser;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
@@ -20,11 +17,11 @@ public class DeleteTemplateHandler {
 
     private WhereTemplateHandler whereTemplateHandler = new WhereTemplateHandler();
 
-    public XNode execute(MapperInfo mapperInfo, MethodInfo methodInfo) {
+    public String execute(MapperInfo mapperInfo, MethodInfo methodInfo) {
         return buildDeleteXNode(mapperInfo, methodInfo);
     }
 
-    private XNode buildDeleteXNode(MapperInfo mapperInfo, MethodInfo methodInfo) {
+    private String buildDeleteXNode(MapperInfo mapperInfo, MethodInfo methodInfo) {
         EntityInfo entityInfo = mapperInfo.getEntityInfo();
         ColumnInfo logicDeleteColumnInfo = entityInfo.getLogicDeleteColumnInfo();
 
@@ -38,12 +35,7 @@ public class DeleteTemplateHandler {
             deleteElement = update(mapperElement, entityInfo, methodInfo, logicDeleteColumnInfo);
         }
         whereTemplateHandler.execute(deleteElement, mapperInfo.getEntityInfo(), methodInfo);
-
-        String insertXmlString = document.asXML();
-        logger.debug(insertXmlString);
-        XPathParser xPathParser = XmlUtils.processXml(insertXmlString);
-        XNode xNode = xPathParser.evalNode(String.format("/mapper/%s", deleteElement.getName()));
-        return xNode;
+        return document.asXML();
     }
 
     private Element delete(Element mapperElement, EntityInfo entityInfo, MethodInfo methodInfo) {

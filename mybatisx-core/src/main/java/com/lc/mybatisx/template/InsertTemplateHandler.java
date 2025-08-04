@@ -3,11 +3,8 @@ package com.lc.mybatisx.template;
 import com.lc.mybatisx.annotation.LogicDelete;
 import com.lc.mybatisx.context.EntityInfoContextHolder;
 import com.lc.mybatisx.model.*;
-import com.lc.mybatisx.utils.XmlUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.parsing.XNode;
-import org.apache.ibatis.parsing.XPathParser;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
@@ -20,15 +17,15 @@ public class InsertTemplateHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(InsertTemplateHandler.class);
 
-    public XNode execute(MapperInfo mapperInfo, MethodInfo methodInfo) {
+    public String execute(MapperInfo mapperInfo, MethodInfo methodInfo) {
         return simpleTemplateHandle(mapperInfo, methodInfo);
     }
 
-    private XNode simpleTemplateHandle(MapperInfo mapperInfo, MethodInfo methodInfo) {
+    private String simpleTemplateHandle(MapperInfo mapperInfo, MethodInfo methodInfo) {
         return buildInsertSelectiveXNode(mapperInfo, methodInfo);
     }
 
-    private XNode buildInsertSelectiveXNode(MapperInfo mapperInfo, MethodInfo methodInfo) {
+    private String buildInsertSelectiveXNode(MapperInfo mapperInfo, MethodInfo methodInfo) {
         Document document = DocumentHelper.createDocument();
         Element mapperElement = document.addElement("mapper");
         Element insertElement = mapperElement.addElement("insert");
@@ -51,12 +48,7 @@ public class InsertTemplateHandler {
         javaTrimElement.addAttribute("suffixOverrides", ",");
 
         this.setValue(mapperInfo, methodInfo, javaTrimElement);
-
-        String insertXmlString = document.asXML();
-        logger.debug(insertXmlString);
-        XPathParser xPathParser = XmlUtils.processXml(insertXmlString);
-        XNode xNode = xPathParser.evalNode("/mapper/insert");
-        return xNode;
+        return document.asXML();
     }
 
     private String getKeyProperty(MethodInfo methodInfo) {

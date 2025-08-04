@@ -6,10 +6,7 @@ import com.lc.mybatisx.model.ColumnInfo;
 import com.lc.mybatisx.model.EntityInfo;
 import com.lc.mybatisx.model.MapperInfo;
 import com.lc.mybatisx.model.MethodInfo;
-import com.lc.mybatisx.utils.XmlUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.ibatis.parsing.XNode;
-import org.apache.ibatis.parsing.XPathParser;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
@@ -24,11 +21,11 @@ public class UpdateTemplateHandler {
 
     private WhereTemplateHandler whereTemplateHandler = new WhereTemplateHandler();
 
-    public XNode execute(MapperInfo mapperInfo, MethodInfo methodInfo) {
+    public String execute(MapperInfo mapperInfo, MethodInfo methodInfo) {
         return buildUpdateXNode(mapperInfo, methodInfo);
     }
 
-    private XNode buildUpdateXNode(MapperInfo mapperInfo, MethodInfo methodInfo) {
+    private String buildUpdateXNode(MapperInfo mapperInfo, MethodInfo methodInfo) {
         EntityInfo entityInfo = mapperInfo.getEntityInfo();
 
         Document document = DocumentHelper.createDocument();
@@ -43,12 +40,7 @@ public class UpdateTemplateHandler {
 
         this.setValue(entityInfo, methodInfo, setTrimElement);
         whereTemplateHandler.execute(updateElement, mapperInfo.getEntityInfo(), methodInfo);
-
-        String insertXmlString = document.asXML();
-        logger.debug(insertXmlString);
-        XPathParser xPathParser = XmlUtils.processXml(insertXmlString);
-        XNode xNode = xPathParser.evalNode("/mapper/update");
-        return xNode;
+        return document.asXML();
     }
 
     private void setValue(EntityInfo entityInfo, MethodInfo methodInfo, Element setTrimElement) {

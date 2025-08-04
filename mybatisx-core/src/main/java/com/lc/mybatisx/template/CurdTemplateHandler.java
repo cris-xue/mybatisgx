@@ -2,8 +2,10 @@ package com.lc.mybatisx.template;
 
 import com.lc.mybatisx.model.MapperInfo;
 import com.lc.mybatisx.model.MethodInfo;
+import com.lc.mybatisx.utils.XmlUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.parsing.XNode;
+import org.apache.ibatis.parsing.XPathParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,19 +34,31 @@ public class CurdTemplateHandler {
     private XNode complexTemplateHandle(MapperInfo mapperInfo, MethodInfo methodInfo) {
         if ("select".equals(methodInfo.getAction())) {
             SelectTemplateHandler selectTemplateHandler = new SelectTemplateHandler();
-            return selectTemplateHandler.execute(mapperInfo, methodInfo);
+            String xmlString = selectTemplateHandler.execute(mapperInfo, methodInfo);
+            logger.info("{}:\n{}", methodInfo.getMethodName(), xmlString);
+            XPathParser xPathParser = XmlUtils.processXml(xmlString);
+            return xPathParser.evalNode("/mapper/select");
         }
         if ("insert".equals(methodInfo.getAction())) {
             InsertTemplateHandler insertTemplateHandler = new InsertTemplateHandler();
-            return insertTemplateHandler.execute(mapperInfo, methodInfo);
+            String xmlString = insertTemplateHandler.execute(mapperInfo, methodInfo);
+            logger.info("{}:\n{}", methodInfo.getMethodName(), xmlString);
+            XPathParser xPathParser = XmlUtils.processXml(xmlString);
+            return xPathParser.evalNode("/mapper/insert");
         }
         if ("delete".equals(methodInfo.getAction())) {
             DeleteTemplateHandler deleteTemplateHandler = new DeleteTemplateHandler();
-            return deleteTemplateHandler.execute(mapperInfo, methodInfo);
+            String xmlString = deleteTemplateHandler.execute(mapperInfo, methodInfo);
+            logger.info("{}:\n{}", methodInfo.getMethodName(), xmlString);
+            XPathParser xPathParser = XmlUtils.processXml(xmlString);
+            return xPathParser.evalNode("/mapper/delete");
         }
         if ("update".equals(methodInfo.getAction())) {
             UpdateTemplateHandler updateTemplateHandler = new UpdateTemplateHandler();
-            return updateTemplateHandler.execute(mapperInfo, methodInfo);
+            String xmlString = updateTemplateHandler.execute(mapperInfo, methodInfo);
+            logger.info("{}:\n{}", methodInfo.getMethodName(), xmlString);
+            XPathParser xPathParser = XmlUtils.processXml(xmlString);
+            return xPathParser.evalNode("/mapper/update");
         }
         throw new RuntimeException("不存在的操作方式");
     }

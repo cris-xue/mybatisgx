@@ -151,7 +151,7 @@ public class MethodInfoHandler {
             }
             Class<?> collectionType = this.getCollectionType(parameter.getType());
             if (collectionType != null) {
-                methodParamInfo.setCollectionType(true);
+                methodParamInfo.setCollectionType(collectionType);
                 methodParamInfo.setCollectionTypeName(collectionType.getTypeName());
             }
 
@@ -174,7 +174,6 @@ public class MethodInfoHandler {
         }
         Class<?> collectionType = this.getCollectionType(methodReturnType);
         if (collectionType != null) {
-            methodReturnInfo.setCollectionType(true);
             methodReturnInfo.setCollectionType(collectionType);
             methodReturnInfo.setCollectionTypeName(collectionType.getTypeName());
         }

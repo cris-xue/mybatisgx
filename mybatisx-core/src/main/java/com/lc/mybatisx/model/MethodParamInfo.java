@@ -40,10 +40,6 @@ public class MethodParamInfo {
      */
     private String argName;
     /**
-     * 是否Collection类型
-     */
-    private Boolean isCollectionType = false;
-    /**
      * 容器类型，List
      */
     private Class<?> collectionType;
@@ -60,7 +56,7 @@ public class MethodParamInfo {
      */
     private Boolean isBatchSize = false;
     /**
-     * 批量节点参数名称
+     * 批量参数名称
      */
     private String batchItemName;
 
@@ -120,12 +116,12 @@ public class MethodParamInfo {
         this.argName = argName;
     }
 
-    public Boolean getCollectionType() {
-        return isCollectionType;
+    public Class<?> getCollectionType() {
+        return collectionType;
     }
 
-    public void setCollectionType(Boolean collectionType) {
-        isCollectionType = collectionType;
+    public void setCollectionType(Class<?> collectionType) {
+        this.collectionType = collectionType;
     }
 
     public String getCollectionTypeName() {

@@ -22,10 +22,6 @@ public class MethodReturnInfo {
      */
     private String typeName;
     /**
-     * 是否Collection类型
-     */
-    private Boolean isCollectionType = false;
-    /**
      * 容器类型，List
      */
     private Class<?> collectionType;
@@ -62,8 +58,8 @@ public class MethodReturnInfo {
         this.typeName = typeName;
     }
 
-    public Boolean getCollectionType() {
-        return isCollectionType;
+    public Class<?> getCollectionType() {
+        return collectionType;
     }
 
     public void setCollectionType(Class<?> collectionType) {
@@ -84,9 +80,5 @@ public class MethodReturnInfo {
 
     public void setColumnInfoList(List<ColumnInfo> columnInfoList) {
         this.columnInfoList = columnInfoList;
-    }
-
-    public void setCollectionType(Boolean collectionType) {
-        isCollectionType = collectionType;
     }
 }

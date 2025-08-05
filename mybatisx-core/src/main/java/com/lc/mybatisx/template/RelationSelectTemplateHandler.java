@@ -1,7 +1,6 @@
 package com.lc.mybatisx.template;
 
 import com.lc.mybatisx.annotation.ManyToMany;
-import com.lc.mybatisx.context.EntityInfoContextHolder;
 import com.lc.mybatisx.model.*;
 import com.lc.mybatisx.utils.XmlUtils;
 import net.sf.jsqlparser.JSQLParserException;
@@ -92,7 +91,6 @@ public class RelationSelectTemplateHandler {
         Document document = DocumentHelper.createDocument();
         Element mapperElement = document.addElement("mapper");
         Element selectElement = mapperElement.addElement("select");
-
         ColumnInfo columnInfo = entityRelationSelectInfo.getColumnInfo();
         selectElement.addAttribute("id", entityRelationSelectInfo.getId());
         selectElement.addAttribute("resultMap", entityRelationSelectInfo.getResultMapId());
@@ -100,11 +98,7 @@ public class RelationSelectTemplateHandler {
         if (StringUtils.isNotBlank(fetchSize)) {
             selectElement.addAttribute("fetchSize", fetchSize);
         }
-
-        Class<?> javaType = columnInfo.getJavaType();
-        ColumnInfoAnnotationInfo columnInfoAnnotationInfo = columnInfo.getColumnInfoAnnotationInfo();
-        EntityInfo queryEntityInfo = EntityInfoContextHolder.get(javaType);
-        this.buildManyToManySelectSqlXNode(selectElement, queryEntityInfo, columnInfoAnnotationInfo, sql);
+        this.buildManyToManySelectSqlXNode(selectElement, entityRelationSelectInfo, sql);
         return document.asXML();
     }
 
@@ -116,85 +110,16 @@ public class RelationSelectTemplateHandler {
         trimElement.addAttribute("suffix", "");
         trimElement.addAttribute("prefixOverrides", "AND|OR|and|or");
 
-        EntityInfo queryEntityInfo = entityRelationSelectInfo.getEntityInfo();
+        EntityInfo relationEntityInfo = entityRelationSelectInfo.getEntityInfo();
         ColumnInfoAnnotationInfo columnInfoAnnotationInfo = entityRelationSelectInfo.getColumnInfo().getColumnInfoAnnotationInfo();
         String mappedBy = columnInfoAnnotationInfo.getMappedBy();
         if (StringUtils.isNotBlank(mappedBy)) {
-            List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = entityRelationSelectInfo.getForeignKeyColumnInfoList(queryEntityInfo.getTableName());
-            Expression whereCondition = null;
-            for (ForeignKeyColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
-                String leftEq = String.format("%s.%s", queryEntityInfo.getTableName(), foreignKeyColumnInfo.getName());
-                String rightEq = foreignKeyColumnInfo.getName();
-                EqualsTo eqCondition = ConditionBuilder.eq(leftEq, String.format("#{%s}", rightEq));
-                // 将表达式添加到条件树
-                if (whereCondition == null) {
-                    whereCondition = eqCondition;
-                } else {
-                    whereCondition = new AndExpression(whereCondition, eqCondition);
-                }
-            }
-            trimElement.addText(whereCondition.toString());
-        } else {
-            List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = entityRelationSelectInfo.getForeignKeyColumnInfoList(queryEntityInfo.getTableName());
-            Expression whereCondition = null;
-            for (ForeignKeyColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
-                String leftEq = String.format("%s.%s", queryEntityInfo.getTableName(), foreignKeyColumnInfo.getName());
-                String rightEq = foreignKeyColumnInfo.getName();
-                EqualsTo eqCondition = ConditionBuilder.eq(leftEq, String.format("#{%s}", rightEq));
-                // 将表达式添加到条件树
-                if (whereCondition == null) {
-                    whereCondition = eqCondition;
-                } else {
-                    whereCondition = new AndExpression(whereCondition, eqCondition);
-                }
-            }
-            trimElement.addText(whereCondition.toString());
-        }
-    }
-
-    private void buildManyToManySelectSqlXNode(Element selectElement, EntityInfo queryEntityInfo, ColumnInfoAnnotationInfo columnInfoAnnotationInfo, String sql) {
-        selectElement.addText(sql);
-        Element whereElement = selectElement.addElement("where");
-        Element whereTrimElement = whereElement.addElement("trim");
-        whereTrimElement.addAttribute("prefix", "");
-        whereTrimElement.addAttribute("suffix", "");
-        whereTrimElement.addAttribute("prefixOverrides", "AND|OR|and|or");
-
-        String mappedBy = columnInfoAnnotationInfo.getMappedBy();
-        if (StringUtils.isNotBlank(mappedBy)) {
-            ColumnInfo targetColumnInfo = queryEntityInfo.getColumnInfo(mappedBy);
-            ColumnInfoAnnotationInfo targetAssociationEntityInfo = targetColumnInfo.getColumnInfoAnnotationInfo();
-            List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = targetAssociationEntityInfo.getForeignKeyColumnInfoList();
-            // user_role left join role on() user_role.role_id = role.id where user_role.user_id = user.id
-            Expression whereCondition = null;
-            for (ForeignKeyColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
-                String leftEq = String.format("%s.%s", queryEntityInfo.getTableName(), foreignKeyColumnInfo.getName());
-                String rightEq = foreignKeyColumnInfo.getName();
-                EqualsTo eqCondition = ConditionBuilder.eq(leftEq, String.format("#{%s}", rightEq));
-                // 将表达式添加到条件树
-                if (whereCondition == null) {
-                    whereCondition = eqCondition;
-                } else {
-                    whereCondition = new AndExpression(whereCondition, eqCondition);
-                }
-
-
-                /*String conditionOp = String.format(
-                        " %s %s.%s %s #{%s}",
-                        "and",
-                        targetAssociationEntityInfo.getJoinTable().name(),
-                        foreignKeyColumnInfo.getName(),
-                        "=",
-                        foreignKeyColumnInfo.getName()
-                );*/
-            }
-            whereTrimElement.addText(whereCondition.toString());
-        } else {
-            List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnInfoAnnotationInfo.getInverseForeignKeyColumnInfoList();
-            // user_role left join user on() user_role.user_id = user.id where user_role.role_id = role.id
+            ColumnInfo mappedByColumnInfo = relationEntityInfo.getColumnInfo(mappedBy);
+            ColumnInfoAnnotationInfo mappedByColumnInfoAnnotationInfo = mappedByColumnInfo.getColumnInfoAnnotationInfo();
+            List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedByColumnInfoAnnotationInfo.getInverseForeignKeyColumnInfoList();
             Expression whereCondition = null;
             for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
-                String leftEq = String.format("%s.%s", queryEntityInfo.getTableName(), inverseForeignKeyColumnInfo.getName());
+                String leftEq = String.format("%s.%s", relationEntityInfo.getTableName(), inverseForeignKeyColumnInfo.getName());
                 String rightEq = inverseForeignKeyColumnInfo.getName();
                 EqualsTo eqCondition = ConditionBuilder.eq(leftEq, String.format("#{%s}", rightEq));
                 // 将表达式添加到条件树
@@ -203,60 +128,72 @@ public class RelationSelectTemplateHandler {
                 } else {
                     whereCondition = new AndExpression(whereCondition, eqCondition);
                 }
-
-
-                /*String conditionOp = String.format(
-                        " %s %s.%s %s #{%s}",
-                        "and",
-                        columnInfoAnnotationInfo.getJoinTable().name(),
-                        inverseForeignKeyColumnInfo.getName(),
-                        "=",
-                        inverseForeignKeyColumnInfo.getName()
-                );
-                whereTrimElement.addText(conditionOp);*/
             }
-            whereTrimElement.addText(whereCondition.toString());
+            trimElement.addText(whereCondition.toString());
+        } else {
+            List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnInfoAnnotationInfo.getInverseForeignKeyColumnInfoList();
+            Expression whereCondition = null;
+            for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
+                String leftEq = String.format("%s.%s", relationEntityInfo.getTableName(), inverseForeignKeyColumnInfo.getReferencedColumnName());
+                String rightEq = inverseForeignKeyColumnInfo.getName();
+                EqualsTo eqCondition = ConditionBuilder.eq(leftEq, String.format("#{%s}", rightEq));
+                // 将表达式添加到条件树
+                if (whereCondition == null) {
+                    whereCondition = eqCondition;
+                } else {
+                    whereCondition = new AndExpression(whereCondition, eqCondition);
+                }
+            }
+            trimElement.addText(whereCondition.toString());
         }
     }
 
-    private void where(Element selectElement, ColumnInfoAnnotationInfo columnInfoAnnotationInfo, EntityInfo queryEntityInfo) {
+    private void buildManyToManySelectSqlXNode(Element selectElement, EntityRelationSelectInfo entityRelationSelectInfo, String sql) {
+        selectElement.addText(sql);
         Element whereElement = selectElement.addElement("where");
         Element whereTrimElement = whereElement.addElement("trim");
         whereTrimElement.addAttribute("prefix", "");
         whereTrimElement.addAttribute("suffix", "");
         whereTrimElement.addAttribute("prefixOverrides", "AND|OR|and|or");
 
+        EntityInfo relationEntityInfo = entityRelationSelectInfo.getEntityInfo();
+        String middleTableName = entityRelationSelectInfo.getMiddleTableName();
+        ColumnInfoAnnotationInfo columnInfoAnnotationInfo = entityRelationSelectInfo.getColumnInfo().getColumnInfoAnnotationInfo();
         String mappedBy = columnInfoAnnotationInfo.getMappedBy();
         if (StringUtils.isNotBlank(mappedBy)) {
-            ColumnInfo targetColumnInfo = queryEntityInfo.getColumnInfo(mappedBy);
-            ColumnInfoAnnotationInfo targetAssociationEntityInfo = targetColumnInfo.getColumnInfoAnnotationInfo();
-            List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = targetAssociationEntityInfo.getForeignKeyColumnInfoList();
             // user_role left join role on() user_role.role_id = role.id where user_role.user_id = user.id
-            foreignKeyColumnInfoList.forEach(foreignKeyColumnInfo -> {
-                String conditionOp = String.format(
-                        " %s %s.%s %s #{%s}",
-                        "and",
-                        targetAssociationEntityInfo.getJoinTable().name(),
-                        foreignKeyColumnInfo.getName(),
-                        "=",
-                        foreignKeyColumnInfo.getName()
-                );
-                whereTrimElement.addText(conditionOp);
-            });
+            ColumnInfo mappedByColumnInfo = relationEntityInfo.getColumnInfo(mappedBy);
+            ColumnInfoAnnotationInfo mappedByColumnInfoAnnotationInfo = mappedByColumnInfo.getColumnInfoAnnotationInfo();
+            List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedByColumnInfoAnnotationInfo.getInverseForeignKeyColumnInfoList();
+            Expression whereCondition = null;
+            for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
+                String leftEq = String.format("%s.%s", middleTableName, inverseForeignKeyColumnInfo.getName());
+                String rightEq = inverseForeignKeyColumnInfo.getName();
+                EqualsTo eqCondition = ConditionBuilder.eq(leftEq, String.format("#{%s}", rightEq));
+                // 将表达式添加到条件树
+                if (whereCondition == null) {
+                    whereCondition = eqCondition;
+                } else {
+                    whereCondition = new AndExpression(whereCondition, eqCondition);
+                }
+            }
+            whereTrimElement.addText(whereCondition.toString());
         } else {
-            List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnInfoAnnotationInfo.getInverseForeignKeyColumnInfoList();
             // user_role left join user on() user_role.user_id = user.id where user_role.role_id = role.id
-            inverseForeignKeyColumnInfoList.forEach(inverseForeignKeyColumnInfo -> {
-                String conditionOp = String.format(
-                        " %s %s.%s %s #{%s}",
-                        "and",
-                        columnInfoAnnotationInfo.getJoinTable().name(),
-                        inverseForeignKeyColumnInfo.getName(),
-                        "=",
-                        inverseForeignKeyColumnInfo.getName()
-                );
-                whereTrimElement.addText(conditionOp);
-            });
+            List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = columnInfoAnnotationInfo.getForeignKeyColumnInfoList();
+            Expression whereCondition = null;
+            for (ForeignKeyColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
+                String leftEq = String.format("%s.%s", middleTableName, foreignKeyColumnInfo.getName());
+                String rightEq = foreignKeyColumnInfo.getName();
+                EqualsTo eqCondition = ConditionBuilder.eq(leftEq, String.format("#{%s}", rightEq));
+                // 将表达式添加到条件树
+                if (whereCondition == null) {
+                    whereCondition = eqCondition;
+                } else {
+                    whereCondition = new AndExpression(whereCondition, eqCondition);
+                }
+            }
+            whereTrimElement.addText(whereCondition.toString());
         }
     }
 }

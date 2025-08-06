@@ -7,7 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 实体关系信息处理
@@ -63,5 +65,83 @@ public class EntityRelationInfoHandler {
             entityRelationInfo.addEntityRelation(subEntityRelationInfo);
         }
         return entityRelationInfo;
+    }
+
+    class EntityRelationDependencyTree {
+
+        /**
+         * aaaa:
+         *   aaaaa:
+         *     aaaaa: 不需要消除，允许自引用，但是需要设置最大层级，最多允许10层
+         *   aaaaa:
+         *     aaaaa: 不需要消除，允许自引用，但是需要设置最大层级，最多允许10层
+         *   bbbbb:
+         *     aaaaa: 消除循环依赖
+         *     bbbbb: 不需要消除，允许自引用，但是需要设置最大层级，最多允许10层
+         *   ccccc:
+         *     aaaaa: 消除循环依赖
+         *     bbbbb:
+         */
+
+        /**
+         * 父类
+         */
+        private Class<?> parent;
+        /**
+         * 当前类
+         */
+        private Class<?> clazz;
+        /**
+         * 当前深度【只有自引用才计算深度】
+         */
+        private int depth = 1;
+        /**
+         * 树路径
+         */
+        private Set<Class<?>> path = new LinkedHashSet<>(10);
+
+        public EntityRelationDependencyTree(EntityRelationDependencyTree entityRelationDependencyTree, Class<?> clazz) {
+            this.clazz = clazz;
+            if (entityRelationDependencyTree != null) {
+                this.parent = entityRelationDependencyTree.getClazz();
+                this.path.addAll(entityRelationDependencyTree.getPath());
+                if (this.parent == clazz) {
+                    this.depth = entityRelationDependencyTree.depth + 1;
+                }
+            }
+            this.path.add(clazz);
+        }
+
+        public Class<?> getParent() {
+            return parent;
+        }
+
+        public void setParent(Class<?> parent) {
+            this.parent = parent;
+        }
+
+        public Class<?> getClazz() {
+            return clazz;
+        }
+
+        public void setClazz(Class<?> clazz) {
+            this.clazz = clazz;
+        }
+
+        public Set<Class<?>> getPath() {
+            return path;
+        }
+
+        public void setPath(Set<Class<?>> path) {
+            this.path = path;
+        }
+
+        public Boolean cycleRefCheck(Class<?> subClazz) {
+            // 自循环引用是可以允许的
+            if (this.clazz == subClazz) {
+                return this.depth > 5;
+            }
+            return this.path.contains(subClazz);
+        }
     }
 }

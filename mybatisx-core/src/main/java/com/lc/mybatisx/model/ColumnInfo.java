@@ -29,13 +29,17 @@ public class ColumnInfo {
      */
     private String collectionTypeName;
     /**
-     *
+     * 数据库类型名
      */
     private String dbTypeName;
     /**
-     *
+     * 数据库列名
      */
     private String dbColumnName;
+    /**
+     * 数据库列别名，用于查询
+     */
+    private String dbColumnAliasName;
     /**
      * 类型处理器
      */
@@ -125,6 +129,14 @@ public class ColumnInfo {
 
     public void setDbColumnName(String dbColumnName) {
         this.dbColumnName = dbColumnName;
+    }
+
+    public String getDbColumnAliasName() {
+        return dbColumnAliasName;
+    }
+
+    public void setDbColumnAliasName(String dbColumnAliasName) {
+        this.dbColumnAliasName = dbColumnAliasName;
     }
 
     public String getTypeHandler() {

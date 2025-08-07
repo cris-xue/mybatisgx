@@ -2,6 +2,7 @@ package com.lc.mybatisx.model.handler;
 
 import com.lc.mybatisx.context.EntityInfoContextHolder;
 import com.lc.mybatisx.model.*;
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +50,7 @@ public class EntityRelationInfoHandler {
         entityRelationInfo.setLevel(level);
         entityRelationInfo.setColumnInfo(columnInfo);
         entityRelationInfo.setEntityInfo(entityInfo);
+        this.processTableColumnAliasName(level, entityInfo);
 
         List<ColumnInfo> relationColumnInfoList = entityInfo.getRelationColumnInfoList();
         for (ColumnInfo relationColumnInfo : relationColumnInfoList) {
@@ -65,6 +67,15 @@ public class EntityRelationInfoHandler {
             entityRelationInfo.addEntityRelation(subEntityRelationInfo);
         }
         return entityRelationInfo;
+    }
+
+    private void processTableColumnAliasName(int level, EntityInfo entityInfo) {
+        List<ColumnInfo> tableColumnInfoList = entityInfo.getTableColumnInfoList();
+        for (int i = 0; i < tableColumnInfoList.size(); i++) {
+            ColumnInfo columnInfo = tableColumnInfoList.get(i);
+            String dbColumnAliasName = String.format("%s_%s_%s_%s_%s", entityInfo.getTableName(), columnInfo.getDbColumnName(), level, i, RandomUtils.nextInt(0, 9));
+            columnInfo.setDbColumnAliasName(dbColumnAliasName);
+        }
     }
 
     class EntityRelationDependencyTree {

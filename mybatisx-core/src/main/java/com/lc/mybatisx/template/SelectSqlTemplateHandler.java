@@ -1,9 +1,6 @@
 package com.lc.mybatisx.template;
 
-import com.lc.mybatisx.model.ColumnInfoAnnotationInfo;
-import com.lc.mybatisx.model.EntityInfo;
-import com.lc.mybatisx.model.EntityRelationSelectInfo;
-import com.lc.mybatisx.model.ForeignKeyColumnInfo;
+import com.lc.mybatisx.model.*;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
@@ -140,24 +137,26 @@ public class SelectSqlTemplateHandler {
     }
 
     private List<SelectItem<?>> getSelectItemList(EntityInfo queryEntityInfo) {
+        Table table = new Table(queryEntityInfo.getTableName());
         List<SelectItem<?>> list = new ArrayList<>();
-        queryEntityInfo.getTableColumnInfoList().forEach(queryColumnInfo -> {
+        for (ColumnInfo queryColumnInfo : queryEntityInfo.getTableColumnInfoList()) {
             // 外键不存在，只需要添加字段。外键存在，则需要添加字段和外键
-            ColumnInfoAnnotationInfo queryAssociationEntityInfo = queryColumnInfo.getColumnInfoAnnotationInfo();
-            if (queryAssociationEntityInfo == null) {
-                list.add(this.getSelectItem(queryColumnInfo.getDbColumnName()));
+            ColumnInfoAnnotationInfo queryColumnInfoAnnotationInfo = queryColumnInfo.getColumnInfoAnnotationInfo();
+            if (queryColumnInfoAnnotationInfo == null) {
+                list.add(this.getSelectItem(table, queryColumnInfo.getDbColumnName()));
             } else {
-                queryAssociationEntityInfo.getForeignKeyColumnInfoList().forEach(foreignKeyColumnInfo -> {
-                    list.add(this.getSelectItem(foreignKeyColumnInfo.getName()));
-                });
+                List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = queryColumnInfoAnnotationInfo.getForeignKeyColumnInfoList();
+                for (ForeignKeyColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
+                    list.add(this.getSelectItem(table, foreignKeyColumnInfo.getName()));
+                }
             }
-        });
+        }
         return list;
     }
 
-    private SelectItem<Column> getSelectItem(String columnName) {
+    private SelectItem<Column> getSelectItem(Table table, String columnName) {
         SelectItem<Column> selectItem = new SelectItem();
-        Column column = new Column(columnName);
+        Column column = new Column(table, columnName);
         selectItem.withExpression(column);
         return selectItem;
     }

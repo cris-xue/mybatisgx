@@ -105,10 +105,6 @@ public class RelationSelectTemplateHandler {
     private void buildSelectSqlXNode(Element selectElement, EntityRelationSelectInfo entityRelationSelectInfo, String sql) {
         selectElement.addText(sql);
         Element whereElement = selectElement.addElement("where");
-        Element trimElement = whereElement.addElement("trim");
-        trimElement.addAttribute("prefix", "");
-        trimElement.addAttribute("suffix", "");
-        trimElement.addAttribute("prefixOverrides", "AND|OR|and|or");
 
         EntityInfo relationEntityInfo = entityRelationSelectInfo.getEntityInfo();
         ColumnInfoAnnotationInfo columnInfoAnnotationInfo = entityRelationSelectInfo.getColumnInfo().getColumnInfoAnnotationInfo();
@@ -129,7 +125,7 @@ public class RelationSelectTemplateHandler {
                     whereCondition = new AndExpression(whereCondition, eqCondition);
                 }
             }
-            trimElement.addText(whereCondition.toString());
+            whereElement.addText(whereCondition.toString());
         } else {
             List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnInfoAnnotationInfo.getInverseForeignKeyColumnInfoList();
             Expression whereCondition = null;
@@ -144,17 +140,13 @@ public class RelationSelectTemplateHandler {
                     whereCondition = new AndExpression(whereCondition, eqCondition);
                 }
             }
-            trimElement.addText(whereCondition.toString());
+            whereElement.addText(whereCondition.toString());
         }
     }
 
     private void buildManyToManySelectSqlXNode(Element selectElement, EntityRelationSelectInfo entityRelationSelectInfo, String sql) {
         selectElement.addText(sql);
         Element whereElement = selectElement.addElement("where");
-        Element whereTrimElement = whereElement.addElement("trim");
-        whereTrimElement.addAttribute("prefix", "");
-        whereTrimElement.addAttribute("suffix", "");
-        whereTrimElement.addAttribute("prefixOverrides", "AND|OR|and|or");
 
         EntityInfo relationEntityInfo = entityRelationSelectInfo.getEntityInfo();
         String middleTableName = entityRelationSelectInfo.getMiddleTableName();
@@ -177,7 +169,7 @@ public class RelationSelectTemplateHandler {
                     whereCondition = new AndExpression(whereCondition, eqCondition);
                 }
             }
-            whereTrimElement.addText(whereCondition.toString());
+            whereElement.addText(whereCondition.toString());
         } else {
             // user_role left join user on() user_role.user_id = user.id where user_role.role_id = role.id
             List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = columnInfoAnnotationInfo.getForeignKeyColumnInfoList();
@@ -193,7 +185,7 @@ public class RelationSelectTemplateHandler {
                     whereCondition = new AndExpression(whereCondition, eqCondition);
                 }
             }
-            whereTrimElement.addText(whereCondition.toString());
+            whereElement.addText(whereCondition.toString());
         }
     }
 }

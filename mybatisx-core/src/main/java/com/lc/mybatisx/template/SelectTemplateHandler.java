@@ -1,10 +1,10 @@
 package com.lc.mybatisx.template;
 
-import com.lc.mybatisx.context.EntityInfoContextHolder;
-import com.lc.mybatisx.model.ColumnInfoAnnotationInfo;
 import com.lc.mybatisx.model.EntityInfo;
 import com.lc.mybatisx.model.MapperInfo;
 import com.lc.mybatisx.model.MethodInfo;
+import com.lc.mybatisx.model.ResultMapInfo;
+import net.sf.jsqlparser.statement.select.PlainSelect;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
@@ -27,29 +27,41 @@ public class SelectTemplateHandler {
         Element selectElement = mapperElement.addElement("select");
         selectElement.addAttribute("id", methodInfo.getMethodName());
         selectElement.addAttribute("resultMap", methodInfo.getResultMapId());
-        selectElement.addText("select");
+        // OselectElement.addText("select");
 
-        Element dbTrimElement = selectElement.addElement("trim");
+        /*Element dbTrimElement = selectElement.addElement("trim");
         dbTrimElement.addAttribute("prefix", "");
         dbTrimElement.addAttribute("suffix", "");
-        dbTrimElement.addAttribute("suffixOverrides", ",");
+        dbTrimElement.addAttribute("suffixOverrides", ",");*/
 
         Class<?> methodReturnType = methodInfo.getMethodReturnInfo().getType();
-        EntityInfo entityInfo = EntityInfoContextHolder.get(methodReturnType);
-        entityInfo.getTableColumnInfoList().forEach(columnInfo -> {
+        ResultMapInfo resultMapInfo = mapperInfo.getResultMapInfo(methodReturnType);
+        EntityInfo entityInfo = resultMapInfo.getEntityInfo();
+
+        SelectSqlTemplateHandler selectSqlTemplateHandler = new SelectSqlTemplateHandler();
+        PlainSelect plainSelect = selectSqlTemplateHandler.buildEntityMainSelect(entityInfo);
+
+        selectElement.addText(plainSelect.toString());
+
+        /*List<ColumnInfo> tableColumnInfoList = entityInfo.getTableColumnInfoList();
+        for (ColumnInfo columnInfo : tableColumnInfoList) {
             // 外键不存在，只需要添加字段。外键存在，则需要添加字段和外键
-            ColumnInfoAnnotationInfo associationEntityInfo = columnInfo.getColumnInfoAnnotationInfo();
-            if (associationEntityInfo == null) {
+            ColumnRelationInfo columnRelationInfo = columnInfo.getColumnInfoAnnotationInfo();
+            if (columnRelationInfo == null) {
                 dbTrimElement.addText(String.format("%s, ", columnInfo.getDbColumnName()));
             } else {
-                associationEntityInfo.getForeignKeyColumnInfoList().forEach(foreignKeyColumnInfo -> {
-                    dbTrimElement.addText(String.format("%s, ", foreignKeyColumnInfo.getName()));
-                });
+                ManyToMany manyToMany = columnRelationInfo.getManyToMany();
+                if (manyToMany == null) {
+                    // 只有一对一、一对多、多对一的时候关联字段才需要作为表字段。多对多存在中间表，关联字段在中间中表，不需要作为实体表字段
+                    List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnRelationInfo.getInverseForeignKeyColumnInfoList();
+                    for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
+                        dbTrimElement.addText(String.format("%s, ", inverseForeignKeyColumnInfo.getName()));
+                    }
+                }
             }
-        });
-
-        selectElement.addText(String.format("from %s", mapperInfo.getEntityInfo().getTableName()));
-        whereTemplateHandler.execute(selectElement, mapperInfo.getEntityInfo(), methodInfo);
+        }*/
+        // selectElement.addText(String.format("from %s", entityInfo.getTableName()));
+        whereTemplateHandler.execute(selectElement, entityInfo, methodInfo);
         return document.asXML();
     }
 }

@@ -1,5 +1,6 @@
 package com.lc.mybatisx.template;
 
+import com.lc.mybatisx.annotation.ManyToMany;
 import com.lc.mybatisx.model.*;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
@@ -26,19 +27,37 @@ public class SelectSqlTemplateHandler {
      * @throws JSQLParserException
      */
     public String buildSelectSql(EntityRelationSelectInfo entityRelationSelectInfo) throws JSQLParserException {
-        PlainSelect plainSelect = new PlainSelect();
-        EntityInfo entityInfo = entityRelationSelectInfo.getEntityInfo();
-        this.buildMainSelect(plainSelect, entityRelationSelectInfo, entityInfo);
+        PlainSelect plainSelect = this.buildMiddleTableMainSelect(entityRelationSelectInfo);
         this.buildSelectSql(plainSelect, entityRelationSelectInfo, entityRelationSelectInfo.getEntityRelationSelectInfoList());
         return plainSelect.toString();
     }
 
-    private void buildMainSelect(PlainSelect plainSelect, EntityRelationSelectInfo entityRelationSelectInfo, EntityInfo entityInfo) {
+    /**
+     * 构建以中间表开始的查询，如：select * from user_role
+     * @param entityRelationSelectInfo
+     * @return
+     */
+    private PlainSelect buildMiddleTableMainSelect(EntityRelationSelectInfo entityRelationSelectInfo) {
+        PlainSelect plainSelect = new PlainSelect();
         Boolean isMiddleTable = entityRelationSelectInfo.getExistMiddleTable();
         String mainTableName = isMiddleTable ? entityRelationSelectInfo.getMiddleTableName() : entityRelationSelectInfo.getEntityTableName();
-        plainSelect.addSelectItems(this.getSelectItemList(entityInfo));
+        plainSelect.addSelectItems(this.buildSelectItemList(entityRelationSelectInfo.getEntityInfo()));
         Table mainTable = new Table(mainTableName);
         plainSelect.setFromItem(mainTable);
+        return plainSelect;
+    }
+
+    /**
+     * 构建以实体表开始的查询，如：select * from user
+     * @param entityInfo
+     * @return
+     */
+    public PlainSelect buildEntityMainSelect(EntityInfo entityInfo) {
+        PlainSelect plainSelect = new PlainSelect();
+        plainSelect.addSelectItems(this.buildSelectItemList(entityInfo));
+        Table mainTable = new Table(entityInfo.getTableName());
+        plainSelect.setFromItem(mainTable);
+        return plainSelect;
     }
 
     private void buildSelectSql(PlainSelect plainSelect, EntityRelationSelectInfo leftEntityRelationSelectInfo, List<EntityRelationSelectInfo> rightEntityRelationSelectInfoList) throws JSQLParserException {
@@ -136,22 +155,31 @@ public class SelectSqlTemplateHandler {
         join.setOnExpressions(onExpressionList);
     }
 
-    private List<SelectItem<?>> getSelectItemList(EntityInfo queryEntityInfo) {
-        Table table = new Table(queryEntityInfo.getTableName());
-        List<SelectItem<?>> list = new ArrayList<>();
-        for (ColumnInfo queryColumnInfo : queryEntityInfo.getTableColumnInfoList()) {
+    /**
+     * 构建查询字段列
+     * @param entityInfo
+     * @return
+     */
+    private List<SelectItem<?>> buildSelectItemList(EntityInfo entityInfo) {
+        List<SelectItem<?>> selectItemList = new ArrayList();
+        Table table = new Table(entityInfo.getTableName());
+        for (ColumnInfo columnInfo : entityInfo.getTableColumnInfoList()) {
             // 外键不存在，只需要添加字段。外键存在，则需要添加字段和外键
-            ColumnInfoAnnotationInfo queryColumnInfoAnnotationInfo = queryColumnInfo.getColumnInfoAnnotationInfo();
-            if (queryColumnInfoAnnotationInfo == null) {
-                list.add(this.getSelectItem(table, queryColumnInfo.getDbColumnName()));
+            ColumnRelationInfo columnRelationInfo = columnInfo.getColumnInfoAnnotationInfo();
+            if (columnRelationInfo == null) {
+                selectItemList.add(this.getSelectItem(table, columnInfo.getDbColumnName()));
             } else {
-                List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = queryColumnInfoAnnotationInfo.getForeignKeyColumnInfoList();
-                for (ForeignKeyColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
-                    list.add(this.getSelectItem(table, foreignKeyColumnInfo.getName()));
+                ManyToMany manyToMany = columnRelationInfo.getManyToMany();
+                if (manyToMany == null) {
+                    // 只有一对一、一对多、多对一的时候关联字段才需要作为表字段。多对多存在中间表，关联字段在中间中表，不需要作为实体表字段
+                    List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnRelationInfo.getInverseForeignKeyColumnInfoList();
+                    for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
+                        selectItemList.add(this.getSelectItem(table, inverseForeignKeyColumnInfo.getName()));
+                    }
                 }
             }
         }
-        return list;
+        return selectItemList;
     }
 
     private SelectItem<Column> getSelectItem(Table table, String columnName) {

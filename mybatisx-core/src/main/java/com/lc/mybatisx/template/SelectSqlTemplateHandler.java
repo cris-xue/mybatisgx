@@ -11,6 +11,7 @@ import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.SelectItem;
+import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +42,11 @@ public class SelectSqlTemplateHandler {
         PlainSelect plainSelect = new PlainSelect();
         Boolean isMiddleTable = entityRelationSelectInfo.getExistMiddleTable();
         String mainTableName = isMiddleTable ? entityRelationSelectInfo.getMiddleTableName() : entityRelationSelectInfo.getEntityTableName();
-        plainSelect.addSelectItems(this.buildSelectItemList(entityRelationSelectInfo.getEntityInfo()));
+        List<EntityInfo> entityInfoList = this.getEntityInfoList(entityRelationSelectInfo);
+        for (EntityInfo entityInfo : entityInfoList) {
+            List<SelectItem<?>> selectItemList = this.buildSelectItemList(entityInfo);
+            plainSelect.addSelectItems(selectItemList);
+        }
         Table mainTable = new Table(mainTableName);
         plainSelect.setFromItem(mainTable);
         return plainSelect;
@@ -58,6 +63,19 @@ public class SelectSqlTemplateHandler {
         Table mainTable = new Table(entityInfo.getTableName());
         plainSelect.setFromItem(mainTable);
         return plainSelect;
+    }
+
+    private List<EntityInfo> getEntityInfoList(EntityRelationSelectInfo entityRelationSelectInfo) {
+        List<EntityInfo> entityInfoList = new ArrayList();
+        entityInfoList.add(entityRelationSelectInfo.getEntityInfo());
+        List<EntityRelationSelectInfo> entityRelationSelectInfoList = entityRelationSelectInfo.getEntityRelationSelectInfoList();
+        for (EntityRelationSelectInfo childrenEntityRelationSelectInfo : entityRelationSelectInfoList) {
+            List<EntityInfo> childrenEntityInfoList = this.getEntityInfoList(childrenEntityRelationSelectInfo);
+            if (ObjectUtils.isNotEmpty(childrenEntityInfoList)) {
+                entityInfoList.addAll(childrenEntityInfoList);
+            }
+        }
+        return entityInfoList;
     }
 
     private void buildSelectSql(PlainSelect plainSelect, EntityRelationSelectInfo leftEntityRelationSelectInfo, List<EntityRelationSelectInfo> rightEntityRelationSelectInfoList) throws JSQLParserException {

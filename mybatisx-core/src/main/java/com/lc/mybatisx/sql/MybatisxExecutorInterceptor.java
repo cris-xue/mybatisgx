@@ -77,6 +77,9 @@ public class MybatisxExecutorInterceptor implements Interceptor {
             PageHandler pageHandler = new PageHandler();
             Pageable pageable = pageHandler.getPageable(parameterObject);
             if (pageable != null) {
+                if (boundSql == null) {
+                    boundSql = mappedStatement.getBoundSql(parameterObject);
+                }
                 return this.processPage(executor, boundSql, pageHandler, invocation, mybatisgxExecutorInfo);
             }
         }

@@ -127,7 +127,10 @@ public class MybatisgxMixExecutor implements Executor {
     }
 
     void newExecutor(MappedStatement mappedStatement) {
-        MethodInfo methodInfo = MethodInfoContextHolder.get(mappedStatement.getId());
+        MethodInfo methodInfo = null;
+        if (mappedStatement != null) {
+            methodInfo = MethodInfoContextHolder.get(mappedStatement.getId());
+        }
         this.delegate = methodInfo != null && methodInfo.getBatch() ? batchExecutor : defaultExecutor;
     }
 }

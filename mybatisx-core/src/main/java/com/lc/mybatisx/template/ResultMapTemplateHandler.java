@@ -195,6 +195,15 @@ public class ResultMapTemplateHandler {
         return null;
     }
 
+    /**
+     * 生成关系查询参数，参数名称带有业务属性，如查询用户，参数名为user_id，查询角色，参数名为role_id
+     * <code>
+     *     <association property="user" column="{user_id=user_id}" javaType="com.lc.mybatisx.test.model.entity.User" fetchType="lazy" select="findUser"/>
+     *     <collection property="roleList" column="{user_id=id}" javaType="java.util.List" ofType="com.lc.mybatisx.test.model.entity.Role" fetchType="lazy" select="findRoleList"/>
+     * </code>
+     * @param resultMapRelationInfo
+     * @return
+     */
     private String getColumn(ResultMapRelationInfo resultMapRelationInfo) {
         EntityInfo entityInfo = resultMapRelationInfo.getEntityInfo();
         ColumnInfo columnInfo = resultMapRelationInfo.getColumnInfo();
@@ -213,7 +222,7 @@ public class ResultMapTemplateHandler {
             } else {
                 List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnInfoAnnotationInfo.getInverseForeignKeyColumnInfoList();
                 for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
-                    column.put(inverseForeignKeyColumnInfo.getReferencedColumnName(), inverseForeignKeyColumnInfo.getName());
+                    column.put(inverseForeignKeyColumnInfo.getName(), inverseForeignKeyColumnInfo.getName());
                 }
             }
         } else {

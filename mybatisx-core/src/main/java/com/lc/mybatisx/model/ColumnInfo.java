@@ -57,10 +57,6 @@ public class ColumnInfo {
      */
     private TenantId tenantId;
     /**
-     * 字段注解信息 TODO 字段所有的注解信息需要放在注解中
-     */
-    private ColumnInfoAnnotationInfo columnInfoAnnotationInfo;
-    /**
      * 生成值注解
      */
     private GenerateValue generateValue;
@@ -68,6 +64,10 @@ public class ColumnInfo {
      * 字段值生成处理器
      */
     private GenerateValueHandler generateValueHandler;
+    /**
+     * 字段关系信息，该字段有值表示该字段是一个关联字段，否则是一个表字段
+     */
+    private ColumnInfoAnnotationInfo columnInfoAnnotationInfo;
 
     public Class<?> getJavaType() {
         return javaType;

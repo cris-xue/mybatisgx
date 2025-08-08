@@ -1,5 +1,6 @@
 package com.lc.mybatisx.model.handler;
 
+import com.lc.mybatisx.annotation.ManyToMany;
 import com.lc.mybatisx.context.EntityInfoContextHolder;
 import com.lc.mybatisx.model.*;
 import org.apache.commons.lang3.RandomUtils;
@@ -69,30 +70,53 @@ public class EntityRelationInfoHandler {
         return entityRelationInfo;
     }
 
+    /**
+     * 处理表字段别名
+     * @param level
+     * @param entityInfo
+     */
     private void processTableColumnAliasName(int level, EntityInfo entityInfo) {
+        String tableName = entityInfo.getTableName();
         List<ColumnInfo> tableColumnInfoList = entityInfo.getTableColumnInfoList();
         for (int i = 0; i < tableColumnInfoList.size(); i++) {
             ColumnInfo columnInfo = tableColumnInfoList.get(i);
-            String dbColumnAliasName = String.format("%s_%s_%s_%s_%s", entityInfo.getTableName(), columnInfo.getDbColumnName(), level, i, RandomUtils.nextInt(0, 9));
-            columnInfo.setDbColumnAliasName(dbColumnAliasName);
+            ColumnRelationInfo columnRelationInfo = columnInfo.getColumnInfoAnnotationInfo();
+            if (columnRelationInfo == null) {
+                String dbColumnAliasName = String.format("%s_%s_%s_%s_%s", tableName, columnInfo.getDbColumnName(), level, i, RandomUtils.nextInt(0, 9));
+                columnInfo.setDbColumnAliasName(dbColumnAliasName);
+            } else {
+                ManyToMany manyToMany = columnRelationInfo.getManyToMany();
+                if (manyToMany == null) {
+                    List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnRelationInfo.getInverseForeignKeyColumnInfoList();
+                    for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
+                        String name = inverseForeignKeyColumnInfo.getName();
+                        String nameAlias = String.format("%s_%s_%s_%s_%s", tableName, name, level, i, RandomUtils.nextInt(0, 9));
+                        inverseForeignKeyColumnInfo.setNameAlias(nameAlias);
+                    }
+                }
+            }
         }
     }
 
+    /**
+     * 循环依赖检测器，用于消除循环引用
+     * <code>
+     * aaaa:
+     *   aaaaa:
+     *     aaaaa: 不需要消除，允许自引用，但是需要设置最大层级，最多允许10层
+     *   aaaaa:
+     *     aaaaa: 不需要消除，允许自引用，但是需要设置最大层级，最多允许10层
+     *   bbbbb:
+     *     aaaaa: 消除循环依赖
+     *     bbbbb: 不需要消除，允许自引用，但是需要设置最大层级，最多允许10层
+     *   ccccc:
+     *     aaaaa: 消除循环依赖
+     *     bbbbb:
+     * </code>
+     * @author ccxuef
+     * @date 2025/8/8 16:56
+     */
     class EntityRelationDependencyTree {
-
-        /**
-         * aaaa:
-         *   aaaaa:
-         *     aaaaa: 不需要消除，允许自引用，但是需要设置最大层级，最多允许10层
-         *   aaaaa:
-         *     aaaaa: 不需要消除，允许自引用，但是需要设置最大层级，最多允许10层
-         *   bbbbb:
-         *     aaaaa: 消除循环依赖
-         *     bbbbb: 不需要消除，允许自引用，但是需要设置最大层级，最多允许10层
-         *   ccccc:
-         *     aaaaa: 消除循环依赖
-         *     bbbbb:
-         */
 
         /**
          * 父类

@@ -3,7 +3,9 @@ package com.lc.mybatisx.model;
 import com.lc.mybatisx.annotation.Id;
 import com.lc.mybatisx.annotation.Lock;
 import com.lc.mybatisx.annotation.LogicDelete;
+import com.lc.mybatisx.annotation.ManyToMany;
 import com.lc.mybatisx.annotation.handler.GenerateValueHandler;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -36,11 +38,15 @@ public class EntityInfo {
     /**
      * java字段映射字段信息，userName={userName=1}
      */
-    private Map<String, ColumnInfo> columnInfoMap = new LinkedHashMap<>();
+    private Map<String, ColumnInfo> columnInfoMap = new LinkedHashMap();
+    /**
+     * 数据库字段和java字段映射信息，如：user_name=userName
+     */
+    private Map<String, String> dbColumnInfoMap = new LinkedHashMap();
     /**
      * id字段列表
      */
-    private List<ColumnInfo> idColumnInfoList = new ArrayList<>();
+    private List<ColumnInfo> idColumnInfoList = new ArrayList();
     /**
      * 生成值字段列表
      */
@@ -110,16 +116,23 @@ public class EntityInfo {
                 generateValueColumnInfoList.add(columnInfo);
             }
 
-            ColumnInfoAnnotationInfo columnInfoAnnotationInfo = columnInfo.getColumnInfoAnnotationInfo();
-            if (columnInfoAnnotationInfo != null) {
+            ColumnRelationInfo columnRelationInfo = columnInfo.getColumnInfoAnnotationInfo();
+            if (columnRelationInfo != null) {
                 relationColumnInfoList.add(columnInfo);
             }
 
-            // 字段不存在关联实体或者存在关联实体并且存在外键的才是表字段
-            if (columnInfoAnnotationInfo == null || columnInfoAnnotationInfo.getJoinColumn() != null) {
+            // 1、字段不存在关联实体为表字段    2、存在关联实体并且是关系维护方才是表字段【多对多关联字段在中间表，所以实体中是不存在表字段的】
+            if (columnRelationInfo == null) {
                 tableColumnInfoList.add(columnInfo);
+            } else {
+                ManyToMany manyToMany = columnRelationInfo.getManyToMany();
+                String mappedBy = columnRelationInfo.getMappedBy();
+                if (manyToMany == null && StringUtils.isBlank(mappedBy)) {
+                    tableColumnInfoList.add(columnInfo);
+                }
             }
             columnInfoMap.put(columnInfo.getJavaColumnName(), columnInfo);
+            dbColumnInfoMap.put(columnInfo.getDbColumnName(), columnInfo.getJavaColumnName());
         });
     }
 
@@ -133,6 +146,11 @@ public class EntityInfo {
 
     public ColumnInfo getColumnInfo(String javaColumnName) {
         return this.columnInfoMap.get(javaColumnName);
+    }
+
+    public ColumnInfo getDbColumnInfo(String dbColumnName) {
+        String javaColumnName = this.dbColumnInfoMap.get(dbColumnName);
+        return this.getColumnInfo(javaColumnName);
     }
 
     public List<ColumnInfo> getIdColumnInfoList() {

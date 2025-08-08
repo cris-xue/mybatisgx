@@ -3,6 +3,7 @@ package com.lc.mybatisx.template;
 import com.lc.mybatisx.annotation.ManyToMany;
 import com.lc.mybatisx.model.*;
 import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
@@ -185,14 +186,14 @@ public class SelectSqlTemplateHandler {
             // 外键不存在，只需要添加字段。外键存在，则需要添加字段和外键
             ColumnRelationInfo columnRelationInfo = columnInfo.getColumnInfoAnnotationInfo();
             if (columnRelationInfo == null) {
-                selectItemList.add(this.getSelectItem(table, columnInfo.getDbColumnName()));
+                selectItemList.add(this.getSelectItem(table, columnInfo.getDbColumnName(), columnInfo.getDbColumnAliasName()));
             } else {
                 ManyToMany manyToMany = columnRelationInfo.getManyToMany();
                 if (manyToMany == null) {
                     // 只有一对一、一对多、多对一的时候关联字段才需要作为表字段。多对多存在中间表，关联字段在中间中表，不需要作为实体表字段
                     List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnRelationInfo.getInverseForeignKeyColumnInfoList();
                     for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
-                        selectItemList.add(this.getSelectItem(table, inverseForeignKeyColumnInfo.getName()));
+                        selectItemList.add(this.getSelectItem(table, inverseForeignKeyColumnInfo.getName(), inverseForeignKeyColumnInfo.getNameAlias()));
                     }
                 }
             }
@@ -200,10 +201,12 @@ public class SelectSqlTemplateHandler {
         return selectItemList;
     }
 
-    private SelectItem<Column> getSelectItem(Table table, String columnName) {
+    private SelectItem<Column> getSelectItem(Table table, String columnName, String columnNameAlias) {
         SelectItem<Column> selectItem = new SelectItem();
         Column column = new Column(table, columnName);
         selectItem.withExpression(column);
+        Alias alias = new Alias(columnNameAlias);
+        selectItem.setAlias(alias);
         return selectItem;
     }
 }

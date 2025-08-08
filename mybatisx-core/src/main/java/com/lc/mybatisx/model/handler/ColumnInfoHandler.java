@@ -149,7 +149,6 @@ public class ColumnInfoHandler {
     private List<ForeignKeyColumnInfo> getForeignKeyList(JoinColumn[] joinColumnList) {
         List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = new ArrayList(5);
         for (JoinColumn joinColumn : joinColumnList) {
-            Class<?> table = joinColumn.table();
             String name = joinColumn.name();
             String referencedColumnName = joinColumn.referencedColumnName();
             ForeignKeyColumnInfo foreignKeyColumnInfo = new ForeignKeyColumnInfo();

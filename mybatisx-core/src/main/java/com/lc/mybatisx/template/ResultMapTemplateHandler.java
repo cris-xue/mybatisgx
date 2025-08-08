@@ -56,29 +56,45 @@ public class ResultMapTemplateHandler {
                 idColumnElement(resultMapElement, columnInfo);
                 continue;
             }
-            ColumnInfoAnnotationInfo associationEntityInfo = columnInfo.getColumnInfoAnnotationInfo();
-            if (associationEntityInfo == null) {
+            ColumnRelationInfo columnRelationInfo = columnInfo.getColumnInfoAnnotationInfo();
+            if (columnRelationInfo == null) {
                 resultColumnElement(resultMapElement, columnInfo);
+            } else {
+                ManyToMany manyToMany = columnRelationInfo.getManyToMany();
+                String mappedBy = columnRelationInfo.getMappedBy();
+                if (manyToMany == null && StringUtils.isBlank(mappedBy)) {
+                    List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnRelationInfo.getInverseForeignKeyColumnInfoList();
+                    for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
+                        this.resultColumnElement(resultMapElement, inverseForeignKeyColumnInfo);
+                    }
+                }
             }
         }
     }
 
     private void idColumnElement(Element resultMapElement, ColumnInfo columnInfo) {
-        Element element = resultMapElement.addElement("id");
-        element.addAttribute("property", columnInfo.getJavaColumnName());
-        element.addAttribute("column", columnInfo.getDbColumnName());
-        String dbTypeName = columnInfo.getDbTypeName();
-        element.addAttribute("jdbcType", StringUtils.isNotBlank(dbTypeName) ? dbTypeName.toUpperCase() : null);
-        element.addAttribute("typeHandler", columnInfo.getTypeHandler());
+        Element idColumnElement = resultMapElement.addElement("id");
+        this.columnElement(idColumnElement, columnInfo);
+    }
+
+    private void resultColumnElement(Element resultMapElement, ForeignKeyColumnInfo foreignKeyColumnInfo) {
+        ColumnInfo columnInfo = new ColumnInfo();
+        columnInfo.setDbColumnName(foreignKeyColumnInfo.getName());
+        columnInfo.setDbColumnAliasName(foreignKeyColumnInfo.getNameAlias());
+        this.resultColumnElement(resultMapElement, columnInfo);
     }
 
     private void resultColumnElement(Element resultMapElement, ColumnInfo columnInfo) {
-        Element element = resultMapElement.addElement("result");
-        element.addAttribute("property", columnInfo.getJavaColumnName());
-        element.addAttribute("column", columnInfo.getDbColumnName());
+        Element resultColumnElement = resultMapElement.addElement("result");
+        this.columnElement(resultColumnElement, columnInfo);
+    }
+
+    private void columnElement(Element columnElement, ColumnInfo columnInfo) {
+        columnElement.addAttribute("property", columnInfo.getJavaColumnName());
+        columnElement.addAttribute("column", columnInfo.getDbColumnName());
         String dbTypeName = columnInfo.getDbTypeName();
-        element.addAttribute("jdbcType", StringUtils.isNotBlank(dbTypeName) ? dbTypeName.toUpperCase() : null);
-        element.addAttribute("typeHandler", columnInfo.getTypeHandler());
+        columnElement.addAttribute("jdbcType", StringUtils.isNotBlank(dbTypeName) ? dbTypeName.toUpperCase() : null);
+        columnElement.addAttribute("typeHandler", columnInfo.getTypeHandler());
     }
 
     private Map<String, XNode> addResultMapRelationElement(Element resultMapElement, MapperInfo mapperInfo, List<ResultMapRelationInfo> resultMapRelationInfoList) {

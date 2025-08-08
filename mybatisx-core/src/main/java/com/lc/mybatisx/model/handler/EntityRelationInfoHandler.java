@@ -93,6 +93,19 @@ public class EntityRelationInfoHandler {
                         String nameAlias = String.format("%s_%s_%s_%s_%s", tableName, name, level, i, RandomUtils.nextInt(0, 9));
                         inverseForeignKeyColumnInfo.setNameAlias(nameAlias);
                     }
+                } else {
+                    List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = columnRelationInfo.getForeignKeyColumnInfoList();
+                    for (ForeignKeyColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
+                        String name = foreignKeyColumnInfo.getName();
+                        String nameAlias = String.format("%s_%s_%s_%s_%s", tableName, name, level, i, RandomUtils.nextInt(0, 9));
+                        foreignKeyColumnInfo.setNameAlias(nameAlias);
+                    }
+                    List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnRelationInfo.getInverseForeignKeyColumnInfoList();
+                    for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
+                        String name = inverseForeignKeyColumnInfo.getName();
+                        String nameAlias = String.format("%s_%s_%s_%s_%s", tableName, name, level, i, RandomUtils.nextInt(0, 9));
+                        inverseForeignKeyColumnInfo.setNameAlias(nameAlias);
+                    }
                 }
             }
         }

@@ -184,6 +184,7 @@ public class ColumnInfo {
     }
 
     public void setColumnInfoAnnotationInfo(ColumnInfoAnnotationInfo columnInfoAnnotationInfo) {
+        this.dbColumnName = null;
         this.columnInfoAnnotationInfo = columnInfoAnnotationInfo;
     }
 

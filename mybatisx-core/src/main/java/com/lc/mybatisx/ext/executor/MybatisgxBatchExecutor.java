@@ -25,7 +25,7 @@ public class MybatisgxBatchExecutor implements Executor {
 
     public MybatisgxBatchExecutor(Executor delegate) {
         this.delegate = delegate;
-        delegate.setExecutorWrapper(this);
+        // delegate.setExecutorWrapper(this);
     }
 
     @Override

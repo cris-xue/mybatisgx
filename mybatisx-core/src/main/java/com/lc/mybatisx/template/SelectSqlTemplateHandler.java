@@ -13,6 +13,7 @@ import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,8 +112,7 @@ public class SelectSqlTemplateHandler {
                 String rightEntityTableName = rightEntityRelationSelectInfo.getEntityTableName();
                 Join join = this.buildLeftJoin(rightEntityTableName);
 
-                List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = rightEntityRelationSelectInfo.getForeignKeyColumnInfoList(rightEntityTableName);
-                this.buildEntityTableOnEntityTable(leftEntityTableName, rightEntityTableName, foreignKeyColumnInfoList, join);
+                this.buildEntityTableOnEntityTable(leftEntityRelationSelectInfo, rightEntityRelationSelectInfo, join);
                 plainSelect.addJoins(join);
             }
             this.buildSelectSql(plainSelect, rightEntityRelationSelectInfo, rightEntityRelationSelectInfo.getEntityRelationSelectInfoList());
@@ -126,15 +126,31 @@ public class SelectSqlTemplateHandler {
         return join;
     }
 
-    private void buildEntityTableOnEntityTable(String leftTableName, String rightTableName, List<ForeignKeyColumnInfo> foreignKeyColumnInfoList, Join join) throws JSQLParserException {
+    private void buildEntityTableOnEntityTable(EntityRelationSelectInfo leftEntityRelationSelectInfo, EntityRelationSelectInfo rightEntityRelationSelectInfo, Join join) throws JSQLParserException {
         List<Expression> onExpressionList = new ArrayList<>();
-        for (int i = 0; i < foreignKeyColumnInfoList.size(); i++) {
-            ForeignKeyColumnInfo foreignKeyColumnInfo = foreignKeyColumnInfoList.get(i);
-            EqualsTo onCondition = new EqualsTo(
-                    CCJSqlParserUtil.parseExpression(leftTableName + "." + foreignKeyColumnInfo.getReferencedColumnName()),
-                    CCJSqlParserUtil.parseExpression(rightTableName + "." + foreignKeyColumnInfo.getName())
-            );
-            onExpressionList.add(onCondition);
+        String leftEntityTableName = leftEntityRelationSelectInfo.getEntityTableName();
+        String rightEntityTableName = rightEntityRelationSelectInfo.getEntityTableName();
+        ColumnRelationInfo rightEntityColumnRelationInfo = rightEntityRelationSelectInfo.getColumnInfo().getColumnInfoAnnotationInfo();
+        String mappedBy = rightEntityColumnRelationInfo.getMappedBy();
+        if (StringUtils.isBlank(mappedBy)) {
+            List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = rightEntityColumnRelationInfo.getInverseForeignKeyColumnInfoList();
+            for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
+                EqualsTo onCondition = new EqualsTo(
+                        CCJSqlParserUtil.parseExpression(leftEntityTableName + "." + inverseForeignKeyColumnInfo.getName()),
+                        CCJSqlParserUtil.parseExpression(rightEntityTableName + "." + inverseForeignKeyColumnInfo.getReferencedColumnName())
+                );
+                onExpressionList.add(onCondition);
+            }
+        } else {
+            ColumnInfo mappedColumnInfo = rightEntityRelationSelectInfo.getColumnInfo(mappedBy);
+            List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedColumnInfo.getColumnInfoAnnotationInfo().getInverseForeignKeyColumnInfoList();
+            for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
+                EqualsTo onCondition = new EqualsTo(
+                        CCJSqlParserUtil.parseExpression(leftEntityTableName + "." + inverseForeignKeyColumnInfo.getReferencedColumnName()),
+                        CCJSqlParserUtil.parseExpression(rightEntityTableName + "." + inverseForeignKeyColumnInfo.getName())
+                );
+                onExpressionList.add(onCondition);
+            }
         }
         join.setOnExpressions(onExpressionList);
     }

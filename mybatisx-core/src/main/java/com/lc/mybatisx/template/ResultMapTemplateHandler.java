@@ -207,35 +207,39 @@ public class ResultMapTemplateHandler {
     private String getColumn(ResultMapRelationInfo resultMapRelationInfo) {
         EntityInfo entityInfo = resultMapRelationInfo.getEntityInfo();
         ColumnInfo columnInfo = resultMapRelationInfo.getColumnInfo();
-        ColumnInfoAnnotationInfo columnInfoAnnotationInfo = columnInfo.getColumnInfoAnnotationInfo();
-        ManyToMany manyToMany = columnInfoAnnotationInfo.getManyToMany();
+        ColumnRelationInfo columnRelationInfo = columnInfo.getColumnInfoAnnotationInfo();
+        ManyToMany manyToMany = columnRelationInfo.getManyToMany();
         Map<String, String> column = new HashMap();
         if (manyToMany == null) {
-            String mappedBy = columnInfoAnnotationInfo.getMappedBy();
+            String mappedBy = columnRelationInfo.getMappedBy();
             if (StringUtils.isNotBlank(mappedBy)) {
                 ColumnInfo mappedByColumnInfo = entityInfo.getColumnInfo(mappedBy);
-                ColumnInfoAnnotationInfo mappedByColumnInfoAnnotationInfo = mappedByColumnInfo.getColumnInfoAnnotationInfo();
-                List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedByColumnInfoAnnotationInfo.getInverseForeignKeyColumnInfoList();
+                ColumnRelationInfo mappedByColumnRelationInfo = mappedByColumnInfo.getColumnInfoAnnotationInfo();
+                List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedByColumnRelationInfo.getInverseForeignKeyColumnInfoList();
                 for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
+                    ColumnInfo inverseForeignKeyRefColumnInfo = entityInfo.getDbColumnInfo(inverseForeignKeyColumnInfo.getName());
                     column.put(inverseForeignKeyColumnInfo.getName(), inverseForeignKeyColumnInfo.getReferencedColumnName());
+                    // column.put(inverseForeignKeyColumnInfo.getName(), inverseForeignKeyRefColumnInfo.getDbColumnAliasName());
                 }
             } else {
-                List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnInfoAnnotationInfo.getInverseForeignKeyColumnInfoList();
+                List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnRelationInfo.getInverseForeignKeyColumnInfoList();
                 for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
+                    ColumnInfo inverseForeignKeyRefColumnInfo = entityInfo.getDbColumnInfo(inverseForeignKeyColumnInfo.getReferencedColumnName());
                     column.put(inverseForeignKeyColumnInfo.getName(), inverseForeignKeyColumnInfo.getName());
+                    // column.put(inverseForeignKeyColumnInfo.getName(), inverseForeignKeyRefColumnInfo.getDbColumnAliasName());
                 }
             }
         } else {
-            String mappedBy = columnInfoAnnotationInfo.getMappedBy();
+            String mappedBy = columnRelationInfo.getMappedBy();
             if (StringUtils.isNotBlank(mappedBy)) {
                 ColumnInfo mappedByColumnInfo = entityInfo.getColumnInfo(mappedBy);
-                ColumnInfoAnnotationInfo mappedByColumnInfoAnnotationInfo = mappedByColumnInfo.getColumnInfoAnnotationInfo();
-                List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedByColumnInfoAnnotationInfo.getInverseForeignKeyColumnInfoList();
+                ColumnRelationInfo mappedByColumnRelationInfo = mappedByColumnInfo.getColumnInfoAnnotationInfo();
+                List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedByColumnRelationInfo.getInverseForeignKeyColumnInfoList();
                 for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
                     column.put(inverseForeignKeyColumnInfo.getName(), inverseForeignKeyColumnInfo.getReferencedColumnName());
                 }
             } else {
-                List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = columnInfoAnnotationInfo.getForeignKeyColumnInfoList();
+                List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = columnRelationInfo.getForeignKeyColumnInfoList();
                 for (ForeignKeyColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
                     column.put(foreignKeyColumnInfo.getName(), foreignKeyColumnInfo.getReferencedColumnName());
                 }

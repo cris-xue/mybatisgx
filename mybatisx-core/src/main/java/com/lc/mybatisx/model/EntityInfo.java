@@ -98,7 +98,7 @@ public class EntityInfo {
 
     public void setColumnInfoList(List<ColumnInfo> columnInfoList) {
         this.columnInfoList = columnInfoList;
-        columnInfoList.forEach(columnInfo -> {
+        for (ColumnInfo columnInfo : columnInfoList) {
             Id id = columnInfo.getId();
             if (id != null) {
                 idColumnInfoList.add(columnInfo);
@@ -121,7 +121,8 @@ public class EntityInfo {
                 relationColumnInfoList.add(columnInfo);
             }
 
-            // 1、字段不存在关联实体为表字段    2、存在关联实体并且是关系维护方才是表字段【多对多关联字段在中间表，所以实体中是不存在表字段的】
+            // 1、字段不存在关联实体为表字段
+            // 2、存在关联实体并且是关系维护方才是表字段【多对多关联字段在中间表，所以实体中是不存在表字段的】
             if (columnRelationInfo == null) {
                 tableColumnInfoList.add(columnInfo);
             } else {
@@ -132,8 +133,7 @@ public class EntityInfo {
                 }
             }
             columnInfoMap.put(columnInfo.getJavaColumnName(), columnInfo);
-            dbColumnInfoMap.put(columnInfo.getDbColumnName(), columnInfo.getJavaColumnName());
-        });
+        }
     }
 
     public Map<String, ColumnInfo> getColumnInfoMap() {

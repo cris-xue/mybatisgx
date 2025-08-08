@@ -43,8 +43,12 @@ public class ColumnInfoHandler {
             LogicDelete logicDelete = field.getAnnotation(LogicDelete.class);
 
             String fieldName = field.getName();
-            String dbColumnName = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, fieldName);
-            dbColumnName = (column != null && StringUtils.isNotBlank(column.name())) ? column.name() : dbColumnName;
+            String dbColumnName;
+            if (column != null && StringUtils.isNotBlank(column.name())) {
+                dbColumnName = column.name();
+            } else {
+                dbColumnName = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, fieldName);
+            }
 
             ColumnInfo columnInfo = new ColumnInfo();
             columnInfo.setJavaColumnName(fieldName);
@@ -57,7 +61,7 @@ public class ColumnInfoHandler {
 
             this.setGenerateValueHandler(field, columnInfo);
             this.setType(field, columnInfo);
-            this.setAssociationEntityInfo(field, columnInfo);
+            this.setColumnRelationInfo(field, columnInfo);
 
             columnInfoList.add(columnInfo);
         }
@@ -95,7 +99,7 @@ public class ColumnInfoHandler {
         }
     }
 
-    private void setAssociationEntityInfo(Field field, ColumnInfo columnInfo) {
+    private void setColumnRelationInfo(Field field, ColumnInfo columnInfo) {
         OneToOne oneToOne = field.getAnnotation(OneToOne.class);
         OneToMany oneToMany = field.getAnnotation(OneToMany.class);
         ManyToOne manyToOne = field.getAnnotation(ManyToOne.class);

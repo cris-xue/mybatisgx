@@ -28,7 +28,7 @@ public class ResultMapTemplateHandler {
             Document document = DocumentHelper.createDocument();
             Element resultMapElement = this.addResultMapElement(document, resultMapInfo);
             this.addColumnElement(resultMapElement, resultMapInfo.getTableColumnInfoList());
-            Map<String, XNode> refResultMapXNodeMap = this.addResultMapRelationElement(resultMapElement, mapperInfo, resultMapInfo.getEntityInfo(), resultMapInfo.getResultMapRelationInfoList());
+            Map<String, XNode> refResultMapXNodeMap = this.addResultMapRelationElement(resultMapElement, mapperInfo, resultMapInfo.getEntityInfo(), resultMapInfo.getResultMapInfoList());
             String resultMapXmlString = XmlUtils.writeString(document);
             logger.info("select resultMap: \n{}", resultMapXmlString);
 
@@ -101,41 +101,41 @@ public class ResultMapTemplateHandler {
             Element resultMapElement,
             MapperInfo mapperInfo,
             EntityInfo parentEntityInfo,
-            List<ResultMapRelationInfo> resultMapRelationInfoList
+            List<ResultMapInfo> resultMapInfoList
     ) {
-        if (ObjectUtils.isEmpty(resultMapRelationInfoList)) {
+        if (ObjectUtils.isEmpty(resultMapInfoList)) {
             return new HashMap();
         }
         Map<String, XNode> refResultMapXNodeMap = new HashMap();
-        for (ResultMapRelationInfo resultMapRelationInfo : resultMapRelationInfoList) {
-            ResultMapInfo resultMapInfo = mapperInfo.getResultMapInfo(resultMapRelationInfo.getEntityClazz());
+        for (ResultMapInfo resultMapInfo : resultMapInfoList) {
+            ResultMapInfo existResultMapInfo = mapperInfo.getResultMapInfo(resultMapInfo.getEntityClazz());
             if (resultMapInfo != null) {
-                this.subQuery(resultMapElement, parentEntityInfo, resultMapRelationInfo);
+                this.subQuery(resultMapElement, parentEntityInfo, resultMapInfo);
             } else {
-                Element resultMapRelationElement = this.joinQuery(resultMapRelationInfo, resultMapElement);
-                List<ResultMapRelationInfo> childrenResultMapRelationInfoList = resultMapRelationInfo.getResultMapRelationInfoList();
-                if (ObjectUtils.isNotEmpty(childrenResultMapRelationInfoList)) {
-                    this.addResultMapRelationElement(resultMapRelationElement, mapperInfo, resultMapRelationInfo.getEntityInfo(), childrenResultMapRelationInfoList);
+                Element resultMapRelationElement = this.joinQuery(resultMapInfo, resultMapElement);
+                List<ResultMapInfo> childrenResultMapInfoList = resultMapInfo.getResultMapInfoList();
+                if (ObjectUtils.isNotEmpty(childrenResultMapInfoList)) {
+                    this.addResultMapRelationElement(resultMapRelationElement, mapperInfo, resultMapInfo.getEntityInfo(), childrenResultMapInfoList);
                 }
             }
         }
         return refResultMapXNodeMap;
     }
 
-    private void subQuery(Element resultMapElement, EntityInfo parentEntityInfo, ResultMapRelationInfo resultMapRelationInfo) {
-        ColumnInfo columnInfo = resultMapRelationInfo.getColumnInfo();
+    private void subQuery(Element resultMapElement, EntityInfo parentEntityInfo, ResultMapInfo resultMapInfo) {
+        ColumnInfo columnInfo = resultMapInfo.getColumnInfo();
         ColumnRelationInfo columnRelationInfo = columnInfo.getColumnRelationInfo();
         Integer associationType = this.getRelationType(columnRelationInfo);
         if (associationType == 1) {
-            this.associationColumnElement(resultMapElement, parentEntityInfo, resultMapRelationInfo);
+            this.associationColumnElement(resultMapElement, parentEntityInfo, resultMapInfo);
         } else if (associationType == 2) {
-            this.collectionColumnElement(resultMapElement, parentEntityInfo, resultMapRelationInfo);
+            this.collectionColumnElement(resultMapElement, parentEntityInfo, resultMapInfo);
         } else {
             throw new RuntimeException(columnInfo.getJavaType() + "没有关联注解");
         }
     }
 
-    private Element joinQuery(ResultMapRelationInfo resultMapRelationInfo, Element resultMapElement) {
+    private Element joinQuery(ResultMapInfo resultMapRelationInfo, Element resultMapElement) {
         ColumnInfo columnInfo = resultMapRelationInfo.getColumnInfo();
         ColumnRelationInfo columnInfoAnnotationInfo = columnInfo.getColumnRelationInfo();
         Integer relationType = this.getRelationType(columnInfoAnnotationInfo);
@@ -152,7 +152,7 @@ public class ResultMapTemplateHandler {
         }
     }
 
-    private Element associationColumnElement(Element resultMapElement, EntityInfo parentEntityInfo, ResultMapRelationInfo resultMapRelationInfo) {
+    private Element associationColumnElement(Element resultMapElement, EntityInfo parentEntityInfo, ResultMapInfo resultMapRelationInfo) {
         ColumnInfo columnInfo = resultMapRelationInfo.getColumnInfo();
         ColumnRelationInfo columnRelationInfo = columnInfo.getColumnRelationInfo();
         Element resultMapAssociationElement = resultMapElement.addElement("association");
@@ -165,7 +165,7 @@ public class ResultMapTemplateHandler {
         return resultMapAssociationElement;
     }
 
-    private Element joinAssociationColumnElement(Element resultMapElement, ResultMapRelationInfo resultMapAssociationInfo) {
+    private Element joinAssociationColumnElement(Element resultMapElement, ResultMapInfo resultMapAssociationInfo) {
         ColumnInfo columnInfo = resultMapAssociationInfo.getColumnInfo();
         Element resultMapAssociationElement = resultMapElement.addElement("association");
         resultMapAssociationElement.addAttribute("property", columnInfo.getJavaColumnName());
@@ -173,7 +173,7 @@ public class ResultMapTemplateHandler {
         return resultMapAssociationElement;
     }
 
-    private Element collectionColumnElement(Element resultMapElement, EntityInfo parentEntityInfo, ResultMapRelationInfo resultMapRelationInfo) {
+    private Element collectionColumnElement(Element resultMapElement, EntityInfo parentEntityInfo, ResultMapInfo resultMapRelationInfo) {
         ColumnInfo columnInfo = resultMapRelationInfo.getColumnInfo();
         ColumnRelationInfo columnRelationInfo = columnInfo.getColumnRelationInfo();
         Element resultMapCollectionElement = resultMapElement.addElement("collection");
@@ -187,7 +187,7 @@ public class ResultMapTemplateHandler {
         return resultMapCollectionElement;
     }
 
-    private Element joinCollectionColumnElement(Element resultMapElement, ResultMapRelationInfo resultMapAssociationInfo) {
+    private Element joinCollectionColumnElement(Element resultMapElement, ResultMapInfo resultMapAssociationInfo) {
         ColumnInfo columnInfo = resultMapAssociationInfo.getColumnInfo();
         Element resultMapCollectionElement = resultMapElement.addElement("collection");
         resultMapCollectionElement.addAttribute("property", columnInfo.getJavaColumnName());
@@ -225,7 +225,7 @@ public class ResultMapTemplateHandler {
      * @param resultMapRelationInfo
      * @return
      */
-    private String getColumn(EntityInfo parentEntityInfo, ResultMapRelationInfo resultMapRelationInfo) {
+    private String getColumn(EntityInfo parentEntityInfo, ResultMapInfo resultMapRelationInfo) {
         EntityInfo entityInfo = resultMapRelationInfo.getEntityInfo();
         ColumnInfo columnInfo = resultMapRelationInfo.getColumnInfo();
         ColumnRelationInfo columnRelationInfo = columnInfo.getColumnRelationInfo();

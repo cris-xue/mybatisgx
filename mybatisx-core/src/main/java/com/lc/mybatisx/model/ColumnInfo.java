@@ -4,7 +4,9 @@ import com.lc.mybatisx.annotation.*;
 import com.lc.mybatisx.annotation.handler.GenerateValueHandler;
 
 /**
- * 列信息
+ * 字段信息信息
+ * @author ccxuef
+ * @date 2025/8/9 15:54
  */
 public class ColumnInfo {
 
@@ -45,6 +47,14 @@ public class ColumnInfo {
      */
     private String typeHandler;
     /**
+     * 字段值生成处理器
+     */
+    private GenerateValueHandler generateValueHandler;
+    /**
+     * 非持久化字段
+     */
+    private NonPersistent nonPersistent;
+    /**
      * 是否是主键
      */
     private Id id;
@@ -64,10 +74,6 @@ public class ColumnInfo {
      * 生成值注解
      */
     private GenerateValue generateValue;
-    /**
-     * 字段值生成处理器
-     */
-    private GenerateValueHandler generateValueHandler;
     /**
      * 字段关系信息，该字段有值表示该字段是一个关联字段，否则是一个表字段
      */
@@ -147,6 +153,22 @@ public class ColumnInfo {
         this.typeHandler = typeHandler;
     }
 
+    public GenerateValueHandler getGenerateValueHandler() {
+        return generateValueHandler;
+    }
+
+    public void setGenerateValueHandler(GenerateValueHandler generateValueHandler) {
+        this.generateValueHandler = generateValueHandler;
+    }
+    
+    public NonPersistent getNonPersistent() {
+        return nonPersistent;
+    }
+
+    public void setNonPersistent(NonPersistent nonPersistent) {
+        this.nonPersistent = nonPersistent;
+    }
+
     public Id getId() {
         return id;
     }
@@ -179,14 +201,6 @@ public class ColumnInfo {
         this.tenantId = tenantId;
     }
 
-    public ColumnRelationInfo getColumnRelationInfo() {
-        return columnRelationInfo;
-    }
-
-    public void setColumnRelationInfo(ColumnRelationInfo columnRelationInfo) {
-        this.columnRelationInfo = columnRelationInfo;
-    }
-
     public GenerateValue getGenerateValue() {
         return generateValue;
     }
@@ -195,11 +209,11 @@ public class ColumnInfo {
         this.generateValue = generateValue;
     }
 
-    public GenerateValueHandler getGenerateValueHandler() {
-        return generateValueHandler;
+    public ColumnRelationInfo getColumnRelationInfo() {
+        return columnRelationInfo;
     }
 
-    public void setGenerateValueHandler(GenerateValueHandler generateValueHandler) {
-        this.generateValueHandler = generateValueHandler;
+    public void setColumnRelationInfo(ColumnRelationInfo columnRelationInfo) {
+        this.columnRelationInfo = columnRelationInfo;
     }
 }

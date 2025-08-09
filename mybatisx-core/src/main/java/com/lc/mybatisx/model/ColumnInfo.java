@@ -37,9 +37,9 @@ public class ColumnInfo {
      */
     private String dbColumnName;
     /**
-     * 数据库列别名，用于查询
+     * 数据库列名别名，用于查询
      */
-    private String dbColumnAliasName;
+    private String dbColumnNameAlias;
     /**
      * 类型处理器
      */
@@ -131,12 +131,12 @@ public class ColumnInfo {
         this.dbColumnName = dbColumnName;
     }
 
-    public String getDbColumnAliasName() {
-        return dbColumnAliasName;
+    public String getDbColumnNameAlias() {
+        return dbColumnNameAlias;
     }
 
-    public void setDbColumnAliasName(String dbColumnAliasName) {
-        this.dbColumnAliasName = dbColumnAliasName;
+    public void setDbColumnNameAlias(String dbColumnNameAlias) {
+        this.dbColumnNameAlias = dbColumnNameAlias;
     }
 
     public String getTypeHandler() {

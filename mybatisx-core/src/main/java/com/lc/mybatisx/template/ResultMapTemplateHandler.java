@@ -28,14 +28,14 @@ public class ResultMapTemplateHandler {
             Document document = DocumentHelper.createDocument();
             Element resultMapElement = this.addResultMapElement(document, resultMapInfo);
             this.addColumnElement(resultMapElement, resultMapInfo.getTableColumnInfoList());
-            Map<String, XNode> refResultMapXNodeMap = this.addResultMapRelationElement(resultMapElement, mapperInfo, resultMapInfo.getEntityInfo(), resultMapInfo.getResultMapInfoList());
+            this.addResultMapRelationElement(resultMapElement, mapperInfo, resultMapInfo.getEntityInfo(), resultMapInfo.getResultMapInfoList());
             String resultMapXmlString = XmlUtils.writeString(document);
             logger.info("select resultMap: \n{}", resultMapXmlString);
 
             XPathParser xPathParser = XmlUtils.processXml(resultMapXmlString);
             XNode xNode = xPathParser.evalNode("/mapper/resultMap");
             xNodeMap.put(resultMapInfo.getId(), xNode);
-            xNodeMap.putAll(refResultMapXNodeMap);
+            // xNodeMap.putAll(refResultMapXNodeMap);
         }
         return xNodeMap;
     }
@@ -97,19 +97,14 @@ public class ResultMapTemplateHandler {
         columnElement.addAttribute("typeHandler", columnInfo.getTypeHandler());
     }
 
-    private Map<String, XNode> addResultMapRelationElement(
-            Element resultMapElement,
-            MapperInfo mapperInfo,
-            EntityInfo parentEntityInfo,
-            List<ResultMapInfo> resultMapInfoList
-    ) {
+    private void addResultMapRelationElement(Element resultMapElement, MapperInfo mapperInfo, EntityInfo parentEntityInfo, List<ResultMapInfo> resultMapInfoList) {
         if (ObjectUtils.isEmpty(resultMapInfoList)) {
-            return new HashMap();
+            return;
         }
-        Map<String, XNode> refResultMapXNodeMap = new HashMap();
+        // Map<String, XNode> refResultMapXNodeMap = new HashMap();
         for (ResultMapInfo resultMapInfo : resultMapInfoList) {
             ResultMapInfo existResultMapInfo = mapperInfo.getResultMapInfo(resultMapInfo.getEntityClazz());
-            if (resultMapInfo != null) {
+            if (existResultMapInfo != null) {
                 this.subQuery(resultMapElement, parentEntityInfo, resultMapInfo);
             } else {
                 Element resultMapRelationElement = this.joinQuery(resultMapInfo, resultMapElement);
@@ -119,7 +114,7 @@ public class ResultMapTemplateHandler {
                 }
             }
         }
-        return refResultMapXNodeMap;
+        // return refResultMapXNodeMap;
     }
 
     private void subQuery(Element resultMapElement, EntityInfo parentEntityInfo, ResultMapInfo resultMapInfo) {

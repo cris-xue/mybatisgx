@@ -25,6 +25,8 @@ public class RelationSelectTemplateHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(RelationSelectTemplateHandler.class);
 
+    private SelectSqlTemplateHandler selectSqlTemplateHandler = new SelectSqlTemplateHandler();
+
     public Map<String, XNode> execute(MapperInfo mapperInfo) {
         Map<String, XNode> totalXNodeMap = new HashMap();
         Map<String, EntityRelationSelectInfo> entityRelationSelectInfoMap = mapperInfo.getEntityRelationSelectInfoMap();
@@ -64,7 +66,6 @@ public class RelationSelectTemplateHandler {
      * @return
      */
     private String buildJoinSelect(EntityRelationSelectInfo entityRelationSelectInfo) {
-        SelectSqlTemplateHandler selectSqlTemplateHandler = new SelectSqlTemplateHandler();
         try {
             return selectSqlTemplateHandler.buildSelectSql(entityRelationSelectInfo);
         } catch (JSQLParserException e) {

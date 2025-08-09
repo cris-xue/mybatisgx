@@ -15,11 +15,11 @@ public class RelationTree {
     /**
      * 关系字段，如当前类为role，关系字段为user中的List<Role>字段
      */
-    private ColumnInfo columnInfo;
+    protected ColumnInfo columnInfo;
     /**
      * 关联实体，如实体为user、role。如第一层为user，则entityInfo为user,跟entityInfo有关系的实体为entityRelationList中的entityInfo
      */
-    private EntityInfo entityInfo;
+    protected EntityInfo entityInfo;
 
     public ColumnInfo getColumnInfo() {
         return columnInfo;

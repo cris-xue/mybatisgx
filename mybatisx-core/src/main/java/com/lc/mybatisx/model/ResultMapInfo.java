@@ -6,32 +6,36 @@ import java.util.List;
  * https://blog.csdn.net/wangruoao/article/details/83147374/
  * https://pythonjishu.com/ywljunyfdqtftcc/
  * https://blog.csdn.net/WG102753/article/details/107989681
- * <resultMap id="blogResult" type="Blog">
- * <id property="id" column="id" />
- * <result property="title" column="title"/>
- * <association property="author" javaType="Author" resultSet="authors" column="author_id" foreignColumn="id">
- * <id property="id" column="id"/>
- * <result property="username" column="username"/>
- * <result property="password" column="password"/>
- * <result property="email" column="email"/>
- * <result property="bio" column="bio"/>
- * </association>
+ * <code>
+ *     <resultMap id="blogResult" type="Blog">
+ *     <id property="id" column="id" />
+ *     <result property="title" column="title"/>
+ *     <association property="author" javaType="Author" resultSet="authors" column="author_id" foreignColumn="id">
+ *         <id property="id" column="id"/>
+ *         <result property="username" column="username"/>
+ *         <result property="password" column="password"/>
+ *         <result property="email" column="email"/>
+ *         <result property="bio" column="bio"/>
+ *     </association>
  * </resultMap>
+ * </code>
+ * @author ccxuef
+ * @date 2025/8/9 18:58
  */
-public class ResultMapInfo {
+public class ResultMapInfo extends RelationTree {
 
     /**
-     * resultMap id
+     * 查询方法对应的结果集id，为结果集子节点时为空
      */
     private String id;
     /**
-     * 实体信息
+     * 结果集子查询节点依赖的方法名，为根节点时为空
      */
-    private EntityInfo entityInfo;
+    private String select;
     /**
      * resultMap关系信息列表
      */
-    private List<ResultMapRelationInfo> resultMapRelationInfoList;
+    private List<ResultMapInfo> resultMapInfoList;
 
     public String getId() {
         return id;
@@ -41,20 +45,20 @@ public class ResultMapInfo {
         this.id = id;
     }
 
-    public EntityInfo getEntityInfo() {
-        return entityInfo;
+    public String getSelect() {
+        return select;
     }
 
-    public void setEntityInfo(EntityInfo entityInfo) {
-        this.entityInfo = entityInfo;
+    public void setSelect(String select) {
+        this.select = select;
     }
 
-    public List<ResultMapRelationInfo> getResultMapRelationInfoList() {
-        return resultMapRelationInfoList;
+    public List<ResultMapInfo> getResultMapInfoList() {
+        return resultMapInfoList;
     }
 
-    public void setResultMapRelationInfoList(List<ResultMapRelationInfo> resultMapRelationInfoList) {
-        this.resultMapRelationInfoList = resultMapRelationInfoList;
+    public void setResultMapInfoList(List<ResultMapInfo> resultMapInfoList) {
+        this.resultMapInfoList = resultMapInfoList;
     }
 
     public ColumnInfo getColumnInfo(String javaColumnName) {

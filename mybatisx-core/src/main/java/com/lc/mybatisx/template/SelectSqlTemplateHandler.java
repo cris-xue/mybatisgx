@@ -130,7 +130,7 @@ public class SelectSqlTemplateHandler {
         List<Expression> onExpressionList = new ArrayList<>();
         String leftEntityTableName = leftEntityRelationSelectInfo.getEntityTableName();
         String rightEntityTableName = rightEntityRelationSelectInfo.getEntityTableName();
-        ColumnRelationInfo rightEntityColumnRelationInfo = rightEntityRelationSelectInfo.getColumnInfo().getColumnInfoAnnotationInfo();
+        ColumnRelationInfo rightEntityColumnRelationInfo = rightEntityRelationSelectInfo.getColumnInfo().getColumnRelationInfo();
         String mappedBy = rightEntityColumnRelationInfo.getMappedBy();
         if (StringUtils.isBlank(mappedBy)) {
             List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = rightEntityColumnRelationInfo.getInverseForeignKeyColumnInfoList();
@@ -143,7 +143,7 @@ public class SelectSqlTemplateHandler {
             }
         } else {
             ColumnInfo mappedColumnInfo = rightEntityRelationSelectInfo.getColumnInfo(mappedBy);
-            List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedColumnInfo.getColumnInfoAnnotationInfo().getInverseForeignKeyColumnInfoList();
+            List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedColumnInfo.getColumnRelationInfo().getInverseForeignKeyColumnInfoList();
             for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
                 EqualsTo onCondition = new EqualsTo(
                         CCJSqlParserUtil.parseExpression(leftEntityTableName + "." + inverseForeignKeyColumnInfo.getReferencedColumnName()),
@@ -200,7 +200,7 @@ public class SelectSqlTemplateHandler {
         Table table = new Table(entityInfo.getTableName());
         for (ColumnInfo columnInfo : entityInfo.getTableColumnInfoList()) {
             // 外键不存在，只需要添加字段。外键存在，则需要添加字段和外键
-            ColumnRelationInfo columnRelationInfo = columnInfo.getColumnInfoAnnotationInfo();
+            ColumnRelationInfo columnRelationInfo = columnInfo.getColumnRelationInfo();
             if (columnRelationInfo == null) {
                 selectItemList.add(this.getSelectItem(table, columnInfo.getDbColumnName(), columnInfo.getDbColumnAliasName()));
             } else {

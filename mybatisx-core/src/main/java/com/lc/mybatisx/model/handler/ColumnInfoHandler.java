@@ -5,7 +5,7 @@ import com.google.common.collect.Maps;
 import com.lc.mybatisx.annotation.*;
 import com.lc.mybatisx.annotation.handler.GenerateValueHandler;
 import com.lc.mybatisx.model.ColumnInfo;
-import com.lc.mybatisx.model.ColumnInfoAnnotationInfo;
+import com.lc.mybatisx.model.ColumnRelationInfo;
 import com.lc.mybatisx.model.ForeignKeyColumnInfo;
 import com.lc.mybatisx.utils.GenericUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -133,17 +133,17 @@ public class ColumnInfoHandler {
             inverseForeignKeyColumnInfoList = this.getForeignKeyList(inverseJoinColumnList);
         }
 
-        ColumnInfoAnnotationInfo columnInfoAnnotationInfo = new ColumnInfoAnnotationInfo();
-        columnInfoAnnotationInfo.setOneToOne(oneToOne);
-        columnInfoAnnotationInfo.setOneToMany(oneToMany);
-        columnInfoAnnotationInfo.setManyToOne(manyToOne);
-        columnInfoAnnotationInfo.setManyToMany(manyToMany);
-        columnInfoAnnotationInfo.setJoinColumn(joinColumn);
-        columnInfoAnnotationInfo.setJoinColumns(joinColumns);
-        columnInfoAnnotationInfo.setJoinTable(joinTable);
-        columnInfoAnnotationInfo.setForeignKeyColumnInfoList(foreignKeyColumnInfoList);
-        columnInfoAnnotationInfo.setInverseForeignKeyColumnInfoList(inverseForeignKeyColumnInfoList);
-        columnInfo.setColumnInfoAnnotationInfo(columnInfoAnnotationInfo);
+        ColumnRelationInfo columnRelationInfo = new ColumnRelationInfo();
+        columnRelationInfo.setOneToOne(oneToOne);
+        columnRelationInfo.setOneToMany(oneToMany);
+        columnRelationInfo.setManyToOne(manyToOne);
+        columnRelationInfo.setManyToMany(manyToMany);
+        columnRelationInfo.setJoinColumn(joinColumn);
+        columnRelationInfo.setJoinColumns(joinColumns);
+        columnRelationInfo.setJoinTable(joinTable);
+        columnRelationInfo.setForeignKeyColumnInfoList(foreignKeyColumnInfoList);
+        columnRelationInfo.setInverseForeignKeyColumnInfoList(inverseForeignKeyColumnInfoList);
+        columnInfo.setColumnRelationInfo(columnRelationInfo);
     }
 
     private List<ForeignKeyColumnInfo> getForeignKeyList(JoinColumn[] joinColumnList) {

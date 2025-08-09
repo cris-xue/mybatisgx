@@ -80,7 +80,7 @@ public class EntityRelationInfoHandler {
         List<ColumnInfo> tableColumnInfoList = entityInfo.getTableColumnInfoList();
         for (int i = 0; i < tableColumnInfoList.size(); i++) {
             ColumnInfo columnInfo = tableColumnInfoList.get(i);
-            ColumnRelationInfo columnRelationInfo = columnInfo.getColumnInfoAnnotationInfo();
+            ColumnRelationInfo columnRelationInfo = columnInfo.getColumnRelationInfo();
             if (columnRelationInfo == null) {
                 String dbColumnAliasName = String.format("%s_%s_%s_%s_%s", tableName, columnInfo.getDbColumnName(), level, i, RandomUtils.nextInt(0, 9));
                 columnInfo.setDbColumnAliasName(dbColumnAliasName);

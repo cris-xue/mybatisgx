@@ -1,9 +1,6 @@
 package com.lc.mybatisx.model;
 
-import com.lc.mybatisx.annotation.Id;
-import com.lc.mybatisx.annotation.Lock;
-import com.lc.mybatisx.annotation.LogicDelete;
-import com.lc.mybatisx.annotation.ManyToMany;
+import com.lc.mybatisx.annotation.*;
 import com.lc.mybatisx.annotation.handler.GenerateValueHandler;
 import org.apache.commons.lang3.StringUtils;
 
@@ -98,7 +95,10 @@ public class EntityInfo {
 
     public void setColumnInfoList(List<ColumnInfo> columnInfoList) {
         this.columnInfoList = columnInfoList;
-        for (ColumnInfo columnInfo : columnInfoList) {
+        EntityColumn entityColumn = new EntityColumn();
+        entityColumn.process(columnInfoList);
+
+        /*for (ColumnInfo columnInfo : columnInfoList) {
             Id id = columnInfo.getId();
             if (id != null) {
                 idColumnInfoList.add(columnInfo);
@@ -133,7 +133,7 @@ public class EntityInfo {
                 }
             }
             columnInfoMap.put(columnInfo.getJavaColumnName(), columnInfo);
-        }
+        }*/
     }
 
     public Map<String, ColumnInfo> getColumnInfoMap() {
@@ -199,5 +199,48 @@ public class EntityInfo {
 
     public void setRelationColumnInfoList(List<ColumnInfo> relationColumnInfoList) {
         this.relationColumnInfoList = relationColumnInfoList;
+    }
+
+    private class EntityColumn {
+
+        public void process(List<ColumnInfo> columnInfoList) {
+            for (ColumnInfo columnInfo : columnInfoList) {
+                Id id = columnInfo.getId();
+                if (id != null) {
+                    idColumnInfoList.add(columnInfo);
+                }
+                Lock lock = columnInfo.getLock();
+                if (lock != null) {
+                    lockColumnInfo = columnInfo;
+                }
+                LogicDelete logicDelete = columnInfo.getLogicDelete();
+                if (logicDelete != null) {
+                    logicDeleteColumnInfo = columnInfo;
+                }
+                GenerateValueHandler generateValueHandler = columnInfo.getGenerateValueHandler();
+                if (id != null || generateValueHandler != null) {
+                    generateValueColumnInfoList.add(columnInfo);
+                }
+
+                ColumnRelationInfo columnRelationInfo = columnInfo.getColumnRelationInfo();
+                if (columnRelationInfo != null) {
+                    relationColumnInfoList.add(columnInfo);
+                }
+
+                // 1、字段不存在关联实体为表字段
+                // 2、存在关联实体并且是关系维护方才是表字段【多对多关联字段在中间表，所以实体中是不存在表字段的】
+                NonPersistent nonPersistent = columnInfo.getNonPersistent();
+                if (columnRelationInfo == null && nonPersistent == null) {
+                    tableColumnInfoList.add(columnInfo);
+                } else {
+                    ManyToMany manyToMany = columnRelationInfo.getManyToMany();
+                    String mappedBy = columnRelationInfo.getMappedBy();
+                    if (manyToMany == null && StringUtils.isBlank(mappedBy)) {
+                        tableColumnInfoList.add(columnInfo);
+                    }
+                }
+                columnInfoMap.put(columnInfo.getJavaColumnName(), columnInfo);
+            }
+        }
     }
 }

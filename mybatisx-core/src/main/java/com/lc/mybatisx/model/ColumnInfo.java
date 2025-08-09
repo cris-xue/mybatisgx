@@ -160,7 +160,7 @@ public class ColumnInfo {
     public void setGenerateValueHandler(GenerateValueHandler generateValueHandler) {
         this.generateValueHandler = generateValueHandler;
     }
-    
+
     public NonPersistent getNonPersistent() {
         return nonPersistent;
     }

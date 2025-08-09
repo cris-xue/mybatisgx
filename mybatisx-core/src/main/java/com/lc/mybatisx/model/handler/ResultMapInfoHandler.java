@@ -71,7 +71,7 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
             resultMapRelationInfo.setColumnInfo(columnInfo);
             resultMapRelationInfo.setEntityInfo(entityInfo);
 
-            LoadStrategy loadStrategy = columnInfo.getColumnInfoAnnotationInfo().getLoadStrategy();
+            LoadStrategy loadStrategy = columnInfo.getColumnRelationInfo().getLoadStrategy();
             if (loadStrategy == LoadStrategy.SUB || (loadStrategy == LoadStrategy.JOIN && level <= 2)) {
                 this.buildResultMapInfo(resultMapInfoList, childrenEntityRelationInfo);
             } else if (loadStrategy == LoadStrategy.JOIN && level > 2) {
@@ -103,7 +103,7 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
             ColumnInfo columnInfo = childrenEntityRelationInfo.getColumnInfo();
             EntityRelationSelectInfo entityRelationSelectInfo = this.buildEntityRelationSelect(resultMapInfo, childrenEntityRelationInfo);
 
-            LoadStrategy loadStrategy = columnInfo.getColumnInfoAnnotationInfo().getLoadStrategy();
+            LoadStrategy loadStrategy = columnInfo.getColumnRelationInfo().getLoadStrategy();
             if (loadStrategy == LoadStrategy.SUB || (loadStrategy == LoadStrategy.JOIN && level <= 2)) {
                 // 子查询和join的第一级都无法生成join查询，第一级join会造成结果膨胀问题，第二级采用in查询或者批量查询，解决N+1问题，把N+1变成1+1
                 entityRelationSelectInfoList.add(entityRelationSelectInfo);
@@ -124,25 +124,25 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
         entityRelationSelectInfo.setResultMapId(this.getResultMapId(resultMapInfo, entityRelationInfo));
         entityRelationSelectInfo.setColumnInfo(columnInfo);
         entityRelationSelectInfo.setEntityInfo(entityInfo);
-        Boolean isExistMiddleTable = columnInfo.getColumnInfoAnnotationInfo().getManyToMany() != null;
+        Boolean isExistMiddleTable = columnInfo.getColumnRelationInfo().getManyToMany() != null;
         entityRelationSelectInfo.setExistMiddleTable(isExistMiddleTable);
 
         // 处理关联查询主外键映射，方便模型处理
-        ColumnInfoAnnotationInfo columnInfoAnnotationInfo = columnInfo.getColumnInfoAnnotationInfo();
-        String mappedBy = columnInfoAnnotationInfo.getMappedBy();
+        ColumnRelationInfo columnRelationInfo = columnInfo.getColumnRelationInfo();
+        String mappedBy = columnRelationInfo.getMappedBy();
         if (isExistMiddleTable) {
             if (StringUtils.isBlank(mappedBy)) {
-                entityRelationSelectInfo.addForeignKeyColumnInfo(entityInfo.getTableName(), columnInfoAnnotationInfo.getInverseForeignKeyColumnInfoList());
+                entityRelationSelectInfo.addForeignKeyColumnInfo(entityInfo.getTableName(), columnRelationInfo.getInverseForeignKeyColumnInfoList());
             } else {
-                ColumnInfoAnnotationInfo mappedByColumnInfoAnnotationInfo = entityInfo.getColumnInfo(mappedBy).getColumnInfoAnnotationInfo();
-                entityRelationSelectInfo.addForeignKeyColumnInfo(entityInfo.getTableName(), mappedByColumnInfoAnnotationInfo.getForeignKeyColumnInfoList());
+                ColumnRelationInfo mappedByColumnRelationInfo = entityInfo.getColumnInfo(mappedBy).getColumnRelationInfo();
+                entityRelationSelectInfo.addForeignKeyColumnInfo(entityInfo.getTableName(), mappedByColumnRelationInfo.getForeignKeyColumnInfoList());
             }
         } else {
             if (StringUtils.isBlank(mappedBy)) {
-                entityRelationSelectInfo.addForeignKeyColumnInfo(entityInfo.getTableName(), columnInfoAnnotationInfo.getInverseForeignKeyColumnInfoList());
+                entityRelationSelectInfo.addForeignKeyColumnInfo(entityInfo.getTableName(), columnRelationInfo.getInverseForeignKeyColumnInfoList());
             } else {
-                ColumnInfoAnnotationInfo mappedByColumnInfoAnnotationInfo = entityInfo.getColumnInfo(mappedBy).getColumnInfoAnnotationInfo();
-                entityRelationSelectInfo.addForeignKeyColumnInfo(entityInfo.getTableName(), mappedByColumnInfoAnnotationInfo.getInverseForeignKeyColumnInfoList());
+                ColumnRelationInfo mappedByColumnRelationInfo = entityInfo.getColumnInfo(mappedBy).getColumnRelationInfo();
+                entityRelationSelectInfo.addForeignKeyColumnInfo(entityInfo.getTableName(), mappedByColumnRelationInfo.getInverseForeignKeyColumnInfoList());
             }
         }
         return entityRelationSelectInfo;

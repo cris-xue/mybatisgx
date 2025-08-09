@@ -37,6 +37,22 @@ public class ColumnEntityRelation {
         this.entityInfo = entityInfo;
     }
 
+    public ColumnInfo getEntityColumnInfo(String javaColumnName) {
+        return this.entityInfo.getColumnInfo(javaColumnName);
+    }
+
+    public Class<?> getEntityClazz() {
+        return this.entityInfo.getClazz();
+    }
+
+    public String getEntityClazzName() {
+        return this.entityInfo.getClazzName();
+    }
+
+    public List<ColumnInfo> getTableColumnInfoList() {
+        return this.entityInfo.getTableColumnInfoList();
+    }
+
     /**
      * 当前实体是否是关系维护方
      * @return true：是关系维护方 false：关系被维护方

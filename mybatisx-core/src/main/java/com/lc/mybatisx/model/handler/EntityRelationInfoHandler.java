@@ -36,7 +36,7 @@ public class EntityRelationInfoHandler {
         EntityInfo entityInfo = EntityInfoContextHolder.get(resultClass);
 
         // 解决循环引用问题
-        EntityRelationDependencyTree entityRelationDependencyTree = new EntityRelationDependencyTree(null, resultClass);
+        EntityRelationDependencyTree entityRelationDependencyTree = EntityRelationDependencyTree.build(null, resultClass);
         EntityRelationInfo entityRelationInfo = this.processRelationColumnInfo(1, entityRelationDependencyTree, entityInfo, null);
 
         mapperInfo.addEntityRelationInfo(entityRelationInfo);
@@ -64,7 +64,7 @@ public class EntityRelationInfoHandler {
                 LOGGER.debug("{}->{}存在循环引用，消除循环引用防止无限循环", pathString, javaType);
                 continue;
             }
-            EntityRelationDependencyTree childrenResultMapDependencyTree = new EntityRelationDependencyTree(entityRelationDependencyTree, javaType);
+            EntityRelationDependencyTree childrenResultMapDependencyTree = EntityRelationDependencyTree.build(entityRelationDependencyTree, javaType);
             EntityInfo relationColumnEntityInfo = EntityInfoContextHolder.get(javaType);
             EntityRelationInfo subEntityRelationInfo = this.processRelationColumnInfo(level + 1, childrenResultMapDependencyTree, relationColumnEntityInfo, relationColumnInfo);
             entityRelationInfo.addEntityRelation(subEntityRelationInfo);
@@ -179,7 +179,7 @@ public class EntityRelationInfoHandler {
          */
         private Set<Class<?>> path = new LinkedHashSet<>(10);
 
-        public EntityRelationDependencyTree(EntityRelationDependencyTree entityRelationDependencyTree, Class<?> clazz) {
+        private EntityRelationDependencyTree(EntityRelationDependencyTree entityRelationDependencyTree, Class<?> clazz) {
             this.clazz = clazz;
             if (entityRelationDependencyTree != null) {
                 this.parent = entityRelationDependencyTree.getClazz();
@@ -221,6 +221,10 @@ public class EntityRelationInfoHandler {
                 return this.depth > MAX_DEPTH;
             }
             return this.path.contains(subClazz);
+        }
+
+        public static EntityRelationDependencyTree build(EntityRelationDependencyTree entityRelationDependencyTree, Class<?> clazz) {
+            return new EntityRelationDependencyTree(entityRelationDependencyTree, clazz);
         }
     }
 }

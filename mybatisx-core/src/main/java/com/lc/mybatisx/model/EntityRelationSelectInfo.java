@@ -125,13 +125,13 @@ public class EntityRelationSelectInfo {
     }
 
     public String getMiddleTableName() {
-        ColumnInfoAnnotationInfo columnInfoAnnotationInfo = this.columnInfo.getColumnInfoAnnotationInfo();
-        String mappedBy = columnInfoAnnotationInfo.getMappedBy();
+        ColumnRelationInfo columnRelationInfo = this.columnInfo.getColumnRelationInfo();
+        String mappedBy = columnRelationInfo.getMappedBy();
         if (StringUtils.isBlank(mappedBy)) {
-            JoinTable joinTable = columnInfoAnnotationInfo.getJoinTable();
+            JoinTable joinTable = columnRelationInfo.getJoinTable();
             return joinTable.name();
         } else {
-            JoinTable joinTable = this.entityInfo.getColumnInfo(mappedBy).getColumnInfoAnnotationInfo().getJoinTable();
+            JoinTable joinTable = this.entityInfo.getColumnInfo(mappedBy).getColumnRelationInfo().getJoinTable();
             return joinTable.name();
         }
     }

@@ -116,7 +116,7 @@ public class EntityInfo {
                 generateValueColumnInfoList.add(columnInfo);
             }
 
-            ColumnRelationInfo columnRelationInfo = columnInfo.getColumnInfoAnnotationInfo();
+            ColumnRelationInfo columnRelationInfo = columnInfo.getColumnRelationInfo();
             if (columnRelationInfo != null) {
                 relationColumnInfoList.add(columnInfo);
             }

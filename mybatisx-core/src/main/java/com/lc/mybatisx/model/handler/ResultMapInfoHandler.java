@@ -128,7 +128,7 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
         entityRelationSelectInfo.setExistMiddleTable(isExistMiddleTable);
 
         // 处理关联查询主外键映射，方便模型处理
-        ColumnRelationInfo columnRelationInfo = columnInfo.getColumnRelationInfo();
+        /*ColumnRelationInfo columnRelationInfo = columnInfo.getColumnRelationInfo();
         String mappedBy = columnRelationInfo.getMappedBy();
         if (isExistMiddleTable) {
             if (StringUtils.isBlank(mappedBy)) {
@@ -144,7 +144,7 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
                 ColumnRelationInfo mappedByColumnRelationInfo = entityInfo.getColumnInfo(mappedBy).getColumnRelationInfo();
                 entityRelationSelectInfo.addForeignKeyColumnInfo(entityInfo.getTableName(), mappedByColumnRelationInfo.getInverseForeignKeyColumnInfoList());
             }
-        }
+        }*/
         return entityRelationSelectInfo;
     }
 

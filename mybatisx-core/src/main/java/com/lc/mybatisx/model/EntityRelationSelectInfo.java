@@ -20,15 +20,15 @@ public class EntityRelationSelectInfo {
      */
     private String id;
     /**
-     * 映射到一个外部的标签中，然后通过 id 进行引入
+     * 关联查询结果映射id
      */
     private String resultMapId;
     /**
-     * 关联字段的信息
+     * 关联字段的信息，比如user关联role。当前类是role，该字段就表示user中的userList
      */
     private ColumnInfo columnInfo;
     /**
-     * 关联字段对应的实体信息
+     * 关联字段对应的实体信息。
      */
     private EntityInfo entityInfo;
     /**
@@ -84,13 +84,13 @@ public class EntityRelationSelectInfo {
         isExistMiddleTable = existMiddleTable;
     }
 
-    public List<ForeignKeyColumnInfo> getForeignKeyColumnInfoList(String entityTableName) {
+    /*public List<ForeignKeyColumnInfo> getForeignKeyColumnInfoList(String entityTableName) {
         return foreignKeyColumnInfoMap.get(entityTableName);
-    }
+    }*/
 
-    public void addForeignKeyColumnInfo(String entityTableName, List<ForeignKeyColumnInfo> foreignKeyColumnInfoList) {
+    /*public void addForeignKeyColumnInfo(String entityTableName, List<ForeignKeyColumnInfo> foreignKeyColumnInfoList) {
         this.foreignKeyColumnInfoMap.put(entityTableName, foreignKeyColumnInfoList);
-    }
+    }*/
 
     public List<EntityRelationSelectInfo> getEntityRelationSelectInfoList() {
         return entityRelationSelectInfoList;

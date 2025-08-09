@@ -83,7 +83,7 @@ public class EntityRelationInfoHandler {
             ColumnRelationInfo columnRelationInfo = columnInfo.getColumnRelationInfo();
             if (columnRelationInfo == null) {
                 String dbColumnAliasName = String.format("%s_%s_%s_%s_%s", tableName, columnInfo.getDbColumnName(), level, i, RandomUtils.nextInt(0, 9));
-                columnInfo.setDbColumnAliasName(dbColumnAliasName);
+                columnInfo.setDbColumnNameAlias(dbColumnAliasName);
             } else {
                 ManyToMany manyToMany = columnRelationInfo.getManyToMany();
                 if (manyToMany == null) {

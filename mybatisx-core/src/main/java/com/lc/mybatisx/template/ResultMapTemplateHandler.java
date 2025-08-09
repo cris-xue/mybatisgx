@@ -80,7 +80,7 @@ public class ResultMapTemplateHandler {
     private void resultColumnElement(Element resultMapElement, ForeignKeyColumnInfo foreignKeyColumnInfo) {
         ColumnInfo columnInfo = new ColumnInfo();
         columnInfo.setDbColumnName(foreignKeyColumnInfo.getName());
-        columnInfo.setDbColumnAliasName(foreignKeyColumnInfo.getNameAlias());
+        columnInfo.setDbColumnNameAlias(foreignKeyColumnInfo.getNameAlias());
         this.resultColumnElement(resultMapElement, columnInfo);
     }
 
@@ -91,7 +91,7 @@ public class ResultMapTemplateHandler {
 
     private void columnElement(Element columnElement, ColumnInfo columnInfo) {
         columnElement.addAttribute("property", columnInfo.getJavaColumnName());
-        columnElement.addAttribute("column", columnInfo.getDbColumnAliasName());
+        columnElement.addAttribute("column", columnInfo.getDbColumnNameAlias());
         String dbTypeName = columnInfo.getDbTypeName();
         columnElement.addAttribute("jdbcType", StringUtils.isNotBlank(dbTypeName) ? dbTypeName.toUpperCase() : null);
         columnElement.addAttribute("typeHandler", columnInfo.getTypeHandler());
@@ -240,7 +240,7 @@ public class ResultMapTemplateHandler {
                 for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
                     ColumnInfo parentEntityColumnInfo = parentEntityInfo.getColumnInfo(inverseForeignKeyColumnInfo.getReferencedColumnName());
                     // column.put(inverseForeignKeyColumnInfo.getName(), inverseForeignKeyColumnInfo.getReferencedColumnName());
-                    column.put(inverseForeignKeyColumnInfo.getName(), parentEntityColumnInfo.getDbColumnAliasName());
+                    column.put(inverseForeignKeyColumnInfo.getName(), parentEntityColumnInfo.getDbColumnNameAlias());
                 }
             } else {
                 List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnRelationInfo.getInverseForeignKeyColumnInfoList();
@@ -259,14 +259,14 @@ public class ResultMapTemplateHandler {
                 for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
                     // column.put(inverseForeignKeyColumnInfo.getName(), inverseForeignKeyColumnInfo.getReferencedColumnName());
                     ColumnInfo parentEntityColumnInfo = parentEntityInfo.getColumnInfo(inverseForeignKeyColumnInfo.getReferencedColumnName());
-                    column.put(inverseForeignKeyColumnInfo.getName(), parentEntityColumnInfo.getDbColumnAliasName());
+                    column.put(inverseForeignKeyColumnInfo.getName(), parentEntityColumnInfo.getDbColumnNameAlias());
                 }
             } else {
                 List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = columnRelationInfo.getForeignKeyColumnInfoList();
                 for (ForeignKeyColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
                     // column.put(foreignKeyColumnInfo.getName(), foreignKeyColumnInfo.getReferencedColumnName());
                     ColumnInfo parentEntityColumnInfo = parentEntityInfo.getColumnInfo(foreignKeyColumnInfo.getReferencedColumnName());
-                    column.put(foreignKeyColumnInfo.getName(), parentEntityColumnInfo.getDbColumnAliasName());
+                    column.put(foreignKeyColumnInfo.getName(), parentEntityColumnInfo.getDbColumnNameAlias());
                 }
             }
         }

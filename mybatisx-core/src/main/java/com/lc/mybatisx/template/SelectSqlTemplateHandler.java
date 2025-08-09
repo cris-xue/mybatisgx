@@ -202,7 +202,7 @@ public class SelectSqlTemplateHandler {
             // 外键不存在，只需要添加字段。外键存在，则需要添加字段和外键
             ColumnRelationInfo columnRelationInfo = columnInfo.getColumnRelationInfo();
             if (columnRelationInfo == null) {
-                selectItemList.add(this.getSelectItem(table, columnInfo.getDbColumnName(), columnInfo.getDbColumnAliasName()));
+                selectItemList.add(this.getSelectItem(table, columnInfo.getDbColumnName(), columnInfo.getDbColumnNameAlias()));
             } else {
                 ManyToMany manyToMany = columnRelationInfo.getManyToMany();
                 if (manyToMany == null) {

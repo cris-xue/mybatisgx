@@ -23,6 +23,8 @@ public class EntityRelationInfoHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EntityRelationInfoHandler.class);
 
+    private TableColumnNameAlias tableColumnNameAlias = new TableColumnNameAlias();
+
     public EntityRelationInfo execute(MapperInfo mapperInfo, MethodInfo methodInfo) {
         String action = methodInfo.getAction();
         if (Arrays.asList("insert", "delete", "update").contains(action)) {
@@ -51,7 +53,7 @@ public class EntityRelationInfoHandler {
         entityRelationInfo.setLevel(level);
         entityRelationInfo.setColumnInfo(columnInfo);
         entityRelationInfo.setEntityInfo(entityInfo);
-        this.processTableColumnAliasName(level, entityInfo);
+        this.tableColumnNameAlias.process(level, entityInfo);
 
         List<ColumnInfo> relationColumnInfoList = entityInfo.getRelationColumnInfoList();
         for (ColumnInfo relationColumnInfo : relationColumnInfoList) {
@@ -71,43 +73,68 @@ public class EntityRelationInfoHandler {
     }
 
     /**
-     * 处理表字段别名
-     * @param level
-     * @param entityInfo
+     * 表字段别名
+     * @author ccxuef
+     * @date 2025/8/9 15:11
      */
-    private void processTableColumnAliasName(int level, EntityInfo entityInfo) {
-        String tableName = entityInfo.getTableName();
-        List<ColumnInfo> tableColumnInfoList = entityInfo.getTableColumnInfoList();
-        for (int i = 0; i < tableColumnInfoList.size(); i++) {
-            ColumnInfo columnInfo = tableColumnInfoList.get(i);
-            ColumnRelationInfo columnRelationInfo = columnInfo.getColumnRelationInfo();
-            if (columnRelationInfo == null) {
-                String dbColumnAliasName = String.format("%s_%s_%s_%s_%s", tableName, columnInfo.getDbColumnName(), level, i, RandomUtils.nextInt(0, 9));
-                columnInfo.setDbColumnNameAlias(dbColumnAliasName);
-            } else {
-                ManyToMany manyToMany = columnRelationInfo.getManyToMany();
-                if (manyToMany == null) {
-                    List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnRelationInfo.getInverseForeignKeyColumnInfoList();
-                    for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
-                        String name = inverseForeignKeyColumnInfo.getName();
-                        String nameAlias = String.format("%s_%s_%s_%s_%s", tableName, name, level, i, RandomUtils.nextInt(0, 9));
-                        inverseForeignKeyColumnInfo.setNameAlias(nameAlias);
-                    }
+    private static class TableColumnNameAlias {
+
+        /**
+         * 处理表字段别名
+         * @param level
+         * @param entityInfo
+         */
+        private void process(int level, EntityInfo entityInfo) {
+            String tableName = entityInfo.getTableName();
+            List<ColumnInfo> tableColumnInfoList = entityInfo.getTableColumnInfoList();
+            for (int i = 0; i < tableColumnInfoList.size(); i++) {
+                ColumnInfo columnInfo = tableColumnInfoList.get(i);
+                ColumnRelationInfo columnRelationInfo = columnInfo.getColumnRelationInfo();
+                if (columnRelationInfo == null) {
+                    String name = columnInfo.getDbColumnName();
+                    String nameAlias = this.buildNameAlias(tableName, name, level, i);
+                    columnInfo.setDbColumnNameAlias(nameAlias);
                 } else {
-                    List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = columnRelationInfo.getForeignKeyColumnInfoList();
-                    for (ForeignKeyColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
-                        String name = foreignKeyColumnInfo.getName();
-                        String nameAlias = String.format("%s_%s_%s_%s_%s", tableName, name, level, i, RandomUtils.nextInt(0, 9));
-                        foreignKeyColumnInfo.setNameAlias(nameAlias);
-                    }
-                    List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnRelationInfo.getInverseForeignKeyColumnInfoList();
-                    for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
-                        String name = inverseForeignKeyColumnInfo.getName();
-                        String nameAlias = String.format("%s_%s_%s_%s_%s", tableName, name, level, i, RandomUtils.nextInt(0, 9));
-                        inverseForeignKeyColumnInfo.setNameAlias(nameAlias);
+                    ManyToMany manyToMany = columnRelationInfo.getManyToMany();
+                    if (manyToMany == null) {
+                        List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnRelationInfo.getInverseForeignKeyColumnInfoList();
+                        this.processForeignKeyColumnAlias(inverseForeignKeyColumnInfoList, tableName, level, i);
+                    } else {
+                        List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = columnRelationInfo.getForeignKeyColumnInfoList();
+                        this.processForeignKeyColumnAlias(foreignKeyColumnInfoList, tableName, level, i);
+
+                        List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnRelationInfo.getInverseForeignKeyColumnInfoList();
+                        this.processForeignKeyColumnAlias(inverseForeignKeyColumnInfoList, tableName, level, i);
                     }
                 }
             }
+        }
+
+        /**
+         * 处理列别名
+         * @param columnInfo
+         */
+        private void processColumnAlias(ColumnInfo columnInfo) {
+        }
+
+        /**
+         * 处理外键列别名
+         * @param foreignKeyColumnInfoList
+         * @param tableName
+         * @param level
+         * @param index
+         */
+        private void processForeignKeyColumnAlias(List<ForeignKeyColumnInfo> foreignKeyColumnInfoList, String tableName, int level, int index) {
+            for (ForeignKeyColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
+                String name = foreignKeyColumnInfo.getName();
+                String nameAlias = this.buildNameAlias(tableName, name, level, index);
+                foreignKeyColumnInfo.setNameAlias(nameAlias);
+            }
+        }
+
+        private String buildNameAlias(String tableName, String name, int level, int index) {
+            int randomIndex = RandomUtils.nextInt(0, 9);
+            return String.format("%s_%s_%s_%s_%s", tableName, name, level, index, randomIndex);
         }
     }
 
@@ -129,8 +156,12 @@ public class EntityRelationInfoHandler {
      * @author ccxuef
      * @date 2025/8/8 16:56
      */
-    class EntityRelationDependencyTree {
+    private static class EntityRelationDependencyTree {
 
+        /**
+         * 自依赖检测最大深度
+         */
+        private static final int MAX_DEPTH = 5;
         /**
          * 父类
          */
@@ -187,7 +218,7 @@ public class EntityRelationInfoHandler {
         public Boolean cycleRefCheck(Class<?> subClazz) {
             // 自循环引用是可以允许的
             if (this.clazz == subClazz) {
-                return this.depth > 5;
+                return this.depth > MAX_DEPTH;
             }
             return this.path.contains(subClazz);
         }

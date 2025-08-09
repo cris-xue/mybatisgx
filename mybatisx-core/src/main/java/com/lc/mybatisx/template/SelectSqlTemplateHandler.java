@@ -6,7 +6,6 @@ import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.Join;
@@ -135,20 +134,26 @@ public class SelectSqlTemplateHandler {
         if (StringUtils.isBlank(mappedBy)) {
             List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = rightEntityColumnRelationInfo.getInverseForeignKeyColumnInfoList();
             for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
-                EqualsTo onCondition = new EqualsTo(
+                String leftExpression = String.format("%s.%s", leftEntityTableName, inverseForeignKeyColumnInfo.getName());
+                String rightExpression = String.format("%s.%s", rightEntityTableName, inverseForeignKeyColumnInfo.getReferencedColumnName());
+                EqualsTo onCondition = ConditionBuilder.eq(leftExpression, rightExpression);
+                /*EqualsTo onCondition = new EqualsTo(
                         CCJSqlParserUtil.parseExpression(leftEntityTableName + "." + inverseForeignKeyColumnInfo.getName()),
                         CCJSqlParserUtil.parseExpression(rightEntityTableName + "." + inverseForeignKeyColumnInfo.getReferencedColumnName())
-                );
+                );*/
                 onExpressionList.add(onCondition);
             }
         } else {
             ColumnInfo mappedColumnInfo = rightEntityRelationSelectInfo.getColumnInfo(mappedBy);
             List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedColumnInfo.getColumnRelationInfo().getInverseForeignKeyColumnInfoList();
             for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
-                EqualsTo onCondition = new EqualsTo(
+                String leftExpression = String.format("%s.%s", leftEntityTableName, inverseForeignKeyColumnInfo.getReferencedColumnName());
+                String rightExpression = String.format("%s.%s", rightEntityTableName, inverseForeignKeyColumnInfo.getName());
+                EqualsTo onCondition = ConditionBuilder.eq(leftExpression, rightExpression);
+                /*EqualsTo onCondition = new EqualsTo(
                         CCJSqlParserUtil.parseExpression(leftEntityTableName + "." + inverseForeignKeyColumnInfo.getReferencedColumnName()),
                         CCJSqlParserUtil.parseExpression(rightEntityTableName + "." + inverseForeignKeyColumnInfo.getName())
-                );
+                );*/
                 onExpressionList.add(onCondition);
             }
         }
@@ -168,23 +173,31 @@ public class SelectSqlTemplateHandler {
         List<Expression> onExpressionList = new ArrayList<>();
         for (int i = 0; i < foreignKeyColumnInfoList.size(); i++) {
             ForeignKeyColumnInfo foreignKeyColumnInfo = foreignKeyColumnInfoList.get(i);
-            EqualsTo onCondition = new EqualsTo(
+            String leftExpression = String.format("%s.%s", entityTableName, foreignKeyColumnInfo.getReferencedColumnName());
+            String rightExpression = String.format("%s.%s", middleTableName, foreignKeyColumnInfo.getName());
+            EqualsTo onCondition = ConditionBuilder.eq(leftExpression, rightExpression);
+            /*EqualsTo onCondition = new EqualsTo(
                     CCJSqlParserUtil.parseExpression(entityTableName + "." + foreignKeyColumnInfo.getReferencedColumnName()),
                     CCJSqlParserUtil.parseExpression(middleTableName + "." + foreignKeyColumnInfo.getName())
-            );
+            );*/
             onExpressionList.add(onCondition);
         }
         join.setOnExpressions(onExpressionList);
     }
 
-    private void buildMiddleTableOnEntityTable(String middleTableName, String entityTableName, List<ForeignKeyColumnInfo> foreignKeyColumnInfoList, Join join) throws JSQLParserException {
+    private void buildMiddleTableOnEntityTable(String middleTableName, String entityTableName, List<ForeignKeyColumnInfo> foreignKeyColumnInfoList, Join join) {
         List<Expression> onExpressionList = new ArrayList<>();
         for (int i = 0; i < foreignKeyColumnInfoList.size(); i++) {
             ForeignKeyColumnInfo foreignKeyColumnInfo = foreignKeyColumnInfoList.get(i);
-            EqualsTo onCondition = new EqualsTo(
+            String leftExpression = String.format("%s.%s", middleTableName, foreignKeyColumnInfo.getName());
+            String rightExpression = String.format("%s.%s", entityTableName, foreignKeyColumnInfo.getReferencedColumnName());
+            //.parseExpression(middleTableName + "." + foreignKeyColumnInfo.getName());
+            // String rightExpression = CCJSqlParserUtil.parseExpression(entityTableName + "." + foreignKeyColumnInfo.getReferencedColumnName());
+            EqualsTo onCondition = ConditionBuilder.eq(leftExpression, rightExpression);
+            /*EqualsTo onCondition = new EqualsTo(
                     CCJSqlParserUtil.parseExpression(middleTableName + "." + foreignKeyColumnInfo.getName()),
                     CCJSqlParserUtil.parseExpression(entityTableName + "." + foreignKeyColumnInfo.getReferencedColumnName())
-            );
+            );*/
             onExpressionList.add(onCondition);
         }
         join.setOnExpressions(onExpressionList);

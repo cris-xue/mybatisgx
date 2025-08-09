@@ -71,7 +71,7 @@ public class ColumnInfo {
     /**
      * 字段关系信息，该字段有值表示该字段是一个关联字段，否则是一个表字段
      */
-    private ColumnInfoAnnotationInfo columnInfoAnnotationInfo;
+    private ColumnRelationInfo columnRelationInfo;
 
     public Class<?> getJavaType() {
         return javaType;
@@ -179,13 +179,12 @@ public class ColumnInfo {
         this.tenantId = tenantId;
     }
 
-    public ColumnInfoAnnotationInfo getColumnInfoAnnotationInfo() {
-        return columnInfoAnnotationInfo;
+    public ColumnRelationInfo getColumnRelationInfo() {
+        return columnRelationInfo;
     }
 
-    public void setColumnInfoAnnotationInfo(ColumnInfoAnnotationInfo columnInfoAnnotationInfo) {
-        this.dbColumnName = null;
-        this.columnInfoAnnotationInfo = columnInfoAnnotationInfo;
+    public void setColumnRelationInfo(ColumnRelationInfo columnRelationInfo) {
+        this.columnRelationInfo = columnRelationInfo;
     }
 
     public GenerateValue getGenerateValue() {

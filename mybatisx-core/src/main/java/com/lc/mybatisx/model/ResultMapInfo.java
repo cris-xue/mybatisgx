@@ -22,7 +22,7 @@ import java.util.List;
  * @author ccxuef
  * @date 2025/8/9 18:58
  */
-public class ResultMapInfo extends RelationTree {
+public class ResultMapInfo extends ColumnEntityRelation {
 
     /**
      * 查询方法对应的结果集id，为结果集子节点时为空

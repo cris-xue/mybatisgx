@@ -4,16 +4,14 @@ import com.lc.mybatisx.annotation.JoinTable;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author ：薛承城
  * @description：实体关系查询，只支持左链接
  * @date ：2021/7/9 17:14
  */
-public class EntityRelationSelectInfo {
+public class EntityRelationSelectInfo extends ColumnEntityRelation {
 
     /**
      * 节点唯一标识，只有在不使用嵌套模式字段时才使用
@@ -24,21 +22,9 @@ public class EntityRelationSelectInfo {
      */
     private String resultMapId;
     /**
-     * 关联字段的信息，比如user关联role。当前类是role，该字段就表示user中的userList
-     */
-    private ColumnInfo columnInfo;
-    /**
-     * 关联字段对应的实体信息。
-     */
-    private EntityInfo entityInfo;
-    /**
      * 是否存在中间表
      */
     private Boolean isExistMiddleTable = false;
-    /**
-     * 主外键映射
-     */
-    private Map<String, List<ForeignKeyColumnInfo>> foreignKeyColumnInfoMap = new HashMap();
     /**
      * 直接关联查询
      */
@@ -60,22 +46,6 @@ public class EntityRelationSelectInfo {
         this.resultMapId = resultMapId;
     }
 
-    public ColumnInfo getColumnInfo() {
-        return columnInfo;
-    }
-
-    public void setColumnInfo(ColumnInfo columnInfo) {
-        this.columnInfo = columnInfo;
-    }
-
-    public EntityInfo getEntityInfo() {
-        return entityInfo;
-    }
-
-    public void setEntityInfo(EntityInfo entityInfo) {
-        this.entityInfo = entityInfo;
-    }
-
     public Boolean getExistMiddleTable() {
         return isExistMiddleTable;
     }
@@ -83,14 +53,6 @@ public class EntityRelationSelectInfo {
     public void setExistMiddleTable(Boolean existMiddleTable) {
         isExistMiddleTable = existMiddleTable;
     }
-
-    /*public List<ForeignKeyColumnInfo> getForeignKeyColumnInfoList(String entityTableName) {
-        return foreignKeyColumnInfoMap.get(entityTableName);
-    }*/
-
-    /*public void addForeignKeyColumnInfo(String entityTableName, List<ForeignKeyColumnInfo> foreignKeyColumnInfoList) {
-        this.foreignKeyColumnInfoMap.put(entityTableName, foreignKeyColumnInfoList);
-    }*/
 
     public List<EntityRelationSelectInfo> getEntityRelationSelectInfoList() {
         return entityRelationSelectInfoList;

@@ -5,11 +5,10 @@ import java.util.List;
 
 /**
  * @author ：薛承城
- * @description：实体关系信息【user: {roleList: [], orderList: []}】
+ * @description：实体关系树【user: {roleList: [], orderList: []}】
  * @date ：2021/7/9 17:34
  */
-@Deprecated
-public class EntityRelationInfo extends ColumnEntityRelation {
+public class EntityRelationTree extends ColumnEntityRelation {
 
     /**
      * 关系层级，第一层为1层，第二层为2层，以此类推，如用户和角色，用户为1、角色为2层
@@ -18,7 +17,7 @@ public class EntityRelationInfo extends ColumnEntityRelation {
     /**
      * 实体关系列表，如用户和订单和角色存在关系，entityRelationList为订单和角色
      */
-    private List<EntityRelationInfo> entityRelationList = new ArrayList();
+    private List<EntityRelationTree> entityRelationList = new ArrayList();
 
     public int getLevel() {
         return level;
@@ -28,15 +27,15 @@ public class EntityRelationInfo extends ColumnEntityRelation {
         this.level = level;
     }
 
-    public List<EntityRelationInfo> getEntityRelationList() {
+    public List<EntityRelationTree> getEntityRelationList() {
         return entityRelationList;
     }
 
-    public void setEntityRelationList(List<EntityRelationInfo> entityRelationList) {
+    public void setEntityRelationList(List<EntityRelationTree> entityRelationList) {
         this.entityRelationList = entityRelationList;
     }
 
-    public void addEntityRelation(EntityRelationInfo entityRelationInfo) {
+    public void addEntityRelation(EntityRelationTree entityRelationInfo) {
         this.entityRelationList.add(entityRelationInfo);
     }
 }

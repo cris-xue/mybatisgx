@@ -19,13 +19,13 @@ import java.util.Set;
  * @author ccxuef
  * @date 2025/7/27 14:31
  */
-public class EntityRelationInfoHandler {
+public class EntityRelationTreeHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(EntityRelationInfoHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EntityRelationTreeHandler.class);
 
     private TableColumnNameAlias tableColumnNameAlias = new TableColumnNameAlias();
 
-    public EntityRelationInfo execute(MapperInfo mapperInfo, MethodInfo methodInfo) {
+    public EntityRelationTree execute(MapperInfo mapperInfo, MethodInfo methodInfo) {
         String action = methodInfo.getAction();
         if (Arrays.asList("insert", "delete", "update").contains(action)) {
             return null;
@@ -37,22 +37,22 @@ public class EntityRelationInfoHandler {
 
         // 解决循环引用问题
         EntityRelationDependencyTree entityRelationDependencyTree = EntityRelationDependencyTree.build(null, resultClass);
-        EntityRelationTr entityRelationInfo = this.processRelationColumnInfo(1, entityRelationDependencyTree, entityInfo, null);
+        EntityRelationTree entityRelationInfo = this.processRelationColumnInfo(1, entityRelationDependencyTree, entityInfo, null);
 
         mapperInfo.addEntityRelationTree(entityRelationInfo);
         return entityRelationInfo;
     }
 
-    private EntityRelationInfo processRelationColumnInfo(
+    private EntityRelationTree processRelationColumnInfo(
             int level, EntityRelationDependencyTree entityRelationDependencyTree, EntityInfo entityInfo, ColumnInfo columnInfo
     ) {
         if (entityInfo == null) {
             return null;
         }
-        EntityRelationInfo entityRelationInfo = new EntityRelationInfo();
-        entityRelationInfo.setLevel(level);
-        entityRelationInfo.setColumnInfo(columnInfo);
-        entityRelationInfo.setEntityInfo(entityInfo);
+        EntityRelationTree entityRelationTree = new EntityRelationTree();
+        entityRelationTree.setLevel(level);
+        entityRelationTree.setColumnInfo(columnInfo);
+        entityRelationTree.setEntityInfo(entityInfo);
         this.tableColumnNameAlias.process(level, entityInfo);
 
         List<ColumnInfo> relationColumnInfoList = entityInfo.getRelationColumnInfoList();
@@ -66,10 +66,10 @@ public class EntityRelationInfoHandler {
             }
             EntityRelationDependencyTree childrenResultMapDependencyTree = EntityRelationDependencyTree.build(entityRelationDependencyTree, javaType);
             EntityInfo relationColumnEntityInfo = EntityInfoContextHolder.get(javaType);
-            EntityRelationInfo subEntityRelationInfo = this.processRelationColumnInfo(level + 1, childrenResultMapDependencyTree, relationColumnEntityInfo, relationColumnInfo);
-            entityRelationInfo.addEntityRelation(subEntityRelationInfo);
+            EntityRelationTree subEntityRelationInfo = this.processRelationColumnInfo(level + 1, childrenResultMapDependencyTree, relationColumnEntityInfo, relationColumnInfo);
+            entityRelationTree.addEntityRelation(subEntityRelationInfo);
         }
-        return entityRelationInfo;
+        return entityRelationTree;
     }
 
     /**

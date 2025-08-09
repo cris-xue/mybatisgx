@@ -41,7 +41,7 @@ public class MethodInfoHandler {
     private ColumnInfoHandler columnInfoHandler = new ColumnInfoHandler();
     private MethodNameAstHandler methodNameAstHandler = new MethodNameAstHandler();
     private QueryConditionAstHandler queryConditionAstHandler = new QueryConditionAstHandler();
-    private EntityRelationInfoHandler entityRelationInfoHandler = new EntityRelationInfoHandler();
+    private EntityRelationTreeHandler entityRelationTreeHandler = new EntityRelationTreeHandler();
     private ResultMapInfoHandler resultMapInfoHandler = new ResultMapInfoHandler();
 
     public List<MethodInfo> execute(MapperInfo mapperInfo, Class<?> interfaceClass) {
@@ -102,7 +102,7 @@ public class MethodInfoHandler {
                 this.queryConditionParse(mapperInfo.getEntityInfo(), methodInfo);
             }
 
-            this.entityRelationInfoHandler.execute(mapperInfo, methodInfo);
+            this.entityRelationTreeHandler.execute(mapperInfo, methodInfo);
             String resultMapId = resultMapInfoHandler.execute(mapperInfo, methodInfo);
             methodInfo.setResultMapId(resultMapId);
 

@@ -12,7 +12,6 @@ import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,7 +78,7 @@ public class SelectSqlTemplateHandler {
         return entityInfoList;
     }
 
-    private void buildSelectSql(PlainSelect plainSelect, EntityRelationSelectInfo leftEntityRelationSelectInfo, List<EntityRelationSelectInfo> rightEntityRelationSelectInfoList) throws JSQLParserException {
+    private void buildSelectSql(PlainSelect plainSelect, EntityRelationSelectInfo leftEntityRelationSelectInfo, List<EntityRelationSelectInfo> rightEntityRelationSelectInfoList) {
         Boolean isMiddleTable = leftEntityRelationSelectInfo.getExistMiddleTable();
         if (isMiddleTable) {
             // user_role
@@ -88,7 +87,7 @@ public class SelectSqlTemplateHandler {
             String entityTableName = leftEntityRelationSelectInfo.getEntityTableName();
             Join join = this.buildLeftJoin(entityTableName);
 
-            List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = leftEntityRelationSelectInfo.getForeignKeyColumnInfoList(entityTableName);
+            List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = leftEntityRelationSelectInfo.getForeignKeyColumnInfoList();
             this.buildMiddleTableOnEntityTable(middleTableName, entityTableName, foreignKeyColumnInfoList, join);
             plainSelect.addJoins(join);
         }
@@ -100,7 +99,7 @@ public class SelectSqlTemplateHandler {
                 String middleTableName = rightEntityRelationSelectInfo.getMiddleTableName();
                 Join join = this.buildLeftJoin(middleTableName);
 
-                List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = leftEntityRelationSelectInfo.getForeignKeyColumnInfoList(entityTableName);
+                List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = leftEntityRelationSelectInfo.getForeignKeyColumnInfoList();
                 this.buildEntityTableOnMiddleTable(entityTableName, middleTableName, foreignKeyColumnInfoList, join);
                 plainSelect.addJoins(join);
             } else {
@@ -125,26 +124,24 @@ public class SelectSqlTemplateHandler {
         return join;
     }
 
-    private void buildEntityTableOnEntityTable(EntityRelationSelectInfo leftEntityRelationSelectInfo, EntityRelationSelectInfo rightEntityRelationSelectInfo, Join join) throws JSQLParserException {
+    private void buildEntityTableOnEntityTable(EntityRelationSelectInfo leftEntityRelationSelectInfo, EntityRelationSelectInfo rightEntityRelationSelectInfo, Join join) {
         List<Expression> onExpressionList = new ArrayList<>();
         String leftEntityTableName = leftEntityRelationSelectInfo.getEntityTableName();
         String rightEntityTableName = rightEntityRelationSelectInfo.getEntityTableName();
-        ColumnRelationInfo rightEntityColumnRelationInfo = rightEntityRelationSelectInfo.getColumnInfo().getColumnRelationInfo();
-        String mappedBy = rightEntityColumnRelationInfo.getMappedBy();
-        if (StringUtils.isBlank(mappedBy)) {
-            List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = rightEntityColumnRelationInfo.getInverseForeignKeyColumnInfoList();
+        Boolean isMappedBy = rightEntityRelationSelectInfo.getMappedBy();
+        if (isMappedBy) {
+            List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = rightEntityRelationSelectInfo.getInverseForeignKeyColumnInfoList();
             for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
-                String leftExpression = String.format("%s.%s", leftEntityTableName, inverseForeignKeyColumnInfo.getName());
-                String rightExpression = String.format("%s.%s", rightEntityTableName, inverseForeignKeyColumnInfo.getReferencedColumnName());
+                String leftExpression = String.format("%s.%s", leftEntityTableName, inverseForeignKeyColumnInfo.getReferencedColumnName());
+                String rightExpression = String.format("%s.%s", rightEntityTableName, inverseForeignKeyColumnInfo.getName());
                 EqualsTo onCondition = ConditionBuilder.eq(leftExpression, rightExpression);
                 onExpressionList.add(onCondition);
             }
         } else {
-            ColumnInfo mappedColumnInfo = rightEntityRelationSelectInfo.getColumnInfo(mappedBy);
-            List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedColumnInfo.getColumnRelationInfo().getInverseForeignKeyColumnInfoList();
+            List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = rightEntityRelationSelectInfo.getInverseForeignKeyColumnInfoList();
             for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
-                String leftExpression = String.format("%s.%s", leftEntityTableName, inverseForeignKeyColumnInfo.getReferencedColumnName());
-                String rightExpression = String.format("%s.%s", rightEntityTableName, inverseForeignKeyColumnInfo.getName());
+                String leftExpression = String.format("%s.%s", leftEntityTableName, inverseForeignKeyColumnInfo.getName());
+                String rightExpression = String.format("%s.%s", rightEntityTableName, inverseForeignKeyColumnInfo.getReferencedColumnName());
                 EqualsTo onCondition = ConditionBuilder.eq(leftExpression, rightExpression);
                 onExpressionList.add(onCondition);
             }
@@ -161,7 +158,7 @@ public class SelectSqlTemplateHandler {
      * @return
      * @throws JSQLParserException
      */
-    private void buildEntityTableOnMiddleTable(String entityTableName, String middleTableName, List<ForeignKeyColumnInfo> foreignKeyColumnInfoList, Join join) throws JSQLParserException {
+    private void buildEntityTableOnMiddleTable(String entityTableName, String middleTableName, List<ForeignKeyColumnInfo> foreignKeyColumnInfoList, Join join) {
         List<Expression> onExpressionList = new ArrayList<>();
         for (int i = 0; i < foreignKeyColumnInfoList.size(); i++) {
             ForeignKeyColumnInfo foreignKeyColumnInfo = foreignKeyColumnInfoList.get(i);

@@ -96,7 +96,13 @@ public class SelectSqlTemplateHandler {
             String entityTableName = leftEntityRelationSelectInfo.getEntityTableName();
             Join join = this.buildLeftJoin(entityTableName);
 
-            List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = leftEntityRelationSelectInfo.getForeignKeyColumnInfoList();
+            List<ForeignKeyColumnInfo> foreignKeyColumnInfoList;
+            Boolean isMappedBy = leftEntityRelationSelectInfo.getMappedBy();
+            if (isMappedBy) {
+                foreignKeyColumnInfoList = leftEntityRelationSelectInfo.getForeignKeyColumnInfoList();
+            } else {
+                foreignKeyColumnInfoList = leftEntityRelationSelectInfo.getInverseForeignKeyColumnInfoList();
+            }
             this.buildMiddleTableOnEntityTable(middleTableName, entityTableName, foreignKeyColumnInfoList, join);
             plainSelect.addJoins(join);
         }

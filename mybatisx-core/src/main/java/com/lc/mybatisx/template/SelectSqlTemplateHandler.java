@@ -57,7 +57,7 @@ public class SelectSqlTemplateHandler {
      * @param entityInfo
      * @return
      */
-    public PlainSelect buildEntityMainSelect(EntityInfo entityInfo) {
+    public PlainSelect buildEntityTableMainSelect(EntityInfo entityInfo) {
         PlainSelect plainSelect = new PlainSelect();
         plainSelect.addSelectItems(this.buildSelectItemList(entityInfo));
         Table mainTable = new Table(entityInfo.getTableName());
@@ -102,9 +102,9 @@ public class SelectSqlTemplateHandler {
                 List<ForeignKeyColumnInfo> foreignKeyColumnInfoList;
                 Boolean isMappedBy = rightEntityRelationSelectInfo.getMappedBy();
                 if (isMappedBy) {
-                    foreignKeyColumnInfoList = rightEntityRelationSelectInfo.getForeignKeyColumnInfoList();
-                } else {
                     foreignKeyColumnInfoList = rightEntityRelationSelectInfo.getInverseForeignKeyColumnInfoList();
+                } else {
+                    foreignKeyColumnInfoList = rightEntityRelationSelectInfo.getForeignKeyColumnInfoList();
                 }
                 this.buildEntityTableOnMiddleTable(entityTableName, middleTableName, foreignKeyColumnInfoList, join);
                 plainSelect.addJoins(join);

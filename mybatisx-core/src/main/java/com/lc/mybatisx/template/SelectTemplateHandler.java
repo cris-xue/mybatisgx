@@ -33,7 +33,7 @@ public class SelectTemplateHandler {
         EntityInfo entityInfo = resultMapInfo.getEntityInfo();
 
         SelectSqlTemplateHandler selectSqlTemplateHandler = new SelectSqlTemplateHandler();
-        PlainSelect plainSelect = selectSqlTemplateHandler.buildEntityMainSelect(entityInfo);
+        PlainSelect plainSelect = selectSqlTemplateHandler.buildEntityTableMainSelect(entityInfo);
         selectElement.addText(plainSelect.toString());
 
         whereTemplateHandler.execute(selectElement, entityInfo, methodInfo);

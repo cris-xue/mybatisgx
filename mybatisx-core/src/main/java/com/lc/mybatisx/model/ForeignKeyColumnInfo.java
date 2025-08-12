@@ -1,7 +1,7 @@
 package com.lc.mybatisx.model;
 
 /**
- * 外键字段信息
+ * 外键字段信息 TODO 该模型需要完善，仅仅只存储字段信息是不够的
  * @author ccxuef
  * @date 2025/8/8 17:48
  */
@@ -19,10 +19,6 @@ public class ForeignKeyColumnInfo {
      * 被引用实体的主键列名（目标表的主键列）
      */
     private String referencedColumnName;
-    /**
-     * 被引用实体的主键列名别名
-     */
-    private String referencedColumnNameAlias;
 
     public String getName() {
         return name;
@@ -46,13 +42,5 @@ public class ForeignKeyColumnInfo {
 
     public void setReferencedColumnName(String referencedColumnName) {
         this.referencedColumnName = referencedColumnName;
-    }
-
-    public String getReferencedColumnNameAlias() {
-        return referencedColumnNameAlias;
-    }
-
-    public void setReferencedColumnNameAlias(String referencedColumnNameAlias) {
-        this.referencedColumnNameAlias = referencedColumnNameAlias;
     }
 }

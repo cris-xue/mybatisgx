@@ -60,14 +60,26 @@ public class ResultMapTemplateHandler {
             if (columnRelationInfo == null) {
                 resultColumnElement(resultMapElement, columnInfo);
             } else {
-                ManyToMany manyToMany = columnRelationInfo.getManyToMany();
+                this.addColumnRelationElement(resultMapElement, columnRelationInfo);
+                /*ManyToMany manyToMany = columnRelationInfo.getManyToMany();
                 String mappedBy = columnRelationInfo.getMappedBy();
                 if (manyToMany == null && StringUtils.isBlank(mappedBy)) {
                     List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnRelationInfo.getInverseForeignKeyColumnInfoList();
                     for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
                         this.resultColumnElement(resultMapElement, inverseForeignKeyColumnInfo);
                     }
-                }
+                }*/
+            }
+        }
+    }
+
+    private void addColumnRelationElement(Element resultMapElement, ColumnRelationInfo columnRelationInfo) {
+        ManyToMany manyToMany = columnRelationInfo.getManyToMany();
+        String mappedBy = columnRelationInfo.getMappedBy();
+        if (manyToMany == null && StringUtils.isBlank(mappedBy)) {
+            List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnRelationInfo.getInverseForeignKeyColumnInfoList();
+            for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
+                this.resultColumnElement(resultMapElement, inverseForeignKeyColumnInfo);
             }
         }
     }

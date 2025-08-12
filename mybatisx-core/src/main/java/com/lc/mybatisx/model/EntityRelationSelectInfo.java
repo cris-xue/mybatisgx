@@ -1,7 +1,6 @@
 package com.lc.mybatisx.model;
 
 import com.lc.mybatisx.annotation.JoinTable;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,31 +69,19 @@ public class EntityRelationSelectInfo extends ColumnEntityRelation {
         return this.entityInfo.getColumnInfo(javaColumnName);
     }
 
-    public Class<?> getEntityClazz() {
-        return this.entityInfo.getClazz();
-    }
-
-    public String getEntityClazzName() {
-        return this.entityInfo.getClazzName();
-    }
-
-    public List<ColumnInfo> getTableColumnInfoList() {
-        return this.entityInfo.getTableColumnInfoList();
-    }
-
     public String getEntityTableName() {
         return this.entityInfo.getTableName();
     }
 
     public String getMiddleTableName() {
         ColumnRelationInfo columnRelationInfo = this.columnInfo.getColumnRelationInfo();
-        String mappedBy = columnRelationInfo.getMappedBy();
-        if (StringUtils.isBlank(mappedBy)) {
-            JoinTable joinTable = columnRelationInfo.getJoinTable();
-            return joinTable.name();
+        JoinTable joinTable;
+        if (this.getMappedBy()) {
+            String mappedBy = columnRelationInfo.getMappedBy();
+            joinTable = this.entityInfo.getColumnInfo(mappedBy).getColumnRelationInfo().getJoinTable();
         } else {
-            JoinTable joinTable = this.entityInfo.getColumnInfo(mappedBy).getColumnRelationInfo().getJoinTable();
-            return joinTable.name();
+            joinTable = columnRelationInfo.getJoinTable();
         }
+        return joinTable.name();
     }
 }

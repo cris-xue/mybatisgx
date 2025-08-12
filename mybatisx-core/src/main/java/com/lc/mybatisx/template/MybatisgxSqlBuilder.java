@@ -13,11 +13,34 @@ import net.sf.jsqlparser.schema.Table;
 
 import java.util.function.Supplier;
 
-public class ConditionBuilder {
+public class MybatisgxSqlBuilder {
 
     public static class ColumnBuilder {
 
-        public static Column with(String tableName, String columnName) {
+        private String tableName;
+        private String columnName;
+
+        public static ColumnBuilder builder() {
+            return new ColumnBuilder();
+        }
+
+        public ColumnBuilder with(String tableName, String columnName) {
+            this.tableName = tableName;
+            this.columnName = columnName;
+            return this;
+        }
+
+        public ColumnBuilder withTableName(String tableName) {
+            this.tableName = tableName;
+            return this;
+        }
+
+        public ColumnBuilder withColumnName(String columnName) {
+            this.columnName = columnName;
+            return this;
+        }
+
+        public Column build() {
             return new Column(new Table(tableName), columnName);
         }
     }

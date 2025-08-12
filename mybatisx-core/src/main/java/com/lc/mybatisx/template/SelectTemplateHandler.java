@@ -16,6 +16,7 @@ public class SelectTemplateHandler {
     private static final Logger logger = LoggerFactory.getLogger(SelectTemplateHandler.class);
 
     private WhereTemplateHandler whereTemplateHandler = new WhereTemplateHandler();
+    private SelectSqlTemplateHandler selectSqlTemplateHandler = new SelectSqlTemplateHandler();
 
     public String execute(MapperInfo mapperInfo, MethodInfo methodInfo) {
         return buildSelectXNode(mapperInfo, methodInfo);
@@ -32,8 +33,7 @@ public class SelectTemplateHandler {
         ResultMapInfo resultMapInfo = mapperInfo.getResultMapInfo(methodReturnType);
         EntityInfo entityInfo = resultMapInfo.getEntityInfo();
 
-        SelectSqlTemplateHandler selectSqlTemplateHandler = new SelectSqlTemplateHandler();
-        PlainSelect plainSelect = selectSqlTemplateHandler.buildEntityTableMainSelect(entityInfo);
+        PlainSelect plainSelect = selectSqlTemplateHandler.buildSelectSql(entityInfo);
         selectElement.addText(plainSelect.toString());
 
         whereTemplateHandler.execute(selectElement, entityInfo, methodInfo);

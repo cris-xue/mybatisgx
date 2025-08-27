@@ -21,7 +21,6 @@
 		<module>mybatisx-core</module>
 		<module>mybatisx-spring-boot-starter</module>
 		<module>mybatisgx-query-entity-processor</module>
-		<module>mybatisgx-idea-plugin</module>
 	</modules>
 	
 	<dependencies>

@@ -11,8 +11,8 @@ import org.apache.commons.lang3.reflect.TypeUtils;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
 
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
 
@@ -59,7 +59,7 @@ public class MapperInfoHandler extends BasicInfoHandler {
         Type[] daoSuperInterfaces = daoInterface.getGenericInterfaces();
         for (int i = 0; i < daoSuperInterfaces.length; i++) {
             Type daoSuperInterfaceType = daoSuperInterfaces[i];
-            ParameterizedTypeImpl daoSuperInterfaceClass = (ParameterizedTypeImpl) daoSuperInterfaceType;
+            ParameterizedType daoSuperInterfaceClass = (ParameterizedType) daoSuperInterfaceType;
             Type[] daoInterfaceParams = daoSuperInterfaceClass.getActualTypeArguments();
             if (TypeUtils.isAssignable(daoInterface, Dao.class)) {
                 return daoInterfaceParams;

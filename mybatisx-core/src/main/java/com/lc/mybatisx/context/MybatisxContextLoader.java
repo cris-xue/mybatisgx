@@ -41,6 +41,9 @@ public class MybatisxContextLoader {
     private static final ResourcePatternResolver RESOURCE_PATTERN_RESOLVER = new PathMatchingResourcePatternResolver();
     private static final MetadataReaderFactory METADATA_READER_FACTORY = new CachingMetadataReaderFactory();
 
+    private static final EntityInfoHandler entityInfoHandler = new EntityInfoHandler();
+    private static final MapperInfoHandler mapperInfoHandler = new MapperInfoHandler();
+
     public void load(String[] entityBasePackages, String[] daoBasePackages, List<Resource> repositoryResourceList) {
         for (String entityBasePackage : entityBasePackages) {
             this.processEntity(entityBasePackage);
@@ -63,14 +66,23 @@ public class MybatisxContextLoader {
         Resource[] resources = this.getResources(basePackage);
         for (Resource resource : resources) {
             Class<?> clazz = this.getResourceClass(resource);
-            Entity entity = clazz.getAnnotation(Entity.class);
-            if (entity == null) {
-                continue;
-            }
-            EntityInfoHandler entityInfoHandler = new EntityInfoHandler();
-            EntityInfo entityInfo = entityInfoHandler.execute(clazz);
-            EntityInfoContextHolder.set(clazz, entityInfo);
+            this.processEntity(clazz);
         }
+    }
+
+    public void processEntityClass(List<Class<?>> clazzList) {
+        for (Class<?> clazz : clazzList) {
+            this.processEntity(clazz);
+        }
+    }
+
+    private void processEntity(Class<?> clazz) {
+        Entity entity = clazz.getAnnotation(Entity.class);
+        if (entity == null) {
+            return;
+        }
+        EntityInfo entityInfo = entityInfoHandler.execute(clazz);
+        EntityInfoContextHolder.set(clazz, entityInfo);
     }
 
     private List<Resource> getDaoResourceList(String basePackage) {
@@ -90,11 +102,20 @@ public class MybatisxContextLoader {
     private void processDao(List<Resource> resourceList) {
         for (Resource resource : resourceList) {
             Class<?> clazz = this.getResourceClass(resource);
-            MapperInfoHandler mapperInfoHandler = new MapperInfoHandler();
-            MapperInfo mapperInfo = mapperInfoHandler.execute(clazz);
-            MapperInfoContextHolder.set(clazz, mapperInfo);
-            MapperInfoContextHolder.set(mapperInfo.getEntityClass(), mapperInfo);
+            this.processDao(clazz);
         }
+    }
+
+    public void processDaoClass(List<Class<?>> clazzList) {
+        for (Class<?> clazz : clazzList) {
+            this.processDao(clazz);
+        }
+    }
+
+    private void processDao(Class<?> clazz) {
+        MapperInfo mapperInfo = mapperInfoHandler.execute(clazz);
+        MapperInfoContextHolder.set(clazz, mapperInfo);
+        MapperInfoContextHolder.set(mapperInfo.getEntityClass(), mapperInfo);
     }
 
     private void processTemplate() {

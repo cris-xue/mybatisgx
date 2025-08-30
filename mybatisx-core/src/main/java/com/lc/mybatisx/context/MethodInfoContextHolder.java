@@ -16,4 +16,8 @@ public class MethodInfoContextHolder {
     public static MethodInfo get(String statement) {
         return STATEMENT_METHOD_INFO_MAP.get(statement);
     }
+
+    public static void remove() {
+        STATEMENT_METHOD_INFO_MAP.clear();
+    }
 }

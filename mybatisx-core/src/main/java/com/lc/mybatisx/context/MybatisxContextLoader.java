@@ -118,6 +118,13 @@ public class MybatisxContextLoader {
         MapperInfoContextHolder.set(mapperInfo.getEntityClass(), mapperInfo);
     }
 
+    public void remove() {
+        EntityInfoContextHolder.remove();
+        MapperInfoContextHolder.remove();
+        MapperTemplateContextHolder.remove();
+        MethodInfoContextHolder.remove();
+    }
+
     private void processTemplate() {
         CurdTemplateHandler curdTemplateHandler = new CurdTemplateHandler();
         ResultMapTemplateHandler resultMapTemplateHandler = new ResultMapTemplateHandler();

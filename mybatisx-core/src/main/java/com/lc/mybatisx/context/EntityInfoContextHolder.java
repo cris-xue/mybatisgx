@@ -22,4 +22,8 @@ public class EntityInfoContextHolder {
     public static List<Class<?>> getEntityClassList() {
         return new ArrayList(entityInfoMap.keySet());
     }
+
+    public static void remove() {
+        entityInfoMap.clear();
+    }
 }

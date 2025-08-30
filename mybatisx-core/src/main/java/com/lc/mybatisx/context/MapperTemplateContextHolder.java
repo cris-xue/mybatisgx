@@ -50,4 +50,8 @@ public class MapperTemplateContextHolder {
         Map<String, XNode> idXNodeMap = mapperTemplateInfo.getAssociationSelectTemplateMap();
         return idXNodeMap.get(id);
     }
+
+    public static void remove() {
+        MAPPER_TEMPLATE_MAP.clear();
+    }
 }

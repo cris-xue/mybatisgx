@@ -22,4 +22,8 @@ public class MapperInfoContextHolder {
     public static List<MapperInfo> getMapperInfoList() {
         return new ArrayList<>(DAO_CLASS_MAPPER_INFO_MAP.values());
     }
+
+    public static void remove() {
+        DAO_CLASS_MAPPER_INFO_MAP.clear();
+    }
 }

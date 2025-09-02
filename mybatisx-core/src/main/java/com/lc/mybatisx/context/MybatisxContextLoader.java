@@ -71,6 +71,7 @@ public class MybatisxContextLoader {
     }
 
     public void processEntityClass(List<Class<?>> clazzList) {
+        this.removeEntityInfo();
         for (Class<?> clazz : clazzList) {
             this.processEntity(clazz);
         }
@@ -107,6 +108,7 @@ public class MybatisxContextLoader {
     }
 
     public void processDaoClass(List<Class<?>> clazzList) {
+        this.removeDaoInfo();
         for (Class<?> clazz : clazzList) {
             this.processDao(clazz);
         }
@@ -118,8 +120,11 @@ public class MybatisxContextLoader {
         MapperInfoContextHolder.set(mapperInfo.getEntityClass(), mapperInfo);
     }
 
-    public void remove() {
+    public void removeEntityInfo() {
         EntityInfoContextHolder.remove();
+    }
+
+    public void removeDaoInfo() {
         MapperInfoContextHolder.remove();
         MapperTemplateContextHolder.remove();
         MethodInfoContextHolder.remove();

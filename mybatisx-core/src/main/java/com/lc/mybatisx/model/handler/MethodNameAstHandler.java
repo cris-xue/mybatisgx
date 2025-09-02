@@ -108,6 +108,7 @@ public class MethodNameAstHandler {
         int childCount = parseTree.getChildCount();
         for (int i = 0; i < childCount; i++) {
             ParseTree parseTreeChild = parseTree.getChild(i);
+            conditionInfo.setOrigin(parseTreeChild.getText());
             if (parseTreeChild instanceof MethodNameParser.Condition_item_clauseContext) {
                 this.parseConditionItem(entityInfo, conditionInfo, conditionEntity, parseTreeChild);
             }
@@ -121,7 +122,6 @@ public class MethodNameAstHandler {
             String token = parseTreeChild.getText();
             if (parseTreeChild instanceof MethodNameParser.Logic_op_clauseContext) {
                 conditionInfo.setConditionEntity(conditionEntity);
-                conditionInfo.setOrigin(parseTreeChild.getText());
                 conditionInfo.setLogicOp(TOKEN_MAP.get(token));
             } else if (parseTreeChild instanceof MethodNameParser.Field_condition_op_clauseContext) {
                 String javaColumnName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, token);

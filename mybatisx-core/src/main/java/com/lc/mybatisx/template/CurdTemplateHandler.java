@@ -1,14 +1,25 @@
 package com.lc.mybatisx.template;
 
+import com.lc.mybatisx.context.MapperInfoContextHolder;
+import com.lc.mybatisx.ext.MybatisxXMLMapperBuilder;
 import com.lc.mybatisx.model.MapperInfo;
 import com.lc.mybatisx.model.MethodInfo;
+import com.lc.mybatisx.utils.FreeMarkerUtils;
 import com.lc.mybatisx.utils.XmlUtils;
+import freemarker.template.Template;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.parsing.XPathParser;
+import org.apache.ibatis.session.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,5 +62,55 @@ public class CurdTemplateHandler {
         logger.info("{}:\n{}", methodInfo.getMethodName(), xmlString);
         XPathParser xPathParser = XmlUtils.processXml(xmlString);
         return xPathParser.evalNode("/mapper/select|/mapper/insert|/mapper/delete|/mapper/update");
+    }
+
+    public void curdMethod(Configuration configuration) {
+        try {
+            List<Resource> mapperResourceList = this.getMapper();
+            for (Resource mapperResource : mapperResourceList) {
+                InputStream is = null;
+                try {
+                    is = mapperResource.getInputStream();
+                    MybatisxXMLMapperBuilder xmlMapperBuilder = new MybatisxXMLMapperBuilder(is,
+                            configuration, mapperResource.toString(), configuration.getSqlFragments());
+                    xmlMapperBuilder.parse();
+                } finally {
+                    if (is != null) {
+                        is.close();
+                    }
+                }
+            }
+        } catch (IOException e) {
+            logger.error(e.getMessage(), e);
+        }
+    }
+
+    private List<Resource> getMapper() throws IOException {
+        List<Resource> mapperResourceList = new ArrayList<>();
+        List<MapperInfo> mapperInfoList = MapperInfoContextHolder.getMapperInfoList();
+        for (MapperInfo mapperInfo : mapperInfoList) {
+            ByteArrayInputStream bais = null;
+            try {
+                String namespace = mapperInfo.getNamespace();
+                String mapperXml = createMapperXml(namespace);
+                bais = new ByteArrayInputStream(mapperXml.getBytes());
+                Resource resource = new InputStreamResource(bais, namespace);
+                mapperResourceList.add(resource);
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+            } finally {
+                if (bais != null) {
+                    bais.close();
+                }
+            }
+        }
+        return mapperResourceList;
+    }
+
+    private String createMapperXml(String namespace) {
+        Template template = FreeMarkerUtils.getTemplate("mapper/base.ftl");
+        Map<String, Object> templateData = new HashMap<>();
+        templateData.put("namespace", namespace);
+        return FreeMarkerUtils.processTemplate(templateData, template);
     }
 }

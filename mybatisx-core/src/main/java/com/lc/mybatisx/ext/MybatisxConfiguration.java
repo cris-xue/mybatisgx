@@ -16,6 +16,7 @@ import org.apache.ibatis.executor.parameter.ParameterHandler;
 import org.apache.ibatis.executor.resultset.ResultSetHandler;
 import org.apache.ibatis.executor.statement.StatementHandler;
 import org.apache.ibatis.mapping.BoundSql;
+import org.apache.ibatis.mapping.Environment;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.reflection.MetaObject;
@@ -30,6 +31,14 @@ import java.util.List;
 public class MybatisxConfiguration extends Configuration {
 
     private IdGenerateValueHandler<?> idGenerateValueHandler;
+
+    public MybatisxConfiguration() {
+        super();
+    }
+
+    public MybatisxConfiguration(Environment environment) {
+        super(environment);
+    }
 
     public void setIdGenerateValueHandler(IdGenerateValueHandler<?> idGenerateValueHandler) {
         this.idGenerateValueHandler = idGenerateValueHandler;

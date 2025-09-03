@@ -67,7 +67,9 @@ public class EntityRelationTreeHandler {
             EntityRelationDependencyTree childrenResultMapDependencyTree = EntityRelationDependencyTree.build(entityRelationDependencyTree, javaType);
             EntityInfo relationColumnEntityInfo = EntityInfoContextHolder.get(javaType);
             EntityRelationTree subEntityRelationInfo = this.processRelationColumnInfo(level + 1, childrenResultMapDependencyTree, relationColumnEntityInfo, relationColumnInfo);
-            entityRelationTree.addEntityRelation(subEntityRelationInfo);
+            if (subEntityRelationInfo != null) {
+                entityRelationTree.addEntityRelation(subEntityRelationInfo);
+            }
         }
         return entityRelationTree;
     }

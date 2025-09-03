@@ -4,6 +4,7 @@ import com.alibaba.druid.pool.DruidDataSource;
 import com.lc.mybatisx.context.MybatisxContextLoader;
 import com.lc.mybatisx.ext.MybatisxConfiguration;
 import com.lc.mybatisx.template.CurdTemplateHandler;
+import org.apache.ibatis.logging.stdout.StdOutImpl;
 import org.apache.ibatis.mapping.Environment;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -48,7 +49,7 @@ public class DaoTestUtils {
                 .dataSource(dataSource)
                 .build();
         MybatisxConfiguration mybatisxConfiguration = new MybatisxConfiguration(environment);
-        // mybatisxConfiguration.setLogImpl(StdOutImpl.class);
+        mybatisxConfiguration.setLogImpl(StdOutImpl.class);
 
         MybatisxContextLoader mybatisxContextLoader = new MybatisxContextLoader();
         mybatisxContextLoader.processEntityClass(Arrays.asList(entityClass));

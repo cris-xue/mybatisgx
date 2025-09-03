@@ -12,16 +12,17 @@ import java.util.List;
 public class UserDaoTest {
 
     @Test
-    public void test01() {
+    public void testInsert() {
         UserDao userDao = DaoTestUtils.getDao(User.class, UserDao.class);
         FixtureGenerator fixtureGenerator = new FixtureGenerator();
+        fixtureGenerator.configure().ignoreCyclicReferences();
         User user = fixtureGenerator.createRandomized(User.class);
         int count = userDao.insert(user);
         Assert.assertEquals(1, count);
     }
 
     @Test
-    public void test02() {
+    public void testDeleteById() {
         UserDao userDao = DaoTestUtils.getDao(User.class, UserDao.class);
         FixtureGenerator fixtureGenerator = new FixtureGenerator();
         User user = fixtureGenerator.createRandomized(User.class);
@@ -30,6 +31,36 @@ public class UserDaoTest {
 
         int deleteCount = userDao.deleteById(user.getId());
         Assert.assertEquals(1, deleteCount);
+    }
+
+    @Test
+    public void testUpdateById() {
+        UserDao userDao = DaoTestUtils.getDao(User.class, UserDao.class);
+        FixtureGenerator fixtureGenerator = new FixtureGenerator();
+        User user = fixtureGenerator.createRandomized(User.class);
+        int insertCount = userDao.insert(user);
+        Assert.assertEquals(1, insertCount);
+
+        user.setName("test");
+        int updateCount = userDao.updateById(user);
+        Assert.assertEquals(1, updateCount);
+
+        User dbUser = userDao.findById(user.getId());
+        Assert.assertNotNull(dbUser);
+        Assert.assertEquals(user.getName(), dbUser.getName());
+    }
+
+    @Test
+    public void testFindById() {
+        UserDao userDao = DaoTestUtils.getDao(User.class, UserDao.class);
+        FixtureGenerator fixtureGenerator = new FixtureGenerator();
+        User user = fixtureGenerator.createRandomized(User.class);
+        int insertCount = userDao.insert(user);
+        Assert.assertEquals(1, insertCount);
+
+        User dbUser = userDao.findById(user.getId());
+        Assert.assertNotNull(dbUser);
+        Assert.assertEquals(user.getName(), dbUser.getName());
     }
 
     @Test

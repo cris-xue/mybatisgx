@@ -71,8 +71,9 @@ public class CurdTemplateHandler {
                 InputStream is = null;
                 try {
                     is = mapperResource.getInputStream();
-                    MybatisxXMLMapperBuilder xmlMapperBuilder = new MybatisxXMLMapperBuilder(is,
-                            configuration, mapperResource.toString(), configuration.getSqlFragments());
+                    MybatisxXMLMapperBuilder xmlMapperBuilder = new MybatisxXMLMapperBuilder(
+                            is, configuration, mapperResource.toString(), configuration.getSqlFragments()
+                    );
                     xmlMapperBuilder.parse();
                 } finally {
                     if (is != null) {

@@ -6,6 +6,9 @@ import com.mybatisgx.dao.test.util.DaoTestUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class UserDaoTest {
 
     @Test
@@ -15,33 +18,6 @@ public class UserDaoTest {
         User user = fixtureGenerator.createRandomized(User.class);
         int count = userDao.insert(user);
         Assert.assertEquals(1, count);
-
-        /*DataSource dataSource = super.dataSource();
-        super.init(dataSource);
-
-        Environment environment = new Environment.Builder("test001")
-                .transactionFactory(new JdbcTransactionFactory())
-                .dataSource(dataSource)
-                .build();
-        MybatisxConfiguration mybatisxConfiguration = new MybatisxConfiguration(environment);
-
-        MybatisxContextLoader mybatisxContextLoader = new MybatisxContextLoader();
-        mybatisxContextLoader.processEntityClass(Arrays.asList(User.class));
-        mybatisxContextLoader.processDaoClass(Arrays.asList(UserDao.class));
-        mybatisxContextLoader.processTemplate();
-
-        CurdTemplateHandler curdTemplateHandler = new CurdTemplateHandler();
-        curdTemplateHandler.curdMethod(mybatisxConfiguration);
-
-        SqlSessionFactory sqlSessionFactory = new DefaultSqlSessionFactory(mybatisxConfiguration);
-
-        SqlSession sqlSession = sqlSessionFactory.openSession();
-        UserDao userDao = sqlSession.getMapper(UserDao.class);
-
-        // 自动生成填充所有字段的 User 对象
-        FixtureGenerator fixtureGenerator = new FixtureGenerator();
-        User user = fixtureGenerator.createRandomized(User.class);
-        userDao.insert(user);*/
     }
 
     @Test
@@ -54,5 +30,25 @@ public class UserDaoTest {
 
         int deleteCount = userDao.deleteById(user.getId());
         Assert.assertEquals(1, deleteCount);
+    }
+
+    @Test
+    public void testInsertBatch() {
+        UserDao userDao = DaoTestUtils.getDao(User.class, UserDao.class);
+        FixtureGenerator fixtureGenerator = new FixtureGenerator();
+
+        int count = 100000;
+        List<User> userList = new ArrayList(count);
+        for (int i = 0; i < count; i++) {
+            User user = fixtureGenerator.createRandomized(User.class);
+            userList.add(user);
+        }
+
+        long startTime = System.currentTimeMillis();
+        int insertBatchCount = userDao.insertBatch(userList, 3000);
+        long endTime = System.currentTimeMillis();
+
+        Assert.assertEquals(count, insertBatchCount);
+        System.out.println("insertBatchCount: " + insertBatchCount + ", time: " + (endTime - startTime));
     }
 }

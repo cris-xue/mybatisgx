@@ -129,7 +129,7 @@ public class MybatisxContextLoader {
         MethodInfoContextHolder.remove();
     }
 
-    private void processTemplate() {
+    public void processTemplate() {
         CurdTemplateHandler curdTemplateHandler = new CurdTemplateHandler();
         ResultMapTemplateHandler resultMapTemplateHandler = new ResultMapTemplateHandler();
         RelationSelectTemplateHandler relationSelectTemplateHandler = new RelationSelectTemplateHandler();

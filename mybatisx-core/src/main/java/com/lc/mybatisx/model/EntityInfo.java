@@ -64,6 +64,10 @@ public class EntityInfo {
      * 关系字段信息
      */
     private List<ColumnInfo> relationColumnInfoList = new ArrayList<>();
+    /**
+     * 一个实体可能对应多个Mapper
+     */
+    private List<MapperInfo> mapperInfoList = new ArrayList();
 
     public String getTableName() {
         return tableName;

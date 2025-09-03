@@ -117,7 +117,6 @@ public class MybatisxContextLoader {
     private void processDao(Class<?> clazz) {
         MapperInfo mapperInfo = mapperInfoHandler.execute(clazz);
         MapperInfoContextHolder.set(clazz, mapperInfo);
-        MapperInfoContextHolder.set(mapperInfo.getEntityClass(), mapperInfo);
     }
 
     public void removeEntityInfo() {

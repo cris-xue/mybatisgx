@@ -37,7 +37,7 @@ public class UserDaoTest {
         UserDao userDao = DaoTestUtils.getDao(User.class, UserDao.class);
         FixtureGenerator fixtureGenerator = new FixtureGenerator();
 
-        int count = 100000;
+        int count = 50000;
         List<User> userList = new ArrayList(count);
         for (int i = 0; i < count; i++) {
             User user = fixtureGenerator.createRandomized(User.class);

@@ -35,6 +35,7 @@ public class DaoTestUtils {
         dataSource.setUsername("sa");
         dataSource.setPassword("");
         dataSource.setDriverClassName("org.h2.Driver");
+        dataSource.setDefaultAutoCommit(false);
         return dataSource;
     }
 

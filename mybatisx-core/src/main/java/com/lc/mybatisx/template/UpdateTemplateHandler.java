@@ -81,14 +81,32 @@ public class UpdateTemplateHandler {
                 continue;
             }
 
-            if (methodInfo.getDynamic()) {
-                Element setTrimIfElement = setTrimElement.addElement("if");
-                setTrimIfElement.addAttribute("test", buildTestNotNull(javaColumnName));
-                String javaColumn = String.format("#{%s%s},", javaColumnName, buildTypeHandler(typeHandler));
-                setTrimIfElement.addText(String.format("%s = %s", dbColumnName, javaColumn));
+            ColumnRelationInfo columnRelationInfo = tableColumnInfo.getColumnRelationInfo();
+            if (columnRelationInfo == null) {
+                if (methodInfo.getDynamic()) {
+                    Element setTrimIfElement = setTrimElement.addElement("if");
+                    setTrimIfElement.addAttribute("test", buildTestNotNull(javaColumnName));
+                    String javaColumn = String.format("#{%s%s},", javaColumnName, buildTypeHandler(typeHandler));
+                    setTrimIfElement.addText(String.format("%s = %s", dbColumnName, javaColumn));
+                } else {
+                    String javaColumn = String.format("#{%s%s},", javaColumnName, buildTypeHandler(typeHandler));
+                    setTrimElement.addText(String.format("%s = %s", dbColumnName, javaColumn));
+                }
             } else {
-                String javaColumn = String.format("#{%s%s},", javaColumnName, buildTypeHandler(typeHandler));
-                setTrimElement.addText(String.format("%s = %s", dbColumnName, javaColumn));
+                List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnRelationInfo.getInverseForeignKeyColumnInfoList();
+                for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
+                    String referencedColumnName = inverseForeignKeyColumnInfo.getReferencedColumnName();
+                    String nestedJavaColumnName = javaColumnName + "." + referencedColumnName;
+                    if (methodInfo.getDynamic()) {
+                        Element setTrimIfElement = setTrimElement.addElement("if");
+                        setTrimIfElement.addAttribute("test", buildTestNotNull(nestedJavaColumnName));
+                        String nestedJavaColumn = String.format("#{%s%s},", nestedJavaColumnName, buildTypeHandler(typeHandler));
+                        setTrimIfElement.addText(String.format("%s = %s", dbColumnName, nestedJavaColumn));
+                    } else {
+                        String nestedJavaColumn = String.format("#{%s%s},", nestedJavaColumnName, buildTypeHandler(typeHandler));
+                        setTrimElement.addText(String.format("%s = %s", dbColumnName, nestedJavaColumn));
+                    }
+                }
             }
         }
     }

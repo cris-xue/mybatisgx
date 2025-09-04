@@ -1,4 +1,4 @@
-package com.mybatisgx.dao.test.util;
+package com.mybatisgx.util;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import com.lc.mybatisx.context.MybatisxContextLoader;
@@ -14,6 +14,7 @@ import org.flywaydb.core.Flyway;
 
 import javax.sql.DataSource;
 import java.util.Arrays;
+import java.util.List;
 
 public class DaoTestUtils {
 
@@ -40,28 +41,37 @@ public class DaoTestUtils {
         return dataSource;
     }
 
-    public static <T> T getDao(Class<?> entityClass, Class<T> daoclass) {
+    protected static MybatisxConfiguration context(List<Class<?>> entityClassList, List<Class<?>> daoClassList) {
         DataSource dataSource = dataSource();
         init(dataSource);
 
-        Environment environment = new Environment.Builder("test001")
+        Environment environment = new Environment.Builder("test_env")
                 .transactionFactory(new JdbcTransactionFactory())
                 .dataSource(dataSource)
                 .build();
         MybatisxConfiguration mybatisxConfiguration = new MybatisxConfiguration(environment);
         mybatisxConfiguration.setLogImpl(StdOutImpl.class);
+        mybatisxConfiguration.setLazyLoadingEnabled(true);
+        mybatisxConfiguration.setAggressiveLazyLoading(true);
 
         MybatisxContextLoader mybatisxContextLoader = new MybatisxContextLoader();
-        mybatisxContextLoader.processEntityClass(Arrays.asList(entityClass));
-        mybatisxContextLoader.processDaoClass(Arrays.asList(daoclass));
+        mybatisxContextLoader.processEntityClass(entityClassList);
+        mybatisxContextLoader.processDaoClass(daoClassList);
         mybatisxContextLoader.processTemplate();
 
         CurdTemplateHandler curdTemplateHandler = new CurdTemplateHandler();
         curdTemplateHandler.curdMethod(mybatisxConfiguration);
+        return mybatisxConfiguration;
+    }
 
+    public static <T> T getDao(Class<?> entityClass, Class<T> daoclass) {
+        return getDao(Arrays.asList(entityClass), Arrays.asList(daoclass), daoclass);
+    }
+
+    public static <T> T getDao(List<Class<?>> entityClassList, List<Class<?>> daoClassList, Class<T> targetDaoclass) {
+        MybatisxConfiguration mybatisxConfiguration = context(entityClassList, daoClassList);
         SqlSessionFactory sqlSessionFactory = new DefaultSqlSessionFactory(mybatisxConfiguration);
-
         SqlSession sqlSession = sqlSessionFactory.openSession();
-        return sqlSession.getMapper(daoclass);
+        return sqlSession.getMapper(targetDaoclass);
     }
 }

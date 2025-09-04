@@ -1,4 +1,4 @@
-package com.mybatisgx.dao.test.entity;
+package com.mybatisgx.entity;
 
 import com.lc.mybatisx.annotation.Column;
 import com.lc.mybatisx.annotation.Id;

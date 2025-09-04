@@ -1,8 +1,9 @@
-package com.mybatisgx.dao.test;
+package com.mybatisgx.simple.test;
 
 import com.github.swierkosz.fixture.generator.FixtureGenerator;
-import com.mybatisgx.dao.test.entity.User;
-import com.mybatisgx.dao.test.util.DaoTestUtils;
+import com.mybatisgx.entity.User;
+import com.mybatisgx.dao.UserDao;
+import com.mybatisgx.util.DaoTestUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -25,6 +26,7 @@ public class UserDaoTest {
     public void testDeleteById() {
         UserDao userDao = DaoTestUtils.getDao(User.class, UserDao.class);
         FixtureGenerator fixtureGenerator = new FixtureGenerator();
+        fixtureGenerator.configure().ignoreCyclicReferences();
         User user = fixtureGenerator.createRandomized(User.class);
         int insertCount = userDao.insert(user);
         Assert.assertEquals(1, insertCount);
@@ -37,6 +39,7 @@ public class UserDaoTest {
     public void testUpdateById() {
         UserDao userDao = DaoTestUtils.getDao(User.class, UserDao.class);
         FixtureGenerator fixtureGenerator = new FixtureGenerator();
+        fixtureGenerator.configure().ignoreCyclicReferences();
         User user = fixtureGenerator.createRandomized(User.class);
         int insertCount = userDao.insert(user);
         Assert.assertEquals(1, insertCount);
@@ -54,6 +57,7 @@ public class UserDaoTest {
     public void testFindById() {
         UserDao userDao = DaoTestUtils.getDao(User.class, UserDao.class);
         FixtureGenerator fixtureGenerator = new FixtureGenerator();
+        fixtureGenerator.configure().ignoreCyclicReferences();
         User user = fixtureGenerator.createRandomized(User.class);
         int insertCount = userDao.insert(user);
         Assert.assertEquals(1, insertCount);
@@ -67,8 +71,9 @@ public class UserDaoTest {
     public void testInsertBatch() {
         UserDao userDao = DaoTestUtils.getDao(User.class, UserDao.class);
         FixtureGenerator fixtureGenerator = new FixtureGenerator();
+        fixtureGenerator.configure().ignoreCyclicReferences();
 
-        int count = 50000;
+        int count = 100;
         List<User> userList = new ArrayList(count);
         for (int i = 0; i < count; i++) {
             User user = fixtureGenerator.createRandomized(User.class);

@@ -1,4 +1,4 @@
-package com.mybatisgx.dao.test.entity;
+package com.mybatisgx.entity;
 
 import com.lc.mybatisx.annotation.*;
 
@@ -30,7 +30,7 @@ public class User extends BaseEntity<Long> {
     @Lock
     private Integer version;
 
-    @OneToOne(mappedBy = "user", fetch = FetchType.EAGER)
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
     private UserDetail userDetail;
 
     public String getRoleIds() {

@@ -1,6 +1,7 @@
 package com.lc.mybatisx.template;
 
 import com.lc.mybatisx.annotation.LogicDelete;
+import com.lc.mybatisx.annotation.ManyToMany;
 import com.lc.mybatisx.context.EntityInfoContextHolder;
 import com.lc.mybatisx.model.*;
 import org.apache.commons.lang3.ObjectUtils;
@@ -83,11 +84,11 @@ public class InsertTemplateHandler {
 
     private void setColumn(MethodInfo methodInfo, MethodParamInfo methodParamInfo, Element dbTrimElement) {
         List<ColumnInfo> tableColumnInfoList = this.getTableColumnInfoList(methodParamInfo.getType());
-        for (ColumnInfo columnInfo : tableColumnInfoList) {
-            String javaColumnName = columnInfo.getJavaColumnName();
-            String dbColumnName = columnInfo.getDbColumnName();
+        for (ColumnInfo tableColumnInfo : tableColumnInfoList) {
+            String javaColumnName = tableColumnInfo.getJavaColumnName();
+            String dbColumnName = tableColumnInfo.getDbColumnName();
 
-            LogicDelete logicDelete = columnInfo.getLogicDelete();
+            LogicDelete logicDelete = tableColumnInfo.getLogicDelete();
             if (logicDelete != null) {
                 String javaColumn = String.format("%s,", dbColumnName);
                 dbTrimElement.addText(javaColumn);
@@ -97,11 +98,11 @@ public class InsertTemplateHandler {
             if (methodInfo.getDynamic()) {
                 Element javaTrimIfElement = dbTrimElement.addElement("if");
                 javaTrimIfElement.addAttribute("test", buildTestNotNull(javaColumnName));
-                String javaColumn = String.format("%s,", dbColumnName);
-                javaTrimIfElement.addText(javaColumn);
+                String dbColumn = String.format("%s,", dbColumnName);
+                javaTrimIfElement.addText(dbColumn);
             } else {
-                String javaColumn = String.format("%s,", dbColumnName);
-                dbTrimElement.addText(javaColumn);
+                String dbColumn = String.format("%s,", dbColumnName);
+                dbTrimElement.addText(dbColumn);
             }
         }
     }
@@ -118,7 +119,8 @@ public class InsertTemplateHandler {
                 throw new RuntimeException("新增方法参数不支持定义基础类型");
             }
 
-            if (methodParamInfoList.size() == 1) {
+            this.handleMethodParam(methodInfo, methodParamInfo, javaTrimElement);
+            /*if (methodParamInfoList.size() == 1) {
                 Param param = methodParamInfo.getParam();
                 if (param == null) {
                     this.handleSingleBusinessObjectParam(methodInfo, methodParamInfo, javaTrimElement);
@@ -127,7 +129,7 @@ public class InsertTemplateHandler {
                 }
             } else {
                 this.handleSingleBusinessObjectParamAnnotation(methodInfo, methodParamInfo, javaTrimElement);
-            }
+            }*/
         }
     }
 
@@ -138,11 +140,10 @@ public class InsertTemplateHandler {
         }
         for (ColumnInfo tableColumnInfo : tableColumnInfoList) {
             String javaColumnName = tableColumnInfo.getJavaColumnName();
-            String typeHandler = tableColumnInfo.getTypeHandler();
 
             LogicDelete logicDelete = tableColumnInfo.getLogicDelete();
             if (logicDelete != null) {
-                String javaColumn = String.format("'%s'%s,", logicDelete.show(), buildTypeHandler(typeHandler));
+                String javaColumn = String.format("'%s'%s,", logicDelete.show(), buildTypeHandler(tableColumnInfo));
                 javaTrimElement.addText(javaColumn);
                 continue;
             }
@@ -150,10 +151,10 @@ public class InsertTemplateHandler {
             if (methodInfo.getDynamic()) {
                 Element javaTrimIfElement = javaTrimElement.addElement("if");
                 javaTrimIfElement.addAttribute("test", buildTestNotNull(javaColumnName));
-                String javaColumn = String.format("#{%s%s},", javaColumnName, buildTypeHandler(typeHandler));
+                String javaColumn = String.format("#{%s%s},", javaColumnName, buildTypeHandler(tableColumnInfo));
                 javaTrimIfElement.addText(javaColumn);
             } else {
-                String javaColumn = String.format("#{%s%s},", javaColumnName, buildTypeHandler(typeHandler));
+                String javaColumn = String.format("#{%s%s},", javaColumnName, buildTypeHandler(tableColumnInfo));
                 javaTrimElement.addText(javaColumn);
             }
         }
@@ -167,11 +168,10 @@ public class InsertTemplateHandler {
         }
         for (ColumnInfo tableColumnInfo : tableColumnInfoList) {
             String javaColumnName = tableColumnInfo.getJavaColumnName();
-            String typeHandler = tableColumnInfo.getTypeHandler();
 
             LogicDelete logicDelete = tableColumnInfo.getLogicDelete();
             if (logicDelete != null) {
-                String javaColumn = String.format("'%s'%s,", logicDelete.show(), buildTypeHandler(typeHandler));
+                String javaColumn = String.format("'%s'%s,", logicDelete.show(), buildTypeHandler(tableColumnInfo));
                 javaTrimElement.addText(javaColumn);
                 continue;
             }
@@ -180,16 +180,127 @@ public class InsertTemplateHandler {
             if (methodInfo.getDynamic()) {
                 Element javaTrimIfElement = javaTrimElement.addElement("if");
                 javaTrimIfElement.addAttribute("test", buildTestNotNull(javaColumnName));
-                String javaColumn = String.format("#{%s.%s%s},", paramName, javaColumnName, buildTypeHandler(typeHandler));
+                String javaColumn = String.format("#{%s.%s%s},", paramName, javaColumnName, buildTypeHandler(tableColumnInfo));
                 javaTrimIfElement.addText(javaColumn);
             } else {
-                String javaColumn = String.format("#{%s.%s%s},", paramName, javaColumnName, buildTypeHandler(typeHandler));
+                String javaColumn = String.format("#{%s.%s%s},", paramName, javaColumnName, buildTypeHandler(tableColumnInfo));
                 javaTrimElement.addText(javaColumn);
             }
         }
     }
 
-    private String buildTypeHandler(String typeHandler) {
+    private void handleMethodParam(MethodInfo methodInfo, MethodParamInfo methodParamInfo, Element javaTrimElement) {
+        List<ColumnInfo> tableColumnInfoList = this.getTableColumnInfoList(methodParamInfo.getType());
+        if (ObjectUtils.isEmpty(tableColumnInfoList)) {
+            throw new RuntimeException("实体表字段不存在");
+        }
+
+        for (ColumnInfo tableColumnInfo : tableColumnInfoList) {
+            LogicDelete logicDelete = tableColumnInfo.getLogicDelete();
+            if (logicDelete != null) {
+                String javaColumn = String.format("'%s'%s,", logicDelete.show(), buildTypeHandler(tableColumnInfo));
+                javaTrimElement.addText(javaColumn);
+                continue;
+            }
+
+            Param param = methodParamInfo.getParam();
+            if (param == null) {
+                this.handleSingleBusinessObjectParam(methodInfo, methodParamInfo, tableColumnInfo, javaTrimElement);
+            } else {
+                this.handleSingleBusinessObjectParamAnnotation(methodInfo, methodParamInfo, tableColumnInfo, javaTrimElement);
+            }
+
+            /*if (methodInfo.getDynamic()) {
+                Element javaTrimIfElement = javaTrimElement.addElement("if");
+                javaTrimIfElement.addAttribute("test", buildTestNotNull(javaColumnName));
+                String javaColumn = String.format("#{%s%s},", javaColumnName, buildTypeHandler(typeHandler));
+                javaTrimIfElement.addText(javaColumn);
+            } else {
+                String javaColumn = String.format("#{%s%s},", javaColumnName, buildTypeHandler(typeHandler));
+                javaTrimElement.addText(javaColumn);
+            }*/
+        }
+    }
+
+    private void handleSingleBusinessObjectParam(MethodInfo methodInfo, MethodParamInfo methodParamInfo, ColumnInfo tableColumnInfo, Element javaTrimElement) {
+        ColumnRelationInfo columnRelationInfo = tableColumnInfo.getColumnRelationInfo();
+        String javaColumnName = tableColumnInfo.getJavaColumnName();
+        if (columnRelationInfo == null) {
+            if (methodInfo.getDynamic()) {
+                Element javaTrimIfElement = javaTrimElement.addElement("if");
+                javaTrimIfElement.addAttribute("test", buildTestNotNull(javaColumnName));
+                String javaColumn = String.format("#{%s%s},", javaColumnName, buildTypeHandler(tableColumnInfo));
+                javaTrimIfElement.addText(javaColumn);
+            } else {
+                String javaColumn = String.format("#{%s%s},", javaColumnName, buildTypeHandler(tableColumnInfo));
+                javaTrimElement.addText(javaColumn);
+            }
+        } else {
+            ManyToMany manyToMany = columnRelationInfo.getManyToMany();
+            if (manyToMany == null) {
+                List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnRelationInfo.getInverseForeignKeyColumnInfoList();
+                for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
+                    String referencedColumnName = inverseForeignKeyColumnInfo.getReferencedColumnName();
+                    String nestedJavaColumnName = javaColumnName + "." + referencedColumnName;
+                    if (methodInfo.getDynamic()) {
+                        Element javaTrimIfElement = javaTrimElement.addElement("if");
+                        javaTrimIfElement.addAttribute("test", buildTestNotNull(nestedJavaColumnName));
+                        String javaColumn = String.format("#{%s%s},", nestedJavaColumnName, buildTypeHandler(tableColumnInfo));
+                        javaTrimIfElement.addText(javaColumn);
+                    } else {
+                        String javaColumn = String.format("#{%s%s},", nestedJavaColumnName, buildTypeHandler(tableColumnInfo));
+                        javaTrimElement.addText(javaColumn);
+                    }
+                }
+            } else {
+
+            }
+        }
+    }
+
+    private void handleSingleBusinessObjectParamAnnotation(MethodInfo methodInfo, MethodParamInfo methodParamInfo, ColumnInfo tableColumnInfo, Element javaTrimElement) {
+        ColumnRelationInfo columnRelationInfo = tableColumnInfo.getColumnRelationInfo();
+        String javaColumnName = tableColumnInfo.getJavaColumnName();
+        if (columnRelationInfo == null) {
+            Boolean isBatch = methodInfo.getBatch();
+            String paramName = isBatch ? methodParamInfo.getBatchItemName() : methodParamInfo.getParamName();
+            if (methodInfo.getDynamic()) {
+                Element javaTrimIfElement = javaTrimElement.addElement("if");
+                javaTrimIfElement.addAttribute("test", buildTestNotNull(javaColumnName));
+                String javaColumn = String.format("#{%s.%s%s},", paramName, javaColumnName, buildTypeHandler(tableColumnInfo));
+                javaTrimIfElement.addText(javaColumn);
+            } else {
+                String javaColumn = String.format("#{%s.%s%s},", paramName, javaColumnName, buildTypeHandler(tableColumnInfo));
+                javaTrimElement.addText(javaColumn);
+            }
+        } else {
+            ManyToMany manyToMany = columnRelationInfo.getManyToMany();
+            if (manyToMany == null) {
+                List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnRelationInfo.getInverseForeignKeyColumnInfoList();
+                for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
+                    String referencedColumnName = inverseForeignKeyColumnInfo.getReferencedColumnName();
+                    String nestedJavaColumnName = javaColumnName + "." + referencedColumnName;
+
+                    Boolean isBatch = methodInfo.getBatch();
+                    String paramName = isBatch ? methodParamInfo.getBatchItemName() : methodParamInfo.getParamName();
+                    if (methodInfo.getDynamic()) {
+                        Element javaTrimIfElement = javaTrimElement.addElement("if");
+                        javaTrimIfElement.addAttribute("test", buildTestNotNull(javaColumnName));
+                        String javaColumn = String.format("#{%s.%s%s},", paramName, javaColumnName, buildTypeHandler(tableColumnInfo));
+                        javaTrimIfElement.addText(javaColumn);
+                    } else {
+                        String javaColumn = String.format("#{%s.%s%s},", paramName, javaColumnName, buildTypeHandler(tableColumnInfo));
+                        javaTrimElement.addText(javaColumn);
+                    }
+                }
+            } else {
+
+            }
+        }
+    }
+
+    private String buildTypeHandler(ColumnInfo tableColumnInfo) {
+        String typeHandler = tableColumnInfo.getTypeHandler();
         if (StringUtils.isNotBlank(typeHandler)) {
             return String.format(", typeHandler=%s", typeHandler);
         }

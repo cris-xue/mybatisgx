@@ -42,13 +42,15 @@ public class ColumnInfoHandler {
             Lock lock = field.getAnnotation(Lock.class);
             LogicDelete logicDelete = field.getAnnotation(LogicDelete.class);
 
-            String fieldName = field.getName();
+            /*String fieldName = field.getName();
             String dbColumnName;
             if (column != null && StringUtils.isNotBlank(column.name())) {
                 dbColumnName = column.name();
             } else {
                 dbColumnName = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, fieldName);
-            }
+            }*/
+            String fieldName = field.getName();
+            String dbColumnName = this.getDbColumnName(field);
 
             ColumnInfo columnInfo = new ColumnInfo();
             columnInfo.setJavaColumnName(fieldName);
@@ -66,6 +68,34 @@ public class ColumnInfoHandler {
             columnInfoList.add(columnInfo);
         }
         return columnInfoList;
+    }
+
+    private String getDbColumnName(Field field) {
+        OneToOne oneToOne = field.getAnnotation(OneToOne.class);
+        OneToMany oneToMany = field.getAnnotation(OneToMany.class);
+        ManyToOne manyToOne = field.getAnnotation(ManyToOne.class);
+        ManyToMany manyToMany = field.getAnnotation(ManyToMany.class);
+
+        String dbColumnName = "";
+        if (oneToOne != null || oneToMany != null || manyToOne != null) {
+            JoinColumn joinColumn = field.getAnnotation(JoinColumn.class);
+            if (joinColumn != null) {
+                dbColumnName = joinColumn.name();
+            }
+        } else if (manyToMany != null) {
+
+        } else {
+            Column column = field.getAnnotation(Column.class);
+            if (column != null) {
+                if (StringUtils.isNotBlank(column.name())) {
+                    dbColumnName = column.name();
+                }
+            } else {
+                String fieldName = field.getName();
+                dbColumnName = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, fieldName);
+            }
+        }
+        return dbColumnName;
     }
 
     private void setType(Field field, ColumnInfo columnInfo) {

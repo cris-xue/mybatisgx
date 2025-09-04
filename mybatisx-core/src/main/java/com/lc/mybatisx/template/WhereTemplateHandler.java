@@ -13,12 +13,16 @@ import java.util.Properties;
 public class WhereTemplateHandler {
 
     public void execute(Element parentElement, EntityInfo entityInfo, MethodInfo methodInfo) {
+        this.execute(parentElement, entityInfo, methodInfo, methodInfo.getConditionInfoList());
+    }
+
+    public void execute(Element parentElement, EntityInfo entityInfo, MethodInfo methodInfo, List<ConditionInfo> conditionInfoList) {
         Element whereElement = parentElement.addElement("where");
         /*Element trimElement = whereElement.addElement("trim");
         trimElement.addAttribute("prefix", "");
         trimElement.addAttribute("suffix", "");
         trimElement.addAttribute("prefixOverrides", "AND|OR|and|or");*/
-        this.handleConditionGroup(entityInfo, methodInfo, whereElement, methodInfo.getConditionInfoList());
+        this.handleConditionGroup(entityInfo, methodInfo, whereElement, conditionInfoList);
         /*methodInfo.getConditionInfoList().forEach(conditionInfo -> {
             ConditionGroupInfo conditionGroupInfo = conditionInfo.getConditionGroupInfo();
             if (conditionGroupInfo != null) {

@@ -3,6 +3,7 @@ package com.lc.mybatisx.template;
 import com.lc.mybatisx.annotation.LogicDelete;
 import com.lc.mybatisx.context.EntityInfoContextHolder;
 import com.lc.mybatisx.model.*;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.annotations.Param;
 import org.dom4j.Document;
@@ -132,6 +133,9 @@ public class InsertTemplateHandler {
 
     private void handleSingleBusinessObjectParam(MethodInfo methodInfo, MethodParamInfo methodParamInfo, Element javaTrimElement) {
         List<ColumnInfo> tableColumnInfoList = this.getTableColumnInfoList(methodParamInfo.getType());
+        if (ObjectUtils.isEmpty(tableColumnInfoList)) {
+            throw new RuntimeException("实体表字段不存在");
+        }
         for (ColumnInfo tableColumnInfo : tableColumnInfoList) {
             String javaColumnName = tableColumnInfo.getJavaColumnName();
             String typeHandler = tableColumnInfo.getTypeHandler();
@@ -158,6 +162,9 @@ public class InsertTemplateHandler {
     private void handleSingleBusinessObjectParamAnnotation(MethodInfo methodInfo, MethodParamInfo methodParamInfo, Element javaTrimElement) {
         Boolean isBatch = methodInfo.getBatch();
         List<ColumnInfo> tableColumnInfoList = this.getTableColumnInfoList(methodParamInfo.getType());
+        if (ObjectUtils.isEmpty(tableColumnInfoList)) {
+            throw new RuntimeException("实体表字段不存在");
+        }
         for (ColumnInfo tableColumnInfo : tableColumnInfoList) {
             String javaColumnName = tableColumnInfo.getJavaColumnName();
             String typeHandler = tableColumnInfo.getTypeHandler();

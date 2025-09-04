@@ -2,10 +2,9 @@ package com.lc.mybatisx.template;
 
 import com.lc.mybatisx.annotation.Lock;
 import com.lc.mybatisx.annotation.LogicDelete;
-import com.lc.mybatisx.model.ColumnInfo;
-import com.lc.mybatisx.model.EntityInfo;
-import com.lc.mybatisx.model.MapperInfo;
-import com.lc.mybatisx.model.MethodInfo;
+import com.lc.mybatisx.context.EntityInfoContextHolder;
+import com.lc.mybatisx.model.*;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
@@ -39,20 +38,36 @@ public class UpdateTemplateHandler {
         setTrimElement.addAttribute("suffixOverrides", ",");
 
         this.setValue(entityInfo, methodInfo, setTrimElement);
-        whereTemplateHandler.execute(updateElement, mapperInfo.getEntityInfo(), methodInfo);
+        this.setWhere(updateElement, entityInfo, methodInfo);
         return document.asXML();
     }
 
+    /**
+     * @param entityInfo
+     * @param methodInfo
+     * @param setTrimElement
+     */
     private void setValue(EntityInfo entityInfo, MethodInfo methodInfo, Element setTrimElement) {
-        List<ColumnInfo> columnInfoList = entityInfo.getColumnInfoList();
-        for (int i = 0; i < columnInfoList.size(); i++) {
-            ColumnInfo columnInfo = columnInfoList.get(i);
+        List<MethodParamInfo> methodParamInfoList = methodInfo.getMethodParamInfoList();
+        for (MethodParamInfo methodParamInfo : methodParamInfoList) {
+            if (methodParamInfo.getBasicType()) {
+                continue;
+            }
+            this.setValue(methodInfo, methodParamInfo, setTrimElement);
+        }
+    }
 
-            String javaColumnName = columnInfo.getJavaColumnName();
-            String dbColumnName = columnInfo.getDbColumnName();
-            String typeHandler = columnInfo.getTypeHandler();
-            Lock lock = columnInfo.getLock();
-            LogicDelete logicDelete = columnInfo.getLogicDelete();
+    private void setValue(MethodInfo methodInfo, MethodParamInfo methodParamInfo, Element setTrimElement) {
+        List<ColumnInfo> tableColumnInfoList = this.getTableColumnInfoList(methodParamInfo.getType());
+        if (ObjectUtils.isEmpty(tableColumnInfoList)) {
+            throw new RuntimeException("实体表字段不存在");
+        }
+        for (ColumnInfo tableColumnInfo : tableColumnInfoList) {
+            String javaColumnName = tableColumnInfo.getJavaColumnName();
+            String dbColumnName = tableColumnInfo.getDbColumnName();
+            String typeHandler = tableColumnInfo.getTypeHandler();
+            Lock lock = tableColumnInfo.getLock();
+            LogicDelete logicDelete = tableColumnInfo.getLogicDelete();
 
             if (lock != null) {
                 String javaColumn = String.format("%s = #{%s} + %s, ", dbColumnName, javaColumnName, lock.increment());
@@ -78,6 +93,10 @@ public class UpdateTemplateHandler {
         }
     }
 
+    private void setWhere(Element updateElement, EntityInfo entityInfo, MethodInfo methodInfo) {
+        whereTemplateHandler.execute(updateElement, entityInfo, methodInfo);
+    }
+
     private String buildTypeHandler(String typeHandler) {
         if (StringUtils.isNotBlank(typeHandler)) {
             return String.format(", typeHandler=%s", typeHandler);
@@ -89,4 +108,8 @@ public class UpdateTemplateHandler {
         return String.format("%s != null", javaColumnName);
     }
 
+    private List<ColumnInfo> getTableColumnInfoList(Class<?> entityClass) {
+        EntityInfo entityInfo = EntityInfoContextHolder.get(entityClass);
+        return entityInfo.getTableColumnInfoList();
+    }
 }

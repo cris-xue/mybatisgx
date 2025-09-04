@@ -1,5 +1,6 @@
 package com.lc.mybatisx.dao;
 
+import com.lc.mybatisx.annotation.BatchData;
 import com.lc.mybatisx.annotation.BatchOperation;
 import com.lc.mybatisx.annotation.BatchSize;
 import com.lc.mybatisx.annotation.Dynamic;
@@ -18,7 +19,7 @@ public interface SimpleDao<ENTITY, ID extends Serializable> extends Dao {
     int insert(ENTITY entity);
 
     @BatchOperation
-    int insertBatch(List<ENTITY> entityList, @BatchSize int batchSize);
+    int insertBatch(@BatchData List<ENTITY> entityList, @BatchSize int batchSize);
 
     @Dynamic
     int insertSelective(ENTITY entity);
@@ -31,7 +32,7 @@ public interface SimpleDao<ENTITY, ID extends Serializable> extends Dao {
     int updateById(ENTITY entity);
 
     @BatchOperation
-    int updateBatchById(List<ENTITY> entityList, @BatchSize int batchSize);
+    int updateBatchById(@BatchData List<ENTITY> entityList, @BatchSize int batchSize);
 
     @Dynamic
     int updateByIdSelective(ENTITY entity);

@@ -40,7 +40,7 @@ public class InsertTemplateHandler {
         dbTrimElement.addAttribute("suffix", ")");
         dbTrimElement.addAttribute("suffixOverrides", ",");
 
-        this.setColumn(mapperInfo, methodInfo, dbTrimElement);
+        this.setColumn(methodInfo, dbTrimElement);
 
         Element javaTrimElement = insertElement.addElement("trim");
         javaTrimElement.addAttribute("prefix", "values (");
@@ -55,8 +55,7 @@ public class InsertTemplateHandler {
         if (methodInfo.getBatch()) {
             MethodParamInfo dataMethodParamInfo = null;
             List<MethodParamInfo> methodParamInfoList = methodInfo.getMethodParamInfoList();
-            for (int i = 0; i < methodParamInfoList.size(); i++) {
-                MethodParamInfo methodParamInfo = methodParamInfoList.get(i);
+            for (MethodParamInfo methodParamInfo : methodParamInfoList) {
                 if (!methodParamInfo.getBatchSize()) {
                     dataMethodParamInfo = methodParamInfo;
                 }
@@ -71,37 +70,37 @@ public class InsertTemplateHandler {
         }
     }
 
-    private void setColumn(MapperInfo mapperInfo, MethodInfo methodInfo, Element dbTrimElement) {
+    private void setColumn(MethodInfo methodInfo, Element dbTrimElement) {
         List<MethodParamInfo> methodParamInfoList = methodInfo.getMethodParamInfoList();
-        for (int i = 0; i < methodParamInfoList.size(); i++) {
-            MethodParamInfo methodParamInfo = methodParamInfoList.get(i);
+        for (MethodParamInfo methodParamInfo : methodParamInfoList) {
             if (methodParamInfo.getBasicType()) {
                 continue;
             }
-            Class<?> methodParamType = methodParamInfo.getType();
-            EntityInfo entityInfo = EntityInfoContextHolder.get(methodParamType);
-            List<ColumnInfo> tableColumnInfoList = entityInfo.getTableColumnInfoList();
-            for (int j = 0; j < tableColumnInfoList.size(); j++) {
-                ColumnInfo columnInfo = tableColumnInfoList.get(j);
-                String javaColumnName = columnInfo.getJavaColumnName();
-                String dbColumnName = columnInfo.getDbColumnName();
+            this.setColumn(methodInfo, methodParamInfo, dbTrimElement);
+        }
+    }
 
-                LogicDelete logicDelete = columnInfo.getLogicDelete();
-                if (logicDelete != null) {
-                    String javaColumn = String.format("%s,", dbColumnName);
-                    dbTrimElement.addText(javaColumn);
-                    continue;
-                }
+    private void setColumn(MethodInfo methodInfo, MethodParamInfo methodParamInfo, Element dbTrimElement) {
+        List<ColumnInfo> tableColumnInfoList = this.getTableColumnInfoList(methodParamInfo.getType());
+        for (ColumnInfo columnInfo : tableColumnInfoList) {
+            String javaColumnName = columnInfo.getJavaColumnName();
+            String dbColumnName = columnInfo.getDbColumnName();
 
-                if (methodInfo.getDynamic()) {
-                    Element javaTrimIfElement = dbTrimElement.addElement("if");
-                    javaTrimIfElement.addAttribute("test", buildTestNotNull(javaColumnName));
-                    String javaColumn = String.format("%s,", dbColumnName);
-                    javaTrimIfElement.addText(javaColumn);
-                } else {
-                    String javaColumn = String.format("%s,", dbColumnName);
-                    dbTrimElement.addText(javaColumn);
-                }
+            LogicDelete logicDelete = columnInfo.getLogicDelete();
+            if (logicDelete != null) {
+                String javaColumn = String.format("%s,", dbColumnName);
+                dbTrimElement.addText(javaColumn);
+                continue;
+            }
+
+            if (methodInfo.getDynamic()) {
+                Element javaTrimIfElement = dbTrimElement.addElement("if");
+                javaTrimIfElement.addAttribute("test", buildTestNotNull(javaColumnName));
+                String javaColumn = String.format("%s,", dbColumnName);
+                javaTrimIfElement.addText(javaColumn);
+            } else {
+                String javaColumn = String.format("%s,", dbColumnName);
+                dbTrimElement.addText(javaColumn);
             }
         }
     }
@@ -109,8 +108,7 @@ public class InsertTemplateHandler {
     private void setValue(MapperInfo mapperInfo, MethodInfo methodInfo, Element javaTrimElement) {
         Boolean isBatch = methodInfo.getBatch();
         List<MethodParamInfo> methodParamInfoList = methodInfo.getMethodParamInfoList();
-        for (int i = 0; i < methodParamInfoList.size(); i++) {
-            MethodParamInfo methodParamInfo = methodParamInfoList.get(i);
+        for (MethodParamInfo methodParamInfo : methodParamInfoList) {
             if (isBatch && methodParamInfo.getBatchSize()) {
                 continue;
             }
@@ -118,27 +116,27 @@ public class InsertTemplateHandler {
             if (isBasicType) {
                 throw new RuntimeException("新增方法参数不支持定义基础类型");
             }
+
             if (methodParamInfoList.size() == 1) {
                 Param param = methodParamInfo.getParam();
                 if (param == null) {
                     this.handleSingleBusinessObjectParam(methodInfo, methodParamInfo, javaTrimElement);
                 } else {
-                    this.handleSingleBusinessObjectParamAnnotation(mapperInfo, methodInfo, methodParamInfo, javaTrimElement);
+                    this.handleSingleBusinessObjectParamAnnotation(methodInfo, methodParamInfo, javaTrimElement);
                 }
             } else {
-                this.handleSingleBusinessObjectParamAnnotation(mapperInfo, methodInfo, methodParamInfo, javaTrimElement);
+                this.handleSingleBusinessObjectParamAnnotation(methodInfo, methodParamInfo, javaTrimElement);
             }
         }
     }
 
     private void handleSingleBusinessObjectParam(MethodInfo methodInfo, MethodParamInfo methodParamInfo, Element javaTrimElement) {
-        List<ColumnInfo> columnInfoList = methodParamInfo.getColumnInfoList();
-        for (int i = 0; i < columnInfoList.size(); i++) {
-            ColumnInfo columnInfo = columnInfoList.get(i);
-            String javaColumnName = columnInfo.getJavaColumnName();
-            String typeHandler = columnInfo.getTypeHandler();
+        List<ColumnInfo> tableColumnInfoList = this.getTableColumnInfoList(methodParamInfo.getType());
+        for (ColumnInfo tableColumnInfo : tableColumnInfoList) {
+            String javaColumnName = tableColumnInfo.getJavaColumnName();
+            String typeHandler = tableColumnInfo.getTypeHandler();
 
-            LogicDelete logicDelete = columnInfo.getLogicDelete();
+            LogicDelete logicDelete = tableColumnInfo.getLogicDelete();
             if (logicDelete != null) {
                 String javaColumn = String.format("'%s'%s,", logicDelete.show(), buildTypeHandler(typeHandler));
                 javaTrimElement.addText(javaColumn);
@@ -157,11 +155,10 @@ public class InsertTemplateHandler {
         }
     }
 
-    private void handleSingleBusinessObjectParamAnnotation(MapperInfo mapperInfo, MethodInfo methodInfo, MethodParamInfo methodParamInfo, Element javaTrimElement) {
+    private void handleSingleBusinessObjectParamAnnotation(MethodInfo methodInfo, MethodParamInfo methodParamInfo, Element javaTrimElement) {
         Boolean isBatch = methodInfo.getBatch();
-        List<ColumnInfo> tableColumnInfoList = mapperInfo.getEntityInfo().getTableColumnInfoList();
-        for (int i = 0; i < tableColumnInfoList.size(); i++) {
-            ColumnInfo tableColumnInfo = tableColumnInfoList.get(i);
+        List<ColumnInfo> tableColumnInfoList = this.getTableColumnInfoList(methodParamInfo.getType());
+        for (ColumnInfo tableColumnInfo : tableColumnInfoList) {
             String javaColumnName = tableColumnInfo.getJavaColumnName();
             String typeHandler = tableColumnInfo.getTypeHandler();
 
@@ -194,5 +191,10 @@ public class InsertTemplateHandler {
 
     private String buildTestNotNull(String javaColumnName) {
         return String.format("%s != null", javaColumnName);
+    }
+
+    private List<ColumnInfo> getTableColumnInfoList(Class<?> entityClass) {
+        EntityInfo entityInfo = EntityInfoContextHolder.get(entityClass);
+        return entityInfo.getTableColumnInfoList();
     }
 }

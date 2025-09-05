@@ -58,7 +58,7 @@ import org.apache.ibatis.type.TypeHandler;
 public class XMLMapperBuilder extends BaseBuilder {
 
     private final XPathParser parser;
-    private final MapperBuilderAssistant builderAssistant;
+    protected final MapperBuilderAssistant builderAssistant;
     private final Map<String, XNode> sqlFragments;
     private final String resource;
 

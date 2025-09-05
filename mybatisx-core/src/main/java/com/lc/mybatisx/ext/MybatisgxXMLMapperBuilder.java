@@ -1,12 +1,15 @@
 package com.lc.mybatisx.ext;
 
+import com.lc.mybatisx.ext.mapping.BatchSelectResultMapping;
 import com.lc.mybatisx.template.TemplateHandler;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.mapping.ResultFlag;
 import org.apache.ibatis.mapping.ResultMapping;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.session.Configuration;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -35,6 +38,24 @@ public class MybatisgxXMLMapperBuilder extends XMLMapperBuilder {
 
     @Override
     protected ResultMapping buildResultMappingFromContext(XNode context, Class<?> resultType, List<ResultFlag> flags) {
-        return super.buildResultMappingFromContext(context, resultType, flags);
+        ResultMapping resultMapping = super.buildResultMappingFromContext(context, resultType, flags);
+        String relationProperty = context.getStringAttribute("relationProperty");
+        if (StringUtils.isNotBlank(relationProperty)) {
+            return relationPropertyMapping(resultMapping, relationProperty);
+        }
+        return resultMapping;
+    }
+
+    private ResultMapping relationPropertyMapping(ResultMapping resultMapping, String relationProperty) {
+        List<BatchSelectResultMapping.RelationPropertyMapping> relationPropertyMappingList = new ArrayList<>();
+        relationProperty = relationProperty.replaceAll("\\{|\\}", "");
+        String[] relationProperties = StringUtils.split(relationProperty, ",");
+        for (String relationColumnMapping : relationProperties) {
+            String[] values = StringUtils.split(relationColumnMapping, "=");
+            relationPropertyMappingList.add(new BatchSelectResultMapping.RelationPropertyMapping(values[0], values[1]));
+        }
+        BatchSelectResultMapping batchSelectResultMapping = new BatchSelectResultMapping(resultMapping);
+        batchSelectResultMapping.setRelationPropertyMappingList(relationPropertyMappingList);
+        return batchSelectResultMapping;
     }
 }

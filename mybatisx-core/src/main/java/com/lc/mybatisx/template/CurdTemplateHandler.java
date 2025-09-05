@@ -1,7 +1,7 @@
 package com.lc.mybatisx.template;
 
 import com.lc.mybatisx.context.MapperInfoContextHolder;
-import com.lc.mybatisx.ext.MybatisxXMLMapperBuilder;
+import com.lc.mybatisx.ext.MybatisgxXMLMapperBuilder;
 import com.lc.mybatisx.model.MapperInfo;
 import com.lc.mybatisx.model.MethodInfo;
 import com.lc.mybatisx.utils.FreeMarkerUtils;
@@ -68,16 +68,19 @@ public class CurdTemplateHandler {
         try {
             List<Resource> mapperResourceList = this.getMapper();
             for (Resource mapperResource : mapperResourceList) {
-                InputStream is = null;
+                InputStream inputStream = null;
                 try {
-                    is = mapperResource.getInputStream();
-                    MybatisxXMLMapperBuilder xmlMapperBuilder = new MybatisxXMLMapperBuilder(
-                            is, configuration, mapperResource.toString(), configuration.getSqlFragments()
+                    inputStream = mapperResource.getInputStream();
+                    MybatisgxXMLMapperBuilder xmlMapperBuilder = new MybatisgxXMLMapperBuilder(
+                            inputStream, configuration, mapperResource.toString(), configuration.getSqlFragments()
                     );
+                    /*MybatisxXMLMapperBuilder xmlMapperBuilder = new MybatisxXMLMapperBuilder(
+                            is, configuration, mapperResource.toString(), configuration.getSqlFragments()
+                    );*/
                     xmlMapperBuilder.parse();
                 } finally {
-                    if (is != null) {
-                        is.close();
+                    if (inputStream != null) {
+                        inputStream.close();
                     }
                 }
             }

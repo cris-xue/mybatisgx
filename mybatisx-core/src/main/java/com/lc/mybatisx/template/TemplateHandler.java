@@ -23,22 +23,27 @@ public class TemplateHandler {
         return new TemplateHandler(builderAssistant);
     }
 
-    public TemplateHandler build() {
-        List<String> actionIdList = mergeMethod(builderAssistant);
-        List<XNode> actionXNodeList = new ArrayList();
-        for (String actionId : actionIdList) {
-            XNode xNode = MapperTemplateContextHolder.getCurdTemplate(builderAssistant.getCurrentNamespace(), actionId);
-            actionXNodeList.add(xNode);
-        }
-
+    public TemplateHandler buildResultMap() {
         List<String> resultMapIdList = mergeResultMap(builderAssistant);
         List<XNode> resultMapXNodeList = new ArrayList();
         for (String resultMapId : resultMapIdList) {
             XNode xNode = MapperTemplateContextHolder.getResultMapTemplate(builderAssistant.getCurrentNamespace(), resultMapId);
             resultMapXNodeList.add(xNode);
         }
+        originResultMapXNodeList.addAll(resultMapXNodeList);
+        // merge(resultMapXNodeList, actionXNodeList);
+        return this;
+    }
 
-        merge(resultMapXNodeList, actionXNodeList);
+    public TemplateHandler buildStatement() {
+        List<String> statementIdList = mergeMethod(builderAssistant);
+        List<XNode> statementList = new ArrayList();
+        for (String statementId : statementIdList) {
+            XNode xNode = MapperTemplateContextHolder.getCurdTemplate(builderAssistant.getCurrentNamespace(), statementId);
+            statementList.add(xNode);
+        }
+        originMapperXNodeList.addAll(statementList);
+        // merge(resultMapXNodeList, actionXNodeList);
         return this;
     }
 

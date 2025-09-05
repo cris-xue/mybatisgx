@@ -2,6 +2,7 @@ package com.lc.mybatisx.ext;
 
 import com.lc.mybatisx.template.TemplateHandler;
 import org.apache.ibatis.builder.*;
+import org.apache.ibatis.builder.xml.XMLMapperBuilder;
 import org.apache.ibatis.builder.xml.XMLMapperEntityResolver;
 import org.apache.ibatis.builder.xml.XMLStatementBuilder;
 import org.apache.ibatis.cache.Cache;
@@ -77,10 +78,11 @@ public class MybatisxXMLMapperBuilder extends BaseBuilder {
             List<XNode> curdXNode = context.evalNodes("select|insert|update|delete");
 
             // 增加自动处理的resultMap   自动处理的增删改查sql
-            TemplateHandler.builder(builderAssistant)
+            // parse(resultMapXNode, curdXNode);
+            /*TemplateHandler.builder(builderAssistant)
                     .resultMap(resultMapXNode)
                     .mapper(curdXNode)
-                    .build();
+                    .build();*/
 
             resultMapElements(resultMapXNode);
             buildStatementFromContext(curdXNode);

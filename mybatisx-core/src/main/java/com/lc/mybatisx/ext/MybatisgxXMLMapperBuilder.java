@@ -1,5 +1,6 @@
 package com.lc.mybatisx.ext;
 
+import com.lc.mybatisx.template.TemplateHandler;
 import org.apache.ibatis.mapping.ResultFlag;
 import org.apache.ibatis.mapping.ResultMapping;
 import org.apache.ibatis.parsing.XNode;
@@ -22,11 +23,13 @@ public class MybatisgxXMLMapperBuilder extends XMLMapperBuilder {
 
     @Override
     protected void resultMapElements(List<XNode> list) {
+        TemplateHandler.builder(builderAssistant).resultMap(list).buildResultMap();
         super.resultMapElements(list);
     }
 
     @Override
     protected void buildStatementFromContext(List<XNode> list) {
+        TemplateHandler.builder(builderAssistant).mapper(list).buildStatement();
         super.buildStatementFromContext(list);
     }
 

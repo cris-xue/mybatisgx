@@ -5,6 +5,7 @@ import com.lc.mybatisx.context.MapperInfoContextHolder;
 import com.lc.mybatisx.ext.MybatisxConfiguration;
 import com.lc.mybatisx.ext.MybatisxXMLMapperBuilder;
 import com.lc.mybatisx.model.MapperInfo;
+import com.lc.mybatisx.template.CurdTemplateHandler;
 import com.lc.mybatisx.utils.FreeMarkerUtils;
 import freemarker.template.Template;
 import org.apache.ibatis.session.Configuration;
@@ -28,6 +29,8 @@ public class SqlSessionFactoryBeanPostProcessor implements BeanPostProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SqlSessionFactoryBeanPostProcessor.class);
 
+    private CurdTemplateHandler curdTemplateHandler = new CurdTemplateHandler();
+
     // @Autowired
     private IdGenerateValueHandler<?> idGenerateValueHandler;
 
@@ -45,7 +48,7 @@ public class SqlSessionFactoryBeanPostProcessor implements BeanPostProcessor {
             LOGGER.info("SqlSessionFactoryBean 初始化完成");
             SqlSessionFactory sqlSessionFactory = (SqlSessionFactory) bean;
             Configuration configuration = sqlSessionFactory.getConfiguration();
-            curdMethod(configuration);
+            curdTemplateHandler.curdMethod(configuration);
 
             if (configuration instanceof MybatisxConfiguration) {
                 MybatisxConfiguration mybatisxConfiguration = (MybatisxConfiguration) configuration;

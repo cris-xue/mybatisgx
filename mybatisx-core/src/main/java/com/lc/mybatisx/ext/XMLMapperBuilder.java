@@ -126,7 +126,7 @@ public class XMLMapperBuilder extends BaseBuilder {
         }
     }
 
-    private void buildStatementFromContext(List<XNode> list) {
+    protected void buildStatementFromContext(List<XNode> list) {
         if (configuration.getDatabaseId() != null) {
             buildStatementFromContext(list, configuration.getDatabaseId());
         }
@@ -242,7 +242,7 @@ public class XMLMapperBuilder extends BaseBuilder {
         }
     }
 
-    private void resultMapElements(List<XNode> list) {
+    protected void resultMapElements(List<XNode> list) {
         for (XNode resultMapNode : list) {
             try {
                 resultMapElement(resultMapNode);
@@ -370,7 +370,7 @@ public class XMLMapperBuilder extends BaseBuilder {
         return context.getStringAttribute("databaseId") == null;
     }
 
-    private ResultMapping buildResultMappingFromContext(XNode context, Class<?> resultType, List<ResultFlag> flags) {
+    protected ResultMapping buildResultMappingFromContext(XNode context, Class<?> resultType, List<ResultFlag> flags) {
         String property;
         if (flags.contains(ResultFlag.CONSTRUCTOR)) {
             property = context.getStringAttribute("name");

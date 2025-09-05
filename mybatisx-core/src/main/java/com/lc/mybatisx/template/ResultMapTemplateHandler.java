@@ -168,6 +168,7 @@ public class ResultMapTemplateHandler {
         resultMapAssociationElement.addAttribute("javaType", columnInfo.getJavaTypeName());
         resultMapAssociationElement.addAttribute("fetchType", columnRelationInfo.getFetch().toLowerCase());
         resultMapAssociationElement.addAttribute("select", resultMapRelationInfo.getSelect());
+        resultMapAssociationElement.addAttribute("relationProperty", "{id=userId}");
         // resultMapAssociationElement.addAttribute("resultMap", resultMapAssociationInfo.getResultMapId());
         return resultMapAssociationElement;
     }

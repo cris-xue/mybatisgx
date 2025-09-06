@@ -18,11 +18,15 @@ public class ColumnRelationInfo {
      */
     private String mappedBy;
     /**
-     * 获取模式
+     * 抓取类型
+     */
+    private String fetchType;
+    /**
+     * 抓取模式
      */
     private FetchMode fetchMode;
     /**
-     * 数据抓取大小
+     * 抓取大小
      */
     private String fetchSize;
     /**
@@ -114,6 +118,7 @@ public class ColumnRelationInfo {
         if (oneToOne != null) {
             this.oneToOne = oneToOne;
             this.mappedBy = oneToOne.mappedBy();
+            this.fetchType = oneToOne.fetch().name().toLowerCase();
         }
     }
 
@@ -125,6 +130,7 @@ public class ColumnRelationInfo {
         if (oneToMany != null) {
             this.oneToMany = oneToMany;
             this.mappedBy = oneToMany.mappedBy();
+            this.fetchType = oneToMany.fetch().name().toLowerCase();
         }
     }
 
@@ -136,6 +142,7 @@ public class ColumnRelationInfo {
         if (manyToOne != null) {
             this.manyToOne = manyToOne;
             this.mappedBy = manyToOne.mappedBy();
+            this.fetchType = manyToOne.fetch().name().toLowerCase();
         }
     }
 
@@ -147,6 +154,7 @@ public class ColumnRelationInfo {
         if (manyToMany != null) {
             this.manyToMany = manyToMany;
             this.mappedBy = manyToMany.mappedBy();
+            this.fetchType = manyToMany.fetch().name().toLowerCase();
         }
     }
 
@@ -179,8 +187,10 @@ public class ColumnRelationInfo {
     }
 
     public void setFetch(Fetch fetch) {
-        this.fetch = fetch;
-        this.fetchMode = fetch.value();
-        this.fetchSize = fetch.size() == 0 ? null : Integer.valueOf(fetch.size()).toString();
+        if (fetch != null) {
+            this.fetch = fetch;
+            this.fetchMode = fetch.value();
+            this.fetchSize = fetch.size() == 0 ? null : Integer.valueOf(fetch.size()).toString();
+        }
     }
 }

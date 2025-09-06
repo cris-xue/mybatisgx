@@ -9,6 +9,7 @@ import com.lc.mybatisx.annotation.handler.JavaColumnInfo;
 import com.lc.mybatisx.context.EntityInfoContextHolder;
 import com.lc.mybatisx.ext.executor.MybatisgxBatchExecutor;
 import com.lc.mybatisx.ext.executor.MybatisgxMixExecutor;
+import com.lc.mybatisx.ext.mapping.BatchSelectBoundSql;
 import com.lc.mybatisx.model.ColumnInfo;
 import com.lc.mybatisx.model.EntityInfo;
 import org.apache.ibatis.executor.Executor;
@@ -58,8 +59,16 @@ public class MybatisxConfiguration extends Configuration {
 
     @Override
     public ResultSetHandler newResultSetHandler(Executor executor, MappedStatement mappedStatement, RowBounds rowBounds, ParameterHandler parameterHandler, ResultHandler resultHandler, BoundSql boundSql) {
-        executor = (Executor) interceptorChain.pluginAll(executor);
-        ResultSetHandler resultSetHandler = super.newResultSetHandler(executor, mappedStatement, rowBounds, parameterHandler, resultHandler, boundSql);
+        ResultSetHandler resultSetHandler;
+        /*if (boundSql instanceof BatchSelectBoundSql) {
+            resultSetHandler = new MybatisgxResultSetHandler(executor, mappedStatement, parameterHandler, resultHandler, boundSql, rowBounds);
+            resultSetHandler = (ResultSetHandler) interceptorChain.pluginAll(resultSetHandler);
+        } else {
+            executor = (Executor) interceptorChain.pluginAll(executor);
+            resultSetHandler = super.newResultSetHandler(executor, mappedStatement, rowBounds, parameterHandler, resultHandler, boundSql);
+        }*/
+        resultSetHandler = new MybatisgxResultSetHandler(executor, mappedStatement, parameterHandler, resultHandler, boundSql, rowBounds);
+        resultSetHandler = (ResultSetHandler) interceptorChain.pluginAll(resultSetHandler);
         return resultSetHandler;
     }
 

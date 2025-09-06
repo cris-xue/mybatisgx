@@ -1,5 +1,6 @@
 package com.lc.mybatisx.template.select;
 
+import com.lc.mybatisx.annotation.FetchMode;
 import com.lc.mybatisx.annotation.ManyToMany;
 import com.lc.mybatisx.model.*;
 import com.lc.mybatisx.utils.XmlUtils;
@@ -58,9 +59,17 @@ public class RelationSelectTemplateHandler {
         ColumnRelationInfo columnRelationInfo = entityRelationSelectInfo.getColumnInfo().getColumnRelationInfo();
         ManyToMany manyToMany = columnRelationInfo.getManyToMany();
         if (manyToMany == null) {
-            Expression whereCondition = this.buildOneToOneWhere(entityRelationSelectInfo);
-            RelationSelectHelper.buildWhereElement(selectElement, whereCondition);
-            return document.asXML();
+            if (columnRelationInfo.getFetchMode() == FetchMode.BATCH) {
+                RelationSelectOrTemplateHandler relationSelectOrTemplateHandler = new RelationSelectOrTemplateHandler();
+                Expression whereCondition = relationSelectOrTemplateHandler.buildSelectSqlXNode(entityRelationSelectInfo);
+                Element whereElement = RelationSelectHelper.buildWhereElement(selectElement);
+                RelationSelectHelper.buildForeachElement(whereElement, whereCondition);
+                return document.asXML();
+            } else {
+                Expression whereCondition = this.buildOneToOneWhere(entityRelationSelectInfo);
+                RelationSelectHelper.buildWhereElement(selectElement, whereCondition);
+                return document.asXML();
+            }
         } else {
             Expression whereCondition = this.buildManyToManyWhere(entityRelationSelectInfo);
             RelationSelectHelper.buildWhereElement(selectElement, whereCondition);

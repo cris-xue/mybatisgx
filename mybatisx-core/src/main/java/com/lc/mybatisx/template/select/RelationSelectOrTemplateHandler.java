@@ -16,10 +16,7 @@ public class RelationSelectOrTemplateHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(RelationSelectOrTemplateHandler.class);
 
-    private void buildSelectSqlXNode(Element selectElement, EntityRelationSelectInfo entityRelationSelectInfo, String sql) {
-        selectElement.addText(sql);
-        Element whereElement = selectElement.addElement("where");
-
+    public Expression buildSelectSqlXNode(EntityRelationSelectInfo entityRelationSelectInfo) {
         EntityInfo relationEntityInfo = entityRelationSelectInfo.getEntityInfo();
         ColumnRelationInfo columnRelationInfo = entityRelationSelectInfo.getColumnInfo().getColumnRelationInfo();
         String mappedBy = columnRelationInfo.getMappedBy();
@@ -40,7 +37,8 @@ public class RelationSelectOrTemplateHandler {
                     whereCondition = new AndExpression(whereCondition, eqCondition);
                 }
             }
-            RelationSelectHelper.buildForeachElement(whereElement, whereCondition);
+            return whereCondition;
+            // RelationSelectHelper.buildForeachElement(whereElement, whereCondition);
         } else {
             List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnRelationInfo.getInverseForeignKeyColumnInfoList();
             Expression whereCondition = null;
@@ -55,7 +53,8 @@ public class RelationSelectOrTemplateHandler {
                     whereCondition = new AndExpression(whereCondition, eqCondition);
                 }
             }
-            RelationSelectHelper.buildForeachElement(whereElement, whereCondition);
+            return whereCondition;
+            // RelationSelectHelper.buildForeachElement(whereElement, whereCondition);
         }
     }
 

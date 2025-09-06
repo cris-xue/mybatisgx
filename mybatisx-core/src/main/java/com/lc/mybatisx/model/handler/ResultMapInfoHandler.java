@@ -1,6 +1,6 @@
 package com.lc.mybatisx.model.handler;
 
-import com.lc.mybatisx.annotation.LoadStrategy;
+import com.lc.mybatisx.annotation.FetchMode;
 import com.lc.mybatisx.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,14 +70,18 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
             resultMapRelationInfo.setColumnInfo(columnInfo);
             resultMapRelationInfo.setEntityInfo(entityInfo);
 
-            LoadStrategy loadStrategy = columnInfo.getColumnRelationInfo().getLoadStrategy();
-            if (loadStrategy == LoadStrategy.SUB || (loadStrategy == LoadStrategy.JOIN && level <= 2)) {
+            FetchMode fetchMode = columnInfo.getColumnRelationInfo().getFetchMode();
+            if (fetchMode == FetchMode.SELECT) {
                 this.buildResultMapInfo(resultMapInfoList, childrenEntityRelationInfo);
-            } else if (loadStrategy == LoadStrategy.JOIN && level > 2) {
+            } else if (fetchMode == FetchMode.BATCH) {
+                this.buildResultMapInfo(resultMapInfoList, childrenEntityRelationInfo);
+            } else if (fetchMode == FetchMode.JOIN && level <= 2) {
+                this.buildResultMapInfo(resultMapInfoList, childrenEntityRelationInfo);
+            } else if (fetchMode == FetchMode.JOIN && level > 2) {
                 List<ResultMapInfo> subResultMapRelationInfoList = this.buildResultMapRelationInfo(resultMapInfoList, childrenEntityRelationInfo.getEntityRelationList());
                 resultMapRelationInfo.setResultMapInfoList(subResultMapRelationInfoList);
             } else {
-                throw new RuntimeException("未知的加载策略");
+                throw new RuntimeException("未知的抓取模式");
             }
             resultMapRelationInfoList.add(resultMapRelationInfo);
         }
@@ -102,14 +106,18 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
             ColumnInfo columnInfo = childrenEntityRelationInfo.getColumnInfo();
             EntityRelationSelectInfo entityRelationSelectInfo = this.buildEntityRelationSelect(resultMapInfo, childrenEntityRelationInfo);
 
-            LoadStrategy loadStrategy = columnInfo.getColumnRelationInfo().getLoadStrategy();
-            if (loadStrategy == LoadStrategy.SUB || (loadStrategy == LoadStrategy.JOIN && level <= 2)) {
-                // 子查询和join的第一级都无法生成join查询，第一级join会造成结果膨胀问题，第二级采用in查询或者批量查询，解决N+1问题，把N+1变成1+1
+            // 子查询和join的第一级都无法生成join查询，第一级join会造成结果膨胀问题，第二级采用in查询或者批量查询，解决N+1问题，把N+1变成1+1
+            FetchMode fetchMode = columnInfo.getColumnRelationInfo().getFetchMode();
+            if (fetchMode == FetchMode.SELECT) {
                 entityRelationSelectInfoList.add(entityRelationSelectInfo);
-            } else if (loadStrategy == LoadStrategy.JOIN && level > 2) {
+            } else if (fetchMode == FetchMode.BATCH) {
+                entityRelationSelectInfoList.add(entityRelationSelectInfo);
+            } else if (fetchMode == FetchMode.JOIN && level <= 2) {
+                entityRelationSelectInfoList.add(entityRelationSelectInfo);
+            } else if (fetchMode == FetchMode.JOIN && level > 2) {
                 parentEntityRelationSelectInfo.addEntityRelationSelectInfo(entityRelationSelectInfo);
             } else {
-                throw new RuntimeException("未知的加载策略");
+                throw new RuntimeException("未知的抓取模式");
             }
             this.buildEntityRelationSelect(resultMapInfo, entityRelationSelectInfoList, childrenEntityRelationInfo, entityRelationSelectInfo);
         }

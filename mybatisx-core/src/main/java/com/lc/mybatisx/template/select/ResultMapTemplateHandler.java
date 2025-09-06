@@ -27,7 +27,7 @@ public class ResultMapTemplateHandler {
         List<ResultMapInfo> resultMapInfoList = mapperInfo.getResultMapInfoList();
         for (ResultMapInfo resultMapInfo : resultMapInfoList) {
             Document document = DocumentHelper.createDocument();
-            Element resultMapElement = this.addResultMapElement(document, resultMapInfo);
+            Element resultMapElement = ResultMapHelper.addResultMapElement(document, resultMapInfo);
             this.addColumnElement(resultMapElement, resultMapInfo.getTableColumnInfoList());
             this.addResultMapRelationElement(resultMapElement, mapperInfo, resultMapInfo.getEntityInfo(), resultMapInfo.getResultMapInfoList());
             String resultMapXmlString = XmlUtils.writeString(document);
@@ -40,25 +40,16 @@ public class ResultMapTemplateHandler {
         return xNodeMap;
     }
 
-    private Element addResultMapElement(Document document, ResultMapInfo resultMapInfo) {
-        Element mapperElement = document.addElement("mapper");
-        Element resultMapElement = mapperElement.addElement("resultMap");
-        resultMapElement.addAttribute("id", resultMapInfo.getId());
-        resultMapElement.addAttribute("type", resultMapInfo.getEntityClazzName());
-        return resultMapElement;
-    }
-
     private void addColumnElement(Element resultMapElement, List<ColumnInfo> columnInfoList) {
-        for (int i = 0; i < columnInfoList.size(); i++) {
-            ColumnInfo columnInfo = columnInfoList.get(i);
+        for (ColumnInfo columnInfo : columnInfoList) {
             Id id = columnInfo.getId();
             if (id != null) {
-                idColumnElement(resultMapElement, columnInfo);
+                ResultMapHelper.idColumnElement(resultMapElement, columnInfo);
                 continue;
             }
             ColumnRelationInfo columnRelationInfo = columnInfo.getColumnRelationInfo();
             if (columnRelationInfo == null) {
-                resultColumnElement(resultMapElement, columnInfo);
+                ResultMapHelper.resultColumnElement(resultMapElement, columnInfo);
             } else {
                 this.addColumnRelationElement(resultMapElement, columnRelationInfo);
             }
@@ -71,34 +62,9 @@ public class ResultMapTemplateHandler {
         if (manyToMany == null && StringUtils.isBlank(mappedBy)) {
             List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnRelationInfo.getInverseForeignKeyColumnInfoList();
             for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
-                this.resultColumnElement(resultMapElement, inverseForeignKeyColumnInfo);
+                ResultMapHelper.resultColumnElement(resultMapElement, inverseForeignKeyColumnInfo);
             }
         }
-    }
-
-    private void idColumnElement(Element resultMapElement, ColumnInfo columnInfo) {
-        Element idColumnElement = resultMapElement.addElement("id");
-        this.columnElement(idColumnElement, columnInfo);
-    }
-
-    private void resultColumnElement(Element resultMapElement, ForeignKeyColumnInfo foreignKeyColumnInfo) {
-        ColumnInfo columnInfo = new ColumnInfo();
-        columnInfo.setDbColumnName(foreignKeyColumnInfo.getName());
-        columnInfo.setDbColumnNameAlias(foreignKeyColumnInfo.getNameAlias());
-        this.resultColumnElement(resultMapElement, columnInfo);
-    }
-
-    private void resultColumnElement(Element resultMapElement, ColumnInfo columnInfo) {
-        Element resultColumnElement = resultMapElement.addElement("result");
-        this.columnElement(resultColumnElement, columnInfo);
-    }
-
-    private void columnElement(Element columnElement, ColumnInfo columnInfo) {
-        columnElement.addAttribute("property", columnInfo.getJavaColumnName());
-        columnElement.addAttribute("column", columnInfo.getDbColumnNameAlias());
-        String dbTypeName = columnInfo.getDbTypeName();
-        columnElement.addAttribute("jdbcType", StringUtils.isNotBlank(dbTypeName) ? dbTypeName.toUpperCase() : null);
-        columnElement.addAttribute("typeHandler", columnInfo.getTypeHandler());
     }
 
     private void addResultMapRelationElement(Element resultMapElement, MapperInfo mapperInfo, EntityInfo parentEntityInfo, List<ResultMapInfo> resultMapInfoList) {
@@ -108,9 +74,9 @@ public class ResultMapTemplateHandler {
         for (ResultMapInfo resultMapInfo : resultMapInfoList) {
             ResultMapInfo existResultMapInfo = mapperInfo.getResultMapInfo(resultMapInfo.getEntityClazz());
             if (existResultMapInfo != null) {
-                this.subQuery(resultMapElement, parentEntityInfo, resultMapInfo);
+                this.subSelect(resultMapElement, parentEntityInfo, resultMapInfo);
             } else {
-                Element resultMapRelationElement = this.joinQuery(resultMapInfo, resultMapElement);
+                Element resultMapRelationElement = this.joinSelect(resultMapInfo, resultMapElement);
                 List<ResultMapInfo> childrenResultMapInfoList = resultMapInfo.getResultMapInfoList();
                 if (ObjectUtils.isNotEmpty(childrenResultMapInfoList)) {
                     this.addResultMapRelationElement(resultMapRelationElement, mapperInfo, resultMapInfo.getEntityInfo(), childrenResultMapInfoList);
@@ -119,7 +85,7 @@ public class ResultMapTemplateHandler {
         }
     }
 
-    private void subQuery(Element resultMapElement, EntityInfo parentEntityInfo, ResultMapInfo resultMapInfo) {
+    private void subSelect(Element resultMapElement, EntityInfo parentEntityInfo, ResultMapInfo resultMapInfo) {
         ColumnInfo columnInfo = resultMapInfo.getColumnInfo();
         ColumnRelationInfo columnRelationInfo = columnInfo.getColumnRelationInfo();
         Integer associationType = this.getRelationType(columnRelationInfo);
@@ -132,7 +98,7 @@ public class ResultMapTemplateHandler {
         }
     }
 
-    private Element joinQuery(ResultMapInfo resultMapRelationInfo, Element resultMapElement) {
+    private Element joinSelect(ResultMapInfo resultMapRelationInfo, Element resultMapElement) {
         ColumnInfo columnInfo = resultMapRelationInfo.getColumnInfo();
         ColumnRelationInfo columnInfoAnnotationInfo = columnInfo.getColumnRelationInfo();
         Integer relationType = this.getRelationType(columnInfoAnnotationInfo);

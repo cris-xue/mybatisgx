@@ -4,32 +4,44 @@ import com.lc.mybatisx.annotation.ManyToMany;
 import com.lc.mybatisx.annotation.ManyToOne;
 import com.lc.mybatisx.annotation.OneToMany;
 import com.lc.mybatisx.annotation.OneToOne;
-import com.lc.mybatisx.model.ColumnInfo;
-import com.lc.mybatisx.model.ColumnRelationInfo;
-import com.lc.mybatisx.model.EntityInfo;
-import com.lc.mybatisx.model.ResultMapInfo;
+import com.lc.mybatisx.model.*;
+import org.apache.commons.lang3.StringUtils;
+import org.dom4j.Document;
 import org.dom4j.Element;
 
 public class ResultMapHelper {
 
-    public static Integer getRelationType(ColumnRelationInfo columnRelationInfo) {
-        OneToOne oneToOne = columnRelationInfo.getOneToOne();
-        OneToMany oneToMany = columnRelationInfo.getOneToMany();
-        ManyToOne manyToOne = columnRelationInfo.getManyToOne();
-        ManyToMany manyToMany = columnRelationInfo.getManyToMany();
-        if (oneToOne != null) {
-            return 1;
-        }
-        if (oneToMany != null) {
-            return 2;
-        }
-        if (manyToOne != null) {
-            return 1;
-        }
-        if (manyToMany != null) {
-            return 2;
-        }
-        return null;
+    public static Element addResultMapElement(Document document, ResultMapInfo resultMapInfo) {
+        Element mapperElement = document.addElement("mapper");
+        Element resultMapElement = mapperElement.addElement("resultMap");
+        resultMapElement.addAttribute("id", resultMapInfo.getId());
+        resultMapElement.addAttribute("type", resultMapInfo.getEntityClazzName());
+        return resultMapElement;
+    }
+
+    public static void idColumnElement(Element resultMapElement, ColumnInfo columnInfo) {
+        Element idColumnElement = resultMapElement.addElement("id");
+        columnElement(idColumnElement, columnInfo);
+    }
+
+    public static void resultColumnElement(Element resultMapElement, ForeignKeyColumnInfo foreignKeyColumnInfo) {
+        ColumnInfo columnInfo = new ColumnInfo();
+        columnInfo.setDbColumnName(foreignKeyColumnInfo.getName());
+        columnInfo.setDbColumnNameAlias(foreignKeyColumnInfo.getNameAlias());
+        resultColumnElement(resultMapElement, columnInfo);
+    }
+
+    public static void resultColumnElement(Element resultMapElement, ColumnInfo columnInfo) {
+        Element resultColumnElement = resultMapElement.addElement("result");
+        columnElement(resultColumnElement, columnInfo);
+    }
+
+    public static void columnElement(Element columnElement, ColumnInfo columnInfo) {
+        columnElement.addAttribute("property", columnInfo.getJavaColumnName());
+        columnElement.addAttribute("column", columnInfo.getDbColumnNameAlias());
+        String dbTypeName = columnInfo.getDbTypeName();
+        columnElement.addAttribute("jdbcType", StringUtils.isNotBlank(dbTypeName) ? dbTypeName.toUpperCase() : null);
+        columnElement.addAttribute("typeHandler", columnInfo.getTypeHandler());
     }
 
     public static Element associationColumnElement(Element resultMapElement, EntityInfo parentEntityInfo, ResultMapInfo resultMapRelationInfo, String column) {
@@ -73,5 +85,25 @@ public class ResultMapHelper {
         resultMapCollectionElement.addAttribute("javaType", columnInfo.getCollectionTypeName());
         resultMapCollectionElement.addAttribute("ofType", columnInfo.getJavaTypeName());
         return resultMapCollectionElement;
+    }
+
+    public static Integer getRelationType(ColumnRelationInfo columnRelationInfo) {
+        OneToOne oneToOne = columnRelationInfo.getOneToOne();
+        OneToMany oneToMany = columnRelationInfo.getOneToMany();
+        ManyToOne manyToOne = columnRelationInfo.getManyToOne();
+        ManyToMany manyToMany = columnRelationInfo.getManyToMany();
+        if (oneToOne != null) {
+            return 1;
+        }
+        if (oneToMany != null) {
+            return 2;
+        }
+        if (manyToOne != null) {
+            return 1;
+        }
+        if (manyToMany != null) {
+            return 2;
+        }
+        return null;
     }
 }

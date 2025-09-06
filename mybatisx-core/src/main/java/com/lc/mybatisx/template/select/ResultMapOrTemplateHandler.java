@@ -27,7 +27,7 @@ public class ResultMapOrTemplateHandler {
         List<ResultMapInfo> resultMapInfoList = mapperInfo.getResultMapInfoList();
         for (ResultMapInfo resultMapInfo : resultMapInfoList) {
             Document document = DocumentHelper.createDocument();
-            Element resultMapElement = this.addResultMapElement(document, resultMapInfo);
+            Element resultMapElement = ResultMapHelper.addResultMapElement(document, resultMapInfo);
             this.addColumnElement(resultMapElement, resultMapInfo.getTableColumnInfoList());
             this.addResultMapRelationElement(resultMapElement, mapperInfo, resultMapInfo.getEntityInfo(), resultMapInfo.getResultMapInfoList());
             String resultMapXmlString = XmlUtils.writeString(document);
@@ -38,14 +38,6 @@ public class ResultMapOrTemplateHandler {
             xNodeMap.put(resultMapInfo.getId(), xNode);
         }
         return xNodeMap;
-    }
-
-    private Element addResultMapElement(Document document, ResultMapInfo resultMapInfo) {
-        Element mapperElement = document.addElement("mapper");
-        Element resultMapElement = mapperElement.addElement("resultMap");
-        resultMapElement.addAttribute("id", resultMapInfo.getId());
-        resultMapElement.addAttribute("type", resultMapInfo.getEntityClazzName());
-        return resultMapElement;
     }
 
     private void addColumnElement(Element resultMapElement, List<ColumnInfo> columnInfoList) {
@@ -79,9 +71,9 @@ public class ResultMapOrTemplateHandler {
         for (ResultMapInfo resultMapInfo : resultMapInfoList) {
             ResultMapInfo existResultMapInfo = mapperInfo.getResultMapInfo(resultMapInfo.getEntityClazz());
             if (existResultMapInfo != null) {
-                this.subQuery(resultMapElement, parentEntityInfo, resultMapInfo);
+                this.subSelect(resultMapElement, parentEntityInfo, resultMapInfo);
             } else {
-                Element resultMapRelationElement = this.joinQuery(resultMapInfo, resultMapElement);
+                Element resultMapRelationElement = this.joinSelect(resultMapInfo, resultMapElement);
                 List<ResultMapInfo> childrenResultMapInfoList = resultMapInfo.getResultMapInfoList();
                 if (ObjectUtils.isNotEmpty(childrenResultMapInfoList)) {
                     this.addResultMapRelationElement(resultMapRelationElement, mapperInfo, resultMapInfo.getEntityInfo(), childrenResultMapInfoList);
@@ -90,7 +82,7 @@ public class ResultMapOrTemplateHandler {
         }
     }
 
-    private void subQuery(Element resultMapElement, EntityInfo parentEntityInfo, ResultMapInfo resultMapInfo) {
+    private void subSelect(Element resultMapElement, EntityInfo parentEntityInfo, ResultMapInfo resultMapInfo) {
         ColumnInfo columnInfo = resultMapInfo.getColumnInfo();
         ColumnRelationInfo columnRelationInfo = columnInfo.getColumnRelationInfo();
         Integer associationType = this.getRelationType(columnRelationInfo);
@@ -103,7 +95,7 @@ public class ResultMapOrTemplateHandler {
         }
     }
 
-    private Element joinQuery(ResultMapInfo resultMapRelationInfo, Element resultMapElement) {
+    private Element joinSelect(ResultMapInfo resultMapRelationInfo, Element resultMapElement) {
         ColumnInfo columnInfo = resultMapRelationInfo.getColumnInfo();
         ColumnRelationInfo columnInfoAnnotationInfo = columnInfo.getColumnRelationInfo();
         Integer relationType = this.getRelationType(columnInfoAnnotationInfo);

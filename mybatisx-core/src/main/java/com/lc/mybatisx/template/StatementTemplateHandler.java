@@ -75,9 +75,6 @@ public class StatementTemplateHandler {
                     MybatisgxXMLMapperBuilder xmlMapperBuilder = new MybatisgxXMLMapperBuilder(
                             inputStream, configuration, mapperResource.toString(), configuration.getSqlFragments()
                     );
-                    /*MybatisxXMLMapperBuilder xmlMapperBuilder = new MybatisxXMLMapperBuilder(
-                            is, configuration, mapperResource.toString(), configuration.getSqlFragments()
-                    );*/
                     xmlMapperBuilder.parse();
                 } finally {
                     if (inputStream != null) {

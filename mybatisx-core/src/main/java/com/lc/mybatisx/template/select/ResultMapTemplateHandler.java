@@ -88,10 +88,10 @@ public class ResultMapTemplateHandler {
     private void subSelect(Element resultMapElement, EntityInfo parentEntityInfo, ResultMapInfo resultMapInfo) {
         ColumnInfo columnInfo = resultMapInfo.getColumnInfo();
         ColumnRelationInfo columnRelationInfo = columnInfo.getColumnRelationInfo();
-        Integer associationType = this.getRelationType(columnRelationInfo);
-        if (associationType == 1) {
+        Integer relationType = this.getRelationType(columnRelationInfo);
+        if (relationType == 1) {
             this.associationColumnElement(resultMapElement, parentEntityInfo, resultMapInfo);
-        } else if (associationType == 2) {
+        } else if (relationType == 2) {
             this.collectionColumnElement(resultMapElement, parentEntityInfo, resultMapInfo);
         } else {
             throw new RuntimeException(columnInfo.getJavaType() + "没有关联注解");
@@ -165,7 +165,6 @@ public class ResultMapTemplateHandler {
             } else {
                 List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnRelationInfo.getInverseForeignKeyColumnInfoList();
                 for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
-                    ColumnInfo inverseForeignKeyRefColumnInfo = entityInfo.getDbColumnInfo(inverseForeignKeyColumnInfo.getReferencedColumnName());
                     column.put(inverseForeignKeyColumnInfo.getName(), inverseForeignKeyColumnInfo.getNameAlias());
                 }
             }

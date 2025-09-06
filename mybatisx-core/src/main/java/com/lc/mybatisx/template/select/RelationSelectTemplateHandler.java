@@ -83,8 +83,7 @@ public class RelationSelectTemplateHandler {
             for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
                 String leftEq = String.format("%s.%s", relationEntityInfo.getTableName(), inverseForeignKeyColumnInfo.getName());
                 String rightEq = inverseForeignKeyColumnInfo.getName();
-                EqualsTo eqCondition = ConditionBuilder.eq(leftEq, String.format("#{%s}", rightEq));
-                whereCondition = this.buildWhereCondition(whereCondition, eqCondition);
+                whereCondition = this.buildWhereCondition(whereCondition, leftEq, rightEq);
             }
             return whereCondition;
         } else {
@@ -93,8 +92,7 @@ public class RelationSelectTemplateHandler {
             for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
                 String leftEq = String.format("%s.%s", relationEntityInfo.getTableName(), inverseForeignKeyColumnInfo.getReferencedColumnName());
                 String rightEq = inverseForeignKeyColumnInfo.getName();
-                EqualsTo eqCondition = ConditionBuilder.eq(leftEq, String.format("#{%s}", rightEq));
-                whereCondition = this.buildWhereCondition(whereCondition, eqCondition);
+                whereCondition = this.buildWhereCondition(whereCondition, leftEq, rightEq);
             }
             return whereCondition;
         }
@@ -110,25 +108,24 @@ public class RelationSelectTemplateHandler {
             ColumnInfo mappedByColumnInfo = relationEntityInfo.getColumnInfo(mappedBy);
             ColumnRelationInfo mappedByColumnRelationInfo = mappedByColumnInfo.getColumnRelationInfo();
             List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedByColumnRelationInfo.getInverseForeignKeyColumnInfoList();
-            Expression whereCondition = null;
+            /*Expression whereCondition = null;
             for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
                 String leftEq = String.format("%s.%s", middleTableName, inverseForeignKeyColumnInfo.getName());
                 String rightEq = inverseForeignKeyColumnInfo.getName();
-                EqualsTo eqCondition = ConditionBuilder.eq(leftEq, String.format("#{%s}", rightEq));
-                whereCondition = this.buildWhereCondition(whereCondition, eqCondition);
+                whereCondition = this.buildWhereCondition(whereCondition, leftEq, rightEq);
             }
-            return whereCondition;
+            return whereCondition;*/
+            return this.buildWhereCondition(middleTableName, inverseForeignKeyColumnInfoList);
         } else {
             // user_role left join user on() user_role.user_id = user.id where user_role.role_id = role.id
             List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = columnRelationInfo.getForeignKeyColumnInfoList();
-            Expression whereCondition = null;
+            /*Expression whereCondition = null;
             for (ForeignKeyColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
                 String leftEq = String.format("%s.%s", middleTableName, foreignKeyColumnInfo.getName());
                 String rightEq = foreignKeyColumnInfo.getName();
-                EqualsTo eqCondition = ConditionBuilder.eq(leftEq, String.format("#{%s}", rightEq));
-                whereCondition = this.buildWhereCondition(whereCondition, eqCondition);
-            }
-            return whereCondition;
+                whereCondition = this.buildWhereCondition(whereCondition, leftEq, rightEq);
+            }*/
+            return this.buildWhereCondition(middleTableName, foreignKeyColumnInfoList);
         }
     }
 
@@ -146,13 +143,25 @@ public class RelationSelectTemplateHandler {
         }
     }
 
+    private Expression buildWhereCondition(String middleTableName, List<ForeignKeyColumnInfo> foreignKeyColumnInfoList) {
+        Expression whereCondition = null;
+        for (ForeignKeyColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
+            String leftEq = String.format("%s.%s", middleTableName, foreignKeyColumnInfo.getName());
+            String rightEq = foreignKeyColumnInfo.getName();
+            whereCondition = this.buildWhereCondition(whereCondition, leftEq, rightEq);
+        }
+        return whereCondition;
+    }
+
     /**
      * 将表达式添加到条件树
      * @param whereCondition
-     * @param eqCondition
+     * @param leftEq
+     * @param rightEq
      * @return
      */
-    private Expression buildWhereCondition(Expression whereCondition, EqualsTo eqCondition) {
+    private Expression buildWhereCondition(Expression whereCondition, String leftEq, String rightEq) {
+        EqualsTo eqCondition = ConditionBuilder.eq(leftEq, String.format("#{%s}", rightEq));
         return whereCondition == null ? eqCondition : new AndExpression(whereCondition, eqCondition);
     }
 }

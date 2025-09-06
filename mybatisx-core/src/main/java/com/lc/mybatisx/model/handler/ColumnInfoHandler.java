@@ -42,13 +42,6 @@ public class ColumnInfoHandler {
             Lock lock = field.getAnnotation(Lock.class);
             LogicDelete logicDelete = field.getAnnotation(LogicDelete.class);
 
-            /*String fieldName = field.getName();
-            String dbColumnName;
-            if (column != null && StringUtils.isNotBlank(column.name())) {
-                dbColumnName = column.name();
-            } else {
-                dbColumnName = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, fieldName);
-            }*/
             String fieldName = field.getName();
             String dbColumnName = this.getDbColumnName(field);
 
@@ -141,6 +134,7 @@ public class ColumnInfoHandler {
         JoinColumn joinColumn = field.getAnnotation(JoinColumn.class);
         JoinColumns joinColumns = field.getAnnotation(JoinColumns.class);
         JoinTable joinTable = field.getAnnotation(JoinTable.class);
+        Fetch fetch = field.getAnnotation(Fetch.class);
 
         if (manyToMany != null && (StringUtils.isBlank(manyToMany.mappedBy()) && joinTable == null)) {
             throw new RuntimeException("many to many association must have mappedBy or joinTable");
@@ -171,6 +165,7 @@ public class ColumnInfoHandler {
         columnRelationInfo.setJoinColumn(joinColumn);
         columnRelationInfo.setJoinColumns(joinColumns);
         columnRelationInfo.setJoinTable(joinTable);
+        columnRelationInfo.setFetch(fetch);
         columnRelationInfo.setForeignKeyColumnInfoList(foreignKeyColumnInfoList);
         columnRelationInfo.setInverseForeignKeyColumnInfoList(inverseForeignKeyColumnInfoList);
         columnInfo.setColumnRelationInfo(columnRelationInfo);

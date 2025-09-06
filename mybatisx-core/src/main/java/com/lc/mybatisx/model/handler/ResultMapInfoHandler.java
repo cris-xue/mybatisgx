@@ -133,25 +133,6 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
         entityRelationSelectInfo.setEntityInfo(entityInfo);
         Boolean isExistMiddleTable = columnInfo.getColumnRelationInfo().getManyToMany() != null;
         entityRelationSelectInfo.setExistMiddleTable(isExistMiddleTable);
-
-        // 处理关联查询主外键映射，方便模型处理
-        /*ColumnRelationInfo columnRelationInfo = columnInfo.getColumnRelationInfo();
-        String mappedBy = columnRelationInfo.getMappedBy();
-        if (isExistMiddleTable) {
-            if (StringUtils.isBlank(mappedBy)) {
-                entityRelationSelectInfo.addForeignKeyColumnInfo(entityInfo.getTableName(), columnRelationInfo.getInverseForeignKeyColumnInfoList());
-            } else {
-                ColumnRelationInfo mappedByColumnRelationInfo = entityInfo.getColumnInfo(mappedBy).getColumnRelationInfo();
-                entityRelationSelectInfo.addForeignKeyColumnInfo(entityInfo.getTableName(), mappedByColumnRelationInfo.getForeignKeyColumnInfoList());
-            }
-        } else {
-            if (StringUtils.isBlank(mappedBy)) {
-                entityRelationSelectInfo.addForeignKeyColumnInfo(entityInfo.getTableName(), columnRelationInfo.getInverseForeignKeyColumnInfoList());
-            } else {
-                ColumnRelationInfo mappedByColumnRelationInfo = entityInfo.getColumnInfo(mappedBy).getColumnRelationInfo();
-                entityRelationSelectInfo.addForeignKeyColumnInfo(entityInfo.getTableName(), mappedByColumnRelationInfo.getInverseForeignKeyColumnInfoList());
-            }
-        }*/
         return entityRelationSelectInfo;
     }
 

@@ -1,6 +1,7 @@
 package com.lc.mybatisx.template.select;
 
-import com.lc.mybatisx.annotation.*;
+import com.lc.mybatisx.annotation.Id;
+import com.lc.mybatisx.annotation.ManyToMany;
 import com.lc.mybatisx.model.*;
 import com.lc.mybatisx.utils.XmlUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -193,23 +194,7 @@ public class ResultMapOrTemplateHandler {
     }
 
     private Integer getRelationType(ColumnRelationInfo columnRelationInfo) {
-        OneToOne oneToOne = columnRelationInfo.getOneToOne();
-        OneToMany oneToMany = columnRelationInfo.getOneToMany();
-        ManyToOne manyToOne = columnRelationInfo.getManyToOne();
-        ManyToMany manyToMany = columnRelationInfo.getManyToMany();
-        if (oneToOne != null) {
-            return 1;
-        }
-        if (oneToMany != null) {
-            return 2;
-        }
-        if (manyToOne != null) {
-            return 1;
-        }
-        if (manyToMany != null) {
-            return 2;
-        }
-        return null;
+        return ResultMapHelper.getRelationType(columnRelationInfo);
     }
 
     /**

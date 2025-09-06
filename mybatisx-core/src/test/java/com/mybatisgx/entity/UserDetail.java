@@ -1,9 +1,6 @@
 package com.mybatisgx.entity;
 
-import com.lc.mybatisx.annotation.Entity;
-import com.lc.mybatisx.annotation.JoinColumn;
-import com.lc.mybatisx.annotation.OneToOne;
-import com.lc.mybatisx.annotation.Table;
+import com.lc.mybatisx.annotation.*;
 
 @Entity
 @Table(name = "user_detail")
@@ -13,6 +10,7 @@ public class UserDetail extends BaseEntity<Long> {
 
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @Fetch
     private User user;
 
     public String getCode() {

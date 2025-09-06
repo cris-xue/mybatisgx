@@ -14,21 +14,17 @@ import java.util.List;
 public class ColumnRelationInfo {
 
     /**
-     * 关系维护放
+     * 关系维护方
      */
     private String mappedBy;
     /**
-     * 获取方式
+     * 获取模式
      */
-    private String fetch;
+    private FetchMode fetchMode;
     /**
      * 数据抓取大小
      */
     private String fetchSize;
-    /**
-     * 加载策略
-     */
-    private LoadStrategy loadStrategy;
     /**
      * 当前实体外键字段列表
      */
@@ -65,6 +61,10 @@ public class ColumnRelationInfo {
      * 关联表
      */
     private JoinTable joinTable;
+    /**
+     * 抓取方式
+     */
+    private Fetch fetch;
 
     public String getMappedBy() {
         return mappedBy;
@@ -74,12 +74,12 @@ public class ColumnRelationInfo {
         this.mappedBy = mappedBy;
     }
 
-    public String getFetch() {
-        return fetch;
+    public FetchMode getFetchMode() {
+        return fetchMode;
     }
 
-    public void setFetch(String fetch) {
-        this.fetch = fetch;
+    public void setFetchMode(FetchMode fetchMode) {
+        this.fetchMode = fetchMode;
     }
 
     public String getFetchSize() {
@@ -88,14 +88,6 @@ public class ColumnRelationInfo {
 
     public void setFetchSize(String fetchSize) {
         this.fetchSize = fetchSize;
-    }
-
-    public LoadStrategy getLoadStrategy() {
-        return loadStrategy;
-    }
-
-    public void setLoadStrategy(LoadStrategy loadStrategy) {
-        this.loadStrategy = loadStrategy;
     }
 
     public List<ForeignKeyColumnInfo> getForeignKeyColumnInfoList() {
@@ -119,12 +111,9 @@ public class ColumnRelationInfo {
     }
 
     public void setOneToOne(OneToOne oneToOne) {
-        this.oneToOne = oneToOne;
         if (oneToOne != null) {
+            this.oneToOne = oneToOne;
             this.mappedBy = oneToOne.mappedBy();
-            this.fetch = oneToOne.fetch().name();
-            this.fetchSize = oneToOne.fetchSize() == 0 ? null : Integer.valueOf(oneToOne.fetchSize()).toString();
-            this.loadStrategy = oneToOne.loadStrategy();
         }
     }
 
@@ -133,12 +122,9 @@ public class ColumnRelationInfo {
     }
 
     public void setOneToMany(OneToMany oneToMany) {
-        this.oneToMany = oneToMany;
         if (oneToMany != null) {
+            this.oneToMany = oneToMany;
             this.mappedBy = oneToMany.mappedBy();
-            this.fetch = oneToMany.fetch().name();
-            this.fetchSize = oneToMany.fetchSize() == 0 ? null : Integer.valueOf(oneToMany.fetchSize()).toString();
-            this.loadStrategy = oneToMany.loadStrategy();
         }
     }
 
@@ -147,12 +133,9 @@ public class ColumnRelationInfo {
     }
 
     public void setManyToOne(ManyToOne manyToOne) {
-        this.manyToOne = manyToOne;
         if (manyToOne != null) {
+            this.manyToOne = manyToOne;
             this.mappedBy = manyToOne.mappedBy();
-            this.fetch = manyToOne.fetch().name();
-            this.fetchSize = manyToOne.fetchSize() == 0 ? null : Integer.valueOf(manyToOne.fetchSize()).toString();
-            this.loadStrategy = manyToOne.loadStrategy();
         }
     }
 
@@ -161,12 +144,9 @@ public class ColumnRelationInfo {
     }
 
     public void setManyToMany(ManyToMany manyToMany) {
-        this.manyToMany = manyToMany;
         if (manyToMany != null) {
+            this.manyToMany = manyToMany;
             this.mappedBy = manyToMany.mappedBy();
-            this.fetch = manyToMany.fetch().name();
-            this.fetchSize = manyToMany.fetchSize() == 0 ? null : Integer.valueOf(manyToMany.fetchSize()).toString();
-            this.loadStrategy = manyToMany.loadStrategy();
         }
     }
 
@@ -192,5 +172,15 @@ public class ColumnRelationInfo {
 
     public void setJoinTable(JoinTable joinTable) {
         this.joinTable = joinTable;
+    }
+
+    public Fetch getFetch() {
+        return fetch;
+    }
+
+    public void setFetch(Fetch fetch) {
+        this.fetch = fetch;
+        this.fetchMode = fetch.value();
+        this.fetchSize = fetch.size() == 0 ? null : Integer.valueOf(fetch.size()).toString();
     }
 }

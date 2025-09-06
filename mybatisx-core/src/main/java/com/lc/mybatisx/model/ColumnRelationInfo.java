@@ -78,6 +78,14 @@ public class ColumnRelationInfo {
         this.mappedBy = mappedBy;
     }
 
+    public String getFetchType() {
+        return fetchType;
+    }
+
+    public void setFetchType(String fetchType) {
+        this.fetchType = fetchType;
+    }
+
     public FetchMode getFetchMode() {
         return fetchMode;
     }

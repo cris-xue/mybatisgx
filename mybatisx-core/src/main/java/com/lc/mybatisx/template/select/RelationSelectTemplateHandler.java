@@ -32,8 +32,7 @@ public class RelationSelectTemplateHandler {
         Map<String, XNode> totalXNodeMap = new HashMap();
         Map<String, EntityRelationSelectInfo> entityRelationSelectInfoMap = mapperInfo.getEntityRelationSelectInfoMap();
         entityRelationSelectInfoMap.forEach((select, entityRelationSelectInfo) -> {
-            String sql = this.buildJoinSelect(entityRelationSelectInfo);
-            Map<String, XNode> entityRelationSelectXNodeMap = this.buildSelect(entityRelationSelectInfo, sql);
+            Map<String, XNode> entityRelationSelectXNodeMap = this.buildSelect(entityRelationSelectInfo);
             if (ObjectUtils.isNotEmpty(entityRelationSelectXNodeMap)) {
                 totalXNodeMap.putAll(entityRelationSelectXNodeMap);
             }
@@ -41,8 +40,8 @@ public class RelationSelectTemplateHandler {
         return totalXNodeMap;
     }
 
-    private Map<String, XNode> buildSelect(EntityRelationSelectInfo entityRelationSelectInfo, String sql) {
-        String selectXmlString = this.buildDocumentString(entityRelationSelectInfo, sql);
+    private Map<String, XNode> buildSelect(EntityRelationSelectInfo entityRelationSelectInfo) {
+        String selectXmlString = this.buildDocumentString(entityRelationSelectInfo);
         Map<String, XNode> entityRelationSelectXNodeMap = new HashMap();
         if (StringUtils.isNotBlank(selectXmlString)) {
             logger.info("auto relation select sql: \n{}", selectXmlString);
@@ -51,6 +50,86 @@ public class RelationSelectTemplateHandler {
             entityRelationSelectXNodeMap.put(entityRelationSelectInfo.getId(), xNode);
         }
         return entityRelationSelectXNodeMap;
+    }
+
+    private String buildDocumentString(EntityRelationSelectInfo entityRelationSelectInfo) {
+        String selectSql = this.buildJoinSelect(entityRelationSelectInfo);
+        Document document = DocumentHelper.createDocument();
+        Element mapperElement = document.addElement("mapper");
+        Element selectElement = RelationSelectHelper.buildSelectElement(mapperElement, entityRelationSelectInfo, selectSql);
+
+        ColumnRelationInfo columnRelationInfo = entityRelationSelectInfo.getColumnInfo().getColumnRelationInfo();
+        ManyToMany manyToMany = columnRelationInfo.getManyToMany();
+        if (manyToMany == null) {
+            Expression whereCondition = this.buildSelectWhereCondition(entityRelationSelectInfo);
+            RelationSelectHelper.buildWhereElement(selectElement, whereCondition);
+            return document.asXML();
+        } else {
+            Expression whereCondition = this.buildManyToManySelectWhereCondition(entityRelationSelectInfo);
+            RelationSelectHelper.buildWhereElement(selectElement, whereCondition);
+            return document.asXML();
+        }
+    }
+
+    private Expression buildSelectWhereCondition(EntityRelationSelectInfo entityRelationSelectInfo) {
+        EntityInfo relationEntityInfo = entityRelationSelectInfo.getEntityInfo();
+        ColumnRelationInfo columnRelationInfo = entityRelationSelectInfo.getColumnInfo().getColumnRelationInfo();
+        String mappedBy = columnRelationInfo.getMappedBy();
+        if (StringUtils.isNotBlank(mappedBy)) {
+            ColumnInfo mappedByColumnInfo = relationEntityInfo.getColumnInfo(mappedBy);
+            ColumnRelationInfo mappedByColumnRelationInfo = mappedByColumnInfo.getColumnRelationInfo();
+            List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedByColumnRelationInfo.getInverseForeignKeyColumnInfoList();
+            Expression whereCondition = null;
+            for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
+                String leftEq = String.format("%s.%s", relationEntityInfo.getTableName(), inverseForeignKeyColumnInfo.getName());
+                String rightEq = inverseForeignKeyColumnInfo.getName();
+                EqualsTo eqCondition = ConditionBuilder.eq(leftEq, String.format("#{%s}", rightEq));
+                whereCondition = this.buildWhereCondition(whereCondition, eqCondition);
+            }
+            return whereCondition;
+        } else {
+            List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnRelationInfo.getInverseForeignKeyColumnInfoList();
+            Expression whereCondition = null;
+            for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
+                String leftEq = String.format("%s.%s", relationEntityInfo.getTableName(), inverseForeignKeyColumnInfo.getReferencedColumnName());
+                String rightEq = inverseForeignKeyColumnInfo.getName();
+                EqualsTo eqCondition = ConditionBuilder.eq(leftEq, String.format("#{%s}", rightEq));
+                whereCondition = this.buildWhereCondition(whereCondition, eqCondition);
+            }
+            return whereCondition;
+        }
+    }
+
+    private Expression buildManyToManySelectWhereCondition(EntityRelationSelectInfo entityRelationSelectInfo) {
+        EntityInfo relationEntityInfo = entityRelationSelectInfo.getEntityInfo();
+        String middleTableName = entityRelationSelectInfo.getMiddleTableName();
+        ColumnRelationInfo columnRelationInfo = entityRelationSelectInfo.getColumnInfo().getColumnRelationInfo();
+        String mappedBy = columnRelationInfo.getMappedBy();
+        if (StringUtils.isNotBlank(mappedBy)) {
+            // user_role left join role on() user_role.role_id = role.id where user_role.user_id = user.id
+            ColumnInfo mappedByColumnInfo = relationEntityInfo.getColumnInfo(mappedBy);
+            ColumnRelationInfo mappedByColumnRelationInfo = mappedByColumnInfo.getColumnRelationInfo();
+            List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedByColumnRelationInfo.getInverseForeignKeyColumnInfoList();
+            Expression whereCondition = null;
+            for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
+                String leftEq = String.format("%s.%s", middleTableName, inverseForeignKeyColumnInfo.getName());
+                String rightEq = inverseForeignKeyColumnInfo.getName();
+                EqualsTo eqCondition = ConditionBuilder.eq(leftEq, String.format("#{%s}", rightEq));
+                whereCondition = this.buildWhereCondition(whereCondition, eqCondition);
+            }
+            return whereCondition;
+        } else {
+            // user_role left join user on() user_role.user_id = user.id where user_role.role_id = role.id
+            List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = columnRelationInfo.getForeignKeyColumnInfoList();
+            Expression whereCondition = null;
+            for (ForeignKeyColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
+                String leftEq = String.format("%s.%s", middleTableName, foreignKeyColumnInfo.getName());
+                String rightEq = foreignKeyColumnInfo.getName();
+                EqualsTo eqCondition = ConditionBuilder.eq(leftEq, String.format("#{%s}", rightEq));
+                whereCondition = this.buildWhereCondition(whereCondition, eqCondition);
+            }
+            return whereCondition;
+        }
     }
 
     /**
@@ -67,106 +146,13 @@ public class RelationSelectTemplateHandler {
         }
     }
 
-    private String buildDocumentString(EntityRelationSelectInfo entityRelationSelectInfo, String sql) {
-        Document document = DocumentHelper.createDocument();
-        Element mapperElement = document.addElement("mapper");
-        Element selectElement = RelationSelectHelper.buildSelectElement(mapperElement, entityRelationSelectInfo);
-
-        ColumnRelationInfo columnRelationInfo = entityRelationSelectInfo.getColumnInfo().getColumnRelationInfo();
-        ManyToMany manyToMany = columnRelationInfo.getManyToMany();
-        if (manyToMany == null) {
-            this.buildSelectSqlXNode(selectElement, entityRelationSelectInfo, sql);
-            return document.asXML();
-        } else {
-            this.buildManyToManySelectSqlXNode(selectElement, entityRelationSelectInfo, sql);
-            return document.asXML();
-        }
-    }
-
-    private void buildSelectSqlXNode(Element selectElement, EntityRelationSelectInfo entityRelationSelectInfo, String sql) {
-        selectElement.addText(sql);
-        Element whereElement = selectElement.addElement("where");
-
-        EntityInfo relationEntityInfo = entityRelationSelectInfo.getEntityInfo();
-        ColumnRelationInfo columnRelationInfo = entityRelationSelectInfo.getColumnInfo().getColumnRelationInfo();
-        String mappedBy = columnRelationInfo.getMappedBy();
-        if (StringUtils.isNotBlank(mappedBy)) {
-            ColumnInfo mappedByColumnInfo = relationEntityInfo.getColumnInfo(mappedBy);
-            ColumnRelationInfo mappedByColumnRelationInfo = mappedByColumnInfo.getColumnRelationInfo();
-            List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedByColumnRelationInfo.getInverseForeignKeyColumnInfoList();
-            Expression whereCondition = null;
-            for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
-                String leftEq = String.format("%s.%s", relationEntityInfo.getTableName(), inverseForeignKeyColumnInfo.getName());
-                String rightEq = inverseForeignKeyColumnInfo.getName();
-                EqualsTo eqCondition = ConditionBuilder.eq(leftEq, String.format("#{%s}", rightEq));
-                // 将表达式添加到条件树
-                if (whereCondition == null) {
-                    whereCondition = eqCondition;
-                } else {
-                    whereCondition = new AndExpression(whereCondition, eqCondition);
-                }
-            }
-            whereElement.addText(whereCondition.toString());
-        } else {
-            List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnRelationInfo.getInverseForeignKeyColumnInfoList();
-            Expression whereCondition = null;
-            for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
-                String leftEq = String.format("%s.%s", relationEntityInfo.getTableName(), inverseForeignKeyColumnInfo.getReferencedColumnName());
-                String rightEq = inverseForeignKeyColumnInfo.getName();
-                EqualsTo eqCondition = ConditionBuilder.eq(leftEq, String.format("#{%s}", rightEq));
-                // 将表达式添加到条件树
-                if (whereCondition == null) {
-                    whereCondition = eqCondition;
-                } else {
-                    whereCondition = new AndExpression(whereCondition, eqCondition);
-                }
-            }
-            whereElement.addText(whereCondition.toString());
-        }
-    }
-
-    private void buildManyToManySelectSqlXNode(Element selectElement, EntityRelationSelectInfo entityRelationSelectInfo, String sql) {
-        selectElement.addText(sql);
-        Element whereElement = selectElement.addElement("where");
-
-        EntityInfo relationEntityInfo = entityRelationSelectInfo.getEntityInfo();
-        String middleTableName = entityRelationSelectInfo.getMiddleTableName();
-        ColumnRelationInfo columnRelationInfo = entityRelationSelectInfo.getColumnInfo().getColumnRelationInfo();
-        String mappedBy = columnRelationInfo.getMappedBy();
-        if (StringUtils.isNotBlank(mappedBy)) {
-            // user_role left join role on() user_role.role_id = role.id where user_role.user_id = user.id
-            ColumnInfo mappedByColumnInfo = relationEntityInfo.getColumnInfo(mappedBy);
-            ColumnRelationInfo mappedByColumnRelationInfo = mappedByColumnInfo.getColumnRelationInfo();
-            List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedByColumnRelationInfo.getInverseForeignKeyColumnInfoList();
-            Expression whereCondition = null;
-            for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
-                String leftEq = String.format("%s.%s", middleTableName, inverseForeignKeyColumnInfo.getName());
-                String rightEq = inverseForeignKeyColumnInfo.getName();
-                EqualsTo eqCondition = ConditionBuilder.eq(leftEq, String.format("#{%s}", rightEq));
-                // 将表达式添加到条件树
-                if (whereCondition == null) {
-                    whereCondition = eqCondition;
-                } else {
-                    whereCondition = new AndExpression(whereCondition, eqCondition);
-                }
-            }
-            whereElement.addText(whereCondition.toString());
-        } else {
-            // user_role left join user on() user_role.user_id = user.id where user_role.role_id = role.id
-            List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = columnRelationInfo.getForeignKeyColumnInfoList();
-            Expression whereCondition = null;
-            for (ForeignKeyColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
-                String leftEq = String.format("%s.%s", middleTableName, foreignKeyColumnInfo.getName());
-                String rightEq = foreignKeyColumnInfo.getName();
-                EqualsTo eqCondition = ConditionBuilder.eq(leftEq, String.format("#{%s}", rightEq));
-                // 将表达式添加到条件树
-                if (whereCondition == null) {
-                    whereCondition = eqCondition;
-                } else {
-                    whereCondition = new AndExpression(whereCondition, eqCondition);
-                }
-            }
-            whereElement.addText(whereCondition.toString());
-        }
+    /**
+     * 将表达式添加到条件树
+     * @param whereCondition
+     * @param eqCondition
+     * @return
+     */
+    private Expression buildWhereCondition(Expression whereCondition, EqualsTo eqCondition) {
+        return whereCondition == null ? eqCondition : new AndExpression(whereCondition, eqCondition);
     }
 }

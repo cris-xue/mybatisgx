@@ -1,9 +1,10 @@
-package com.lc.mybatisx.template;
+package com.lc.mybatisx.template.select;
 
 import com.lc.mybatisx.model.EntityInfo;
 import com.lc.mybatisx.model.MapperInfo;
 import com.lc.mybatisx.model.MethodInfo;
 import com.lc.mybatisx.model.ResultMapInfo;
+import com.lc.mybatisx.template.WhereTemplateHandler;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;

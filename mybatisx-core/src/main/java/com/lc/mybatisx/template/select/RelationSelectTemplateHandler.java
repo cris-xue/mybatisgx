@@ -1,7 +1,8 @@
-package com.lc.mybatisx.template;
+package com.lc.mybatisx.template.select;
 
 import com.lc.mybatisx.annotation.ManyToMany;
 import com.lc.mybatisx.model.*;
+import com.lc.mybatisx.template.ConditionBuilder;
 import com.lc.mybatisx.utils.XmlUtils;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;

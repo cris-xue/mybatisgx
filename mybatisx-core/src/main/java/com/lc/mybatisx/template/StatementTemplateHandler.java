@@ -4,6 +4,7 @@ import com.lc.mybatisx.context.MapperInfoContextHolder;
 import com.lc.mybatisx.ext.MybatisgxXMLMapperBuilder;
 import com.lc.mybatisx.model.MapperInfo;
 import com.lc.mybatisx.model.MethodInfo;
+import com.lc.mybatisx.template.select.SelectTemplateHandler;
 import com.lc.mybatisx.utils.FreeMarkerUtils;
 import com.lc.mybatisx.utils.XmlUtils;
 import freemarker.template.Template;

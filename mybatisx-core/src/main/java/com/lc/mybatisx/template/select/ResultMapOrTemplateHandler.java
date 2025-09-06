@@ -155,7 +155,7 @@ public class ResultMapOrTemplateHandler {
         resultMapAssociationElement.addAttribute("column", this.getColumn(parentEntityInfo, resultMapRelationInfo));
         resultMapAssociationElement.addAttribute("javaType", List.class.getName());
         resultMapAssociationElement.addAttribute("ofType", columnInfo.getJavaTypeName());
-        resultMapAssociationElement.addAttribute("fetchType", columnRelationInfo.getFetch().toLowerCase());
+        resultMapAssociationElement.addAttribute("fetchType", columnRelationInfo.getFetchType());
         resultMapAssociationElement.addAttribute("select", resultMapRelationInfo.getSelect());
         // resultMapAssociationElement.addAttribute("resultMap", resultMapAssociationInfo.getResultMapId());
         return resultMapAssociationElement;
@@ -177,7 +177,7 @@ public class ResultMapOrTemplateHandler {
         resultMapCollectionElement.addAttribute("column", this.getColumn(parentEntityInfo, resultMapRelationInfo));
         resultMapCollectionElement.addAttribute("javaType", columnInfo.getCollectionTypeName());
         resultMapCollectionElement.addAttribute("ofType", columnInfo.getJavaTypeName());
-        resultMapCollectionElement.addAttribute("fetchType", columnRelationInfo.getFetch().toLowerCase());
+        resultMapCollectionElement.addAttribute("fetchType", columnRelationInfo.getFetchType());
         resultMapCollectionElement.addAttribute("select", resultMapRelationInfo.getSelect());
         // resultMapAssociationElement.addAttribute("resultMap", resultMapAssociationInfo.getResultMapId());
         return resultMapCollectionElement;

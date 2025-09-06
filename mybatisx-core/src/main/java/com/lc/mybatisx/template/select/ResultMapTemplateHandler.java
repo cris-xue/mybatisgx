@@ -166,7 +166,7 @@ public class ResultMapTemplateHandler {
         resultMapAssociationElement.addAttribute("property", columnInfo.getJavaColumnName());
         resultMapAssociationElement.addAttribute("column", this.getColumn(parentEntityInfo, resultMapRelationInfo));
         resultMapAssociationElement.addAttribute("javaType", columnInfo.getJavaTypeName());
-        resultMapAssociationElement.addAttribute("fetchType", columnRelationInfo.getFetch().toLowerCase());
+        resultMapAssociationElement.addAttribute("fetchType", columnRelationInfo.getFetchType());
         resultMapAssociationElement.addAttribute("select", resultMapRelationInfo.getSelect());
         resultMapAssociationElement.addAttribute("relationProperty", "{id=userId}");
         // resultMapAssociationElement.addAttribute("resultMap", resultMapAssociationInfo.getResultMapId());
@@ -189,7 +189,7 @@ public class ResultMapTemplateHandler {
         resultMapCollectionElement.addAttribute("column", this.getColumn(parentEntityInfo, resultMapRelationInfo));
         resultMapCollectionElement.addAttribute("javaType", columnInfo.getCollectionTypeName());
         resultMapCollectionElement.addAttribute("ofType", columnInfo.getJavaTypeName());
-        resultMapCollectionElement.addAttribute("fetchType", columnRelationInfo.getFetch().toLowerCase());
+        resultMapCollectionElement.addAttribute("fetchType", columnRelationInfo.getFetchType());
         resultMapCollectionElement.addAttribute("select", resultMapRelationInfo.getSelect());
         // resultMapAssociationElement.addAttribute("resultMap", resultMapAssociationInfo.getResultMapId());
         return resultMapCollectionElement;

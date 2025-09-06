@@ -42,14 +42,7 @@ public class RelationSelectTemplateHandler {
     }
 
     private Map<String, XNode> buildSelect(EntityRelationSelectInfo entityRelationSelectInfo, String sql) {
-        ColumnRelationInfo columnRelationInfo = entityRelationSelectInfo.getColumnInfo().getColumnRelationInfo();
-        String selectXmlString;
-        ManyToMany manyToMany = columnRelationInfo.getManyToMany();
-        if (manyToMany == null) {
-            selectXmlString = this.buildOneToOne(entityRelationSelectInfo, sql);
-        } else {
-            selectXmlString = this.buildManyToMany(entityRelationSelectInfo, sql);
-        }
+        String selectXmlString = this.buildDocumentString(entityRelationSelectInfo, sql);
         Map<String, XNode> entityRelationSelectXNodeMap = new HashMap();
         if (StringUtils.isNotBlank(selectXmlString)) {
             logger.info("auto relation select sql: \n{}", selectXmlString);
@@ -74,34 +67,20 @@ public class RelationSelectTemplateHandler {
         }
     }
 
-    private String buildOneToOne(EntityRelationSelectInfo entityRelationSelectInfo, String sql) {
+    private String buildDocumentString(EntityRelationSelectInfo entityRelationSelectInfo, String sql) {
         Document document = DocumentHelper.createDocument();
         Element mapperElement = document.addElement("mapper");
-        Element selectElement = mapperElement.addElement("select");
-        selectElement.addAttribute("id", entityRelationSelectInfo.getId());
-        selectElement.addAttribute("resultMap", entityRelationSelectInfo.getResultMapId());
-        ColumnInfo columnInfo = entityRelationSelectInfo.getColumnInfo();
-        String fetchSize = columnInfo.getColumnRelationInfo().getFetchSize();
-        if (StringUtils.isNotBlank(fetchSize)) {
-            selectElement.addAttribute("fetchSize", fetchSize);
-        }
-        this.buildSelectSqlXNode(selectElement, entityRelationSelectInfo, sql);
-        return document.asXML();
-    }
+        Element selectElement = RelationSelectHelper.buildSelectElement(mapperElement, entityRelationSelectInfo);
 
-    private String buildManyToMany(EntityRelationSelectInfo entityRelationSelectInfo, String sql) {
-        Document document = DocumentHelper.createDocument();
-        Element mapperElement = document.addElement("mapper");
-        Element selectElement = mapperElement.addElement("select");
-        ColumnInfo columnInfo = entityRelationSelectInfo.getColumnInfo();
-        selectElement.addAttribute("id", entityRelationSelectInfo.getId());
-        selectElement.addAttribute("resultMap", entityRelationSelectInfo.getResultMapId());
-        String fetchSize = columnInfo.getColumnRelationInfo().getFetchSize();
-        if (StringUtils.isNotBlank(fetchSize)) {
-            selectElement.addAttribute("fetchSize", fetchSize);
+        ColumnRelationInfo columnRelationInfo = entityRelationSelectInfo.getColumnInfo().getColumnRelationInfo();
+        ManyToMany manyToMany = columnRelationInfo.getManyToMany();
+        if (manyToMany == null) {
+            this.buildSelectSqlXNode(selectElement, entityRelationSelectInfo, sql);
+            return document.asXML();
+        } else {
+            this.buildManyToManySelectSqlXNode(selectElement, entityRelationSelectInfo, sql);
+            return document.asXML();
         }
-        this.buildManyToManySelectSqlXNode(selectElement, entityRelationSelectInfo, sql);
-        return document.asXML();
     }
 
     private void buildSelectSqlXNode(Element selectElement, EntityRelationSelectInfo entityRelationSelectInfo, String sql) {

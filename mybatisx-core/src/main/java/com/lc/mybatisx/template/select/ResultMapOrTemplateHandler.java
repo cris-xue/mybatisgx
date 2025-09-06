@@ -41,8 +41,7 @@ public class ResultMapOrTemplateHandler {
     }
 
     private void addColumnElement(Element resultMapElement, List<ColumnInfo> columnInfoList) {
-        for (int i = 0; i < columnInfoList.size(); i++) {
-            ColumnInfo columnInfo = columnInfoList.get(i);
+        for (ColumnInfo columnInfo : columnInfoList) {
             Id id = columnInfo.getId();
             if (id != null) {
                 ResultMapHelper.idColumnElement(resultMapElement, columnInfo);
@@ -52,14 +51,18 @@ public class ResultMapOrTemplateHandler {
             if (columnRelationInfo == null) {
                 ResultMapHelper.resultColumnElement(resultMapElement, columnInfo);
             } else {
-                ManyToMany manyToMany = columnRelationInfo.getManyToMany();
-                String mappedBy = columnRelationInfo.getMappedBy();
-                if (manyToMany == null && StringUtils.isBlank(mappedBy)) {
-                    List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnRelationInfo.getInverseForeignKeyColumnInfoList();
-                    for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
-                        ResultMapHelper.resultColumnElement(resultMapElement, inverseForeignKeyColumnInfo);
-                    }
-                }
+                this.addColumnRelationElement(resultMapElement, columnRelationInfo);
+            }
+        }
+    }
+
+    private void addColumnRelationElement(Element resultMapElement, ColumnRelationInfo columnRelationInfo) {
+        ManyToMany manyToMany = columnRelationInfo.getManyToMany();
+        String mappedBy = columnRelationInfo.getMappedBy();
+        if (manyToMany == null && StringUtils.isBlank(mappedBy)) {
+            List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnRelationInfo.getInverseForeignKeyColumnInfoList();
+            for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
+                ResultMapHelper.resultColumnElement(resultMapElement, inverseForeignKeyColumnInfo);
             }
         }
     }
@@ -157,7 +160,6 @@ public class ResultMapOrTemplateHandler {
                 List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedByColumnRelationInfo.getInverseForeignKeyColumnInfoList();
                 for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
                     ColumnInfo parentEntityColumnInfo = parentEntityInfo.getColumnInfo(inverseForeignKeyColumnInfo.getReferencedColumnName());
-                    // column.put(inverseForeignKeyColumnInfo.getName(), inverseForeignKeyColumnInfo.getReferencedColumnName());
                     column.put(inverseForeignKeyColumnInfo.getName(), parentEntityColumnInfo.getDbColumnNameAlias());
                     column.put("nested_select_collection", parentEntityColumnInfo.getDbColumnNameAlias());
                 }
@@ -165,7 +167,6 @@ public class ResultMapOrTemplateHandler {
                 List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnRelationInfo.getInverseForeignKeyColumnInfoList();
                 for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
                     ColumnInfo inverseForeignKeyRefColumnInfo = entityInfo.getDbColumnInfo(inverseForeignKeyColumnInfo.getReferencedColumnName());
-                    // column.put(inverseForeignKeyColumnInfo.getName(), inverseForeignKeyColumnInfo.getName());
                     column.put(inverseForeignKeyColumnInfo.getName(), inverseForeignKeyColumnInfo.getNameAlias());
                     column.put("nested_select_collection", inverseForeignKeyColumnInfo.getNameAlias());
                 }
@@ -177,7 +178,6 @@ public class ResultMapOrTemplateHandler {
                 ColumnRelationInfo mappedByColumnRelationInfo = mappedByColumnInfo.getColumnRelationInfo();
                 List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedByColumnRelationInfo.getInverseForeignKeyColumnInfoList();
                 for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
-                    // column.put(inverseForeignKeyColumnInfo.getName(), inverseForeignKeyColumnInfo.getReferencedColumnName());
                     ColumnInfo parentEntityColumnInfo = parentEntityInfo.getColumnInfo(inverseForeignKeyColumnInfo.getReferencedColumnName());
                     column.put(inverseForeignKeyColumnInfo.getName(), parentEntityColumnInfo.getDbColumnNameAlias());
                     column.put("nested_select_collection", parentEntityColumnInfo.getDbColumnNameAlias());
@@ -185,7 +185,6 @@ public class ResultMapOrTemplateHandler {
             } else {
                 List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = columnRelationInfo.getForeignKeyColumnInfoList();
                 for (ForeignKeyColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
-                    // column.put(foreignKeyColumnInfo.getName(), foreignKeyColumnInfo.getReferencedColumnName());
                     ColumnInfo parentEntityColumnInfo = parentEntityInfo.getColumnInfo(foreignKeyColumnInfo.getReferencedColumnName());
                     column.put(foreignKeyColumnInfo.getName(), parentEntityColumnInfo.getDbColumnNameAlias());
                     column.put("nested_select_collection", parentEntityColumnInfo.getDbColumnNameAlias());

@@ -39,7 +39,7 @@ public class EntityInfo {
     /**
      * 数据库字段和java字段映射信息，如：user_name=userName
      */
-    private Map<String, String> dbColumnInfoMap = new LinkedHashMap();
+    private Map<String, String> tableColumnInfoMap = new LinkedHashMap();
     /**
      * id字段列表
      */
@@ -101,43 +101,6 @@ public class EntityInfo {
         this.columnInfoList = columnInfoList;
         EntityColumn entityColumn = new EntityColumn();
         entityColumn.process(columnInfoList);
-
-        /*for (ColumnInfo columnInfo : columnInfoList) {
-            Id id = columnInfo.getId();
-            if (id != null) {
-                idColumnInfoList.add(columnInfo);
-            }
-            Lock lock = columnInfo.getLock();
-            if (lock != null) {
-                lockColumnInfo = columnInfo;
-            }
-            LogicDelete logicDelete = columnInfo.getLogicDelete();
-            if (logicDelete != null) {
-                logicDeleteColumnInfo = columnInfo;
-            }
-            GenerateValueHandler generateValueHandler = columnInfo.getGenerateValueHandler();
-            if (id != null || generateValueHandler != null) {
-                generateValueColumnInfoList.add(columnInfo);
-            }
-
-            ColumnRelationInfo columnRelationInfo = columnInfo.getColumnRelationInfo();
-            if (columnRelationInfo != null) {
-                relationColumnInfoList.add(columnInfo);
-            }
-
-            // 1、字段不存在关联实体为表字段
-            // 2、存在关联实体并且是关系维护方才是表字段【多对多关联字段在中间表，所以实体中是不存在表字段的】
-            if (columnRelationInfo == null) {
-                tableColumnInfoList.add(columnInfo);
-            } else {
-                ManyToMany manyToMany = columnRelationInfo.getManyToMany();
-                String mappedBy = columnRelationInfo.getMappedBy();
-                if (manyToMany == null && StringUtils.isBlank(mappedBy)) {
-                    tableColumnInfoList.add(columnInfo);
-                }
-            }
-            columnInfoMap.put(columnInfo.getJavaColumnName(), columnInfo);
-        }*/
     }
 
     public Map<String, ColumnInfo> getColumnInfoMap() {
@@ -153,7 +116,7 @@ public class EntityInfo {
     }
 
     public ColumnInfo getDbColumnInfo(String dbColumnName) {
-        String javaColumnName = this.dbColumnInfoMap.get(dbColumnName);
+        String javaColumnName = this.tableColumnInfoMap.get(dbColumnName);
         return this.getColumnInfo(javaColumnName);
     }
 
@@ -233,15 +196,22 @@ public class EntityInfo {
 
                 // 1、字段不存在关联实体为表字段
                 // 2、存在关联实体并且是关系维护方才是表字段【多对多关联字段在中间表，所以实体中是不存在表字段的】
-                NonPersistent nonPersistent = columnInfo.getNonPersistent();
-                if (columnRelationInfo == null && nonPersistent == null) {
-                    tableColumnInfoList.add(columnInfo);
+                ColumnInfo tableColumnInfo = null;
+                if (columnRelationInfo == null) {
+                    NonPersistent nonPersistent = columnInfo.getNonPersistent();
+                    if (nonPersistent == null) {
+                        tableColumnInfo = columnInfo;
+                    }
                 } else {
                     ManyToMany manyToMany = columnRelationInfo.getManyToMany();
                     String mappedBy = columnRelationInfo.getMappedBy();
                     if (manyToMany == null && StringUtils.isBlank(mappedBy)) {
-                        tableColumnInfoList.add(columnInfo);
+                        tableColumnInfo = columnInfo;
                     }
+                }
+                if (tableColumnInfo != null) {
+                    tableColumnInfoList.add(columnInfo);
+                    tableColumnInfoMap.put(columnInfo.getDbColumnName(), columnInfo.getJavaColumnName());
                 }
                 columnInfoMap.put(columnInfo.getJavaColumnName(), columnInfo);
             }

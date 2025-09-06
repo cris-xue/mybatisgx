@@ -3,7 +3,7 @@ package com.mybatisgx.util;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.lc.mybatisx.context.MybatisxContextLoader;
 import com.lc.mybatisx.ext.MybatisxConfiguration;
-import com.lc.mybatisx.template.CurdTemplateHandler;
+import com.lc.mybatisx.template.StatementTemplateHandler;
 import org.apache.ibatis.logging.stdout.StdOutImpl;
 import org.apache.ibatis.mapping.Environment;
 import org.apache.ibatis.session.SqlSession;
@@ -59,8 +59,8 @@ public class DaoTestUtils {
         mybatisxContextLoader.processDaoClass(daoClassList);
         mybatisxContextLoader.processTemplate();
 
-        CurdTemplateHandler curdTemplateHandler = new CurdTemplateHandler();
-        curdTemplateHandler.curdMethod(mybatisxConfiguration);
+        StatementTemplateHandler statementTemplateHandler = new StatementTemplateHandler();
+        statementTemplateHandler.curdMethod(mybatisxConfiguration);
         return mybatisxConfiguration;
     }
 
@@ -73,5 +73,11 @@ public class DaoTestUtils {
         SqlSessionFactory sqlSessionFactory = new DefaultSqlSessionFactory(mybatisxConfiguration);
         SqlSession sqlSession = sqlSessionFactory.openSession();
         return sqlSession.getMapper(targetDaoclass);
+    }
+
+    public static SqlSession getSqlSession(List<Class<?>> entityClassList, List<Class<?>> daoClassList) {
+        MybatisxConfiguration mybatisxConfiguration = context(entityClassList, daoClassList);
+        SqlSessionFactory sqlSessionFactory = new DefaultSqlSessionFactory(mybatisxConfiguration);
+        return sqlSessionFactory.openSession();
     }
 }

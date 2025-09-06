@@ -32,7 +32,7 @@ public class MybatisgxXMLMapperBuilder extends XMLMapperBuilder {
 
     @Override
     protected void buildStatementFromContext(List<XNode> list) {
-        TemplateHandler.builder(builderAssistant).mapper(list).buildStatement();
+        TemplateHandler.builder(builderAssistant).statement(list).buildStatement();
         super.buildStatementFromContext(list);
     }
 

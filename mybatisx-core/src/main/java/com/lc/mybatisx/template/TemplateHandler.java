@@ -61,10 +61,10 @@ public class TemplateHandler {
      */
     private List<String> mergeStatement(MapperBuilderAssistant builderAssistant) {
         String namespace = builderAssistant.getCurrentNamespace();
-        List<String> actionIdList = MapperTemplateContextHolder.getActionIdList(namespace);
+        List<String> statementIdList = MapperTemplateContextHolder.getStatementIdList(namespace);
         Collection<String> mappedStatementNames = builderAssistant.getConfiguration().getMappedStatementNames();
-        return actionIdList.stream()
-                .filter(actionId -> !mappedStatementNames.contains(String.format("%s.%s", namespace, actionId)))
+        return statementIdList.stream()
+                .filter(statementId -> !mappedStatementNames.contains(String.format("%s.%s", namespace, statementId)))
                 .collect(Collectors.toList());
     }
 

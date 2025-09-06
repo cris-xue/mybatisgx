@@ -7,9 +7,9 @@ import com.lc.mybatisx.model.MapperInfo;
 import com.lc.mybatisx.model.MapperTemplateInfo;
 import com.lc.mybatisx.model.handler.EntityInfoHandler;
 import com.lc.mybatisx.model.handler.MapperInfoHandler;
-import com.lc.mybatisx.template.CurdTemplateHandler;
 import com.lc.mybatisx.template.RelationSelectTemplateHandler;
 import com.lc.mybatisx.template.ResultMapTemplateHandler;
+import com.lc.mybatisx.template.StatementTemplateHandler;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.parsing.XNode;
@@ -130,12 +130,12 @@ public class MybatisxContextLoader {
     }
 
     public void processTemplate() {
-        CurdTemplateHandler curdTemplateHandler = new CurdTemplateHandler();
+        StatementTemplateHandler statementTemplateHandler = new StatementTemplateHandler();
         ResultMapTemplateHandler resultMapTemplateHandler = new ResultMapTemplateHandler();
         RelationSelectTemplateHandler relationSelectTemplateHandler = new RelationSelectTemplateHandler();
         List<MapperInfo> mapperInfoList = MapperInfoContextHolder.getMapperInfoList();
-        mapperInfoList.forEach(mapperInfo -> {
-            Map<String, XNode> curdXNodeMap = curdTemplateHandler.execute(mapperInfo);
+        for (MapperInfo mapperInfo : mapperInfoList) {
+            Map<String, XNode> curdXNodeMap = statementTemplateHandler.execute(mapperInfo);
             Map<String, XNode> resultMapXNodeMap = resultMapTemplateHandler.execute(mapperInfo);
             Map<String, XNode> relationSelectXNodeMap = relationSelectTemplateHandler.execute(mapperInfo);
 
@@ -145,7 +145,7 @@ public class MybatisxContextLoader {
             mappingTemplateInfo.setResultMapTemplateMap(resultMapXNodeMap);
             mappingTemplateInfo.setAssociationSelectTemplateMap(relationSelectXNodeMap);
             MapperTemplateContextHolder.set(mappingTemplateInfo);
-        });
+        }
     }
 
     private Resource[] getResources(String basePackage) {

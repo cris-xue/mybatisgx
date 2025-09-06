@@ -22,6 +22,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * 查询sql模板处理
+ * @author ccxuef
+ * @date 2025/9/6 14:05
+ */
 public class SelectSqlTemplateHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(SelectSqlTemplateHandler.class);

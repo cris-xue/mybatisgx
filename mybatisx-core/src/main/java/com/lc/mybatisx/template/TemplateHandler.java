@@ -13,7 +13,7 @@ public class TemplateHandler {
 
     private MapperBuilderAssistant builderAssistant;
     private List<XNode> originResultMapXNodeList = null;
-    private List<XNode> originMapperXNodeList = null;
+    private List<XNode> originStatementXNodeList = null;
 
     private TemplateHandler(MapperBuilderAssistant builderAssistant) {
         this.builderAssistant = builderAssistant;
@@ -31,34 +31,18 @@ public class TemplateHandler {
             resultMapXNodeList.add(xNode);
         }
         originResultMapXNodeList.addAll(resultMapXNodeList);
-        // merge(resultMapXNodeList, actionXNodeList);
         return this;
     }
 
     public TemplateHandler buildStatement() {
-        List<String> statementIdList = mergeMethod(builderAssistant);
+        List<String> statementIdList = mergeStatement(builderAssistant);
         List<XNode> statementList = new ArrayList();
         for (String statementId : statementIdList) {
-            XNode xNode = MapperTemplateContextHolder.getCurdTemplate(builderAssistant.getCurrentNamespace(), statementId);
+            XNode xNode = MapperTemplateContextHolder.getStatementTemplate(builderAssistant.getCurrentNamespace(), statementId);
             statementList.add(xNode);
         }
-        originMapperXNodeList.addAll(statementList);
-        // merge(resultMapXNodeList, actionXNodeList);
+        originStatementXNodeList.addAll(statementList);
         return this;
-    }
-
-    /**
-     * 已经自定义的方法从解析中移除掉
-     *
-     * @param builderAssistant
-     */
-    private List<String> mergeMethod(MapperBuilderAssistant builderAssistant) {
-        String namespace = builderAssistant.getCurrentNamespace();
-        List<String> actionIdList = MapperTemplateContextHolder.getActionIdList(namespace);
-        Collection<String> mappedStatementNames = builderAssistant.getConfiguration().getMappedStatementNames();
-        return actionIdList.stream()
-                .filter(actionId -> !mappedStatementNames.contains(String.format("%s.%s", namespace, actionId)))
-                .collect(Collectors.toList());
     }
 
     private List<String> mergeResultMap(MapperBuilderAssistant builderAssistant) {
@@ -70,18 +54,27 @@ public class TemplateHandler {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * 已经自定义的方法从解析中移除掉
+     *
+     * @param builderAssistant
+     */
+    private List<String> mergeStatement(MapperBuilderAssistant builderAssistant) {
+        String namespace = builderAssistant.getCurrentNamespace();
+        List<String> actionIdList = MapperTemplateContextHolder.getActionIdList(namespace);
+        Collection<String> mappedStatementNames = builderAssistant.getConfiguration().getMappedStatementNames();
+        return actionIdList.stream()
+                .filter(actionId -> !mappedStatementNames.contains(String.format("%s.%s", namespace, actionId)))
+                .collect(Collectors.toList());
+    }
+
     public TemplateHandler resultMap(List<XNode> resultMapXNodeList) {
         this.originResultMapXNodeList = resultMapXNodeList;
         return this;
     }
 
-    public TemplateHandler mapper(List<XNode> curdXNodeList) {
-        this.originMapperXNodeList = curdXNodeList;
+    public TemplateHandler statement(List<XNode> statementXNodeList) {
+        this.originStatementXNodeList = statementXNodeList;
         return this;
-    }
-
-    private void merge(List<XNode> resultMapXNodeList, List<XNode> mapperXNodeList) {
-        originResultMapXNodeList.addAll(resultMapXNodeList);
-        originMapperXNodeList.addAll(mapperXNodeList);
     }
 }

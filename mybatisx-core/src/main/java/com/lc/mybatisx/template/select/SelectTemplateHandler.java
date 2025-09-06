@@ -12,6 +12,11 @@ import org.dom4j.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * 单表查询模板处理
+ * @author ccxuef
+ * @date 2025/9/6 14:05
+ */
 public class SelectTemplateHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(SelectTemplateHandler.class);

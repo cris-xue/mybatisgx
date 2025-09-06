@@ -17,16 +17,6 @@ public class MapperTemplateContextHolder {
         MAPPER_TEMPLATE_MAP.put(mapperTemplateInfo.getNamespace(), mapperTemplateInfo);
     }
 
-    @Deprecated
-    public static List<String> getActionIdList(String namespace) {
-        Set<String> curdActionIdSet = MAPPER_TEMPLATE_MAP.get(namespace).getCurdTemplateMap().keySet();
-        Set<String> associationSelectActionIdSet = MAPPER_TEMPLATE_MAP.get(namespace).getAssociationSelectTemplateMap().keySet();
-        List<String> totalActionIdList = new ArrayList(20);
-        totalActionIdList.addAll(curdActionIdSet);
-        totalActionIdList.addAll(associationSelectActionIdSet);
-        return totalActionIdList;
-    }
-
     public static List<String> getResultMapIdList(String namespace) {
         Set<String> resultMapIdSet = MAPPER_TEMPLATE_MAP.get(namespace).getResultMapTemplateMap().keySet();
         return new ArrayList(resultMapIdSet);
@@ -53,13 +43,6 @@ public class MapperTemplateContextHolder {
         Map<String, XNode> idSubSelectXNodeMap = mapperTemplateInfo.getAssociationSelectTemplateMap();
         idSimpleXNodeMap.putAll(idSubSelectXNodeMap);
         return idSimpleXNodeMap.get(id);
-    }
-
-    @Deprecated
-    public static XNode getAssociationSelectTemplate(String namespace, String id) {
-        MapperTemplateInfo mapperTemplateInfo = MAPPER_TEMPLATE_MAP.get(namespace);
-        Map<String, XNode> idXNodeMap = mapperTemplateInfo.getAssociationSelectTemplateMap();
-        return idXNodeMap.get(id);
     }
 
     public static void remove() {

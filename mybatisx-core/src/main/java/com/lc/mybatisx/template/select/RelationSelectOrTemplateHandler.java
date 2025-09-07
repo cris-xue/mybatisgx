@@ -25,11 +25,11 @@ public class RelationSelectOrTemplateHandler {
             ColumnRelationInfo mappedByColumnRelationInfo = mappedByColumnInfo.getColumnRelationInfo();
             List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedByColumnRelationInfo.getInverseForeignKeyColumnInfoList();
             Expression whereCondition = null;
-            // FROM user_detail WHERE user_detail.user_id = ? or user_detail.user_id = ?
+            // FROM user_detail WHERE user_detail.user_id = #{user.id} or user_detail.user_id = #{user.id}
             for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
                 String leftEq = String.format("%s.%s", relationEntityInfo.getTableName(), inverseForeignKeyColumnInfo.getName());
-                String rightEq = inverseForeignKeyColumnInfo.getName();
-                EqualsTo eqCondition = ConditionBuilder.eq(leftEq, String.format("#{%s.%s}", "item", rightEq));
+                String rightEq = String.format("#{%s.%s}", "item", inverseForeignKeyColumnInfo.getReferencedColumnName());
+                EqualsTo eqCondition = ConditionBuilder.eq(leftEq, rightEq);
                 // 将表达式添加到条件树
                 if (whereCondition == null) {
                     whereCondition = eqCondition;
@@ -38,7 +38,6 @@ public class RelationSelectOrTemplateHandler {
                 }
             }
             return whereCondition;
-            // RelationSelectHelper.buildForeachElement(whereElement, whereCondition);
         } else {
             List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnRelationInfo.getInverseForeignKeyColumnInfoList();
             Expression whereCondition = null;
@@ -54,7 +53,6 @@ public class RelationSelectOrTemplateHandler {
                 }
             }
             return whereCondition;
-            // RelationSelectHelper.buildForeachElement(whereElement, whereCondition);
         }
     }
 

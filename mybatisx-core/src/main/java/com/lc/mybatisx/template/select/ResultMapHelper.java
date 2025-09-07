@@ -75,6 +75,7 @@ public class ResultMapHelper {
         resultMapCollectionElement.addAttribute("ofType", columnInfo.getJavaTypeName());
         resultMapCollectionElement.addAttribute("fetchType", columnRelationInfo.getFetchType());
         resultMapCollectionElement.addAttribute("select", resultMapRelationInfo.getSelect());
+        resultMapCollectionElement.addAttribute("relationProperty", "{id=userId}");
         return resultMapCollectionElement;
     }
 

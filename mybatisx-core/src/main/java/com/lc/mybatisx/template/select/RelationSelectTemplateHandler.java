@@ -212,7 +212,7 @@ public class RelationSelectTemplateHandler {
             Expression whereConditionExpression = null;
             for (ForeignKeyColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
                 String leftEq = String.format("%s.%s", middleTableName, foreignKeyColumnInfo.getName());
-                String rightEq = String.format("#{%s.%s}", "item", foreignKeyColumnInfo.getName());
+                String rightEq = String.format("#{%s.%s}", "item", foreignKeyColumnInfo.getReferencedColumnName());
                 whereConditionExpression = RelationSelectHelper.buildWhereConditionExpression(whereConditionExpression, leftEq, rightEq);
             }
             return whereConditionExpression;

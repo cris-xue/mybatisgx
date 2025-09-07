@@ -10,8 +10,6 @@ import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Element;
 
-import java.util.List;
-
 public class RelationSelectHelper {
 
     public static Element buildSelectElement(Element mapperElement, EntityRelationSelectInfo entityRelationSelectInfo, String sql) {
@@ -51,23 +49,14 @@ public class RelationSelectHelper {
 
     /**
      * 将表达式添加到条件树
-     * @param middleTableName 中间表名称
-     * @param foreignKeyColumnInfoList 外键字段列表
+     * @param whereConditionExpression
+     * @param leftEq
+     * @param rightEq
      * @return
      */
-    public static Expression buildManyToManyWhere(String middleTableName, List<ForeignKeyColumnInfo> foreignKeyColumnInfoList) {
-        Expression whereCondition = null;
-        for (ForeignKeyColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
-            String leftEq = String.format("%s.%s", middleTableName, foreignKeyColumnInfo.getName());
-            String rightEq = foreignKeyColumnInfo.getName();
-            whereCondition = buildWhereCondition(whereCondition, leftEq, rightEq);
-        }
-        return whereCondition;
-    }
-
-    public static Expression buildWhereCondition(Expression whereCondition, String leftEq, String rightEq) {
-        EqualsTo eqCondition = ConditionBuilder.eq(leftEq, String.format("#{%s}", rightEq));
-        return whereCondition == null ? eqCondition : new AndExpression(whereCondition, eqCondition);
+    public static Expression buildWhereConditionExpression(Expression whereConditionExpression, String leftEq, String rightEq) {
+        EqualsTo eqCondition = ConditionBuilder.eq(leftEq, rightEq);
+        return whereConditionExpression == null ? eqCondition : new AndExpression(whereConditionExpression, eqCondition);
     }
 
     /**

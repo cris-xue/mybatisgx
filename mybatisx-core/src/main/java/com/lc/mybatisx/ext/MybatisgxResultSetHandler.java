@@ -1,6 +1,5 @@
 package com.lc.mybatisx.ext;
 
-import com.lc.mybatisx.ext.mapping.BatchSelectBoundSql;
 import com.lc.mybatisx.ext.mapping.BatchSelectResultMapping;
 import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.cursor.Cursor;
@@ -22,7 +21,10 @@ import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
 
@@ -72,38 +74,17 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
         Map<String, Object> nestedQueryResultMap = new HashMap();
         for (String nestedQueryId : nestedQueryMap.keySet()) {
             List<ResultMapping> resultMappingList = nestedQueryMap.get(nestedQueryId);
-            Map<String, List<Object>> nestedQueryParamMap = this.getNestedQueryParamList(nestedQueryId, list, resultMappingList, columnPropertyMap);
+            Map<String, List<Object>> nestedQueryParamMap = this.getNestedQueryParamMap(list);
             Object nestedQueryList = this.execute(nestedQueryId, nestedQueryParamMap);
             nestedQueryResultMap.put(nestedQueryId, nestedQueryList);
         }
         return list;
     }
 
-    private Map<String, List<Object>> getNestedQueryParamList(String nestedQueryId, List<Object> list, List<ResultMapping> resultMappingList, Map<String, ResultMapping> columnPropertyMap) {
-        List<Map<String, Object>> nestedQueryParamList = new ArrayList();
-        for (Object item : list) {
-            MetaObject metaObject = configuration.newMetaObject(item);
-
-            Map<String, Object> nestedQueryParam = new HashMap();
-            for (ResultMapping nestedQueryResultMapping : resultMappingList) {
-                String property = nestedQueryResultMapping.getProperty();
-                String column = nestedQueryResultMapping.getColumn();
-
-                ResultMapping columnResultMapping = columnPropertyMap.get(column);
-                Object propertyValue = metaObject.getValue(columnResultMapping.getProperty());
-
-                nestedQueryParam.put(property, propertyValue);
-            }
-
-            nestedQueryParamList.add(nestedQueryParam);
-        }
-        Map<String, List<Map<String, Object>>> nestedQueryParamMap = new HashMap();
-        nestedQueryParamMap.put("nested_select_collection", nestedQueryParamList);
-
-        Map<String, List<Object>> nestedQueryParamMapNew = new HashMap();
-        nestedQueryParamMapNew.put("nested_select_collection", list);
-
-        return nestedQueryParamMapNew;
+    private Map<String, List<Object>> getNestedQueryParamMap(List<Object> list) {
+        Map<String, List<Object>> nestedQueryParamMap = new HashMap();
+        nestedQueryParamMap.put("nested_select_collection", list);
+        return nestedQueryParamMap;
     }
 
     private Object execute(String nestedQueryId, Map<String, List<Object>> nestedQueryParamMap) throws SQLException {
@@ -114,11 +95,6 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
         CacheKey cacheKey = executor.createCacheKey(nestedQuery, nestedQueryParamMap, RowBounds.DEFAULT, nestedBoundSql);
         ResultLoader resultLoader = new ResultLoader(configuration, executor, nestedQuery, nestedQueryParamMap, List.class, cacheKey, nestedBoundSql);
         return resultLoader.loadResult();
-    }
-
-    private BatchSelectBoundSql getBatchSelectBoundSql(MappedStatement nestedQuery, Map<String, List<Object>> nestedQueryParamMap) {
-        BoundSql nestedBoundSql = nestedQuery.getBoundSql(nestedQueryParamMap);
-        return new BatchSelectBoundSql(configuration, nestedBoundSql.getSql(), nestedBoundSql.getParameterMappings(), nestedBoundSql.getParameterObject());
     }
 
     @Override

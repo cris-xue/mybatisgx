@@ -55,7 +55,19 @@ public class ResultMapTemplateHandler {
         }
     }
 
+    private void addColumnRelationElement(Element resultMapElement, ResultMapInfo resultMapInfo, ColumnInfo columnInfo, ColumnRelationInfo columnRelationInfo) {
+        ManyToMany manyToMany = columnRelationInfo.getManyToMany();
+        String mappedBy = columnRelationInfo.getMappedBy();
+        if (manyToMany == null && StringUtils.isBlank(mappedBy)) {
+            List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnRelationInfo.getInverseForeignKeyColumnInfoList();
+            for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
+                ResultMapHelper.resultColumnElement(resultMapElement, inverseForeignKeyColumnInfo);
+            }
+        }
+    }
+
     /**
+     * 添加字段关系节点，主要实现纯对象关系映射
      * <code>
      *     <resultMap id="resultMapId" type="User">
      *         <id property="id" column="id"/>
@@ -71,19 +83,8 @@ public class ResultMapTemplateHandler {
      *     </resultMap>
      * </code>
      * @param resultMapElement
-     * @param columnRelationInfo
+     * @param resultMapInfo
      */
-    private void addColumnRelationElement(Element resultMapElement, ResultMapInfo resultMapInfo, ColumnInfo columnInfo, ColumnRelationInfo columnRelationInfo) {
-        ManyToMany manyToMany = columnRelationInfo.getManyToMany();
-        String mappedBy = columnRelationInfo.getMappedBy();
-        if (manyToMany == null && StringUtils.isBlank(mappedBy)) {
-            List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnRelationInfo.getInverseForeignKeyColumnInfoList();
-            for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
-                ResultMapHelper.resultColumnElement(resultMapElement, inverseForeignKeyColumnInfo);
-            }
-        }
-    }
-
     private void addColumnRelationElement(Element resultMapElement, ResultMapInfo resultMapInfo) {
         EntityInfo resultMapEntityInfo = resultMapInfo.getEntityInfo();
         List<ColumnInfo> relationColumnInfoList = resultMapEntityInfo.getRelationColumnInfoList();

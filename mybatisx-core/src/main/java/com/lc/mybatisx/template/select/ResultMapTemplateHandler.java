@@ -87,17 +87,19 @@ public class ResultMapTemplateHandler {
      */
     private void addColumnRelationElement(Element resultMapElement, ResultMapInfo resultMapInfo) {
         EntityInfo resultMapEntityInfo = resultMapInfo.getEntityInfo();
-        List<ColumnInfo> relationColumnInfoList = resultMapEntityInfo.getRelationColumnInfoList();
-        for (ColumnInfo relationColumnInfo : relationColumnInfoList) {
+        for (ColumnInfo relationColumnInfo : resultMapEntityInfo.getRelationColumnInfoList()) {
             ColumnRelationInfo columnRelationInfo = relationColumnInfo.getColumnRelationInfo();
             ManyToMany manyToMany = columnRelationInfo.getManyToMany();
+            String mappedBy = columnRelationInfo.getMappedBy();
             if (manyToMany == null) {
-                String mappedBy = columnRelationInfo.getMappedBy();
                 if (StringUtils.isBlank(mappedBy)) {
                     List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnRelationInfo.getInverseForeignKeyColumnInfoList();
                     for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
+                        String referencedColumnName = inverseForeignKeyColumnInfo.getReferencedColumnName();
+                        String javaColumnName = String.format("%s.%s", relationColumnInfo.getJavaColumnName(), referencedColumnName);
+
                         ColumnInfo subColumnInfo = new ColumnInfo();
-                        subColumnInfo.setJavaColumnName(relationColumnInfo.getJavaColumnName() + ".id");
+                        subColumnInfo.setJavaColumnName(javaColumnName);
                         subColumnInfo.setDbColumnName(inverseForeignKeyColumnInfo.getName());
                         subColumnInfo.setDbColumnNameAlias(inverseForeignKeyColumnInfo.getNameAlias());
                         ResultMapHelper.resultColumnElement(resultMapElement, subColumnInfo);
@@ -108,9 +110,12 @@ public class ResultMapTemplateHandler {
                     ColumnRelationInfo mappedByColumnRelationInfo = mappedByColumnInfo.getColumnRelationInfo();
                     List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedByColumnRelationInfo.getInverseForeignKeyColumnInfoList();
                     for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
+                        String referencedColumnName = inverseForeignKeyColumnInfo.getReferencedColumnName();
+                        String javaColumnName = String.format("%s.%s.%s", relationColumnInfo.getJavaColumnName(), mappedByColumnInfo.getJavaColumnName(), referencedColumnName);
+                        ColumnInfo referenceColumnInfo = resultMapEntityInfo.getDbColumnInfo(referencedColumnName);
+
                         ColumnInfo subColumnInfo = new ColumnInfo();
-                        subColumnInfo.setJavaColumnName(relationColumnInfo.getJavaColumnName() + ".user.id");
-                        ColumnInfo referenceColumnInfo = resultMapEntityInfo.getDbColumnInfo(inverseForeignKeyColumnInfo.getReferencedColumnName());
+                        subColumnInfo.setJavaColumnName(javaColumnName);
                         subColumnInfo.setDbColumnName(referenceColumnInfo.getDbColumnName());
                         subColumnInfo.setDbColumnNameAlias(referenceColumnInfo.getDbColumnNameAlias());
                         ResultMapHelper.resultColumnElement(resultMapElement, subColumnInfo);

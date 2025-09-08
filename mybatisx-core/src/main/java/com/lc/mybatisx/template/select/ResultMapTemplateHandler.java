@@ -3,6 +3,7 @@ package com.lc.mybatisx.template.select;
 import com.lc.mybatisx.annotation.FetchMode;
 import com.lc.mybatisx.annotation.Id;
 import com.lc.mybatisx.annotation.ManyToMany;
+import com.lc.mybatisx.context.EntityInfoContextHolder;
 import com.lc.mybatisx.model.*;
 import com.lc.mybatisx.utils.XmlUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -30,6 +31,7 @@ public class ResultMapTemplateHandler {
             Document document = DocumentHelper.createDocument();
             Element resultMapElement = ResultMapHelper.addResultMapElement(document, resultMapInfo);
             this.addColumnElement(resultMapElement, resultMapInfo.getTableColumnInfoList());
+            this.addColumnRelationElement(resultMapElement, resultMapInfo);
             this.addResultMapRelationElement(resultMapElement, mapperInfo, resultMapInfo.getEntityInfo(), resultMapInfo.getResultMapInfoList());
             String resultMapXmlString = XmlUtils.writeString(document);
             logger.info("select resultMap: \n{}", resultMapXmlString);
@@ -41,23 +43,37 @@ public class ResultMapTemplateHandler {
         return xNodeMap;
     }
 
-    private void addColumnElement(Element resultMapElement, List<ColumnInfo> columnInfoList) {
-        for (ColumnInfo columnInfo : columnInfoList) {
-            Id id = columnInfo.getId();
+    private void addColumnElement(Element resultMapElement, List<ColumnInfo> tableColumnInfoList) {
+        for (ColumnInfo tableColumnInfo : tableColumnInfoList) {
+            Id id = tableColumnInfo.getId();
+            ColumnRelationInfo columnRelationInfo = tableColumnInfo.getColumnRelationInfo();
             if (id != null) {
-                ResultMapHelper.idColumnElement(resultMapElement, columnInfo);
-                continue;
-            }
-            ColumnRelationInfo columnRelationInfo = columnInfo.getColumnRelationInfo();
-            if (columnRelationInfo == null) {
-                ResultMapHelper.resultColumnElement(resultMapElement, columnInfo);
-            } else {
-                this.addColumnRelationElement(resultMapElement, columnRelationInfo);
+                ResultMapHelper.idColumnElement(resultMapElement, tableColumnInfo);
+            } else if (columnRelationInfo == null) {
+                ResultMapHelper.resultColumnElement(resultMapElement, tableColumnInfo);
             }
         }
     }
 
-    private void addColumnRelationElement(Element resultMapElement, ColumnRelationInfo columnRelationInfo) {
+    /**
+     * <code>
+     *     <resultMap id="resultMapId" type="User">
+     *         <id property="id" column="id"/>
+     *         <id property="code" column="code"/>
+     *         <column property="userDetail.user.id" column="id"/>
+     *         <column property="userDetail.user.code" column="code"/>
+     *         <association property="userDetail" column="{user_id=id,user_code=code}"/>
+     *     </resultMap>
+     *     <resultMap id="resultMapId" type="UserDetail">
+     *         <column property="user.id" column="user_id"/>
+     *         <column property="user.code" column="user_code"/>
+     *         <association property="user" column="{user_id=user_id,user_code=user_code}"/>
+     *     </resultMap>
+     * </code>
+     * @param resultMapElement
+     * @param columnRelationInfo
+     */
+    private void addColumnRelationElement(Element resultMapElement, ResultMapInfo resultMapInfo, ColumnInfo columnInfo, ColumnRelationInfo columnRelationInfo) {
         ManyToMany manyToMany = columnRelationInfo.getManyToMany();
         String mappedBy = columnRelationInfo.getMappedBy();
         if (manyToMany == null && StringUtils.isBlank(mappedBy)) {
@@ -68,14 +84,52 @@ public class ResultMapTemplateHandler {
         }
     }
 
-    private void addResultMapRelationElement(Element resultMapElement, MapperInfo mapperInfo, EntityInfo parentEntityInfo, List<ResultMapInfo> resultMapInfoList) {
+    private void addColumnRelationElement(Element resultMapElement, ResultMapInfo resultMapInfo) {
+        EntityInfo resultMapEntityInfo = resultMapInfo.getEntityInfo();
+        List<ColumnInfo> relationColumnInfoList = resultMapEntityInfo.getRelationColumnInfoList();
+        for (ColumnInfo relationColumnInfo : relationColumnInfoList) {
+            ColumnRelationInfo columnRelationInfo = relationColumnInfo.getColumnRelationInfo();
+            ManyToMany manyToMany = columnRelationInfo.getManyToMany();
+            if (manyToMany == null) {
+                String mappedBy = columnRelationInfo.getMappedBy();
+                if (StringUtils.isBlank(mappedBy)) {
+                    List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnRelationInfo.getInverseForeignKeyColumnInfoList();
+                    for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
+                        ColumnInfo subColumnInfo = new ColumnInfo();
+                        subColumnInfo.setJavaColumnName(relationColumnInfo.getJavaColumnName() + ".id");
+                        subColumnInfo.setDbColumnName(inverseForeignKeyColumnInfo.getName());
+                        subColumnInfo.setDbColumnNameAlias(inverseForeignKeyColumnInfo.getNameAlias());
+                        ResultMapHelper.resultColumnElement(resultMapElement, subColumnInfo);
+                    }
+                } else {
+                    EntityInfo entityInfo = EntityInfoContextHolder.get(relationColumnInfo.getJavaType());
+                    ColumnInfo mappedByColumnInfo = entityInfo.getColumnInfo(mappedBy);
+                    ColumnRelationInfo mappedByColumnRelationInfo = mappedByColumnInfo.getColumnRelationInfo();
+                    List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedByColumnRelationInfo.getInverseForeignKeyColumnInfoList();
+                    for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
+                        ColumnInfo subColumnInfo = new ColumnInfo();
+                        subColumnInfo.setJavaColumnName(relationColumnInfo.getJavaColumnName() + ".user.id");
+                        ColumnInfo referenceColumnInfo = resultMapEntityInfo.getDbColumnInfo(inverseForeignKeyColumnInfo.getReferencedColumnName());
+                        subColumnInfo.setDbColumnName(referenceColumnInfo.getDbColumnName());
+                        subColumnInfo.setDbColumnNameAlias(referenceColumnInfo.getDbColumnNameAlias());
+                        ResultMapHelper.resultColumnElement(resultMapElement, subColumnInfo);
+                    }
+                }
+            } else {
+
+            }
+        }
+    }
+
+    private void addResultMapRelationElement(Element resultMapElement, MapperInfo mapperInfo, EntityInfo resultMapEntityInfo, List<ResultMapInfo> resultMapInfoList) {
         if (ObjectUtils.isEmpty(resultMapInfoList)) {
             return;
         }
         for (ResultMapInfo resultMapInfo : resultMapInfoList) {
+            // TODO 这里判断是否存在子查询还可以优化
             ResultMapInfo existResultMapInfo = mapperInfo.getResultMapInfo(resultMapInfo.getEntityClazz());
             if (existResultMapInfo != null) {
-                this.subSelect(resultMapElement, parentEntityInfo, resultMapInfo);
+                this.subSelect(resultMapElement, resultMapEntityInfo, resultMapInfo);
             } else {
                 Element resultMapRelationElement = this.joinSelect(resultMapInfo, resultMapElement);
                 List<ResultMapInfo> childrenResultMapInfoList = resultMapInfo.getResultMapInfoList();

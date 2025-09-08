@@ -1,7 +1,7 @@
-package com.mybatisgx.dao;
+package com.mybatisgx.manytomany.dao;
 
 import com.lc.mybatisx.dao.SimpleDao;
-import com.mybatisgx.entity.Role;
+import com.mybatisgx.manytomany.entity.Role;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper

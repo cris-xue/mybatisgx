@@ -1,8 +1,8 @@
 package com.mybatisgx.simple.test;
 
 import com.github.swierkosz.fixture.generator.FixtureGenerator;
-import com.mybatisgx.entity.UserDetail;
-import com.mybatisgx.dao.UserDetailDao;
+import com.mybatisgx.simple.dao.UserDetailDao;
+import com.mybatisgx.simple.entity.UserDetail;
 import com.mybatisgx.util.DaoTestUtils;
 import org.junit.Assert;
 import org.junit.Test;

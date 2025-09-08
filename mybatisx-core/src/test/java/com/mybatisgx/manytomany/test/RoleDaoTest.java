@@ -1,10 +1,10 @@
 package com.mybatisgx.manytomany.test;
 
 import com.github.swierkosz.fixture.generator.FixtureGenerator;
-import com.mybatisgx.dao.RoleDao;
-import com.mybatisgx.dao.UserDao;
-import com.mybatisgx.entity.Role;
-import com.mybatisgx.entity.User;
+import com.mybatisgx.manytomany.dao.RoleDao;
+import com.mybatisgx.manytomany.dao.UserDao;
+import com.mybatisgx.manytomany.entity.Role;
+import com.mybatisgx.manytomany.entity.User;
 import com.mybatisgx.util.DaoTestUtils;
 import org.apache.ibatis.session.SqlSession;
 import org.junit.Assert;
@@ -45,7 +45,6 @@ public class RoleDaoTest {
         Assert.assertNotNull(dbUserList);
         for (int i = 0; i < count; i++) {
             User dbUser = dbUserList.get(i);
-            dbUser.getUserDetail();
         }
         User dbUser = dbUserList.get(0);
         // Assert.assertEquals(dbUser.getId(), dbUser.getUserDetail().getUser().getId());

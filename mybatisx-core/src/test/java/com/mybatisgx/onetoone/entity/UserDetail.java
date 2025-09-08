@@ -1,6 +1,7 @@
-package com.mybatisgx.entity;
+package com.mybatisgx.onetoone.entity;
 
 import com.lc.mybatisx.annotation.*;
+import com.mybatisgx.entity.BaseEntity;
 
 @Entity
 @Table(name = "user_detail")

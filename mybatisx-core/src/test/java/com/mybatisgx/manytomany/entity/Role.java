@@ -1,6 +1,7 @@
-package com.mybatisgx.entity;
+package com.mybatisgx.manytomany.entity;
 
 import com.lc.mybatisx.annotation.*;
+import com.mybatisgx.entity.BaseEntity;
 
 import javax.persistence.FetchType;
 import java.util.List;

@@ -5,7 +5,6 @@ import com.lc.mybatisx.model.EntityInfo;
 import com.lc.mybatisx.model.MethodInfo;
 import com.lc.mybatisx.model.handler.EntityInfoHandler;
 import com.lc.mybatisx.model.handler.MethodNameAstHandler;
-import com.mybatisgx.entity.User;
 import org.junit.Assert;
 import org.junit.Test;
 

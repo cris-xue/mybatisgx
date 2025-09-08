@@ -1,7 +1,7 @@
-package com.mybatisgx.dao;
+package com.mybatisgx.onetoone.dao;
 
 import com.lc.mybatisx.dao.SimpleDao;
-import com.mybatisgx.entity.User;
+import com.mybatisgx.onetoone.entity.User;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper

@@ -33,7 +33,7 @@ public class ResultMapTemplateHandler {
             this.addColumnElement(resultMapElement, resultMapInfo.getTableColumnInfoList());
             this.addColumnRelationElement(resultMapElement, resultMapInfo);
             this.addResultMapRelationElement(resultMapElement, mapperInfo, resultMapInfo.getEntityInfo(), resultMapInfo.getResultMapInfoList());
-            String resultMapXmlString = XmlUtils.writeString(document);
+            String resultMapXmlString = document.asXML();
             logger.info("select resultMap: \n{}", resultMapXmlString);
 
             XPathParser xPathParser = XmlUtils.processXml(resultMapXmlString);

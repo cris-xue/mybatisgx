@@ -2,14 +2,12 @@ package com.lc.mybatisx.context;
 
 import com.lc.mybatisx.annotation.Entity;
 import com.lc.mybatisx.dao.Dao;
-import com.lc.mybatisx.model.EntityInfo;
-import com.lc.mybatisx.model.MapperInfo;
-import com.lc.mybatisx.model.MapperTemplateInfo;
+import com.lc.mybatisx.model.*;
 import com.lc.mybatisx.model.handler.EntityInfoHandler;
 import com.lc.mybatisx.model.handler.MapperInfoHandler;
+import com.lc.mybatisx.template.StatementTemplateHandler;
 import com.lc.mybatisx.template.select.RelationSelectTemplateHandler;
 import com.lc.mybatisx.template.select.ResultMapTemplateHandler;
-import com.lc.mybatisx.template.StatementTemplateHandler;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.parsing.XNode;
@@ -48,6 +46,7 @@ public class MybatisxContextLoader {
         for (String entityBasePackage : entityBasePackages) {
             this.processEntity(entityBasePackage);
         }
+        this.validateEntityRelation();
 
         List<Resource> totalResourceList = new ArrayList();
         for (String daoBasePackage : daoBasePackages) {
@@ -75,6 +74,7 @@ public class MybatisxContextLoader {
         for (Class<?> clazz : clazzList) {
             this.processEntity(clazz);
         }
+        this.validateEntityRelation();
     }
 
     private void processEntity(Class<?> clazz) {
@@ -84,6 +84,30 @@ public class MybatisxContextLoader {
         }
         EntityInfo entityInfo = entityInfoHandler.execute(clazz);
         EntityInfoContextHolder.set(clazz, entityInfo);
+    }
+
+    /**
+     * 验证实体关系
+     */
+    private void validateEntityRelation() {
+        List<Class<?>> entityClassList = EntityInfoContextHolder.getEntityClassList();
+        for (Class<?> entityClass : entityClassList) {
+            EntityInfo entityInfo = EntityInfoContextHolder.get(entityClass);
+            List<ColumnInfo> relationColumnInfoList = entityInfo.getRelationColumnInfoList();
+            for (ColumnInfo columnInfo : relationColumnInfoList) {
+                Class<?> columnJavaType = columnInfo.getJavaType();
+                EntityInfo relationEntityInfo = EntityInfoContextHolder.get(columnJavaType);
+                if (relationEntityInfo == null) {
+                    throw new RuntimeException("实体关系验证失败，实体类" + entityClass.getName() + "的属性" + columnInfo.getJavaColumnName() + "对应的实体类" + columnJavaType.getName() + "不存在");
+                }
+                ColumnRelationInfo columnRelationInfo = columnInfo.getColumnRelationInfo();
+                String mappedBy = columnRelationInfo.getMappedBy();
+                ColumnInfo relationColumnInfo = relationEntityInfo.getColumnInfo(mappedBy);
+                if (relationColumnInfo == null) {
+                    throw new RuntimeException("实体关系验证失败，实体类" + entityClass.getName() + "的属性" + columnInfo.getJavaColumnName() + "对应的实体类" + columnJavaType);
+                }
+            }
+        }
     }
 
     private List<Resource> getDaoResourceList(String basePackage) {

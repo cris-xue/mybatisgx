@@ -122,7 +122,20 @@ public class ResultMapTemplateHandler {
                     }
                 }
             } else {
+                if (StringUtils.isBlank(mappedBy)) {
+                    List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnRelationInfo.getInverseForeignKeyColumnInfoList();
+                    for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
 
+                    }
+                } else {
+                    EntityInfo entityInfo = EntityInfoContextHolder.get(relationColumnInfo.getJavaType());
+                    ColumnInfo mappedByColumnInfo = entityInfo.getColumnInfo(mappedBy);
+                    ColumnRelationInfo mappedByColumnRelationInfo = mappedByColumnInfo.getColumnRelationInfo();
+                    List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedByColumnRelationInfo.getInverseForeignKeyColumnInfoList();
+                    for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
+
+                    }
+                }
             }
         }
     }

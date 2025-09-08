@@ -15,6 +15,7 @@ import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -158,19 +159,25 @@ public class SelectSqlTemplateHandler {
     private List<SelectItem<?>> buildSelectItemList(EntityInfo entityInfo) {
         List<SelectItem<?>> selectItemList = new ArrayList();
         Table table = new Table(entityInfo.getTableName());
+        // 添加非外键表字段
         for (ColumnInfo columnInfo : entityInfo.getTableColumnInfoList()) {
-            // 外键不存在，只需要添加字段。外键存在，则需要添加字段和外键
             ColumnRelationInfo columnRelationInfo = columnInfo.getColumnRelationInfo();
             if (columnRelationInfo == null) {
-                selectItemList.add(this.getSelectItem(table, columnInfo.getDbColumnName(), columnInfo.getDbColumnNameAlias()));
-            } else {
-                ManyToMany manyToMany = columnRelationInfo.getManyToMany();
-                if (manyToMany == null) {
-                    // 只有一对一、一对多、多对一的时候关联字段才需要作为表字段。多对多存在中间表，关联字段在中间中表，不需要作为实体表字段
-                    List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnRelationInfo.getInverseForeignKeyColumnInfoList();
-                    for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
-                        selectItemList.add(this.getSelectItem(table, inverseForeignKeyColumnInfo.getName(), inverseForeignKeyColumnInfo.getNameAlias()));
-                    }
+                SelectItem<?> selectItem = this.getSelectItem(table, columnInfo.getDbColumnName(), columnInfo.getDbColumnNameAlias());
+                selectItemList.add(selectItem);
+            }
+        }
+        // 添加外键表字段
+        for (ColumnInfo columnInfo : entityInfo.getRelationColumnInfoList()) {
+            ColumnRelationInfo columnRelationInfo = columnInfo.getColumnRelationInfo();
+            ManyToMany manyToMany = columnRelationInfo.getManyToMany();
+            String mappedBy = columnRelationInfo.getMappedBy();
+            if (manyToMany == null && StringUtils.isBlank(mappedBy)) {
+                // 只有一对一、一对多、多对一的时候关联字段才需要作为表字段。多对多存在中间表，关联字段在中间中表，不需要作为实体表字段
+                List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnRelationInfo.getInverseForeignKeyColumnInfoList();
+                for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
+                    SelectItem<?> selectItem = this.getSelectItem(table, inverseForeignKeyColumnInfo.getName(), inverseForeignKeyColumnInfo.getNameAlias());
+                    selectItemList.add(selectItem);
                 }
             }
         }

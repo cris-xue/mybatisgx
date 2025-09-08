@@ -122,21 +122,25 @@ public class ResultMapTemplateHandler {
         }
     }
 
+    /**
+     * 添加结果集关联节点
+     * @param resultMapElement
+     * @param mapperInfo
+     * @param resultMapEntityInfo
+     * @param resultMapInfoList
+     */
     private void addResultMapRelationElement(Element resultMapElement, MapperInfo mapperInfo, EntityInfo resultMapEntityInfo, List<ResultMapInfo> resultMapInfoList) {
         if (ObjectUtils.isEmpty(resultMapInfoList)) {
             return;
         }
         for (ResultMapInfo resultMapInfo : resultMapInfoList) {
-            // TODO 这里判断是否存在子查询还可以优化
-            ResultMapInfo existResultMapInfo = mapperInfo.getResultMapInfo(resultMapInfo.getEntityClazz());
-            if (existResultMapInfo != null) {
+            // 是否存在独立的 resultMap，如果存在，为子查询，如果不存在，则为join关联查询
+            ResultMapInfo existIndependenceResultMapInfo = mapperInfo.getResultMapInfo(resultMapInfo.getEntityClazz());
+            if (existIndependenceResultMapInfo != null) {
                 this.subSelect(resultMapElement, resultMapEntityInfo, resultMapInfo);
             } else {
-                Element resultMapRelationElement = this.joinSelect(resultMapInfo, resultMapElement);
-                List<ResultMapInfo> childrenResultMapInfoList = resultMapInfo.getResultMapInfoList();
-                if (ObjectUtils.isNotEmpty(childrenResultMapInfoList)) {
-                    this.addResultMapRelationElement(resultMapRelationElement, mapperInfo, resultMapInfo.getEntityInfo(), childrenResultMapInfoList);
-                }
+                Element resultMapRelationElement = this.joinSelect(resultMapElement, resultMapInfo);
+                this.addResultMapRelationElement(resultMapRelationElement, mapperInfo, resultMapInfo.getEntityInfo(), resultMapInfo.getResultMapInfoList());
             }
         }
     }
@@ -154,7 +158,7 @@ public class ResultMapTemplateHandler {
         }
     }
 
-    private Element joinSelect(ResultMapInfo resultMapRelationInfo, Element resultMapElement) {
+    private Element joinSelect(Element resultMapElement, ResultMapInfo resultMapRelationInfo) {
         ColumnInfo columnInfo = resultMapRelationInfo.getColumnInfo();
         ColumnRelationInfo columnInfoAnnotationInfo = columnInfo.getColumnRelationInfo();
         Integer relationType = this.getRelationType(columnInfoAnnotationInfo);

@@ -33,7 +33,7 @@ public class ResultMapInfo extends ColumnEntityRelation {
      */
     private String select;
     /**
-     * resultMap关系信息列表
+     * resultMap关系信息列表，如果存在表示采用的select join的方式，对应的xml节点为association、collection
      */
     private List<ResultMapInfo> resultMapInfoList;
 

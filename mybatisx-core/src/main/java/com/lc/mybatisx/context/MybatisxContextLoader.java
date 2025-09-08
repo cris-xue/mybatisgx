@@ -9,6 +9,7 @@ import com.lc.mybatisx.template.StatementTemplateHandler;
 import com.lc.mybatisx.template.select.RelationSelectTemplateHandler;
 import com.lc.mybatisx.template.select.ResultMapTemplateHandler;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.parsing.XNode;
 import org.slf4j.Logger;
@@ -102,6 +103,9 @@ public class MybatisxContextLoader {
                 }
                 ColumnRelationInfo columnRelationInfo = columnInfo.getColumnRelationInfo();
                 String mappedBy = columnRelationInfo.getMappedBy();
+                if (StringUtils.isBlank(mappedBy)) {
+                    continue;
+                }
                 ColumnInfo relationColumnInfo = relationEntityInfo.getColumnInfo(mappedBy);
                 if (relationColumnInfo == null) {
                     throw new RuntimeException("实体关系验证失败，实体类" + entityClass.getName() + "的属性" + columnInfo.getJavaColumnName() + "对应的实体类" + columnJavaType);

@@ -1,8 +1,9 @@
 package com.lc.mybatisx.model;
 
-import com.lc.mybatisx.annotation.*;
+import com.lc.mybatisx.annotation.Id;
+import com.lc.mybatisx.annotation.Lock;
+import com.lc.mybatisx.annotation.LogicDelete;
 import com.lc.mybatisx.annotation.handler.GenerateValueHandler;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -189,30 +190,30 @@ public class EntityInfo {
                     generateValueColumnInfoList.add(columnInfo);
                 }
 
-                ColumnRelationInfo columnRelationInfo = columnInfo.getColumnRelationInfo();
-                if (columnRelationInfo != null) {
+                if (columnInfo instanceof RelationColumnInfo) {
                     relationColumnInfoList.add(columnInfo);
                 }
 
                 // 1、字段不存在关联实体为表字段
                 // 2、存在关联实体并且是关系维护方才是表字段【多对多关联字段在中间表，所以实体中是不存在表字段的】
-                ColumnInfo tableColumnInfo = null;
-                if (columnRelationInfo == null) {
-                    NonPersistent nonPersistent = columnInfo.getNonPersistent();
-                    if (nonPersistent == null) {
+                /*ColumnInfo tableColumnInfo = null;
+                if (columnInfo instanceof RelationColumnInfo) {
+                    RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
+                    ManyToMany manyToMany = relationColumnInfo.getManyToMany();
+                    String mappedBy = relationColumnInfo.getMappedBy();
+                    if (manyToMany == null && StringUtils.isBlank(mappedBy)) {
                         tableColumnInfo = columnInfo;
                     }
                 } else {
-                    ManyToMany manyToMany = columnRelationInfo.getManyToMany();
-                    String mappedBy = columnRelationInfo.getMappedBy();
-                    if (manyToMany == null && StringUtils.isBlank(mappedBy)) {
+                    NonPersistent nonPersistent = columnInfo.getNonPersistent();
+                    if (nonPersistent == null) {
                         tableColumnInfo = columnInfo;
                     }
                 }
                 if (tableColumnInfo != null) {
                     tableColumnInfoList.add(columnInfo);
                     tableColumnInfoMap.put(columnInfo.getDbColumnName(), columnInfo.getJavaColumnName());
-                }
+                }*/
                 columnInfoMap.put(columnInfo.getJavaColumnName(), columnInfo);
             }
         }

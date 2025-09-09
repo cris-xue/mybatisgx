@@ -76,6 +76,7 @@ public class MybatisxContextLoader {
         for (Class<?> clazz : clazzList) {
             this.processEntity(clazz);
         }
+        this.processEntityRelation();
         this.validateEntityRelation();
     }
 
@@ -89,7 +90,22 @@ public class MybatisxContextLoader {
     }
 
     private void processEntityRelation() {
+        List<Class<?>> entityClassList = EntityInfoContextHolder.getEntityClassList();
+        for (Class<?> entityClass : entityClassList) {
+            EntityInfo entityInfo = EntityInfoContextHolder.get(entityClass);
+            List<ColumnInfo> relationColumnInfoList = entityInfo.getRelationColumnInfoList();
+            for (ColumnInfo columnInfo : relationColumnInfoList) {
+                RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
+                String mappedBy = relationColumnInfo.getMappedBy();
+                if (StringUtils.isBlank(mappedBy)) {
 
+                } else {
+                    EntityInfo relationColumnEntityInfo = EntityInfoContextHolder.get(relationColumnInfo.getJavaType());
+                    ColumnInfo mappedByRelationColumnInfo = relationColumnEntityInfo.getColumnInfo(mappedBy);
+                    relationColumnInfo.setMappedByRelationColumnInfo((RelationColumnInfo) mappedByRelationColumnInfo);
+                }
+            }
+        }
     }
 
     /**

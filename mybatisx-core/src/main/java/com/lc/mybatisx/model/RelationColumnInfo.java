@@ -110,6 +110,22 @@ public class RelationColumnInfo extends ColumnInfo {
         this.fetchSize = fetchSize;
     }
 
+    public RelationType getRelationType() {
+        return relationType;
+    }
+
+    public void setRelationType(RelationType relationType) {
+        this.relationType = relationType;
+    }
+
+    public RelationColumnInfo getMappedByRelationColumnInfo() {
+        return mappedByRelationColumnInfo;
+    }
+
+    public void setMappedByRelationColumnInfo(RelationColumnInfo mappedByRelationColumnInfo) {
+        this.mappedByRelationColumnInfo = mappedByRelationColumnInfo;
+    }
+
     public List<ForeignKeyColumnInfo> getForeignKeyColumnInfoList() {
         return foreignKeyColumnInfoList;
     }

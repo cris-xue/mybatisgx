@@ -47,6 +47,7 @@ public class MybatisxContextLoader {
         for (String entityBasePackage : entityBasePackages) {
             this.processEntity(entityBasePackage);
         }
+        this.processEntityRelation();
         this.validateEntityRelation();
 
         List<Resource> totalResourceList = new ArrayList();
@@ -85,6 +86,10 @@ public class MybatisxContextLoader {
         }
         EntityInfo entityInfo = entityInfoHandler.execute(clazz);
         EntityInfoContextHolder.set(clazz, entityInfo);
+    }
+
+    private void processEntityRelation() {
+
     }
 
     /**

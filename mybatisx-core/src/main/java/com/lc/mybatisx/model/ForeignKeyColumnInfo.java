@@ -1,7 +1,7 @@
 package com.lc.mybatisx.model;
 
 /**
- * 外键字段信息 TODO 该模型需要完善，仅仅只存储字段信息是不够的
+ * 外键字段是关系字段的特殊情况
  * @author ccxuef
  * @date 2025/8/8 17:48
  */
@@ -19,6 +19,14 @@ public class ForeignKeyColumnInfo {
      * 被引用实体的主键列名（目标表的主键列）
      */
     private String referencedColumnName;
+    /**
+     * 外键字段信息列表
+     */
+    private ColumnInfo columnInfo;
+    /**
+     * 被引用实体外键字段信息列表
+     */
+    private ColumnInfo referencedColumnInfo;
 
     public String getName() {
         return name;

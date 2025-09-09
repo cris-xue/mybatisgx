@@ -97,11 +97,8 @@ public class MybatisxContextLoader {
             for (ColumnInfo columnInfo : relationColumnInfoList) {
                 RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
                 String mappedBy = relationColumnInfo.getMappedBy();
-                if (StringUtils.isBlank(mappedBy)) {
-
-                } else {
-                    EntityInfo relationColumnEntityInfo = EntityInfoContextHolder.get(relationColumnInfo.getJavaType());
-                    ColumnInfo mappedByRelationColumnInfo = relationColumnEntityInfo.getColumnInfo(mappedBy);
+                if (StringUtils.isNotBlank(mappedBy)) {
+                    ColumnInfo mappedByRelationColumnInfo = validateEntityRelation(relationColumnInfo, mappedBy);
                     relationColumnInfo.setMappedByRelationColumnInfo((RelationColumnInfo) mappedByRelationColumnInfo);
                 }
             }
@@ -112,27 +109,19 @@ public class MybatisxContextLoader {
      * 验证实体关系
      */
     private void validateEntityRelation() {
-        List<Class<?>> entityClassList = EntityInfoContextHolder.getEntityClassList();
-        for (Class<?> entityClass : entityClassList) {
-            EntityInfo entityInfo = EntityInfoContextHolder.get(entityClass);
-            List<ColumnInfo> relationColumnInfoList = entityInfo.getRelationColumnInfoList();
-            for (ColumnInfo columnInfo : relationColumnInfoList) {
-                Class<?> columnJavaType = columnInfo.getJavaType();
-                EntityInfo relationEntityInfo = EntityInfoContextHolder.get(columnJavaType);
-                if (relationEntityInfo == null) {
-                    throw new RuntimeException("实体关系验证失败，实体类" + entityClass.getName() + "的属性" + columnInfo.getJavaColumnName() + "对应的实体类" + columnJavaType.getName() + "不存在");
-                }
-                ColumnRelationInfo columnRelationInfo = columnInfo.getColumnRelationInfo();
-                String mappedBy = columnRelationInfo.getMappedBy();
-                if (StringUtils.isBlank(mappedBy)) {
-                    continue;
-                }
-                ColumnInfo relationColumnInfo = relationEntityInfo.getColumnInfo(mappedBy);
-                if (relationColumnInfo == null) {
-                    throw new RuntimeException("实体关系验证失败，实体类" + entityClass.getName() + "的属性" + columnInfo.getJavaColumnName() + "对应的实体类" + columnJavaType);
-                }
-            }
+    }
+
+    private ColumnInfo validateEntityRelation(RelationColumnInfo relationColumnInfo, String mappedBy) {
+        Class<?> javaType = relationColumnInfo.getJavaType();
+        EntityInfo relationColumnEntityInfo = EntityInfoContextHolder.get(javaType);
+        if (relationColumnEntityInfo == null) {
+            throw new RuntimeException("实体类" + javaType + "不存在");
         }
+        ColumnInfo mappedByRelationColumnInfo = relationColumnEntityInfo.getColumnInfo(mappedBy);
+        if (mappedByRelationColumnInfo == null) {
+            throw new RuntimeException("实体类" + javaType + "不存在" + mappedBy + "字段");
+        }
+        return mappedByRelationColumnInfo;
     }
 
     private List<Resource> getDaoResourceList(String basePackage) {

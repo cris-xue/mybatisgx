@@ -51,4 +51,20 @@ public class ForeignKeyColumnInfo {
     public void setReferencedColumnName(String referencedColumnName) {
         this.referencedColumnName = referencedColumnName;
     }
+
+    public ColumnInfo getColumnInfo() {
+        return columnInfo;
+    }
+
+    public void setColumnInfo(ColumnInfo columnInfo) {
+        this.columnInfo = columnInfo;
+    }
+
+    public ColumnInfo getReferencedColumnInfo() {
+        return referencedColumnInfo;
+    }
+
+    public void setReferencedColumnInfo(ColumnInfo referencedColumnInfo) {
+        this.referencedColumnInfo = referencedColumnInfo;
+    }
 }

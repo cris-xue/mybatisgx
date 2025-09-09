@@ -98,8 +98,27 @@ public class MybatisxContextLoader {
                 RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
                 String mappedBy = relationColumnInfo.getMappedBy();
                 if (StringUtils.isNotBlank(mappedBy)) {
-                    ColumnInfo mappedByRelationColumnInfo = validateEntityRelation(relationColumnInfo, mappedBy);
+                    ColumnInfo mappedByRelationColumnInfo = this.validateEntityRelation(relationColumnInfo, mappedBy);
                     relationColumnInfo.setMappedByRelationColumnInfo((RelationColumnInfo) mappedByRelationColumnInfo);
+                } else {
+                    RelationType relationType = relationColumnInfo.getRelationType();
+                    if (relationType != RelationType.MANY_TO_MANY) {
+                        List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
+                        for (ForeignKeyColumnInfo inverseForeignKeyColumn : inverseForeignKeyColumnInfoList) {
+                            Class<?> javaType = relationColumnInfo.getJavaType();
+                            EntityInfo relationColumnEntityInfo = EntityInfoContextHolder.get(javaType);
+
+                            String name = inverseForeignKeyColumn.getName();
+                            String referencedColumnName = inverseForeignKeyColumn.getReferencedColumnName();
+                            inverseForeignKeyColumn.setColumnInfo(null);
+
+                            ColumnInfo columnInfo111 = relationColumnEntityInfo.getDbColumnInfo(referencedColumnName);
+                            inverseForeignKeyColumn.setReferencedColumnInfo(columnInfo111);
+                        }
+                    } else {
+                        relationColumnInfo.getForeignKeyColumnInfoList();
+                        relationColumnInfo.getInverseForeignKeyColumnInfoList();
+                    }
                 }
             }
         }

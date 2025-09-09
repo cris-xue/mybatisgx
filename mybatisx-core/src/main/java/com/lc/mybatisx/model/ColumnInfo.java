@@ -51,6 +51,10 @@ public class ColumnInfo {
      */
     private GenerateValueHandler generateValueHandler;
     /**
+     * 字段注解
+     */
+    private Column column;
+    /**
      * 非持久化字段
      */
     private NonPersistent nonPersistent;
@@ -159,6 +163,14 @@ public class ColumnInfo {
 
     public void setGenerateValueHandler(GenerateValueHandler generateValueHandler) {
         this.generateValueHandler = generateValueHandler;
+    }
+
+    public Column getColumn() {
+        return column;
+    }
+
+    public void setColumn(Column column) {
+        this.column = column;
     }
 
     public NonPersistent getNonPersistent() {

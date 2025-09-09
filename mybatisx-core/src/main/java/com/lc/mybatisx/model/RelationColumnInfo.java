@@ -135,6 +135,7 @@ public class RelationColumnInfo extends ColumnInfo {
             this.oneToOne = oneToOne;
             this.mappedBy = oneToOne.mappedBy();
             this.fetchType = oneToOne.fetch().name().toLowerCase();
+            this.relationType = RelationType.ONE_TO_ONE;
         }
     }
 
@@ -147,6 +148,7 @@ public class RelationColumnInfo extends ColumnInfo {
             this.oneToMany = oneToMany;
             this.mappedBy = oneToMany.mappedBy();
             this.fetchType = oneToMany.fetch().name().toLowerCase();
+            this.relationType = RelationType.ONE_TO_MANY;
         }
     }
 
@@ -159,6 +161,7 @@ public class RelationColumnInfo extends ColumnInfo {
             this.manyToOne = manyToOne;
             this.mappedBy = manyToOne.mappedBy();
             this.fetchType = manyToOne.fetch().name().toLowerCase();
+            this.relationType = RelationType.MANY_TO_ONE;
         }
     }
 
@@ -171,6 +174,7 @@ public class RelationColumnInfo extends ColumnInfo {
             this.manyToMany = manyToMany;
             this.mappedBy = manyToMany.mappedBy();
             this.fetchType = manyToMany.fetch().name().toLowerCase();
+            this.relationType = RelationType.MANY_TO_MANY;
         }
     }
 

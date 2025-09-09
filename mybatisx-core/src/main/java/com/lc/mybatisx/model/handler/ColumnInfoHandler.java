@@ -5,8 +5,8 @@ import com.google.common.collect.Maps;
 import com.lc.mybatisx.annotation.*;
 import com.lc.mybatisx.annotation.handler.GenerateValueHandler;
 import com.lc.mybatisx.model.ColumnInfo;
-import com.lc.mybatisx.model.ColumnRelationInfo;
 import com.lc.mybatisx.model.ForeignKeyColumnInfo;
+import com.lc.mybatisx.model.RelationColumnInfo;
 import com.lc.mybatisx.utils.GenericUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -45,7 +45,7 @@ public class ColumnInfoHandler {
             String fieldName = field.getName();
             String dbColumnName = this.getDbColumnName(field);
 
-            ColumnInfo columnInfo = new ColumnInfo();
+            ColumnInfo columnInfo = this.getColumnInfo(field);
             columnInfo.setJavaColumnName(fieldName);
             columnInfo.setDbTypeName(column != null ? column.columnDefinition() : null);
             columnInfo.setDbColumnName(dbColumnName);
@@ -56,7 +56,9 @@ public class ColumnInfoHandler {
 
             this.setGenerateValueHandler(field, columnInfo);
             this.setType(field, columnInfo);
-            this.setColumnRelationInfo(field, columnInfo);
+            if (columnInfo instanceof RelationColumnInfo) {
+                this.setRelationColumnInfo(field, (RelationColumnInfo) columnInfo);
+            }
 
             columnInfoList.add(columnInfo);
         }
@@ -122,23 +124,44 @@ public class ColumnInfoHandler {
         }
     }
 
-    private void setColumnRelationInfo(Field field, ColumnInfo columnInfo) {
+    private ColumnInfo getColumnInfo(Field field) {
+        Column column = field.getAnnotation(Column.class);
         OneToOne oneToOne = field.getAnnotation(OneToOne.class);
+        OneToMany oneToMany = field.getAnnotation(OneToMany.class);
+        ManyToOne manyToOne = field.getAnnotation(ManyToOne.class);
+        ManyToMany manyToMany = field.getAnnotation(ManyToMany.class);
+        if (oneToOne != null || oneToMany != null || manyToOne != null || manyToMany != null) {
+            RelationColumnInfo relationColumnInfo = new RelationColumnInfo();
+            relationColumnInfo.setOneToOne(oneToOne);
+            relationColumnInfo.setOneToMany(oneToMany);
+            relationColumnInfo.setManyToOne(manyToOne);
+            relationColumnInfo.setManyToMany(manyToMany);
+            relationColumnInfo.setColumn(column);
+            return relationColumnInfo;
+        } else {
+            ColumnInfo columnInfo = new ColumnInfo();
+            columnInfo.setColumn(column);
+            return columnInfo;
+        }
+    }
+
+    private void setRelationColumnInfo(Field field, RelationColumnInfo relationColumnInfo) {
+        /*OneToOne oneToOne = field.getAnnotation(OneToOne.class);
         OneToMany oneToMany = field.getAnnotation(OneToMany.class);
         ManyToOne manyToOne = field.getAnnotation(ManyToOne.class);
         ManyToMany manyToMany = field.getAnnotation(ManyToMany.class);
         if (!(oneToOne != null || oneToMany != null || manyToOne != null || manyToMany != null)) {
             return;
-        }
+        }*/
 
         JoinColumn joinColumn = field.getAnnotation(JoinColumn.class);
         JoinColumns joinColumns = field.getAnnotation(JoinColumns.class);
         JoinTable joinTable = field.getAnnotation(JoinTable.class);
         Fetch fetch = field.getAnnotation(Fetch.class);
 
-        if (manyToMany != null && (StringUtils.isBlank(manyToMany.mappedBy()) && joinTable == null)) {
+        /*if (manyToMany != null && (StringUtils.isBlank(manyToMany.mappedBy()) && joinTable == null)) {
             throw new RuntimeException("many to many association must have mappedBy or joinTable");
-        }
+        }*/
 
         List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = new ArrayList();
         List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = new ArrayList();
@@ -157,18 +180,17 @@ public class ColumnInfoHandler {
             inverseForeignKeyColumnInfoList = this.getForeignKeyList(inverseJoinColumnList);
         }
 
-        ColumnRelationInfo columnRelationInfo = new ColumnRelationInfo();
-        columnRelationInfo.setOneToOne(oneToOne);
-        columnRelationInfo.setOneToMany(oneToMany);
-        columnRelationInfo.setManyToOne(manyToOne);
-        columnRelationInfo.setManyToMany(manyToMany);
-        columnRelationInfo.setJoinColumn(joinColumn);
-        columnRelationInfo.setJoinColumns(joinColumns);
-        columnRelationInfo.setJoinTable(joinTable);
-        columnRelationInfo.setFetch(fetch);
-        columnRelationInfo.setForeignKeyColumnInfoList(foreignKeyColumnInfoList);
-        columnRelationInfo.setInverseForeignKeyColumnInfoList(inverseForeignKeyColumnInfoList);
-        columnInfo.setColumnRelationInfo(columnRelationInfo);
+        // ColumnRelationInfo columnRelationInfo = new ColumnRelationInfo();
+        /*relationColumnInfo.setOneToOne(oneToOne);
+        relationColumnInfo.setOneToMany(oneToMany);
+        relationColumnInfo.setManyToOne(manyToOne);
+        relationColumnInfo.setManyToMany(manyToMany);*/
+        relationColumnInfo.setJoinColumn(joinColumn);
+        relationColumnInfo.setJoinColumns(joinColumns);
+        relationColumnInfo.setJoinTable(joinTable);
+        relationColumnInfo.setFetch(fetch);
+        relationColumnInfo.setForeignKeyColumnInfoList(foreignKeyColumnInfoList);
+        relationColumnInfo.setInverseForeignKeyColumnInfoList(inverseForeignKeyColumnInfoList);
     }
 
     private List<ForeignKeyColumnInfo> getForeignKeyList(JoinColumn[] joinColumnList) {

@@ -74,13 +74,13 @@ public class EntityRelationSelectInfo extends ColumnEntityRelation {
     }
 
     public String getMiddleTableName() {
-        ColumnRelationInfo columnRelationInfo = this.columnInfo.getColumnRelationInfo();
+        RelationColumnInfo relationColumnInfo = (RelationColumnInfo) this.columnInfo;
+        RelationColumnInfo mappedByRelationColumnInfo = relationColumnInfo.getMappedByRelationColumnInfo();
         JoinTable joinTable;
-        if (this.getMappedBy()) {
-            String mappedBy = columnRelationInfo.getMappedBy();
-            joinTable = this.entityInfo.getColumnInfo(mappedBy).getColumnRelationInfo().getJoinTable();
+        if (mappedByRelationColumnInfo != null) {
+            joinTable = mappedByRelationColumnInfo.getJoinTable();
         } else {
-            joinTable = columnRelationInfo.getJoinTable();
+            joinTable = relationColumnInfo.getJoinTable();
         }
         return joinTable.name();
     }

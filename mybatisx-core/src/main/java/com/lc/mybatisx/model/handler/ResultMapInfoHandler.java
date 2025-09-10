@@ -62,7 +62,7 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
         List<ResultMapInfo> resultMapRelationInfoList = new ArrayList();
         for (EntityRelationTree childrenEntityRelationInfo : childrenEntityRelationInfoList) {
             int level = childrenEntityRelationInfo.getLevel();
-            ColumnInfo columnInfo = childrenEntityRelationInfo.getColumnInfo();
+            RelationColumnInfo columnInfo = (RelationColumnInfo) childrenEntityRelationInfo.getColumnInfo();
             EntityInfo entityInfo = childrenEntityRelationInfo.getEntityInfo();
 
             ResultMapInfo resultMapRelationInfo = new ResultMapInfo();
@@ -70,7 +70,7 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
             resultMapRelationInfo.setColumnInfo(columnInfo);
             resultMapRelationInfo.setEntityInfo(entityInfo);
 
-            FetchMode fetchMode = columnInfo.getColumnRelationInfo().getFetchMode();
+            FetchMode fetchMode = columnInfo.getFetchMode();
             if (fetchMode == FetchMode.SELECT) {
                 this.buildResultMapInfo(resultMapInfoList, childrenEntityRelationInfo);
             } else if (fetchMode == FetchMode.BATCH) {
@@ -103,11 +103,11 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
         List<EntityRelationTree> childrenEntityRelationInfoList = entityRelationInfo.getEntityRelationList();
         for (EntityRelationTree childrenEntityRelationInfo : childrenEntityRelationInfoList) {
             int level = childrenEntityRelationInfo.getLevel();
-            ColumnInfo columnInfo = childrenEntityRelationInfo.getColumnInfo();
+            RelationColumnInfo columnInfo = (RelationColumnInfo) childrenEntityRelationInfo.getColumnInfo();
             EntityRelationSelectInfo entityRelationSelectInfo = this.buildEntityRelationSelect(resultMapInfo, childrenEntityRelationInfo);
 
             // 子查询和join的第一级都无法生成join查询，第一级join会造成结果膨胀问题，第二级采用in查询或者批量查询，解决N+1问题，把N+1变成1+1
-            FetchMode fetchMode = columnInfo.getColumnRelationInfo().getFetchMode();
+            FetchMode fetchMode = columnInfo.getFetchMode();
             if (fetchMode == FetchMode.SELECT) {
                 entityRelationSelectInfoList.add(entityRelationSelectInfo);
             } else if (fetchMode == FetchMode.BATCH) {
@@ -124,14 +124,14 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
     }
 
     private EntityRelationSelectInfo buildEntityRelationSelect(ResultMapInfo resultMapInfo, EntityRelationTree entityRelationInfo) {
-        ColumnInfo columnInfo = entityRelationInfo.getColumnInfo();
+        RelationColumnInfo columnInfo = (RelationColumnInfo) entityRelationInfo.getColumnInfo();
         EntityInfo entityInfo = entityRelationInfo.getEntityInfo();
         EntityRelationSelectInfo entityRelationSelectInfo = new EntityRelationSelectInfo();
         entityRelationSelectInfo.setId(this.getSelect(columnInfo.getJavaType(), columnInfo.getCollectionType()));
         entityRelationSelectInfo.setResultMapId(this.getResultMapId(resultMapInfo, entityRelationInfo));
         entityRelationSelectInfo.setColumnInfo(columnInfo);
         entityRelationSelectInfo.setEntityInfo(entityInfo);
-        Boolean isExistMiddleTable = columnInfo.getColumnRelationInfo().getManyToMany() != null;
+        Boolean isExistMiddleTable = columnInfo.getManyToMany() != null;
         entityRelationSelectInfo.setExistMiddleTable(isExistMiddleTable);
         return entityRelationSelectInfo;
     }

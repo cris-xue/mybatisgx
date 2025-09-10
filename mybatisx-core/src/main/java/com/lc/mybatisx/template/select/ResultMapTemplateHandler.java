@@ -3,7 +3,6 @@ package com.lc.mybatisx.template.select;
 import com.lc.mybatisx.annotation.FetchMode;
 import com.lc.mybatisx.annotation.Id;
 import com.lc.mybatisx.annotation.ManyToMany;
-import com.lc.mybatisx.context.EntityInfoContextHolder;
 import com.lc.mybatisx.model.*;
 import com.lc.mybatisx.utils.XmlUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -46,10 +45,9 @@ public class ResultMapTemplateHandler {
     private void addColumnElement(Element resultMapElement, List<ColumnInfo> tableColumnInfoList) {
         for (ColumnInfo tableColumnInfo : tableColumnInfoList) {
             Id id = tableColumnInfo.getId();
-            ColumnRelationInfo columnRelationInfo = tableColumnInfo.getColumnRelationInfo();
             if (id != null) {
                 ResultMapHelper.idColumnElement(resultMapElement, tableColumnInfo);
-            } else if (columnRelationInfo == null) {
+            } else if (!(tableColumnInfo instanceof RelationColumnInfo)) {
                 ResultMapHelper.resultColumnElement(resultMapElement, tableColumnInfo);
             }
         }
@@ -87,13 +85,13 @@ public class ResultMapTemplateHandler {
      */
     private void addColumnRelationElement(Element resultMapElement, ResultMapInfo resultMapInfo) {
         EntityInfo resultMapEntityInfo = resultMapInfo.getEntityInfo();
-        for (ColumnInfo relationColumnInfo : resultMapEntityInfo.getRelationColumnInfoList()) {
-            ColumnRelationInfo columnRelationInfo = relationColumnInfo.getColumnRelationInfo();
-            ManyToMany manyToMany = columnRelationInfo.getManyToMany();
-            String mappedBy = columnRelationInfo.getMappedBy();
+        for (ColumnInfo columnInfo : resultMapEntityInfo.getRelationColumnInfoList()) {
+            RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
+            RelationColumnInfo mappedByRelationColumnInfo = relationColumnInfo.getMappedByRelationColumnInfo();
+            ManyToMany manyToMany = relationColumnInfo.getManyToMany();
             if (manyToMany == null) {
-                if (StringUtils.isBlank(mappedBy)) {
-                    List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnRelationInfo.getInverseForeignKeyColumnInfoList();
+                if (mappedByRelationColumnInfo == null) {
+                    List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
                     for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
                         String referencedColumnName = inverseForeignKeyColumnInfo.getReferencedColumnName();
                         String javaColumnName = String.format("%s.%s", relationColumnInfo.getJavaColumnName(), referencedColumnName);
@@ -105,7 +103,7 @@ public class ResultMapTemplateHandler {
                         ResultMapHelper.resultColumnElement(resultMapElement, subColumnInfo);
                     }
                 } else {
-                    EntityInfo entityInfo = EntityInfoContextHolder.get(relationColumnInfo.getJavaType());
+                    /*EntityInfo entityInfo = EntityInfoContextHolder.get(relationColumnInfo.getJavaType());
                     ColumnInfo mappedByColumnInfo = entityInfo.getColumnInfo(mappedBy);
                     ColumnRelationInfo mappedByColumnRelationInfo = mappedByColumnInfo.getColumnRelationInfo();
                     List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedByColumnRelationInfo.getInverseForeignKeyColumnInfoList();
@@ -119,19 +117,16 @@ public class ResultMapTemplateHandler {
                         subColumnInfo.setDbColumnName(referenceColumnInfo.getDbColumnName());
                         subColumnInfo.setDbColumnNameAlias(referenceColumnInfo.getDbColumnNameAlias());
                         ResultMapHelper.resultColumnElement(resultMapElement, subColumnInfo);
-                    }
+                    }*/
                 }
             } else {
-                if (StringUtils.isBlank(mappedBy)) {
-                    List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnRelationInfo.getInverseForeignKeyColumnInfoList();
+                if (mappedByRelationColumnInfo == null) {
+                    List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
                     for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
 
                     }
                 } else {
-                    EntityInfo entityInfo = EntityInfoContextHolder.get(relationColumnInfo.getJavaType());
-                    ColumnInfo mappedByColumnInfo = entityInfo.getColumnInfo(mappedBy);
-                    ColumnRelationInfo mappedByColumnRelationInfo = mappedByColumnInfo.getColumnRelationInfo();
-                    List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedByColumnRelationInfo.getInverseForeignKeyColumnInfoList();
+                    List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedByRelationColumnInfo.getInverseForeignKeyColumnInfoList();
                     for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
 
                     }
@@ -165,8 +160,8 @@ public class ResultMapTemplateHandler {
 
     private void subSelect(Element resultMapElement, EntityInfo parentEntityInfo, ResultMapInfo resultMapInfo) {
         ColumnInfo columnInfo = resultMapInfo.getColumnInfo();
-        ColumnRelationInfo columnRelationInfo = columnInfo.getColumnRelationInfo();
-        Integer relationType = this.getRelationType(columnRelationInfo);
+        RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
+        Integer relationType = this.getRelationType(relationColumnInfo);
         if (relationType == 1) {
             this.associationColumnElement(resultMapElement, parentEntityInfo, resultMapInfo);
         } else if (relationType == 2) {
@@ -178,8 +173,8 @@ public class ResultMapTemplateHandler {
 
     private Element joinSelect(Element resultMapElement, ResultMapInfo resultMapRelationInfo) {
         ColumnInfo columnInfo = resultMapRelationInfo.getColumnInfo();
-        ColumnRelationInfo columnInfoAnnotationInfo = columnInfo.getColumnRelationInfo();
-        Integer relationType = this.getRelationType(columnInfoAnnotationInfo);
+        RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
+        Integer relationType = this.getRelationType(relationColumnInfo);
         if (relationType == 1) {
             Element resultMapRelationElement = this.joinAssociationColumnElement(resultMapElement, resultMapRelationInfo);
             this.addColumnElement(resultMapRelationElement, resultMapRelationInfo.getTableColumnInfoList());
@@ -211,8 +206,8 @@ public class ResultMapTemplateHandler {
         return ResultMapHelper.joinCollectionColumnElement(resultMapElement, resultMapAssociationInfo);
     }
 
-    private Integer getRelationType(ColumnRelationInfo columnRelationInfo) {
-        return ResultMapHelper.getRelationType(columnRelationInfo);
+    private Integer getRelationType(RelationColumnInfo relationColumnInfo) {
+        return ResultMapHelper.getRelationType(relationColumnInfo);
     }
 
     /**
@@ -227,16 +222,14 @@ public class ResultMapTemplateHandler {
     private String getColumn(EntityInfo parentEntityInfo, ResultMapInfo resultMapRelationInfo) {
         EntityInfo entityInfo = resultMapRelationInfo.getEntityInfo();
         ColumnInfo columnInfo = resultMapRelationInfo.getColumnInfo();
-        ColumnRelationInfo columnRelationInfo = columnInfo.getColumnRelationInfo();
-        FetchMode fetchMode = columnRelationInfo.getFetchMode();
-        ManyToMany manyToMany = columnRelationInfo.getManyToMany();
+        RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
+        RelationColumnInfo mappedByRelationColumnInfo = relationColumnInfo.getMappedByRelationColumnInfo();
+        FetchMode fetchMode = relationColumnInfo.getFetchMode();
+        ManyToMany manyToMany = relationColumnInfo.getManyToMany();
         Map<String, String> column = new HashMap();
         if (manyToMany == null) {
-            String mappedBy = columnRelationInfo.getMappedBy();
-            if (StringUtils.isNotBlank(mappedBy)) {
-                ColumnInfo mappedByColumnInfo = entityInfo.getColumnInfo(mappedBy);
-                ColumnRelationInfo mappedByColumnRelationInfo = mappedByColumnInfo.getColumnRelationInfo();
-                List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedByColumnRelationInfo.getInverseForeignKeyColumnInfoList();
+            if (mappedByRelationColumnInfo != null) {
+                List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedByRelationColumnInfo.getInverseForeignKeyColumnInfoList();
                 for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
                     ColumnInfo parentEntityColumnInfo = parentEntityInfo.getColumnInfo(inverseForeignKeyColumnInfo.getReferencedColumnName());
                     if (fetchMode == FetchMode.BATCH) {
@@ -246,7 +239,7 @@ public class ResultMapTemplateHandler {
                     }
                 }
             } else {
-                List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnRelationInfo.getInverseForeignKeyColumnInfoList();
+                List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
                 for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
                     if (fetchMode == FetchMode.BATCH) {
                         this.addNestedSelectCollection(column, inverseForeignKeyColumnInfo.getNameAlias());
@@ -256,11 +249,8 @@ public class ResultMapTemplateHandler {
                 }
             }
         } else {
-            String mappedBy = columnRelationInfo.getMappedBy();
-            if (StringUtils.isNotBlank(mappedBy)) {
-                ColumnInfo mappedByColumnInfo = entityInfo.getColumnInfo(mappedBy);
-                ColumnRelationInfo mappedByColumnRelationInfo = mappedByColumnInfo.getColumnRelationInfo();
-                List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedByColumnRelationInfo.getInverseForeignKeyColumnInfoList();
+            if (mappedByRelationColumnInfo != null) {
+                List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedByRelationColumnInfo.getInverseForeignKeyColumnInfoList();
                 for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
                     ColumnInfo parentEntityColumnInfo = parentEntityInfo.getColumnInfo(inverseForeignKeyColumnInfo.getReferencedColumnName());
                     if (fetchMode == FetchMode.BATCH) {
@@ -270,7 +260,7 @@ public class ResultMapTemplateHandler {
                     }
                 }
             } else {
-                List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = columnRelationInfo.getForeignKeyColumnInfoList();
+                List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = relationColumnInfo.getForeignKeyColumnInfoList();
                 for (ForeignKeyColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
                     ColumnInfo parentEntityColumnInfo = parentEntityInfo.getColumnInfo(foreignKeyColumnInfo.getReferencedColumnName());
                     if (fetchMode == FetchMode.BATCH) {

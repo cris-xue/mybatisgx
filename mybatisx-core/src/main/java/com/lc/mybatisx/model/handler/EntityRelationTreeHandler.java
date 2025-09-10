@@ -91,21 +91,21 @@ public class EntityRelationTreeHandler {
             List<ColumnInfo> tableColumnInfoList = entityInfo.getTableColumnInfoList();
             for (int i = 0; i < tableColumnInfoList.size(); i++) {
                 ColumnInfo columnInfo = tableColumnInfoList.get(i);
-                ColumnRelationInfo columnRelationInfo = columnInfo.getColumnRelationInfo();
-                if (columnRelationInfo == null) {
+                if (!(columnInfo instanceof RelationColumnInfo)) {
                     String name = columnInfo.getDbColumnName();
                     String nameAlias = this.buildNameAlias(tableName, name, level, i);
                     columnInfo.setDbColumnNameAlias(nameAlias);
                 } else {
-                    ManyToMany manyToMany = columnRelationInfo.getManyToMany();
+                    RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
+                    ManyToMany manyToMany = relationColumnInfo.getManyToMany();
                     if (manyToMany == null) {
-                        List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnRelationInfo.getInverseForeignKeyColumnInfoList();
+                        List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
                         this.processForeignKeyColumnAlias(inverseForeignKeyColumnInfoList, tableName, level, i);
                     } else {
-                        List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = columnRelationInfo.getForeignKeyColumnInfoList();
+                        List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = relationColumnInfo.getForeignKeyColumnInfoList();
                         this.processForeignKeyColumnAlias(foreignKeyColumnInfoList, tableName, level, i);
 
-                        List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnRelationInfo.getInverseForeignKeyColumnInfoList();
+                        List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
                         this.processForeignKeyColumnAlias(inverseForeignKeyColumnInfoList, tableName, level, i);
                     }
                 }

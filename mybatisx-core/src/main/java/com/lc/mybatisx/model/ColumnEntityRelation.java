@@ -57,8 +57,10 @@ public class ColumnEntityRelation {
      * 当前实体是否是关系维护方
      * @return true：是关系维护方 false：关系被维护方
      */
-    public Boolean getMappedBy() {
-        String mappedBy = this.columnInfo.getColumnRelationInfo().getMappedBy();
+    public Boolean isMappedBy() {
+        RelationColumnInfo relationColumnInfo = (RelationColumnInfo) this.columnInfo;
+        RelationColumnInfo mappedByRelationColumnInfo = relationColumnInfo.getMappedByRelationColumnInfo();
+        String mappedBy = mappedByRelationColumnInfo.getMappedBy();
         if (StringUtils.isBlank(mappedBy)) {
             return false;
         } else {
@@ -74,28 +76,32 @@ public class ColumnEntityRelation {
      * 是否是多对多关系
      * @return true: 表示是多对多关系 false: 表示不是多对多关系
      */
-    public Boolean getManyToMany() {
-        ManyToMany manyToMany = this.columnInfo.getColumnRelationInfo().getManyToMany();
-        return manyToMany != null;
+    public Boolean isManyToMany() {
+        if (this.columnInfo instanceof RelationColumnInfo) {
+            RelationColumnInfo relationColumnInfo = (RelationColumnInfo) this.columnInfo;
+            ManyToMany manyToMany = relationColumnInfo.getManyToMany();
+            return manyToMany != null;
+        }
+        return false;
     }
 
     public List<ForeignKeyColumnInfo> getForeignKeyColumnInfoList() {
-        if (this.getMappedBy()) {
-            ColumnRelationInfo columnRelationInfo = this.columnInfo.getColumnRelationInfo();
-            ColumnInfo mappedByColumnInfo = this.entityInfo.getColumnInfo(columnRelationInfo.getMappedBy());
-            return mappedByColumnInfo.getColumnRelationInfo().getForeignKeyColumnInfoList();
+        RelationColumnInfo relationColumnInfo = (RelationColumnInfo) this.columnInfo;
+        if (this.isMappedBy()) {
+            RelationColumnInfo mappedByRelationColumnInfo = (RelationColumnInfo) this.entityInfo.getColumnInfo(relationColumnInfo.getMappedBy());
+            return mappedByRelationColumnInfo.getForeignKeyColumnInfoList();
         } else {
-            return this.columnInfo.getColumnRelationInfo().getForeignKeyColumnInfoList();
+            return relationColumnInfo.getForeignKeyColumnInfoList();
         }
     }
 
     public List<ForeignKeyColumnInfo> getInverseForeignKeyColumnInfoList() {
-        if (this.getMappedBy()) {
-            ColumnRelationInfo columnRelationInfo = this.columnInfo.getColumnRelationInfo();
-            ColumnInfo mappedByColumnInfo = this.entityInfo.getColumnInfo(columnRelationInfo.getMappedBy());
-            return mappedByColumnInfo.getColumnRelationInfo().getInverseForeignKeyColumnInfoList();
+        RelationColumnInfo relationColumnInfo = (RelationColumnInfo) this.columnInfo;
+        if (this.isMappedBy()) {
+            RelationColumnInfo mappedByRelationColumnInfo = (RelationColumnInfo) this.entityInfo.getColumnInfo(relationColumnInfo.getMappedBy());
+            return mappedByRelationColumnInfo.getInverseForeignKeyColumnInfoList();
         } else {
-            return this.columnInfo.getColumnRelationInfo().getInverseForeignKeyColumnInfoList();
+            return relationColumnInfo.getInverseForeignKeyColumnInfoList();
         }
     }
 }

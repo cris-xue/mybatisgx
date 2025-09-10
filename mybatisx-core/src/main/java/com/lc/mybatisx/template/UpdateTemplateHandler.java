@@ -81,8 +81,7 @@ public class UpdateTemplateHandler {
                 continue;
             }
 
-            ColumnRelationInfo columnRelationInfo = tableColumnInfo.getColumnRelationInfo();
-            if (columnRelationInfo == null) {
+            if (!(tableColumnInfo instanceof RelationColumnInfo)) {
                 if (methodInfo.getDynamic()) {
                     Element setTrimIfElement = setTrimElement.addElement("if");
                     setTrimIfElement.addAttribute("test", buildTestNotNull(javaColumnName));
@@ -93,7 +92,8 @@ public class UpdateTemplateHandler {
                     setTrimElement.addText(String.format("%s = %s", dbColumnName, javaColumn));
                 }
             } else {
-                List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnRelationInfo.getInverseForeignKeyColumnInfoList();
+                RelationColumnInfo relationColumnInfo = (RelationColumnInfo) tableColumnInfo;
+                List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
                 for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
                     String referencedColumnName = inverseForeignKeyColumnInfo.getReferencedColumnName();
                     String nestedJavaColumnName = javaColumnName + "." + referencedColumnName;

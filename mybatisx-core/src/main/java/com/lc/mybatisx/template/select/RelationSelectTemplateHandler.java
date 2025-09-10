@@ -58,10 +58,10 @@ public class RelationSelectTemplateHandler {
         Element mapperElement = document.addElement("mapper");
         Element selectElement = RelationSelectHelper.buildSelectElement(mapperElement, entityRelationSelectInfo, selectSql);
 
-        ColumnRelationInfo columnRelationInfo = entityRelationSelectInfo.getColumnInfo().getColumnRelationInfo();
-        ManyToMany manyToMany = columnRelationInfo.getManyToMany();
+        RelationColumnInfo relationColumnInfo = (RelationColumnInfo) entityRelationSelectInfo.getColumnInfo();
+        ManyToMany manyToMany = relationColumnInfo.getManyToMany();
         if (manyToMany == null) {
-            if (columnRelationInfo.getFetchMode() == FetchMode.BATCH) {
+            if (relationColumnInfo.getFetchMode() == FetchMode.BATCH) {
                 Expression whereCondition = batchRelationSelect.buildOneToOneWhere(entityRelationSelectInfo);
                 Element whereElement = RelationSelectHelper.buildWhereElement(selectElement);
                 RelationSelectHelper.buildForeachElement(whereElement, whereCondition);
@@ -70,7 +70,7 @@ public class RelationSelectTemplateHandler {
                 RelationSelectHelper.buildWhereElement(selectElement, whereCondition);
             }
         } else {
-            if (columnRelationInfo.getFetchMode() == FetchMode.BATCH) {
+            if (relationColumnInfo.getFetchMode() == FetchMode.BATCH) {
                 Expression whereCondition = batchRelationSelect.buildManyToManyWhere(entityRelationSelectInfo);
                 Element whereElement = RelationSelectHelper.buildWhereElement(selectElement);
                 RelationSelectHelper.buildForeachElement(whereElement, whereCondition);
@@ -94,12 +94,10 @@ public class RelationSelectTemplateHandler {
 
         public Expression buildOneToOneWhere(EntityRelationSelectInfo entityRelationSelectInfo) {
             EntityInfo relationEntityInfo = entityRelationSelectInfo.getEntityInfo();
-            ColumnRelationInfo columnRelationInfo = entityRelationSelectInfo.getColumnInfo().getColumnRelationInfo();
-            String mappedBy = columnRelationInfo.getMappedBy();
-            if (StringUtils.isNotBlank(mappedBy)) {
-                ColumnInfo mappedByColumnInfo = relationEntityInfo.getColumnInfo(mappedBy);
-                ColumnRelationInfo mappedByColumnRelationInfo = mappedByColumnInfo.getColumnRelationInfo();
-                List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedByColumnRelationInfo.getInverseForeignKeyColumnInfoList();
+            RelationColumnInfo relationColumnInfo = (RelationColumnInfo) entityRelationSelectInfo.getColumnInfo();
+            RelationColumnInfo mappedByRelationColumnInfo = relationColumnInfo.getMappedByRelationColumnInfo();
+            if (mappedByRelationColumnInfo != null) {
+                List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedByRelationColumnInfo.getInverseForeignKeyColumnInfoList();
                 Expression whereCondition = null;
                 for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
                     String leftEq = String.format("%s.%s", relationEntityInfo.getTableName(), inverseForeignKeyColumnInfo.getName());
@@ -108,7 +106,7 @@ public class RelationSelectTemplateHandler {
                 }
                 return whereCondition;
             } else {
-                List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnRelationInfo.getInverseForeignKeyColumnInfoList();
+                List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
                 Expression whereCondition = null;
                 for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
                     String leftEq = String.format("%s.%s", relationEntityInfo.getTableName(), inverseForeignKeyColumnInfo.getReferencedColumnName());
@@ -122,17 +120,15 @@ public class RelationSelectTemplateHandler {
         public Expression buildManyToManyWhere(EntityRelationSelectInfo entityRelationSelectInfo) {
             EntityInfo relationEntityInfo = entityRelationSelectInfo.getEntityInfo();
             String middleTableName = entityRelationSelectInfo.getMiddleTableName();
-            ColumnRelationInfo columnRelationInfo = entityRelationSelectInfo.getColumnInfo().getColumnRelationInfo();
-            String mappedBy = columnRelationInfo.getMappedBy();
-            if (StringUtils.isNotBlank(mappedBy)) {
+            RelationColumnInfo relationColumnInfo = (RelationColumnInfo) entityRelationSelectInfo.getColumnInfo();
+            RelationColumnInfo mappedByRelationColumnInfo = relationColumnInfo.getMappedByRelationColumnInfo();
+            if (mappedByRelationColumnInfo != null) {
                 // user_role left join role on() user_role.role_id = role.id where user_role.user_id = user.id
-                ColumnInfo mappedByColumnInfo = relationEntityInfo.getColumnInfo(mappedBy);
-                ColumnRelationInfo mappedByColumnRelationInfo = mappedByColumnInfo.getColumnRelationInfo();
-                List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedByColumnRelationInfo.getInverseForeignKeyColumnInfoList();
+                List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedByRelationColumnInfo.getInverseForeignKeyColumnInfoList();
                 return this.buildManyToManyWhereExpression(middleTableName, inverseForeignKeyColumnInfoList);
             } else {
                 // user_role left join user on() user_role.user_id = user.id where user_role.role_id = role.id
-                List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = columnRelationInfo.getForeignKeyColumnInfoList();
+                List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = relationColumnInfo.getForeignKeyColumnInfoList();
                 return this.buildManyToManyWhereExpression(middleTableName, foreignKeyColumnInfoList);
             }
         }
@@ -158,12 +154,10 @@ public class RelationSelectTemplateHandler {
 
         public Expression buildOneToOneWhere(EntityRelationSelectInfo entityRelationSelectInfo) {
             EntityInfo relationEntityInfo = entityRelationSelectInfo.getEntityInfo();
-            ColumnRelationInfo columnRelationInfo = entityRelationSelectInfo.getColumnInfo().getColumnRelationInfo();
-            String mappedBy = columnRelationInfo.getMappedBy();
-            if (StringUtils.isNotBlank(mappedBy)) {
-                ColumnInfo mappedByColumnInfo = relationEntityInfo.getColumnInfo(mappedBy);
-                ColumnRelationInfo mappedByColumnRelationInfo = mappedByColumnInfo.getColumnRelationInfo();
-                List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedByColumnRelationInfo.getInverseForeignKeyColumnInfoList();
+            RelationColumnInfo relationColumnInfo = (RelationColumnInfo) entityRelationSelectInfo.getColumnInfo();
+            RelationColumnInfo mappedByRelationColumnInfo = relationColumnInfo.getMappedByRelationColumnInfo();
+            if (mappedByRelationColumnInfo != null) {
+                List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedByRelationColumnInfo.getInverseForeignKeyColumnInfoList();
                 Expression whereConditionExpression = null;
                 // FROM user_detail WHERE user_detail.user_id = #{user.id} or user_detail.user_id = #{user.id}
                 for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
@@ -173,7 +167,7 @@ public class RelationSelectTemplateHandler {
                 }
                 return whereConditionExpression;
             } else {
-                List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnRelationInfo.getInverseForeignKeyColumnInfoList();
+                List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
                 Expression whereConditionExpression = null;
                 for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
                     String leftEq = String.format("%s.%s", relationEntityInfo.getTableName(), inverseForeignKeyColumnInfo.getReferencedColumnName());
@@ -187,17 +181,15 @@ public class RelationSelectTemplateHandler {
         public Expression buildManyToManyWhere(EntityRelationSelectInfo entityRelationSelectInfo) {
             EntityInfo relationEntityInfo = entityRelationSelectInfo.getEntityInfo();
             String middleTableName = entityRelationSelectInfo.getMiddleTableName();
-            ColumnRelationInfo columnRelationInfo = entityRelationSelectInfo.getColumnInfo().getColumnRelationInfo();
-            String mappedBy = columnRelationInfo.getMappedBy();
-            if (StringUtils.isNotBlank(mappedBy)) {
+            RelationColumnInfo relationColumnInfo = (RelationColumnInfo) entityRelationSelectInfo.getColumnInfo();
+            RelationColumnInfo mappedByRelationColumnInfo = relationColumnInfo.getMappedByRelationColumnInfo();
+            if (mappedByRelationColumnInfo != null) {
                 // user_role left join role on() user_role.role_id = role.id where user_role.user_id = user.id
-                ColumnInfo mappedByColumnInfo = relationEntityInfo.getColumnInfo(mappedBy);
-                ColumnRelationInfo mappedByColumnRelationInfo = mappedByColumnInfo.getColumnRelationInfo();
-                List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedByColumnRelationInfo.getInverseForeignKeyColumnInfoList();
+                List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedByRelationColumnInfo.getInverseForeignKeyColumnInfoList();
                 return this.buildManyToManyWhereExpression(middleTableName, inverseForeignKeyColumnInfoList);
             } else {
                 // user_role left join user on() user_role.user_id = user.id where user_role.role_id = role.id
-                List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = columnRelationInfo.getForeignKeyColumnInfoList();
+                List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = relationColumnInfo.getForeignKeyColumnInfoList();
                 return this.buildManyToManyWhereExpression(middleTableName, foreignKeyColumnInfoList);
             }
         }

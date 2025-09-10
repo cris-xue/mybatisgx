@@ -3,6 +3,7 @@ package com.lc.mybatisx.template.select;
 import com.lc.mybatisx.model.ColumnInfo;
 import com.lc.mybatisx.model.EntityRelationSelectInfo;
 import com.lc.mybatisx.model.ForeignKeyColumnInfo;
+import com.lc.mybatisx.model.RelationColumnInfo;
 import com.lc.mybatisx.template.ConditionBuilder;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
@@ -17,7 +18,8 @@ public class RelationSelectHelper {
         selectElement.addAttribute("id", entityRelationSelectInfo.getId());
         selectElement.addAttribute("resultMap", entityRelationSelectInfo.getResultMapId());
         ColumnInfo columnInfo = entityRelationSelectInfo.getColumnInfo();
-        String fetchSize = columnInfo.getColumnRelationInfo().getFetchSize();
+        RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
+        String fetchSize = relationColumnInfo.getFetchSize();
         if (StringUtils.isNotBlank(fetchSize)) {
             selectElement.addAttribute("fetchSize", fetchSize);
         }

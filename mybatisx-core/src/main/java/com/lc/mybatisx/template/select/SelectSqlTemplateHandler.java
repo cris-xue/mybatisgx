@@ -15,7 +15,6 @@ import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +41,7 @@ public class SelectSqlTemplateHandler {
      * @throws JSQLParserException
      */
     public String buildSelectSql(EntityRelationSelectInfo entityRelationSelectInfo) throws JSQLParserException {
-        Boolean isManyToMany = entityRelationSelectInfo.getManyToMany();
+        Boolean isManyToMany = entityRelationSelectInfo.isManyToMany();
         String mainTableName = isManyToMany ? entityRelationSelectInfo.getMiddleTableName() : entityRelationSelectInfo.getEntityTableName();
         List<EntityInfo> entityInfoList = this.getEntityInfoList(entityRelationSelectInfo);
         PlainSelect plainSelect = this.buildMainSelect(mainTableName, entityInfoList);
@@ -97,7 +96,7 @@ public class SelectSqlTemplateHandler {
      * @param rightEntityRelationSelectInfoList
      */
     private void buildLeftJoinOn(PlainSelect plainSelect, EntityRelationSelectInfo leftEntityRelationSelectInfo, List<EntityRelationSelectInfo> rightEntityRelationSelectInfoList) {
-        Boolean leftManyToMany = leftEntityRelationSelectInfo.getManyToMany();
+        Boolean leftManyToMany = leftEntityRelationSelectInfo.isManyToMany();
         if (leftManyToMany) {
             // 左表是多对多的处理【user_role left join role on user_role.user_id = role.id】
             String middleTableName = leftEntityRelationSelectInfo.getMiddleTableName();
@@ -105,7 +104,7 @@ public class SelectSqlTemplateHandler {
             Join join = this.buildLeftJoin(entityTableName);
 
             List<ForeignKeyColumnInfo> foreignKeyColumnInfoList;
-            Boolean isMappedBy = leftEntityRelationSelectInfo.getMappedBy();
+            Boolean isMappedBy = leftEntityRelationSelectInfo.isMappedBy();
             if (isMappedBy) {
                 foreignKeyColumnInfoList = leftEntityRelationSelectInfo.getForeignKeyColumnInfoList();
             } else {
@@ -115,7 +114,7 @@ public class SelectSqlTemplateHandler {
             plainSelect.addJoins(join);
         }
         for (EntityRelationSelectInfo rightEntityRelationSelectInfo : rightEntityRelationSelectInfoList) {
-            Boolean rightManyToMany = rightEntityRelationSelectInfo.getManyToMany();
+            Boolean rightManyToMany = rightEntityRelationSelectInfo.isManyToMany();
             if (rightManyToMany) {
                 // 右表是多对多的处理【role left join role_menu on role.id = role_menu.role_id】
                 String entityTableName = leftEntityRelationSelectInfo.getEntityTableName();
@@ -123,7 +122,7 @@ public class SelectSqlTemplateHandler {
                 Join join = this.buildLeftJoin(middleTableName);
 
                 List<ForeignKeyColumnInfo> foreignKeyColumnInfoList;
-                Boolean isMappedBy = rightEntityRelationSelectInfo.getMappedBy();
+                Boolean isMappedBy = rightEntityRelationSelectInfo.isMappedBy();
                 if (isMappedBy) {
                     foreignKeyColumnInfoList = rightEntityRelationSelectInfo.getInverseForeignKeyColumnInfoList();
                 } else {
@@ -161,20 +160,19 @@ public class SelectSqlTemplateHandler {
         Table table = new Table(entityInfo.getTableName());
         // 添加非外键表字段
         for (ColumnInfo columnInfo : entityInfo.getTableColumnInfoList()) {
-            ColumnRelationInfo columnRelationInfo = columnInfo.getColumnRelationInfo();
-            if (columnRelationInfo == null) {
+            if (!(columnInfo instanceof RelationColumnInfo)) {
                 SelectItem<?> selectItem = this.getSelectItem(table, columnInfo.getDbColumnName(), columnInfo.getDbColumnNameAlias());
                 selectItemList.add(selectItem);
             }
         }
         // 添加外键表字段
         for (ColumnInfo columnInfo : entityInfo.getRelationColumnInfoList()) {
-            ColumnRelationInfo columnRelationInfo = columnInfo.getColumnRelationInfo();
-            ManyToMany manyToMany = columnRelationInfo.getManyToMany();
-            String mappedBy = columnRelationInfo.getMappedBy();
-            if (manyToMany == null && StringUtils.isBlank(mappedBy)) {
+            RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
+            ManyToMany manyToMany = relationColumnInfo.getManyToMany();
+            RelationColumnInfo mappedByRelationColumnInfo = relationColumnInfo.getMappedByRelationColumnInfo();
+            if (manyToMany == null && mappedByRelationColumnInfo == null) {
                 // 只有一对一、一对多、多对一的时候关联字段才需要作为表字段。多对多存在中间表，关联字段在中间中表，不需要作为实体表字段
-                List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnRelationInfo.getInverseForeignKeyColumnInfoList();
+                List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
                 for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
                     SelectItem<?> selectItem = this.getSelectItem(table, inverseForeignKeyColumnInfo.getName(), inverseForeignKeyColumnInfo.getNameAlias());
                     selectItemList.add(selectItem);
@@ -197,7 +195,7 @@ public class SelectSqlTemplateHandler {
         List<Expression> onExpressionList = new ArrayList<>();
         String leftEntityTableName = leftEntityRelationSelectInfo.getEntityTableName();
         String rightEntityTableName = rightEntityRelationSelectInfo.getEntityTableName();
-        Boolean isMappedBy = rightEntityRelationSelectInfo.getMappedBy();
+        Boolean isMappedBy = rightEntityRelationSelectInfo.isMappedBy();
         List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = rightEntityRelationSelectInfo.getInverseForeignKeyColumnInfoList();
         if (isMappedBy) {
             for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {

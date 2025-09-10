@@ -8,7 +8,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -25,22 +24,17 @@ public class EntityRelationHandler {
 
     private TableColumnNameAlias tableColumnNameAlias = new TableColumnNameAlias();
 
-    public EntityRelationTree execute(MapperInfo mapperInfo, MethodInfo methodInfo) {
-        String action = methodInfo.getAction();
-        if (Arrays.asList("insert", "delete", "update").contains(action)) {
-            return null;
+    public void execute(List<Class<?>> entityClassList) {
+        for (Class<?> entityClass : entityClassList) {
+            this.execute(entityClass);
         }
+    }
 
-        MethodReturnInfo methodReturnInfo = methodInfo.getMethodReturnInfo();
-        Class<?> resultClass = methodReturnInfo.getType();
-        EntityInfo entityInfo = EntityInfoContextHolder.get(resultClass);
-
+    public void execute(Class<?> entityClass) {
+        EntityInfo entityInfo = EntityInfoContextHolder.get(entityClass);
         // 解决循环引用问题
-        EntityRelationDependencyTree entityRelationDependencyTree = EntityRelationDependencyTree.build(null, resultClass);
-        EntityRelationTree entityRelationInfo = this.processRelationColumnInfo(1, entityRelationDependencyTree, entityInfo, null);
-
-        mapperInfo.addEntityRelationTree(entityRelationInfo);
-        return entityRelationInfo;
+        EntityRelationDependencyTree entityRelationDependencyTree = EntityRelationDependencyTree.build(null, entityClass);
+        this.processRelationColumnInfo(1, entityRelationDependencyTree, entityInfo, null);
     }
 
     private EntityRelationTree processRelationColumnInfo(

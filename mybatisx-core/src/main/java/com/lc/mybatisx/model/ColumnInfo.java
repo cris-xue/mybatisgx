@@ -78,10 +78,6 @@ public class ColumnInfo {
      * 生成值注解
      */
     private GenerateValue generateValue;
-    /**
-     * 字段关系信息，该字段有值表示该字段是一个关联字段，否则是一个表字段
-     */
-    private ColumnRelationInfo columnRelationInfo;
 
     public Class<?> getJavaType() {
         return javaType;
@@ -220,12 +216,4 @@ public class ColumnInfo {
     public void setGenerateValue(GenerateValue generateValue) {
         this.generateValue = generateValue;
     }
-
-    /*public ColumnRelationInfo getColumnRelationInfo() {
-        return columnRelationInfo;
-    }
-
-    public void setColumnRelationInfo(ColumnRelationInfo columnRelationInfo) {
-        this.columnRelationInfo = columnRelationInfo;
-    }*/
 }

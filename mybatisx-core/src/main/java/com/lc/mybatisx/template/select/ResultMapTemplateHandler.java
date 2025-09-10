@@ -6,7 +6,6 @@ import com.lc.mybatisx.annotation.ManyToMany;
 import com.lc.mybatisx.model.*;
 import com.lc.mybatisx.utils.XmlUtils;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.parsing.XPathParser;
 import org.dom4j.Document;
@@ -49,17 +48,6 @@ public class ResultMapTemplateHandler {
                 ResultMapHelper.idColumnElement(resultMapElement, tableColumnInfo);
             } else if (!(tableColumnInfo instanceof RelationColumnInfo)) {
                 ResultMapHelper.resultColumnElement(resultMapElement, tableColumnInfo);
-            }
-        }
-    }
-
-    private void addColumnRelationElement(Element resultMapElement, ResultMapInfo resultMapInfo, ColumnInfo columnInfo, ColumnRelationInfo columnRelationInfo) {
-        ManyToMany manyToMany = columnRelationInfo.getManyToMany();
-        String mappedBy = columnRelationInfo.getMappedBy();
-        if (manyToMany == null && StringUtils.isBlank(mappedBy)) {
-            List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnRelationInfo.getInverseForeignKeyColumnInfoList();
-            for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
-                ResultMapHelper.resultColumnElement(resultMapElement, inverseForeignKeyColumnInfo);
             }
         }
     }

@@ -2,9 +2,10 @@ package com.lc.mybatisx.context;
 
 import com.lc.mybatisx.annotation.Entity;
 import com.lc.mybatisx.dao.Dao;
-import com.lc.mybatisx.model.*;
+import com.lc.mybatisx.model.EntityInfo;
+import com.lc.mybatisx.model.MapperInfo;
+import com.lc.mybatisx.model.MapperTemplateInfo;
 import com.lc.mybatisx.model.handler.EntityInfoHandler;
-import com.lc.mybatisx.model.handler.EntityRelationHandler;
 import com.lc.mybatisx.model.handler.MapperInfoHandler;
 import com.lc.mybatisx.template.StatementTemplateHandler;
 import com.lc.mybatisx.template.select.RelationSelectTemplateHandler;
@@ -41,7 +42,6 @@ public class MybatisxContextLoader {
     private static final MetadataReaderFactory METADATA_READER_FACTORY = new CachingMetadataReaderFactory();
 
     private static final EntityInfoHandler entityInfoHandler = new EntityInfoHandler();
-    private static final EntityRelationHandler entityRelationHandler = new EntityRelationHandler();
     private static final MapperInfoHandler mapperInfoHandler = new MapperInfoHandler();
 
     public void load(String[] entityBasePackages, String[] daoBasePackages, List<Resource> repositoryResourceList) {
@@ -90,50 +90,6 @@ public class MybatisxContextLoader {
 
     private void processEntityRelation() {
         entityInfoHandler.processColumnRelation();
-        /*for (Class<?> entityClass : entityClassList) {
-            EntityInfo entityInfo = EntityInfoContextHolder.get(entityClass);
-            List<ColumnInfo> relationColumnInfoList = entityInfo.getRelationColumnInfoList();
-            for (ColumnInfo columnInfo : relationColumnInfoList) {
-                RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
-                String mappedBy = relationColumnInfo.getMappedBy();
-                if (StringUtils.isNotBlank(mappedBy)) {
-                    ColumnInfo mappedByRelationColumnInfo = this.validateEntityRelation(relationColumnInfo, mappedBy);
-                    relationColumnInfo.setMappedByRelationColumnInfo((RelationColumnInfo) mappedByRelationColumnInfo);
-                } else {
-                    RelationType relationType = relationColumnInfo.getRelationType();
-                    if (relationType != RelationType.MANY_TO_MANY) {
-                        List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
-                        for (ForeignKeyColumnInfo inverseForeignKeyColumn : inverseForeignKeyColumnInfoList) {
-                            Class<?> javaType = relationColumnInfo.getJavaType();
-                            EntityInfo relationColumnEntityInfo = EntityInfoContextHolder.get(javaType);
-
-                            String name = inverseForeignKeyColumn.getName();
-                            String referencedColumnName = inverseForeignKeyColumn.getReferencedColumnName();
-                            inverseForeignKeyColumn.setColumnInfo(null);
-
-                            ColumnInfo columnInfo111 = relationColumnEntityInfo.getDbColumnInfo(referencedColumnName);
-                            inverseForeignKeyColumn.setReferencedColumnInfo(columnInfo111);
-                        }
-                    } else {
-                        relationColumnInfo.getForeignKeyColumnInfoList();
-                        relationColumnInfo.getInverseForeignKeyColumnInfoList();
-                    }
-                }
-            }
-        }*/
-    }
-
-    private ColumnInfo validateEntityRelation(RelationColumnInfo relationColumnInfo, String mappedBy) {
-        Class<?> javaType = relationColumnInfo.getJavaType();
-        EntityInfo relationColumnEntityInfo = EntityInfoContextHolder.get(javaType);
-        if (relationColumnEntityInfo == null) {
-            throw new RuntimeException("实体类" + javaType + "不存在");
-        }
-        ColumnInfo mappedByRelationColumnInfo = relationColumnEntityInfo.getColumnInfo(mappedBy);
-        if (mappedByRelationColumnInfo == null) {
-            throw new RuntimeException("实体类" + javaType + "不存在" + mappedBy + "字段");
-        }
-        return mappedByRelationColumnInfo;
     }
 
     private List<Resource> getDaoResourceList(String basePackage) {

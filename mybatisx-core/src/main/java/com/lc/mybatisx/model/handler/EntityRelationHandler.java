@@ -24,17 +24,12 @@ public class EntityRelationHandler {
 
     private TableColumnNameAlias tableColumnNameAlias = new TableColumnNameAlias();
 
-    public void execute(List<Class<?>> entityClassList) {
-        for (Class<?> entityClass : entityClassList) {
-            EntityInfo entityInfo = EntityInfoContextHolder.get(entityClass);
-            this.processEntityRelation(entityInfo);
-        }
-        for (Class<?> entityClass : entityClassList) {
-            EntityInfo entityInfo = EntityInfoContextHolder.get(entityClass);
-            // 解决循环引用问题
-            EntityRelationDependencyTree entityRelationDependencyTree = EntityRelationDependencyTree.build(null, entityClass);
-            this.processRelationColumnInfo(1, entityRelationDependencyTree, entityInfo, null);
-        }
+    public EntityRelationTree execute(Class<?> entityClass) {
+        EntityInfo entityInfo = EntityInfoContextHolder.get(entityClass);
+        this.processEntityRelation(entityInfo);
+        EntityRelationDependencyTree entityRelationDependencyTree = EntityRelationDependencyTree.build(null, entityClass);
+        EntityRelationTree entityRelationTree = this.processRelationColumnInfo(1, entityRelationDependencyTree, entityInfo, null);
+        return entityRelationTree;
     }
 
     private EntityRelationTree processRelationColumnInfo(

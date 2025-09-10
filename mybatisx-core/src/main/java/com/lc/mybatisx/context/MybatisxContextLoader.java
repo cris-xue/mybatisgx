@@ -89,8 +89,7 @@ public class MybatisxContextLoader {
     }
 
     private void processEntityRelation() {
-        List<Class<?>> entityClassList = EntityInfoContextHolder.getEntityClassList();
-        this.entityRelationHandler.execute(entityClassList);
+        entityInfoHandler.processColumnRelation();
         /*for (Class<?> entityClass : entityClassList) {
             EntityInfo entityInfo = EntityInfoContextHolder.get(entityClass);
             List<ColumnInfo> relationColumnInfoList = entityInfo.getRelationColumnInfoList();

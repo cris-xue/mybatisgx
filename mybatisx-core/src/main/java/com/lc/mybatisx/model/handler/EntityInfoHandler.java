@@ -1,6 +1,7 @@
 package com.lc.mybatisx.model.handler;
 
 import com.lc.mybatisx.annotation.Table;
+import com.lc.mybatisx.context.EntityInfoContextHolder;
 import com.lc.mybatisx.model.ColumnInfo;
 import com.lc.mybatisx.model.EntityInfo;
 import org.slf4j.Logger;
@@ -27,5 +28,13 @@ public class EntityInfoHandler {
         entityInfo.setClazzName(entityClass.getName());
         entityInfo.setColumnInfoList(columnInfoList);
         return entityInfo;
+    }
+
+    public void processColumnRelation() {
+        List<Class<?>> entityClassList = EntityInfoContextHolder.getEntityClassList();
+        for (Class<?> entityClass : entityClassList) {
+            EntityInfo entityInfo = EntityInfoContextHolder.get(entityClass);
+            this.columnInfoHandler.processRelation(entityInfo);
+        }
     }
 }

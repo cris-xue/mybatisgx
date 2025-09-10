@@ -4,9 +4,8 @@ import com.google.common.base.CaseFormat;
 import com.google.common.collect.Maps;
 import com.lc.mybatisx.annotation.*;
 import com.lc.mybatisx.annotation.handler.GenerateValueHandler;
-import com.lc.mybatisx.model.ColumnInfo;
-import com.lc.mybatisx.model.ForeignKeyColumnInfo;
-import com.lc.mybatisx.model.RelationColumnInfo;
+import com.lc.mybatisx.context.EntityInfoContextHolder;
+import com.lc.mybatisx.model.*;
 import com.lc.mybatisx.utils.GenericUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -206,5 +205,49 @@ public class ColumnInfoHandler {
             }
         }
         return foreignKeyColumnInfoList;
+    }
+
+    public void processRelation(EntityInfo entityInfo) {
+        List<ColumnInfo> relationColumnInfoList = entityInfo.getRelationColumnInfoList();
+        for (ColumnInfo columnInfo : relationColumnInfoList) {
+            RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
+            String mappedBy = relationColumnInfo.getMappedBy();
+            if (StringUtils.isNotBlank(mappedBy)) {
+                ColumnInfo mappedByRelationColumnInfo = this.validateEntityRelation(relationColumnInfo, mappedBy);
+                relationColumnInfo.setMappedByRelationColumnInfo((RelationColumnInfo) mappedByRelationColumnInfo);
+            } else {
+                RelationType relationType = relationColumnInfo.getRelationType();
+                if (relationType != RelationType.MANY_TO_MANY) {
+                    List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
+                    for (ForeignKeyColumnInfo inverseForeignKeyColumn : inverseForeignKeyColumnInfoList) {
+                        Class<?> javaType = relationColumnInfo.getJavaType();
+                        EntityInfo relationColumnEntityInfo = EntityInfoContextHolder.get(javaType);
+
+                        String name = inverseForeignKeyColumn.getName();
+                        String referencedColumnName = inverseForeignKeyColumn.getReferencedColumnName();
+                        inverseForeignKeyColumn.setColumnInfo(null);
+
+                        ColumnInfo columnInfo111 = relationColumnEntityInfo.getDbColumnInfo(referencedColumnName);
+                        inverseForeignKeyColumn.setReferencedColumnInfo(columnInfo111);
+                    }
+                } else {
+                    relationColumnInfo.getForeignKeyColumnInfoList();
+                    relationColumnInfo.getInverseForeignKeyColumnInfoList();
+                }
+            }
+        }
+    }
+
+    private ColumnInfo validateEntityRelation(RelationColumnInfo relationColumnInfo, String mappedBy) {
+        Class<?> javaType = relationColumnInfo.getJavaType();
+        EntityInfo relationColumnEntityInfo = EntityInfoContextHolder.get(javaType);
+        if (relationColumnEntityInfo == null) {
+            throw new RuntimeException("实体类" + javaType + "不存在");
+        }
+        ColumnInfo mappedByRelationColumnInfo = relationColumnEntityInfo.getColumnInfo(mappedBy);
+        if (mappedByRelationColumnInfo == null) {
+            throw new RuntimeException("实体类" + javaType + "不存在" + mappedBy + "字段");
+        }
+        return mappedByRelationColumnInfo;
     }
 }

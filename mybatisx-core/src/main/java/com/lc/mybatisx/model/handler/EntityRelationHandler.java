@@ -26,15 +26,15 @@ public class EntityRelationHandler {
 
     public void execute(List<Class<?>> entityClassList) {
         for (Class<?> entityClass : entityClassList) {
-            this.execute(entityClass);
+            EntityInfo entityInfo = EntityInfoContextHolder.get(entityClass);
+            this.processEntityRelation(entityInfo);
         }
-    }
-
-    public void execute(Class<?> entityClass) {
-        EntityInfo entityInfo = EntityInfoContextHolder.get(entityClass);
-        // 解决循环引用问题
-        EntityRelationDependencyTree entityRelationDependencyTree = EntityRelationDependencyTree.build(null, entityClass);
-        this.processRelationColumnInfo(1, entityRelationDependencyTree, entityInfo, null);
+        for (Class<?> entityClass : entityClassList) {
+            EntityInfo entityInfo = EntityInfoContextHolder.get(entityClass);
+            // 解决循环引用问题
+            EntityRelationDependencyTree entityRelationDependencyTree = EntityRelationDependencyTree.build(null, entityClass);
+            this.processRelationColumnInfo(1, entityRelationDependencyTree, entityInfo, null);
+        }
     }
 
     private EntityRelationTree processRelationColumnInfo(
@@ -66,6 +66,50 @@ public class EntityRelationHandler {
             }
         }
         return entityRelationTree;
+    }
+
+    private void processEntityRelation(EntityInfo entityInfo) {
+        List<ColumnInfo> relationColumnInfoList = entityInfo.getRelationColumnInfoList();
+        for (ColumnInfo columnInfo : relationColumnInfoList) {
+            RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
+            String mappedBy = relationColumnInfo.getMappedBy();
+            if (StringUtils.isNotBlank(mappedBy)) {
+                ColumnInfo mappedByRelationColumnInfo = this.validateEntityRelation(relationColumnInfo, mappedBy);
+                relationColumnInfo.setMappedByRelationColumnInfo((RelationColumnInfo) mappedByRelationColumnInfo);
+            } else {
+                RelationType relationType = relationColumnInfo.getRelationType();
+                if (relationType != RelationType.MANY_TO_MANY) {
+                    List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
+                    for (ForeignKeyColumnInfo inverseForeignKeyColumn : inverseForeignKeyColumnInfoList) {
+                        Class<?> javaType = relationColumnInfo.getJavaType();
+                        EntityInfo relationColumnEntityInfo = EntityInfoContextHolder.get(javaType);
+
+                        String name = inverseForeignKeyColumn.getName();
+                        String referencedColumnName = inverseForeignKeyColumn.getReferencedColumnName();
+                        inverseForeignKeyColumn.setColumnInfo(null);
+
+                        ColumnInfo columnInfo111 = relationColumnEntityInfo.getDbColumnInfo(referencedColumnName);
+                        inverseForeignKeyColumn.setReferencedColumnInfo(columnInfo111);
+                    }
+                } else {
+                    relationColumnInfo.getForeignKeyColumnInfoList();
+                    relationColumnInfo.getInverseForeignKeyColumnInfoList();
+                }
+            }
+        }
+    }
+
+    private ColumnInfo validateEntityRelation(RelationColumnInfo relationColumnInfo, String mappedBy) {
+        Class<?> javaType = relationColumnInfo.getJavaType();
+        EntityInfo relationColumnEntityInfo = EntityInfoContextHolder.get(javaType);
+        if (relationColumnEntityInfo == null) {
+            throw new RuntimeException("实体类" + javaType + "不存在");
+        }
+        ColumnInfo mappedByRelationColumnInfo = relationColumnEntityInfo.getColumnInfo(mappedBy);
+        if (mappedByRelationColumnInfo == null) {
+            throw new RuntimeException("实体类" + javaType + "不存在" + mappedBy + "字段");
+        }
+        return mappedByRelationColumnInfo;
     }
 
     /**

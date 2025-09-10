@@ -4,12 +4,12 @@ import com.lc.mybatisx.annotation.Entity;
 import com.lc.mybatisx.dao.Dao;
 import com.lc.mybatisx.model.*;
 import com.lc.mybatisx.model.handler.EntityInfoHandler;
+import com.lc.mybatisx.model.handler.EntityRelationHandler;
 import com.lc.mybatisx.model.handler.MapperInfoHandler;
 import com.lc.mybatisx.template.StatementTemplateHandler;
 import com.lc.mybatisx.template.select.RelationSelectTemplateHandler;
 import com.lc.mybatisx.template.select.ResultMapTemplateHandler;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.parsing.XNode;
 import org.slf4j.Logger;
@@ -41,6 +41,7 @@ public class MybatisxContextLoader {
     private static final MetadataReaderFactory METADATA_READER_FACTORY = new CachingMetadataReaderFactory();
 
     private static final EntityInfoHandler entityInfoHandler = new EntityInfoHandler();
+    private static final EntityRelationHandler entityRelationHandler = new EntityRelationHandler();
     private static final MapperInfoHandler mapperInfoHandler = new MapperInfoHandler();
 
     public void load(String[] entityBasePackages, String[] daoBasePackages, List<Resource> repositoryResourceList) {
@@ -48,7 +49,6 @@ public class MybatisxContextLoader {
             this.processEntity(entityBasePackage);
         }
         this.processEntityRelation();
-        this.validateEntityRelation();
 
         List<Resource> totalResourceList = new ArrayList();
         for (String daoBasePackage : daoBasePackages) {
@@ -77,7 +77,6 @@ public class MybatisxContextLoader {
             this.processEntity(clazz);
         }
         this.processEntityRelation();
-        this.validateEntityRelation();
     }
 
     private void processEntity(Class<?> clazz) {
@@ -91,7 +90,8 @@ public class MybatisxContextLoader {
 
     private void processEntityRelation() {
         List<Class<?>> entityClassList = EntityInfoContextHolder.getEntityClassList();
-        for (Class<?> entityClass : entityClassList) {
+        this.entityRelationHandler.execute(entityClassList);
+        /*for (Class<?> entityClass : entityClassList) {
             EntityInfo entityInfo = EntityInfoContextHolder.get(entityClass);
             List<ColumnInfo> relationColumnInfoList = entityInfo.getRelationColumnInfoList();
             for (ColumnInfo columnInfo : relationColumnInfoList) {
@@ -121,13 +121,7 @@ public class MybatisxContextLoader {
                     }
                 }
             }
-        }
-    }
-
-    /**
-     * 验证实体关系
-     */
-    private void validateEntityRelation() {
+        }*/
     }
 
     private ColumnInfo validateEntityRelation(RelationColumnInfo relationColumnInfo, String mappedBy) {

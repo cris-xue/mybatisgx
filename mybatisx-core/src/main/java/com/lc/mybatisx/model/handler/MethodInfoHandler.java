@@ -102,7 +102,7 @@ public class MethodInfoHandler {
                 this.queryConditionParse(mapperInfo.getEntityInfo(), methodInfo);
             }
 
-            this.entityRelationTreeHandler.execute(mapperInfo, methodInfo);
+            // this.entityRelationTreeHandler.execute(mapperInfo, methodInfo);
             String resultMapId = resultMapInfoHandler.execute(mapperInfo, methodInfo);
             methodInfo.setResultMapId(resultMapId);
 

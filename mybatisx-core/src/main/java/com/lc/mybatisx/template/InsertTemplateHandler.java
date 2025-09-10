@@ -180,10 +180,8 @@ public class InsertTemplateHandler {
     private void handleBatchValue(MethodInfo methodInfo, MethodParamInfo methodParamInfo, ColumnInfo tableColumnInfo, Element javaTrimElement) {
         String batchItemName = methodParamInfo.getBatchItemName();
         Boolean dynamic = methodInfo.getDynamic();
-        ColumnRelationInfo columnRelationInfo = tableColumnInfo.getColumnRelationInfo();
         String javaColumnName = tableColumnInfo.getJavaColumnName();
-
-        if (columnRelationInfo == null) {
+        if (ColumnInfoHelper.isColumnInfo(tableColumnInfo)) {
             String nestedJavaColumnName = String.format("%s.%s", batchItemName, javaColumnName);
             if (dynamic) {
                 Element javaTrimIfElement = javaTrimElement.addElement("if");
@@ -195,9 +193,10 @@ public class InsertTemplateHandler {
                 javaTrimElement.addText(javaColumn);
             }
         } else {
-            ManyToMany manyToMany = columnRelationInfo.getManyToMany();
+            RelationColumnInfo relationColumnInfo = (RelationColumnInfo) tableColumnInfo;
+            ManyToMany manyToMany = relationColumnInfo.getManyToMany();
             if (manyToMany == null) {
-                List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnRelationInfo.getInverseForeignKeyColumnInfoList();
+                List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
                 for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
                     String referencedColumnName = inverseForeignKeyColumnInfo.getReferencedColumnName();
                     String nestedJavaColumnName = String.format("%s.%s.%s", batchItemName, javaColumnName, referencedColumnName);
@@ -219,9 +218,8 @@ public class InsertTemplateHandler {
 
     private void handleSingleBusinessObjectParam(MethodInfo methodInfo, MethodParamInfo methodParamInfo, ColumnInfo tableColumnInfo, Element javaTrimElement) {
         Boolean dynamic = methodInfo.getDynamic();
-        ColumnRelationInfo columnRelationInfo = tableColumnInfo.getColumnRelationInfo();
         String javaColumnName = tableColumnInfo.getJavaColumnName();
-        if (columnRelationInfo == null) {
+        if (ColumnInfoHelper.isColumnInfo(tableColumnInfo)) {
             if (dynamic) {
                 Element javaTrimIfElement = javaTrimElement.addElement("if");
                 javaTrimIfElement.addAttribute("test", buildTestNotNull(javaColumnName));
@@ -232,9 +230,10 @@ public class InsertTemplateHandler {
                 javaTrimElement.addText(javaColumn);
             }
         } else {
-            ManyToMany manyToMany = columnRelationInfo.getManyToMany();
+            RelationColumnInfo relationColumnInfo = (RelationColumnInfo) tableColumnInfo;
+            ManyToMany manyToMany = relationColumnInfo.getManyToMany();
             if (manyToMany == null) {
-                List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnRelationInfo.getInverseForeignKeyColumnInfoList();
+                List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
                 for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
                     String referencedColumnName = inverseForeignKeyColumnInfo.getReferencedColumnName();
                     String nestedJavaColumnName = javaColumnName + "." + referencedColumnName;
@@ -255,9 +254,8 @@ public class InsertTemplateHandler {
     }
 
     private void handleSingleBusinessObjectParamAnnotation(MethodInfo methodInfo, MethodParamInfo methodParamInfo, ColumnInfo tableColumnInfo, Element javaTrimElement) {
-        ColumnRelationInfo columnRelationInfo = tableColumnInfo.getColumnRelationInfo();
         String javaColumnName = tableColumnInfo.getJavaColumnName();
-        if (columnRelationInfo == null) {
+        if (ColumnInfoHelper.isColumnInfo(tableColumnInfo)) {
             Boolean isBatch = methodInfo.getBatch();
             String paramName = isBatch ? methodParamInfo.getBatchItemName() : methodParamInfo.getParamName();
             if (methodInfo.getDynamic()) {
@@ -270,9 +268,10 @@ public class InsertTemplateHandler {
                 javaTrimElement.addText(javaColumn);
             }
         } else {
-            ManyToMany manyToMany = columnRelationInfo.getManyToMany();
+            RelationColumnInfo relationColumnInfo = (RelationColumnInfo) tableColumnInfo;
+            ManyToMany manyToMany = relationColumnInfo.getManyToMany();
             if (manyToMany == null) {
-                List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = columnRelationInfo.getInverseForeignKeyColumnInfoList();
+                List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
                 for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
                     String referencedColumnName = inverseForeignKeyColumnInfo.getReferencedColumnName();
                     String nestedJavaColumnName = javaColumnName + "." + referencedColumnName;

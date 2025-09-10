@@ -221,11 +221,11 @@ public class ColumnInfo {
         this.generateValue = generateValue;
     }
 
-    public ColumnRelationInfo getColumnRelationInfo() {
+    /*public ColumnRelationInfo getColumnRelationInfo() {
         return columnRelationInfo;
     }
 
     public void setColumnRelationInfo(ColumnRelationInfo columnRelationInfo) {
         this.columnRelationInfo = columnRelationInfo;
-    }
+    }*/
 }

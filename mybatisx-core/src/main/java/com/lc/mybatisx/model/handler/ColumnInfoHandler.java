@@ -196,13 +196,19 @@ public class ColumnInfoHandler {
         List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = new ArrayList(5);
         for (JoinColumn joinColumn : joinColumnList) {
             String name = joinColumn.name();
+            // orderColumn、order_column -> order_column
+            String dbColumnName = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name);
+            // order_column -> orderColumn
+            String javaColumnName = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, dbColumnName);
+
+            ColumnInfo columnInfo = new ColumnInfo();
+            columnInfo.setJavaColumnName(javaColumnName);
+            columnInfo.setDbColumnName(dbColumnName);
+
             String referencedColumnName = joinColumn.referencedColumnName();
-            ForeignKeyColumnInfo foreignKeyColumnInfo = new ForeignKeyColumnInfo();
-            foreignKeyColumnInfo.setName(name);
-            foreignKeyColumnInfo.setReferencedColumnName(referencedColumnName);
-            if (foreignKeyColumnInfo != null) {
-                foreignKeyColumnInfoList.add(foreignKeyColumnInfo);
-            }
+
+            ForeignKeyColumnInfo foreignKeyColumnInfo = new ForeignKeyColumnInfo(columnInfo, referencedColumnName);
+            foreignKeyColumnInfoList.add(foreignKeyColumnInfo);
         }
         return foreignKeyColumnInfoList;
     }
@@ -224,11 +230,16 @@ public class ColumnInfoHandler {
                         EntityInfo relationColumnEntityInfo = EntityInfoContextHolder.get(javaType);
 
                         String name = inverseForeignKeyColumn.getName();
+                        String nameAlias = inverseForeignKeyColumn.getNameAlias();
                         String referencedColumnName = inverseForeignKeyColumn.getReferencedColumnName();
-                        inverseForeignKeyColumn.setColumnInfo(null);
+                        ColumnInfo relationColumnInfo222 = new ColumnInfo();
+                        relationColumnInfo222.setJavaColumnName(name);
+                        relationColumnInfo222.setDbColumnName(name);
+                        relationColumnInfo222.setDbColumnNameAlias(nameAlias);
+                        inverseForeignKeyColumn.setColumnInfo(relationColumnInfo222);
 
-                        ColumnInfo columnInfo111 = relationColumnEntityInfo.getDbColumnInfo(referencedColumnName);
-                        inverseForeignKeyColumn.setReferencedColumnInfo(columnInfo111);
+                        ColumnInfo referencedColumnInfo = relationColumnEntityInfo.getDbColumnInfo(referencedColumnName);
+                        inverseForeignKeyColumn.setReferencedColumnInfo(referencedColumnInfo);
                     }
                 } else {
                     relationColumnInfo.getForeignKeyColumnInfoList();

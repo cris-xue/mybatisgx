@@ -4,6 +4,7 @@ import com.lc.mybatisx.annotation.FetchMode;
 import com.lc.mybatisx.annotation.Id;
 import com.lc.mybatisx.annotation.ManyToMany;
 import com.lc.mybatisx.model.*;
+import com.lc.mybatisx.template.ColumnInfoHelper;
 import com.lc.mybatisx.utils.XmlUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.ibatis.parsing.XNode;
@@ -44,10 +45,31 @@ public class ResultMapTemplateHandler {
     private void addColumnElement(Element resultMapElement, List<ColumnInfo> tableColumnInfoList) {
         for (ColumnInfo tableColumnInfo : tableColumnInfoList) {
             Id id = tableColumnInfo.getId();
+            Boolean isColumnInfo = ColumnInfoHelper.isColumnInfo(tableColumnInfo);
             if (id != null) {
                 ResultMapHelper.idColumnElement(resultMapElement, tableColumnInfo);
-            } else if (!(tableColumnInfo instanceof RelationColumnInfo)) {
+            } else if (isColumnInfo) {
                 ResultMapHelper.resultColumnElement(resultMapElement, tableColumnInfo);
+            } else {
+                RelationColumnInfo relationColumnInfo = (RelationColumnInfo) tableColumnInfo;
+                RelationType relationType = relationColumnInfo.getRelationType();
+                if (relationType == RelationType.MANY_TO_MANY) {
+                    continue;
+                }
+                List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
+                for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
+                    ResultMapHelper.resultColumnElement(resultMapElement, inverseForeignKeyColumnInfo);
+                }
+            }
+        }
+    }
+
+    private void addColumnRelationElement(Element resultMapElement, ResultMapInfo resultMapInfo, ColumnInfo columnInfo, RelationColumnInfo relationColumnInfo) {
+        ManyToMany manyToMany = relationColumnInfo.getManyToMany();
+        if (manyToMany == null) {
+            List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
+            for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
+                ResultMapHelper.resultColumnElement(resultMapElement, inverseForeignKeyColumnInfo);
             }
         }
     }

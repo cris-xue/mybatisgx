@@ -28,6 +28,14 @@ public class ForeignKeyColumnInfo {
      */
     private ColumnInfo referencedColumnInfo;
 
+    public ForeignKeyColumnInfo() {
+    }
+
+    public ForeignKeyColumnInfo(ColumnInfo columnInfo, String referencedColumnName) {
+        this.columnInfo = columnInfo;
+        this.referencedColumnName = referencedColumnName;
+    }
+
     public String getName() {
         return name;
     }

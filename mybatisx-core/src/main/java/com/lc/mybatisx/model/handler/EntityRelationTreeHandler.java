@@ -92,9 +92,9 @@ public class EntityRelationTreeHandler {
             for (int i = 0; i < tableColumnInfoList.size(); i++) {
                 ColumnInfo columnInfo = tableColumnInfoList.get(i);
                 if (!(columnInfo instanceof RelationColumnInfo)) {
-                    String name = columnInfo.getDbColumnName();
-                    String nameAlias = this.buildNameAlias(tableName, name, level, i);
-                    columnInfo.setDbColumnNameAlias(nameAlias);
+                    String dbColumnName = columnInfo.getDbColumnName();
+                    String dbColumnNameAlias = this.buildTableColumnNameAlias(tableName, dbColumnName, level, i);
+                    columnInfo.setDbColumnNameAlias(dbColumnNameAlias);
                 } else {
                     RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
                     ManyToMany manyToMany = relationColumnInfo.getManyToMany();
@@ -128,13 +128,14 @@ public class EntityRelationTreeHandler {
          */
         private void processForeignKeyColumnAlias(List<ForeignKeyColumnInfo> foreignKeyColumnInfoList, String tableName, int level, int index) {
             for (ForeignKeyColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
-                String name = foreignKeyColumnInfo.getName();
-                String nameAlias = this.buildNameAlias(tableName, name, level, index);
-                foreignKeyColumnInfo.setNameAlias(nameAlias);
+                ColumnInfo columnInfo = foreignKeyColumnInfo.getColumnInfo();
+                String dbColumnName = columnInfo.getDbColumnName();
+                String dbColumnNameAlias = this.buildTableColumnNameAlias(tableName, dbColumnName, level, index);
+                columnInfo.setDbColumnNameAlias(dbColumnNameAlias);
             }
         }
 
-        private String buildNameAlias(String tableName, String name, int level, int index) {
+        private String buildTableColumnNameAlias(String tableName, String name, int level, int index) {
             int randomIndex = RandomUtils.nextInt(0, 9);
             return String.format("%s_%s_%s_%s_%s", tableName, name, level, index, randomIndex);
         }

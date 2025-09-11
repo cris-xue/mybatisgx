@@ -26,8 +26,8 @@ public class ResultMapHelper {
 
     public static void resultColumnElement(Element resultMapElement, ForeignKeyColumnInfo foreignKeyColumnInfo) {
         ColumnInfo columnInfo = new ColumnInfo();
-        columnInfo.setDbColumnName(foreignKeyColumnInfo.getName());
-        columnInfo.setDbColumnNameAlias(foreignKeyColumnInfo.getNameAlias());
+        /*columnInfo.setDbColumnName(foreignKeyColumnInfo.getName());
+        columnInfo.setDbColumnNameAlias(foreignKeyColumnInfo.getNameAlias());*/
         resultColumnElement(resultMapElement, columnInfo);
     }
 

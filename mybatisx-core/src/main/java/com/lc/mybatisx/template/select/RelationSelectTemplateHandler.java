@@ -100,8 +100,9 @@ public class RelationSelectTemplateHandler {
                 List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedByRelationColumnInfo.getInverseForeignKeyColumnInfoList();
                 Expression whereCondition = null;
                 for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
-                    String leftEq = String.format("%s.%s", relationEntityInfo.getTableName(), inverseForeignKeyColumnInfo.getName());
-                    String rightEq = String.format("#{%s}", inverseForeignKeyColumnInfo.getName());
+                    ColumnInfo foreignKeyColumnInfo = inverseForeignKeyColumnInfo.getColumnInfo();
+                    String leftEq = String.format("%s.%s", relationEntityInfo.getTableName(), foreignKeyColumnInfo.getDbColumnName());
+                    String rightEq = String.format("#{%s}", foreignKeyColumnInfo.getJavaColumnName());
                     whereCondition = RelationSelectHelper.buildWhereConditionExpression(whereCondition, leftEq, rightEq);
                 }
                 return whereCondition;
@@ -109,8 +110,10 @@ public class RelationSelectTemplateHandler {
                 List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
                 Expression whereCondition = null;
                 for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
-                    String leftEq = String.format("%s.%s", relationEntityInfo.getTableName(), inverseForeignKeyColumnInfo.getReferencedColumnName());
-                    String rightEq = String.format("#{%s}", inverseForeignKeyColumnInfo.getName());
+                    ColumnInfo foreignKeyColumnInfo = inverseForeignKeyColumnInfo.getColumnInfo();
+                    ColumnInfo referencedColumnInfo = inverseForeignKeyColumnInfo.getReferencedColumnInfo();
+                    String leftEq = String.format("%s.%s", relationEntityInfo.getTableName(), referencedColumnInfo.getDbColumnName());
+                    String rightEq = String.format("#{%s}", foreignKeyColumnInfo.getJavaColumnName());
                     whereCondition = RelationSelectHelper.buildWhereConditionExpression(whereCondition, leftEq, rightEq);
                 }
                 return whereCondition;
@@ -118,7 +121,6 @@ public class RelationSelectTemplateHandler {
         }
 
         public Expression buildManyToManyWhere(EntityRelationSelectInfo entityRelationSelectInfo) {
-            EntityInfo relationEntityInfo = entityRelationSelectInfo.getEntityInfo();
             String middleTableName = entityRelationSelectInfo.getMiddleTableName();
             RelationColumnInfo relationColumnInfo = (RelationColumnInfo) entityRelationSelectInfo.getColumnInfo();
             RelationColumnInfo mappedByRelationColumnInfo = relationColumnInfo.getMappedByRelationColumnInfo();
@@ -141,9 +143,10 @@ public class RelationSelectTemplateHandler {
          */
         public Expression buildManyToManyWhereExpression(String middleTableName, List<ForeignKeyColumnInfo> foreignKeyColumnInfoList) {
             Expression whereCondition = null;
-            for (ForeignKeyColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
-                String leftEq = String.format("%s.%s", middleTableName, foreignKeyColumnInfo.getName());
-                String rightEq = String.format("#{%s}", foreignKeyColumnInfo.getName());
+            for (ForeignKeyInfo foreignKeyInfo : foreignKeyColumnInfoList) {
+                ColumnInfo foreignKeyColumnInfo = foreignKeyInfo.getColumnInfo();
+                String leftEq = String.format("%s.%s", middleTableName, foreignKeyColumnInfo.getDbColumnName());
+                String rightEq = String.format("#{%s}", foreignKeyColumnInfo.getJavaColumnName());
                 whereCondition = RelationSelectHelper.buildWhereConditionExpression(whereCondition, leftEq, rightEq);
             }
             return whereCondition;
@@ -160,18 +163,22 @@ public class RelationSelectTemplateHandler {
                 List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedByRelationColumnInfo.getInverseForeignKeyColumnInfoList();
                 Expression whereConditionExpression = null;
                 // FROM user_detail WHERE user_detail.user_id = #{user.id} or user_detail.user_id = #{user.id}
-                for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
-                    String leftEq = String.format("%s.%s", relationEntityInfo.getTableName(), inverseForeignKeyColumnInfo.getName());
-                    String rightEq = String.format("#{%s.%s}", "item", inverseForeignKeyColumnInfo.getReferencedColumnName());
+                for (ForeignKeyColumnInfo inverseForeignKeyInfo : inverseForeignKeyColumnInfoList) {
+                    ColumnInfo foreignKeyColumnInfo = inverseForeignKeyInfo.getColumnInfo();
+                    ColumnInfo referencedColumnInfo = inverseForeignKeyInfo.getReferencedColumnInfo();
+                    String leftEq = String.format("%s.%s", relationEntityInfo.getTableName(), foreignKeyColumnInfo.getDbColumnName());
+                    String rightEq = String.format("#{%s.%s}", "item", referencedColumnInfo.getJavaColumnName());
                     whereConditionExpression = RelationSelectHelper.buildWhereConditionExpression(whereConditionExpression, leftEq, rightEq);
                 }
                 return whereConditionExpression;
             } else {
                 List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
                 Expression whereConditionExpression = null;
-                for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
-                    String leftEq = String.format("%s.%s", relationEntityInfo.getTableName(), inverseForeignKeyColumnInfo.getReferencedColumnName());
-                    String rightEq = String.format("#{%s.%s}", "item", inverseForeignKeyColumnInfo.getName());
+                for (ForeignKeyInfo inverseForeignKeyInfo : inverseForeignKeyColumnInfoList) {
+                    ColumnInfo foreignKeyColumnInfo = inverseForeignKeyInfo.getColumnInfo();
+                    ColumnInfo referencedColumnInfo = inverseForeignKeyInfo.getReferencedColumnInfo();
+                    String leftEq = String.format("%s.%s", relationEntityInfo.getTableName(), referencedColumnInfo.getDbColumnName());
+                    String rightEq = String.format("#{%s.%s}", "item", foreignKeyColumnInfo.getDbColumnName());
                     whereConditionExpression = RelationSelectHelper.buildWhereConditionExpression(whereConditionExpression, leftEq, rightEq);
                 }
                 return whereConditionExpression;
@@ -202,9 +209,11 @@ public class RelationSelectTemplateHandler {
          */
         public Expression buildManyToManyWhereExpression(String middleTableName, List<ForeignKeyColumnInfo> foreignKeyColumnInfoList) {
             Expression whereConditionExpression = null;
-            for (ForeignKeyColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
-                String leftEq = String.format("%s.%s", middleTableName, foreignKeyColumnInfo.getName());
-                String rightEq = String.format("#{%s.%s}", "item", foreignKeyColumnInfo.getReferencedColumnName());
+            for (ForeignKeyInfo foreignKeyInfo : foreignKeyColumnInfoList) {
+                ColumnInfo foreignKeyColumnInfo = foreignKeyInfo.getColumnInfo();
+                ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();
+                String leftEq = String.format("%s.%s", middleTableName, foreignKeyColumnInfo.getDbColumnName());
+                String rightEq = String.format("#{%s.%s}", "item", referencedColumnInfo.getDbColumnName());
                 whereConditionExpression = RelationSelectHelper.buildWhereConditionExpression(whereConditionExpression, leftEq, rightEq);
             }
             return whereConditionExpression;

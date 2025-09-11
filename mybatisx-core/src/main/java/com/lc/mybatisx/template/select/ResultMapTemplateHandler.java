@@ -51,6 +51,7 @@ public class ResultMapTemplateHandler {
             } else if (isColumnInfo) {
                 ResultMapHelper.resultColumnElement(resultMapElement, tableColumnInfo);
             } else {
+                // 处理外键字段，外键字段也是需要映射结果集的
                 RelationColumnInfo relationColumnInfo = (RelationColumnInfo) tableColumnInfo;
                 RelationType relationType = relationColumnInfo.getRelationType();
                 if (relationType == RelationType.MANY_TO_MANY) {
@@ -58,7 +59,8 @@ public class ResultMapTemplateHandler {
                 }
                 List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
                 for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
-                    ResultMapHelper.resultColumnElement(resultMapElement, inverseForeignKeyColumnInfo);
+                    ColumnInfo foreignKeyColumnInfo = inverseForeignKeyColumnInfo.getColumnInfo();
+                    ResultMapHelper.resultColumnElement(resultMapElement, foreignKeyColumnInfo);
                 }
             }
         }
@@ -103,13 +105,17 @@ public class ResultMapTemplateHandler {
                 if (mappedByRelationColumnInfo == null) {
                     List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
                     for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
-                        String referencedColumnName = inverseForeignKeyColumnInfo.getReferencedColumnName();
-                        String javaColumnName = String.format("%s.%s", relationColumnInfo.getJavaColumnName(), referencedColumnName);
+                        ColumnInfo foreignKeyColumnInfo = inverseForeignKeyColumnInfo.getColumnInfo();
+                        ColumnInfo referencedColumnInfo = inverseForeignKeyColumnInfo.getReferencedColumnInfo();
+
+                        String javaColumnName = String.format("%s.%s", relationColumnInfo.getJavaColumnName(), referencedColumnInfo.getJavaColumnName());
+                        String dbColumnName = foreignKeyColumnInfo.getDbColumnName();
+                        String dbColumnNameAlias = foreignKeyColumnInfo.getDbColumnNameAlias();
 
                         ColumnInfo subColumnInfo = new ColumnInfo();
                         subColumnInfo.setJavaColumnName(javaColumnName);
-                        subColumnInfo.setDbColumnName(inverseForeignKeyColumnInfo.getName());
-                        subColumnInfo.setDbColumnNameAlias(inverseForeignKeyColumnInfo.getNameAlias());
+                        subColumnInfo.setDbColumnName(dbColumnName);
+                        subColumnInfo.setDbColumnNameAlias(dbColumnNameAlias);
                         ResultMapHelper.resultColumnElement(resultMapElement, subColumnInfo);
                     }
                 } else {

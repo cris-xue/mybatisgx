@@ -229,17 +229,14 @@ public class ColumnInfoHandler {
                         Class<?> javaType = relationColumnInfo.getJavaType();
                         EntityInfo relationColumnEntityInfo = EntityInfoContextHolder.get(javaType);
 
-                        String name = inverseForeignKeyColumn.getName();
-                        String nameAlias = inverseForeignKeyColumn.getNameAlias();
                         String referencedColumnName = inverseForeignKeyColumn.getReferencedColumnName();
-                        ColumnInfo relationColumnInfo222 = new ColumnInfo();
-                        relationColumnInfo222.setJavaColumnName(name);
-                        relationColumnInfo222.setDbColumnName(name);
-                        relationColumnInfo222.setDbColumnNameAlias(nameAlias);
-                        inverseForeignKeyColumn.setColumnInfo(relationColumnInfo222);
-
                         ColumnInfo referencedColumnInfo = relationColumnEntityInfo.getDbColumnInfo(referencedColumnName);
                         inverseForeignKeyColumn.setReferencedColumnInfo(referencedColumnInfo);
+
+                        // 补充外键字段信息
+                        ColumnInfo foreignKeyColumnInfo = inverseForeignKeyColumn.getColumnInfo();
+                        // foreignKeyColumnInfo.setJavaType(referencedColumnInfo.getJavaType());
+                        // foreignKeyColumnInfo.setDbTypeName(referencedColumnInfo.getDbTypeName());
                     }
                 } else {
                     relationColumnInfo.getForeignKeyColumnInfoList();

@@ -60,7 +60,7 @@ public class ResultMapTemplateHandler {
                 List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
                 for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
                     ColumnInfo foreignKeyColumnInfo = inverseForeignKeyColumnInfo.getColumnInfo();
-                    ResultMapHelper.resultColumnElement(resultMapElement, foreignKeyColumnInfo);
+                    // ResultMapHelper.resultColumnElement(resultMapElement, foreignKeyColumnInfo);
                 }
             }
         }

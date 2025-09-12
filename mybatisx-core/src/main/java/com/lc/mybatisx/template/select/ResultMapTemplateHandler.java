@@ -30,7 +30,7 @@ public class ResultMapTemplateHandler {
             Document document = DocumentHelper.createDocument();
             Element resultMapElement = ResultMapHelper.addResultMapElement(document, resultMapInfo);
             this.addColumnElement(resultMapElement, resultMapInfo.getTableColumnInfoList());
-            this.addColumnRelationElement(resultMapElement, resultMapInfo);
+            this.addRelationColumnElement(resultMapElement, resultMapInfo);
             this.addResultMapRelationElement(resultMapElement, mapperInfo, resultMapInfo.getEntityInfo(), resultMapInfo.getResultMapInfoList());
             String resultMapXmlString = document.asXML();
             logger.info("select resultMap: \n{}", resultMapXmlString);
@@ -95,7 +95,7 @@ public class ResultMapTemplateHandler {
      * @param resultMapElement
      * @param resultMapInfo
      */
-    private void addColumnRelationElement(Element resultMapElement, ResultMapInfo resultMapInfo) {
+    private void addRelationColumnElement(Element resultMapElement, ResultMapInfo resultMapInfo) {
         EntityInfo resultMapEntityInfo = resultMapInfo.getEntityInfo();
         for (ColumnInfo columnInfo : resultMapEntityInfo.getRelationColumnInfoList()) {
             RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;

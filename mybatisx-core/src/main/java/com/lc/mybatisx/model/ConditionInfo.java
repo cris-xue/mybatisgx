@@ -52,7 +52,7 @@ public class ConditionInfo {
     /**
      * 条件字段关联的id字段信息列表
      */
-    private List<ColumnInfo> idColumnInfoList;
+    private List<IdColumnInfo> idColumnInfoList = new ArrayList();
     /**
      * 左括号
      */
@@ -171,11 +171,11 @@ public class ConditionInfo {
         this.javaColumnName = columnInfo.getJavaColumnName();
     }
 
-    public List<ColumnInfo> getIdColumnInfoList() {
+    public List<IdColumnInfo> getIdColumnInfoList() {
         return idColumnInfoList;
     }
 
-    public void setIdColumnInfoList(List<ColumnInfo> idColumnInfoList) {
+    public void setIdColumnInfoList(List<IdColumnInfo> idColumnInfoList) {
         this.idColumnInfoList = idColumnInfoList;
     }
 

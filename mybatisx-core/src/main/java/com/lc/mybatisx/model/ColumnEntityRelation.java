@@ -1,7 +1,6 @@
 package com.lc.mybatisx.model;
 
 import com.lc.mybatisx.annotation.ManyToMany;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 
@@ -60,12 +59,10 @@ public class ColumnEntityRelation {
     public Boolean isMappedBy() {
         RelationColumnInfo relationColumnInfo = (RelationColumnInfo) this.columnInfo;
         RelationColumnInfo mappedByRelationColumnInfo = relationColumnInfo.getMappedByRelationColumnInfo();
-        String mappedBy = mappedByRelationColumnInfo.getMappedBy();
-        if (StringUtils.isBlank(mappedBy)) {
+        if (mappedByRelationColumnInfo == null) {
             return false;
         } else {
-            ColumnInfo mappedByColumnInfo = this.entityInfo.getColumnInfo(mappedBy);
-            if (mappedByColumnInfo != null) {
+            if (mappedByRelationColumnInfo != null) {
                 return true;
             }
         }

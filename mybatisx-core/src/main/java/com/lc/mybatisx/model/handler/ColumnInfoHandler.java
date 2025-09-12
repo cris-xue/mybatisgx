@@ -239,8 +239,25 @@ public class ColumnInfoHandler {
                         // foreignKeyColumnInfo.setDbTypeName(referencedColumnInfo.getDbTypeName());
                     }
                 } else {
-                    relationColumnInfo.getForeignKeyColumnInfoList();
-                    relationColumnInfo.getInverseForeignKeyColumnInfoList();
+                    List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = relationColumnInfo.getForeignKeyColumnInfoList();
+                    for (ForeignKeyColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
+                        Class<?> javaType = relationColumnInfo.getJavaType();
+                        EntityInfo relationColumnEntityInfo = EntityInfoContextHolder.get(javaType);
+
+                        String referencedColumnName = foreignKeyColumnInfo.getReferencedColumnName();
+                        ColumnInfo referencedColumnInfo = relationColumnEntityInfo.getDbColumnInfo(referencedColumnName);
+                        foreignKeyColumnInfo.setReferencedColumnInfo(referencedColumnInfo);
+                    }
+
+                    List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
+                    for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
+                        Class<?> javaType = relationColumnInfo.getJavaType();
+                        EntityInfo relationColumnEntityInfo = EntityInfoContextHolder.get(javaType);
+
+                        String referencedColumnName = inverseForeignKeyColumnInfo.getReferencedColumnName();
+                        ColumnInfo referencedColumnInfo = relationColumnEntityInfo.getDbColumnInfo(referencedColumnName);
+                        inverseForeignKeyColumnInfo.setReferencedColumnInfo(referencedColumnInfo);
+                    }
                 }
             }
         }

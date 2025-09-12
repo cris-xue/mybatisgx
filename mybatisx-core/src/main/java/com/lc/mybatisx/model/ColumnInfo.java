@@ -59,10 +59,6 @@ public class ColumnInfo {
      */
     private NonPersistent nonPersistent;
     /**
-     * 是否是主键
-     */
-    private Id id;
-    /**
      * 是否是乐观锁字段
      */
     private Lock lock;
@@ -175,14 +171,6 @@ public class ColumnInfo {
 
     public void setNonPersistent(NonPersistent nonPersistent) {
         this.nonPersistent = nonPersistent;
-    }
-
-    public Id getId() {
-        return id;
-    }
-
-    public void setId(Id id) {
-        this.id = id;
     }
 
     public Lock getLock() {

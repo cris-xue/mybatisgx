@@ -46,6 +46,14 @@ public class ConditionInfo {
      */
     private List<String> paramName = new ArrayList<>();
     /**
+     * 条件字段关联的字段信息
+     */
+    private ColumnInfo columnInfo;
+    /**
+     * 条件字段关联的id字段信息列表
+     */
+    private List<ColumnInfo> idColumnInfoList;
+    /**
      * 左括号
      */
     private String leftBracket;
@@ -151,6 +159,24 @@ public class ConditionInfo {
 
     public void setParamName(List<String> paramName) {
         this.paramName = paramName;
+    }
+
+    public ColumnInfo getColumnInfo() {
+        return columnInfo;
+    }
+
+    public void setColumnInfo(ColumnInfo columnInfo) {
+        this.columnInfo = columnInfo;
+        this.dbColumnName = columnInfo.getDbColumnName();
+        this.javaColumnName = columnInfo.getJavaColumnName();
+    }
+
+    public List<ColumnInfo> getIdColumnInfoList() {
+        return idColumnInfoList;
+    }
+
+    public void setIdColumnInfoList(List<ColumnInfo> idColumnInfoList) {
+        this.idColumnInfoList = idColumnInfoList;
     }
 
     public String getLeftBracket() {

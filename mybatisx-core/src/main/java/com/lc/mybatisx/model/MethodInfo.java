@@ -118,10 +118,10 @@ public class MethodInfo {
     public void setMethodParamInfoList(List<MethodParamInfo> methodParamInfoList) {
         this.methodParamInfoList = methodParamInfoList;
         // 写字段的时候在参数或者方法名中可能出现user_name写成username、userName两种情况
-        this.methodParamInfoList.forEach(methodParamInfo -> {
+        for (MethodParamInfo methodParamInfo : methodParamInfoList) {
             methodParamInfoMap.put(methodParamInfo.getParamName(), methodParamInfo);
             methodParamInfoMap.put(methodParamInfo.getParamName().toLowerCase(), methodParamInfo);
-        });
+        }
     }
 
     public MethodParamInfo getMethodParamInfo(String paramName) {

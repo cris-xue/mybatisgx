@@ -245,8 +245,7 @@ public class MethodInfoHandler {
     }
 
     private void handleConditionInfo(MethodInfo methodInfo, List<ConditionInfo> conditionInfoList) {
-        for (int i = 0; i < conditionInfoList.size(); i++) {
-            ConditionInfo conditionInfo = conditionInfoList.get(i);
+        for (ConditionInfo conditionInfo : conditionInfoList) {
             ConditionGroupInfo conditionGroupInfo = conditionInfo.getConditionGroupInfo();
             if (conditionGroupInfo != null) {
                 this.handleConditionInfo(methodInfo, conditionGroupInfo.getConditionInfoList());

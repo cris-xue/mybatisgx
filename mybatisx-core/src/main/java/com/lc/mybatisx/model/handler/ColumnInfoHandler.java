@@ -36,7 +36,6 @@ public class ColumnInfoHandler {
                 continue;
             }
 
-            Id id = field.getAnnotation(Id.class);
             Column column = field.getAnnotation(Column.class);
             Lock lock = field.getAnnotation(Lock.class);
             LogicDelete logicDelete = field.getAnnotation(LogicDelete.class);
@@ -49,12 +48,14 @@ public class ColumnInfoHandler {
             columnInfo.setDbTypeName(column != null ? column.columnDefinition() : null);
             columnInfo.setDbColumnName(dbColumnName);
 
-            columnInfo.setId(id);
             columnInfo.setLock(lock);
             columnInfo.setLogicDelete(logicDelete);
 
             this.setGenerateValueHandler(field, columnInfo);
             this.setType(field, columnInfo);
+            if (columnInfo instanceof IdColumnInfo) {
+                this.setIdColumnInfo(field, (IdColumnInfo) columnInfo);
+            }
             if (columnInfo instanceof RelationColumnInfo) {
                 this.setRelationColumnInfo(field, (RelationColumnInfo) columnInfo);
             }
@@ -142,6 +143,16 @@ public class ColumnInfoHandler {
             columnInfo.setColumn(column);
             return columnInfo;
         }
+    }
+
+    private void setIdColumnInfo(Field field, IdColumnInfo idColumnInfo) {
+        Class<?> javaType = idColumnInfo.getJavaType();
+        List<ColumnInfo> columnInfoList = this.getColumnInfoList(javaType);
+        Id id = field.getAnnotation(Id.class);
+        EmbeddedId embeddedId = field.getAnnotation(EmbeddedId.class);
+        idColumnInfo.setId(id);
+        idColumnInfo.setEmbeddedId(embeddedId);
+        idColumnInfo.setColumnInfoList(columnInfoList);
     }
 
     private void setRelationColumnInfo(Field field, RelationColumnInfo relationColumnInfo) {

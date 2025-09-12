@@ -18,29 +18,7 @@ public class WhereTemplateHandler {
 
     public void execute(Element parentElement, EntityInfo entityInfo, MethodInfo methodInfo, List<ConditionInfo> conditionInfoList) {
         Element whereElement = parentElement.addElement("where");
-        /*Element trimElement = whereElement.addElement("trim");
-        trimElement.addAttribute("prefix", "");
-        trimElement.addAttribute("suffix", "");
-        trimElement.addAttribute("prefixOverrides", "AND|OR|and|or");*/
         this.handleConditionGroup(entityInfo, methodInfo, whereElement, conditionInfoList);
-        /*methodInfo.getConditionInfoList().forEach(conditionInfo -> {
-            ConditionGroupInfo conditionGroupInfo = conditionInfo.getConditionGroupInfo();
-            if (conditionGroupInfo != null) {
-                List<ConditionInfo> conditionInfoList = conditionGroupInfo.getConditionInfoList();
-            } else {
-                ColumnInfo columnInfo = entityInfo.getColumnInfo(conditionInfo.getJavaColumnName());
-                Id id = columnInfo.getId();
-                LogicDelete logicDelete = columnInfo.getLogicDelete();
-                if (id != null) {
-                    processId(trimElement, entityInfo, methodInfo.getDynamic());
-                    return;
-                }
-                if (logicDelete != null) {
-                    return;
-                }
-                this.processCondition(methodInfo, conditionInfo, whereElement, trimElement);
-            }
-        });*/
 
         // 查询不需要乐观锁版本条件
         ColumnInfo lockColumnInfo = entityInfo.getLockColumnInfo();
@@ -68,8 +46,7 @@ public class WhereTemplateHandler {
      * @param conditionInfoList
      */
     private void handleConditionGroup(EntityInfo entityInfo, MethodInfo methodInfo, Element whereElement, List<ConditionInfo> conditionInfoList) {
-        for (int i = 0; i < conditionInfoList.size(); i++) {
-            ConditionInfo conditionInfo = conditionInfoList.get(i);
+        for (ConditionInfo conditionInfo : conditionInfoList) {
             ConditionGroupInfo conditionGroupInfo = conditionInfo.getConditionGroupInfo();
             if (conditionGroupInfo != null) {
                 // 处理分组的括号
@@ -94,8 +71,7 @@ public class WhereTemplateHandler {
 
     private void processId(Element whereElement, EntityInfo entityInfo, Boolean dynamic) {
         List<ColumnInfo> idColumnInfoList = entityInfo.getIdColumnInfoList();
-        for (int i = 0; i < idColumnInfoList.size(); i++) {
-            ColumnInfo idColumnInfo = idColumnInfoList.get(i);
+        for (ColumnInfo idColumnInfo : idColumnInfoList) {
             if (dynamic) {
                 Element ifElement = whereElement.addElement("if");
                 ifElement.addAttribute("test", String.format("%s != null", idColumnInfo.getJavaColumnName()));

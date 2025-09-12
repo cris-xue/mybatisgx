@@ -2,9 +2,6 @@ package com.mybatisgx.simple.entity;
 
 import com.lc.mybatisx.annotation.*;
 import com.mybatisgx.entity.BaseEntity;
-import com.mybatisgx.onetoone.entity.UserDetail;
-
-import javax.persistence.FetchType;
 
 @Entity
 @Table(name = "test_user")
@@ -31,10 +28,6 @@ public class User extends BaseEntity<Long> {
 
     @Lock
     private Integer version;
-
-    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
-    @Fetch
-    private com.mybatisgx.onetoone.entity.UserDetail userDetail;
 
     public String getRoleIds() {
         return roleIds;
@@ -106,13 +99,5 @@ public class User extends BaseEntity<Long> {
 
     public void setVersion(Integer version) {
         this.version = version;
-    }
-
-    public com.mybatisgx.onetoone.entity.UserDetail getUserDetail() {
-        return userDetail;
-    }
-
-    public void setUserDetail(UserDetail userDetail) {
-        this.userDetail = userDetail;
     }
 }

@@ -1,10 +1,7 @@
 package com.lc.mybatisx.model.handler;
 
 import com.google.common.base.CaseFormat;
-import com.lc.mybatisx.model.ColumnInfo;
-import com.lc.mybatisx.model.ConditionInfo;
-import com.lc.mybatisx.model.EntityInfo;
-import com.lc.mybatisx.model.MethodInfo;
+import com.lc.mybatisx.model.*;
 import com.lc.mybatisx.syntax.method.name.MethodNameLexer;
 import com.lc.mybatisx.syntax.method.name.MethodNameParser;
 import org.antlr.v4.runtime.CharStream;
@@ -130,18 +127,14 @@ public class MethodNameAstHandler {
             } else if (parseTreeChild instanceof MethodNameParser.Field_clauseContext) {
                 String javaColumnName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, token);
                 if ("id".equals(javaColumnName)) {
-                    List<ColumnInfo> idColumnInfoList = entityInfo.getIdColumnInfoList();
-                    for (ColumnInfo idColumnInfo : idColumnInfoList) {
-                        conditionInfo.setDbColumnName(idColumnInfo.getDbColumnName());
-                        conditionInfo.setJavaColumnName(idColumnInfo.getJavaColumnName());
-                    }
+                    IdColumnInfo idColumnInfo = entityInfo.getIdColumnInfo();
+                    conditionInfo.setColumnInfo(idColumnInfo);
                 } else {
                     ColumnInfo columnInfo = entityInfo.getColumnInfo(javaColumnName);
                     if (columnInfo == null) {
                         throw new RuntimeException("方法条件或者实体中条件与数据库库实体无法对应：" + javaColumnName);
                     }
-                    conditionInfo.setDbColumnName(columnInfo.getDbColumnName());
-                    conditionInfo.setJavaColumnName(columnInfo.getJavaColumnName());
+                    conditionInfo.setColumnInfo(columnInfo);
                 }
             } else if (parseTreeChild instanceof MethodNameParser.Comparison_op_clauseContext) {
                 conditionInfo.setComparisonOp(TOKEN_MAP.get(token));

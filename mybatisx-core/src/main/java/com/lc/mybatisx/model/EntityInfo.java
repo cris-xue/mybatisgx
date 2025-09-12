@@ -1,6 +1,9 @@
 package com.lc.mybatisx.model;
 
-import com.lc.mybatisx.annotation.*;
+import com.lc.mybatisx.annotation.Lock;
+import com.lc.mybatisx.annotation.LogicDelete;
+import com.lc.mybatisx.annotation.ManyToMany;
+import com.lc.mybatisx.annotation.NonPersistent;
 import com.lc.mybatisx.annotation.handler.GenerateValueHandler;
 import org.apache.commons.lang3.StringUtils;
 
@@ -172,10 +175,6 @@ public class EntityInfo {
 
         public void process(List<ColumnInfo> columnInfoList) {
             for (ColumnInfo columnInfo : columnInfoList) {
-                Id id = columnInfo.getId();
-                if (id != null) {
-                    idColumnInfoList.add(columnInfo);
-                }
                 Lock lock = columnInfo.getLock();
                 if (lock != null) {
                     lockColumnInfo = columnInfo;
@@ -185,7 +184,7 @@ public class EntityInfo {
                     logicDeleteColumnInfo = columnInfo;
                 }
                 GenerateValueHandler generateValueHandler = columnInfo.getGenerateValueHandler();
-                if (id != null || generateValueHandler != null) {
+                if (columnInfo instanceof IdColumnInfo || generateValueHandler != null) {
                     generateValueColumnInfoList.add(columnInfo);
                 }
 

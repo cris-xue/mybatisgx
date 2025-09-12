@@ -41,9 +41,9 @@ public class EntityInfo {
      */
     private Map<String, String> tableColumnInfoMap = new LinkedHashMap();
     /**
-     * id字段列表
+     * id字段
      */
-    private List<ColumnInfo> idColumnInfoList = new ArrayList();
+    private IdColumnInfo idColumnInfo;
     /**
      * 生成值字段列表
      */
@@ -120,12 +120,12 @@ public class EntityInfo {
         return this.getColumnInfo(javaColumnName);
     }
 
-    public List<ColumnInfo> getIdColumnInfoList() {
-        return idColumnInfoList;
+    public IdColumnInfo getIdColumnInfo() {
+        return idColumnInfo;
     }
 
-    public void setIdColumnInfoList(List<ColumnInfo> idColumnInfoList) {
-        this.idColumnInfoList = idColumnInfoList;
+    public void setIdColumnInfo(IdColumnInfo idColumnInfo) {
+        this.idColumnInfo = idColumnInfo;
     }
 
     public List<ColumnInfo> getGenerateValueColumnInfoList() {
@@ -191,6 +191,10 @@ public class EntityInfo {
 
                 if (columnInfo instanceof RelationColumnInfo) {
                     relationColumnInfoList.add(columnInfo);
+                }
+
+                if (columnInfo instanceof IdColumnInfo) {
+                    idColumnInfo = (IdColumnInfo) columnInfo;
                 }
 
                 // 1、字段不存在关联实体为表字段

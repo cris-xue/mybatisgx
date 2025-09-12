@@ -129,12 +129,20 @@ public class MethodNameAstHandler {
                 this.parseConditionItem(entityInfo, conditionInfo, conditionEntity, parseTreeChild);
             } else if (parseTreeChild instanceof MethodNameParser.Field_clauseContext) {
                 String javaColumnName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, token);
-                ColumnInfo columnInfo = entityInfo.getColumnInfo(javaColumnName);
-                if (columnInfo == null) {
-                    throw new RuntimeException("方法条件或者实体中条件与数据库库实体无法对应：" + javaColumnName);
+                if ("id".equals(javaColumnName)) {
+                    List<ColumnInfo> idColumnInfoList = entityInfo.getIdColumnInfoList();
+                    for (ColumnInfo idColumnInfo : idColumnInfoList) {
+                        conditionInfo.setDbColumnName(idColumnInfo.getDbColumnName());
+                        conditionInfo.setJavaColumnName(idColumnInfo.getJavaColumnName());
+                    }
+                } else {
+                    ColumnInfo columnInfo = entityInfo.getColumnInfo(javaColumnName);
+                    if (columnInfo == null) {
+                        throw new RuntimeException("方法条件或者实体中条件与数据库库实体无法对应：" + javaColumnName);
+                    }
+                    conditionInfo.setDbColumnName(columnInfo.getDbColumnName());
+                    conditionInfo.setJavaColumnName(columnInfo.getJavaColumnName());
                 }
-                conditionInfo.setDbColumnName(columnInfo.getDbColumnName());
-                conditionInfo.setJavaColumnName(columnInfo.getJavaColumnName());
             } else if (parseTreeChild instanceof MethodNameParser.Comparison_op_clauseContext) {
                 conditionInfo.setComparisonOp(TOKEN_MAP.get(token));
             } else {

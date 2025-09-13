@@ -49,11 +49,8 @@ public class ResultMapTemplateHandler {
             ResultMapHelper.idColumnElement(resultMapElement, idColumnInfo);
         } else {
             for (ColumnInfo columnInfo : columnList) {
-                ColumnInfo composite = new ColumnInfo();
                 String javaColumnName = String.format("%s.%s", idColumnInfo.getJavaColumnName(), columnInfo.getJavaColumnName());
-                composite.setJavaColumnName(javaColumnName);
-                composite.setDbColumnName(columnInfo.getDbColumnName());
-                composite.setDbColumnNameAlias(columnInfo.getDbColumnNameAlias());
+                ColumnInfo composite = new ColumnInfo.Builder().columnInfo(columnInfo).javaColumnName(javaColumnName).build();
                 ResultMapHelper.idColumnElement(resultMapElement, composite);
             }
         }
@@ -100,14 +97,8 @@ public class ResultMapTemplateHandler {
                         ColumnInfo referencedColumnInfo = inverseForeignKeyColumnInfo.getReferencedColumnInfo();
 
                         String javaColumnName = String.format("%s.%s", relationColumnInfo.getJavaColumnName(), referencedColumnInfo.getJavaColumnName());
-                        String dbColumnName = foreignKeyColumnInfo.getDbColumnName();
-                        String dbColumnNameAlias = foreignKeyColumnInfo.getDbColumnNameAlias();
-
-                        ColumnInfo subColumnInfo = new ColumnInfo();
-                        subColumnInfo.setJavaColumnName(javaColumnName);
-                        subColumnInfo.setDbColumnName(dbColumnName);
-                        subColumnInfo.setDbColumnNameAlias(dbColumnNameAlias);
-                        ResultMapHelper.resultColumnElement(resultMapElement, subColumnInfo);
+                        ColumnInfo composite = new ColumnInfo.Builder().columnInfo(foreignKeyColumnInfo).javaColumnName(javaColumnName).build();
+                        ResultMapHelper.resultColumnElement(resultMapElement, composite);
                     }
                 } else {
                     /*EntityInfo entityInfo = EntityInfoContextHolder.get(relationColumnInfo.getJavaType());

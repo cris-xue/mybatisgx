@@ -1,7 +1,10 @@
 package com.lc.mybatisx.model.handler;
 
 import com.google.common.base.CaseFormat;
-import com.lc.mybatisx.model.*;
+import com.lc.mybatisx.model.ColumnInfo;
+import com.lc.mybatisx.model.ConditionInfo;
+import com.lc.mybatisx.model.EntityInfo;
+import com.lc.mybatisx.model.MethodInfo;
 import com.lc.mybatisx.syntax.method.name.MethodNameLexer;
 import com.lc.mybatisx.syntax.method.name.MethodNameParser;
 import org.antlr.v4.runtime.CharStream;
@@ -126,16 +129,21 @@ public class MethodNameAstHandler {
                 this.parseConditionItem(entityInfo, conditionInfo, conditionEntity, parseTreeChild);
             } else if (parseTreeChild instanceof MethodNameParser.Field_clauseContext) {
                 String javaColumnName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, token);
+                /*ColumnInfo columnInfo;
                 if ("id".equals(javaColumnName)) {
-                    IdColumnInfo idColumnInfo = entityInfo.getIdColumnInfo();
-                    conditionInfo.setColumnInfo(idColumnInfo);
+                    columnInfo = entityInfo.getIdColumnInfo();
                 } else {
-                    ColumnInfo columnInfo = entityInfo.getColumnInfo(javaColumnName);
+                    columnInfo = entityInfo.getColumnInfo(javaColumnName);
                     if (columnInfo == null) {
                         throw new RuntimeException("方法条件或者实体中条件与数据库库实体无法对应：" + javaColumnName);
                     }
-                    conditionInfo.setColumnInfo(columnInfo);
+                }*/
+                ColumnInfo columnInfo = entityInfo.getColumnInfo(javaColumnName);
+                if (columnInfo == null) {
+                    throw new RuntimeException("方法条件或者实体中条件与数据库库实体无法对应：" + javaColumnName);
                 }
+                conditionInfo.setConditionName(javaColumnName);
+                conditionInfo.setColumnInfo(columnInfo);
             } else if (parseTreeChild instanceof MethodNameParser.Comparison_op_clauseContext) {
                 conditionInfo.setComparisonOp(TOKEN_MAP.get(token));
             } else {

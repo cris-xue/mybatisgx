@@ -23,7 +23,7 @@ public class XmlUtils {
         try {
             inputStream = new ByteArrayInputStream(xml.getBytes());
             // 把xml字符串转换成Document
-            return new XPathParser(inputStream);
+            return new XPathParser(xml);
         } finally {
             try {
                 if (inputStream != null) {

@@ -50,6 +50,7 @@ public class ConditionInfo {
     /**
      * 条件对应的方法中的参数
      */
+    @Deprecated
     private List<String> paramName = new ArrayList<>();
     /**
      * 条件字段关联的字段信息
@@ -58,6 +59,7 @@ public class ConditionInfo {
     /**
      * 条件字段关联的id字段信息列表
      */
+    @Deprecated
     private List<IdColumnInfo> idColumnInfoList = new ArrayList();
     /**
      * 左括号

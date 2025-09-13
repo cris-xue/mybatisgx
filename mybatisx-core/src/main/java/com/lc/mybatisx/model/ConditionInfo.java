@@ -129,6 +129,7 @@ public class ConditionInfo {
         this.comparisonOp = comparisonOp;
     }
 
+    @Deprecated
     public String getJavaColumnName() {
         return javaColumnName;
     }

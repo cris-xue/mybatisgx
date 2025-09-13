@@ -13,22 +13,34 @@ import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
 import org.flywaydb.core.Flyway;
 
 import javax.sql.DataSource;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 
 public class DaoTestUtils {
 
-    protected static void init(DataSource dataSource) {
+    private static final Properties properties = new Properties();
+
+    static {
+        try {
+            properties.load(DaoTestUtils.class.getClassLoader().getResourceAsStream("application.properties"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected static void flywayInit(DataSource dataSource) {
         // 初始化Flyway
         Flyway flyway = Flyway.configure()
                 .dataSource(dataSource)
-                .locations("classpath:db/migration/mysql")
+                .locations(properties.getProperty("flywayLocations"))
                 .load();
         flyway.migrate();
     }
 
     protected static DataSource dataSource() {
-        return dataSource("jdbc:h2:mem:test_db;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE");
+        return dataSource(properties.getProperty("dataSourceUrl"));
     }
 
     protected static DataSource dataSource(String url) {
@@ -43,7 +55,7 @@ public class DaoTestUtils {
 
     protected static MybatisxConfiguration context(List<Class<?>> entityClassList, List<Class<?>> daoClassList) {
         DataSource dataSource = dataSource();
-        init(dataSource);
+        flywayInit(dataSource);
 
         Environment environment = new Environment.Builder("test_env")
                 .transactionFactory(new JdbcTransactionFactory())

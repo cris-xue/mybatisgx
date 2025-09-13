@@ -29,7 +29,7 @@ public class UserDaoTest {
         int insertCount = userDao.insert(user);
         Assert.assertEquals(1, insertCount);
 
-        User dbUser = userDao.findById(user.getId());
+        User dbUser = userDao.findById(user.getMultiId());
         Assert.assertNotNull(dbUser);
         Assert.assertEquals(user.getName(), dbUser.getName());
     }

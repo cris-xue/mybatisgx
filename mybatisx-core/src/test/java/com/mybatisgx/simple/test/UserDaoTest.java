@@ -20,6 +20,10 @@ public class UserDaoTest {
         User user = fixtureGenerator.createRandomized(User.class);
         int count = userDao.insert(user);
         Assert.assertEquals(1, count);
+
+        User dbUser = userDao.findById(user.getId());
+        Assert.assertNotNull(dbUser);
+        Assert.assertEquals(user.getId(), dbUser.getId());
     }
 
     @Test
@@ -33,6 +37,9 @@ public class UserDaoTest {
 
         int deleteCount = userDao.deleteById(user.getId());
         Assert.assertEquals(1, deleteCount);
+
+        User dbUser = userDao.findById(user.getId());
+        Assert.assertNull(dbUser);
     }
 
     @Test

@@ -1,13 +1,13 @@
 package com.mybatisgx.onetoone.entity;
 
 import com.lc.mybatisx.annotation.*;
-import com.mybatisgx.entity.BaseEntity;
+import com.mybatisgx.entity.IdBaseEntity;
 
 import javax.persistence.FetchType;
 
 @Entity
 @Table(name = "test_user")
-public class User extends BaseEntity<Long> {
+public class User extends IdBaseEntity<Long> {
 
     @Column(name = "role_ids")
     private String roleIds;

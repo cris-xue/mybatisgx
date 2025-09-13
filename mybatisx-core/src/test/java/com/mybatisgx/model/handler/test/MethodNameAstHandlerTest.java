@@ -26,7 +26,7 @@ public class MethodNameAstHandlerTest {
         List<ConditionInfo> conditionInfoList = methodInfo.getConditionInfoList();
         Assert.assertTrue(conditionInfoList != null && conditionInfoList.size() > 0);
         ConditionInfo conditionInfo = conditionInfoList.get(0);
-        Assert.assertEquals("name", conditionInfo.getJavaColumnName());
+        Assert.assertEquals("name", conditionInfo.getConditionName());
     }
 
     @Test
@@ -41,11 +41,11 @@ public class MethodNameAstHandlerTest {
         Assert.assertTrue(conditionInfoList != null && conditionInfoList.size() > 0);
 
         ConditionInfo conditionInfo1 = conditionInfoList.get(0);
-        Assert.assertEquals("id", conditionInfo1.getJavaColumnName());
+        Assert.assertEquals("id", conditionInfo1.getConditionName());
         Assert.assertEquals("Id", conditionInfo1.getOrigin());
 
         ConditionInfo conditionInfo2 = conditionInfoList.get(1);
-        Assert.assertEquals("name", conditionInfo2.getJavaColumnName());
+        Assert.assertEquals("name", conditionInfo2.getConditionName());
         Assert.assertEquals("AndName", conditionInfo2.getOrigin());
 
         ConditionInfo conditionInfo3 = conditionInfoList.get(2);

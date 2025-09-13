@@ -193,13 +193,7 @@ public class EntityInfo {
                     relationColumnInfoList.add(columnInfo);
                 }
 
-                if (columnInfo instanceof IdColumnInfo) {
-                    // id字段特殊，如果是联合主键，则自动生成一个id映射到联合主键 TODO: 需要创建id常量
-                    idColumnInfo = (IdColumnInfo) columnInfo;
-                    if (ObjectUtils.isNotEmpty(idColumnInfo.getColumnInfoList())) {
-                        columnInfoMap.put("id", columnInfo);
-                    }
-                }
+                this.processIdColumnInfo(columnInfo);
 
                 // 1、字段不存在关联实体为表字段
                 // 2、存在关联实体并且是关系维护方才是表字段【多对多关联字段在中间表，所以实体中是不存在表字段的】
@@ -222,6 +216,27 @@ public class EntityInfo {
                     tableColumnInfoMap.put(columnInfo.getDbColumnName(), columnInfo.getJavaColumnName());
                 }
                 columnInfoMap.put(columnInfo.getJavaColumnName(), columnInfo);
+            }
+        }
+
+        /**
+         * id字段特殊，如果是联合主键，则自动生成一个id映射到联合主键 TODO: 需要创建id常量
+         * @param columnInfo
+         */
+        public void processIdColumnInfo(ColumnInfo columnInfo) {
+            if (columnInfo instanceof IdColumnInfo) {
+                idColumnInfo = (IdColumnInfo) columnInfo;
+                columnInfoMap.put("id", idColumnInfo);
+                tableColumnInfoMap.put("id", idColumnInfo.getJavaColumnName());
+
+                List<ColumnInfo> compositeList = idColumnInfo.getColumnInfoList();
+                if (ObjectUtils.isEmpty(compositeList)) {
+                    return;
+                }
+                for (ColumnInfo composite : compositeList) {
+                    columnInfoMap.put(composite.getJavaColumnName(), composite);
+                    tableColumnInfoMap.put(composite.getDbColumnName(), composite.getJavaColumnName());
+                }
             }
         }
     }

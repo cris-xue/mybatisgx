@@ -164,6 +164,9 @@ public class ColumnInfoHandler {
         if (embeddedId != null) {
             Class<?> javaType = idColumnInfo.getJavaType();
             columnInfoList = this.getColumnInfoList(javaType);
+            for (ColumnInfo columnInfo : columnInfoList) {
+                columnInfo.setJavaColumnPath(idColumnInfo.getJavaColumnName() + "." + columnInfo.getJavaColumnName());
+            }
         }
         idColumnInfo.setId(id);
         idColumnInfo.setEmbeddedId(embeddedId);
@@ -192,17 +195,17 @@ public class ColumnInfoHandler {
         List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = new ArrayList();
         if (joinColumn != null) {
             JoinColumn[] joinColumnList = new JoinColumn[]{joinColumn};
-            inverseForeignKeyColumnInfoList = this.getForeignKeyList(joinColumnList);
+            inverseForeignKeyColumnInfoList = this.getForeignKeyList(joinColumnList, relationColumnInfo);
         }
         if (joinColumns != null) {
             JoinColumn[] joinColumnList = joinColumns.value();
-            inverseForeignKeyColumnInfoList = this.getForeignKeyList(joinColumnList);
+            inverseForeignKeyColumnInfoList = this.getForeignKeyList(joinColumnList, relationColumnInfo);
         }
         if (joinTable != null) {
             JoinColumn[] joinColumnList = joinTable.joinColumns();
-            foreignKeyColumnInfoList = this.getForeignKeyList(joinColumnList);
+            foreignKeyColumnInfoList = this.getForeignKeyList(joinColumnList, relationColumnInfo);
             JoinColumn[] inverseJoinColumnList = joinTable.inverseJoinColumns();
-            inverseForeignKeyColumnInfoList = this.getForeignKeyList(inverseJoinColumnList);
+            inverseForeignKeyColumnInfoList = this.getForeignKeyList(inverseJoinColumnList, relationColumnInfo);
         }
 
         // ColumnRelationInfo columnRelationInfo = new ColumnRelationInfo();
@@ -218,7 +221,7 @@ public class ColumnInfoHandler {
         relationColumnInfo.setInverseForeignKeyColumnInfoList(inverseForeignKeyColumnInfoList);
     }
 
-    private List<ForeignKeyColumnInfo> getForeignKeyList(JoinColumn[] joinColumnList) {
+    private List<ForeignKeyColumnInfo> getForeignKeyList(JoinColumn[] joinColumnList, RelationColumnInfo relationColumnInfo) {
         List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = new ArrayList(5);
         for (JoinColumn joinColumn : joinColumnList) {
             String name = joinColumn.name();
@@ -230,6 +233,7 @@ public class ColumnInfoHandler {
             ColumnInfo columnInfo = new ColumnInfo();
             columnInfo.setJavaColumnName(javaColumnName);
             columnInfo.setDbColumnName(dbColumnName);
+            columnInfo.setJavaColumnPath(relationColumnInfo.getJavaColumnName());
 
             String referencedColumnName = joinColumn.referencedColumnName();
 

@@ -65,7 +65,7 @@ public class InsertTemplateHandler {
             }
             if (dataMethodParamInfo != null) {
                 EntityInfo entityInfo = EntityInfoContextHolder.get(dataMethodParamInfo.getType());
-                List<ColumnInfo> idColumnInfoList = entityInfo.getIdColumnInfoList();
+                List<ColumnInfo> idColumnInfoList = entityInfo.getIdColumnInfo().getColumnInfoList();
                 List<String> keyPropertyList = new ArrayList();
                 for (ColumnInfo idColumnInfo : idColumnInfoList) {
                     String keyProperty = String.format("%s.%s", dataMethodParamInfo.getBatchItemName(), idColumnInfo.getJavaColumnName());
@@ -85,9 +85,15 @@ public class InsertTemplateHandler {
             }
 
             EntityInfo entityInfo = EntityInfoContextHolder.get(dataMethodParamInfo.getType());
-            List<ColumnInfo> idColumnInfoList = entityInfo.getIdColumnInfoList();
+            IdColumnInfo idColumnInfo = entityInfo.getIdColumnInfo();
+            List<ColumnInfo> columnInfoList = idColumnInfo.getColumnInfoList();
             List<String> keyPropertyList = new ArrayList();
-            for (ColumnInfo idColumnInfo : idColumnInfoList) {
+            if (ObjectUtils.isNotEmpty(columnInfoList)) {
+                for (ColumnInfo columnInfo : columnInfoList) {
+                    String keyProperty = String.format("%s", columnInfo.getJavaColumnName());
+                    keyPropertyList.add(keyProperty);
+                }
+            } else {
                 String keyProperty = String.format("%s", idColumnInfo.getJavaColumnName());
                 keyPropertyList.add(keyProperty);
             }

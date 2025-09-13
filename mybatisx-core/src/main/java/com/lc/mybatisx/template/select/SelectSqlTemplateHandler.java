@@ -4,6 +4,7 @@ import com.lc.mybatisx.annotation.ManyToMany;
 import com.lc.mybatisx.model.*;
 import com.lc.mybatisx.template.ConditionBuilder;
 import com.lc.mybatisx.template.MybatisgxSqlBuilder;
+import com.lc.mybatisx.utils.TypeUtils;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.Expression;
@@ -160,7 +161,15 @@ public class SelectSqlTemplateHandler {
         Table table = new Table(entityInfo.getTableName());
         // 添加非外键表字段
         for (ColumnInfo columnInfo : entityInfo.getTableColumnInfoList()) {
-            if (!(columnInfo instanceof RelationColumnInfo)) {
+            if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class)) {
+                IdColumnInfo idColumnInfo = (IdColumnInfo) columnInfo;
+                List<ColumnInfo> compositeList = idColumnInfo.getColumnInfoList();
+                for (ColumnInfo composite : compositeList) {
+                    SelectItem<?> selectItem = this.getSelectItem(table, composite.getDbColumnName(), composite.getDbColumnNameAlias());
+                    selectItemList.add(selectItem);
+                }
+            }
+            if (TypeUtils.typeEquals(columnInfo, ColumnInfo.class)) {
                 SelectItem<?> selectItem = this.getSelectItem(table, columnInfo.getDbColumnName(), columnInfo.getDbColumnNameAlias());
                 selectItemList.add(selectItem);
             }

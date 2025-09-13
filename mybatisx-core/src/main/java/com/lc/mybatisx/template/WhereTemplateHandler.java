@@ -1,6 +1,5 @@
 package com.lc.mybatisx.template;
 
-import com.lc.mybatisx.annotation.Id;
 import com.lc.mybatisx.annotation.LogicDelete;
 import com.lc.mybatisx.model.*;
 import com.lc.mybatisx.utils.PropertyPlaceholderUtils;
@@ -54,11 +53,11 @@ public class WhereTemplateHandler {
                 this.handleConditionGroup(entityInfo, methodInfo, whereElement, conditionGroupInfo.getConditionInfoList());
                 whereElement.addText(conditionInfo.getRightBracket());
             } else {
-                ColumnInfo columnInfo = entityInfo.getColumnInfo(conditionInfo.getJavaColumnName());
-                Id id = columnInfo.getId();
+                // ColumnInfo columnInfo = entityInfo.getColumnInfo(conditionInfo.getJavaColumnName());
+                ColumnInfo columnInfo = conditionInfo.getColumnInfo();
                 LogicDelete logicDelete = columnInfo.getLogicDelete();
-                if (id != null) {
-                    processId(whereElement, entityInfo, methodInfo.getDynamic());
+                if (columnInfo instanceof IdColumnInfo) {
+                    processId(whereElement, entityInfo, columnInfo, methodInfo.getDynamic());
                     return;
                 }
                 if (logicDelete != null) {
@@ -69,16 +68,40 @@ public class WhereTemplateHandler {
         }
     }
 
-    private void processId(Element whereElement, EntityInfo entityInfo, Boolean dynamic) {
-        List<ColumnInfo> idColumnInfoList = entityInfo.getIdColumnInfoList();
-        for (ColumnInfo idColumnInfo : idColumnInfoList) {
-            if (dynamic) {
+    private void processId(Element whereElement, EntityInfo entityInfo, ColumnInfo columnInfo, Boolean dynamic) {
+        if (!(columnInfo instanceof IdColumnInfo)) {
+            this.processIdCondition(whereElement, columnInfo.getJavaColumnName(), columnInfo.getDbColumnName(), dynamic);
+            /*if (dynamic) {
                 Element ifElement = whereElement.addElement("if");
-                ifElement.addAttribute("test", String.format("%s != null", idColumnInfo.getJavaColumnName()));
-                ifElement.addText(String.format(" %s %s %s #{%s}", "and", idColumnInfo.getDbColumnName(), "=", idColumnInfo.getJavaColumnName()));
+                ifElement.addAttribute("test", String.format("%s != null", columnInfo.getJavaColumnName()));
+                ifElement.addText(String.format(" %s %s %s #{%s}", "and", columnInfo.getDbColumnName(), "=", columnInfo.getJavaColumnName()));
             } else {
-                whereElement.addText(String.format(" %s %s %s #{%s}", "and", idColumnInfo.getDbColumnName(), "=", idColumnInfo.getJavaColumnName()));
+                whereElement.addText(String.format(" %s %s %s #{%s}", "and", columnInfo.getDbColumnName(), "=", columnInfo.getJavaColumnName()));
+            }*/
+        } else {
+            List<ColumnInfo> idColumnInfoList = ((IdColumnInfo) columnInfo).getColumnInfoList();
+            for (ColumnInfo idColumnInfo : idColumnInfoList) {
+                String javaColumnName = String.format("%s.%s", columnInfo.getJavaColumnName(), idColumnInfo.getJavaColumnName());
+                this.processIdCondition(whereElement, javaColumnName, idColumnInfo.getDbColumnName(), dynamic);
+                // this.processId(whereElement, entityInfo, idColumnInfo, dynamic);
+                /*if (dynamic) {
+                    Element ifElement = whereElement.addElement("if");
+                    ifElement.addAttribute("test", String.format("%s != null", idColumnInfo.getJavaColumnName()));
+                    ifElement.addText(String.format(" %s %s %s #{%s}", "and", idColumnInfo.getDbColumnName(), "=", idColumnInfo.getJavaColumnName()));
+                } else {
+                    whereElement.addText(String.format(" %s %s %s #{%s}", "and", idColumnInfo.getDbColumnName(), "=", idColumnInfo.getJavaColumnName()));
+                }*/
             }
+        }
+    }
+
+    private void processIdCondition(Element whereElement, String javaColumnName, String tableColumnName, Boolean dynamic) {
+        if (dynamic) {
+            Element ifElement = whereElement.addElement("if");
+            ifElement.addAttribute("test", String.format("%s != null", javaColumnName));
+            ifElement.addText(String.format(" %s %s %s #{%s}", "and", tableColumnName, "=", javaColumnName));
+        } else {
+            whereElement.addText(String.format(" %s %s %s #{%s}", "and", tableColumnName, "=", javaColumnName));
         }
     }
 
@@ -137,12 +160,14 @@ public class WhereTemplateHandler {
     }
 
     private void whereCommon(Element whereElement, MethodInfo methodInfo, ConditionInfo conditionInfo) {
-        String dbColumnName = conditionInfo.getDbColumnName();
-        String javaColumnName = conditionInfo.getConditionEntity() ? conditionInfo.getConditionEntityJavaColumnName() : conditionInfo.getJavaColumnName();
+        /*String dbColumnName = conditionInfo.getDbColumnName();
+        String javaColumnName = conditionInfo.getConditionEntity() ? conditionInfo.getConditionEntityJavaColumnName() : conditionInfo.getJavaColumnName();*/
+        String tableColumnName = conditionInfo.getColumnInfo().getDbColumnName();
+        String javaColumnName = conditionInfo.getColumnInfo().getJavaColumnName();
         String logicOp = this.getLogicOp(conditionInfo);
         String comparisonOp = conditionInfo.getComparisonOp();
         Element trimOrIfElement = whereOpDynamic(methodInfo.getDynamic(), whereElement, javaColumnName);
-        String conditionOp = String.format(" %s %s %s #{%s}", logicOp, dbColumnName, comparisonOp, javaColumnName);
+        String conditionOp = String.format(" %s %s %s #{%s}", logicOp, tableColumnName, comparisonOp, javaColumnName);
         trimOrIfElement.addText(conditionOp);
     }
 

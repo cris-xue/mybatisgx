@@ -3,6 +3,8 @@ package com.lc.mybatisx.model.handler;
 import com.lc.mybatisx.annotation.ManyToMany;
 import com.lc.mybatisx.context.EntityInfoContextHolder;
 import com.lc.mybatisx.model.*;
+import com.lc.mybatisx.utils.TypeUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -91,11 +93,25 @@ public class EntityRelationTreeHandler {
             List<ColumnInfo> tableColumnInfoList = entityInfo.getTableColumnInfoList();
             for (int i = 0; i < tableColumnInfoList.size(); i++) {
                 ColumnInfo columnInfo = tableColumnInfoList.get(i);
-                if (!(columnInfo instanceof RelationColumnInfo)) {
+                if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class)) {
+                    IdColumnInfo idColumnInfo = (IdColumnInfo) columnInfo;
+                    List<ColumnInfo> columnInfoList = idColumnInfo.getColumnInfoList();
+                    if (ObjectUtils.isEmpty(columnInfoList)) {
+                        String dbColumnName = columnInfo.getDbColumnName();
+                        String dbColumnNameAlias = this.buildTableColumnNameAlias(tableName, dbColumnName, level, i);
+                        columnInfo.setDbColumnNameAlias(dbColumnNameAlias);
+                    } else {
+                        for (ColumnInfo subColumnInfo : columnInfoList) {
+                            String dbColumnName = subColumnInfo.getDbColumnName();
+                            String dbColumnNameAlias = this.buildTableColumnNameAlias(tableName, dbColumnName, level, i);
+                            subColumnInfo.setDbColumnNameAlias(dbColumnNameAlias);
+                        }
+                    }
+                } else if (TypeUtils.typeEquals(columnInfo, ColumnInfo.class)) {
                     String dbColumnName = columnInfo.getDbColumnName();
                     String dbColumnNameAlias = this.buildTableColumnNameAlias(tableName, dbColumnName, level, i);
                     columnInfo.setDbColumnNameAlias(dbColumnNameAlias);
-                } else {
+                } else if (TypeUtils.typeEquals(columnInfo, RelationColumnInfo.class)) {
                     RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
                     ManyToMany manyToMany = relationColumnInfo.getManyToMany();
                     if (manyToMany == null) {

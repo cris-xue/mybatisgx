@@ -125,6 +125,8 @@ public class ColumnInfoHandler {
     }
 
     private ColumnInfo getColumnInfo(Field field) {
+        Id id = field.getAnnotation(Id.class);
+        EmbeddedId embeddedId = field.getAnnotation(EmbeddedId.class);
         Column column = field.getAnnotation(Column.class);
         OneToOne oneToOne = field.getAnnotation(OneToOne.class);
         OneToMany oneToMany = field.getAnnotation(OneToMany.class);
@@ -138,6 +140,11 @@ public class ColumnInfoHandler {
             relationColumnInfo.setManyToMany(manyToMany);
             relationColumnInfo.setColumn(column);
             return relationColumnInfo;
+        } else if (id != null || embeddedId != null) {
+            IdColumnInfo idColumnInfo = new IdColumnInfo();
+            idColumnInfo.setId(id);
+            idColumnInfo.setEmbeddedId(embeddedId);
+            return idColumnInfo;
         } else {
             ColumnInfo columnInfo = new ColumnInfo();
             columnInfo.setColumn(column);

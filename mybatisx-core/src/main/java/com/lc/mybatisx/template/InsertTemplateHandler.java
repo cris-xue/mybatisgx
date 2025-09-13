@@ -121,11 +121,31 @@ public class InsertTemplateHandler {
             if (TypeUtils.typeEquals(tableColumnInfo, IdColumnInfo.class)) {
                 IdColumnInfo idColumnInfo = (IdColumnInfo) tableColumnInfo;
                 List<ColumnInfo> columnInfoList = idColumnInfo.getColumnInfoList();
-                for (ColumnInfo columnInfo : columnInfoList) {
-                    this.setColumn(methodInfo, columnInfo, dbTrimElement);
+                if (ObjectUtils.isEmpty(columnInfoList)) {
+                    this.setColumn(methodInfo, tableColumnInfo, dbTrimElement);
+                } else {
+                    for (ColumnInfo columnInfo : columnInfoList) {
+                        this.setColumn(methodInfo, columnInfo, dbTrimElement);
+                    }
                 }
-            } else {
+            } else if (TypeUtils.typeEquals(tableColumnInfo, ColumnInfo.class)) {
                 this.setColumn(methodInfo, tableColumnInfo, dbTrimElement);
+            } else if (TypeUtils.typeEquals(tableColumnInfo, RelationColumnInfo.class)) {
+                RelationColumnInfo relationColumnInfo = (RelationColumnInfo) tableColumnInfo;
+                RelationType relationType = relationColumnInfo.getRelationType();
+                if (relationType == RelationType.MANY_TO_MANY) {
+                    continue;
+                }
+                ColumnInfo mappedByRelationColumnInfo = relationColumnInfo.getMappedByRelationColumnInfo();
+                if (mappedByRelationColumnInfo == null) {
+                    List<ForeignKeyColumnInfo> inverseForeignKeyInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
+                    for (ForeignKeyColumnInfo inverseForeignKeyInfo : inverseForeignKeyInfoList) {
+                        ColumnInfo columnInfo = inverseForeignKeyInfo.getColumnInfo();
+                        this.setColumn(methodInfo, columnInfo, dbTrimElement);
+                    }
+                } else {
+                    this.setColumn(methodInfo, tableColumnInfo, dbTrimElement);
+                }
             }
         }
     }
@@ -178,11 +198,8 @@ public class InsertTemplateHandler {
                 IdColumnInfo idColumnInfo = (IdColumnInfo) tableColumnInfo;
                 List<ColumnInfo> columnInfoList = idColumnInfo.getColumnInfoList();
                 for (ColumnInfo columnInfo : columnInfoList) {
-                    ColumnInfo composite = new ColumnInfo();
                     String javaColumnName = String.format("%s.%s", idColumnInfo.getJavaColumnName(), columnInfo.getJavaColumnName());
-                    composite.setJavaColumnName(javaColumnName);
-                    composite.setDbColumnName(columnInfo.getDbColumnName());
-                    composite.setDbColumnNameAlias(columnInfo.getDbColumnNameAlias());
+                    ColumnInfo composite = new ColumnInfo.Builder().columnInfo(columnInfo).javaColumnName(javaColumnName).build();
                     this.handleMethodParam(methodInfo, methodParamInfo, composite, javaTrimElement);
                 }
             } else {
@@ -216,7 +233,7 @@ public class InsertTemplateHandler {
         String batchItemName = methodParamInfo.getBatchItemName();
         Boolean dynamic = methodInfo.getDynamic();
         String javaColumnName = tableColumnInfo.getJavaColumnName();
-        if (ColumnInfoHelper.isColumnInfo(tableColumnInfo)) {
+        if (TypeUtils.typeEquals(tableColumnInfo, IdColumnInfo.class)) {
             String nestedJavaColumnName = String.format("%s.%s", batchItemName, javaColumnName);
             if (dynamic) {
                 Element javaTrimIfElement = javaTrimElement.addElement("if");
@@ -227,14 +244,26 @@ public class InsertTemplateHandler {
                 String javaColumn = String.format("#{%s%s},", nestedJavaColumnName, buildTypeHandler(tableColumnInfo));
                 javaTrimElement.addText(javaColumn);
             }
-        } else {
+        } else if (TypeUtils.typeEquals(tableColumnInfo, ColumnInfo.class)) {
+            String nestedJavaColumnName = String.format("%s.%s", batchItemName, javaColumnName);
+            if (dynamic) {
+                Element javaTrimIfElement = javaTrimElement.addElement("if");
+                javaTrimIfElement.addAttribute("test", buildTestNotNull(nestedJavaColumnName));
+                String javaColumn = String.format("#{%s%s},", nestedJavaColumnName, buildTypeHandler(tableColumnInfo));
+                javaTrimIfElement.addText(javaColumn);
+            } else {
+                String javaColumn = String.format("#{%s%s},", nestedJavaColumnName, buildTypeHandler(tableColumnInfo));
+                javaTrimElement.addText(javaColumn);
+            }
+        } else if (TypeUtils.typeEquals(tableColumnInfo, RelationColumnInfo.class)) {
             RelationColumnInfo relationColumnInfo = (RelationColumnInfo) tableColumnInfo;
             ManyToMany manyToMany = relationColumnInfo.getManyToMany();
             if (manyToMany == null) {
                 List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
                 for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
-                    String referencedColumnName = inverseForeignKeyColumnInfo.getReferencedColumnName();
-                    String nestedJavaColumnName = String.format("%s.%s.%s", batchItemName, javaColumnName, referencedColumnName);
+                    ColumnInfo referencedColumnInfo = inverseForeignKeyColumnInfo.getReferencedColumnInfo();
+                    String javaColumnPath = referencedColumnInfo.getJavaColumnPath();
+                    String nestedJavaColumnName = String.format("%s.%s.%s", batchItemName, javaColumnName, javaColumnPath);
                     if (dynamic) {
                         Element javaTrimIfElement = javaTrimElement.addElement("if");
                         javaTrimIfElement.addAttribute("test", buildTestNotNull(nestedJavaColumnName));

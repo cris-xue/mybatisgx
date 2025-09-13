@@ -10,10 +10,7 @@ import com.lc.mybatisx.utils.GenericUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
+import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -98,6 +95,10 @@ public class ColumnInfoHandler {
     private void setType(Field field, ColumnInfo columnInfo, Map<String, Class<?>> typeParameterMap) {
         Type genericType = field.getGenericType();
         Class<?> fieldType = field.getType();
+        if (genericType instanceof ParameterizedType) {
+            ParameterizedType parameterizedType = (ParameterizedType) genericType;
+            genericType = parameterizedType.getRawType();
+        }
         if (genericType instanceof TypeVariable) {
             genericType = typeParameterMap.get(genericType.getTypeName());
         }

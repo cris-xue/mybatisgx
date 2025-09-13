@@ -43,6 +43,10 @@ public class ColumnInfo {
      */
     private String dbColumnNameAlias;
     /**
+     * java字段路径，通过链式调用，如：user.name获取到对象的值
+     */
+    private String javaColumnPath;
+    /**
      * 类型处理器
      */
     private String typeHandler;
@@ -139,6 +143,14 @@ public class ColumnInfo {
 
     public void setDbColumnNameAlias(String dbColumnNameAlias) {
         this.dbColumnNameAlias = dbColumnNameAlias;
+    }
+
+    public String getJavaColumnPath() {
+        return javaColumnPath;
+    }
+
+    public void setJavaColumnPath(String javaColumnPath) {
+        this.javaColumnPath = javaColumnPath;
     }
 
     public String getTypeHandler() {

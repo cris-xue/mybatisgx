@@ -234,8 +234,12 @@ public class EntityInfo {
                     return;
                 }
                 for (ColumnInfo composite : compositeList) {
-                    columnInfoMap.put(composite.getJavaColumnName(), composite);
-                    tableColumnInfoMap.put(composite.getDbColumnName(), composite.getJavaColumnName());
+                    String javaColumnName = composite.getJavaColumnName();
+                    String javaColumnNameNew = String.format("%s.%s", idColumnInfo.getJavaColumnName(), javaColumnName);
+                    columnInfoMap.put(javaColumnName, composite);
+                    columnInfoMap.put(javaColumnNameNew, composite);
+
+                    tableColumnInfoMap.put(composite.getDbColumnName(), javaColumnNameNew);
                 }
             }
         }

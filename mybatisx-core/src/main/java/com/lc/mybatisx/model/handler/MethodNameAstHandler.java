@@ -85,6 +85,7 @@ public class MethodNameAstHandler {
 
     private List<ConditionInfo> parseWhereClause(EntityInfo entityInfo, Boolean conditionEntity, ParseTree whereClause) {
         List<ConditionInfo> conditionInfoList = new ArrayList<>();
+        Integer conditionCount = 0;
         int childCount = whereClause.getChildCount();
         for (int i = 0; i < childCount; i++) {
             ParseTree whereChildItem = whereClause.getChild(i);
@@ -94,7 +95,7 @@ public class MethodNameAstHandler {
                 }
             } else if (whereChildItem instanceof MethodNameParser.Condition_clauseContext) {
                 ConditionInfo conditionInfo = new ConditionInfo();
-                conditionInfo.setIndex(i);
+                conditionInfo.setIndex(conditionCount++);
                 this.parseCondition(entityInfo, conditionInfo, conditionEntity, whereChildItem);
                 conditionInfoList.add(conditionInfo);
             } else {

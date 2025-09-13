@@ -82,8 +82,8 @@ public class MethodInfoHandler {
                 continue;
             }
 
-            List<MethodParamInfo> methodParamInfoList = getMethodParam(mapperInfo, method);
-            MethodReturnInfo methodReturnInfo = getMethodReturn(mapperInfo, method);
+            List<MethodParamInfo> methodParamInfoList = this.getMethodParam(mapperInfo, method);
+            MethodReturnInfo methodReturnInfo = this.getMethodReturn(mapperInfo, method);
 
             MethodInfo methodInfo = new MethodInfo();
             methodInfo.setMethod(method);
@@ -106,7 +106,7 @@ public class MethodInfoHandler {
             String resultMapId = resultMapInfoHandler.execute(mapperInfo, methodInfo);
             methodInfo.setResultMapId(resultMapId);
 
-            handleConditionParamInfo(methodInfo);
+            this.handleConditionParamInfo(methodInfo);
             // check(resultMapInfo, methodInfo);
 
             methodInfoMap.put(methodName, methodInfo);
@@ -134,6 +134,7 @@ public class MethodInfoHandler {
             methodParamInfo.setType(methodParamType);
             methodParamInfo.setTypeName(methodParamType.getName());
             this.getMethodParamName(methodParamInfo, parameter);
+            BatchData batchData = parameter.getAnnotation(BatchData.class);
             BatchSize batchSize = parameter.getAnnotation(BatchSize.class);
             if (batchSize != null) {
                 methodParamInfo.setBatchSize(true);
@@ -241,26 +242,34 @@ public class MethodInfoHandler {
      */
     public void handleConditionParamInfo(MethodInfo methodInfo) {
         List<ConditionInfo> conditionInfoList = methodInfo.getConditionInfoList();
-        this.handleConditionInfo(methodInfo, conditionInfoList);
+        this.bindConditionParam(methodInfo, conditionInfoList);
     }
 
-    private void handleConditionInfo(MethodInfo methodInfo, List<ConditionInfo> conditionInfoList) {
+    /**
+     * 绑定和条件和参数
+     * @param methodInfo
+     * @param conditionInfoList
+     */
+    private void bindConditionParam(MethodInfo methodInfo, List<ConditionInfo> conditionInfoList) {
         for (ConditionInfo conditionInfo : conditionInfoList) {
             ConditionGroupInfo conditionGroupInfo = conditionInfo.getConditionGroupInfo();
             if (conditionGroupInfo != null) {
-                this.handleConditionInfo(methodInfo, conditionGroupInfo.getConditionInfoList());
+                this.bindConditionParam(methodInfo, conditionGroupInfo.getConditionInfoList());
             } else {
                 // 处理查询条件和参数之间的关系，需要对特殊操作符进行处理，如between
                 Integer index = conditionInfo.getIndex();
-                String javaColumnName = conditionInfo.getJavaColumnName();
-                String comparisonOp = conditionInfo.getComparisonOp();
+                String conditionName = conditionInfo.getConditionName();
 
+                // 采用4种方式获取参数：argx -> conditionName -> conditionName.toLowerCase() -> paramx：【arg0 -> userName -> username -> param1】
                 MethodParamInfo methodParamInfo = methodInfo.getMethodParamInfo("arg" + index);
                 if (methodParamInfo == null) {
-                    methodParamInfo = methodInfo.getMethodParamInfo(javaColumnName);
+                    methodParamInfo = methodInfo.getMethodParamInfo(conditionName);
                 }
                 if (methodParamInfo == null) {
-                    methodParamInfo = methodInfo.getMethodParamInfo(javaColumnName.toLowerCase());
+                    methodParamInfo = methodInfo.getMethodParamInfo(conditionName.toLowerCase());
+                }
+                if (methodParamInfo == null) {
+                    methodParamInfo = methodInfo.getMethodParamInfo("param" + (index + 1));
                 }
                 if (methodParamInfo == null) {
                     // TODO 这里还需校验条件实体的参数    暂时先不校验

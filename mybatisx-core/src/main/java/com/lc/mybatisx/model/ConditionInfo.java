@@ -53,7 +53,7 @@ public class ConditionInfo {
     @Deprecated
     private List<String> paramName = new ArrayList<>();
     /**
-     * 条件字段关联的字段信息
+     * 条件字段关联的实体中的字段信息
      */
     private ColumnInfo columnInfo;
     /**

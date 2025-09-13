@@ -113,6 +113,14 @@ public class ConditionInfo {
         this.dbColumnName = dbColumnName;
     }
 
+    public String getConditionName() {
+        return conditionName;
+    }
+
+    public void setConditionName(String conditionName) {
+        this.conditionName = conditionName;
+    }
+
     public String getComparisonOp() {
         return comparisonOp;
     }

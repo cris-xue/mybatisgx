@@ -5,6 +5,7 @@ import com.lc.mybatisx.annotation.LogicDelete;
 import com.lc.mybatisx.annotation.ManyToMany;
 import com.lc.mybatisx.annotation.NonPersistent;
 import com.lc.mybatisx.annotation.handler.GenerateValueHandler;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -193,7 +194,11 @@ public class EntityInfo {
                 }
 
                 if (columnInfo instanceof IdColumnInfo) {
+                    // id字段特殊，如果是联合主键，则自动生成一个id映射到联合主键 TODO: 需要创建id常量
                     idColumnInfo = (IdColumnInfo) columnInfo;
+                    if (ObjectUtils.isNotEmpty(idColumnInfo.getColumnInfoList())) {
+                        columnInfoMap.put("id", columnInfo);
+                    }
                 }
 
                 // 1、字段不存在关联实体为表字段

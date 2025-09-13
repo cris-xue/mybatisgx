@@ -5,6 +5,7 @@ import com.lc.mybatisx.dao.Page;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -37,5 +38,27 @@ public class GenericUtils {
             return clazz;
         }
         return null;
+    }
+
+    /**
+     * 获取泛型参数和真实类型的映射关系
+     * @param clazz
+     * @return
+     */
+    public static Map<String, Class<?>> getTypeParameterMap(Class<?> clazz) {
+        Type type = clazz.getGenericSuperclass();
+        if (!(type instanceof ParameterizedType)) {
+            return new HashMap();
+        }
+        ParameterizedType parameterizedType = (ParameterizedType) type;
+        Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+        TypeVariable[] typeParameters = clazz.getSuperclass().getTypeParameters();
+        Map<String, Class<?>> typeParameterMap = new HashMap();
+        for (int i = 0; i < actualTypeArguments.length; i++) {
+            Type actualTypeArgument = actualTypeArguments[i];
+            TypeVariable typeParameter = typeParameters[i];
+            typeParameterMap.put(typeParameter.getName(), (Class<?>) actualTypeArgument);
+        }
+        return typeParameterMap;
     }
 }

@@ -204,4 +204,24 @@ public class ColumnInfo {
     public void setGenerateValue(GenerateValue generateValue) {
         this.generateValue = generateValue;
     }
+
+    public static class Builder {
+
+        private ColumnInfo columnInfo = new ColumnInfo();
+
+        public Builder columnInfo(ColumnInfo columnInfo) {
+            this.columnInfo.setDbColumnName(columnInfo.getDbColumnName());
+            this.columnInfo.setDbColumnNameAlias(columnInfo.getDbColumnNameAlias());
+            return this;
+        }
+
+        public Builder javaColumnName(String javaColumnName) {
+            this.columnInfo.setJavaColumnName(javaColumnName);
+            return this;
+        }
+
+        public ColumnInfo build() {
+            return columnInfo;
+        }
+    }
 }

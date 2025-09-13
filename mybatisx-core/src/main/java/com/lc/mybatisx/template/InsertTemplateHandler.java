@@ -4,6 +4,7 @@ import com.lc.mybatisx.annotation.LogicDelete;
 import com.lc.mybatisx.annotation.ManyToMany;
 import com.lc.mybatisx.context.EntityInfoContextHolder;
 import com.lc.mybatisx.model.*;
+import com.lc.mybatisx.utils.TypeUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.annotations.Param;
@@ -117,25 +118,37 @@ public class InsertTemplateHandler {
     private void setColumn(MethodInfo methodInfo, MethodParamInfo methodParamInfo, Element dbTrimElement) {
         List<ColumnInfo> tableColumnInfoList = this.getTableColumnInfoList(methodParamInfo.getType());
         for (ColumnInfo tableColumnInfo : tableColumnInfoList) {
-            String javaColumnName = tableColumnInfo.getJavaColumnName();
-            String dbColumnName = tableColumnInfo.getDbColumnName();
-
-            LogicDelete logicDelete = tableColumnInfo.getLogicDelete();
-            if (logicDelete != null) {
-                String javaColumn = String.format("%s,", dbColumnName);
-                dbTrimElement.addText(javaColumn);
-                continue;
-            }
-
-            if (methodInfo.getDynamic()) {
-                Element javaTrimIfElement = dbTrimElement.addElement("if");
-                javaTrimIfElement.addAttribute("test", buildTestNotNull(javaColumnName));
-                String dbColumn = String.format("%s,", dbColumnName);
-                javaTrimIfElement.addText(dbColumn);
+            if (TypeUtils.typeEquals(tableColumnInfo, IdColumnInfo.class)) {
+                IdColumnInfo idColumnInfo = (IdColumnInfo) tableColumnInfo;
+                List<ColumnInfo> columnInfoList = idColumnInfo.getColumnInfoList();
+                for (ColumnInfo columnInfo : columnInfoList) {
+                    this.setColumn(methodInfo, columnInfo, dbTrimElement);
+                }
             } else {
-                String dbColumn = String.format("%s,", dbColumnName);
-                dbTrimElement.addText(dbColumn);
+                this.setColumn(methodInfo, tableColumnInfo, dbTrimElement);
             }
+        }
+    }
+
+    private void setColumn(MethodInfo methodInfo, ColumnInfo columnInfo, Element dbTrimElement) {
+        String javaColumnName = columnInfo.getJavaColumnName();
+        String dbColumnName = columnInfo.getDbColumnName();
+
+        LogicDelete logicDelete = columnInfo.getLogicDelete();
+        if (logicDelete != null) {
+            String javaColumn = String.format("%s,", dbColumnName);
+            dbTrimElement.addText(javaColumn);
+            return;
+        }
+
+        if (methodInfo.getDynamic()) {
+            Element javaTrimIfElement = dbTrimElement.addElement("if");
+            javaTrimIfElement.addAttribute("test", buildTestNotNull(javaColumnName));
+            String dbColumn = String.format("%s,", dbColumnName);
+            javaTrimIfElement.addText(dbColumn);
+        } else {
+            String dbColumn = String.format("%s,", dbColumnName);
+            dbTrimElement.addText(dbColumn);
         }
     }
 
@@ -160,25 +173,41 @@ public class InsertTemplateHandler {
         if (ObjectUtils.isEmpty(tableColumnInfoList)) {
             throw new RuntimeException("实体表字段不存在");
         }
-
         for (ColumnInfo tableColumnInfo : tableColumnInfoList) {
-            LogicDelete logicDelete = tableColumnInfo.getLogicDelete();
-            if (logicDelete != null) {
-                String javaColumn = String.format("'%s'%s,", logicDelete.show(), buildTypeHandler(tableColumnInfo));
-                javaTrimElement.addText(javaColumn);
-                continue;
-            }
-
-            Boolean isBatch = methodInfo.getBatch();
-            if (isBatch) {
-                this.handleBatchValue(methodInfo, methodParamInfo, tableColumnInfo, javaTrimElement);
-            } else {
-                Param param = methodParamInfo.getParam();
-                if (param == null) {
-                    this.handleSingleBusinessObjectParam(methodInfo, methodParamInfo, tableColumnInfo, javaTrimElement);
-                } else {
-                    this.handleSingleBusinessObjectParamAnnotation(methodInfo, methodParamInfo, tableColumnInfo, javaTrimElement);
+            if (TypeUtils.typeEquals(tableColumnInfo, IdColumnInfo.class)) {
+                IdColumnInfo idColumnInfo = (IdColumnInfo) tableColumnInfo;
+                List<ColumnInfo> columnInfoList = idColumnInfo.getColumnInfoList();
+                for (ColumnInfo columnInfo : columnInfoList) {
+                    ColumnInfo composite = new ColumnInfo();
+                    String javaColumnName = String.format("%s.%s", idColumnInfo.getJavaColumnName(), columnInfo.getJavaColumnName());
+                    composite.setJavaColumnName(javaColumnName);
+                    composite.setDbColumnName(columnInfo.getDbColumnName());
+                    composite.setDbColumnNameAlias(columnInfo.getDbColumnNameAlias());
+                    this.handleMethodParam(methodInfo, methodParamInfo, composite, javaTrimElement);
                 }
+            } else {
+                this.handleMethodParam(methodInfo, methodParamInfo, tableColumnInfo, javaTrimElement);
+            }
+        }
+    }
+
+    private void handleMethodParam(MethodInfo methodInfo, MethodParamInfo methodParamInfo, ColumnInfo columnInfo, Element javaTrimElement) {
+        LogicDelete logicDelete = columnInfo.getLogicDelete();
+        if (logicDelete != null) {
+            String javaColumn = String.format("'%s'%s,", logicDelete.show(), buildTypeHandler(columnInfo));
+            javaTrimElement.addText(javaColumn);
+            return;
+        }
+
+        Boolean isBatch = methodInfo.getBatch();
+        if (isBatch) {
+            this.handleBatchValue(methodInfo, methodParamInfo, columnInfo, javaTrimElement);
+        } else {
+            Param param = methodParamInfo.getParam();
+            if (param == null) {
+                this.handleSingleBusinessObjectParam(methodInfo, methodParamInfo, columnInfo, javaTrimElement);
+            } else {
+                this.handleSingleBusinessObjectParamAnnotation(methodInfo, methodParamInfo, columnInfo, javaTrimElement);
             }
         }
     }

@@ -167,7 +167,7 @@ public class RelationSelectTemplateHandler {
                     ColumnInfo foreignKeyColumnInfo = inverseForeignKeyInfo.getColumnInfo();
                     ColumnInfo referencedColumnInfo = inverseForeignKeyInfo.getReferencedColumnInfo();
                     String leftEq = String.format("%s.%s", relationEntityInfo.getTableName(), foreignKeyColumnInfo.getDbColumnName());
-                    String rightEq = String.format("#{%s.%s}", "item", referencedColumnInfo.getJavaColumnName());
+                    String rightEq = String.format("#{%s.%s}", "item", referencedColumnInfo.getJavaColumnPath());
                     whereConditionExpression = RelationSelectHelper.buildWhereConditionExpression(whereConditionExpression, leftEq, rightEq);
                 }
                 return whereConditionExpression;

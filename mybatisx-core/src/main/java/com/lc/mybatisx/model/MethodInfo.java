@@ -121,6 +121,7 @@ public class MethodInfo {
         for (MethodParamInfo methodParamInfo : methodParamInfoList) {
             methodParamInfoMap.put(methodParamInfo.getParamName(), methodParamInfo);
             methodParamInfoMap.put(methodParamInfo.getParamName().toLowerCase(), methodParamInfo);
+            methodParamInfoMap.put(methodParamInfo.getArgName(), methodParamInfo);
         }
     }
 

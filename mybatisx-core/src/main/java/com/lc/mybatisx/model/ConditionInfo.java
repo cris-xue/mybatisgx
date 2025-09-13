@@ -20,7 +20,12 @@ public class ConditionInfo {
     /**
      * user_name
      */
+    @Deprecated
     private String dbColumnName;
+    /**
+     * 条件名，如：findByNameAndUserId，条件名为name、userId
+     */
+    private String conditionName;
     /**
      * 比较操作符【=、<=、!=】
      */
@@ -28,13 +33,14 @@ public class ConditionInfo {
     /**
      * [userName、Name]
      */
+    @Deprecated
     private String javaColumnName;
     /**
      * 是否是条件实体中的字段
      */
     private Boolean conditionEntity = false;
     /**
-     * 原始java字段
+     * 条件实体java字段名称，如nameLike、userIdEq，条件名为name、userId。后续废弃掉，采用[conditionName]字段
      */
     private String conditionEntityJavaColumnName;
     /**
@@ -167,8 +173,8 @@ public class ConditionInfo {
 
     public void setColumnInfo(ColumnInfo columnInfo) {
         this.columnInfo = columnInfo;
-        this.dbColumnName = columnInfo.getDbColumnName();
-        this.javaColumnName = columnInfo.getJavaColumnName();
+        /*this.dbColumnName = columnInfo.getDbColumnName();
+        this.javaColumnName = columnInfo.getJavaColumnName();*/
     }
 
     public List<IdColumnInfo> getIdColumnInfoList() {

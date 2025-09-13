@@ -32,11 +32,11 @@ public class MethodParamInfo {
      */
     private Param param;
     /**
-     * 参数名，userName。有@Param则使用@Param中的值，如果没有则使用param1、param2这种方式
+     * 参数名，如：param1、param2、param3
      */
     private String paramName;
     /**
-     * 参数索引名称，param1、param2
+     * 参数索引名称，如：arg0、arg1、arg2 。有@Param则使用@Param中的值
      */
     private String argName;
     /**

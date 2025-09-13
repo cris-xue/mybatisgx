@@ -13,6 +13,7 @@ import org.apache.commons.lang3.reflect.FieldUtils;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,7 @@ public class ColumnInfoHandler {
     }
 
     public List<ColumnInfo> getColumnInfoList(Class<?> clazz) {
+        Map<String, Class<?>> typeParameterMap = GenericUtils.getTypeParameterMap(clazz);
         Field[] fields = FieldUtils.getAllFields(clazz);
         List<ColumnInfo> columnInfoList = new ArrayList<>();
         for (Field field : fields) {
@@ -52,7 +54,7 @@ public class ColumnInfoHandler {
             columnInfo.setLogicDelete(logicDelete);
 
             this.setGenerateValueHandler(field, columnInfo);
-            this.setType(field, columnInfo);
+            this.setType(field, columnInfo, typeParameterMap);
             if (columnInfo instanceof IdColumnInfo) {
                 this.setIdColumnInfo(field, (IdColumnInfo) columnInfo);
             }
@@ -93,15 +95,17 @@ public class ColumnInfoHandler {
         return dbColumnName;
     }
 
-    private void setType(Field field, ColumnInfo columnInfo) {
+    private void setType(Field field, ColumnInfo columnInfo, Map<String, Class<?>> typeParameterMap) {
         Type genericType = field.getGenericType();
-        Type fieldType = GenericUtils.getGenericType(genericType);
-        Class<?> containerType = field.getType();
-        if (fieldType instanceof Class) {
-            columnInfo.setJavaType((Class<?>) fieldType);
+        Class<?> fieldType = field.getType();
+        if (genericType instanceof TypeVariable) {
+            genericType = typeParameterMap.get(genericType.getTypeName());
         }
-        if (containerType == List.class || containerType == Set.class) {
-            columnInfo.setCollectionType(containerType);
+        if (genericType instanceof Class) {
+            columnInfo.setJavaType((Class<?>) genericType);
+        }
+        if (fieldType == List.class || fieldType == Set.class) {
+            columnInfo.setCollectionType(fieldType);
         }
         TypeHandler typeHandler = field.getAnnotation(TypeHandler.class);
         if (typeHandler != null) {
@@ -153,10 +157,13 @@ public class ColumnInfoHandler {
     }
 
     private void setIdColumnInfo(Field field, IdColumnInfo idColumnInfo) {
-        Class<?> javaType = idColumnInfo.getJavaType();
-        List<ColumnInfo> columnInfoList = this.getColumnInfoList(javaType);
         Id id = field.getAnnotation(Id.class);
         EmbeddedId embeddedId = field.getAnnotation(EmbeddedId.class);
+        List<ColumnInfo> columnInfoList = new ArrayList();
+        if (embeddedId != null) {
+            Class<?> javaType = idColumnInfo.getJavaType();
+            columnInfoList = this.getColumnInfoList(javaType);
+        }
         idColumnInfo.setId(id);
         idColumnInfo.setEmbeddedId(embeddedId);
         idColumnInfo.setColumnInfoList(columnInfoList);

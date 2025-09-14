@@ -3,6 +3,9 @@ package com.lc.mybatisx.model;
 import com.lc.mybatisx.annotation.*;
 import com.lc.mybatisx.annotation.handler.GenerateValueHandler;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * 字段信息信息
  * @author ccxuef
@@ -46,6 +49,10 @@ public class ColumnInfo {
      * java字段路径，通过链式调用，如：user.name获取到对象的值
      */
     private String javaColumnPath;
+    /**
+     * java字段路径列表
+     */
+    private List<String> javaColumnPathList = new ArrayList();
     /**
      * 类型处理器
      */
@@ -153,6 +160,14 @@ public class ColumnInfo {
         this.javaColumnPath = javaColumnPath;
     }
 
+    public List<String> getJavaColumnPathList() {
+        return javaColumnPathList;
+    }
+
+    public void setJavaColumnPathList(List<String> javaColumnPathList) {
+        this.javaColumnPathList = javaColumnPathList;
+    }
+
     public String getTypeHandler() {
         return typeHandler;
     }
@@ -229,6 +244,11 @@ public class ColumnInfo {
 
         public Builder javaColumnName(String javaColumnName) {
             this.columnInfo.setJavaColumnName(javaColumnName);
+            return this;
+        }
+
+        public Builder javaColumnPathList(List<String> javaColumnPathList) {
+            this.columnInfo.setJavaColumnPathList(javaColumnPathList);
             return this;
         }
 

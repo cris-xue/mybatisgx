@@ -95,19 +95,15 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
                 MetaObject metaObject = configuration.newMetaObject(left);
 
                 List<String> leftValueList = new ArrayList();
-                List<String> rightKeyList = new ArrayList();
                 List<BatchSelectResultMapping.RelationPropertyMapping> relationPropertyMappingList = batchSelectResultMapping.getRelationPropertyMappingList();
                 for (BatchSelectResultMapping.RelationPropertyMapping relationPropertyMapping : relationPropertyMappingList) {
                     String leftPropertyName = relationPropertyMapping.getLeftProperty();
-                    String rightPropertyName = relationPropertyMapping.getRightProperty();
                     leftValueList.add(metaObject.getValue(leftPropertyName.trim()).toString());
-                    rightKeyList.add(rightPropertyName);
                 }
                 String leftValue = StringUtils.join(leftValueList, "");
-                String rightKey = StringUtils.join(rightKeyList, "");
 
                 Object value = rightKeyMap.get(leftValue);
-                metaObject.setValue("userDetail", value);
+                metaObject.setValue(batchSelectResultMapping.getProperty(), value);
             }
         }
         return leftList;

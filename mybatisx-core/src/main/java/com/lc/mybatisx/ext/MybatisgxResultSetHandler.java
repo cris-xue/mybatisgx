@@ -54,21 +54,15 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
         ResultMap resultMap = resultMaps.get(0);
 
         List<ResultMapping> propertyResultMappings = resultMap.getPropertyResultMappings();
-        Map<String, ResultMapping> columnPropertyMap = new LinkedHashMap();
         Map<String, ResultMapping> nestedQueryMap = new LinkedHashMap();
         for (int i = 0; i < propertyResultMappings.size(); i++) {
             ResultMapping propertyMapping = propertyResultMappings.get(i);
-            if (propertyMapping.getNestedQueryId() == null) {
-                if (propertyMapping.getProperty() != null) {
-                    columnPropertyMap.put(propertyMapping.getColumn(), propertyMapping);
-                }
-            } else {
+            if (propertyMapping.getNestedQueryId() != null) {
                 String nestedQueryId = propertyMapping.getNestedQueryId();
                 nestedQueryMap.put(nestedQueryId, propertyMapping);
             }
         }
 
-        Map<String, Object> nestedQueryResultMap = new HashMap();
         for (String nestedQueryId : nestedQueryMap.keySet()) {
             BatchSelectResultMapping batchSelectResultMapping = (BatchSelectResultMapping) nestedQueryMap.get(nestedQueryId);
             Map<String, List<Object>> nestedQueryParamMap = this.getNestedQueryParamMap(leftList);
@@ -89,7 +83,6 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
                     rightKeyMap.put(StringUtils.join(rightValueList, ""), right);
                 }
             }
-            // nestedQueryResultMap.put(nestedQueryId, nestedQuery);
 
             for (Object left : leftList) {
                 MetaObject metaObject = configuration.newMetaObject(left);

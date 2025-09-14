@@ -8,6 +8,8 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Element;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
@@ -19,7 +21,7 @@ public class WhereTemplateHandler {
 
     public void execute(Element parentElement, EntityInfo entityInfo, MethodInfo methodInfo, List<ConditionInfo> conditionInfoList) {
         Element whereElement = parentElement.addElement("where");
-        this.handleConditionGroup(entityInfo, methodInfo, whereElement, conditionInfoList);
+        this.handleConditionGroup(methodInfo, whereElement, conditionInfoList);
 
         // 查询不需要乐观锁版本条件
         ColumnInfo lockColumnInfo = entityInfo.getLockColumnInfo();
@@ -41,30 +43,37 @@ public class WhereTemplateHandler {
     /**
      * 处理条件组
      *
-     * @param entityInfo
      * @param methodInfo
      * @param whereElement
      * @param conditionInfoList
      */
-    private void handleConditionGroup(EntityInfo entityInfo, MethodInfo methodInfo, Element whereElement, List<ConditionInfo> conditionInfoList) {
+    private void handleConditionGroup(MethodInfo methodInfo, Element whereElement, List<ConditionInfo> conditionInfoList) {
         for (ConditionInfo conditionInfo : conditionInfoList) {
             ConditionGroupInfo conditionGroupInfo = conditionInfo.getConditionGroupInfo();
             if (conditionGroupInfo != null) {
                 // 处理分组的括号
                 whereElement.addText(String.format(" %s %s", this.getLogicOp(conditionInfo), conditionInfo.getLeftBracket()));
-                this.handleConditionGroup(entityInfo, methodInfo, whereElement, conditionGroupInfo.getConditionInfoList());
+                this.handleConditionGroup(methodInfo, whereElement, conditionGroupInfo.getConditionInfoList());
                 whereElement.addText(conditionInfo.getRightBracket());
             } else {
-                // ColumnInfo columnInfo = entityInfo.getColumnInfo(conditionInfo.getJavaColumnName());
                 ColumnInfo columnInfo = conditionInfo.getColumnInfo();
                 LogicDelete logicDelete = columnInfo.getLogicDelete();
+                if (logicDelete != null) {
+                    return;
+                }
+
+                int methodParamCount = methodInfo.getMethodParamInfoList().size();
+                if (methodParamCount == 1) {
+                    MethodParamInfo methodParamInfo = methodInfo.getMethodParamInfoList().get(0);
+                    if (methodParamInfo.getBasicType()) {
+                    }
+                }
+
                 if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class)) {
                     this.processId(whereElement, methodInfo, conditionInfo);
                     return;
                 }
-                if (logicDelete != null) {
-                    return;
-                }
+
                 this.processCondition(methodInfo, conditionInfo, whereElement);
             }
         }
@@ -74,22 +83,35 @@ public class WhereTemplateHandler {
         IdColumnInfo idColumnInfo = (IdColumnInfo) conditionInfo.getColumnInfo();
         List<ColumnInfo> columnInfoList = idColumnInfo.getColumnInfoList();
         if (ObjectUtils.isEmpty(columnInfoList)) {
-            this.processIdCondition(whereElement, methodInfo, idColumnInfo);
+            List<String> javaColumnPathList = Arrays.asList(idColumnInfo.getJavaColumnName());
+            ColumnInfo composite = new ColumnInfo.Builder().columnInfo(idColumnInfo).javaColumnPathList(javaColumnPathList).build();
+            this.processIdCondition(whereElement, methodInfo, composite);
         } else {
             for (ColumnInfo columnInfo : columnInfoList) {
-                String javaColumnName = String.format("%s.%s", conditionInfo.getConditionName(), columnInfo.getJavaColumnName());
-                ColumnInfo composite = new ColumnInfo.Builder().columnInfo(columnInfo).javaColumnName(javaColumnName).build();
+                List<String> javaColumnPathList = Arrays.asList(conditionInfo.getConditionName(), columnInfo.getJavaColumnName());
+                ColumnInfo composite = new ColumnInfo.Builder().columnInfo(columnInfo).javaColumnPathList(javaColumnPathList).build();
                 this.processIdCondition(whereElement, methodInfo, composite);
             }
         }
     }
 
     private void processIdCondition(Element whereElement, MethodInfo methodInfo, ColumnInfo columnInfo) {
-        String javaColumnName = columnInfo.getJavaColumnName();
+        List<String> javaColumnPathList = columnInfo.getJavaColumnPathList();
+        String javaColumnName = StringUtils.join(javaColumnPathList, ".");
         String tableColumnName = columnInfo.getDbColumnName();
         if (methodInfo.getDynamic()) {
+            List<String> testExpressionList = new ArrayList();
+            List<String> previousJavaColumnPath = new ArrayList();
+            for (String javaColumnPath : javaColumnPathList) {
+                previousJavaColumnPath.add(javaColumnPath);
+                javaColumnName = StringUtils.join(previousJavaColumnPath, ".");
+                String testExpression = String.format("%s != null", javaColumnName);
+                testExpressionList.add(testExpression);
+            }
+            String testExpressionString = StringUtils.join(testExpressionList, " and ");
+
             Element ifElement = whereElement.addElement("if");
-            ifElement.addAttribute("test", String.format("%s != null", javaColumnName));
+            ifElement.addAttribute("test", testExpressionString);
             ifElement.addText(String.format(" %s %s %s #{%s}", "and", tableColumnName, "=", javaColumnName));
         } else {
             whereElement.addText(String.format(" %s %s %s #{%s}", "and", tableColumnName, "=", javaColumnName));
@@ -169,7 +191,7 @@ public class WhereTemplateHandler {
      * </if>
      */
     private void whereLike(Element whereElement, MethodInfo methodInfo, ConditionInfo conditionInfo) {
-        String javaColumnName = conditionInfo.getConditionEntity() ? conditionInfo.getConditionEntityJavaColumnName() : conditionInfo.getJavaColumnName();
+        String javaColumnName = conditionInfo.getConditionEntity() ? conditionInfo.getConditionEntityJavaColumnName() : conditionInfo.getColumnInfo().getJavaColumnName();
 
         String likeValueTemplate = "'%' + ${like} + '%'";
         Properties properties = new Properties();

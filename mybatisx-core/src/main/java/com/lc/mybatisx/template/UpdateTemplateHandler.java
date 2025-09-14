@@ -58,7 +58,7 @@ public class UpdateTemplateHandler {
     }
 
     private void setValue(MethodInfo methodInfo, MethodParamInfo methodParamInfo, Element setTrimElement) {
-        List<ColumnInfo> tableColumnInfoList = this.getTableColumnInfoList(methodParamInfo.getType());
+        List<ColumnInfo> tableColumnInfoList = this.getTableColumnInfoList(methodParamInfo);
         if (ObjectUtils.isEmpty(tableColumnInfoList)) {
             throw new RuntimeException("实体表字段不存在");
         }
@@ -126,8 +126,12 @@ public class UpdateTemplateHandler {
         return String.format("%s != null", javaColumnName);
     }
 
-    private List<ColumnInfo> getTableColumnInfoList(Class<?> entityClass) {
+    private List<ColumnInfo> getTableColumnInfoList(MethodParamInfo methodParamInfo) {
+        Class<?> entityClass = methodParamInfo.getType();
         EntityInfo entityInfo = EntityInfoContextHolder.get(entityClass);
-        return entityInfo.getTableColumnInfoList();
+        if (entityInfo != null) {
+            return entityInfo.getTableColumnInfoList();
+        }
+        return methodParamInfo.getColumnInfoList();
     }
 }

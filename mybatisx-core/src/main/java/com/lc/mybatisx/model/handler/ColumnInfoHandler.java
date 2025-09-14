@@ -7,6 +7,7 @@ import com.lc.mybatisx.annotation.handler.GenerateValueHandler;
 import com.lc.mybatisx.context.EntityInfoContextHolder;
 import com.lc.mybatisx.model.*;
 import com.lc.mybatisx.utils.GenericUtils;
+import com.lc.mybatisx.utils.TypeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
 
@@ -93,17 +94,16 @@ public class ColumnInfoHandler {
     }
 
     private void setType(Field field, ColumnInfo columnInfo, Map<String, Class<?>> typeParameterMap) {
-        Type genericType = field.getGenericType();
+        Type actualTypeArgument = field.getGenericType();
         Class<?> fieldType = field.getType();
-        if (genericType instanceof ParameterizedType) {
-            ParameterizedType parameterizedType = (ParameterizedType) genericType;
-            genericType = parameterizedType.getRawType();
+        if (actualTypeArgument instanceof ParameterizedType) {
+            actualTypeArgument = TypeUtils.getActualTypeArgument(actualTypeArgument);
         }
-        if (genericType instanceof TypeVariable) {
-            genericType = typeParameterMap.get(genericType.getTypeName());
+        if (actualTypeArgument instanceof TypeVariable) {
+            actualTypeArgument = typeParameterMap.get(actualTypeArgument.getTypeName());
         }
-        if (genericType instanceof Class) {
-            columnInfo.setJavaType((Class<?>) genericType);
+        if (actualTypeArgument instanceof Class) {
+            columnInfo.setJavaType((Class<?>) actualTypeArgument);
         }
         if (fieldType == List.class || fieldType == Set.class) {
             columnInfo.setCollectionType(fieldType);

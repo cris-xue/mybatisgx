@@ -130,15 +130,6 @@ public class MethodNameAstHandler {
                 this.parseConditionItem(entityInfo, conditionInfo, conditionEntity, parseTreeChild);
             } else if (parseTreeChild instanceof MethodNameParser.Field_clauseContext) {
                 String javaColumnName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, token);
-                /*ColumnInfo columnInfo;
-                if ("id".equals(javaColumnName)) {
-                    columnInfo = entityInfo.getIdColumnInfo();
-                } else {
-                    columnInfo = entityInfo.getColumnInfo(javaColumnName);
-                    if (columnInfo == null) {
-                        throw new RuntimeException("方法条件或者实体中条件与数据库库实体无法对应：" + javaColumnName);
-                    }
-                }*/
                 ColumnInfo columnInfo = entityInfo.getColumnInfo(javaColumnName);
                 if (columnInfo == null) {
                     throw new RuntimeException("方法条件或者实体中条件与数据库库实体无法对应：" + javaColumnName);

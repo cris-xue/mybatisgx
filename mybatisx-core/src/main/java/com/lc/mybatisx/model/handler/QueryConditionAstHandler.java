@@ -112,8 +112,8 @@ public class QueryConditionAstHandler {
                 if (columnInfo == null) {
                     throw new RuntimeException("方法条件或者实体中条件与数据库库实体无法对应：" + javaColumnName);
                 }
-                conditionInfo.setDbColumnName(columnInfo.getDbColumnName());
-                conditionInfo.setJavaColumnName(columnInfo.getJavaColumnName());
+                conditionInfo.setConditionName(javaColumnName);
+                conditionInfo.setColumnInfo(columnInfo);
             } else if (parseTreeChild instanceof QueryConditionParser.Comparison_op_clauseContext) {
                 conditionInfo.setComparisonOp(TOKEN_MAP.get(token));
             } else if (parseTreeChild instanceof QueryConditionParser.Condition_group_clauseContext) {

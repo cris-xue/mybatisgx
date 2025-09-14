@@ -1,6 +1,7 @@
 package com.lc.mybatisx.ext;
 
 import com.lc.mybatisx.ext.mapping.BatchSelectResultMapping;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.executor.Executor;
@@ -21,10 +22,7 @@ import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
 
@@ -50,14 +48,14 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
 
     @Override
     public List<Object> handleResultSets(Statement stmt) throws SQLException {
-        List<Object> list = super.handleResultSets(stmt);
+        List<Object> leftList = super.handleResultSets(stmt);
 
         List<ResultMap> resultMaps = mappedStatement.getResultMaps();
         ResultMap resultMap = resultMaps.get(0);
 
         List<ResultMapping> propertyResultMappings = resultMap.getPropertyResultMappings();
         Map<String, ResultMapping> columnPropertyMap = new LinkedHashMap();
-        Map<String, List<ResultMapping>> nestedQueryMap = new LinkedHashMap();
+        Map<String, ResultMapping> nestedQueryMap = new LinkedHashMap();
         for (int i = 0; i < propertyResultMappings.size(); i++) {
             ResultMapping propertyMapping = propertyResultMappings.get(i);
             if (propertyMapping.getNestedQueryId() == null) {
@@ -66,19 +64,53 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
                 }
             } else {
                 String nestedQueryId = propertyMapping.getNestedQueryId();
-                List<ResultMapping> composites = propertyMapping.getComposites();
-                nestedQueryMap.put(nestedQueryId, composites);
+                nestedQueryMap.put(nestedQueryId, propertyMapping);
             }
         }
 
         Map<String, Object> nestedQueryResultMap = new HashMap();
         for (String nestedQueryId : nestedQueryMap.keySet()) {
-            List<ResultMapping> resultMappingList = nestedQueryMap.get(nestedQueryId);
-            Map<String, List<Object>> nestedQueryParamMap = this.getNestedQueryParamMap(list);
-            Object nestedQueryList = this.execute(nestedQueryId, nestedQueryParamMap);
-            nestedQueryResultMap.put(nestedQueryId, nestedQueryList);
+            BatchSelectResultMapping batchSelectResultMapping = (BatchSelectResultMapping) nestedQueryMap.get(nestedQueryId);
+            Map<String, List<Object>> nestedQueryParamMap = this.getNestedQueryParamMap(leftList);
+            Object nestedQuery = this.execute(nestedQueryId, nestedQueryParamMap);
+
+            Map<String, Object> rightKeyMap = new HashMap();
+            if (nestedQuery instanceof List) {
+                List<Object> rightList = (List<Object>) nestedQuery;
+                for (Object right : rightList) {
+                    MetaObject metaObject = configuration.newMetaObject(right);
+
+                    List<String> rightValueList = new ArrayList();
+                    List<BatchSelectResultMapping.RelationPropertyMapping> relationPropertyMappingList = batchSelectResultMapping.getRelationPropertyMappingList();
+                    for (BatchSelectResultMapping.RelationPropertyMapping relationPropertyMapping : relationPropertyMappingList) {
+                        String relationPropertyName = relationPropertyMapping.getRightProperty();
+                        rightValueList.add(metaObject.getValue(relationPropertyName).toString());
+                    }
+                    rightKeyMap.put(StringUtils.join(rightValueList, ""), right);
+                }
+            }
+            // nestedQueryResultMap.put(nestedQueryId, nestedQuery);
+
+            for (Object left : leftList) {
+                MetaObject metaObject = configuration.newMetaObject(left);
+
+                List<String> leftValueList = new ArrayList();
+                List<String> rightKeyList = new ArrayList();
+                List<BatchSelectResultMapping.RelationPropertyMapping> relationPropertyMappingList = batchSelectResultMapping.getRelationPropertyMappingList();
+                for (BatchSelectResultMapping.RelationPropertyMapping relationPropertyMapping : relationPropertyMappingList) {
+                    String leftPropertyName = relationPropertyMapping.getLeftProperty();
+                    String rightPropertyName = relationPropertyMapping.getRightProperty();
+                    leftValueList.add(metaObject.getValue(leftPropertyName.trim()).toString());
+                    rightKeyList.add(rightPropertyName);
+                }
+                String leftValue = StringUtils.join(leftValueList, "");
+                String rightKey = StringUtils.join(rightKeyList, "");
+
+                Object value = rightKeyMap.get(leftValue);
+                metaObject.setValue("userDetail", value);
+            }
         }
-        return list;
+        return leftList;
     }
 
     private Map<String, List<Object>> getNestedQueryParamMap(List<Object> list) {

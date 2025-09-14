@@ -97,7 +97,12 @@ public class ColumnInfoHandler {
         Type actualTypeArgument = field.getGenericType();
         Class<?> fieldType = field.getType();
         if (actualTypeArgument instanceof ParameterizedType) {
-            actualTypeArgument = TypeUtils.getActualTypeArgument(actualTypeArgument);
+            if (fieldType == List.class || fieldType == Set.class) {
+                actualTypeArgument = TypeUtils.getActualTypeArgument(actualTypeArgument);
+            } else {
+                ParameterizedType parameterizedType = (ParameterizedType) actualTypeArgument;
+                actualTypeArgument = parameterizedType.getRawType();
+            }
         }
         if (actualTypeArgument instanceof TypeVariable) {
             actualTypeArgument = typeParameterMap.get(actualTypeArgument.getTypeName());

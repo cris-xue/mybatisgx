@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -188,7 +189,37 @@ public class ResultMapTemplateHandler {
 
     private Element associationColumnElement(Element resultMapElement, EntityInfo parentEntityInfo, ResultMapInfo resultMapRelationInfo) {
         String column = this.getColumn(parentEntityInfo, resultMapRelationInfo);
-        return ResultMapHelper.associationColumnElement(resultMapElement, parentEntityInfo, resultMapRelationInfo, column);
+        Map<String, String> leftRightMap = new LinkedHashMap<>();
+        List<ColumnInfo> relationColumnInfoList = parentEntityInfo.getRelationColumnInfoList();
+        for (ColumnInfo columnInfo : relationColumnInfoList) {
+            RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
+            RelationColumnInfo mappedByColumnRelationInfo = relationColumnInfo.getMappedByRelationColumnInfo();
+            if (mappedByColumnRelationInfo == null) {
+                // 关系维护方
+                List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
+                for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
+                    ColumnInfo foreignKeyColumnInfo = inverseForeignKeyColumnInfo.getColumnInfo();
+                    ColumnInfo referencedColumnInfo = inverseForeignKeyColumnInfo.getReferencedColumnInfo();
+                    String foreignKeyJavaColumnPath = foreignKeyColumnInfo.getJavaColumnPath();
+                    String referencedJavaColumnPath = referencedColumnInfo.getJavaColumnPath();
+                    String left = foreignKeyJavaColumnPath + "." + referencedJavaColumnPath;
+                    String right = referencedJavaColumnPath;
+                    leftRightMap.put(left, right);
+                }
+            } else {
+                List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedByColumnRelationInfo.getInverseForeignKeyColumnInfoList();
+                for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
+                    ColumnInfo foreignKeyColumnInfo = inverseForeignKeyColumnInfo.getColumnInfo();
+                    ColumnInfo referencedColumnInfo = inverseForeignKeyColumnInfo.getReferencedColumnInfo();
+                    String foreignKeyJavaColumnPath = foreignKeyColumnInfo.getJavaColumnPath();
+                    String referencedJavaColumnPath = referencedColumnInfo.getJavaColumnPath();
+                    String left = referencedJavaColumnPath;
+                    String right = foreignKeyJavaColumnPath + "." + referencedJavaColumnPath;
+                    leftRightMap.put(left, right);
+                }
+            }
+        }
+        return ResultMapHelper.associationColumnElement(resultMapElement, resultMapRelationInfo, column, leftRightMap.toString());
     }
 
     private Element joinAssociationColumnElement(Element resultMapElement, ResultMapInfo resultMapAssociationInfo) {

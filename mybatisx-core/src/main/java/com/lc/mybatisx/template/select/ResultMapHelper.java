@@ -44,7 +44,7 @@ public class ResultMapHelper {
         columnElement.addAttribute("typeHandler", columnInfo.getTypeHandler());
     }
 
-    public static Element associationColumnElement(Element resultMapElement, EntityInfo parentEntityInfo, ResultMapInfo resultMapRelationInfo, String column) {
+    public static Element associationColumnElement(Element resultMapElement, ResultMapInfo resultMapRelationInfo, String column, String leftRightMap) {
         ColumnInfo columnInfo = resultMapRelationInfo.getColumnInfo();
         RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
         Element resultMapAssociationElement = resultMapElement.addElement("association");
@@ -53,7 +53,7 @@ public class ResultMapHelper {
         resultMapAssociationElement.addAttribute("javaType", columnInfo.getJavaTypeName());
         resultMapAssociationElement.addAttribute("fetchType", relationColumnInfo.getFetchType());
         resultMapAssociationElement.addAttribute("select", resultMapRelationInfo.getSelect());
-        resultMapAssociationElement.addAttribute("relationProperty", "{id=userId}");
+        resultMapAssociationElement.addAttribute("relationProperty", leftRightMap);
         return resultMapAssociationElement;
     }
 

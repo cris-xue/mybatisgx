@@ -164,9 +164,14 @@ public class SelectSqlTemplateHandler {
             if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class)) {
                 IdColumnInfo idColumnInfo = (IdColumnInfo) columnInfo;
                 List<ColumnInfo> compositeList = idColumnInfo.getColumnInfoList();
-                for (ColumnInfo composite : compositeList) {
-                    SelectItem<?> selectItem = this.getSelectItem(table, composite.getDbColumnName(), composite.getDbColumnNameAlias());
+                if (ObjectUtils.isEmpty(compositeList)) {
+                    SelectItem<?> selectItem = this.getSelectItem(table, idColumnInfo.getDbColumnName(), idColumnInfo.getDbColumnNameAlias());
                     selectItemList.add(selectItem);
+                } else {
+                    for (ColumnInfo composite : compositeList) {
+                        SelectItem<?> selectItem = this.getSelectItem(table, composite.getDbColumnName(), composite.getDbColumnNameAlias());
+                        selectItemList.add(selectItem);
+                    }
                 }
             }
             if (TypeUtils.typeEquals(columnInfo, ColumnInfo.class)) {

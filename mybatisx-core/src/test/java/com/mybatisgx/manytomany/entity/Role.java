@@ -7,7 +7,7 @@ import javax.persistence.FetchType;
 import java.util.List;
 
 @Entity
-@Table(name = "role")
+@Table(name = "role_simple")
 public class Role extends BaseEntity<Long> {
 
     private String code;
@@ -22,7 +22,7 @@ public class Role extends BaseEntity<Long> {
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-            name = "user_role",
+            name = "user_role_simple",
             joinColumns = @JoinColumn(name = "role_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )

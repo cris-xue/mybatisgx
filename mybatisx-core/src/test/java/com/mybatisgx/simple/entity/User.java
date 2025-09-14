@@ -4,7 +4,7 @@ import com.lc.mybatisx.annotation.*;
 import com.mybatisgx.entity.BaseEntity;
 
 @Entity
-@Table(name = "test_user")
+@Table(name = "test_user_simple")
 public class User extends BaseEntity<Long> {
 
     @Column(name = "role_ids")

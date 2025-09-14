@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 public abstract class IdBaseEntity<ID> {
 
     @EmbeddedId
-    private MultiId multiId;
+    private MultiId<ID> multiId;
 
     @Column(name = "input_user_id", insertable = true)
     private Long inputUserId;

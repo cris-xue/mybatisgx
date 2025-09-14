@@ -4,6 +4,7 @@ import com.alibaba.druid.pool.DruidDataSource;
 import com.lc.mybatisx.context.MybatisxContextLoader;
 import com.lc.mybatisx.ext.MybatisxConfiguration;
 import com.lc.mybatisx.template.StatementTemplateHandler;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.logging.stdout.StdOutImpl;
 import org.apache.ibatis.mapping.Environment;
 import org.apache.ibatis.session.SqlSession;
@@ -32,9 +33,10 @@ public class DaoTestUtils {
 
     protected static void flywayInit(DataSource dataSource) {
         // 初始化Flyway
+        String flywayLocations = properties.getProperty("flywayLocations");
         Flyway flyway = Flyway.configure()
                 .dataSource(dataSource)
-                .locations(properties.getProperty("flywayLocations"))
+                .locations(StringUtils.split(flywayLocations, ","))
                 .load();
         flyway.migrate();
     }

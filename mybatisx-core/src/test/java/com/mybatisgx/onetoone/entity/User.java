@@ -6,7 +6,7 @@ import com.mybatisgx.entity.IdBaseEntity;
 import javax.persistence.FetchType;
 
 @Entity
-@Table(name = "test_user")
+@Table(name = "test_user_complex")
 public class User extends IdBaseEntity<Long> {
 
     @Column(name = "role_ids")

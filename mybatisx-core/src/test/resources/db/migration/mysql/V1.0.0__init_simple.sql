@@ -1,4 +1,4 @@
-create table if not exists test_user
+create table if not exists test_user_simple
 (
     id             bigint       not null auto_increment,
     role_ids       varchar(256) not null comment '',
@@ -19,7 +19,7 @@ create table if not exists test_user
 ) engine = InnoDB
   default charset = utf8mb4;
 
-create table if not exists user_detail
+create table if not exists user_detail_simple
 (
     id             bigint      not null auto_increment,
     code           varchar(64) not null comment '',
@@ -33,7 +33,7 @@ create table if not exists user_detail
 ) engine = InnoDB
   default charset = utf8mb4;
 
-create table if not exists user_role
+create table if not exists user_role_simple
 (
     id      bigint not null auto_increment,
     user_id bigint not null comment '',
@@ -42,7 +42,7 @@ create table if not exists user_role
 ) engine = InnoDB
   default charset = utf8mb4;
 
-create table if not exists role
+create table if not exists role_simple
 (
     id             bigint      not null auto_increment,
     name           varchar(64) not null comment '',

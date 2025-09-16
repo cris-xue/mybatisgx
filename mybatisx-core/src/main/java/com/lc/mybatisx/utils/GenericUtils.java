@@ -45,7 +45,7 @@ public class GenericUtils {
      * @param clazz
      * @return
      */
-    public static Map<String, Class<?>> getTypeParameterMap(Class<?> clazz) {
+    public static Map<String, Type> getTypeParameterMap(Class<?> clazz) {
         Type type = clazz.getGenericSuperclass();
         if (!(type instanceof ParameterizedType)) {
             return new HashMap();
@@ -53,11 +53,12 @@ public class GenericUtils {
         ParameterizedType parameterizedType = (ParameterizedType) type;
         Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
         TypeVariable[] typeParameters = clazz.getSuperclass().getTypeParameters();
-        Map<String, Class<?>> typeParameterMap = new HashMap();
+        Map<String, Type> typeParameterMap = new HashMap();
         for (int i = 0; i < actualTypeArguments.length; i++) {
             Type actualTypeArgument = actualTypeArguments[i];
             TypeVariable typeParameter = typeParameters[i];
-            typeParameterMap.put(typeParameter.getName(), (Class<?>) actualTypeArgument);
+            String typeNameKey = String.format("%s%s", clazz.getSimpleName(), typeParameter.getName());
+            typeParameterMap.put(typeNameKey, actualTypeArgument);
         }
         return typeParameterMap;
     }

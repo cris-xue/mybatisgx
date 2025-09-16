@@ -4,10 +4,12 @@ import com.lc.mybatisx.annotation.Table;
 import com.lc.mybatisx.context.EntityInfoContextHolder;
 import com.lc.mybatisx.model.ColumnInfo;
 import com.lc.mybatisx.model.EntityInfo;
+import com.lc.mybatisx.utils.TypeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author ：薛承城
@@ -21,12 +23,14 @@ public class EntityInfoHandler {
     private ColumnInfoHandler columnInfoHandler = new ColumnInfoHandler();
 
     public EntityInfo execute(Class<?> entityClass) {
-        List<ColumnInfo> columnInfoList = columnInfoHandler.getColumnInfoList(entityClass);
+        Map<String, Class<?>> typeParameterMap = TypeUtils.getTypeParameterMap(entityClass);
+        List<ColumnInfo> columnInfoList = columnInfoHandler.getColumnInfoList(entityClass, typeParameterMap);
         EntityInfo entityInfo = new EntityInfo();
         entityInfo.setTableName(entityClass.getAnnotation(Table.class).name());
         entityInfo.setClazz(entityClass);
         entityInfo.setClazzName(entityClass.getName());
         entityInfo.setColumnInfoList(columnInfoList);
+        entityInfo.setTypeParameterMap(typeParameterMap);
         return entityInfo;
     }
 

@@ -6,7 +6,6 @@ import com.lc.mybatisx.annotation.*;
 import com.lc.mybatisx.annotation.handler.GenerateValueHandler;
 import com.lc.mybatisx.context.EntityInfoContextHolder;
 import com.lc.mybatisx.model.*;
-import com.lc.mybatisx.utils.GenericUtils;
 import com.lc.mybatisx.utils.TypeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -25,9 +24,12 @@ public class ColumnInfoHandler {
         typeMap.put("", "");
     }
 
-    public List<ColumnInfo> getColumnInfoList(Class<?> clazz) {
-        Map<String, Class<?>> typeParameterMap = GenericUtils.getTypeParameterMap(clazz);
+    public List<ColumnInfo> getColumnInfoList(Class<?> clazz, Map<String, Class<?>> typeParameterMap) {
         Field[] fields = FieldUtils.getAllFields(clazz);
+        return this.processColumnInfo(fields, typeParameterMap);
+    }
+
+    private List<ColumnInfo> processColumnInfo(Field[] fields, Map<String, Class<?>> typeParameterMap) {
         List<ColumnInfo> columnInfoList = new ArrayList<>();
         for (Field field : fields) {
             int modifiers = field.getModifiers();
@@ -52,9 +54,9 @@ public class ColumnInfoHandler {
             columnInfo.setLogicDelete(logicDelete);
 
             this.setGenerateValueHandler(field, columnInfo);
-            this.setType(field, columnInfo, typeParameterMap);
+            this.processColumnType(field, columnInfo, typeParameterMap);
             if (columnInfo instanceof IdColumnInfo) {
-                this.setIdColumnInfo(field, (IdColumnInfo) columnInfo);
+                this.setIdColumnInfo(field, (IdColumnInfo) columnInfo, typeParameterMap);
             }
             if (columnInfo instanceof RelationColumnInfo) {
                 this.setRelationColumnInfo(field, (RelationColumnInfo) columnInfo);
@@ -93,29 +95,42 @@ public class ColumnInfoHandler {
         return dbColumnName;
     }
 
-    private void setType(Field field, ColumnInfo columnInfo, Map<String, Class<?>> typeParameterMap) {
-        Type actualTypeArgument = field.getGenericType();
-        Class<?> fieldType = field.getType();
-        if (actualTypeArgument instanceof ParameterizedType) {
-            if (fieldType == List.class || fieldType == Set.class) {
-                actualTypeArgument = TypeUtils.getActualTypeArgument(actualTypeArgument);
-            } else {
-                ParameterizedType parameterizedType = (ParameterizedType) actualTypeArgument;
-                actualTypeArgument = parameterizedType.getRawType();
-            }
-        }
-        if (actualTypeArgument instanceof TypeVariable) {
-            actualTypeArgument = typeParameterMap.get(actualTypeArgument.getTypeName());
-        }
-        if (actualTypeArgument instanceof Class) {
-            columnInfo.setJavaType((Class<?>) actualTypeArgument);
-        }
-        if (fieldType == List.class || fieldType == Set.class) {
-            columnInfo.setCollectionType(fieldType);
-        }
+    private void processColumnType(Field field, ColumnInfo columnInfo, Map<String, Class<?>> typeParameterMap) {
+        this.processColumnTypeNew(field, columnInfo, typeParameterMap);
         TypeHandler typeHandler = field.getAnnotation(TypeHandler.class);
         if (typeHandler != null) {
             columnInfo.setTypeHandler(typeHandler.value().getTypeName());
+        }
+    }
+
+    /**
+     * 处理字段类型
+     * @param field
+     * @param columnInfo
+     * @param typeParameterMap
+     */
+    private void processColumnTypeNew(Field field, ColumnInfo columnInfo, Map<String, Class<?>> typeParameterMap) {
+        Type type = field.getGenericType();
+        if (type instanceof TypeVariable) {
+            String typeParameterName = TypeUtils.getTypeParameterName(field);
+            Class<?> clazz = typeParameterMap.get(typeParameterName);
+            columnInfo.setJavaType(clazz);
+        }
+        if (type instanceof ParameterizedType) {
+            ParameterizedType parameterizedType = (ParameterizedType) type;
+            Type[] actualTypes = parameterizedType.getActualTypeArguments();
+            Type rawType = parameterizedType.getRawType();
+            if (rawType instanceof Class<?>) {
+                Class<?> aaaa = (Class<?>) rawType;
+                aaaa.getTypeParameters();
+            }
+        }
+        if (type == List.class || type == Set.class) {
+            type = TypeUtils.getActualTypeArgument(type);
+            columnInfo.setCollectionType((Class<?>) type);
+        }
+        if (type instanceof Class) {
+            columnInfo.setJavaType((Class<?>) type);
         }
     }
 
@@ -162,13 +177,13 @@ public class ColumnInfoHandler {
         }
     }
 
-    private void setIdColumnInfo(Field field, IdColumnInfo idColumnInfo) {
+    private void setIdColumnInfo(Field field, IdColumnInfo idColumnInfo, Map<String, Class<?>> typeParameterMap) {
         Id id = field.getAnnotation(Id.class);
         EmbeddedId embeddedId = field.getAnnotation(EmbeddedId.class);
         List<ColumnInfo> columnInfoList = new ArrayList();
         if (embeddedId != null) {
             Class<?> javaType = idColumnInfo.getJavaType();
-            columnInfoList = this.getColumnInfoList(javaType);
+            columnInfoList = this.getColumnInfoList(javaType, typeParameterMap);
             for (ColumnInfo columnInfo : columnInfoList) {
                 columnInfo.setJavaColumnPath(idColumnInfo.getJavaColumnName() + "." + columnInfo.getJavaColumnName());
             }

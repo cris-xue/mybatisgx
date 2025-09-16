@@ -7,9 +7,9 @@ import com.lc.mybatisx.dao.Dao;
 import com.lc.mybatisx.dao.SimpleDao;
 import com.lc.mybatisx.model.*;
 import com.lc.mybatisx.utils.GenericUtils;
+import com.lc.mybatisx.utils.TypeUtils;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.reflect.TypeUtils;
 import org.apache.ibatis.annotations.Param;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -147,7 +147,8 @@ public class MethodInfoHandler {
             Boolean basicType = this.getBasicType(methodParamType);
             methodParamInfo.setBasicType(basicType);
             if (!basicType && methodParamType != Map.class) {
-                List<ColumnInfo> columnInfoList = columnInfoHandler.getColumnInfoList(methodParamType);
+                Map<String, Class<?>> typeParameterMap = mapperInfo.getEntityInfo().getTypeParameterMap();
+                List<ColumnInfo> columnInfoList = columnInfoHandler.getColumnInfoList(methodParamType, typeParameterMap);
                 methodParamInfo.setColumnInfoList(columnInfoList);
             }
             Class<?> collectionType = this.getCollectionType(parameter.getType());
@@ -170,7 +171,8 @@ public class MethodInfoHandler {
         methodReturnInfo.setType(methodReturnType);
         methodReturnInfo.setTypeName(methodReturnType.getName());
         if (!basicType && methodReturnType != Map.class) {
-            List<ColumnInfo> columnInfoList = columnInfoHandler.getColumnInfoList(methodReturnType);
+            Map<String, Class<?>> typeParameterMap = mapperInfo.getEntityInfo().getTypeParameterMap();
+            List<ColumnInfo> columnInfoList = columnInfoHandler.getColumnInfoList(methodReturnType, typeParameterMap);
             methodReturnInfo.setColumnInfoList(columnInfoList);
         }
         Class<?> collectionType = this.getCollectionType(methodReturnType);

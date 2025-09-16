@@ -34,7 +34,7 @@ public class MapperInfoHandler extends BasicInfoHandler {
     }
 
     public MapperInfo execute(Class<?> daoInterface) {
-        MapperInfo mapperInfo = getMapperInfo(daoInterface);
+        MapperInfo mapperInfo = this.getMapperInfo(daoInterface);
         EntityInfo entityInfo = EntityInfoContextHolder.get(mapperInfo.getEntityClass());
         mapperInfo.setEntityInfo(entityInfo);
 
@@ -44,13 +44,14 @@ public class MapperInfoHandler extends BasicInfoHandler {
     }
 
     public MapperInfo getMapperInfo(Class<?> daoInterface) {
-        Type[] daoInterfaceParams = getDaoInterfaceParams(daoInterface);
+        Type[] daoInterfaceParams = this.getDaoInterfaceParams(daoInterface);
         Class<?> idClass = (Class<?>) daoInterfaceParams[1];
         Class<?> entityClass = (Class<?>) daoInterfaceParams[0];
 
         MapperInfo mapperInfo = new MapperInfo();
         mapperInfo.setIdClass(idClass);
         mapperInfo.setEntityClass(entityClass);
+        mapperInfo.setDaoClass(daoInterface);
         mapperInfo.setNamespace(daoInterface.getName());
         return mapperInfo;
     }

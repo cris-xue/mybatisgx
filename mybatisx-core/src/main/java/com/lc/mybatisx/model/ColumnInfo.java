@@ -58,6 +58,10 @@ public class ColumnInfo {
      */
     private String typeHandler;
     /**
+     * 复合字段列表
+     */
+    private List<ColumnInfo> compositeList;
+    /**
      * 字段值生成处理器
      */
     private GenerateValueHandler generateValueHandler;
@@ -174,6 +178,14 @@ public class ColumnInfo {
 
     public void setTypeHandler(String typeHandler) {
         this.typeHandler = typeHandler;
+    }
+
+    public List<ColumnInfo> getCompositeList() {
+        return compositeList;
+    }
+
+    public void setCompositeList(List<ColumnInfo> compositeList) {
+        this.compositeList = compositeList;
     }
 
     public GenerateValueHandler getGenerateValueHandler() {

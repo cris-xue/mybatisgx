@@ -72,6 +72,10 @@ public class EntityInfo {
      * 一个实体可能对应多个Mapper
      */
     private List<MapperInfo> mapperInfoList = new ArrayList();
+    /**
+     * 实体类泛型参数类型映射
+     */
+    private Map<String, Class<?>> typeParameterMap;
 
     public String getTableName() {
         return tableName;
@@ -170,6 +174,14 @@ public class EntityInfo {
 
     public void setRelationColumnInfoList(List<ColumnInfo> relationColumnInfoList) {
         this.relationColumnInfoList = relationColumnInfoList;
+    }
+
+    public Map<String, Class<?>> getTypeParameterMap() {
+        return typeParameterMap;
+    }
+
+    public void setTypeParameterMap(Map<String, Class<?>> typeParameterMap) {
+        this.typeParameterMap = typeParameterMap;
     }
 
     private class EntityColumn {

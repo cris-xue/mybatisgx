@@ -21,6 +21,10 @@ public class MapperInfo {
      */
     private Class<?> entityClass;
     /**
+     * dao类型
+     */
+    private Class<?> daoClass;
+    /**
      * 命名空间
      */
     private String namespace;
@@ -59,6 +63,14 @@ public class MapperInfo {
 
     public void setEntityClass(Class<?> entityClass) {
         this.entityClass = entityClass;
+    }
+
+    public Class<?> getDaoClass() {
+        return daoClass;
+    }
+
+    public void setDaoClass(Class<?> daoClass) {
+        this.daoClass = daoClass;
     }
 
     public String getTableName() {

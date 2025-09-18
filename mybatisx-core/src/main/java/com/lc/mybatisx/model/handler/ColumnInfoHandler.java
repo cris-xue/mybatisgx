@@ -14,7 +14,6 @@ import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class ColumnInfoHandler {
 
@@ -96,7 +95,8 @@ public class ColumnInfoHandler {
     }
 
     private void processColumnType(Field field, ColumnInfo columnInfo, Map<String, Class<?>> typeParameterMap) {
-        this.processColumnTypeNew(field, columnInfo, typeParameterMap);
+        Type type = field.getGenericType();
+        this.processColumnTypeNew(type, columnInfo, typeParameterMap);
         TypeHandler typeHandler = field.getAnnotation(TypeHandler.class);
         if (typeHandler != null) {
             columnInfo.setTypeHandler(typeHandler.value().getTypeName());
@@ -105,32 +105,35 @@ public class ColumnInfoHandler {
 
     /**
      * 处理字段类型
-     * @param field
+     * @param type
      * @param columnInfo
      * @param typeParameterMap
      */
-    private void processColumnTypeNew(Field field, ColumnInfo columnInfo, Map<String, Class<?>> typeParameterMap) {
-        Type type = field.getGenericType();
+    private void processColumnTypeNew(Type type, ColumnInfo columnInfo, Map<String, Class<?>> typeParameterMap) {
+        Class<?> collectionType = null;
+        Class<?> javaType = null;
         if (type instanceof TypeVariable) {
-            String typeParameterName = TypeUtils.getTypeParameterName(field);
-            Class<?> clazz = typeParameterMap.get(typeParameterName);
-            columnInfo.setJavaType(clazz);
+            String typeParameterName = TypeUtils.getTypeParameterName(type);
+            javaType = typeParameterMap.get(typeParameterName);
         }
         if (type instanceof ParameterizedType) {
             ParameterizedType parameterizedType = (ParameterizedType) type;
-            Type[] actualTypes = parameterizedType.getActualTypeArguments();
-            Type rawType = parameterizedType.getRawType();
-            if (rawType instanceof Class<?>) {
-                Class<?> aaaa = (Class<?>) rawType;
-                aaaa.getTypeParameters();
+            collectionType = (Class<?>) TypeUtils.getCollectionType(parameterizedType);
+            if (collectionType != null) {
+                javaType = (Class<?>) TypeUtils.getActualType(parameterizedType);
+            } else {
+                javaType = (Class<?>) TypeUtils.getRawType(parameterizedType);
             }
         }
-        if (type == List.class || type == Set.class) {
-            type = TypeUtils.getActualTypeArgument(type);
-            columnInfo.setCollectionType((Class<?>) type);
-        }
         if (type instanceof Class) {
-            columnInfo.setJavaType((Class<?>) type);
+            javaType = (Class<?>) type;
+        }
+
+        if (collectionType != null) {
+            columnInfo.setCollectionType(collectionType);
+        }
+        if (javaType != null) {
+            columnInfo.setJavaType(javaType);
         }
     }
 

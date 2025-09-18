@@ -3,7 +3,6 @@ package com.lc.mybatisx.utils;
 import com.lc.mybatisx.dao.Page;
 import org.apache.commons.lang3.ObjectUtils;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
@@ -33,6 +32,33 @@ public class TypeUtils extends org.apache.commons.lang3.reflect.TypeUtils {
         } else if (type instanceof Class<?>) {
             Class<?> clazz = (Class<?>) type;
             return clazz;
+        }
+        return null;
+    }
+
+    public static Type getCollectionType(ParameterizedType parameterizedType) {
+        Class<?> rawType = (Class<?>) parameterizedType.getRawType();
+        if (rawType == List.class) {
+            return rawType;
+        }
+        return null;
+    }
+
+    public static Type getRawType(ParameterizedType parameterizedType) {
+        return (Class<?>) parameterizedType.getRawType();
+    }
+
+    public static Type getActualType(ParameterizedType parameterizedType) {
+        Type[] actualTypes = parameterizedType.getActualTypeArguments();
+        Class<?> rawType = (Class<?>) parameterizedType.getRawType();
+        if (rawType == List.class) {
+            Type actualType = actualTypes[0];
+            return getActualTypeArgument(actualType);
+        } else if (rawType == Page.class) {
+            Type actualType = actualTypes[0];
+            return getActualTypeArgument(actualType);
+        } else if (rawType == Map.class) {
+            return rawType;
         }
         return null;
     }
@@ -97,11 +123,10 @@ public class TypeUtils extends org.apache.commons.lang3.reflect.TypeUtils {
 
     /**
      * 获取字段的泛型名称
-     * @param field
+     * @param type
      * @return
      */
-    public static String getTypeParameterName(Field field) {
-        Type type = field.getGenericType();
+    public static String getTypeParameterName(Type type) {
         if (type instanceof TypeVariable) {
             TypeVariable typeVariable = (TypeVariable) type;
             Class genericDeclaration = (Class) typeVariable.getGenericDeclaration();

@@ -38,6 +38,7 @@ public class ResultMapHelper {
 
     public static void columnElement(Element columnElement, ColumnInfo columnInfo) {
         columnElement.addAttribute("property", columnInfo.getJavaColumnName());
+        columnElement.addAttribute("javaType", columnInfo.getJavaTypeName());
         columnElement.addAttribute("column", columnInfo.getDbColumnNameAlias());
         String dbTypeName = columnInfo.getDbTypeName();
         columnElement.addAttribute("jdbcType", StringUtils.isNotBlank(dbTypeName) ? dbTypeName.toUpperCase() : null);

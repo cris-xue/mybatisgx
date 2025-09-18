@@ -249,6 +249,7 @@ public class ColumnInfo {
         private ColumnInfo columnInfo = new ColumnInfo();
 
         public Builder columnInfo(ColumnInfo columnInfo) {
+            this.columnInfo.setJavaTypeName(columnInfo.getJavaTypeName());
             this.columnInfo.setDbColumnName(columnInfo.getDbColumnName());
             this.columnInfo.setDbColumnNameAlias(columnInfo.getDbColumnNameAlias());
             return this;

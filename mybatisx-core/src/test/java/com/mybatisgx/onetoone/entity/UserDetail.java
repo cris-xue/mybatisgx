@@ -1,11 +1,11 @@
 package com.mybatisgx.onetoone.entity;
 
 import com.lc.mybatisx.annotation.*;
-import com.mybatisgx.entity.IdBaseEntity;
+import com.mybatisgx.entity.EmbeddedIdBaseEntity;
 
 @Entity
 @Table(name = "user_detail_complex")
-public class UserDetail extends IdBaseEntity<Long> {
+public class UserDetail extends EmbeddedIdBaseEntity<Long> {
 
     private String code;
 

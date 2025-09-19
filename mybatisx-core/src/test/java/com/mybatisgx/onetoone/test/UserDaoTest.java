@@ -68,6 +68,7 @@ public class UserDaoTest {
             dbUser.getUserDetail();
         }
         User dbUser = dbUserList.get(0);
-        // Assert.assertEquals(dbUser.getId(), dbUser.getUserDetail().getUser().getId());
+        Assert.assertEquals(dbUser.getMultiId().getTestId1(), dbUser.getUserDetail().getUser().getMultiId().getTestId1());
+        Assert.assertEquals(dbUser.getMultiId().getTestId2(), dbUser.getUserDetail().getUser().getMultiId().getTestId2());
     }
 }

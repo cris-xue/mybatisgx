@@ -3,11 +3,14 @@ package com.mybatisgx.manytomany.test;
 import com.github.swierkosz.fixture.generator.FixtureGenerator;
 import com.mybatisgx.manytomany.dao.RoleDao;
 import com.mybatisgx.manytomany.dao.UserDao;
+import com.mybatisgx.manytomany.dao.UserRoleDao;
 import com.mybatisgx.manytomany.entity.Role;
 import com.mybatisgx.manytomany.entity.User;
+import com.mybatisgx.manytomany.entity.UserRole;
 import com.mybatisgx.util.DaoTestUtils;
 import org.apache.ibatis.session.SqlSession;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -16,37 +19,58 @@ import java.util.List;
 
 public class RoleDaoTest {
 
-    @Test
-    public void testFindList() {
-        List<Class<?>> entityClassList = Arrays.asList(User.class, Role.class);
-        List<Class<?>> daoClassList = Arrays.asList(UserDao.class, RoleDao.class);
+    private static int count = 10;
+    private static UserDao userDao;
+    private static UserRoleDao userRoleDao;
+    private static RoleDao roleDao;
+
+    @BeforeClass
+    public static void beforeClass() {
+        List<Class<?>> entityClassList = Arrays.asList(User.class, UserRole.class, Role.class);
+        List<Class<?>> daoClassList = Arrays.asList(UserDao.class, UserRoleDao.class, RoleDao.class);
         SqlSession sqlSession = DaoTestUtils.getSqlSession(entityClassList, daoClassList);
-        UserDao userDao = sqlSession.getMapper(UserDao.class);
-        RoleDao roleDao = sqlSession.getMapper(RoleDao.class);
+        userDao = sqlSession.getMapper(UserDao.class);
+        userRoleDao = sqlSession.getMapper(UserRoleDao.class);
+        roleDao = sqlSession.getMapper(RoleDao.class);
 
         FixtureGenerator fixtureGenerator = new FixtureGenerator();
         fixtureGenerator.configure().ignoreCyclicReferences();
 
-        int count = 10;
         List<User> userList = new ArrayList(count);
         List<Role> roleList = new ArrayList(count);
         for (int i = 0; i < count; i++) {
             User user = fixtureGenerator.createRandomized(User.class);
             userList.add(user);
-
             roleList.addAll(user.getRoleList());
         }
-        int insertCount = userDao.insertBatch(userList, count);
-        Assert.assertEquals(count, insertCount);
-        int insertCount1 = roleDao.insertBatch(roleList, count);
-        Assert.assertEquals(roleList.size(), insertCount1);
 
+        List<UserRole> userRoleList = new ArrayList(count);
+        for (User user : userList) {
+            for (Role role : user.getRoleList()) {
+                UserRole userRole = new UserRole();
+                userRole.setUserId(user.getId());
+                userRole.setRoleId(role.getId());
+                userRoleList.add(userRole);
+            }
+        }
+
+        int insertCount = userDao.insertBatch(userList, 100);
+        Assert.assertEquals(userList.size(), insertCount);
+
+        int userRoleInsertCount = userRoleDao.insertBatch(userRoleList, 100);
+        Assert.assertEquals(userRoleList.size(), userRoleInsertCount);
+
+        int insertCount1 = roleDao.insertBatch(roleList, 100);
+        Assert.assertEquals(roleList.size(), insertCount1);
+    }
+
+    @Test
+    public void testFindList() {
         List<User> dbUserList = userDao.findList(new User());
         Assert.assertNotNull(dbUserList);
         for (int i = 0; i < count; i++) {
             User dbUser = dbUserList.get(i);
         }
         User dbUser = dbUserList.get(0);
-        // Assert.assertEquals(dbUser.getId(), dbUser.getUserDetail().getUser().getId());
     }
 }

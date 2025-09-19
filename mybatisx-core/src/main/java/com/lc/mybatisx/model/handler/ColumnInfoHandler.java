@@ -23,12 +23,12 @@ public class ColumnInfoHandler {
         typeMap.put("", "");
     }
 
-    public List<ColumnInfo> getColumnInfoList(Class<?> clazz, Map<String, Class<?>> typeParameterMap) {
+    public List<ColumnInfo> getColumnInfoList(Class<?> clazz, Map<Type, Class<?>> typeParameterMap) {
         Field[] fields = FieldUtils.getAllFields(clazz);
         return this.processColumnInfo(fields, typeParameterMap);
     }
 
-    private List<ColumnInfo> processColumnInfo(Field[] fields, Map<String, Class<?>> typeParameterMap) {
+    private List<ColumnInfo> processColumnInfo(Field[] fields, Map<Type, Class<?>> typeParameterMap) {
         List<ColumnInfo> columnInfoList = new ArrayList<>();
         for (Field field : fields) {
             int modifiers = field.getModifiers();
@@ -94,7 +94,7 @@ public class ColumnInfoHandler {
         return dbColumnName;
     }
 
-    private void processColumnType(Field field, ColumnInfo columnInfo, Map<String, Class<?>> typeParameterMap) {
+    private void processColumnType(Field field, ColumnInfo columnInfo, Map<Type, Class<?>> typeParameterMap) {
         Type type = field.getGenericType();
         this.processColumnTypeNew(type, columnInfo, typeParameterMap);
         TypeHandler typeHandler = field.getAnnotation(TypeHandler.class);
@@ -109,12 +109,11 @@ public class ColumnInfoHandler {
      * @param columnInfo
      * @param typeParameterMap
      */
-    private void processColumnTypeNew(Type type, ColumnInfo columnInfo, Map<String, Class<?>> typeParameterMap) {
+    private void processColumnTypeNew(Type type, ColumnInfo columnInfo, Map<Type, Class<?>> typeParameterMap) {
         Class<?> collectionType = null;
         Class<?> javaType = null;
         if (type instanceof TypeVariable) {
-            String typeParameterName = TypeUtils.getTypeParameterName(type);
-            javaType = typeParameterMap.get(typeParameterName);
+            javaType = typeParameterMap.get(type);
         }
         if (type instanceof ParameterizedType) {
             ParameterizedType parameterizedType = (ParameterizedType) type;
@@ -180,7 +179,7 @@ public class ColumnInfoHandler {
         }
     }
 
-    private void setIdColumnInfo(Field field, IdColumnInfo idColumnInfo, Map<String, Class<?>> typeParameterMap) {
+    private void setIdColumnInfo(Field field, IdColumnInfo idColumnInfo, Map<Type, Class<?>> typeParameterMap) {
         Id id = field.getAnnotation(Id.class);
         EmbeddedId embeddedId = field.getAnnotation(EmbeddedId.class);
         List<ColumnInfo> columnInfoList = new ArrayList();

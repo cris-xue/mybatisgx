@@ -8,6 +8,7 @@ import com.lc.mybatisx.utils.TypeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 
@@ -23,7 +24,7 @@ public class EntityInfoHandler {
     private ColumnInfoHandler columnInfoHandler = new ColumnInfoHandler();
 
     public EntityInfo execute(Class<?> entityClass) {
-        Map<String, Class<?>> typeParameterMap = TypeUtils.getTypeParameterMap(entityClass);
+        Map<Type, Class<?>> typeParameterMap = TypeUtils.getTypeParameterMap(entityClass);
         List<ColumnInfo> columnInfoList = columnInfoHandler.getColumnInfoList(entityClass, typeParameterMap);
         EntityInfo entityInfo = new EntityInfo();
         entityInfo.setTableName(entityClass.getAnnotation(Table.class).name());

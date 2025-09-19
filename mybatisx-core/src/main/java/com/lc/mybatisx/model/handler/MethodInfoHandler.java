@@ -147,7 +147,7 @@ public class MethodInfoHandler {
             Boolean basicType = this.getBasicType(methodParamType);
             methodParamInfo.setBasicType(basicType);
             if (!basicType && methodParamType != Map.class) {
-                Map<String, Class<?>> typeParameterMap = mapperInfo.getEntityInfo().getTypeParameterMap();
+                Map<Type, Class<?>> typeParameterMap = mapperInfo.getEntityInfo().getTypeParameterMap();
                 List<ColumnInfo> columnInfoList = columnInfoHandler.getColumnInfoList(methodParamType, typeParameterMap);
                 methodParamInfo.setColumnInfoList(columnInfoList);
             }
@@ -171,7 +171,7 @@ public class MethodInfoHandler {
         methodReturnInfo.setType(methodReturnType);
         methodReturnInfo.setTypeName(methodReturnType.getName());
         if (!basicType && methodReturnType != Map.class) {
-            Map<String, Class<?>> typeParameterMap = mapperInfo.getEntityInfo().getTypeParameterMap();
+            Map<Type, Class<?>> typeParameterMap = mapperInfo.getEntityInfo().getTypeParameterMap();
             List<ColumnInfo> columnInfoList = columnInfoHandler.getColumnInfoList(methodReturnType, typeParameterMap);
             methodReturnInfo.setColumnInfoList(columnInfoList);
         }

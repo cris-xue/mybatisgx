@@ -8,6 +8,7 @@ import com.lc.mybatisx.annotation.handler.GenerateValueHandler;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -75,7 +76,7 @@ public class EntityInfo {
     /**
      * 实体类泛型参数类型映射
      */
-    private Map<String, Class<?>> typeParameterMap;
+    private Map<Type, Class<?>> typeParameterMap;
 
     public String getTableName() {
         return tableName;
@@ -176,11 +177,11 @@ public class EntityInfo {
         this.relationColumnInfoList = relationColumnInfoList;
     }
 
-    public Map<String, Class<?>> getTypeParameterMap() {
+    public Map<Type, Class<?>> getTypeParameterMap() {
         return typeParameterMap;
     }
 
-    public void setTypeParameterMap(Map<String, Class<?>> typeParameterMap) {
+    public void setTypeParameterMap(Map<Type, Class<?>> typeParameterMap) {
         this.typeParameterMap = typeParameterMap;
     }
 

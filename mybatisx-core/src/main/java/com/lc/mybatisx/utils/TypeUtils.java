@@ -68,8 +68,8 @@ public class TypeUtils extends org.apache.commons.lang3.reflect.TypeUtils {
      * @param type
      * @return
      */
-    public static Map<String, Class<?>> getTypeParameterMap(Type type) {
-        Map<String, Class<?>> typeParameterMap = new HashMap();
+    public static Map<Type, Class<?>> getTypeParameterMap(Type type) {
+        Map<Type, Class<?>> typeParameterMap = new HashMap();
         if (type instanceof ParameterizedType) {
             ParameterizedType parameterizedType = (ParameterizedType) type;
             Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
@@ -83,28 +83,28 @@ public class TypeUtils extends org.apache.commons.lang3.reflect.TypeUtils {
                 if (actualTypeArgument instanceof ParameterizedType) {
                     ParameterizedType childActualTypeArgument = (ParameterizedType) actualTypeArgument;
                     Type childRawType = childActualTypeArgument.getRawType();
-                    typeParameterMap.put(rawType.getTypeName() + typeVariable.getName(), (Class<?>) childRawType);
-                    Map<String, Class<?>> childTypeParameterMap = getTypeParameterMap(childActualTypeArgument);
+                    typeParameterMap.put(typeVariable, (Class<?>) childRawType);
+                    Map<Type, Class<?>> childTypeParameterMap = getTypeParameterMap(childActualTypeArgument);
                     if (ObjectUtils.isNotEmpty(childTypeParameterMap)) {
                         typeParameterMap.putAll(childTypeParameterMap);
                     }
                 }
                 if (actualTypeArgument instanceof Class) {
-                    typeParameterMap.put(rawType.getTypeName() + typeVariable.getName(), (Class<?>) actualTypeArgument);
+                    typeParameterMap.put(typeVariable, (Class<?>) actualTypeArgument);
                 }
             }
         }
         if (type instanceof Class) {
             Class<?> clazz = (Class<?>) type;
             Type genericSuperclass = clazz.getGenericSuperclass();
-            Map<String, Class<?>> superClassTypeParameterMap = getTypeParameterMap(genericSuperclass);
+            Map<Type, Class<?>> superClassTypeParameterMap = getTypeParameterMap(genericSuperclass);
             if (ObjectUtils.isNotEmpty(superClassTypeParameterMap)) {
                 typeParameterMap.putAll(superClassTypeParameterMap);
             }
 
             Type[] genericInterfaces = clazz.getGenericInterfaces();
             for (Type genericInterface : genericInterfaces) {
-                Map<String, Class<?>> interfaceTypeParameterMap = getTypeParameterMap(genericInterface);
+                Map<Type, Class<?>> interfaceTypeParameterMap = getTypeParameterMap(genericInterface);
                 if (ObjectUtils.isNotEmpty(interfaceTypeParameterMap)) {
                     typeParameterMap.putAll(interfaceTypeParameterMap);
                 }

@@ -1,5 +1,6 @@
 package com.lc.mybatisx.model.handler;
 
+import com.lc.mybatisx.annotation.JoinTable;
 import com.lc.mybatisx.annotation.ManyToMany;
 import com.lc.mybatisx.context.EntityInfoContextHolder;
 import com.lc.mybatisx.model.*;
@@ -10,10 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 实体关系信息处理
@@ -39,21 +37,21 @@ public class EntityRelationTreeHandler {
 
         // 解决循环引用问题
         EntityRelationDependencyTree entityRelationDependencyTree = EntityRelationDependencyTree.build(null, resultClass);
-        EntityRelationTree entityRelationInfo = this.processRelationColumnInfo(1, entityRelationDependencyTree, entityInfo, null);
+        EntityRelationTree entityRelationInfo = this.buildRelationColumnInfo(null, entityInfo, entityRelationDependencyTree, 1);
 
         mapperInfo.addEntityRelationTree(entityRelationInfo);
         return entityRelationInfo;
     }
 
-    private EntityRelationTree processRelationColumnInfo(
-            int level, EntityRelationDependencyTree entityRelationDependencyTree, EntityInfo entityInfo, ColumnInfo columnInfo
-    ) {
+    private EntityRelationTree buildRelationColumnInfo(ColumnInfo columnInfo, EntityInfo entityInfo, EntityRelationDependencyTree entityRelationDependencyTree, int level) {
         if (entityInfo == null) {
             return null;
         }
+        MiddleEntityInfo middleEntityInfo = this.buildMiddleEntityInfo(columnInfo, entityInfo);
         EntityRelationTree entityRelationTree = new EntityRelationTree();
         entityRelationTree.setLevel(level);
         entityRelationTree.setColumnInfo(columnInfo);
+        entityRelationTree.setMiddleEntityInfo(middleEntityInfo);
         entityRelationTree.setEntityInfo(entityInfo);
         this.tableColumnNameAlias.process(level, entityInfo);
 
@@ -68,12 +66,61 @@ public class EntityRelationTreeHandler {
             }
             EntityRelationDependencyTree childrenResultMapDependencyTree = EntityRelationDependencyTree.build(entityRelationDependencyTree, javaType);
             EntityInfo relationColumnEntityInfo = EntityInfoContextHolder.get(javaType);
-            EntityRelationTree subEntityRelationInfo = this.processRelationColumnInfo(level + 1, childrenResultMapDependencyTree, relationColumnEntityInfo, relationColumnInfo);
+            EntityRelationTree subEntityRelationInfo = this.buildRelationColumnInfo(relationColumnInfo, relationColumnEntityInfo, childrenResultMapDependencyTree, level + 1);
             if (subEntityRelationInfo != null) {
                 entityRelationTree.addEntityRelation(subEntityRelationInfo);
             }
         }
         return entityRelationTree;
+    }
+
+    private MiddleEntityInfo buildMiddleEntityInfo(ColumnInfo columnInfo, EntityInfo entityInfo) {
+        if (columnInfo == null) {
+            return null;
+        }
+        RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
+        RelationType relationType = relationColumnInfo.getRelationType();
+        if (relationType != RelationType.MANY_TO_MANY) {
+            return null;
+        }
+
+        String tableName;
+        List<ColumnInfo> leftColumnInfoList = new ArrayList();
+        List<ColumnInfo> rightColumnInfoList = new ArrayList();
+        RelationColumnInfo mappedByRelationColumnInfo = relationColumnInfo.getMappedByRelationColumnInfo();
+        if (mappedByRelationColumnInfo != null) {
+            JoinTable joinTable = mappedByRelationColumnInfo.getJoinTable();
+            tableName = joinTable.name();
+
+            List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = mappedByRelationColumnInfo.getForeignKeyColumnInfoList();
+            for (ForeignKeyColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
+                rightColumnInfoList.add(foreignKeyColumnInfo.getColumnInfo());
+            }
+
+            List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedByRelationColumnInfo.getInverseForeignKeyColumnInfoList();
+            for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
+                leftColumnInfoList.add(inverseForeignKeyColumnInfo.getColumnInfo());
+            }
+        } else {
+            JoinTable joinTable = relationColumnInfo.getJoinTable();
+            tableName = joinTable.name();
+
+            List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = relationColumnInfo.getForeignKeyColumnInfoList();
+            for (ForeignKeyColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
+                leftColumnInfoList.add(foreignKeyColumnInfo.getColumnInfo());
+            }
+
+            List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
+            for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
+                rightColumnInfoList.add(inverseForeignKeyColumnInfo.getColumnInfo());
+            }
+        }
+
+        MiddleEntityInfo middleEntityInfo = new MiddleEntityInfo();
+        middleEntityInfo.setTableName(tableName);
+        middleEntityInfo.setLeftColumnInfoList(leftColumnInfoList);
+        middleEntityInfo.setRightColumnInfoList(rightColumnInfoList);
+        return middleEntityInfo;
     }
 
     /**

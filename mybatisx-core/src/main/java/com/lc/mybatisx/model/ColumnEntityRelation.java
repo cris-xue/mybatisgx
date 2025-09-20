@@ -16,6 +16,10 @@ public class ColumnEntityRelation {
      */
     protected ColumnInfo columnInfo;
     /**
+     * 中间实体，只有多对多场景才会存在
+     */
+    private MiddleEntityInfo middleEntityInfo;
+    /**
      * 关联实体，如实体为user、role。如第一层为user，则entityInfo为user,跟entityInfo有关系的实体为entityRelationList中的entityInfo
      */
     protected EntityInfo entityInfo;
@@ -26,6 +30,14 @@ public class ColumnEntityRelation {
 
     public void setColumnInfo(ColumnInfo columnInfo) {
         this.columnInfo = columnInfo;
+    }
+
+    public MiddleEntityInfo getMiddleEntityInfo() {
+        return middleEntityInfo;
+    }
+
+    public void setMiddleEntityInfo(MiddleEntityInfo middleEntityInfo) {
+        this.middleEntityInfo = middleEntityInfo;
     }
 
     public EntityInfo getEntityInfo() {

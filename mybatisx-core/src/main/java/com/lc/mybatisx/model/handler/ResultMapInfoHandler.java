@@ -87,11 +87,11 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
                 EntityRelationTree entityRelationTree,
                 EntityRelationSelectInfo parentEntityRelationSelectInfo
         ) {
-            List<EntityRelationTree> childrenEntityRelationInfoList = entityRelationTree.getEntityRelationList();
-            for (EntityRelationTree childrenEntityRelationInfo : childrenEntityRelationInfoList) {
-                int level = childrenEntityRelationInfo.getLevel();
-                RelationColumnInfo relationColumnInfo = (RelationColumnInfo) childrenEntityRelationInfo.getColumnInfo();
-                EntityRelationSelectInfo entityRelationSelectInfo = this.buildEntityRelationSelect(resultMapInfo, childrenEntityRelationInfo);
+            List<EntityRelationTree> childrenEntityRelationTreeList = entityRelationTree.getEntityRelationList();
+            for (EntityRelationTree childrenEntityRelationTree : childrenEntityRelationTreeList) {
+                int level = childrenEntityRelationTree.getLevel();
+                RelationColumnInfo relationColumnInfo = (RelationColumnInfo) childrenEntityRelationTree.getColumnInfo();
+                EntityRelationSelectInfo entityRelationSelectInfo = this.buildEntityRelationSelect(resultMapInfo, childrenEntityRelationTree);
 
                 // 子查询和join的第一级都无法生成join查询，第一级join会造成结果膨胀问题，第二级采用in查询或者批量查询，解决N+1问题，把N+1变成1+1
                 FetchMode fetchMode = relationColumnInfo.getFetchMode();
@@ -106,17 +106,20 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
                 } else {
                     throw new RuntimeException("未知的抓取模式");
                 }
-                this.buildEntityRelationSelect(resultMapInfo, entityRelationSelectInfoList, childrenEntityRelationInfo, entityRelationSelectInfo);
+                this.buildEntityRelationSelect(resultMapInfo, entityRelationSelectInfoList, childrenEntityRelationTree, entityRelationSelectInfo);
             }
         }
 
         public EntityRelationSelectInfo buildEntityRelationSelect(ResultMapInfo resultMapInfo, EntityRelationTree entityRelationTree) {
             RelationColumnInfo relationColumnInfo = (RelationColumnInfo) entityRelationTree.getColumnInfo();
+            MiddleEntityInfo middleEntityInfo = entityRelationTree.getMiddleEntityInfo();
             EntityInfo entityInfo = entityRelationTree.getEntityInfo();
+
             EntityRelationSelectInfo entityRelationSelectInfo = new EntityRelationSelectInfo();
             entityRelationSelectInfo.setId(this.getSelect(relationColumnInfo.getJavaType(), relationColumnInfo.getCollectionType()));
             entityRelationSelectInfo.setResultMapId(this.getResultMapId(resultMapInfo, entityRelationTree));
             entityRelationSelectInfo.setColumnInfo(relationColumnInfo);
+            entityRelationSelectInfo.setMiddleEntityInfo(middleEntityInfo);
             entityRelationSelectInfo.setEntityInfo(entityInfo);
             Boolean isExistMiddleTable = relationColumnInfo.getManyToMany() != null;
             entityRelationSelectInfo.setExistMiddleTable(isExistMiddleTable);
@@ -127,14 +130,16 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
     public static class EntityRelationResultMap extends AbstractEntityRelation {
 
         public ResultMapInfo buildResultMapInfo(List<ResultMapInfo> resultMapInfoList, EntityRelationTree entityRelationTree) {
-            List<EntityRelationTree> entityRelationTreeList = entityRelationTree.getEntityRelationList();
-            List<ResultMapInfo> resultMapRelationInfoList = this.buildResultMapRelationInfo(resultMapInfoList, entityRelationTreeList);
-            EntityInfo entityInfo = entityRelationTree.getEntityInfo();
             ResultMapInfo resultMapInfo = new ResultMapInfo();
             resultMapInfo.setId(this.getResultMapId(null, entityRelationTree));
-            resultMapInfo.setEntityInfo(entityInfo);
-            resultMapInfo.setResultMapInfoList(resultMapRelationInfoList);
+            resultMapInfo.setMiddleEntityInfo(entityRelationTree.getMiddleEntityInfo());
+            resultMapInfo.setEntityInfo(entityRelationTree.getEntityInfo());
             resultMapInfoList.add(resultMapInfo);
+
+            List<EntityRelationTree> entityRelationTreeList = entityRelationTree.getEntityRelationList();
+            List<ResultMapInfo> resultMapRelationInfoList = this.buildResultMapRelationInfo(resultMapInfoList, entityRelationTreeList);
+            resultMapInfo.setResultMapInfoList(resultMapRelationInfoList);
+
             return resultMapInfo;
         }
 
@@ -147,25 +152,27 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
          */
         public List<ResultMapInfo> buildResultMapRelationInfo(List<ResultMapInfo> resultMapInfoList, List<EntityRelationTree> childrenEntityRelationInfoList) {
             List<ResultMapInfo> resultMapRelationInfoList = new ArrayList();
-            for (EntityRelationTree childrenEntityRelationInfo : childrenEntityRelationInfoList) {
-                int level = childrenEntityRelationInfo.getLevel();
-                RelationColumnInfo columnInfo = (RelationColumnInfo) childrenEntityRelationInfo.getColumnInfo();
-                EntityInfo entityInfo = childrenEntityRelationInfo.getEntityInfo();
+            for (EntityRelationTree childrenEntityRelationTree : childrenEntityRelationInfoList) {
+                int level = childrenEntityRelationTree.getLevel();
+                RelationColumnInfo relationColumnInfo = (RelationColumnInfo) childrenEntityRelationTree.getColumnInfo();
+                MiddleEntityInfo middleEntityInfo = childrenEntityRelationTree.getMiddleEntityInfo();
+                EntityInfo entityInfo = childrenEntityRelationTree.getEntityInfo();
 
                 ResultMapInfo resultMapRelationInfo = new ResultMapInfo();
-                resultMapRelationInfo.setSelect(this.getSelect(columnInfo.getJavaType(), columnInfo.getCollectionType()));
-                resultMapRelationInfo.setColumnInfo(columnInfo);
+                resultMapRelationInfo.setSelect(this.getSelect(relationColumnInfo.getJavaType(), relationColumnInfo.getCollectionType()));
+                resultMapRelationInfo.setColumnInfo(relationColumnInfo);
+                resultMapRelationInfo.setMiddleEntityInfo(middleEntityInfo);
                 resultMapRelationInfo.setEntityInfo(entityInfo);
 
-                FetchMode fetchMode = columnInfo.getFetchMode();
+                FetchMode fetchMode = relationColumnInfo.getFetchMode();
                 if (fetchMode == FetchMode.SELECT) {
-                    this.buildResultMapInfo(resultMapInfoList, childrenEntityRelationInfo);
+                    this.buildResultMapInfo(resultMapInfoList, childrenEntityRelationTree);
                 } else if (fetchMode == FetchMode.BATCH) {
-                    this.buildResultMapInfo(resultMapInfoList, childrenEntityRelationInfo);
+                    this.buildResultMapInfo(resultMapInfoList, childrenEntityRelationTree);
                 } else if (fetchMode == FetchMode.JOIN && level <= 2) {
-                    this.buildResultMapInfo(resultMapInfoList, childrenEntityRelationInfo);
+                    this.buildResultMapInfo(resultMapInfoList, childrenEntityRelationTree);
                 } else if (fetchMode == FetchMode.JOIN && level > 2) {
-                    List<ResultMapInfo> subResultMapRelationInfoList = this.buildResultMapRelationInfo(resultMapInfoList, childrenEntityRelationInfo.getEntityRelationList());
+                    List<ResultMapInfo> subResultMapRelationInfoList = this.buildResultMapRelationInfo(resultMapInfoList, childrenEntityRelationTree.getEntityRelationList());
                     resultMapRelationInfo.setResultMapInfoList(subResultMapRelationInfoList);
                 } else {
                     throw new RuntimeException("未知的抓取模式");

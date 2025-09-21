@@ -33,6 +33,10 @@ public class ResultMapInfo extends ColumnEntityRelation {
      */
     private String select;
     /**
+     * 内嵌查询id，如果存在表示采用内嵌查询的方式，对应的xml节点为association、collection
+     */
+    private String nestedSelectId;
+    /**
      * resultMap关系信息列表，如果存在表示采用的select join的方式，对应的xml节点为association、collection
      */
     private List<ResultMapInfo> resultMapInfoList;
@@ -51,6 +55,14 @@ public class ResultMapInfo extends ColumnEntityRelation {
 
     public void setSelect(String select) {
         this.select = select;
+    }
+
+    public String getNestedSelectId() {
+        return nestedSelectId;
+    }
+
+    public void setNestedSelectId(String nestedSelectId) {
+        this.nestedSelectId = nestedSelectId;
     }
 
     public List<ResultMapInfo> getResultMapInfoList() {

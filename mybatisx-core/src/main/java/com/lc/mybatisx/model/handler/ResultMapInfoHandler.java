@@ -2,6 +2,7 @@ package com.lc.mybatisx.model.handler;
 
 import com.lc.mybatisx.annotation.FetchMode;
 import com.lc.mybatisx.model.*;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,32 +46,55 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
 
     public static abstract class AbstractEntityRelation {
 
+        protected String getNestedSelectId(Class<?> entityClass, Class<?> collectionType) {
+            return String.format("findNestedSelect%s%s", entityClass.getSimpleName(), collectionType != null ? collectionType.getSimpleName() : "");
+        }
+
         protected String getResultMapId(ResultMapInfo resultMapInfo, EntityRelationTree entityRelationTree) {
-            Class<?> resultMapClazz = resultMapInfo != null ? resultMapInfo.getEntityInfo().getClazz() : null;
-            Class<?> entityRelationClazz = entityRelationTree.getEntityInfo().getClazz();
             int level = entityRelationTree.getLevel();
-            String className = entityRelationTree.getEntityInfo().getClazzName();
+            ColumnInfo columnInfo = entityRelationTree.getColumnInfo();
+            EntityInfo entityInfo = entityRelationTree.getEntityInfo();
+
+            Class<?> resultMapClazz = resultMapInfo != null ? entityInfo.getClazz() : null;
+            Class<?> entityRelationClazz = entityInfo.getClazz();
+            String className = entityInfo.getClazzName();
+            String commonResultMapId = className.replaceAll("\\.", "_");
+            String resultMapId = String.format("%s_ResultMap", commonResultMapId);
             if (level == 1 || entityRelationClazz == resultMapClazz) {
-                return String.format("%sResultMap", className.replaceAll("\\.", "_"));
+                return resultMapId;
             } else {
-                return this.getSubQueryResultMapId(className, entityRelationTree.getColumnInfo());
+                return this.getNestedSelectResultMapId(resultMapId, columnInfo);
             }
         }
 
-        protected String getSubQueryResultMapId(String className, ColumnInfo columnInfo) {
+        private String getNestedSelectResultMapId(String resultMapId, ColumnInfo columnInfo) {
             Class<?> collectionType = columnInfo.getCollectionType();
-            String resultMapId;
+            String nestedSelectResultMapId;
             if (collectionType == null) {
-                resultMapId = String.format("%sResultMap%s", className.replaceAll("\\.", "_"), "Association");
+                nestedSelectResultMapId = String.format("%s_%s", resultMapId, "Association");
             } else {
-                resultMapId = String.format("%sResultMap%s", className.replaceAll("\\.", "_"), "Collection");
+                nestedSelectResultMapId = String.format("%s_%s", resultMapId, "Collection");
             }
-            return resultMapId;
+            return nestedSelectResultMapId;
+        }
+    }
+
+    public static abstract class AbstractEntityRelationResultMap extends AbstractEntityRelation {
+
+        protected ResultMapInfo buildResultMapInfoNew(List<ResultMapInfo> resultMapInfoList, EntityRelationTree entityRelationTree) {
+            String resultMapId = this.getResultMapId(null, entityRelationTree);
+            ResultMapInfo resultMapInfo = this.buildResultMapInfo(resultMapId, entityRelationTree);
+
+            List<EntityRelationTree> childrenEntityRelationTreeList = entityRelationTree.getEntityRelationList();
+            List<ResultMapInfo> resultMapRelationInfoList = this.buildResultMapRelationInfo(resultMapInfoList, entityRelationTree, childrenEntityRelationTreeList);
+            resultMapInfo.setResultMapInfoList(resultMapRelationInfoList);
+
+            return resultMapInfo;
         }
 
-        protected String getSelect(Class<?> entityClass, Class<?> collectionType) {
-            return String.format("find%s%s", entityClass.getSimpleName(), collectionType != null ? collectionType.getSimpleName() : "");
-        }
+        protected abstract ResultMapInfo buildResultMapInfo(String resultMapId, EntityRelationTree entityRelationTree);
+
+        protected abstract List<ResultMapInfo> buildResultMapRelationInfo(List<ResultMapInfo> resultMapInfoList, EntityRelationTree entityRelationTree, List<EntityRelationTree> childrenEntityRelationTreeList);
     }
 
     public static class EntityRelationSelect extends AbstractEntityRelation {
@@ -116,7 +140,7 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
             EntityInfo entityInfo = entityRelationTree.getEntityInfo();
 
             EntityRelationSelectInfo entityRelationSelectInfo = new EntityRelationSelectInfo();
-            entityRelationSelectInfo.setId(this.getSelect(relationColumnInfo.getJavaType(), relationColumnInfo.getCollectionType()));
+            entityRelationSelectInfo.setId(this.getNestedSelectId(relationColumnInfo.getJavaType(), relationColumnInfo.getCollectionType()));
             entityRelationSelectInfo.setResultMapId(this.getResultMapId(resultMapInfo, entityRelationTree));
             entityRelationSelectInfo.setColumnInfo(relationColumnInfo);
             entityRelationSelectInfo.setMiddleEntityInfo(middleEntityInfo);
@@ -127,19 +151,18 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
         }
     }
 
-    public static class EntityRelationResultMap extends AbstractEntityRelation {
+    public static class EntityRelationResultMap extends AbstractEntityRelationResultMap {
 
         public ResultMapInfo buildResultMapInfo(List<ResultMapInfo> resultMapInfoList, EntityRelationTree entityRelationTree) {
-            ResultMapInfo resultMapInfo = new ResultMapInfo();
-            resultMapInfo.setId(this.getResultMapId(null, entityRelationTree));
-            resultMapInfo.setMiddleEntityInfo(entityRelationTree.getMiddleEntityInfo());
-            resultMapInfo.setEntityInfo(entityRelationTree.getEntityInfo());
+            ResultMapInfo resultMapInfo = this.buildResultMapInfoNew(resultMapInfoList, entityRelationTree);
             resultMapInfoList.add(resultMapInfo);
+            return resultMapInfo;
+        }
 
-            List<EntityRelationTree> entityRelationTreeList = entityRelationTree.getEntityRelationList();
-            List<ResultMapInfo> resultMapRelationInfoList = this.buildResultMapRelationInfo(resultMapInfoList, entityRelationTreeList);
-            resultMapInfo.setResultMapInfoList(resultMapRelationInfoList);
-
+        private ResultMapInfo buildResultMapInfo(ResultMapInfo parentResultMapInfo, List<ResultMapInfo> resultMapInfoList, EntityRelationTree entityRelationTree) {
+            ResultMapInfo resultMapInfo = this.buildResultMapInfoNew(resultMapInfoList, entityRelationTree);
+            parentResultMapInfo.setResultMapInfoList(Arrays.asList(resultMapInfo));
+            resultMapInfoList.add(parentResultMapInfo);
             return resultMapInfo;
         }
 
@@ -147,19 +170,21 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
          * 构建结果集关联信息
          *
          * @param resultMapInfoList              结果集信息列表
-         * @param childrenEntityRelationInfoList
+         * @param childrenEntityRelationTreeList
          * @return
          */
-        public List<ResultMapInfo> buildResultMapRelationInfo(List<ResultMapInfo> resultMapInfoList, List<EntityRelationTree> childrenEntityRelationInfoList) {
+        @Override
+        protected List<ResultMapInfo> buildResultMapRelationInfo(List<ResultMapInfo> resultMapInfoList, EntityRelationTree entityRelationTree, List<EntityRelationTree> childrenEntityRelationTreeList) {
             List<ResultMapInfo> resultMapRelationInfoList = new ArrayList();
-            for (EntityRelationTree childrenEntityRelationTree : childrenEntityRelationInfoList) {
+            for (EntityRelationTree childrenEntityRelationTree : childrenEntityRelationTreeList) {
                 int level = childrenEntityRelationTree.getLevel();
                 RelationColumnInfo relationColumnInfo = (RelationColumnInfo) childrenEntityRelationTree.getColumnInfo();
                 MiddleEntityInfo middleEntityInfo = childrenEntityRelationTree.getMiddleEntityInfo();
                 EntityInfo entityInfo = childrenEntityRelationTree.getEntityInfo();
 
                 ResultMapInfo resultMapRelationInfo = new ResultMapInfo();
-                resultMapRelationInfo.setSelect(this.getSelect(relationColumnInfo.getJavaType(), relationColumnInfo.getCollectionType()));
+                resultMapRelationInfo.setSelect(this.getNestedSelectId(relationColumnInfo.getJavaType(), relationColumnInfo.getCollectionType()));
+                resultMapRelationInfo.setNestedSelectId(this.getNestedSelectId(relationColumnInfo.getJavaType(), relationColumnInfo.getCollectionType()));
                 resultMapRelationInfo.setColumnInfo(relationColumnInfo);
                 resultMapRelationInfo.setMiddleEntityInfo(middleEntityInfo);
                 resultMapRelationInfo.setEntityInfo(entityInfo);
@@ -168,11 +193,17 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
                 if (fetchMode == FetchMode.SELECT) {
                     this.buildResultMapInfo(resultMapInfoList, childrenEntityRelationTree);
                 } else if (fetchMode == FetchMode.BATCH) {
-                    this.buildResultMapInfo(resultMapInfoList, childrenEntityRelationTree);
+                    if (middleEntityInfo != null) {
+                        String resultMapId = this.getResultMapId(null, childrenEntityRelationTree);
+                        ResultMapInfo parentResultMapInfo = this.buildResultMapInfo(resultMapId, entityRelationTree);
+                        this.buildResultMapInfo(parentResultMapInfo, resultMapInfoList, childrenEntityRelationTree);
+                    } else {
+                        this.buildResultMapInfo(resultMapInfoList, childrenEntityRelationTree);
+                    }
                 } else if (fetchMode == FetchMode.JOIN && level <= 2) {
                     this.buildResultMapInfo(resultMapInfoList, childrenEntityRelationTree);
                 } else if (fetchMode == FetchMode.JOIN && level > 2) {
-                    List<ResultMapInfo> subResultMapRelationInfoList = this.buildResultMapRelationInfo(resultMapInfoList, childrenEntityRelationTree.getEntityRelationList());
+                    List<ResultMapInfo> subResultMapRelationInfoList = this.buildResultMapRelationInfo(resultMapInfoList, childrenEntityRelationTree, childrenEntityRelationTree.getEntityRelationList());
                     resultMapRelationInfo.setResultMapInfoList(subResultMapRelationInfoList);
                 } else {
                     throw new RuntimeException("未知的抓取模式");
@@ -180,6 +211,18 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
                 resultMapRelationInfoList.add(resultMapRelationInfo);
             }
             return resultMapRelationInfoList;
+        }
+
+        @Override
+        protected ResultMapInfo buildResultMapInfo(String resultMapId, EntityRelationTree entityRelationTree) {
+            if (StringUtils.isBlank(resultMapId)) {
+                resultMapId = this.getResultMapId(null, entityRelationTree);
+            }
+            ResultMapInfo resultMapInfo = new ResultMapInfo();
+            resultMapInfo.setId(resultMapId);
+            resultMapInfo.setMiddleEntityInfo(entityRelationTree.getMiddleEntityInfo());
+            resultMapInfo.setEntityInfo(entityRelationTree.getEntityInfo());
+            return resultMapInfo;
         }
     }
 }

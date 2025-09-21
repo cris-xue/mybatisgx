@@ -2,7 +2,6 @@ package com.lc.mybatisx.model.handler;
 
 import com.lc.mybatisx.annotation.FetchMode;
 import com.lc.mybatisx.model.*;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -214,9 +213,6 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
 
         @Override
         protected ResultMapInfo buildResultMapInfo(String resultMapId, EntityRelationTree entityRelationTree) {
-            if (StringUtils.isBlank(resultMapId)) {
-                resultMapId = this.getResultMapId(null, entityRelationTree);
-            }
             ResultMapInfo resultMapInfo = new ResultMapInfo();
             resultMapInfo.setId(resultMapId);
             resultMapInfo.setMiddleEntityInfo(entityRelationTree.getMiddleEntityInfo());

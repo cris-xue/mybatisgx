@@ -39,7 +39,7 @@ public class MapperInfo {
     /**
      * 实体关系信息，使用map是因为自定义方法可能使用非实体类
      */
-    private Map<Class<?>, EntityRelationTree> entityRelationInfoMap = new LinkedHashMap();
+    private Map<Class<?>, EntityRelationTree> entityRelationTreeMap = new LinkedHashMap();
     /**
      * 结果集信息列表
      */
@@ -102,16 +102,16 @@ public class MapperInfo {
     }
 
     public List<EntityRelationTree> getEntityRelationTreeList() {
-        return new ArrayList<>(entityRelationInfoMap.values());
+        return new ArrayList<>(entityRelationTreeMap.values());
     }
 
     public EntityRelationTree getEntityRelationTree(Class<?> clazz) {
-        return entityRelationInfoMap.get(clazz);
+        return entityRelationTreeMap.get(clazz);
     }
 
     public void addEntityRelationTree(EntityRelationTree entityRelationTree) {
         EntityInfo entityInfo = entityRelationTree.getEntityInfo();
-        this.entityRelationInfoMap.put(entityInfo.getClazz(), entityRelationTree);
+        this.entityRelationTreeMap.put(entityInfo.getClazz(), entityRelationTree);
     }
 
     public List<ResultMapInfo> getResultMapInfoList() {
@@ -127,7 +127,9 @@ public class MapperInfo {
     }
 
     public void addResultMapInfoList(List<ResultMapInfo> resultMapInfoList) {
-        resultMapInfoList.forEach(resultMapInfo -> this.addResultMapInfo(resultMapInfo));
+        for (ResultMapInfo resultMapInfo : resultMapInfoList) {
+            this.addResultMapInfo(resultMapInfo);
+        }
     }
 
     public Map<String, EntityRelationSelectInfo> getEntityRelationSelectInfoMap() {
@@ -139,8 +141,8 @@ public class MapperInfo {
     }
 
     public void setEntityRelationSelectInfoList(List<EntityRelationSelectInfo> entityRelationSelectInfoList) {
-        entityRelationSelectInfoList.forEach(entityRelationSelectInfo ->
-                this.entityRelationSelectInfoMap.put(entityRelationSelectInfo.getId(), entityRelationSelectInfo)
-        );
+        for (EntityRelationSelectInfo entityRelationSelectInfo : entityRelationSelectInfoList) {
+            this.entityRelationSelectInfoMap.put(entityRelationSelectInfo.getId(), entityRelationSelectInfo);
+        }
     }
 }

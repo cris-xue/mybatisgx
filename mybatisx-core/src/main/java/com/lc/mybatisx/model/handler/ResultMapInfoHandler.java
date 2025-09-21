@@ -58,8 +58,7 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
             Class<?> resultMapClazz = resultMapInfo != null ? entityInfo.getClazz() : null;
             Class<?> entityRelationClazz = entityInfo.getClazz();
             String className = entityInfo.getClazzName();
-            String commonResultMapId = className.replaceAll("\\.", "_");
-            String resultMapId = String.format("%s_ResultMap", commonResultMapId);
+            String resultMapId = String.format("%s_ResultMap", className.replaceAll("\\.", "_"));
             if (level == 1 || entityRelationClazz == resultMapClazz) {
                 return resultMapId;
             } else {

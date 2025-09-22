@@ -56,24 +56,23 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
 
             Class<?> resultMapClazz = resultMapInfo != null ? entityInfo.getClazz() : null;
             Class<?> entityRelationClazz = entityInfo.getClazz();
-            String className = entityInfo.getClazzName();
-            String resultMapId = String.format("%s_ResultMap", className.replaceAll("\\.", "_"));
             if (level == 1 || entityRelationClazz == resultMapClazz) {
-                return resultMapId;
+                return this.getResultMapId(entityInfo);
             } else {
-                return this.getNestedSelectResultMapId(resultMapId, columnInfo);
+                return this.getNestedSelectResultMapId(columnInfo, entityInfo);
             }
         }
 
-        private String getNestedSelectResultMapId(String resultMapId, ColumnInfo columnInfo) {
+        protected String getResultMapId(EntityInfo entityInfo) {
+            String className = entityInfo.getClazzName();
+            return String.format("%s_ResultMap", className.replaceAll("\\.", "_"));
+        }
+
+        protected String getNestedSelectResultMapId(ColumnInfo columnInfo, EntityInfo entityInfo) {
+            String resultMapId = this.getResultMapId(entityInfo);
             Class<?> collectionType = columnInfo.getCollectionType();
-            String nestedSelectResultMapId;
-            if (collectionType == null) {
-                nestedSelectResultMapId = String.format("%s_%s", resultMapId, "Association");
-            } else {
-                nestedSelectResultMapId = String.format("%s_%s", resultMapId, "Collection");
-            }
-            return nestedSelectResultMapId;
+            String nestedSelectResultMapType = collectionType == null ? "Association" : "Collection";
+            return String.format("%s_%s", resultMapId, nestedSelectResultMapType);
         }
     }
 
@@ -133,18 +132,17 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
         }
 
         public EntityRelationSelectInfo buildEntityRelationSelect(ResultMapInfo resultMapInfo, EntityRelationTree entityRelationTree) {
-            RelationColumnInfo relationColumnInfo = (RelationColumnInfo) entityRelationTree.getColumnInfo();
-            MiddleEntityInfo middleEntityInfo = entityRelationTree.getMiddleEntityInfo();
-            EntityInfo entityInfo = entityRelationTree.getEntityInfo();
+            ColumnInfo columnInfo = entityRelationTree.getColumnInfo();
 
             EntityRelationSelectInfo entityRelationSelectInfo = new EntityRelationSelectInfo();
-            entityRelationSelectInfo.setId(this.getNestedSelectId(relationColumnInfo.getJavaType(), relationColumnInfo.getCollectionType()));
+            entityRelationSelectInfo.setId(this.getNestedSelectId(columnInfo.getJavaType(), columnInfo.getCollectionType()));
             entityRelationSelectInfo.setResultMapId(this.getResultMapId(resultMapInfo, entityRelationTree));
-            entityRelationSelectInfo.setColumnInfo(relationColumnInfo);
+            ColumnEntityRelationHelper.copy(entityRelationTree, entityRelationSelectInfo);
+            /*entityRelationSelectInfo.setColumnInfo(relationColumnInfo);
             entityRelationSelectInfo.setMiddleEntityInfo(middleEntityInfo);
-            entityRelationSelectInfo.setEntityInfo(entityInfo);
-            Boolean isExistMiddleTable = relationColumnInfo.getManyToMany() != null;
-            entityRelationSelectInfo.setExistMiddleTable(isExistMiddleTable);
+            entityRelationSelectInfo.setEntityInfo(entityInfo);*/
+            /*Boolean isExistMiddleTable = relationColumnInfo.getManyToMany() != null;
+            entityRelationSelectInfo.setExistMiddleTable(isExistMiddleTable);*/
             return entityRelationSelectInfo;
         }
     }
@@ -182,9 +180,10 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
 
                 ResultMapInfo resultMapRelationInfo = new ResultMapInfo();
                 resultMapRelationInfo.setNestedSelectId(this.getNestedSelectId(relationColumnInfo.getJavaType(), relationColumnInfo.getCollectionType()));
-                resultMapRelationInfo.setColumnInfo(relationColumnInfo);
+                ColumnEntityRelationHelper.copy(entityRelationTree, resultMapRelationInfo);
+                /*resultMapRelationInfo.setColumnInfo(relationColumnInfo);
                 resultMapRelationInfo.setMiddleEntityInfo(middleEntityInfo);
-                resultMapRelationInfo.setEntityInfo(entityInfo);
+                resultMapRelationInfo.setEntityInfo(entityInfo);*/
 
                 FetchMode fetchMode = relationColumnInfo.getFetchMode();
                 if (fetchMode == FetchMode.SELECT) {

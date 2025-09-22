@@ -53,7 +53,7 @@ public class ResultMapHelper {
         resultMapAssociationElement.addAttribute("column", column);
         resultMapAssociationElement.addAttribute("javaType", columnInfo.getJavaTypeName());
         resultMapAssociationElement.addAttribute("fetchType", relationColumnInfo.getFetchType());
-        resultMapAssociationElement.addAttribute("select", resultMapRelationInfo.getSelect());
+        resultMapAssociationElement.addAttribute("select", resultMapRelationInfo.getNestedSelectId());
         resultMapAssociationElement.addAttribute("relationProperty", leftRightMap);
         return resultMapAssociationElement;
     }
@@ -75,7 +75,7 @@ public class ResultMapHelper {
         resultMapCollectionElement.addAttribute("javaType", columnInfo.getCollectionTypeName());
         resultMapCollectionElement.addAttribute("ofType", columnInfo.getJavaTypeName());
         resultMapCollectionElement.addAttribute("fetchType", relationColumnInfo.getFetchType());
-        resultMapCollectionElement.addAttribute("select", resultMapRelationInfo.getSelect());
+        resultMapCollectionElement.addAttribute("select", resultMapRelationInfo.getNestedSelectId());
         resultMapCollectionElement.addAttribute("relationProperty", "{id=userId}");
         return resultMapCollectionElement;
     }

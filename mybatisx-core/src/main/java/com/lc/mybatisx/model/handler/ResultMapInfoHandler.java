@@ -181,7 +181,6 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
                 EntityInfo entityInfo = childrenEntityRelationTree.getEntityInfo();
 
                 ResultMapInfo resultMapRelationInfo = new ResultMapInfo();
-                resultMapRelationInfo.setSelect(this.getNestedSelectId(relationColumnInfo.getJavaType(), relationColumnInfo.getCollectionType()));
                 resultMapRelationInfo.setNestedSelectId(this.getNestedSelectId(relationColumnInfo.getJavaType(), relationColumnInfo.getCollectionType()));
                 resultMapRelationInfo.setColumnInfo(relationColumnInfo);
                 resultMapRelationInfo.setMiddleEntityInfo(middleEntityInfo);

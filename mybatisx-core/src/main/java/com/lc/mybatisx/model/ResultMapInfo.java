@@ -29,11 +29,6 @@ public class ResultMapInfo extends ColumnEntityRelation {
      */
     private String id;
     /**
-     * 结果集子查询节点依赖的方法名，为根节点时为空
-     */
-    @Deprecated
-    private String select;
-    /**
      * 内嵌查询id，如果存在表示采用内嵌查询的方式，对应的xml节点为association、collection
      */
     private String nestedSelectId;
@@ -48,14 +43,6 @@ public class ResultMapInfo extends ColumnEntityRelation {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public String getSelect() {
-        return select;
-    }
-
-    public void setSelect(String select) {
-        this.select = select;
     }
 
     public String getNestedSelectId() {

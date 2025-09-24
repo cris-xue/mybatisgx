@@ -76,24 +76,6 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
         }
     }
 
-    public static abstract class AbstractEntityRelationResultMap extends AbstractEntityRelation {
-
-        protected ResultMapInfo buildResultMapInfoNew(List<ResultMapInfo> resultMapInfoList, EntityRelationTree entityRelationTree) {
-            String resultMapId = this.getResultMapId(null, entityRelationTree);
-            ResultMapInfo resultMapInfo = this.buildResultMapInfo(resultMapId, entityRelationTree);
-
-            List<EntityRelationTree> childrenEntityRelationTreeList = entityRelationTree.getEntityRelationList();
-            List<ResultMapInfo> resultMapRelationInfoList = this.buildResultMapRelationInfo(resultMapInfoList, entityRelationTree, childrenEntityRelationTreeList);
-            resultMapInfo.setResultMapInfoList(resultMapRelationInfoList);
-
-            return resultMapInfo;
-        }
-
-        protected abstract ResultMapInfo buildResultMapInfo(String resultMapId, EntityRelationTree entityRelationTree);
-
-        protected abstract List<ResultMapInfo> buildResultMapRelationInfo(List<ResultMapInfo> resultMapInfoList, EntityRelationTree entityRelationTree, List<EntityRelationTree> childrenEntityRelationTreeList);
-    }
-
     public static class EntityRelationSelect extends AbstractEntityRelation {
 
         /**
@@ -138,29 +120,22 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
             entityRelationSelectInfo.setId(this.getNestedSelectId(columnInfo.getJavaType(), columnInfo.getCollectionType()));
             entityRelationSelectInfo.setResultMapId(this.getResultMapId(resultMapInfo, entityRelationTree));
             ColumnEntityRelationHelper.copy(entityRelationTree, entityRelationSelectInfo);
-            /*entityRelationSelectInfo.setColumnInfo(relationColumnInfo);
-            entityRelationSelectInfo.setMiddleEntityInfo(middleEntityInfo);
-            entityRelationSelectInfo.setEntityInfo(entityInfo);*/
-            /*Boolean isExistMiddleTable = relationColumnInfo.getManyToMany() != null;
-            entityRelationSelectInfo.setExistMiddleTable(isExistMiddleTable);*/
             return entityRelationSelectInfo;
         }
     }
 
-    public static class EntityRelationResultMap extends AbstractEntityRelationResultMap {
+    public static class EntityRelationResultMap extends AbstractEntityRelation {
 
         public ResultMapInfo buildResultMapInfo(List<ResultMapInfo> resultMapInfoList, EntityRelationTree entityRelationTree) {
             String resultMapId = this.getResultMapId(null, entityRelationTree);
             ResultMapInfo resultMapInfo = new ResultMapInfo();
             resultMapInfo.setId(resultMapId);
             ColumnEntityRelationHelper.copy(entityRelationTree, resultMapInfo);
-            // ResultMapInfo resultMapInfo = this.buildResultMapInfo(resultMapId, entityRelationTree);
 
             List<EntityRelationTree> childrenEntityRelationTreeList = entityRelationTree.getEntityRelationList();
             List<ResultMapInfo> resultMapRelationInfoList = this.buildResultMapRelationInfo(resultMapInfoList, entityRelationTree, childrenEntityRelationTreeList);
             resultMapInfo.setResultMapInfoList(resultMapRelationInfoList);
 
-            // ResultMapInfo resultMapInfo = this.buildResultMapInfoNew(resultMapInfoList, entityRelationTree);
             resultMapInfoList.add(resultMapInfo);
             return resultMapInfo;
         }
@@ -172,7 +147,6 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
          * @param childrenEntityRelationTreeList
          * @return
          */
-        @Override
         protected List<ResultMapInfo> buildResultMapRelationInfo(List<ResultMapInfo> resultMapInfoList, EntityRelationTree entityRelationTree, List<EntityRelationTree> childrenEntityRelationTreeList) {
             List<ResultMapInfo> resultMapRelationInfoList = new ArrayList();
             for (EntityRelationTree childrenEntityRelationTree : childrenEntityRelationTreeList) {
@@ -184,17 +158,12 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
                 ResultMapInfo resultMapRelationInfo = new ResultMapInfo();
                 resultMapRelationInfo.setNestedSelectId(this.getNestedSelectId(relationColumnInfo.getJavaType(), relationColumnInfo.getCollectionType()));
                 ColumnEntityRelationHelper.copy(childrenEntityRelationTree, resultMapRelationInfo);
-                /*resultMapRelationInfo.setColumnInfo(relationColumnInfo);
-                resultMapRelationInfo.setMiddleEntityInfo(middleEntityInfo);
-                resultMapRelationInfo.setEntityInfo(entityInfo);*/
 
                 FetchMode fetchMode = relationColumnInfo.getFetchMode();
                 if (fetchMode == FetchMode.SELECT) {
                     this.buildResultMapInfo(resultMapInfoList, childrenEntityRelationTree);
                 } else if (fetchMode == FetchMode.BATCH) {
                     if (middleEntityInfo != null) {
-                        // String resultMapId = this.getResultMapId(null, childrenEntityRelationTree);
-                        // ResultMapInfo parentResultMapInfo = this.buildResultMapInfo(resultMapId, entityRelationTree);
                         this.buildManyToManyBatchSelectResultMapInfo(resultMapInfoList, childrenEntityRelationTree);
                     } else {
                         this.buildResultMapInfo(resultMapInfoList, childrenEntityRelationTree);
@@ -212,15 +181,6 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
             return resultMapRelationInfoList;
         }
 
-        @Override
-        protected ResultMapInfo buildResultMapInfo(String resultMapId, EntityRelationTree entityRelationTree) {
-            ResultMapInfo resultMapInfo = new ResultMapInfo();
-            resultMapInfo.setId(resultMapId);
-            resultMapInfo.setMiddleEntityInfo(entityRelationTree.getMiddleEntityInfo());
-            resultMapInfo.setEntityInfo(entityRelationTree.getEntityInfo());
-            return resultMapInfo;
-        }
-
         /**
          * 构建多对多批量查询结果集信息
          * @param resultMapInfoList
@@ -232,9 +192,6 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
             ManyToManyBatchSelectResultMapInfo manyToManyBatchSelectResultMapInfo = new ManyToManyBatchSelectResultMapInfo();
             manyToManyBatchSelectResultMapInfo.setNestedSelectId(resultMapId);
             ColumnEntityRelationHelper.copy(entityRelationTree, manyToManyBatchSelectResultMapInfo);
-            /*manyToManyBatchSelectResultMapInfo.setId(resultMapId);
-            manyToManyBatchSelectResultMapInfo.setMiddleEntityInfo(entityRelationTree.getMiddleEntityInfo());
-            manyToManyBatchSelectResultMapInfo.setEntityInfo(entityRelationTree.getEntityInfo());*/
 
             List<EntityRelationTree> childrenEntityRelationTreeList = entityRelationTree.getEntityRelationList();
             List<ResultMapInfo> resultMapRelationInfoList = this.buildResultMapRelationInfo(resultMapInfoList, entityRelationTree, childrenEntityRelationTreeList);

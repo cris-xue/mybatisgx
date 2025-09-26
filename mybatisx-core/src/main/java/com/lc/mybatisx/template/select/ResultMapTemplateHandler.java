@@ -6,6 +6,7 @@ import com.lc.mybatisx.model.*;
 import com.lc.mybatisx.utils.TypeUtils;
 import com.lc.mybatisx.utils.XmlUtils;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.parsing.XPathParser;
 import org.dom4j.Document;
@@ -28,11 +29,13 @@ public class ResultMapTemplateHandler {
         List<ResultMapInfo> resultMapInfoList = mapperInfo.getResultMapInfoList();
         for (ResultMapInfo resultMapInfo : resultMapInfoList) {
             Document document = DocumentHelper.createDocument();
-            Element resultMapElement = ResultMapHelper.addResultMapElement(document, resultMapInfo);
-            this.addIdColumnElement(resultMapElement, resultMapInfo.getEntityInfo());
-            this.addColumnElement(resultMapElement, resultMapInfo.getTableColumnInfoList());
-            this.addRelationColumnElement(resultMapElement, resultMapInfo);
-            this.addResultMapRelationElement(resultMapElement, mapperInfo, resultMapInfo.getEntityInfo(), resultMapInfo.getResultMapInfoList());
+            if (TypeUtils.typeEquals(resultMapInfo, ManyToManyBatchSelectResultMapInfo.class)) {
+                ManyToManyBatchSelectResultMapInfo manyToManyBatchSelectResultMapInfo = (ManyToManyBatchSelectResultMapInfo) resultMapInfo;
+                this.buildResultMap(document, mapperInfo, manyToManyBatchSelectResultMapInfo.getManyToManyBatchSelectResultMapInfo());
+            }
+            if (TypeUtils.typeEquals(resultMapInfo, ResultMapInfo.class)) {
+                this.buildResultMap(document, mapperInfo, resultMapInfo);
+            }
             String resultMapXmlString = document.asXML();
             logger.info("select resultMap: \n{}", resultMapXmlString);
 
@@ -41,6 +44,14 @@ public class ResultMapTemplateHandler {
             xNodeMap.put(resultMapInfo.getId(), xNode);
         }
         return xNodeMap;
+    }
+
+    private void buildResultMap(Document document, MapperInfo mapperInfo, ResultMapInfo resultMapInfo) {
+        Element resultMapElement = ResultMapHelper.addResultMapElement(document, resultMapInfo);
+        this.addIdColumnElement(resultMapElement, resultMapInfo.getEntityInfo());
+        this.addColumnElement(resultMapElement, resultMapInfo.getTableColumnInfoList());
+        this.addRelationColumnElement(resultMapElement, resultMapInfo);
+        this.addResultMapRelationElement(resultMapElement, mapperInfo, resultMapInfo.getEntityInfo(), resultMapInfo.getResultMapInfoList());
     }
 
     private void addIdColumnElement(Element resultMapElement, EntityInfo entityInfo) {
@@ -146,24 +157,48 @@ public class ResultMapTemplateHandler {
             return;
         }
         for (ResultMapInfo resultMapInfo : resultMapInfoList) {
+            RelationColumnInfo relationColumnInfo = (RelationColumnInfo) resultMapInfo.getColumnInfo();
+            if (relationColumnInfo.getFetchMode() == FetchMode.SELECT) {
+                this.subSelect(resultMapElement, resultMapEntityInfo, resultMapInfo);
+            }
+            if (relationColumnInfo.getFetchMode() == FetchMode.BATCH) {
+                RelationType relationType = relationColumnInfo.getRelationType();
+                if (relationType == RelationType.ONE_TO_ONE || relationType == RelationType.MANY_TO_ONE) {
+                    this.subSelect(resultMapElement, resultMapEntityInfo, resultMapInfo);
+                }
+                if (relationType == RelationType.ONE_TO_MANY || relationType == RelationType.MANY_TO_MANY) {
+                    String nestedSelectId = resultMapInfo.getNestedSelectId();
+                    if (StringUtils.isNotBlank(nestedSelectId)) {
+                        this.subSelect(resultMapElement, resultMapEntityInfo, resultMapInfo);
+                    } else {
+                        Element resultMapRelationElement = this.joinSelect(resultMapElement, resultMapInfo);
+                        this.addResultMapRelationElement(resultMapRelationElement, mapperInfo, resultMapInfo.getEntityInfo(), resultMapInfo.getResultMapInfoList());
+                    }
+                }
+            }
+            if (relationColumnInfo.getFetchMode() == FetchMode.JOIN) {
+                Element resultMapRelationElement = this.joinSelect(resultMapElement, resultMapInfo);
+                this.addResultMapRelationElement(resultMapRelationElement, mapperInfo, resultMapInfo.getEntityInfo(), resultMapInfo.getResultMapInfoList());
+            }
+
             // 是否存在独立的 resultMap，如果存在，为子查询，如果不存在，则为join关联查询
-            ResultMapInfo existIndependenceResultMapInfo = mapperInfo.getResultMapInfo(resultMapInfo.getEntityClazz());
+            /*ResultMapInfo existIndependenceResultMapInfo = mapperInfo.getResultMapInfo(resultMapInfo.getEntityClazz());
             if (existIndependenceResultMapInfo != null) {
                 this.subSelect(resultMapElement, resultMapEntityInfo, resultMapInfo);
             } else {
                 Element resultMapRelationElement = this.joinSelect(resultMapElement, resultMapInfo);
                 this.addResultMapRelationElement(resultMapRelationElement, mapperInfo, resultMapInfo.getEntityInfo(), resultMapInfo.getResultMapInfoList());
-            }
+            }*/
         }
     }
 
     private void subSelect(Element resultMapElement, EntityInfo parentEntityInfo, ResultMapInfo resultMapInfo) {
         ColumnInfo columnInfo = resultMapInfo.getColumnInfo();
         RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
-        Integer relationType = this.getRelationType(relationColumnInfo);
-        if (relationType == 1) {
+        RelationType relationType = relationColumnInfo.getRelationType();
+        if (relationType == RelationType.ONE_TO_ONE || relationType == RelationType.MANY_TO_ONE) {
             this.associationColumnElement(resultMapElement, parentEntityInfo, resultMapInfo);
-        } else if (relationType == 2) {
+        } else if (relationType == RelationType.ONE_TO_MANY || relationType == RelationType.MANY_TO_MANY) {
             this.collectionColumnElement(resultMapElement, parentEntityInfo, resultMapInfo);
         } else {
             throw new RuntimeException(columnInfo.getJavaType() + "没有关联注解");
@@ -173,12 +208,12 @@ public class ResultMapTemplateHandler {
     private Element joinSelect(Element resultMapElement, ResultMapInfo resultMapRelationInfo) {
         ColumnInfo columnInfo = resultMapRelationInfo.getColumnInfo();
         RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
-        Integer relationType = this.getRelationType(relationColumnInfo);
-        if (relationType == 1) {
+        RelationType relationType = relationColumnInfo.getRelationType();
+        if (relationType == RelationType.ONE_TO_ONE || relationType == RelationType.MANY_TO_ONE) {
             Element resultMapRelationElement = this.joinAssociationColumnElement(resultMapElement, resultMapRelationInfo);
             this.addColumnElement(resultMapRelationElement, resultMapRelationInfo.getTableColumnInfoList());
             return resultMapRelationElement;
-        } else if (relationType == 2) {
+        } else if (relationType == RelationType.ONE_TO_MANY || relationType == RelationType.MANY_TO_MANY) {
             Element resultMapCollectionElement = this.joinCollectionColumnElement(resultMapElement, resultMapRelationInfo);
             this.addColumnElement(resultMapCollectionElement, resultMapRelationInfo.getTableColumnInfoList());
             return resultMapCollectionElement;
@@ -233,10 +268,6 @@ public class ResultMapTemplateHandler {
 
     private Element joinCollectionColumnElement(Element resultMapElement, ResultMapInfo resultMapAssociationInfo) {
         return ResultMapHelper.joinCollectionColumnElement(resultMapElement, resultMapAssociationInfo);
-    }
-
-    private Integer getRelationType(RelationColumnInfo relationColumnInfo) {
-        return ResultMapHelper.getRelationType(relationColumnInfo);
     }
 
     /**

@@ -43,6 +43,10 @@ public class ConditionBuilder {
         return createComparison(left, right, GreaterThan::new);
     }
 
+    public static AndExpression and() {
+        return new AndExpression();
+    }
+
     /**
      * 创建 AND 条件
      */

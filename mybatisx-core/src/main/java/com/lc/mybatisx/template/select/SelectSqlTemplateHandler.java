@@ -3,12 +3,10 @@ package com.lc.mybatisx.template.select;
 import com.lc.mybatisx.annotation.ManyToMany;
 import com.lc.mybatisx.model.*;
 import com.lc.mybatisx.template.ConditionBuilder;
-import com.lc.mybatisx.template.MybatisgxSqlBuilder;
 import com.lc.mybatisx.utils.TypeUtils;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.expression.operators.relational.ComparisonOperator;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
@@ -244,7 +242,15 @@ public class SelectSqlTemplateHandler {
                 onExpressionList.add(onCondition);
             }
         }
-        join.setOnExpressions(onExpressionList);
+        Expression expression = null;
+        for (Expression onExpression : onExpressionList) {
+            if (expression == null) {
+                expression = onExpression;
+            } else {
+                expression = ConditionBuilder.and(expression, onExpression);
+            }
+        }
+        join.addOnExpression(expression);
     }
 
     private void buildEntityTableOnMiddleTable(String entityTableName, String middleTableName, List<ForeignKeyColumnInfo> foreignKeyColumnInfoList, Join join) {
@@ -257,7 +263,15 @@ public class SelectSqlTemplateHandler {
             EqualsTo onCondition = ConditionBuilder.eq(leftExpression, rightExpression);
             onExpressionList.add(onCondition);
         }
-        join.setOnExpressions(onExpressionList);
+        Expression expression = null;
+        for (Expression onExpression : onExpressionList) {
+            if (expression == null) {
+                expression = onExpression;
+            } else {
+                expression = ConditionBuilder.and(expression, onExpression);
+            }
+        }
+        join.addOnExpression(expression);
     }
 
     private void buildMiddleTableOnEntityTable(String middleTableName, String entityTableName, List<ForeignKeyColumnInfo> foreignKeyColumnInfoList, Join join) {
@@ -270,19 +284,14 @@ public class SelectSqlTemplateHandler {
             EqualsTo onCondition = ConditionBuilder.eq(leftExpression, rightExpression);
             onExpressionList.add(onCondition);
         }
-        join.setOnExpressions(onExpressionList);
-    }
-
-    private void buildLeftTableOnRightTable(String leftTableName, String rightTableName, List<ForeignKeyColumnInfo> foreignKeyColumnInfoList, Join join) {
-        List<Expression> onExpressionList = new ArrayList<>();
-        for (ForeignKeyInfo foreignKeyInfo : foreignKeyColumnInfoList) {
-            ColumnInfo foreignKeyColumnInfo = foreignKeyInfo.getColumnInfo();
-            ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();
-            Column leftColumn = MybatisgxSqlBuilder.ColumnBuilder.builder().with(leftTableName, foreignKeyColumnInfo.getDbColumnName()).build();
-            Column rightColumn = MybatisgxSqlBuilder.ColumnBuilder.builder().with(rightTableName, referencedColumnInfo.getDbColumnName()).build();
-            ComparisonOperator comparisonOperator = MybatisgxSqlBuilder.buildComparisonOperator(leftColumn, rightColumn);
-            onExpressionList.add(comparisonOperator);
+        Expression expression = null;
+        for (Expression onExpression : onExpressionList) {
+            if (expression == null) {
+                expression = onExpression;
+            } else {
+                expression = ConditionBuilder.and(expression, onExpression);
+            }
         }
-        join.setOnExpressions(onExpressionList);
+        join.addOnExpression(expression);
     }
 }

@@ -30,13 +30,13 @@ public class RelationSelectTemplateHandler {
 
     public Map<String, XNode> execute(MapperInfo mapperInfo) {
         Map<String, XNode> totalXNodeMap = new HashMap();
-        Map<String, EntityRelationSelectInfo> entityRelationSelectInfoMap = mapperInfo.getEntityRelationSelectInfoMap();
-        entityRelationSelectInfoMap.forEach((select, entityRelationSelectInfo) -> {
+        List<EntityRelationSelectInfo> entityRelationSelectInfoList = mapperInfo.getEntityRelationSelectInfoList();
+        for (EntityRelationSelectInfo entityRelationSelectInfo : entityRelationSelectInfoList) {
             Map<String, XNode> entityRelationSelectXNodeMap = this.buildSelect(entityRelationSelectInfo);
             if (ObjectUtils.isNotEmpty(entityRelationSelectXNodeMap)) {
                 totalXNodeMap.putAll(entityRelationSelectXNodeMap);
             }
-        });
+        }
         return totalXNodeMap;
     }
 

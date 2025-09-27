@@ -43,7 +43,7 @@ public class MapperInfo {
     /**
      * 结果集信息列表
      */
-    private Map<Class<?>, ResultMapInfo> resultMapInfoMap = new LinkedHashMap();
+    private Map<String, ResultMapInfo> resultMapInfoMap = new LinkedHashMap();
     /**
      * 实体关联查询方法
      */
@@ -118,22 +118,18 @@ public class MapperInfo {
         return new ArrayList<>(resultMapInfoMap.values());
     }
 
-    public ResultMapInfo getResultMapInfo(Class<?> clazz) {
-        return resultMapInfoMap.get(clazz);
+    public ResultMapInfo getResultMapInfo(String resultMapId) {
+        return resultMapInfoMap.get(resultMapId);
     }
 
     public void addResultMapInfo(ResultMapInfo resultMapInfo) {
-        this.resultMapInfoMap.put(resultMapInfo.getEntityInfo().getClazz(), resultMapInfo);
+        this.resultMapInfoMap.put(resultMapInfo.getId(), resultMapInfo);
     }
 
     public void addResultMapInfoList(List<ResultMapInfo> resultMapInfoList) {
         for (ResultMapInfo resultMapInfo : resultMapInfoList) {
             this.addResultMapInfo(resultMapInfo);
         }
-    }
-
-    public Map<String, EntityRelationSelectInfo> getEntityRelationSelectInfoMap() {
-        return entityRelationSelectInfoMap;
     }
 
     public List<EntityRelationSelectInfo> getEntityRelationSelectInfoList() {

@@ -20,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -42,10 +41,10 @@ public class SelectSqlTemplateHandler {
      * @throws JSQLParserException
      */
     public String buildSelectSql(EntityRelationSelectInfo entityRelationSelectInfo) throws JSQLParserException {
-        Boolean isManyToMany = entityRelationSelectInfo.isManyToMany();
-        String mainTableName = isManyToMany ? entityRelationSelectInfo.getMiddleTableName() : entityRelationSelectInfo.getEntityTableName();
+        // EntityInfo mainEntityInfo = entityRelationSelectInfo.getMainEntityInfo();
         List<EntityInfo> entityInfoList = this.getEntityInfoList(entityRelationSelectInfo);
-        PlainSelect plainSelect = this.buildMainSelect(mainTableName, entityInfoList);
+        PlainSelect plainSelect = this.buildMainSelect(entityInfoList);
+        this.buildFromItem(plainSelect, entityRelationSelectInfo.getEntityInfo());
         this.buildLeftJoinOn(plainSelect, entityRelationSelectInfo, entityRelationSelectInfo.getEntityRelationSelectInfoList());
         return plainSelect.toString();
     }
@@ -56,25 +55,36 @@ public class SelectSqlTemplateHandler {
      * @return
      */
     public PlainSelect buildSelectSql(EntityInfo entityInfo) {
-        PlainSelect plainSelect = this.buildMainSelect(entityInfo.getTableName(), Arrays.asList(entityInfo));
+        PlainSelect plainSelect = this.buildMainSelect(entityInfo);
+        this.buildFromItem(plainSelect, entityInfo);
         return plainSelect;
     }
 
     /**
      * 构建主表查询，如：select * from user_role
-     * @param mainTableName
      * @param entityInfoList
      * @return
      */
-    private PlainSelect buildMainSelect(String mainTableName, List<EntityInfo> entityInfoList) {
+    private PlainSelect buildMainSelect(List<EntityInfo> entityInfoList) {
         PlainSelect plainSelect = new PlainSelect();
         for (EntityInfo entityInfo : entityInfoList) {
             List<SelectItem<?>> selectItemList = this.buildSelectItemList(entityInfo);
             plainSelect.addSelectItems(selectItemList);
         }
-        Table mainTable = new Table(mainTableName);
-        plainSelect.setFromItem(mainTable);
         return plainSelect;
+    }
+
+    private PlainSelect buildMainSelect(EntityInfo mainEntityInfo) {
+        List<SelectItem<?>> mainSelectItemList = this.buildSelectItemList(mainEntityInfo);
+        PlainSelect plainSelect = new PlainSelect();
+        plainSelect.addSelectItems(mainSelectItemList);
+        return plainSelect;
+    }
+
+    private Table buildFromItem(PlainSelect plainSelect, EntityInfo mainEntityInfo) {
+        Table mainTable = new Table(mainEntityInfo.getTableName());
+        plainSelect.setFromItem(mainTable);
+        return mainTable;
     }
 
     private List<EntityInfo> getEntityInfoList(EntityRelationSelectInfo entityRelationSelectInfo) {
@@ -97,22 +107,25 @@ public class SelectSqlTemplateHandler {
      * @param rightEntityRelationSelectInfoList
      */
     private void buildLeftJoinOn(PlainSelect plainSelect, EntityRelationSelectInfo leftEntityRelationSelectInfo, List<EntityRelationSelectInfo> rightEntityRelationSelectInfoList) {
-        Boolean leftManyToMany = leftEntityRelationSelectInfo.isManyToMany();
-        if (leftManyToMany) {
-            // 左表是多对多的处理【user_role left join role on user_role.user_id = role.id】
-            String middleTableName = leftEntityRelationSelectInfo.getMiddleTableName();
-            String entityTableName = leftEntityRelationSelectInfo.getEntityTableName();
-            Join join = this.buildLeftJoin(entityTableName);
+        MiddleEntityInfo middleEntityInfo = leftEntityRelationSelectInfo.getMiddleEntityInfo();
+        if (middleEntityInfo != null) {
+            Boolean leftManyToMany = leftEntityRelationSelectInfo.isManyToMany();
+            if (leftManyToMany) {
+                // 左表是多对多的处理【user_role left join role on user_role.user_id = role.id】
+                String middleTableName = leftEntityRelationSelectInfo.getMiddleTableName();
+                String entityTableName = leftEntityRelationSelectInfo.getEntityTableName();
+                Join join = this.buildLeftJoin(entityTableName);
 
-            List<ForeignKeyColumnInfo> foreignKeyColumnInfoList;
-            Boolean isMappedBy = leftEntityRelationSelectInfo.isMappedBy();
-            if (isMappedBy) {
-                foreignKeyColumnInfoList = leftEntityRelationSelectInfo.getForeignKeyColumnInfoList();
-            } else {
-                foreignKeyColumnInfoList = leftEntityRelationSelectInfo.getInverseForeignKeyColumnInfoList();
+                List<ForeignKeyColumnInfo> foreignKeyColumnInfoList;
+                Boolean isMappedBy = leftEntityRelationSelectInfo.isMappedBy();
+                if (isMappedBy) {
+                    foreignKeyColumnInfoList = leftEntityRelationSelectInfo.getForeignKeyColumnInfoList();
+                } else {
+                    foreignKeyColumnInfoList = leftEntityRelationSelectInfo.getInverseForeignKeyColumnInfoList();
+                }
+                this.buildMiddleTableOnEntityTable(middleTableName, entityTableName, foreignKeyColumnInfoList, join);
+                plainSelect.addJoins(join);
             }
-            this.buildMiddleTableOnEntityTable(middleTableName, entityTableName, foreignKeyColumnInfoList, join);
-            plainSelect.addJoins(join);
         }
         for (EntityRelationSelectInfo rightEntityRelationSelectInfo : rightEntityRelationSelectInfoList) {
             Boolean rightManyToMany = rightEntityRelationSelectInfo.isManyToMany();

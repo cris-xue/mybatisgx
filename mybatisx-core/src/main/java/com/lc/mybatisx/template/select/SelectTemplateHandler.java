@@ -1,9 +1,9 @@
 package com.lc.mybatisx.template.select;
 
+import com.lc.mybatisx.context.EntityInfoContextHolder;
 import com.lc.mybatisx.model.EntityInfo;
 import com.lc.mybatisx.model.MapperInfo;
 import com.lc.mybatisx.model.MethodInfo;
-import com.lc.mybatisx.model.ResultMapInfo;
 import com.lc.mybatisx.template.WhereTemplateHandler;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import org.dom4j.Document;
@@ -36,9 +36,7 @@ public class SelectTemplateHandler {
         selectElement.addAttribute("resultMap", methodInfo.getResultMapId());
 
         Class<?> methodReturnType = methodInfo.getMethodReturnInfo().getType();
-        ResultMapInfo resultMapInfo = mapperInfo.getResultMapInfo(methodReturnType);
-        EntityInfo entityInfo = resultMapInfo.getEntityInfo();
-
+        EntityInfo entityInfo = EntityInfoContextHolder.get(methodReturnType);
         PlainSelect plainSelect = selectSqlTemplateHandler.buildSelectSql(entityInfo);
         selectElement.addText(plainSelect.toString());
 

@@ -21,10 +21,6 @@ public class EntityRelationSelectInfo extends ColumnEntityRelation {
      */
     private String resultMapId;
     /**
-     * 是否存在中间表
-     */
-    private Boolean isExistMiddleTable = false;
-    /**
      * 直接关联查询
      */
     private List<EntityRelationSelectInfo> entityRelationSelectInfoList = new ArrayList();
@@ -43,14 +39,6 @@ public class EntityRelationSelectInfo extends ColumnEntityRelation {
 
     public void setResultMapId(String resultMapId) {
         this.resultMapId = resultMapId;
-    }
-
-    public Boolean getExistMiddleTable() {
-        return isExistMiddleTable;
-    }
-
-    public void setExistMiddleTable(Boolean existMiddleTable) {
-        isExistMiddleTable = existMiddleTable;
     }
 
     public List<EntityRelationSelectInfo> getEntityRelationSelectInfoList() {

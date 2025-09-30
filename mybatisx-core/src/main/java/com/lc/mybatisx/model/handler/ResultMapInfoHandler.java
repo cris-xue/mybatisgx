@@ -210,7 +210,7 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
                         throw new RuntimeException("解析错误");
                     }
                     if (level == 2) {
-                        this.buildSelectResultMapInfo(resultMapContext, childEntityRelationTree);
+                        this.buildBatchResultMapInfo(resultMapContext, entityRelationTree, childEntityRelationTree);
                     }
                     if (level > 2) {
                         this.buildJoinResultMapInfo(resultMapContext, nestedResultMapInfo, childEntityRelationTree);
@@ -252,7 +252,7 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
             ResultMapInfo resultMapInfo = this.buildAloneResultMapInfo(resultMapContext, childEntityRelationTree);
 
             ResultMapInfo parentResultMapInfo = new ResultMapInfo();
-            parentResultMapInfo.setId(resultMapInfo.getId());
+            // parentResultMapInfo.setId(resultMapInfo.getId());
             parentResultMapInfo.setEntityInfo(parentRelationTree.getEntityInfo());
             parentResultMapInfo.setResultMapInfoList(Arrays.asList(resultMapInfo));
 
@@ -269,9 +269,9 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
         }
 
         private ResultMapInfo buildAloneResultMapInfo(ResultMapContext resultMapContext, EntityRelationTree childEntityRelationTree) {
-            String resultMapId = this.getResultMapId(null, childEntityRelationTree);
+            // String resultMapId = this.getResultMapId(null, childEntityRelationTree);
             ResultMapInfo resultMapInfo = new ResultMapInfo();
-            resultMapInfo.setId(resultMapId);
+            // resultMapInfo.setId(resultMapId);
             resultMapInfo.setColumnInfo(childEntityRelationTree.getColumnInfo());
             resultMapInfo.setMiddleEntityInfo(childEntityRelationTree.getMiddleEntityInfo());
             resultMapInfo.setEntityInfo(childEntityRelationTree.getEntityInfo());

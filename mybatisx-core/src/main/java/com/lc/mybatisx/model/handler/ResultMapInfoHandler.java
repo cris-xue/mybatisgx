@@ -49,41 +49,11 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
         return resultMapInfo.getId();
     }
 
-    private void processResultMapInfo(List<ResultMapInfo> resultMapInfoList) {
-        for (ResultMapInfo resultMapInfo : resultMapInfoList) {
-            List<EntityInfo> entityInfoList = this.getEntityInfoList(resultMapInfo);
-            String resultMapId = this.getResultMapId(entityInfoList);
-            resultMapInfo.setId(resultMapId);
-        }
-    }
-
-    private List<EntityInfo> getEntityInfoList(ResultMapInfo resultMapInfo) {
-        List<EntityInfo> entityInfoList = new ArrayList();
-        EntityInfo entityInfo = resultMapInfo.getEntityInfo();
-        if (entityInfo != null) {
-            entityInfoList.add(resultMapInfo.getEntityInfo());
-        }
-        List<ResultMapInfo> composites = resultMapInfo.getComposites();
-        for (ResultMapInfo composite : composites) {
-            List<EntityInfo> childrenEntityInfoList = this.getEntityInfoList(composite);
-            if (ObjectUtils.isNotEmpty(childrenEntityInfoList)) {
-                entityInfoList.addAll(childrenEntityInfoList);
-            }
-        }
-        return entityInfoList;
-    }
-
-    private String getResultMapId(List<EntityInfo> entityInfoList) {
-        List<String> classNameList = entityInfoList.stream()
-                .map(entityInfo -> entityInfo.getClazzName().replaceAll("\\.", "_"))
-                .collect(Collectors.toList());
-        return StringUtils.join(classNameList, "_join_");
-    }
 
     public static abstract class AbstractEntityRelation {
 
         protected String getNestedSelectId(Class<?> entityClass, Class<?> collectionType) {
-            return String.format("findNestedSelect%s%s", entityClass.getSimpleName(), collectionType != null ? collectionType.getSimpleName() : "");
+            return String.format("nestedSelect%s%s", entityClass.getSimpleName(), collectionType != null ? collectionType.getSimpleName() : "");
         }
 
         protected String getResultMapId(ResultMapInfo resultMapInfo, EntityRelationTree entityRelationTree) {
@@ -101,6 +71,30 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
 
         protected String getResultMapId(String className) {
             return String.format("%s_ResultMap", className.replaceAll("\\.", "_"));
+        }
+
+
+        protected List<EntityInfo> getEntityInfoList(ColumnEntityRelation columnEntityRelation) {
+            List<EntityInfo> entityInfoList = new ArrayList();
+            EntityInfo entityInfo = columnEntityRelation.getEntityInfo();
+            if (entityInfo != null) {
+                entityInfoList.add(columnEntityRelation.getEntityInfo());
+            }
+            List<ResultMapInfo> composites = columnEntityRelation.getComposites();
+            for (ResultMapInfo composite : composites) {
+                List<EntityInfo> childEntityInfoList = this.getEntityInfoList(composite);
+                if (ObjectUtils.isNotEmpty(childEntityInfoList)) {
+                    entityInfoList.addAll(childEntityInfoList);
+                }
+            }
+            return entityInfoList;
+        }
+
+        protected String getResultMapId(List<EntityInfo> entityInfoList) {
+            List<String> classNameList = entityInfoList.stream()
+                    .map(entityInfo -> entityInfo.getClazzName().replaceAll("\\.", "_"))
+                    .collect(Collectors.toList());
+            return StringUtils.join(classNameList, "_join_") + "_ResultMap";
         }
 
         protected String getNestedSelectResultMapId(String className, Class<?> collectionType) {
@@ -182,6 +176,9 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
             resultMapContext.addRelationResultMap(resultMapInfo);
 
             resultMapInfo.setResultMapInfoList(this.buildResultMapRelationInfo(resultMapContext, entityRelationTree));
+
+            List<ResultMapInfo> resultMapInfoList = resultMapContext.getResultMapInfoList();
+            this.processResultMapInfo(resultMapInfoList);
             return resultMapContext;
         }
 
@@ -277,6 +274,14 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
             resultMapInfo.setMiddleEntityInfo(childEntityRelationTree.getMiddleEntityInfo());
             resultMapInfo.setEntityInfo(childEntityRelationTree.getEntityInfo());
             return resultMapInfo;
+        }
+
+        protected void processResultMapInfo(List<ResultMapInfo> resultMapInfoList) {
+            for (ResultMapInfo resultMapInfo : resultMapInfoList) {
+                List<EntityInfo> entityInfoList = this.getEntityInfoList(resultMapInfo);
+                String resultMapId = this.getResultMapId(entityInfoList);
+                resultMapInfo.setId(resultMapId);
+            }
         }
     }
 

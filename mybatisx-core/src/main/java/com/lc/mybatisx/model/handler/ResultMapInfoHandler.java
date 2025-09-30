@@ -118,8 +118,7 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
                 EntityRelationTree entityRelationTree,
                 EntityRelationSelectInfo parentEntityRelationSelectInfo
         ) {
-            List<EntityRelationTree> childEntityRelationTreeList = entityRelationTree.getEntityRelationList();
-            for (EntityRelationTree childEntityRelationTree : childEntityRelationTreeList) {
+            for (EntityRelationTree childEntityRelationTree : entityRelationTree.getEntityRelationList()) {
                 int level = childEntityRelationTree.getLevel();
                 RelationColumnInfo relationColumnInfo = (RelationColumnInfo) childEntityRelationTree.getColumnInfo();
                 EntityRelationSelectInfo nestedSelectInfo = this.buildNestedSelectInfo(resultMapInfo, childEntityRelationTree);
@@ -138,7 +137,10 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
                     batchRelationSelectInfo.setBatchRelationSelectInfo(nestedSelectInfo);
                     entityRelationSelectInfoList.add(batchRelationSelectInfo);
                 } else if (fetchMode == FetchMode.JOIN) {
-                    if (level <= 2) {
+                    if (level == 1) {
+                        throw new RuntimeException("解析错误");
+                    }
+                    if (level == 2) {
                         entityRelationSelectInfoList.add(nestedSelectInfo);
                     }
                     if (level > 2) {
@@ -175,7 +177,7 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
             resultMapContext.setResultMapInfo(resultMapInfo);
             resultMapContext.addRelationResultMap(resultMapInfo);
 
-            resultMapInfo.setResultMapInfoList(this.buildResultMapRelationInfo(resultMapContext, entityRelationTree));
+            resultMapInfo.setResultMapInfoList(this.buildRelationResultMapInfo(resultMapContext, entityRelationTree));
 
             List<ResultMapInfo> resultMapInfoList = resultMapContext.getResultMapInfoList();
             this.processResultMapInfo(resultMapInfoList);
@@ -188,7 +190,7 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
          * @param resultMapContext              结果集信息列表
          * @return
          */
-        protected List<ResultMapInfo> buildResultMapRelationInfo(ResultMapContext resultMapContext, EntityRelationTree entityRelationTree) {
+        protected List<ResultMapInfo> buildRelationResultMapInfo(ResultMapContext resultMapContext, EntityRelationTree entityRelationTree) {
             List<ResultMapInfo> resultMapInfoList = new ArrayList();
             for (EntityRelationTree childEntityRelationTree : entityRelationTree.getEntityRelationList()) {
                 int level = childEntityRelationTree.getLevel();
@@ -242,7 +244,7 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
             ResultMapInfo resultMapInfo = this.buildAloneResultMapInfo(resultMapContext, childEntityRelationTree);
             resultMapContext.addRelationResultMap(resultMapInfo);
 
-            resultMapInfo.setResultMapInfoList(this.buildResultMapRelationInfo(resultMapContext, childEntityRelationTree));
+            resultMapInfo.setResultMapInfoList(this.buildRelationResultMapInfo(resultMapContext, childEntityRelationTree));
             return resultMapInfo;
         }
 
@@ -256,13 +258,13 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
 
             resultMapContext.addRelationResultMap(parentResultMapInfo);
 
-            resultMapInfo.setResultMapInfoList(this.buildResultMapRelationInfo(resultMapContext, childEntityRelationTree));
+            resultMapInfo.setResultMapInfoList(this.buildRelationResultMapInfo(resultMapContext, childEntityRelationTree));
 
             return parentResultMapInfo;
         }
 
         private void buildJoinResultMapInfo(ResultMapContext resultMapContext, ResultMapInfo nestedResultMapInfo, EntityRelationTree childEntityRelationTree) {
-            List<ResultMapInfo> childResultMapRelationInfoList = this.buildResultMapRelationInfo(resultMapContext, childEntityRelationTree);
+            List<ResultMapInfo> childResultMapRelationInfoList = this.buildRelationResultMapInfo(resultMapContext, childEntityRelationTree);
             nestedResultMapInfo.setResultMapInfoList(childResultMapRelationInfoList);
         }
 

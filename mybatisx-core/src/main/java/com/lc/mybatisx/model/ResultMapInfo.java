@@ -31,7 +31,11 @@ public class ResultMapInfo extends ColumnEntityRelation<ResultMapInfo> {
     /**
      * 内嵌查询id，如果存在表示采用内嵌查询的方式，对应的xml节点为association、collection
      */
-    private String nestedSelectId;
+    // private String nestedSelectId;
+    /**
+     * 内嵌查询
+     */
+    private NestedSelectId nestedSelectId;
 
     public String getId() {
         return id;
@@ -42,10 +46,16 @@ public class ResultMapInfo extends ColumnEntityRelation<ResultMapInfo> {
     }
 
     public String getNestedSelectId() {
-        return nestedSelectId;
+        return this.nestedSelectId.getId();
     }
 
     public void setNestedSelectId(String nestedSelectId) {
+        if (this.nestedSelectId != null) {
+            this.nestedSelectId.setId(nestedSelectId);
+        }
+    }
+
+    public void setNestedSelectId(NestedSelectId nestedSelectId) {
         this.nestedSelectId = nestedSelectId;
     }
 
@@ -69,5 +79,25 @@ public class ResultMapInfo extends ColumnEntityRelation<ResultMapInfo> {
 
     public List<ColumnInfo> getTableColumnInfoList() {
         return this.entityInfo.getTableColumnInfoList();
+    }
+
+    public static class NestedSelectId {
+
+        private String id;
+
+        public NestedSelectId() {
+        }
+
+        public NestedSelectId(String id) {
+            this.id = id;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
     }
 }

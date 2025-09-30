@@ -97,6 +97,13 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
             return StringUtils.join(classNameList, "_join_") + "_ResultMap";
         }
 
+        protected String getNestedSelectId(List<EntityInfo> entityInfoList) {
+            List<String> classNameList = entityInfoList.stream()
+                    .map(entityInfo -> entityInfo.getClazzName().replaceAll("\\.", "_"))
+                    .collect(Collectors.toList());
+            return "nestedSelect_" + StringUtils.join(classNameList, "_join_");
+        }
+
         protected String getNestedSelectResultMapId(String className, Class<?> collectionType) {
             String resultMapId = this.getResultMapId(className);
             String nestedSelectResultMapType = collectionType == null ? "Association" : "Collection";
@@ -232,9 +239,9 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
                 resultMapInfo.setEntityInfo(entityRelationTree.getEntityInfo());
                 return resultMapInfo;
             } else {
-                String nestedSelectId = this.getNestedSelectId(relationColumnInfo.getJavaType(), relationColumnInfo.getCollectionType());
+                // String nestedSelectId = this.getNestedSelectId(relationColumnInfo.getJavaType(), relationColumnInfo.getCollectionType());
                 ResultMapInfo resultMapRelationInfo = new ResultMapInfo();
-                resultMapRelationInfo.setNestedSelectId(nestedSelectId);
+                resultMapRelationInfo.setNestedSelectId(new ResultMapInfo.NestedSelectId());
                 resultMapRelationInfo.setColumnInfo(entityRelationTree.getColumnInfo());
                 return resultMapRelationInfo;
             }
@@ -282,7 +289,9 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
             for (ResultMapInfo resultMapInfo : resultMapInfoList) {
                 List<EntityInfo> entityInfoList = this.getEntityInfoList(resultMapInfo);
                 String resultMapId = this.getResultMapId(entityInfoList);
+                String nestedSelectId = this.getNestedSelectId(entityInfoList);
                 resultMapInfo.setId(resultMapId);
+                resultMapInfo.setNestedSelectId(nestedSelectId);
             }
         }
     }

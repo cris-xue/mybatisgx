@@ -10,7 +10,7 @@ import java.util.List;
  * @description：实体关系查询，只支持左链接
  * @date ：2021/7/9 17:14
  */
-public class EntityRelationSelectInfo extends ColumnEntityRelation {
+public class EntityRelationSelectInfo extends ColumnEntityRelation<EntityRelationSelectInfo> {
 
     /**
      * 节点唯一标识，只有在不使用嵌套模式字段时才使用
@@ -47,10 +47,12 @@ public class EntityRelationSelectInfo extends ColumnEntityRelation {
 
     public void setEntityRelationSelectInfoList(List<EntityRelationSelectInfo> entityRelationSelectInfoList) {
         this.entityRelationSelectInfoList = entityRelationSelectInfoList;
+        super.setComposites(this.entityRelationSelectInfoList);
     }
 
     public void addEntityRelationSelectInfo(EntityRelationSelectInfo entityRelationSelectInfo) {
         this.entityRelationSelectInfoList.add(entityRelationSelectInfo);
+        super.setComposites(this.entityRelationSelectInfoList);
     }
 
     public ColumnInfo getColumnInfo(String javaColumnName) {

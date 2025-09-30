@@ -17,12 +17,12 @@ import java.util.List;
  *         <result property="email" column="email"/>
  *         <result property="bio" column="bio"/>
  *     </association>
- * </resultMap>
+ *     </resultMap>
  * </code>
  * @author ccxuef
  * @date 2025/8/9 18:58
  */
-public class ResultMapInfo extends ColumnEntityRelation {
+public class ResultMapInfo extends ColumnEntityRelation<ResultMapInfo> {
 
     /**
      * 查询方法对应的结果集id，为结果集子节点时为空
@@ -32,10 +32,6 @@ public class ResultMapInfo extends ColumnEntityRelation {
      * 内嵌查询id，如果存在表示采用内嵌查询的方式，对应的xml节点为association、collection
      */
     private String nestedSelectId;
-    /**
-     * resultMap关系信息列表，如果存在表示采用的select join的方式，对应的xml节点为association、collection
-     */
-    private List<ResultMapInfo> resultMapInfoList;
 
     public String getId() {
         return id;
@@ -53,12 +49,14 @@ public class ResultMapInfo extends ColumnEntityRelation {
         this.nestedSelectId = nestedSelectId;
     }
 
+    @Deprecated
     public List<ResultMapInfo> getResultMapInfoList() {
-        return resultMapInfoList;
+        return super.getComposites();
     }
 
+    @Deprecated
     public void setResultMapInfoList(List<ResultMapInfo> resultMapInfoList) {
-        this.resultMapInfoList = resultMapInfoList;
+        super.setComposites(resultMapInfoList);
     }
 
     public ColumnInfo getColumnInfo(String javaColumnName) {

@@ -2,6 +2,7 @@ package com.lc.mybatisx.model;
 
 import com.lc.mybatisx.annotation.ManyToMany;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -9,7 +10,7 @@ import java.util.List;
  * @author ccxuef
  * @date 2025/8/9 18:03
  */
-public class ColumnEntityRelation {
+public class ColumnEntityRelation<T> {
 
     /**
      * 关系字段，如当前类为role，关系字段为user中的List<Role>字段
@@ -23,6 +24,11 @@ public class ColumnEntityRelation {
      * 关联实体，如实体为user、role。如第一层为user，则entityInfo为user,跟entityInfo有关系的实体为entityRelationList中的entityInfo
      */
     protected EntityInfo entityInfo;
+    /**
+     * 子对象
+     * TODO: 后续优化结果集和关系查询中的子对象
+     */
+    private List<T> composites = new ArrayList();
 
     public ColumnInfo getColumnInfo() {
         return columnInfo;
@@ -50,6 +56,14 @@ public class ColumnEntityRelation {
 
     public ColumnInfo getEntityColumnInfo(String javaColumnName) {
         return this.entityInfo.getColumnInfo(javaColumnName);
+    }
+
+    public List<T> getComposites() {
+        return composites;
+    }
+
+    public void setComposites(List<T> composites) {
+        this.composites = composites;
     }
 
     public Class<?> getEntityClazz() {

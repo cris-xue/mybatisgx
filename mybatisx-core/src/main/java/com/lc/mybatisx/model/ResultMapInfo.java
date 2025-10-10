@@ -1,7 +1,5 @@
 package com.lc.mybatisx.model;
 
-import java.util.List;
-
 /**
  * https://blog.csdn.net/wangruoao/article/details/83147374/
  * https://pythonjishu.com/ywljunyfdqtftcc/
@@ -60,16 +58,6 @@ public class ResultMapInfo extends ColumnEntityRelation<ResultMapInfo> {
 
     public String getMiddleTableName() {
         return this.getMiddleEntityInfo().getTableName();
-    }
-
-    @Deprecated
-    public List<ResultMapInfo> getResultMapInfoList() {
-        return super.getComposites();
-    }
-
-    @Deprecated
-    public void setResultMapInfoList(List<ResultMapInfo> resultMapInfoList) {
-        super.setComposites(resultMapInfoList);
     }
 
     public ColumnInfo getColumnInfo(String javaColumnName) {

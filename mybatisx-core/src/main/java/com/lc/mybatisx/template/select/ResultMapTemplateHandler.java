@@ -155,12 +155,14 @@ public class ResultMapTemplateHandler {
     }
 
     private void subSelect(Element resultMapElement, ResultMapInfo resultMapInfo) {
+        String column = this.getColumn(resultMapInfo);
         RelationColumnInfo relationColumnInfo = (RelationColumnInfo) resultMapInfo.getColumnInfo();
         RelationType relationType = relationColumnInfo.getRelationType();
         if (relationType == RelationType.ONE_TO_ONE || relationType == RelationType.MANY_TO_ONE) {
-            this.associationColumnElement(resultMapElement, resultMapInfo);
+            String relationProperty = this.getRelationProperty(resultMapInfo);
+            ResultMapHelper.associationColumnElement(resultMapElement, resultMapInfo, column, relationProperty);
         } else if (relationType == RelationType.ONE_TO_MANY || relationType == RelationType.MANY_TO_MANY) {
-            this.collectionColumnElement(resultMapElement, resultMapInfo);
+            ResultMapHelper.collectionColumnElement(resultMapElement, resultMapInfo, column);
         } else {
             throw new RuntimeException(relationColumnInfo.getJavaType() + "没有关联注解");
         }
@@ -182,11 +184,8 @@ public class ResultMapTemplateHandler {
         }
     }
 
-    private Element associationColumnElement(Element resultMapElement, ResultMapInfo resultMapRelationInfo) {
-        String column = this.getColumn(resultMapRelationInfo);
-        Map<String, String> leftRightMap = new LinkedHashMap<>();
-        // List<ColumnInfo> relationColumnInfoList = parentEntityInfo.getRelationColumnInfoList();
-        // for (ColumnInfo columnInfo : relationColumnInfoList) {
+    private String getRelationProperty(ResultMapInfo resultMapRelationInfo) {
+        Map<String, String> relationProperty = new LinkedHashMap<>();
         RelationColumnInfo relationColumnInfo = (RelationColumnInfo) resultMapRelationInfo.getColumnInfo();
         RelationColumnInfo mappedByColumnRelationInfo = relationColumnInfo.getMappedByRelationColumnInfo();
         if (mappedByColumnRelationInfo == null) {
@@ -199,7 +198,7 @@ public class ResultMapTemplateHandler {
                 String referencedJavaColumnPath = referencedColumnInfo.getJavaColumnPath();
                 String left = foreignKeyJavaColumnPath + "." + referencedJavaColumnPath;
                 String right = referencedJavaColumnPath;
-                leftRightMap.put(left, right);
+                relationProperty.put(left, right);
             }
         } else {
             List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedByColumnRelationInfo.getInverseForeignKeyColumnInfoList();
@@ -210,20 +209,14 @@ public class ResultMapTemplateHandler {
                 String referencedJavaColumnPath = referencedColumnInfo.getJavaColumnPath();
                 String left = referencedJavaColumnPath;
                 String right = foreignKeyJavaColumnPath + "." + referencedJavaColumnPath;
-                leftRightMap.put(left, right);
+                relationProperty.put(left, right);
             }
         }
-        // }
-        return ResultMapHelper.associationColumnElement(resultMapElement, resultMapRelationInfo, column, leftRightMap.toString());
+        return relationProperty.toString();
     }
 
     private Element joinAssociationColumnElement(Element resultMapElement, ResultMapInfo resultMapAssociationInfo) {
         return ResultMapHelper.joinAssociationColumnElement(resultMapElement, resultMapAssociationInfo);
-    }
-
-    private Element collectionColumnElement(Element resultMapElement, ResultMapInfo resultMapRelationInfo) {
-        String column = this.getColumn(resultMapRelationInfo);
-        return ResultMapHelper.collectionColumnElement(resultMapElement, resultMapRelationInfo, column);
     }
 
     private Element joinCollectionColumnElement(Element resultMapElement, ResultMapInfo resultMapAssociationInfo) {
@@ -241,7 +234,6 @@ public class ResultMapTemplateHandler {
      * @return
      */
     private String getColumn(ResultMapInfo resultMapRelationInfo) {
-        EntityInfo entityInfo = resultMapRelationInfo.getEntityInfo();
         ColumnInfo columnInfo = resultMapRelationInfo.getColumnInfo();
         RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
         RelationColumnInfo mappedByRelationColumnInfo = relationColumnInfo.getMappedByRelationColumnInfo();

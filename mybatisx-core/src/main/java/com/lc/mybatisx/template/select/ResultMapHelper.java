@@ -1,10 +1,8 @@
 package com.lc.mybatisx.template.select;
 
-import com.lc.mybatisx.annotation.ManyToMany;
-import com.lc.mybatisx.annotation.ManyToOne;
-import com.lc.mybatisx.annotation.OneToMany;
-import com.lc.mybatisx.annotation.OneToOne;
-import com.lc.mybatisx.model.*;
+import com.lc.mybatisx.model.ColumnInfo;
+import com.lc.mybatisx.model.RelationColumnInfo;
+import com.lc.mybatisx.model.ResultMapInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Document;
 import org.dom4j.Element;
@@ -24,13 +22,6 @@ public class ResultMapHelper {
         columnElement(idColumnElement, columnInfo);
     }
 
-    public static void resultColumnElement(Element resultMapElement, ForeignKeyColumnInfo foreignKeyColumnInfo) {
-        ColumnInfo columnInfo = new ColumnInfo();
-        /*columnInfo.setDbColumnName(foreignKeyColumnInfo.getName());
-        columnInfo.setDbColumnNameAlias(foreignKeyColumnInfo.getNameAlias());*/
-        resultColumnElement(resultMapElement, columnInfo);
-    }
-
     public static void resultColumnElement(Element resultMapElement, ColumnInfo columnInfo) {
         Element resultColumnElement = resultMapElement.addElement("result");
         columnElement(resultColumnElement, columnInfo);
@@ -46,12 +37,11 @@ public class ResultMapHelper {
     }
 
     public static Element associationColumnElement(Element resultMapElement, ResultMapInfo resultMapRelationInfo, String column, String leftRightMap) {
-        ColumnInfo columnInfo = resultMapRelationInfo.getColumnInfo();
-        RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
+        RelationColumnInfo relationColumnInfo = (RelationColumnInfo) resultMapRelationInfo.getColumnInfo();
         Element resultMapAssociationElement = resultMapElement.addElement("association");
-        resultMapAssociationElement.addAttribute("property", columnInfo.getJavaColumnName());
+        resultMapAssociationElement.addAttribute("property", relationColumnInfo.getJavaColumnName());
         resultMapAssociationElement.addAttribute("column", column);
-        resultMapAssociationElement.addAttribute("javaType", columnInfo.getJavaTypeName());
+        resultMapAssociationElement.addAttribute("javaType", relationColumnInfo.getJavaTypeName());
         resultMapAssociationElement.addAttribute("fetchType", relationColumnInfo.getFetchType());
         resultMapAssociationElement.addAttribute("select", resultMapRelationInfo.getNestedSelectId());
         resultMapAssociationElement.addAttribute("relationProperty", leftRightMap);
@@ -66,14 +56,13 @@ public class ResultMapHelper {
         return resultMapAssociationElement;
     }
 
-    public static Element collectionColumnElement(Element resultMapElement, EntityInfo parentEntityInfo, ResultMapInfo resultMapRelationInfo, String column) {
-        ColumnInfo columnInfo = resultMapRelationInfo.getColumnInfo();
-        RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
+    public static Element collectionColumnElement(Element resultMapElement, ResultMapInfo resultMapRelationInfo, String column) {
+        RelationColumnInfo relationColumnInfo = (RelationColumnInfo) resultMapRelationInfo.getColumnInfo();
         Element resultMapCollectionElement = resultMapElement.addElement("collection");
-        resultMapCollectionElement.addAttribute("property", columnInfo.getJavaColumnName());
+        resultMapCollectionElement.addAttribute("property", relationColumnInfo.getJavaColumnName());
         resultMapCollectionElement.addAttribute("column", column);
-        resultMapCollectionElement.addAttribute("javaType", columnInfo.getCollectionTypeName());
-        resultMapCollectionElement.addAttribute("ofType", columnInfo.getJavaTypeName());
+        resultMapCollectionElement.addAttribute("javaType", relationColumnInfo.getCollectionTypeName());
+        resultMapCollectionElement.addAttribute("ofType", relationColumnInfo.getJavaTypeName());
         resultMapCollectionElement.addAttribute("fetchType", relationColumnInfo.getFetchType());
         resultMapCollectionElement.addAttribute("select", resultMapRelationInfo.getNestedSelectId());
         resultMapCollectionElement.addAttribute("relationProperty", "{id=userId}");
@@ -87,25 +76,5 @@ public class ResultMapHelper {
         resultMapCollectionElement.addAttribute("javaType", columnInfo.getCollectionTypeName());
         resultMapCollectionElement.addAttribute("ofType", columnInfo.getJavaTypeName());
         return resultMapCollectionElement;
-    }
-
-    public static Integer getRelationType(RelationColumnInfo relationColumnInfo) {
-        OneToOne oneToOne = relationColumnInfo.getOneToOne();
-        OneToMany oneToMany = relationColumnInfo.getOneToMany();
-        ManyToOne manyToOne = relationColumnInfo.getManyToOne();
-        ManyToMany manyToMany = relationColumnInfo.getManyToMany();
-        if (oneToOne != null) {
-            return 1;
-        }
-        if (oneToMany != null) {
-            return 2;
-        }
-        if (manyToOne != null) {
-            return 1;
-        }
-        if (manyToMany != null) {
-            return 2;
-        }
-        return null;
     }
 }

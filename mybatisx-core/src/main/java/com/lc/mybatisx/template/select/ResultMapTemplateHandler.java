@@ -6,7 +6,6 @@ import com.lc.mybatisx.model.*;
 import com.lc.mybatisx.utils.TypeUtils;
 import com.lc.mybatisx.utils.XmlUtils;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.parsing.XPathParser;
 import org.dom4j.Document;
@@ -29,13 +28,11 @@ public class ResultMapTemplateHandler {
         List<ResultMapInfo> resultMapInfoList = mapperInfo.getResultMapInfoList();
         for (ResultMapInfo resultMapInfo : resultMapInfoList) {
             Document document = DocumentHelper.createDocument();
-            if (TypeUtils.typeEquals(resultMapInfo, ManyToManyBatchSelectResultMapInfo.class)) {
-                ManyToManyBatchSelectResultMapInfo manyToManyBatchSelectResultMapInfo = (ManyToManyBatchSelectResultMapInfo) resultMapInfo;
-                this.buildResultMap(document, mapperInfo, manyToManyBatchSelectResultMapInfo.getManyToManyBatchSelectResultMapInfo());
-            }
-            if (TypeUtils.typeEquals(resultMapInfo, ResultMapInfo.class)) {
-                this.buildResultMap(document, mapperInfo, resultMapInfo);
-            }
+            Element resultMapElement = ResultMapHelper.addResultMapElement(document, resultMapInfo);
+            this.addIdColumnElement(resultMapElement, resultMapInfo.getEntityInfo());
+            this.addColumnElement(resultMapElement, resultMapInfo.getTableColumnInfoList());
+            this.addRelationColumnElement(resultMapElement, resultMapInfo);
+            this.addResultMapRelationElement(resultMapElement, resultMapInfo);
             String resultMapXmlString = document.asXML();
             logger.info("select resultMap: \n{}", resultMapXmlString);
 
@@ -44,14 +41,6 @@ public class ResultMapTemplateHandler {
             xNodeMap.put(resultMapInfo.getId(), xNode);
         }
         return xNodeMap;
-    }
-
-    private void buildResultMap(Document document, MapperInfo mapperInfo, ResultMapInfo resultMapInfo) {
-        Element resultMapElement = ResultMapHelper.addResultMapElement(document, resultMapInfo);
-        this.addIdColumnElement(resultMapElement, resultMapInfo.getEntityInfo());
-        this.addColumnElement(resultMapElement, resultMapInfo.getTableColumnInfoList());
-        this.addRelationColumnElement(resultMapElement, resultMapInfo);
-        this.addResultMapRelationElement(resultMapElement, mapperInfo, resultMapInfo.getEntityInfo(), resultMapInfo.getResultMapInfoList());
     }
 
     private void addIdColumnElement(Element resultMapElement, EntityInfo entityInfo) {
@@ -79,19 +68,20 @@ public class ResultMapTemplateHandler {
     /**
      * 添加字段关系节点，主要实现纯对象关系映射
      * <code>
-     *     <resultMap id="resultMapId" type="User">
-     *         <id property="id" column="id"/>
-     *         <id property="code" column="code"/>
-     *         <column property="userDetail.user.id" column="id"/>
-     *         <column property="userDetail.user.code" column="code"/>
-     *         <association property="userDetail" column="{user_id=id,user_code=code}"/>
-     *     </resultMap>
-     *     <resultMap id="resultMapId" type="UserDetail">
-     *         <column property="user.id" column="user_id"/>
-     *         <column property="user.code" column="user_code"/>
-     *         <association property="user" column="{user_id=user_id,user_code=user_code}"/>
-     *     </resultMap>
+     * <resultMap id="resultMapId" type="User">
+     * <id property="id" column="id"/>
+     * <id property="code" column="code"/>
+     * <column property="userDetail.user.id" column="id"/>
+     * <column property="userDetail.user.code" column="code"/>
+     * <association property="userDetail" column="{user_id=id,user_code=code}"/>
+     * </resultMap>
+     * <resultMap id="resultMapId" type="UserDetail">
+     * <column property="user.id" column="user_id"/>
+     * <column property="user.code" column="user_code"/>
+     * <association property="user" column="{user_id=user_id,user_code=user_code}"/>
+     * </resultMap>
      * </code>
+     *
      * @param resultMapElement
      * @param resultMapInfo
      */
@@ -147,48 +137,20 @@ public class ResultMapTemplateHandler {
 
     /**
      * 添加结果集关联节点
+     *
      * @param resultMapElement
-     * @param mapperInfo
-     * @param resultMapEntityInfo
-     * @param resultMapInfoList
+     * @param resultMapInfo
      */
-    private void addResultMapRelationElement(Element resultMapElement, MapperInfo mapperInfo, EntityInfo resultMapEntityInfo, List<ResultMapInfo> resultMapInfoList) {
-        if (ObjectUtils.isEmpty(resultMapInfoList)) {
-            return;
-        }
-        for (ResultMapInfo resultMapInfo : resultMapInfoList) {
-            RelationColumnInfo relationColumnInfo = (RelationColumnInfo) resultMapInfo.getColumnInfo();
-            if (relationColumnInfo.getFetchMode() == FetchMode.SELECT) {
-                this.subSelect(resultMapElement, resultMapEntityInfo, resultMapInfo);
-            }
-            if (relationColumnInfo.getFetchMode() == FetchMode.BATCH) {
-                RelationType relationType = relationColumnInfo.getRelationType();
-                if (relationType == RelationType.ONE_TO_ONE || relationType == RelationType.MANY_TO_ONE) {
-                    this.subSelect(resultMapElement, resultMapEntityInfo, resultMapInfo);
-                }
-                if (relationType == RelationType.ONE_TO_MANY || relationType == RelationType.MANY_TO_MANY) {
-                    String nestedSelectId = resultMapInfo.getNestedSelectId();
-                    if (StringUtils.isNotBlank(nestedSelectId)) {
-                        this.subSelect(resultMapElement, resultMapEntityInfo, resultMapInfo);
-                    } else {
-                        Element resultMapRelationElement = this.joinSelect(resultMapElement, resultMapInfo);
-                        this.addResultMapRelationElement(resultMapRelationElement, mapperInfo, resultMapInfo.getEntityInfo(), resultMapInfo.getResultMapInfoList());
-                    }
-                }
-            }
-            if (relationColumnInfo.getFetchMode() == FetchMode.JOIN) {
-                Element resultMapRelationElement = this.joinSelect(resultMapElement, resultMapInfo);
-                this.addResultMapRelationElement(resultMapRelationElement, mapperInfo, resultMapInfo.getEntityInfo(), resultMapInfo.getResultMapInfoList());
-            }
-
+    private void addResultMapRelationElement(Element resultMapElement, ResultMapInfo resultMapInfo) {
+        for (ResultMapInfo composite : resultMapInfo.getComposites()) {
+            ResultMapInfo.NestedSelect nestedSelect = composite.getNestedSelect();
             // 是否存在独立的 resultMap，如果存在，为子查询，如果不存在，则为join关联查询
-            /*ResultMapInfo existIndependenceResultMapInfo = mapperInfo.getResultMapInfo(resultMapInfo.getEntityClazz());
-            if (existIndependenceResultMapInfo != null) {
-                this.subSelect(resultMapElement, resultMapEntityInfo, resultMapInfo);
+            if (nestedSelect != null) {
+                this.subSelect(resultMapElement, resultMapInfo.getEntityInfo(), composite);
             } else {
-                Element resultMapRelationElement = this.joinSelect(resultMapElement, resultMapInfo);
-                this.addResultMapRelationElement(resultMapRelationElement, mapperInfo, resultMapInfo.getEntityInfo(), resultMapInfo.getResultMapInfoList());
-            }*/
+                Element resultMapRelationElement = this.joinSelect(resultMapElement, composite);
+                this.addResultMapRelationElement(resultMapRelationElement, composite);
+            }
         }
     }
 
@@ -223,7 +185,7 @@ public class ResultMapTemplateHandler {
     }
 
     private Element associationColumnElement(Element resultMapElement, EntityInfo parentEntityInfo, ResultMapInfo resultMapRelationInfo) {
-        String column = this.getColumn(parentEntityInfo, resultMapRelationInfo);
+        String column = this.getColumn(resultMapRelationInfo);
         Map<String, String> leftRightMap = new LinkedHashMap<>();
         List<ColumnInfo> relationColumnInfoList = parentEntityInfo.getRelationColumnInfoList();
         for (ColumnInfo columnInfo : relationColumnInfoList) {
@@ -262,7 +224,7 @@ public class ResultMapTemplateHandler {
     }
 
     private Element collectionColumnElement(Element resultMapElement, EntityInfo parentEntityInfo, ResultMapInfo resultMapRelationInfo) {
-        String column = this.getColumn(parentEntityInfo, resultMapRelationInfo);
+        String column = this.getColumn(resultMapRelationInfo);
         return ResultMapHelper.collectionColumnElement(resultMapElement, parentEntityInfo, resultMapRelationInfo, column);
     }
 
@@ -273,13 +235,14 @@ public class ResultMapTemplateHandler {
     /**
      * 生成关系查询参数，参数名称带有业务属性，如查询用户，参数名为user_id，查询角色，参数名为role_id
      * <code>
-     *     <association property="user" column="{user_id=user_id}" javaType="com.lc.mybatisx.test.model.entity.User" fetchType="lazy" select="findUser"/>
-     *     <collection property="roleList" column="{user_id=id}" javaType="java.util.List" ofType="com.lc.mybatisx.test.model.entity.Role" fetchType="lazy" select="findRoleList"/>
+     * <association property="user" column="{user_id=user_id}" javaType="com.lc.mybatisx.test.model.entity.User" fetchType="lazy" select="findUser"/>
+     * <collection property="roleList" column="{user_id=id}" javaType="java.util.List" ofType="com.lc.mybatisx.test.model.entity.Role" fetchType="lazy" select="findRoleList"/>
      * </code>
+     *
      * @param resultMapRelationInfo
      * @return
      */
-    private String getColumn(EntityInfo parentEntityInfo, ResultMapInfo resultMapRelationInfo) {
+    private String getColumn(ResultMapInfo resultMapRelationInfo) {
         EntityInfo entityInfo = resultMapRelationInfo.getEntityInfo();
         ColumnInfo columnInfo = resultMapRelationInfo.getColumnInfo();
         RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;

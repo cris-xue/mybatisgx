@@ -22,6 +22,7 @@ import java.util.List;
 
 /**
  * 查询sql模板处理
+ *
  * @author ccxuef
  * @date 2025/9/6 14:05
  */
@@ -32,23 +33,25 @@ public class SelectSqlTemplateHandler {
     /**
      * 构建关联查询
      * <code>
-     *     select * from user_role left join role on user_role.user_id = role.id
+     * select * from user_role left join role on user_role.user_id = role.id
      * </code>
+     *
      * @param entityRelationSelectInfo
      * @return
      * @throws JSQLParserException
      */
-    public String buildSelectSql(EntityRelationSelectInfo entityRelationSelectInfo) throws JSQLParserException {
+    public String buildSelectSql(ResultMapInfo entityRelationSelectInfo) throws JSQLParserException {
         // EntityInfo mainEntityInfo = entityRelationSelectInfo.getMainEntityInfo();
         List<EntityInfo> entityInfoList = this.getEntityInfoList(entityRelationSelectInfo);
         PlainSelect plainSelect = this.buildMainSelect(entityInfoList);
         this.buildFromItem(plainSelect, entityRelationSelectInfo.getEntityInfo());
-        this.buildLeftJoinOn(plainSelect, entityRelationSelectInfo, entityRelationSelectInfo.getEntityRelationSelectInfoList());
+        this.buildLeftJoinOn(plainSelect, entityRelationSelectInfo, entityRelationSelectInfo.getComposites());
         return plainSelect.toString();
     }
 
     /**
      * 构建单表查询，如：select * from user
+     *
      * @param entityInfo
      * @return
      */
@@ -60,6 +63,7 @@ public class SelectSqlTemplateHandler {
 
     /**
      * 构建主表查询，如：select * from user_role
+     *
      * @param entityInfoList
      * @return
      */
@@ -85,12 +89,14 @@ public class SelectSqlTemplateHandler {
         return mainTable;
     }
 
-    private List<EntityInfo> getEntityInfoList(EntityRelationSelectInfo entityRelationSelectInfo) {
+    private List<EntityInfo> getEntityInfoList(ResultMapInfo resultMapInfo) {
         List<EntityInfo> entityInfoList = new ArrayList();
-        entityInfoList.add(entityRelationSelectInfo.getEntityInfo());
-        List<EntityRelationSelectInfo> entityRelationSelectInfoList = entityRelationSelectInfo.getEntityRelationSelectInfoList();
-        for (EntityRelationSelectInfo childrenEntityRelationSelectInfo : entityRelationSelectInfoList) {
-            List<EntityInfo> childrenEntityInfoList = this.getEntityInfoList(childrenEntityRelationSelectInfo);
+        EntityInfo entityInfo = resultMapInfo.getEntityInfo();
+        if (entityInfo != null) {
+            entityInfoList.add(entityInfo);
+        }
+        for (ResultMapInfo composite : resultMapInfo.getComposites()) {
+            List<EntityInfo> childrenEntityInfoList = this.getEntityInfoList(composite);
             if (ObjectUtils.isNotEmpty(childrenEntityInfoList)) {
                 entityInfoList.addAll(childrenEntityInfoList);
             }
@@ -100,11 +106,12 @@ public class SelectSqlTemplateHandler {
 
     /**
      * 构建join查询sql【一对一、一对多、多对一、多对多】
+     *
      * @param plainSelect
      * @param leftEntityRelationSelectInfo
      * @param rightEntityRelationSelectInfoList
      */
-    private void buildLeftJoinOn(PlainSelect plainSelect, EntityRelationSelectInfo leftEntityRelationSelectInfo, List<EntityRelationSelectInfo> rightEntityRelationSelectInfoList) {
+    private void buildLeftJoinOn(PlainSelect plainSelect, ResultMapInfo leftEntityRelationSelectInfo, List<ResultMapInfo> rightEntityRelationSelectInfoList) {
         MiddleEntityInfo middleEntityInfo = leftEntityRelationSelectInfo.getMiddleEntityInfo();
         if (middleEntityInfo != null) {
             Boolean leftManyToMany = leftEntityRelationSelectInfo.isManyToMany();
@@ -125,7 +132,11 @@ public class SelectSqlTemplateHandler {
                 plainSelect.addJoins(join);
             }
         }
-        for (EntityRelationSelectInfo rightEntityRelationSelectInfo : rightEntityRelationSelectInfoList) {
+        for (ResultMapInfo rightEntityRelationSelectInfo : rightEntityRelationSelectInfoList) {
+            ResultMapInfo.NestedSelect nestedSelect = rightEntityRelationSelectInfo.getNestedSelect();
+            if (nestedSelect != null) {
+                continue;
+            }
             Boolean rightManyToMany = rightEntityRelationSelectInfo.isManyToMany();
             if (rightManyToMany) {
                 // 右表是多对多的处理【role left join role_menu on role.id = role_menu.role_id】
@@ -151,7 +162,7 @@ public class SelectSqlTemplateHandler {
                 this.buildEntityTableOnEntityTable(leftEntityRelationSelectInfo, rightEntityRelationSelectInfo, join);
                 plainSelect.addJoins(join);
             }
-            this.buildLeftJoinOn(plainSelect, rightEntityRelationSelectInfo, rightEntityRelationSelectInfo.getEntityRelationSelectInfoList());
+            this.buildLeftJoinOn(plainSelect, rightEntityRelationSelectInfo, rightEntityRelationSelectInfo.getComposites());
         }
     }
 
@@ -164,6 +175,7 @@ public class SelectSqlTemplateHandler {
 
     /**
      * 构建查询字段列
+     *
      * @param entityInfo
      * @return
      */
@@ -217,7 +229,7 @@ public class SelectSqlTemplateHandler {
         return selectItem;
     }
 
-    private void buildEntityTableOnEntityTable(EntityRelationSelectInfo leftEntityRelationSelectInfo, EntityRelationSelectInfo rightEntityRelationSelectInfo, Join join) {
+    private void buildEntityTableOnEntityTable(ResultMapInfo leftEntityRelationSelectInfo, ResultMapInfo rightEntityRelationSelectInfo, Join join) {
         List<Expression> onExpressionList = new ArrayList<>();
         String leftEntityTableName = leftEntityRelationSelectInfo.getEntityTableName();
         String rightEntityTableName = rightEntityRelationSelectInfo.getEntityTableName();

@@ -1,9 +1,9 @@
 package com.lc.mybatisx.template.select;
 
 import com.lc.mybatisx.model.ColumnInfo;
-import com.lc.mybatisx.model.EntityRelationSelectInfo;
 import com.lc.mybatisx.model.ForeignKeyColumnInfo;
 import com.lc.mybatisx.model.RelationColumnInfo;
+import com.lc.mybatisx.model.ResultMapInfo;
 import com.lc.mybatisx.template.ConditionBuilder;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
@@ -13,12 +13,11 @@ import org.dom4j.Element;
 
 public class RelationSelectHelper {
 
-    public static Element buildSelectElement(Element mapperElement, EntityRelationSelectInfo entityRelationSelectInfo, String sql) {
+    public static Element buildSelectElement(Element mapperElement, ResultMapInfo resultMapInfo, String sql) {
         Element selectElement = mapperElement.addElement("select");
-        selectElement.addAttribute("id", entityRelationSelectInfo.getId());
-        selectElement.addAttribute("resultMap", entityRelationSelectInfo.getResultMapId());
-        ColumnInfo columnInfo = entityRelationSelectInfo.getColumnInfo();
-        RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
+        selectElement.addAttribute("id", resultMapInfo.getNestedSelectId());
+        selectElement.addAttribute("resultMap", resultMapInfo.getId());
+        RelationColumnInfo relationColumnInfo = (RelationColumnInfo) resultMapInfo.getColumnInfo();
         String fetchSize = relationColumnInfo.getFetchSize();
         if (StringUtils.isNotBlank(fetchSize)) {
             selectElement.addAttribute("fetchSize", fetchSize);
@@ -51,6 +50,7 @@ public class RelationSelectHelper {
 
     /**
      * 将表达式添加到条件树
+     *
      * @param whereConditionExpression
      * @param leftEq
      * @param rightEq
@@ -64,17 +64,18 @@ public class RelationSelectHelper {
     /**
      * 用户关联用户详情：关联查询用户详情的时候需要获取【userDetail -> user.id】
      * <code>
-     *     user: {
-     *         userDetail: {
-     *             user: {
-     *                 id: user.id
-     *             }
-     *         }
-     *     }
-     *     // column中的key会映射userDetail中的user对象的id
-     *     <association property="userDetail" column="{user.id=id}"></association>
-     *     where user_detail.user_id = #{user.id}
+     * user: {
+     * userDetail: {
+     * user: {
+     * id: user.id
+     * }
+     * }
+     * }
+     * // column中的key会映射userDetail中的user对象的id
+     * <association property="userDetail" column="{user.id=id}"></association>
+     * where user_detail.user_id = #{user.id}
      * </code>
+     *
      * @param mappedByColumnInfo
      * @return
      */

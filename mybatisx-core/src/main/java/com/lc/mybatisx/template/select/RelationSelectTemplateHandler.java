@@ -30,9 +30,13 @@ public class RelationSelectTemplateHandler {
 
     public Map<String, XNode> execute(MapperInfo mapperInfo) {
         Map<String, XNode> totalXNodeMap = new HashMap();
-        List<EntityRelationSelectInfo> entityRelationSelectInfoList = mapperInfo.getEntityRelationSelectInfoList();
-        for (EntityRelationSelectInfo entityRelationSelectInfo : entityRelationSelectInfoList) {
-            Map<String, XNode> entityRelationSelectXNodeMap = this.buildSelect(entityRelationSelectInfo);
+        List<ResultMapInfo> resultMapInfoList = mapperInfo.getResultMapInfoList();
+        for (ResultMapInfo resultMapInfo : resultMapInfoList) {
+            ResultMapInfo.NestedSelect nestedSelect = resultMapInfo.getNestedSelect();
+            if (nestedSelect == null) {
+                continue;
+            }
+            Map<String, XNode> entityRelationSelectXNodeMap = this.buildSelect(resultMapInfo);
             if (ObjectUtils.isNotEmpty(entityRelationSelectXNodeMap)) {
                 totalXNodeMap.putAll(entityRelationSelectXNodeMap);
             }
@@ -40,51 +44,51 @@ public class RelationSelectTemplateHandler {
         return totalXNodeMap;
     }
 
-    private Map<String, XNode> buildSelect(EntityRelationSelectInfo entityRelationSelectInfo) {
-        String selectXmlString = this.buildDocumentString(entityRelationSelectInfo);
+    private Map<String, XNode> buildSelect(ResultMapInfo resultMapInfo) {
+        String selectXmlString = this.buildDocumentString(resultMapInfo);
         Map<String, XNode> entityRelationSelectXNodeMap = new HashMap();
         if (StringUtils.isNotBlank(selectXmlString)) {
             logger.info("auto relation select sql: \n{}", selectXmlString);
             XPathParser xPathParser = XmlUtils.processXml(selectXmlString);
             XNode xNode = xPathParser.evalNode("/mapper/select");
-            entityRelationSelectXNodeMap.put(entityRelationSelectInfo.getId(), xNode);
+            entityRelationSelectXNodeMap.put(resultMapInfo.getId(), xNode);
         }
         return entityRelationSelectXNodeMap;
     }
 
-    private String buildDocumentString(EntityRelationSelectInfo entityRelationSelectInfo) {
-        String selectSql = this.buildJoinSelect(entityRelationSelectInfo);
+    private String buildDocumentString(ResultMapInfo resultMapInfo) {
+        String selectSql = this.buildJoinSelect(resultMapInfo);
         Document document = DocumentHelper.createDocument();
         Element mapperElement = document.addElement("mapper");
-        Element selectElement = RelationSelectHelper.buildSelectElement(mapperElement, entityRelationSelectInfo, selectSql);
+        Element selectElement = RelationSelectHelper.buildSelectElement(mapperElement, resultMapInfo, selectSql);
 
-        RelationColumnInfo relationColumnInfo = (RelationColumnInfo) entityRelationSelectInfo.getColumnInfo();
+        RelationColumnInfo relationColumnInfo = (RelationColumnInfo) resultMapInfo.getColumnInfo();
         ManyToMany manyToMany = relationColumnInfo.getManyToMany();
         if (manyToMany == null) {
             if (relationColumnInfo.getFetchMode() == FetchMode.BATCH) {
-                Expression whereCondition = batchRelationSelect.buildOneToOneWhere(entityRelationSelectInfo);
+                Expression whereCondition = batchRelationSelect.buildOneToOneWhere(resultMapInfo);
                 Element whereElement = RelationSelectHelper.buildWhereElement(selectElement);
                 RelationSelectHelper.buildForeachElement(whereElement, whereCondition);
             } else {
-                Expression whereCondition = simpleRelationSelect.buildOneToOneWhere(entityRelationSelectInfo);
+                Expression whereCondition = simpleRelationSelect.buildOneToOneWhere(resultMapInfo);
                 RelationSelectHelper.buildWhereElement(selectElement, whereCondition);
             }
         } else {
             if (relationColumnInfo.getFetchMode() == FetchMode.BATCH) {
-                Expression whereCondition = batchRelationSelect.buildManyToManyWhere(entityRelationSelectInfo);
+                Expression whereCondition = batchRelationSelect.buildManyToManyWhere(resultMapInfo);
                 Element whereElement = RelationSelectHelper.buildWhereElement(selectElement);
                 RelationSelectHelper.buildForeachElement(whereElement, whereCondition);
             } else {
-                Expression whereCondition = simpleRelationSelect.buildManyToManyWhere(entityRelationSelectInfo);
+                Expression whereCondition = simpleRelationSelect.buildManyToManyWhere(resultMapInfo);
                 RelationSelectHelper.buildWhereElement(selectElement, whereCondition);
             }
         }
         return document.asXML();
     }
 
-    private String buildJoinSelect(EntityRelationSelectInfo entityRelationSelectInfo) {
+    private String buildJoinSelect(ResultMapInfo resultMapInfo) {
         try {
-            return selectSqlTemplateHandler.buildSelectSql(entityRelationSelectInfo);
+            return selectSqlTemplateHandler.buildSelectSql(resultMapInfo);
         } catch (JSQLParserException e) {
             throw new RuntimeException(e);
         }
@@ -92,7 +96,7 @@ public class RelationSelectTemplateHandler {
 
     private static class SimpleRelationSelect {
 
-        public Expression buildOneToOneWhere(EntityRelationSelectInfo entityRelationSelectInfo) {
+        public Expression buildOneToOneWhere(ResultMapInfo entityRelationSelectInfo) {
             EntityInfo relationEntityInfo = entityRelationSelectInfo.getEntityInfo();
             RelationColumnInfo relationColumnInfo = (RelationColumnInfo) entityRelationSelectInfo.getColumnInfo();
             RelationColumnInfo mappedByRelationColumnInfo = relationColumnInfo.getMappedByRelationColumnInfo();
@@ -120,7 +124,7 @@ public class RelationSelectTemplateHandler {
             }
         }
 
-        public Expression buildManyToManyWhere(EntityRelationSelectInfo entityRelationSelectInfo) {
+        public Expression buildManyToManyWhere(ResultMapInfo entityRelationSelectInfo) {
             String middleTableName = entityRelationSelectInfo.getMiddleTableName();
             RelationColumnInfo relationColumnInfo = (RelationColumnInfo) entityRelationSelectInfo.getColumnInfo();
             RelationColumnInfo mappedByRelationColumnInfo = relationColumnInfo.getMappedByRelationColumnInfo();
@@ -137,7 +141,8 @@ public class RelationSelectTemplateHandler {
 
         /**
          * 将表达式添加到条件树
-         * @param middleTableName 中间表名称
+         *
+         * @param middleTableName          中间表名称
          * @param foreignKeyColumnInfoList 外键字段列表
          * @return
          */
@@ -155,18 +160,18 @@ public class RelationSelectTemplateHandler {
 
     private static class BatchRelationSelect {
 
-        public Expression buildOneToOneWhere(EntityRelationSelectInfo entityRelationSelectInfo) {
-            EntityInfo relationEntityInfo = entityRelationSelectInfo.getEntityInfo();
-            RelationColumnInfo relationColumnInfo = (RelationColumnInfo) entityRelationSelectInfo.getColumnInfo();
+        public Expression buildOneToOneWhere(ResultMapInfo resultMapInfo) {
+            EntityInfo relationEntityInfo = resultMapInfo.getEntityInfo();
+            RelationColumnInfo relationColumnInfo = (RelationColumnInfo) resultMapInfo.getColumnInfo();
             RelationColumnInfo mappedByRelationColumnInfo = relationColumnInfo.getMappedByRelationColumnInfo();
             if (mappedByRelationColumnInfo != null) {
                 List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedByRelationColumnInfo.getInverseForeignKeyColumnInfoList();
                 Expression whereConditionExpression = null;
-                // FROM user_detail WHERE user_detail.user_id = #{user.id} or user_detail.user_id = #{user.id}
+                // FROM user left join user_detail on() WHERE user_detail.user_id = #{user.id} or user_detail.user_id = #{user.id}
                 for (ForeignKeyColumnInfo inverseForeignKeyInfo : inverseForeignKeyColumnInfoList) {
                     ColumnInfo foreignKeyColumnInfo = inverseForeignKeyInfo.getColumnInfo();
                     ColumnInfo referencedColumnInfo = inverseForeignKeyInfo.getReferencedColumnInfo();
-                    String leftEq = String.format("%s.%s", relationEntityInfo.getTableName(), foreignKeyColumnInfo.getDbColumnName());
+                    String leftEq = String.format("%s.%s", relationEntityInfo.getTableName(), referencedColumnInfo.getDbColumnName());
                     String rightEq = String.format("#{%s.%s}", "item", referencedColumnInfo.getJavaColumnPath());
                     whereConditionExpression = RelationSelectHelper.buildWhereConditionExpression(whereConditionExpression, leftEq, rightEq);
                 }
@@ -184,7 +189,7 @@ public class RelationSelectTemplateHandler {
             }
         }
 
-        public Expression buildManyToManyWhere(EntityRelationSelectInfo entityRelationSelectInfo) {
+        public Expression buildManyToManyWhere(ResultMapInfo entityRelationSelectInfo) {
             EntityInfo relationEntityInfo = entityRelationSelectInfo.getEntityInfo();
             String middleTableName = entityRelationSelectInfo.getMiddleTableName();
             RelationColumnInfo relationColumnInfo = (RelationColumnInfo) entityRelationSelectInfo.getColumnInfo();
@@ -202,7 +207,8 @@ public class RelationSelectTemplateHandler {
 
         /**
          * 将表达式添加到条件树
-         * @param middleTableName 中间表名称
+         *
+         * @param middleTableName          中间表名称
          * @param foreignKeyColumnInfoList 外键字段列表
          * @return
          */

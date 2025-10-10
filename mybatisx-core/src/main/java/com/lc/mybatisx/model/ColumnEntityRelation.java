@@ -7,6 +7,7 @@ import java.util.List;
 
 /**
  * 字段实体关系
+ *
  * @author ccxuef
  * @date 2025/8/9 18:03
  */
@@ -25,8 +26,7 @@ public class ColumnEntityRelation<T> {
      */
     protected EntityInfo entityInfo;
     /**
-     * 子对象
-     * TODO: 后续优化结果集和关系查询中的子对象
+     * 结果集和关系查询中的子对象
      */
     private List<T> composites = new ArrayList();
 
@@ -80,6 +80,7 @@ public class ColumnEntityRelation<T> {
 
     /**
      * 当前实体是否是关系维护方
+     *
      * @return true：是关系维护方 false：关系被维护方
      */
     public Boolean isMappedBy() {
@@ -97,6 +98,7 @@ public class ColumnEntityRelation<T> {
 
     /**
      * 是否是多对多关系
+     *
      * @return true: 表示是多对多关系 false: 表示不是多对多关系
      */
     public Boolean isManyToMany() {

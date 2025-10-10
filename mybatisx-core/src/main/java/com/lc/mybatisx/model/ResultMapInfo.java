@@ -7,18 +7,19 @@ import java.util.List;
  * https://pythonjishu.com/ywljunyfdqtftcc/
  * https://blog.csdn.net/WG102753/article/details/107989681
  * <code>
- *     <resultMap id="blogResult" type="Blog">
- *     <id property="id" column="id" />
- *     <result property="title" column="title"/>
- *     <association property="author" javaType="Author" resultSet="authors" column="author_id" foreignColumn="id">
- *         <id property="id" column="id"/>
- *         <result property="username" column="username"/>
- *         <result property="password" column="password"/>
- *         <result property="email" column="email"/>
- *         <result property="bio" column="bio"/>
- *     </association>
- *     </resultMap>
+ * <resultMap id="blogResult" type="Blog">
+ * <id property="id" column="id" />
+ * <result property="title" column="title"/>
+ * <association property="author" javaType="Author" resultSet="authors" column="author_id" foreignColumn="id">
+ * <id property="id" column="id"/>
+ * <result property="username" column="username"/>
+ * <result property="password" column="password"/>
+ * <result property="email" column="email"/>
+ * <result property="bio" column="bio"/>
+ * </association>
+ * </resultMap>
  * </code>
+ *
  * @author ccxuef
  * @date 2025/8/9 18:58
  */
@@ -29,13 +30,9 @@ public class ResultMapInfo extends ColumnEntityRelation<ResultMapInfo> {
      */
     private String id;
     /**
-     * 内嵌查询id，如果存在表示采用内嵌查询的方式，对应的xml节点为association、collection
+     * 内嵌查询，内嵌查询id，对应的xml节点为association、collection
      */
-    // private String nestedSelectId;
-    /**
-     * 内嵌查询
-     */
-    private NestedSelectId nestedSelectId;
+    private NestedSelect nestedSelect;
 
     public String getId() {
         return id;
@@ -46,17 +43,23 @@ public class ResultMapInfo extends ColumnEntityRelation<ResultMapInfo> {
     }
 
     public String getNestedSelectId() {
-        return this.nestedSelectId.getId();
+        return nestedSelect.getId();
     }
 
-    public void setNestedSelectId(String nestedSelectId) {
-        if (this.nestedSelectId != null) {
-            this.nestedSelectId.setId(nestedSelectId);
-        }
+    public NestedSelect getNestedSelect() {
+        return nestedSelect;
     }
 
-    public void setNestedSelectId(NestedSelectId nestedSelectId) {
-        this.nestedSelectId = nestedSelectId;
+    public void setNestedSelect(NestedSelect nestedSelect) {
+        this.nestedSelect = nestedSelect;
+    }
+
+    public String getEntityTableName() {
+        return this.entityInfo.getTableName();
+    }
+
+    public String getMiddleTableName() {
+        return this.getMiddleEntityInfo().getTableName();
     }
 
     @Deprecated
@@ -73,24 +76,9 @@ public class ResultMapInfo extends ColumnEntityRelation<ResultMapInfo> {
         return this.entityInfo.getColumnInfo(javaColumnName);
     }
 
-    public String getEntityClazzName() {
-        return this.entityInfo.getClazzName();
-    }
-
-    public List<ColumnInfo> getTableColumnInfoList() {
-        return this.entityInfo.getTableColumnInfoList();
-    }
-
-    public static class NestedSelectId {
+    public static class NestedSelect {
 
         private String id;
-
-        public NestedSelectId() {
-        }
-
-        public NestedSelectId(String id) {
-            this.id = id;
-        }
 
         public String getId() {
             return id;

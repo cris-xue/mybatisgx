@@ -41,11 +41,11 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
         }
 
         // 处理关联查询
-        List<EntityRelationSelectInfo> entityRelationSelectInfoList = new ArrayList();
-        entityRelationSelect.buildEntityRelationSelect(resultMapInfo, entityRelationSelectInfoList, entityRelationTree, null);
+        /*List<EntityRelationSelectInfo> entityRelationSelectInfoList = new ArrayList();
+        entityRelationSelect.buildEntityRelationSelect(resultMapInfo, entityRelationSelectInfoList, entityRelationTree, null);*/
 
         mapperInfo.addResultMapInfoList(resultMapInfoList);
-        mapperInfo.setEntityRelationSelectInfoList(entityRelationSelectInfoList);
+        // mapperInfo.setEntityRelationSelectInfoList(entityRelationSelectInfoList);
         return resultMapInfo.getId();
     }
 
@@ -179,7 +179,7 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
 
         public ResultMapContext buildResultMapInfo(EntityRelationTree entityRelationTree) {
             ResultMapContext resultMapContext = new ResultMapContext();
-            ResultMapInfo resultMapInfo = this.buildAloneResultMapInfo(resultMapContext, entityRelationTree);
+            ResultMapInfo resultMapInfo = this.buildAloneResultMapInfo(entityRelationTree);
 
             resultMapContext.setResultMapInfo(resultMapInfo);
             resultMapContext.addRelationResultMap(resultMapInfo);
@@ -194,7 +194,7 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
         /**
          * 构建结果集关联信息
          *
-         * @param resultMapContext              结果集信息列表
+         * @param resultMapContext 结果集信息列表
          * @return
          */
         protected List<ResultMapInfo> buildRelationResultMapInfo(ResultMapContext resultMapContext, EntityRelationTree entityRelationTree) {
@@ -209,15 +209,18 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
 
                 FetchMode fetchMode = relationColumnInfo.getFetchMode();
                 if (fetchMode == FetchMode.SELECT) {
-                    this.buildSelectResultMapInfo(resultMapContext, childEntityRelationTree);
+                    ResultMapInfo resultMapInfo = this.buildSelectResultMapInfo(resultMapContext, childEntityRelationTree);
+                    resultMapInfo.setNestedSelect(nestedResultMapInfo.getNestedSelect());
                 } else if (fetchMode == FetchMode.BATCH) {
-                    this.buildBatchResultMapInfo(resultMapContext, entityRelationTree, childEntityRelationTree);
+                    ResultMapInfo resultMapInfo = this.buildBatchResultMapInfo(resultMapContext, entityRelationTree, childEntityRelationTree);
+                    resultMapInfo.setNestedSelect(nestedResultMapInfo.getNestedSelect());
                 } else if (fetchMode == FetchMode.JOIN) {
                     if (level == 1) {
                         throw new RuntimeException("解析错误");
                     }
                     if (level == 2) {
-                        this.buildBatchResultMapInfo(resultMapContext, entityRelationTree, childEntityRelationTree);
+                        ResultMapInfo resultMapInfo = this.buildBatchResultMapInfo(resultMapContext, entityRelationTree, childEntityRelationTree);
+                        resultMapInfo.setNestedSelect(nestedResultMapInfo.getNestedSelect());
                     }
                     if (level > 2) {
                         this.buildJoinResultMapInfo(resultMapContext, nestedResultMapInfo, childEntityRelationTree);
@@ -239,16 +242,15 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
                 resultMapInfo.setEntityInfo(entityRelationTree.getEntityInfo());
                 return resultMapInfo;
             } else {
-                // String nestedSelectId = this.getNestedSelectId(relationColumnInfo.getJavaType(), relationColumnInfo.getCollectionType());
-                ResultMapInfo resultMapRelationInfo = new ResultMapInfo();
-                resultMapRelationInfo.setNestedSelectId(new ResultMapInfo.NestedSelectId());
-                resultMapRelationInfo.setColumnInfo(entityRelationTree.getColumnInfo());
-                return resultMapRelationInfo;
+                ResultMapInfo resultMapInfo = new ResultMapInfo();
+                resultMapInfo.setColumnInfo(entityRelationTree.getColumnInfo());
+                resultMapInfo.setNestedSelect(new ResultMapInfo.NestedSelect());
+                return resultMapInfo;
             }
         }
 
         private ResultMapInfo buildSelectResultMapInfo(ResultMapContext resultMapContext, EntityRelationTree childEntityRelationTree) {
-            ResultMapInfo resultMapInfo = this.buildAloneResultMapInfo(resultMapContext, childEntityRelationTree);
+            ResultMapInfo resultMapInfo = this.buildAloneResultMapInfo(childEntityRelationTree);
             resultMapContext.addRelationResultMap(resultMapInfo);
 
             resultMapInfo.setResultMapInfoList(this.buildRelationResultMapInfo(resultMapContext, childEntityRelationTree));
@@ -256,13 +258,11 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
         }
 
         private ResultMapInfo buildBatchResultMapInfo(ResultMapContext resultMapContext, EntityRelationTree parentRelationTree, EntityRelationTree childEntityRelationTree) {
-            ResultMapInfo resultMapInfo = this.buildAloneResultMapInfo(resultMapContext, childEntityRelationTree);
+            ResultMapInfo resultMapInfo = this.buildAloneResultMapInfo(childEntityRelationTree);
 
-            ResultMapInfo parentResultMapInfo = new ResultMapInfo();
-            // parentResultMapInfo.setId(resultMapInfo.getId());
+            BatchResultMapInfo parentResultMapInfo = new BatchResultMapInfo();
             parentResultMapInfo.setEntityInfo(parentRelationTree.getEntityInfo());
             parentResultMapInfo.setResultMapInfoList(Arrays.asList(resultMapInfo));
-
             resultMapContext.addRelationResultMap(parentResultMapInfo);
 
             resultMapInfo.setResultMapInfoList(this.buildRelationResultMapInfo(resultMapContext, childEntityRelationTree));
@@ -275,10 +275,8 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
             nestedResultMapInfo.setResultMapInfoList(childResultMapRelationInfoList);
         }
 
-        private ResultMapInfo buildAloneResultMapInfo(ResultMapContext resultMapContext, EntityRelationTree childEntityRelationTree) {
-            // String resultMapId = this.getResultMapId(null, childEntityRelationTree);
+        private ResultMapInfo buildAloneResultMapInfo(EntityRelationTree childEntityRelationTree) {
             ResultMapInfo resultMapInfo = new ResultMapInfo();
-            // resultMapInfo.setId(resultMapId);
             resultMapInfo.setColumnInfo(childEntityRelationTree.getColumnInfo());
             resultMapInfo.setMiddleEntityInfo(childEntityRelationTree.getMiddleEntityInfo());
             resultMapInfo.setEntityInfo(childEntityRelationTree.getEntityInfo());
@@ -289,15 +287,20 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
             for (ResultMapInfo resultMapInfo : resultMapInfoList) {
                 List<EntityInfo> entityInfoList = this.getEntityInfoList(resultMapInfo);
                 String resultMapId = this.getResultMapId(entityInfoList);
-                String nestedSelectId = this.getNestedSelectId(entityInfoList);
                 resultMapInfo.setId(resultMapId);
-                resultMapInfo.setNestedSelectId(nestedSelectId);
+
+                ResultMapInfo.NestedSelect nestedSelect = resultMapInfo.getNestedSelect();
+                if (nestedSelect != null) {
+                    String nestedSelectId = this.getNestedSelectId(entityInfoList);
+                    nestedSelect.setId(nestedSelectId);
+                }
             }
         }
     }
 
     /**
      * 结果集上下文，生命周期仅仅在解析实体关系时有效
+     *
      * @author ccxuef
      * @date 2025/9/30 14:59
      */

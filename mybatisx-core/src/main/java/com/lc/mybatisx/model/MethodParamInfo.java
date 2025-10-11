@@ -56,6 +56,10 @@ public class MethodParamInfo {
      */
     private Boolean isBatchSize = false;
     /**
+     * 是否批量数据
+     */
+    private Boolean isBatchData = false;
+    /**
      * 批量参数名称
      */
     private String batchItemName;
@@ -146,6 +150,14 @@ public class MethodParamInfo {
 
     public void setBatchSize(Boolean batchSize) {
         isBatchSize = batchSize;
+    }
+
+    public Boolean getBatchData() {
+        return isBatchData;
+    }
+
+    public void setBatchData(Boolean batchData) {
+        isBatchData = batchData;
     }
 
     public String getBatchItemName() {

@@ -134,14 +134,15 @@ public class MethodInfoHandler {
             methodParamInfo.setType(methodParamType);
             methodParamInfo.setTypeName(methodParamType.getName());
             this.getMethodParamName(methodParamInfo, parameter);
+
             BatchData batchData = parameter.getAnnotation(BatchData.class);
+            if (batchOperation != null && batchData != null) {
+                methodParamInfo.setBatchData(true);
+                methodParamInfo.setBatchItemName(batchData.value());
+            }
             BatchSize batchSize = parameter.getAnnotation(BatchSize.class);
-            if (batchSize != null) {
+            if (batchOperation != null && batchSize != null) {
                 methodParamInfo.setBatchSize(true);
-            } else {
-                if (batchOperation != null) {
-                    methodParamInfo.setBatchItemName(String.format("%s_batch_item", methodParamInfo.getParamName()));
-                }
             }
 
             Boolean basicType = this.getBasicType(methodParamType);
@@ -249,6 +250,7 @@ public class MethodInfoHandler {
 
     /**
      * 绑定和条件和参数
+     *
      * @param methodInfo
      * @param conditionInfoList
      */

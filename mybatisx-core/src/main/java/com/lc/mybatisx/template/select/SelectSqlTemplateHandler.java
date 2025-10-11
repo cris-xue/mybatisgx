@@ -186,7 +186,7 @@ public class SelectSqlTemplateHandler {
         for (ColumnInfo columnInfo : entityInfo.getTableColumnInfoList()) {
             if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class)) {
                 IdColumnInfo idColumnInfo = (IdColumnInfo) columnInfo;
-                List<ColumnInfo> compositeList = idColumnInfo.getColumnInfoList();
+                List<ColumnInfo> compositeList = idColumnInfo.getComposites();
                 if (ObjectUtils.isEmpty(compositeList)) {
                     SelectItem<?> selectItem = this.getSelectItem(table, idColumnInfo.getDbColumnName(), idColumnInfo.getDbColumnNameAlias());
                     selectItemList.add(selectItem);

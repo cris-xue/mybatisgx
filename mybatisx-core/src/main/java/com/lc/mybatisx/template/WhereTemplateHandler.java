@@ -81,13 +81,13 @@ public class WhereTemplateHandler {
 
     private void processId(Element whereElement, MethodInfo methodInfo, ConditionInfo conditionInfo) {
         IdColumnInfo idColumnInfo = (IdColumnInfo) conditionInfo.getColumnInfo();
-        List<ColumnInfo> columnInfoList = idColumnInfo.getColumnInfoList();
-        if (ObjectUtils.isEmpty(columnInfoList)) {
+        List<ColumnInfo> composites = idColumnInfo.getComposites();
+        if (ObjectUtils.isEmpty(composites)) {
             List<String> javaColumnPathList = Arrays.asList(idColumnInfo.getJavaColumnName());
             ColumnInfo composite = new ColumnInfo.Builder().columnInfo(idColumnInfo).javaColumnPathList(javaColumnPathList).build();
             this.processIdCondition(whereElement, methodInfo, composite);
         } else {
-            for (ColumnInfo columnInfo : columnInfoList) {
+            for (ColumnInfo columnInfo : composites) {
                 List<String> javaColumnPathList = Arrays.asList(conditionInfo.getConditionName(), columnInfo.getJavaColumnName());
                 ColumnInfo composite = new ColumnInfo.Builder().columnInfo(columnInfo).javaColumnPathList(javaColumnPathList).build();
                 this.processIdCondition(whereElement, methodInfo, composite);

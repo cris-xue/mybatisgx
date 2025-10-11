@@ -8,6 +8,7 @@ import java.util.List;
 
 /**
  * 字段信息信息
+ *
  * @author ccxuef
  * @date 2025/8/9 15:54
  */
@@ -60,7 +61,7 @@ public class ColumnInfo {
     /**
      * 复合字段列表
      */
-    private List<ColumnInfo> compositeList;
+    private List<ColumnInfo> composites;
     /**
      * 字段值生成处理器
      */
@@ -180,12 +181,12 @@ public class ColumnInfo {
         this.typeHandler = typeHandler;
     }
 
-    public List<ColumnInfo> getCompositeList() {
-        return compositeList;
+    public List<ColumnInfo> getComposites() {
+        return composites;
     }
 
-    public void setCompositeList(List<ColumnInfo> compositeList) {
-        this.compositeList = compositeList;
+    public void setComposites(List<ColumnInfo> composites) {
+        this.composites = composites;
     }
 
     public GenerateValueHandler getGenerateValueHandler() {

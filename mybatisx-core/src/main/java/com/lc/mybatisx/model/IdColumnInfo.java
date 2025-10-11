@@ -3,10 +3,9 @@ package com.lc.mybatisx.model;
 import com.lc.mybatisx.annotation.EmbeddedId;
 import com.lc.mybatisx.annotation.Id;
 
-import java.util.List;
-
 /**
  * 字段信息信息
+ *
  * @author ccxuef
  * @date 2025/8/9 15:54
  */
@@ -20,10 +19,6 @@ public class IdColumnInfo extends ColumnInfo {
      * 联合主键
      */
     private EmbeddedId embeddedId;
-    /**
-     * 字段列表
-     */
-    private List<ColumnInfo> columnInfoList;
 
     public Id getId() {
         return id;
@@ -39,13 +34,5 @@ public class IdColumnInfo extends ColumnInfo {
 
     public void setEmbeddedId(EmbeddedId embeddedId) {
         this.embeddedId = embeddedId;
-    }
-
-    public List<ColumnInfo> getColumnInfoList() {
-        return columnInfoList;
-    }
-
-    public void setColumnInfoList(List<ColumnInfo> columnInfoList) {
-        this.columnInfoList = columnInfoList;
     }
 }

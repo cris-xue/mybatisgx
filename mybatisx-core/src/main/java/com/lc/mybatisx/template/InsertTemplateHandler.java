@@ -64,7 +64,7 @@ public class InsertTemplateHandler {
             }
             if (dataMethodParamInfo != null) {
                 EntityInfo entityInfo = EntityInfoContextHolder.get(dataMethodParamInfo.getType());
-                List<ColumnInfo> idColumnInfoList = entityInfo.getIdColumnInfo().getColumnInfoList();
+                List<ColumnInfo> idColumnInfoList = entityInfo.getIdColumnInfo().getComposites();
                 List<String> keyPropertyList = new ArrayList();
                 for (ColumnInfo idColumnInfo : idColumnInfoList) {
                     String keyProperty = String.format("%s.%s", dataMethodParamInfo.getBatchItemName(), idColumnInfo.getJavaColumnName());
@@ -85,7 +85,7 @@ public class InsertTemplateHandler {
 
             EntityInfo entityInfo = EntityInfoContextHolder.get(dataMethodParamInfo.getType());
             IdColumnInfo idColumnInfo = entityInfo.getIdColumnInfo();
-            List<ColumnInfo> columnInfoList = idColumnInfo.getColumnInfoList();
+            List<ColumnInfo> columnInfoList = idColumnInfo.getComposites();
             List<String> keyPropertyList = new ArrayList();
             if (ObjectUtils.isEmpty(columnInfoList)) {
                 String keyProperty = String.format("%s", idColumnInfo.getJavaColumnName());
@@ -119,7 +119,7 @@ public class InsertTemplateHandler {
         for (ColumnInfo tableColumnInfo : tableColumnInfoList) {
             if (TypeUtils.typeEquals(tableColumnInfo, IdColumnInfo.class)) {
                 IdColumnInfo idColumnInfo = (IdColumnInfo) tableColumnInfo;
-                List<ColumnInfo> columnInfoList = idColumnInfo.getColumnInfoList();
+                List<ColumnInfo> columnInfoList = idColumnInfo.getComposites();
                 if (ObjectUtils.isEmpty(columnInfoList)) {
                     this.setColumn(methodInfo, tableColumnInfo, dbTrimElement);
                 } else {
@@ -197,7 +197,7 @@ public class InsertTemplateHandler {
         for (ColumnInfo tableColumnInfo : tableColumnInfoList) {
             if (TypeUtils.typeEquals(tableColumnInfo, IdColumnInfo.class)) {
                 IdColumnInfo idColumnInfo = (IdColumnInfo) tableColumnInfo;
-                List<ColumnInfo> columnInfoList = idColumnInfo.getColumnInfoList();
+                List<ColumnInfo> columnInfoList = idColumnInfo.getComposites();
                 if (ObjectUtils.isEmpty(columnInfoList)) {
                     this.handleMethodParam(methodInfo, methodParamInfo, idColumnInfo, javaTrimElement);
                 } else {

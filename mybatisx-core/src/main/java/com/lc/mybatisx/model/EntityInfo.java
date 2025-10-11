@@ -233,7 +233,8 @@ public class EntityInfo {
         }
 
         /**
-         * id字段特殊，如果是联合主键，则自动生成一个id映射到联合主键 TODO: 需要创建id常量
+         * id字段特殊，如果是联合主键，则自动生成一个id映射到联合主键
+         *
          * @param columnInfo
          */
         public void processIdColumnInfo(ColumnInfo columnInfo) {
@@ -242,11 +243,11 @@ public class EntityInfo {
                 columnInfoMap.put("id", idColumnInfo);
                 tableColumnInfoMap.put("id", idColumnInfo.getJavaColumnName());
 
-                List<ColumnInfo> compositeList = idColumnInfo.getColumnInfoList();
-                if (ObjectUtils.isEmpty(compositeList)) {
+                List<ColumnInfo> composites = idColumnInfo.getComposites();
+                if (ObjectUtils.isEmpty(composites)) {
                     return;
                 }
-                for (ColumnInfo composite : compositeList) {
+                for (ColumnInfo composite : composites) {
                     String javaColumnName = composite.getJavaColumnName();
                     String javaColumnNameNew = String.format("%s.%s", idColumnInfo.getJavaColumnName(), javaColumnName);
                     columnInfoMap.put(javaColumnName, composite);

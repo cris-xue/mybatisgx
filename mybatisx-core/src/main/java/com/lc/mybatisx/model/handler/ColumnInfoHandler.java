@@ -105,6 +105,7 @@ public class ColumnInfoHandler {
 
     /**
      * 处理字段类型
+     *
      * @param type
      * @param columnInfo
      * @param typeParameterMap
@@ -182,17 +183,17 @@ public class ColumnInfoHandler {
     private void setIdColumnInfo(Field field, IdColumnInfo idColumnInfo, Map<Type, Class<?>> typeParameterMap) {
         Id id = field.getAnnotation(Id.class);
         EmbeddedId embeddedId = field.getAnnotation(EmbeddedId.class);
-        List<ColumnInfo> columnInfoList = new ArrayList();
+        List<ColumnInfo> composites = new ArrayList();
         if (embeddedId != null) {
             Class<?> javaType = idColumnInfo.getJavaType();
-            columnInfoList = this.getColumnInfoList(javaType, typeParameterMap);
-            for (ColumnInfo columnInfo : columnInfoList) {
+            composites = this.getColumnInfoList(javaType, typeParameterMap);
+            for (ColumnInfo columnInfo : composites) {
                 columnInfo.setJavaColumnPath(idColumnInfo.getJavaColumnName() + "." + columnInfo.getJavaColumnName());
             }
         }
         idColumnInfo.setId(id);
         idColumnInfo.setEmbeddedId(embeddedId);
-        idColumnInfo.setColumnInfoList(columnInfoList);
+        idColumnInfo.setComposites(composites);
     }
 
     private void setRelationColumnInfo(Field field, RelationColumnInfo relationColumnInfo) {

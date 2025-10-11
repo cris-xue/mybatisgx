@@ -125,6 +125,7 @@ public class EntityRelationTreeHandler {
 
     /**
      * 表字段别名
+     *
      * @author ccxuef
      * @date 2025/8/9 15:11
      */
@@ -132,6 +133,7 @@ public class EntityRelationTreeHandler {
 
         /**
          * 处理表字段别名
+         *
          * @param level
          * @param entityInfo
          */
@@ -142,7 +144,7 @@ public class EntityRelationTreeHandler {
                 ColumnInfo columnInfo = tableColumnInfoList.get(i);
                 if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class)) {
                     IdColumnInfo idColumnInfo = (IdColumnInfo) columnInfo;
-                    List<ColumnInfo> columnInfoList = idColumnInfo.getColumnInfoList();
+                    List<ColumnInfo> columnInfoList = idColumnInfo.getComposites();
                     if (ObjectUtils.isEmpty(columnInfoList)) {
                         String dbColumnName = columnInfo.getDbColumnName();
                         String dbColumnNameAlias = this.buildTableColumnNameAlias(tableName, dbColumnName, level, i);
@@ -177,6 +179,7 @@ public class EntityRelationTreeHandler {
 
         /**
          * 处理列别名
+         *
          * @param columnInfo
          */
         private void processColumnAlias(ColumnInfo columnInfo) {
@@ -184,6 +187,7 @@ public class EntityRelationTreeHandler {
 
         /**
          * 处理外键列别名
+         *
          * @param foreignKeyColumnInfoList
          * @param tableName
          * @param level
@@ -208,17 +212,18 @@ public class EntityRelationTreeHandler {
      * 循环依赖检测器，用于消除循环引用
      * <code>
      * aaaa:
-     *   aaaaa:
-     *     aaaaa: 不需要消除，允许自引用，但是需要设置最大层级，最多允许10层
-     *   aaaaa:
-     *     aaaaa: 不需要消除，允许自引用，但是需要设置最大层级，最多允许10层
-     *   bbbbb:
-     *     aaaaa: 消除循环依赖
-     *     bbbbb: 不需要消除，允许自引用，但是需要设置最大层级，最多允许10层
-     *   ccccc:
-     *     aaaaa: 消除循环依赖
-     *     bbbbb:
+     * aaaaa:
+     * aaaaa: 不需要消除，允许自引用，但是需要设置最大层级，最多允许10层
+     * aaaaa:
+     * aaaaa: 不需要消除，允许自引用，但是需要设置最大层级，最多允许10层
+     * bbbbb:
+     * aaaaa: 消除循环依赖
+     * bbbbb: 不需要消除，允许自引用，但是需要设置最大层级，最多允许10层
+     * ccccc:
+     * aaaaa: 消除循环依赖
+     * bbbbb:
      * </code>
+     *
      * @author ccxuef
      * @date 2025/8/8 16:56
      */

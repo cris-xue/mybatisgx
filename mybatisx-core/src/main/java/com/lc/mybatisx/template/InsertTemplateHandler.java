@@ -55,46 +55,41 @@ public class InsertTemplateHandler {
 
     private String getKeyProperty(MethodInfo methodInfo) {
         if (methodInfo.getBatch()) {
-            MethodParamInfo dataMethodParamInfo = null;
             List<MethodParamInfo> methodParamInfoList = methodInfo.getMethodParamInfoList();
-            for (MethodParamInfo methodParamInfo : methodParamInfoList) {
-                if (!methodParamInfo.getBatchSize()) {
-                    dataMethodParamInfo = methodParamInfo;
-                }
-            }
-            if (dataMethodParamInfo != null) {
-                EntityInfo entityInfo = EntityInfoContextHolder.get(dataMethodParamInfo.getType());
-                List<ColumnInfo> idColumnInfoList = entityInfo.getIdColumnInfo().getComposites();
-                List<String> keyPropertyList = new ArrayList();
-                for (ColumnInfo idColumnInfo : idColumnInfoList) {
-                    String keyProperty = String.format("%s.%s", dataMethodParamInfo.getBatchItemName(), idColumnInfo.getJavaColumnName());
-                    keyPropertyList.add(keyProperty);
-                }
-                return StringUtils.join(keyPropertyList, ",");
-            } else {
-                throw new RuntimeException("新增批量方法必须有数据列表");
-            }
-        } else {
-            MethodParamInfo dataMethodParamInfo = null;
-            List<MethodParamInfo> methodParamInfoList = methodInfo.getMethodParamInfoList();
-            for (MethodParamInfo methodParamInfo : methodParamInfoList) {
-                if (!methodParamInfo.getBatchSize()) {
-                    dataMethodParamInfo = methodParamInfo;
-                }
-            }
-
-            EntityInfo entityInfo = EntityInfoContextHolder.get(dataMethodParamInfo.getType());
-            IdColumnInfo idColumnInfo = entityInfo.getIdColumnInfo();
-            List<ColumnInfo> columnInfoList = idColumnInfo.getComposites();
             List<String> keyPropertyList = new ArrayList();
-            if (ObjectUtils.isEmpty(columnInfoList)) {
-                String keyProperty = String.format("%s", idColumnInfo.getJavaColumnName());
-                keyPropertyList.add(keyProperty);
-            } else {
-                for (ColumnInfo columnInfo : columnInfoList) {
-                    String javaColumnName = String.format("%s.%s", idColumnInfo.getJavaColumnName(), columnInfo.getJavaColumnName());
-                    String keyProperty = String.format("%s", javaColumnName);
+            for (MethodParamInfo methodParamInfo : methodParamInfoList) {
+                if (methodParamInfo.getBatchData()) {
+                    EntityInfo entityInfo = EntityInfoContextHolder.get(methodParamInfo.getType());
+                    IdColumnInfo idColumnInfo = entityInfo.getIdColumnInfo();
+                    List<ColumnInfo> idColumnComposites = idColumnInfo.getComposites();
+                    if (ObjectUtils.isEmpty(idColumnComposites)) {
+                        String keyProperty = String.format("%s", idColumnInfo.getJavaColumnName());
+                        keyPropertyList.add(keyProperty);
+                    } else {
+                        for (ColumnInfo idColumnComposite : idColumnComposites) {
+                            String keyProperty = String.format("%s.%s.%s", methodParamInfo.getBatchItemName(), idColumnInfo.getJavaColumnName(), idColumnComposite.getJavaColumnName());
+                            keyPropertyList.add(keyProperty);
+                        }
+                    }
+                }
+            }
+            return StringUtils.join(keyPropertyList, ",");
+        } else {
+            List<MethodParamInfo> methodParamInfoList = methodInfo.getMethodParamInfoList();
+            List<String> keyPropertyList = new ArrayList();
+            for (MethodParamInfo methodParamInfo : methodParamInfoList) {
+                EntityInfo entityInfo = EntityInfoContextHolder.get(methodParamInfo.getType());
+                IdColumnInfo idColumnInfo = entityInfo.getIdColumnInfo();
+                List<ColumnInfo> idColumnComposites = idColumnInfo.getComposites();
+                if (ObjectUtils.isEmpty(idColumnComposites)) {
+                    String keyProperty = String.format("%s", idColumnInfo.getJavaColumnName());
                     keyPropertyList.add(keyProperty);
+                } else {
+                    for (ColumnInfo idColumnComposite : idColumnComposites) {
+                        String javaColumnName = String.format("%s.%s", idColumnInfo.getJavaColumnName(), idColumnComposite.getJavaColumnName());
+                        String keyProperty = String.format("%s", javaColumnName);
+                        keyPropertyList.add(keyProperty);
+                    }
                 }
             }
             return StringUtils.join(keyPropertyList, ",");
@@ -236,12 +231,10 @@ public class InsertTemplateHandler {
 
         Boolean isBatch = methodInfo.getBatch();
         if (isBatch) {
-            String methodParamName = methodParamInfo.getBatchItemName();
             this.handleBatchValue(methodInfo, methodParamInfo, columnInfo, javaTrimElement);
             return;
         }
 
-        String methodParamName = methodParamInfo.getParamName();
         this.handleSingleBusinessObjectParam(methodInfo, columnInfo, javaTrimElement);
     }
 

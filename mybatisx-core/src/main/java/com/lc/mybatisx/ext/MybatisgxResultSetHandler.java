@@ -34,7 +34,7 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
     private ResultSetHandler delegate;
     private Executor executor;
     private Configuration configuration;
-    private Map<String, Object> batchNestedQueryMap = new ConcurrentHashMap();
+    private Map<String, BatchResultSetContext> batchNestedQueryMap = new ConcurrentHashMap();
 
     public MybatisgxResultSetHandler(Executor executor, MappedStatement mappedStatement, ParameterHandler parameterHandler, ResultHandler<?> resultHandler, BoundSql boundSql, RowBounds rowBounds) {
         super(executor, mappedStatement, parameterHandler, resultHandler, boundSql, rowBounds);
@@ -118,19 +118,21 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
         if (propertyMapping instanceof BatchSelectResultMapping) {
             BatchSelectResultMapping batchSelectResultMapping = (BatchSelectResultMapping) propertyMapping;
             String nestedQueryId = propertyMapping.getNestedQueryId();
-            MappedStatement nestedQuery = configuration.getMappedStatement(propertyMapping.getNestedQueryId());
+            MappedStatement nestedQuery = configuration.getMappedStatement(nestedQueryId);
             ResultMap resultMap = nestedQuery.getResultMaps().get(0);
 
             Object nestedQueryMetaObject = this.configuration.getObjectFactory().create(batchSelectResultMapping.getJavaType());
             metaResultObject.setValue(batchSelectResultMapping.getProperty(), nestedQueryMetaObject);
 
+            BatchResultSetContext batchResultSetContext = batchNestedQueryMap.get(nestedQueryId);
+            if (batchResultSetContext == null) {
+                batchResultSetContext = new BatchResultSetContext();
+                batchResultSetContext.setPropertyMapping(propertyMapping);
+                batchResultSetContext.setResultMap(resultMap);
+                batchNestedQueryMap.put(nestedQueryId, batchResultSetContext);
+            }
             String objectId = this.getObjectId(resultMap.getIdResultMappings(), metaResultObject.getOriginalObject());
-            BatchResultSetContext batchResultSetContext = new BatchResultSetContext();
-            batchResultSetContext.setPropertyMapping(propertyMapping);
-            batchResultSetContext.setResultMap(resultMap);
             batchResultSetContext.addMap(objectId, metaResultObject.getOriginalObject());
-
-            batchNestedQueryMap.put(nestedQueryId, batchResultSetContext);
             return null;
         }
         return super.getNestedQueryMappingValue(rs, metaResultObject, propertyMapping, lazyLoader, columnPrefix);
@@ -149,8 +151,6 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
 
     public static class BatchResultSetContext {
 
-        private String nestedQueryId;
-
         private ResultMapping propertyMapping;
 
         private ResultMap resultMap;
@@ -158,14 +158,6 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
         private Map<String, Object> map = new ConcurrentHashMap();
 
         private List<Object> list = new ArrayList();
-
-        public String getNestedQueryId() {
-            return nestedQueryId;
-        }
-
-        public void setNestedQueryId(String nestedQueryId) {
-            this.nestedQueryId = nestedQueryId;
-        }
 
         public ResultMapping getPropertyMapping() {
             return propertyMapping;

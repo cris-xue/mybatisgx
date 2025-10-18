@@ -194,17 +194,18 @@ public class RelationSelectTemplateHandler {
 
         public Expression buildManyToManyWhere(ResultMapInfo entityRelationSelectInfo) {
             EntityInfo relationEntityInfo = entityRelationSelectInfo.getEntityInfo();
+            IdColumnInfo idColumnInfo = relationEntityInfo.getIdColumnInfo();
             // String middleTableName = entityRelationSelectInfo.getMiddleTableName();
             RelationColumnInfo relationColumnInfo = (RelationColumnInfo) entityRelationSelectInfo.getColumnInfo();
             RelationColumnInfo mappedByRelationColumnInfo = relationColumnInfo.getMappedByRelationColumnInfo();
             if (mappedByRelationColumnInfo != null) {
                 // user_role left join role on() user_role.role_id = role.id where user_role.user_id = user.id
                 List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedByRelationColumnInfo.getInverseForeignKeyColumnInfoList();
-                return this.buildManyToManyWhereExpression(relationEntityInfo.getTableName(), inverseForeignKeyColumnInfoList);
+                return this.buildManyToManyWhereExpression(relationEntityInfo.getTableName(), idColumnInfo);
             } else {
                 // user_role left join user on() user_role.user_id = user.id where user_role.role_id = role.id
                 List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = relationColumnInfo.getForeignKeyColumnInfoList();
-                return this.buildManyToManyWhereExpression(relationEntityInfo.getTableName(), foreignKeyColumnInfoList);
+                return this.buildManyToManyWhereExpression(relationEntityInfo.getTableName(), idColumnInfo);
             }
         }
 
@@ -223,6 +224,21 @@ public class RelationSelectTemplateHandler {
                 String leftEq = String.format("%s.%s", middleTableName, foreignKeyColumnInfo.getDbColumnName());
                 String rightEq = String.format("#{%s.%s}", "item", referencedColumnInfo.getDbColumnName());
                 whereConditionExpression = RelationSelectHelper.buildWhereConditionExpression(whereConditionExpression, leftEq, rightEq);
+            }
+            return whereConditionExpression;
+        }
+
+        public Expression buildManyToManyWhereExpression(String leftTableName, IdColumnInfo idColumnInfo) {
+            List<ColumnInfo> idColumnInfoComposites = idColumnInfo.getComposites();
+            Expression whereConditionExpression = null;
+            if (ObjectUtils.isEmpty(idColumnInfoComposites)) {
+                String leftEq = String.format("%s.%s", leftTableName, idColumnInfo.getDbColumnName());
+                String rightEq = String.format("#{%s.%s}", "item", idColumnInfo.getDbColumnName());
+                whereConditionExpression = RelationSelectHelper.buildWhereConditionExpression(whereConditionExpression, leftEq, rightEq);
+            } else {
+                for (ColumnInfo idColumnComposite : idColumnInfoComposites) {
+
+                }
             }
             return whereConditionExpression;
         }

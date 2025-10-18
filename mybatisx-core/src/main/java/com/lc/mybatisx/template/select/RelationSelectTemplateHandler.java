@@ -194,17 +194,17 @@ public class RelationSelectTemplateHandler {
 
         public Expression buildManyToManyWhere(ResultMapInfo entityRelationSelectInfo) {
             EntityInfo relationEntityInfo = entityRelationSelectInfo.getEntityInfo();
-            String middleTableName = entityRelationSelectInfo.getMiddleTableName();
+            // String middleTableName = entityRelationSelectInfo.getMiddleTableName();
             RelationColumnInfo relationColumnInfo = (RelationColumnInfo) entityRelationSelectInfo.getColumnInfo();
             RelationColumnInfo mappedByRelationColumnInfo = relationColumnInfo.getMappedByRelationColumnInfo();
             if (mappedByRelationColumnInfo != null) {
                 // user_role left join role on() user_role.role_id = role.id where user_role.user_id = user.id
                 List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedByRelationColumnInfo.getInverseForeignKeyColumnInfoList();
-                return this.buildManyToManyWhereExpression(middleTableName, inverseForeignKeyColumnInfoList);
+                return this.buildManyToManyWhereExpression(relationEntityInfo.getTableName(), inverseForeignKeyColumnInfoList);
             } else {
                 // user_role left join user on() user_role.user_id = user.id where user_role.role_id = role.id
                 List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = relationColumnInfo.getForeignKeyColumnInfoList();
-                return this.buildManyToManyWhereExpression(middleTableName, foreignKeyColumnInfoList);
+                return this.buildManyToManyWhereExpression(relationEntityInfo.getTableName(), foreignKeyColumnInfoList);
             }
         }
 

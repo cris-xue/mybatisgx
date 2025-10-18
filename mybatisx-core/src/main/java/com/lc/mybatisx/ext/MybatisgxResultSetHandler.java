@@ -53,12 +53,14 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
     public List<Object> handleResultSets(Statement stmt) throws SQLException {
         List<Object> leftList = super.handleResultSets(stmt);
         for (String nestedQueryId : this.batchNestedQueryMap.keySet()) {
-            BatchResultSetContext batchResultSetContext = (BatchResultSetContext) this.batchNestedQueryMap.get(nestedQueryId);
+            BatchResultSetContext batchResultSetContext = this.batchNestedQueryMap.get(nestedQueryId);
             Map<String, List<Object>> nestedQueryParamMap = this.getNestedQueryParamMap(batchResultSetContext);
-            Object nestedQuery = this.execute(nestedQueryId, nestedQueryParamMap);
-            if (nestedQuery instanceof List) {
-                List<Object> rightList = (List<Object>) nestedQuery;
-                this.leftJoin(batchResultSetContext, rightList);
+            if (ObjectUtils.isNotEmpty(nestedQueryParamMap)) {
+                Object nestedQuery = this.execute(nestedQueryId, nestedQueryParamMap);
+                if (nestedQuery instanceof List) {
+                    List<Object> rightList = (List<Object>) nestedQuery;
+                    this.leftJoin(batchResultSetContext, rightList);
+                }
             }
         }
         return leftList;
@@ -98,8 +100,12 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
     }
 
     private Map<String, List<Object>> getNestedQueryParamMap(BatchResultSetContext batchResultSetContext) {
+        List<Object> list = batchResultSetContext.getList();
+        if (ObjectUtils.isEmpty(list)) {
+            return null;
+        }
         Map<String, List<Object>> nestedQueryParamMap = new HashMap();
-        nestedQueryParamMap.put("nested_select_collection", batchResultSetContext.getList());
+        nestedQueryParamMap.put("nested_select_collection", list);
         return nestedQueryParamMap;
     }
 
@@ -116,13 +122,9 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
     @Override
     public Object getNestedQueryMappingValue(ResultSet rs, MetaObject metaResultObject, ResultMapping propertyMapping, ResultLoaderMap lazyLoader, String columnPrefix) throws SQLException {
         if (propertyMapping instanceof BatchSelectResultMapping) {
-            BatchSelectResultMapping batchSelectResultMapping = (BatchSelectResultMapping) propertyMapping;
             String nestedQueryId = propertyMapping.getNestedQueryId();
             MappedStatement nestedQuery = configuration.getMappedStatement(nestedQueryId);
             ResultMap resultMap = nestedQuery.getResultMaps().get(0);
-
-            Object nestedQueryMetaObject = this.configuration.getObjectFactory().create(batchSelectResultMapping.getJavaType());
-            metaResultObject.setValue(batchSelectResultMapping.getProperty(), nestedQueryMetaObject);
 
             BatchResultSetContext batchResultSetContext = batchNestedQueryMap.get(nestedQueryId);
             if (batchResultSetContext == null) {
@@ -131,8 +133,12 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
                 batchResultSetContext.setResultMap(resultMap);
                 batchNestedQueryMap.put(nestedQueryId, batchResultSetContext);
             }
+
+            // 对象如果获取到的id值不为空，则将当前对象添加到batchResultSetContext中
             String objectId = this.getObjectId(resultMap.getIdResultMappings(), metaResultObject.getOriginalObject());
-            batchResultSetContext.addMap(objectId, metaResultObject.getOriginalObject());
+            if (StringUtils.isNotBlank(objectId)) {
+                batchResultSetContext.addMap(objectId, metaResultObject.getOriginalObject());
+            }
             return null;
         }
         return super.getNestedQueryMappingValue(rs, metaResultObject, propertyMapping, lazyLoader, columnPrefix);
@@ -184,6 +190,9 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
         }
 
         public void addMap(String key, Object object) {
+            if (object == null) {
+                return;
+            }
             this.map.put(key, object);
             this.list.add(object);
         }

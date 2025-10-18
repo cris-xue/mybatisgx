@@ -1,14 +1,11 @@
 package com.lc.mybatisx.template.select;
 
-import com.lc.mybatisx.model.ColumnInfo;
-import com.lc.mybatisx.model.ForeignKeyColumnInfo;
-import com.lc.mybatisx.model.RelationColumnInfo;
-import com.lc.mybatisx.model.ResultMapInfo;
+import com.lc.mybatisx.model.*;
 import com.lc.mybatisx.template.ConditionBuilder;
+import com.lc.mybatisx.utils.TypeUtils;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
-import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Element;
 
 public class RelationSelectHelper {
@@ -17,13 +14,20 @@ public class RelationSelectHelper {
         Element selectElement = mapperElement.addElement("select");
         selectElement.addAttribute("id", resultMapInfo.getNestedSelectId());
         selectElement.addAttribute("resultMap", resultMapInfo.getId());
-        RelationColumnInfo relationColumnInfo = (RelationColumnInfo) resultMapInfo.getColumnInfo();
-        String fetchSize = relationColumnInfo.getFetchSize();
-        if (StringUtils.isNotBlank(fetchSize)) {
-            selectElement.addAttribute("fetchSize", fetchSize);
-        }
+        selectElement.addAttribute("fetchSize", getFetchSize(resultMapInfo));
         selectElement.addText(sql);
         return selectElement;
+    }
+
+    private static String getFetchSize(ResultMapInfo resultMapInfo) {
+        RelationColumnInfo relationColumnInfo = null;
+        if (TypeUtils.typeEquals(resultMapInfo, ResultMapInfo.class)) {
+            relationColumnInfo = (RelationColumnInfo) resultMapInfo.getColumnInfo();
+        }
+        if (TypeUtils.typeEquals(resultMapInfo, BatchResultMapInfo.class)) {
+            relationColumnInfo = (RelationColumnInfo) resultMapInfo.getComposites().get(0).getColumnInfo();
+        }
+        return relationColumnInfo != null ? relationColumnInfo.getFetchSize() : null;
     }
 
     public static Element buildWhereElement(Element selectElement) {

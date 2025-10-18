@@ -1,8 +1,8 @@
 package com.lc.mybatisx.template.select;
 
-import com.lc.mybatisx.annotation.FetchMode;
 import com.lc.mybatisx.annotation.ManyToMany;
 import com.lc.mybatisx.model.*;
+import com.lc.mybatisx.utils.TypeUtils;
 import com.lc.mybatisx.utils.XmlUtils;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
@@ -45,7 +45,7 @@ public class RelationSelectTemplateHandler {
     }
 
     private Map<String, XNode> buildSelect(ResultMapInfo resultMapInfo) {
-        String selectXmlString = this.buildDocumentString(resultMapInfo);
+        String selectXmlString = this.buildSelectString(resultMapInfo);
         Map<String, XNode> entityRelationSelectXNodeMap = new HashMap();
         if (StringUtils.isNotBlank(selectXmlString)) {
             logger.info("auto relation select sql: \n{}", selectXmlString);
@@ -56,28 +56,31 @@ public class RelationSelectTemplateHandler {
         return entityRelationSelectXNodeMap;
     }
 
-    private String buildDocumentString(ResultMapInfo resultMapInfo) {
+    private String buildSelectString(ResultMapInfo resultMapInfo) {
         String selectSql = this.buildJoinSelect(resultMapInfo);
         Document document = DocumentHelper.createDocument();
         Element mapperElement = document.addElement("mapper");
         Element selectElement = RelationSelectHelper.buildSelectElement(mapperElement, resultMapInfo, selectSql);
 
-        RelationColumnInfo relationColumnInfo = (RelationColumnInfo) resultMapInfo.getColumnInfo();
-        ManyToMany manyToMany = relationColumnInfo.getManyToMany();
-        if (manyToMany == null) {
-            if (relationColumnInfo.getFetchMode() == FetchMode.BATCH) {
+        if (TypeUtils.typeEquals(resultMapInfo, BatchResultMapInfo.class)) {
+            RelationColumnInfo relationColumnInfo = (RelationColumnInfo) resultMapInfo.getColumnInfo();
+            ManyToMany manyToMany = relationColumnInfo.getManyToMany();
+            if (manyToMany == null) {
                 Expression whereCondition = batchRelationSelect.buildOneToOneWhere(resultMapInfo);
                 Element whereElement = RelationSelectHelper.buildWhereElement(selectElement);
                 RelationSelectHelper.buildForeachElement(whereElement, whereCondition);
             } else {
-                Expression whereCondition = simpleRelationSelect.buildOneToOneWhere(resultMapInfo);
-                RelationSelectHelper.buildWhereElement(selectElement, whereCondition);
-            }
-        } else {
-            if (relationColumnInfo.getFetchMode() == FetchMode.BATCH) {
                 Expression whereCondition = batchRelationSelect.buildManyToManyWhere(resultMapInfo);
                 Element whereElement = RelationSelectHelper.buildWhereElement(selectElement);
                 RelationSelectHelper.buildForeachElement(whereElement, whereCondition);
+            }
+        }
+        if (TypeUtils.typeEquals(resultMapInfo, ResultMapInfo.class)) {
+            RelationColumnInfo relationColumnInfo = (RelationColumnInfo) resultMapInfo.getColumnInfo();
+            ManyToMany manyToMany = relationColumnInfo.getManyToMany();
+            if (manyToMany == null) {
+                Expression whereCondition = simpleRelationSelect.buildOneToOneWhere(resultMapInfo);
+                RelationSelectHelper.buildWhereElement(selectElement, whereCondition);
             } else {
                 Expression whereCondition = simpleRelationSelect.buildManyToManyWhere(resultMapInfo);
                 RelationSelectHelper.buildWhereElement(selectElement, whereCondition);

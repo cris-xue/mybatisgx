@@ -29,10 +29,15 @@ public class ResultMapTemplateHandler {
         for (ResultMapInfo resultMapInfo : resultMapInfoList) {
             Document document = DocumentHelper.createDocument();
             Element resultMapElement = ResultMapHelper.addResultMapElement(document, resultMapInfo);
-            this.addIdColumnElement(resultMapElement, resultMapInfo.getEntityInfo());
-            this.addColumnElement(resultMapElement, resultMapInfo.getTableColumnInfoList());
-            this.addRelationColumnElement(resultMapElement, resultMapInfo);
-            this.addRelationResultMapElement(resultMapElement, resultMapInfo);
+            if (TypeUtils.typeEquals(resultMapInfo, ResultMapInfo.class)) {
+                this.addIdColumnElement(resultMapElement, resultMapInfo.getEntityInfo());
+                this.addColumnElement(resultMapElement, resultMapInfo.getTableColumnInfoList());
+                this.addRelationResultMapElement(resultMapElement, resultMapInfo);
+            }
+            if (TypeUtils.typeEquals(resultMapInfo, BatchResultMapInfo.class)) {
+                this.addIdColumnElement(resultMapElement, resultMapInfo.getEntityInfo());
+                this.addRelationResultMapElement(resultMapElement, resultMapInfo);
+            }
             String resultMapXmlString = document.asXML();
             logger.info("select resultMap: \n{}", resultMapXmlString);
 
@@ -156,10 +161,12 @@ public class ResultMapTemplateHandler {
         RelationType relationType = relationColumnInfo.getRelationType();
         if (relationType == RelationType.ONE_TO_ONE || relationType == RelationType.MANY_TO_ONE) {
             Element resultMapRelationElement = ResultMapHelper.joinAssociationColumnElement(resultMapElement, resultMapInfo);
+            this.addIdColumnElement(resultMapRelationElement, resultMapInfo.getEntityInfo());
             this.addColumnElement(resultMapRelationElement, resultMapInfo.getTableColumnInfoList());
             return resultMapRelationElement;
         } else if (relationType == RelationType.ONE_TO_MANY || relationType == RelationType.MANY_TO_MANY) {
             Element resultMapCollectionElement = ResultMapHelper.joinCollectionColumnElement(resultMapElement, resultMapInfo);
+            this.addIdColumnElement(resultMapCollectionElement, resultMapInfo.getEntityInfo());
             this.addColumnElement(resultMapCollectionElement, resultMapInfo.getTableColumnInfoList());
             return resultMapCollectionElement;
         } else {
@@ -184,7 +191,6 @@ public class ResultMapTemplateHandler {
                 relationProperty.put(left, right);
             }
         } else {
-            // user.id -> user.id user.userDetail.id user.userDetail           user.userDetail.id -> userDetail.id userDetail.userDetailItem1.id userDetail.userDetailItem1
             List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedByColumnRelationInfo.getInverseForeignKeyColumnInfoList();
             for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
                 ColumnInfo foreignKeyColumnInfo = inverseForeignKeyColumnInfo.getColumnInfo();

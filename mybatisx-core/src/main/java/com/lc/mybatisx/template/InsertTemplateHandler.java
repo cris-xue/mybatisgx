@@ -63,7 +63,7 @@ public class InsertTemplateHandler {
                     IdColumnInfo idColumnInfo = entityInfo.getIdColumnInfo();
                     List<ColumnInfo> idColumnComposites = idColumnInfo.getComposites();
                     if (ObjectUtils.isEmpty(idColumnComposites)) {
-                        String keyProperty = String.format("%s", idColumnInfo.getJavaColumnName());
+                        String keyProperty = String.format("%s.%s", methodParamInfo.getBatchItemName(), idColumnInfo.getJavaColumnName());
                         keyPropertyList.add(keyProperty);
                     } else {
                         for (ColumnInfo idColumnComposite : idColumnComposites) {

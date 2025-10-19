@@ -10,9 +10,4 @@ public class BasicInfoHandler {
         }
         return null;
     }
-
-    protected String getResultMap(Class<?> entityClass) {
-        return entityClass.getSimpleName() + "FullColumnResultMap";
-    }
-
 }

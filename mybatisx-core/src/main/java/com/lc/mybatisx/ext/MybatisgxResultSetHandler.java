@@ -42,13 +42,6 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
         this.configuration = mappedStatement.getConfiguration();
     }
 
-    public MybatisgxResultSetHandler(ResultSetHandler delegate, Executor executor, MappedStatement mappedStatement, ParameterHandler parameterHandler, ResultHandler<?> resultHandler, BoundSql boundSql, RowBounds rowBounds) {
-        super(executor, mappedStatement, parameterHandler, resultHandler, boundSql, rowBounds);
-        this.delegate = delegate;
-        this.executor = executor;
-        this.configuration = mappedStatement.getConfiguration();
-    }
-
     @Override
     public List<Object> handleResultSets(Statement stmt) throws SQLException {
         List<Object> leftList = super.handleResultSets(stmt);
@@ -112,7 +105,6 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
     private Object execute(String nestedQueryId, Map<String, List<Object>> nestedQueryParamMap) throws SQLException {
         MappedStatement nestedQuery = configuration.getMappedStatement(nestedQueryId);
         ResultMap resultMap = nestedQuery.getResultMaps().get(0);
-        Class<?> targetType = resultMap.getType();
         BoundSql nestedBoundSql = nestedQuery.getBoundSql(nestedQueryParamMap);
         CacheKey cacheKey = executor.createCacheKey(nestedQuery, nestedQueryParamMap, RowBounds.DEFAULT, nestedBoundSql);
         ResultLoader resultLoader = new ResultLoader(configuration, executor, nestedQuery, nestedQueryParamMap, List.class, cacheKey, nestedBoundSql);
@@ -170,10 +162,6 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
 
         public ResultMapping getPropertyMapping() {
             return propertyMapping;
-        }
-
-        public void setPropertyMapping(ResultMapping propertyMapping) {
-            this.propertyMapping = propertyMapping;
         }
 
         public ResultMap getResultMap() {

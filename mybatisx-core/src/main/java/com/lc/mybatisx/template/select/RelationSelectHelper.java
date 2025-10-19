@@ -1,6 +1,9 @@
 package com.lc.mybatisx.template.select;
 
-import com.lc.mybatisx.model.*;
+import com.lc.mybatisx.model.BatchNestedResultMapInfo;
+import com.lc.mybatisx.model.RelationColumnInfo;
+import com.lc.mybatisx.model.ResultMapInfo;
+import com.lc.mybatisx.model.SimpleNestedResultMapInfo;
 import com.lc.mybatisx.template.ConditionBuilder;
 import com.lc.mybatisx.utils.TypeUtils;
 import net.sf.jsqlparser.expression.Expression;
@@ -63,27 +66,5 @@ public class RelationSelectHelper {
     public static Expression buildWhereConditionExpression(Expression whereConditionExpression, String leftEq, String rightEq) {
         EqualsTo eqCondition = ConditionBuilder.eq(leftEq, rightEq);
         return whereConditionExpression == null ? eqCondition : new AndExpression(whereConditionExpression, eqCondition);
-    }
-
-    /**
-     * 用户关联用户详情：关联查询用户详情的时候需要获取【userDetail -> user.id】
-     * <code>
-     * user: {
-     * userDetail: {
-     * user: {
-     * id: user.id
-     * }
-     * }
-     * }
-     * // column中的key会映射userDetail中的user对象的id
-     * <association property="userDetail" column="{user.id=id}"></association>
-     * where user_detail.user_id = #{user.id}
-     * </code>
-     *
-     * @param mappedByColumnInfo
-     * @return
-     */
-    public static String buildRelationSelectParam(ColumnInfo mappedByColumnInfo, ForeignKeyColumnInfo inverseForeignKeyColumnInfo) {
-        return mappedByColumnInfo.getJavaColumnName() + "." + inverseForeignKeyColumnInfo.getReferencedColumnName();
     }
 }

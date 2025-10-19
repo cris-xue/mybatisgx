@@ -32,7 +32,7 @@ public class User extends EmbeddedIdBaseEntity<Long> {
     private Integer version;
 
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
-    @Fetch(FetchMode.BATCH)
+    @Fetch(FetchMode.JOIN)
     private UserDetail userDetail;
 
     public String getRoleIds() {

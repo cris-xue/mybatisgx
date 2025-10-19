@@ -16,11 +16,11 @@ public class UserDetailItem1 extends EmbeddedIdBaseEntity<Long> {
             @JoinColumn(name = "user_detail_id1", referencedColumnName = "id1"),
             @JoinColumn(name = "user_detail_id2", referencedColumnName = "id2")
     })
-    @Fetch(FetchMode.BATCH)
+    @Fetch(FetchMode.JOIN)
     private UserDetail userDetail;
 
     @OneToOne(mappedBy = "userDetailItem1", fetch = FetchType.LAZY)
-    @Fetch(FetchMode.BATCH)
+    @Fetch(FetchMode.JOIN)
     private UserDetailItem2 userDetailItem2;
 
     public String getCode() {

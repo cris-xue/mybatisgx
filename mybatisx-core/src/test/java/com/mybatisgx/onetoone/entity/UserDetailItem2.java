@@ -14,7 +14,7 @@ public class UserDetailItem2 extends EmbeddedIdBaseEntity<Long> {
             @JoinColumn(name = "user_detail_item1_id1", referencedColumnName = "id1"),
             @JoinColumn(name = "user_detail_item1_id2", referencedColumnName = "id2")
     })
-    @Fetch(FetchMode.BATCH)
+    @Fetch(FetchMode.JOIN)
     private UserDetailItem1 userDetailItem1;
 
     public String getCode() {

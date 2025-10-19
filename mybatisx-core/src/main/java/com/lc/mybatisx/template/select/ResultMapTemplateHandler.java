@@ -29,13 +29,13 @@ public class ResultMapTemplateHandler {
         for (ResultMapInfo resultMapInfo : resultMapInfoList) {
             Document document = DocumentHelper.createDocument();
             Element resultMapElement = ResultMapHelper.addResultMapElement(document, resultMapInfo);
-            if (TypeUtils.typeEquals(resultMapInfo, ResultMapInfo.class)) {
+            if (TypeUtils.typeEquals(resultMapInfo, ResultMapInfo.class) || TypeUtils.typeEquals(resultMapInfo, SimpleNestedResultMapInfo.class)) {
                 this.addIdColumnElement(resultMapElement, resultMapInfo.getEntityInfo());
                 this.addColumnElement(resultMapElement, resultMapInfo.getTableColumnInfoList());
                 this.addRelationColumnElement(resultMapElement, resultMapInfo);
                 this.addRelationResultMapElement(resultMapElement, resultMapInfo);
             }
-            if (TypeUtils.typeEquals(resultMapInfo, BatchResultMapInfo.class)) {
+            if (TypeUtils.typeEquals(resultMapInfo, BatchNestedResultMapInfo.class)) {
                 this.addIdColumnElement(resultMapElement, resultMapInfo.getEntityInfo());
                 this.addRelationColumnElement(resultMapElement, resultMapInfo);
                 this.addRelationResultMapElement(resultMapElement, resultMapInfo);

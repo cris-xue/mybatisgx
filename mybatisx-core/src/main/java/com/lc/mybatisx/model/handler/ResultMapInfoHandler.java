@@ -114,14 +114,14 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
                     ResultMapInfo resultMapInfo = this.buildSimpleNestedResultMapInfo(resultMapContext, childEntityRelationTree);
                     resultMapInfo.setNestedSelect(nestedResultMapInfo.getNestedSelect());
                 } else if (fetchMode == FetchMode.BATCH) {
-                    ResultMapInfo resultMapInfo = this.buildBatchSelectResultMapInfo(resultMapContext, entityRelationTree, childEntityRelationTree);
+                    ResultMapInfo resultMapInfo = this.buildBatchNestedResultMapInfo(resultMapContext, entityRelationTree, childEntityRelationTree);
                     resultMapInfo.setNestedSelect(nestedResultMapInfo.getNestedSelect());
                 } else if (fetchMode == FetchMode.JOIN) {
                     if (level == 1) {
                         throw new RuntimeException("解析错误");
                     }
                     if (level == 2) {
-                        ResultMapInfo resultMapInfo = this.buildBatchSelectResultMapInfo(resultMapContext, entityRelationTree, childEntityRelationTree);
+                        ResultMapInfo resultMapInfo = this.buildBatchNestedResultMapInfo(resultMapContext, entityRelationTree, childEntityRelationTree);
                         resultMapInfo.setNestedSelect(nestedResultMapInfo.getNestedSelect());
                     }
                     if (level > 2) {
@@ -163,10 +163,10 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
             return resultMapInfo;
         }
 
-        private ResultMapInfo buildBatchSelectResultMapInfo(ResultMapContext resultMapContext, EntityRelationTree parentRelationTree, EntityRelationTree childEntityRelationTree) {
+        private ResultMapInfo buildBatchNestedResultMapInfo(ResultMapContext resultMapContext, EntityRelationTree parentRelationTree, EntityRelationTree childEntityRelationTree) {
             ResultMapInfo resultMapInfo = this.buildAloneResultMapInfo(childEntityRelationTree);
 
-            ResultMapInfo parentResultMapInfo = new BatchSelectResultMapInfo();
+            ResultMapInfo parentResultMapInfo = new BatchNestedResultMapInfo();
             parentResultMapInfo.setEntityInfo(parentRelationTree.getEntityInfo());
             parentResultMapInfo.setComposites(Arrays.asList(resultMapInfo));
             resultMapContext.addRelationResultMap(parentResultMapInfo);

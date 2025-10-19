@@ -21,11 +21,11 @@ public class RelationSelectHelper {
 
     private static String getFetchSize(ResultMapInfo resultMapInfo) {
         RelationColumnInfo relationColumnInfo = null;
-        if (TypeUtils.typeEquals(resultMapInfo, ResultMapInfo.class)) {
+        if (TypeUtils.typeEquals(resultMapInfo, ResultMapInfo.class) || TypeUtils.typeEquals(resultMapInfo, SimpleNestedResultMapInfo.class)) {
             relationColumnInfo = (RelationColumnInfo) resultMapInfo.getColumnInfo();
         }
-        if (TypeUtils.typeEquals(resultMapInfo, BatchResultMapInfo.class)) {
-            relationColumnInfo = (RelationColumnInfo) resultMapInfo.getComposites().get(0).getColumnInfo();
+        if (TypeUtils.typeEquals(resultMapInfo, BatchNestedResultMapInfo.class)) {
+            relationColumnInfo = (RelationColumnInfo) resultMapInfo.getColumnInfo();
         }
         return relationColumnInfo != null ? relationColumnInfo.getFetchSize() : null;
     }

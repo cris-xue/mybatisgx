@@ -58,7 +58,7 @@ public class SelectSqlTemplateHandler {
             this.buildFromItem(plainSelect, mainTableName);
             this.buildLeftJoinOn(plainSelect, entityRelationSelectInfo, entityRelationSelectInfo.getComposites());
         }
-        if (TypeUtils.typeEquals(entityRelationSelectInfo, BatchSelectResultMapInfo.class)) {
+        if (TypeUtils.typeEquals(entityRelationSelectInfo, BatchNestedResultMapInfo.class)) {
             this.buildFromItem(plainSelect, entityRelationSelectInfo.getEntityInfo().getTableName());
             this.buildLeftJoinOn(plainSelect, entityRelationSelectInfo, entityRelationSelectInfo.getComposites());
         }
@@ -109,7 +109,7 @@ public class SelectSqlTemplateHandler {
         List<EntityContext> entityContextList = new ArrayList();
         EntityInfo entityInfo = resultMapInfo.getEntityInfo();
         if (entityInfo != null) {
-            Boolean isBatch = TypeUtils.typeEquals(resultMapInfo, BatchResultMapInfo.class);
+            Boolean isBatch = TypeUtils.typeEquals(resultMapInfo, BatchNestedResultMapInfo.class);
             entityContextList.add(new EntityContext(entityInfo, isBatch));
         }
         for (ResultMapInfo composite : resultMapInfo.getComposites()) {

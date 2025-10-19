@@ -6,7 +6,7 @@ package com.lc.mybatisx.model;
  * @author ccxuef
  * @date 2025/9/22 20:46
  */
-public class BatchSelectResultMapInfo extends ResultMapInfo {
+public class BatchNestedResultMapInfo extends ResultMapInfo {
 
     @Override
     public RelationColumnInfo getColumnInfo() {

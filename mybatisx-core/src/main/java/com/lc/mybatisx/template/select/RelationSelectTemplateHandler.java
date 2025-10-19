@@ -62,7 +62,18 @@ public class RelationSelectTemplateHandler {
         Element mapperElement = document.addElement("mapper");
         Element selectElement = RelationSelectHelper.buildSelectElement(mapperElement, resultMapInfo, selectSql);
 
-        if (TypeUtils.typeEquals(resultMapInfo, BatchResultMapInfo.class)) {
+        if (TypeUtils.typeEquals(resultMapInfo, ResultMapInfo.class) || TypeUtils.typeEquals(resultMapInfo, SimpleNestedResultMapInfo.class)) {
+            RelationColumnInfo relationColumnInfo = (RelationColumnInfo) resultMapInfo.getColumnInfo();
+            ManyToMany manyToMany = relationColumnInfo.getManyToMany();
+            if (manyToMany == null) {
+                Expression whereCondition = simpleRelationSelect.buildOneToOneWhere(resultMapInfo);
+                RelationSelectHelper.buildWhereElement(selectElement, whereCondition);
+            } else {
+                Expression whereCondition = simpleRelationSelect.buildManyToManyWhere(resultMapInfo);
+                RelationSelectHelper.buildWhereElement(selectElement, whereCondition);
+            }
+        }
+        if (TypeUtils.typeEquals(resultMapInfo, BatchNestedResultMapInfo.class)) {
             RelationColumnInfo relationColumnInfo = (RelationColumnInfo) resultMapInfo.getColumnInfo();
             ManyToMany manyToMany = relationColumnInfo.getManyToMany();
             if (manyToMany == null) {
@@ -73,17 +84,6 @@ public class RelationSelectTemplateHandler {
                 Expression whereCondition = batchRelationSelect.buildManyToManyWhere(resultMapInfo);
                 Element whereElement = RelationSelectHelper.buildWhereElement(selectElement);
                 RelationSelectHelper.buildForeachElement(whereElement, whereCondition);
-            }
-        }
-        if (TypeUtils.typeEquals(resultMapInfo, ResultMapInfo.class)) {
-            RelationColumnInfo relationColumnInfo = (RelationColumnInfo) resultMapInfo.getColumnInfo();
-            ManyToMany manyToMany = relationColumnInfo.getManyToMany();
-            if (manyToMany == null) {
-                Expression whereCondition = simpleRelationSelect.buildOneToOneWhere(resultMapInfo);
-                RelationSelectHelper.buildWhereElement(selectElement, whereCondition);
-            } else {
-                Expression whereCondition = simpleRelationSelect.buildManyToManyWhere(resultMapInfo);
-                RelationSelectHelper.buildWhereElement(selectElement, whereCondition);
             }
         }
         return document.asXML();

@@ -41,6 +41,9 @@ public class MybatisgxXMLMapperBuilder extends XMLMapperBuilder {
         if (FetchMode.BATCH.name().equals(context.getStringAttribute("fetchMode"))) {
             return new BatchSelectResultMapping(resultMapping);
         }
+        if (FetchMode.JOIN.name().equals(context.getStringAttribute("fetchMode"))) {
+            return new BatchSelectResultMapping(resultMapping);
+        }
         return resultMapping;
     }
 }

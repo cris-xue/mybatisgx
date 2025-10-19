@@ -70,6 +70,7 @@ public class UserDetailDaoTest {
         Assert.assertNotNull(dbUserDetailList);
         for (int i = 0; i < count; i++) {
             UserDetail dbUserDetail = dbUserDetailList.get(i);
+            dbUserDetail.getUser();
         }
         UserDetail dbUserDetail = dbUserDetailList.get(0);
         // Assert.assertEquals(dbUser.getId(), dbUser.getUserDetail().getUser().getId());

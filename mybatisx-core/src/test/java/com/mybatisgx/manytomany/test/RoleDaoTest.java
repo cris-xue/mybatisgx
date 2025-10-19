@@ -70,6 +70,7 @@ public class RoleDaoTest {
         Assert.assertNotNull(dbUserList);
         for (int i = 0; i < count; i++) {
             User dbUser = dbUserList.get(i);
+            dbUser.getRoleList();
         }
         User dbUser = dbUserList.get(0);
     }

@@ -11,10 +11,10 @@ public class UserDetailItem2 extends EmbeddedIdBaseEntity<Long> {
 
     @OneToOne
     @JoinColumns({
-            @JoinColumn(name = "user_detail_item_id1", referencedColumnName = "id1"),
-            @JoinColumn(name = "user_detail_item_id2", referencedColumnName = "id2")
+            @JoinColumn(name = "user_detail_item1_id1", referencedColumnName = "id1"),
+            @JoinColumn(name = "user_detail_item1_id2", referencedColumnName = "id2")
     })
-    @Fetch(FetchMode.JOIN)
+    @Fetch(FetchMode.BATCH)
     private UserDetailItem1 userDetailItem1;
 
     public String getCode() {

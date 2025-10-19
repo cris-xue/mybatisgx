@@ -33,7 +33,7 @@ public class User extends BaseEntity<Long> {
     private Integer version;
 
     @ManyToMany(mappedBy = "userList", fetch = FetchType.LAZY)
-    @Fetch
+    @Fetch(FetchMode.BATCH)
     private List<Role> roleList;
 
     public String getRoleIds() {

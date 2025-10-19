@@ -16,7 +16,7 @@ public class UserDetailItem1 extends EmbeddedIdBaseEntity<Long> {
             @JoinColumn(name = "user_detail_id1", referencedColumnName = "id1"),
             @JoinColumn(name = "user_detail_id2", referencedColumnName = "id2")
     })
-    @Fetch(FetchMode.JOIN)
+    @Fetch(FetchMode.BATCH)
     private UserDetail userDetail;
 
     @OneToOne(mappedBy = "userDetailItem1", fetch = FetchType.LAZY)

@@ -42,8 +42,26 @@ public class SelectSqlTemplateHandler {
     public String buildSelectSql(ResultMapInfo entityRelationSelectInfo) throws JSQLParserException {
         List<EntityContext> entityContextList = this.getEntityInfoList(entityRelationSelectInfo);
         PlainSelect plainSelect = this.buildMainSelect(entityContextList);
-        this.buildFromItem(plainSelect, entityRelationSelectInfo.getEntityInfo());
-        this.buildLeftJoinOn(plainSelect, entityRelationSelectInfo, entityRelationSelectInfo.getComposites());
+        if (TypeUtils.typeEquals(entityRelationSelectInfo, ResultMapInfo.class)) {
+            this.buildFromItem(plainSelect, entityRelationSelectInfo.getEntityTableName());
+            this.buildLeftJoinOn(plainSelect, entityRelationSelectInfo, entityRelationSelectInfo.getComposites());
+        }
+        if (TypeUtils.typeEquals(entityRelationSelectInfo, SimpleNestedResultMapInfo.class)) {
+            RelationColumnInfo relationColumnInfo = (RelationColumnInfo) entityRelationSelectInfo.getColumnInfo();
+            RelationType relationType = relationColumnInfo.getRelationType();
+            String mainTableName;
+            if (relationType == RelationType.MANY_TO_MANY) {
+                mainTableName = entityRelationSelectInfo.getMiddleTableName();
+            } else {
+                mainTableName = entityRelationSelectInfo.getEntityTableName();
+            }
+            this.buildFromItem(plainSelect, mainTableName);
+            this.buildLeftJoinOn(plainSelect, entityRelationSelectInfo, entityRelationSelectInfo.getComposites());
+        }
+        if (TypeUtils.typeEquals(entityRelationSelectInfo, BatchSelectResultMapInfo.class)) {
+            this.buildFromItem(plainSelect, entityRelationSelectInfo.getEntityInfo().getTableName());
+            this.buildLeftJoinOn(plainSelect, entityRelationSelectInfo, entityRelationSelectInfo.getComposites());
+        }
         return plainSelect.toString();
     }
 
@@ -55,7 +73,7 @@ public class SelectSqlTemplateHandler {
      */
     public PlainSelect buildSelectSql(EntityInfo entityInfo) {
         PlainSelect plainSelect = this.buildMainSelect(new EntityContext(entityInfo, false));
-        this.buildFromItem(plainSelect, entityInfo);
+        this.buildFromItem(plainSelect, entityInfo.getTableName());
         return plainSelect;
     }
 
@@ -81,8 +99,8 @@ public class SelectSqlTemplateHandler {
         return plainSelect;
     }
 
-    private Table buildFromItem(PlainSelect plainSelect, EntityInfo mainEntityInfo) {
-        Table mainTable = new Table(mainEntityInfo.getTableName());
+    private Table buildFromItem(PlainSelect plainSelect, String mainTableName) {
+        Table mainTable = new Table(mainTableName);
         plainSelect.setFromItem(mainTable);
         return mainTable;
     }

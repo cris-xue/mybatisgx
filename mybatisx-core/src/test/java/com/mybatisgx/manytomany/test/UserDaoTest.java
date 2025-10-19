@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class RoleDaoTest {
+public class UserDaoTest {
 
     private static int count = 10;
     private static UserDao userDao;
@@ -66,11 +66,12 @@ public class RoleDaoTest {
 
     @Test
     public void testFindList() {
-        List<Role> dbRoleList = roleDao.findList(new Role());
-        Assert.assertNotNull(dbRoleList);
+        List<User> dbUserList = userDao.findList(new User());
+        Assert.assertNotNull(dbUserList);
         for (int i = 0; i < count; i++) {
-            Role dbRole = dbRoleList.get(i);
-            dbRole.getUserList();
+            User dbUser = dbUserList.get(i);
+            dbUser.getRoleList();
         }
+        User dbUser = dbUserList.get(0);
     }
 }

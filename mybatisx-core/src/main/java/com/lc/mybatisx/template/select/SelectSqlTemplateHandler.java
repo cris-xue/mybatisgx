@@ -1,6 +1,5 @@
 package com.lc.mybatisx.template.select;
 
-import com.lc.mybatisx.annotation.ManyToMany;
 import com.lc.mybatisx.model.*;
 import com.lc.mybatisx.template.ConditionBuilder;
 import com.lc.mybatisx.utils.TypeUtils;
@@ -41,9 +40,8 @@ public class SelectSqlTemplateHandler {
      * @throws JSQLParserException
      */
     public String buildSelectSql(ResultMapInfo entityRelationSelectInfo) throws JSQLParserException {
-        // EntityInfo mainEntityInfo = entityRelationSelectInfo.getMainEntityInfo();
-        List<EntityInfo> entityInfoList = this.getEntityInfoList(entityRelationSelectInfo);
-        PlainSelect plainSelect = this.buildMainSelect(entityInfoList);
+        List<EntityContext> entityContextList = this.getEntityInfoList(entityRelationSelectInfo);
+        PlainSelect plainSelect = this.buildMainSelect(entityContextList);
         this.buildFromItem(plainSelect, entityRelationSelectInfo.getEntityInfo());
         this.buildLeftJoinOn(plainSelect, entityRelationSelectInfo, entityRelationSelectInfo.getComposites());
         return plainSelect.toString();
@@ -56,7 +54,7 @@ public class SelectSqlTemplateHandler {
      * @return
      */
     public PlainSelect buildSelectSql(EntityInfo entityInfo) {
-        PlainSelect plainSelect = this.buildMainSelect(entityInfo);
+        PlainSelect plainSelect = this.buildMainSelect(new EntityContext(entityInfo, false));
         this.buildFromItem(plainSelect, entityInfo);
         return plainSelect;
     }
@@ -64,20 +62,20 @@ public class SelectSqlTemplateHandler {
     /**
      * 构建主表查询，如：select * from user_role
      *
-     * @param entityInfoList
+     * @param entityContextList
      * @return
      */
-    private PlainSelect buildMainSelect(List<EntityInfo> entityInfoList) {
+    private PlainSelect buildMainSelect(List<EntityContext> entityContextList) {
         PlainSelect plainSelect = new PlainSelect();
-        for (EntityInfo entityInfo : entityInfoList) {
-            List<SelectItem<?>> selectItemList = this.buildSelectItemList(entityInfo);
+        for (EntityContext entityContext : entityContextList) {
+            List<SelectItem<?>> selectItemList = this.buildSelectItemList(entityContext);
             plainSelect.addSelectItems(selectItemList);
         }
         return plainSelect;
     }
 
-    private PlainSelect buildMainSelect(EntityInfo mainEntityInfo) {
-        List<SelectItem<?>> mainSelectItemList = this.buildSelectItemList(mainEntityInfo);
+    private PlainSelect buildMainSelect(EntityContext entityContext) {
+        List<SelectItem<?>> mainSelectItemList = this.buildSelectItemList(entityContext);
         PlainSelect plainSelect = new PlainSelect();
         plainSelect.addSelectItems(mainSelectItemList);
         return plainSelect;
@@ -89,19 +87,20 @@ public class SelectSqlTemplateHandler {
         return mainTable;
     }
 
-    private List<EntityInfo> getEntityInfoList(ResultMapInfo resultMapInfo) {
-        List<EntityInfo> entityInfoList = new ArrayList();
+    private List<EntityContext> getEntityInfoList(ResultMapInfo resultMapInfo) {
+        List<EntityContext> entityContextList = new ArrayList();
         EntityInfo entityInfo = resultMapInfo.getEntityInfo();
         if (entityInfo != null) {
-            entityInfoList.add(entityInfo);
+            Boolean isBatch = TypeUtils.typeEquals(resultMapInfo, BatchResultMapInfo.class);
+            entityContextList.add(new EntityContext(entityInfo, isBatch));
         }
         for (ResultMapInfo composite : resultMapInfo.getComposites()) {
-            List<EntityInfo> childrenEntityInfoList = this.getEntityInfoList(composite);
-            if (ObjectUtils.isNotEmpty(childrenEntityInfoList)) {
-                entityInfoList.addAll(childrenEntityInfoList);
+            List<EntityContext> childrenEntityContextList = this.getEntityInfoList(composite);
+            if (ObjectUtils.isNotEmpty(childrenEntityContextList)) {
+                entityContextList.addAll(childrenEntityContextList);
             }
         }
-        return entityInfoList;
+        return entityContextList;
     }
 
     /**
@@ -176,10 +175,13 @@ public class SelectSqlTemplateHandler {
     /**
      * 构建查询字段列
      *
-     * @param entityInfo
+     * @param entityContext
      * @return
      */
-    private List<SelectItem<?>> buildSelectItemList(EntityInfo entityInfo) {
+    private List<SelectItem<?>> buildSelectItemList(EntityContext entityContext) {
+        EntityInfo entityInfo = entityContext.getEntityInfo();
+        Boolean isBatch = entityContext.getBatch();
+
         List<SelectItem<?>> selectItemList = new ArrayList();
         Table table = new Table(entityInfo.getTableName());
         // 添加非外键表字段
@@ -197,24 +199,10 @@ public class SelectSqlTemplateHandler {
                     }
                 }
             }
-            if (TypeUtils.typeEquals(columnInfo, ColumnInfo.class)) {
+            // 批量结果集节点是不需要查询字段的，只需要查询出主键最终能够合并数据即可
+            if (!isBatch && TypeUtils.typeEquals(columnInfo, ColumnInfo.class)) {
                 SelectItem<?> selectItem = this.getSelectItem(table, columnInfo.getDbColumnName(), columnInfo.getDbColumnNameAlias());
                 selectItemList.add(selectItem);
-            }
-        }
-        // 添加外键表字段
-        for (ColumnInfo columnInfo : entityInfo.getRelationColumnInfoList()) {
-            RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
-            ManyToMany manyToMany = relationColumnInfo.getManyToMany();
-            RelationColumnInfo mappedByRelationColumnInfo = relationColumnInfo.getMappedByRelationColumnInfo();
-            if (manyToMany == null && mappedByRelationColumnInfo == null) {
-                // 只有一对一、一对多、多对一的时候关联字段才需要作为表字段。多对多存在中间表，关联字段在中间中表，不需要作为实体表字段
-                List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
-                for (ForeignKeyInfo inverseForeignKeyInfo : inverseForeignKeyColumnInfoList) {
-                    ColumnInfo foreignKeyColumnInfo = inverseForeignKeyInfo.getColumnInfo();
-                    SelectItem<?> selectItem = this.getSelectItem(table, foreignKeyColumnInfo.getDbColumnName(), foreignKeyColumnInfo.getDbColumnNameAlias());
-                    selectItemList.add(selectItem);
-                }
             }
         }
         return selectItemList;
@@ -305,5 +293,25 @@ public class SelectSqlTemplateHandler {
             }
         }
         join.addOnExpression(expression);
+    }
+
+    private static class EntityContext {
+
+        private EntityInfo entityInfo;
+
+        private Boolean isBatch;
+
+        public EntityContext(EntityInfo entityInfo, Boolean isBatch) {
+            this.entityInfo = entityInfo;
+            this.isBatch = isBatch;
+        }
+
+        public EntityInfo getEntityInfo() {
+            return entityInfo;
+        }
+
+        public Boolean getBatch() {
+            return isBatch;
+        }
     }
 }

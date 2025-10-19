@@ -205,6 +205,21 @@ public class SelectSqlTemplateHandler {
                 selectItemList.add(selectItem);
             }
         }
+        // 添加外键表字段
+        for (ColumnInfo columnInfo : entityInfo.getRelationColumnInfoList()) {
+            RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
+            RelationType relationType = relationColumnInfo.getRelationType();
+            RelationColumnInfo mappedByRelationColumnInfo = relationColumnInfo.getMappedByRelationColumnInfo();
+            if (relationType != RelationType.MANY_TO_MANY && mappedByRelationColumnInfo == null) {
+                // 只有一对一、一对多、多对一的时候关联字段才需要作为表字段。多对多存在中间表，关联字段在中间中表，不需要作为实体表字段
+                List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
+                for (ForeignKeyInfo inverseForeignKeyInfo : inverseForeignKeyColumnInfoList) {
+                    ColumnInfo foreignKeyColumnInfo = inverseForeignKeyInfo.getColumnInfo();
+                    SelectItem<?> selectItem = this.getSelectItem(table, foreignKeyColumnInfo.getDbColumnName(), foreignKeyColumnInfo.getDbColumnNameAlias());
+                    selectItemList.add(selectItem);
+                }
+            }
+        }
         return selectItemList;
     }
 

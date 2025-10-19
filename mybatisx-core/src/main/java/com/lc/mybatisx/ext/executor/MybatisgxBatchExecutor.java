@@ -35,29 +35,28 @@ public class MybatisgxBatchExecutor implements Executor {
             List<MethodParamInfo> methodParamInfoList = methodInfo.getMethodParamInfoList();
             MethodParamInfo dataMethodParamInfo = null;
             MethodParamInfo batchSizeMethodParamInfo = null;
-            for (int i = 0; i < methodParamInfoList.size(); i++) {
-                MethodParamInfo methodParamInfo = methodParamInfoList.get(i);
-                Boolean isBatchSize = methodParamInfo.getBatchSize();
-                if (isBatchSize) {
+            for (MethodParamInfo methodParamInfo : methodParamInfoList) {
+                if (methodParamInfo.getBatchSize()) {
                     batchSizeMethodParamInfo = methodParamInfo;
-                } else {
+                }
+                if (methodParamInfo.getBatchData()) {
                     dataMethodParamInfo = methodParamInfo;
                 }
             }
 
             MapperMethod.ParamMap<Object> mapperMethodParam = (MapperMethod.ParamMap<Object>) parameter;
-            Collection collection = (Collection) mapperMethodParam.get(dataMethodParamInfo.getParamName());
+            Collection batchDataCollection = (Collection) mapperMethodParam.get(dataMethodParamInfo.getParamName());
             int batchSize = (int) mapperMethodParam.get(batchSizeMethodParamInfo.getParamName());
-            List<Object> list = (List<Object>) collection;
-            for (int i = 0; i < list.size(); i++) {
-                Object item = list.get(i);
-                mapperMethodParam.put(dataMethodParamInfo.getBatchItemName(), item);
+            List<Object> batchDataList = (List<Object>) batchDataCollection;
+            for (int i = 0; i < batchDataList.size(); i++) {
+                Object batchData = batchDataList.get(i);
+                mapperMethodParam.put(dataMethodParamInfo.getBatchItemName(), batchData);
                 this.delegate.update(ms, mapperMethodParam);
-                if ((i + 1) % batchSize == 0 || (i + 1) == list.size()) {
+                if ((i + 1) % batchSize == 0 || (i + 1) == batchDataList.size()) {
                     this.flushStatements();
                 }
             }
-            return list.size();
+            return batchDataList.size();
         } else {
             return this.delegate.update(ms, parameter);
         }

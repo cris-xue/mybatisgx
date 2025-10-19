@@ -13,18 +13,12 @@ public class BatchSelectResultMapping extends ResultMappingAdapter {
 
     private ResultMapping resultMapping;
 
-    private List<RelationPropertyMapping> relationPropertyMappingList;
-
     public BatchSelectResultMapping(ResultMapping resultMapping) {
         this.resultMapping = resultMapping;
     }
 
-    public List<RelationPropertyMapping> getRelationPropertyMappingList() {
-        return relationPropertyMappingList;
-    }
-
-    public void setRelationPropertyMappingList(List<RelationPropertyMapping> relationPropertyMappingList) {
-        this.relationPropertyMappingList = relationPropertyMappingList;
+    public ResultMapping getResultMapping() {
+        return resultMapping;
     }
 
     @Override
@@ -105,33 +99,5 @@ public class BatchSelectResultMapping extends ResultMappingAdapter {
     @Override
     public boolean isSimple() {
         return this.resultMapping.isSimple();
-    }
-
-    public static class RelationPropertyMapping {
-
-        private String leftProperty;
-
-        private String rightProperty;
-
-        public RelationPropertyMapping(String leftProperty, String rightProperty) {
-            this.leftProperty = leftProperty;
-            this.rightProperty = rightProperty;
-        }
-
-        public String getLeftProperty() {
-            return leftProperty;
-        }
-
-        public void setLeftProperty(String leftProperty) {
-            this.leftProperty = leftProperty;
-        }
-
-        public String getRightProperty() {
-            return rightProperty;
-        }
-
-        public void setRightProperty(String rightProperty) {
-            this.rightProperty = rightProperty;
-        }
     }
 }

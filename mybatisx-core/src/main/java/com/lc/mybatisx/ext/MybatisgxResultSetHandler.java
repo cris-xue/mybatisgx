@@ -80,14 +80,14 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
         // 处理主键和对象的映射关系
         for (Object rightValue : rightValueList) {
             Object linkRightValue = this.configuration.newMetaObject(rightValue).getValue(property);
-            String objectId = this.getObjectId(idResultMappings, rightValue);
+            String objectKey = this.getObjectKey(idResultMappings, rightValue);
 
-            Object leftValue = leftMap.get(objectId);
+            Object leftValue = leftMap.get(objectKey);
             this.configuration.newMetaObject(leftValue).setValue(property, linkRightValue);
         }
     }
 
-    private String getObjectId(List<ResultMapping> idResultMappings, Object object) {
+    private String getObjectKey(List<ResultMapping> idResultMappings, Object object) {
         if (object == null) {
             return "";
         }
@@ -128,16 +128,14 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
 
             BatchResultSetContext batchResultSetContext = batchNestedQueryMap.get(nestedQueryId);
             if (batchResultSetContext == null) {
-                batchResultSetContext = new BatchResultSetContext();
-                batchResultSetContext.setPropertyMapping(propertyMapping);
-                batchResultSetContext.setResultMap(resultMap);
+                batchResultSetContext = new BatchResultSetContext(propertyMapping, resultMap);
                 batchNestedQueryMap.put(nestedQueryId, batchResultSetContext);
             }
 
             // 对象如果获取到的id值不为空，则将当前对象添加到batchResultSetContext中
-            String objectId = this.getObjectId(resultMap.getIdResultMappings(), metaResultObject.getOriginalObject());
-            if (StringUtils.isNotBlank(objectId)) {
-                batchResultSetContext.addMap(objectId, metaResultObject.getOriginalObject());
+            String objectKey = this.getObjectKey(resultMap.getIdResultMappings(), metaResultObject.getOriginalObject());
+            if (StringUtils.isNotBlank(objectKey)) {
+                batchResultSetContext.addMap(objectKey, metaResultObject.getOriginalObject());
             }
             return null;
         }
@@ -164,6 +162,11 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
         private Map<String, Object> map = new ConcurrentHashMap();
 
         private List<Object> list = new ArrayList();
+
+        public BatchResultSetContext(ResultMapping propertyMapping, ResultMap resultMap) {
+            this.propertyMapping = propertyMapping;
+            this.resultMap = resultMap;
+        }
 
         public ResultMapping getPropertyMapping() {
             return propertyMapping;

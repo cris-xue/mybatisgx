@@ -9,6 +9,7 @@ import java.util.List;
 public class Org extends BaseEntity<Long> {
 
     // 自引用字段
+    @Fetch
     @ManyToOne
     @JoinColumn(name = "parent_id")
     private Org parent;
@@ -17,6 +18,7 @@ public class Org extends BaseEntity<Long> {
 
     private String code;
 
+    @Fetch
     @OneToMany(mappedBy = "parent")
     private List<Org> children;
 

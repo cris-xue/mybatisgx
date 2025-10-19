@@ -45,7 +45,15 @@ public class UserService {
         pageable.setPageNo(1);
         pageable.setPageSize(10);
         // PageHelper.startPage(1, 10);
-        Page<User> page = userDao.findListPage(user, pageable);
-        return userConverter.toPage(page);
+        List<User> page = userDao.findList(user);
+        List<UserDto> userDtoList = userConverter.toDtoList(page);
+        return new Page<>(10, userDtoList);
+    }
+
+    public void findTestSubQuery() {
+        List<User> userList = userDao.findTestSubQuery();
+        for (User user : userList) {
+            user.getUserDetail();
+        }
     }
 }

@@ -7,20 +7,21 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     # url: jdbc:mysql://192.168.2.181:31130/mybatisx?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC
-    url: jdbc:mysql://localhost:3306/mybatisx?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC
+    url: jdbc:mysql://localhost:3306/mybatisx?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC&useCursorFetch=true
     username: app
     # username: root
     password: 123456
     schema: classpath*:db/schema.sql
 
-mybatis:
-  mapper-locations: classpath:com/lc/mybatisx/test/dao/mapper/*Mapper.xml
+mybatisx:
+  mapper-locations: classpath*:com/lc/mybatisx/test/dao/mapper/*Mapper.xml
   type-aliases-package: com.lc.mybatisx.test.model.entity
   # configuration:
     # object-factory: org.apache.ibatis.reflection.factory.DefaultObjectFactory
     # object-wrapper-factory: com.lc.mybatisx.converter.MybatisxObjectWrapperFactory
   configuration:
     meta-object-handler: com.lc.mybatisx.test.commons.TestMetaObjectHandler
+    cache-enabled: false
     lazy-loading-enabled: true
     # lazy-load-trigger-methods: get
     aggressive-lazy-loading: false
@@ -28,3 +29,4 @@ mybatis:
 logging:
   level:
     com.lc.mybatisx.test.dao: debug
+    com.mysql.cj: DEBUG

@@ -3,6 +3,7 @@ package com.lc.mybatisx.test.model.entity;
 import com.lc.mybatisx.annotation.*;
 import com.lc.mybatisx.test.commons.handler.ListLongTypeHandler;
 
+import javax.persistence.FetchType;
 import java.util.List;
 
 @Entity
@@ -40,13 +41,16 @@ public class User extends BaseEntity<Long> {
      * where user.user_id = id
      * </select>
      */
-    @ManyToMany(mappedBy = "userList")
+    @ManyToMany(mappedBy = "userList", fetch = FetchType.EAGER)
+    @Fetch
     private List<Role> roleList;
 
-    @OneToMany(mappedBy = "user", fetchSize = 100)
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, fetchSize = 100)
+    @Fetch
     private List<Order> orderList;
 
-    @OneToOne(mappedBy = "user", loadStrategy = LoadStrategy.JOIN)
+    @OneToOne(mappedBy = "user", fetch = FetchType.EAGER)
+    @Fetch
     private UserDetail userDetail;
 
     public List<Long> getRoleIds() {

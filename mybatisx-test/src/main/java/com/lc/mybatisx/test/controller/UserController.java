@@ -99,4 +99,9 @@ public class UserController {
     public List<UserDto> findTestParam(Long id) {
         return userService.findTestParam(id);
     }
+
+    @GetMapping(path = "/test-sub-query")
+    public void findTestSubQuery() {
+        userService.findTestSubQuery();
+    }
 }

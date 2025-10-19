@@ -10,6 +10,7 @@ public class Order extends BaseEntity<Long> {
 
     private String code;
 
+    @Fetch
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;

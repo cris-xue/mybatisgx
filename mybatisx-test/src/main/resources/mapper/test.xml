@@ -9,8 +9,8 @@
 
 
         <!-- 如果关联一个对象 -->
-        <association column="tid" property="teacher" select="com.bjsxt.mapper.TeacherMapper.selById"></association>
-        <collection column="id" property="list" select="com.bjsxt.mapper.StudentMapper.selByTid"></collection>
+        <association column="tid" property="teacher" select="com.bjsxt.mapper.TeacherMapper.selById" foreignColumn=""></association>
+        <collection column="id" property="list" select="com.bjsxt.mapper.StudentMapper.selByTid" foreignColumn=""></collection>
     </resultMap>
 
     <parameterMap id="testaaa" type="arraylist">
@@ -24,24 +24,20 @@
 
 
 
-
-
-
-
-
-    <resultMap type="com.lc.mybatisx.test.model.entity.UserDetail" id="com_lc_mybatisx_test_model_entity_UserDetailResultMap">
+    <resultMap type="com.lc.mybatisx.test.model.entity.Order" id="com_lc_mybatisx_test_model_entity_OrderResultMap">
+        <result column="name" property="name"/>
         <result column="code" property="code"/>
+        <result column="status" property="status"/>
+        <result column="version" property="version"/>
         <id column="id" property="id"/>
         <result column="tenant_id" property="tenantId"/>
         <result column="input_user_id" property="inputUserId"/>
         <result column="input_time" property="inputTime"/>
         <result column="update_user_id" property="updateUserId"/>
         <result column="update_time" property="updateTime"/>
-        <association select="findUser" fetchType="lazy" column="user_id" property="user" javaType="com.lc.mybatisx.test.model.entity.User">
-            <association select="findOrderList" fetchType="lazy" column="id" property="orderList" javaType="com.lc.mybatisx.test.model.entity.Order"/>
-        </association>
+        <association select="findUser" fetchType="lazy" column="user_id" property="user" javaType="com.lc.mybatisx.test.model.entity.User"/>
     </resultMap>
-    <resultMap type="com.lc.mybatisx.test.model.entity.User" id="com_lc_mybatisx_test_model_entity_UserResultMap">
+    <resultMap type="com.lc.mybatisx.test.model.entity.User" id="com_lc_mybatisx_test_model_entity_UserResultMapAssociation">
         <result jdbcType="VARCHAR" column="role_ids" property="roleIds" typeHandler="com.lc.mybatisx.test.commons.handler.ListLongTypeHandler"/>
         <result column="name" property="name"/>
         <result column="age" property="age"/>
@@ -57,8 +53,106 @@
         <result column="input_time" property="inputTime"/>
         <result column="update_user_id" property="updateUserId"/>
         <result column="update_time" property="updateTime"/>
+        <association select="findUserDetail" fetchType="lazy" column="id" property="userDetail" javaType="com.lc.mybatisx.test.model.entity.UserDetail"/>
     </resultMap>
-    <resultMap type="com.lc.mybatisx.test.model.entity.Order" id="com_lc_mybatisx_test_model_entity_OrderResultMap">
+    <resultMap type="com.lc.mybatisx.test.model.entity.UserDetail" id="com_lc_mybatisx_test_model_entity_UserDetailResultMapAssociation">
+        <result column="code" property="code"/>
+        <id column="id" property="id"/>
+        <result column="tenant_id" property="tenantId"/>
+        <result column="input_user_id" property="inputUserId"/>
+        <result column="input_time" property="inputTime"/>
+        <result column="update_user_id" property="updateUserId"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <select resultMap="com_lc_mybatisx_test_model_entity_UserResultMapAssociation" id="findUser">select * from user where id = #{user_id}</select>
+    <select resultMap="com_lc_mybatisx_test_model_entity_UserDetailResultMapAssociation" id="findUserDetail">select * from user_detail where user_id = #{id}</select>
+
+
+
+
+    <resultMap type="com.lc.mybatisx.test.model.entity.Org" id="com_lc_mybatisx_test_model_entity_OrgResultMap">
+        <result column="name" property="name"/>
+        <result column="code" property="code"/>
+        <id column="id" property="id"/>
+        <result column="tenant_id" property="tenantId"/>
+        <result column="input_user_id" property="inputUserId"/>
+        <result column="input_time" property="inputTime"/>
+        <result column="update_user_id" property="updateUserId"/>
+        <result column="update_time" property="updateTime"/>
+        <association select="findOrg" fetchType="lazy" column="parent_id" property="parent" javaType="com.lc.mybatisx.test.model.entity.Org"/>
+        <collection select="findOrgList" fetchType="lazy" column="id" property="children" javaType="java.util.List" ofType="com.lc.mybatisx.test.model.entity.Org"/>
+    </resultMap>
+    <resultMap type="com.lc.mybatisx.test.model.entity.Org" id="com_lc_mybatisx_test_model_entity_OrgResultMapAssociation">
+        <result column="name" property="name"/>
+        <result column="code" property="code"/>
+        <id column="id" property="id"/>
+        <result column="tenant_id" property="tenantId"/>
+        <result column="input_user_id" property="inputUserId"/>
+        <result column="input_time" property="inputTime"/>
+        <result column="update_user_id" property="updateUserId"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+    <resultMap type="com.lc.mybatisx.test.model.entity.Org" id="com_lc_mybatisx_test_model_entity_OrgResultMapCollection">
+        <result column="name" property="name"/>
+        <result column="code" property="code"/>
+        <id column="id" property="id"/>
+        <result column="tenant_id" property="tenantId"/>
+        <result column="input_user_id" property="inputUserId"/>
+        <result column="input_time" property="inputTime"/>
+        <result column="update_user_id" property="updateUserId"/>
+        <result column="update_time" property="updateTime"/>
+        <association select="findOrg" fetchType="lazy" column="parent_id" property="parent" javaType="com.lc.mybatisx.test.model.entity.Org"/>
+        <collection select="findOrgList" fetchType="lazy" column="id" property="children" javaType="java.util.List" ofType="com.lc.mybatisx.test.model.entity.Org"/>
+    </resultMap>
+    <select resultMap="com_lc_mybatisx_test_model_entity_OrgResultMapCollection" id="findOrgList">select * from org where parent_id = #{id}</select>
+    <select resultMap="com_lc_mybatisx_test_model_entity_OrgResultMapAssociation" id="findOrg">select * from org where id = #{parent_id}</select>
+
+
+
+
+
+
+    <resultMap type="com.lc.mybatisx.test.model.entity.UserDetail" id="com_lc_mybatisx_test_model_entity_UserDetailResultMap">
+        <result column="code" property="code"/>
+        <id column="id" property="id"/>
+        <result column="tenant_id" property="tenantId"/>
+        <result column="input_user_id" property="inputUserId"/>
+        <result column="input_time" property="inputTime"/>
+        <result column="update_user_id" property="updateUserId"/>
+        <result column="update_time" property="updateTime"/>
+        <association select="findUser" fetchType="lazy" column="{id=user_id}" property="user" javaType="com.lc.mybatisx.test.model.entity.User"/>
+    </resultMap>
+    <resultMap type="com.lc.mybatisx.test.model.entity.User" id="com_lc_mybatisx_test_model_entity_UserResultMapAssociation">
+        <result jdbcType="VARCHAR" column="role_ids" property="roleIds" typeHandler="com.lc.mybatisx.test.commons.handler.ListLongTypeHandler"/>
+        <result column="name" property="name"/>
+        <result column="age" property="age"/>
+        <result column="phone" property="phone"/>
+        <result column="email" property="email"/>
+        <result column="user_name" property="userName"/>
+        <result column="password" property="password"/>
+        <result column="status" property="status"/>
+        <result column="version" property="version"/>
+        <id column="id" property="id"/>
+        <result column="tenant_id" property="tenantId"/>
+        <result column="input_user_id" property="inputUserId"/>
+        <result column="input_time" property="inputTime"/>
+        <result column="update_user_id" property="updateUserId"/>
+        <result column="update_time" property="updateTime"/>
+        <collection select="findRoleList" fetchType="lazy" column="{user_id=id}" property="roleList" javaType="java.util.List" ofType="com.lc.mybatisx.test.model.entity.Role"/>
+        <collection select="findOrderList" fetchType="lazy" column="{user_id=id}" property="orderList" javaType="java.util.List" ofType="com.lc.mybatisx.test.model.entity.Order"/>
+    </resultMap>
+    <resultMap type="com.lc.mybatisx.test.model.entity.Role" id="com_lc_mybatisx_test_model_entity_RoleResultMapCollection">
+        <result column="name" property="name"/>
+        <result column="code" property="code"/>
+        <id column="id" property="id"/>
+        <result column="tenant_id" property="tenantId"/>
+        <result column="input_user_id" property="inputUserId"/>
+        <result column="input_time" property="inputTime"/>
+        <result column="update_user_id" property="updateUserId"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+    <resultMap type="com.lc.mybatisx.test.model.entity.Order" id="com_lc_mybatisx_test_model_entity_OrderResultMapCollection">
         <result column="name" property="name"/>
         <result column="code" property="code"/>
         <result column="status" property="status"/>
@@ -71,10 +165,23 @@
         <result column="update_time" property="updateTime"/>
     </resultMap>
 
-    <select resultMap="com_lc_mybatisx_test_model_entity_UserResultMap" id="findUser">
-        select * from user where id = #{user_id}
+    <select resultMap="com_lc_mybatisx_test_model_entity_UserResultMapAssociation" id="findUser">
+        <trim suffixOverrides="," prefix="" suffix="">
+            role_ids, name, age, phone, email, user_name, password, status, version, id, tenant_id, input_user_id, input_time, update_user_id, update_time,
+        </trim>
+        <where>
+            <trim prefix="" suffix="" prefixOverrides="AND|OR|and|or"> and id = #{id}</trim>
+        </where>
     </select>
-    <select resultMap="com_lc_mybatisx_test_model_entity_OrderResultMap" id="findOrderList">
-        select * from order_test where user_id = #{id}
+    <select fetchSize="100" resultMap="com_lc_mybatisx_test_model_entity_OrderResultMapCollection" id="findOrderList">
+        <trim suffixOverrides="," prefix="" suffix="">
+            name, code, user_id, status, version, id, tenant_id, input_user_id, input_time, update_user_id, update_time,
+        </trim>
+        <where>
+            <trim prefix="" suffix="" prefixOverrides="AND|OR|and|or"> and user_id = #{user_id}</trim>
+        </where>
+    </select>
+    <select resultMap="com_lc_mybatisx_test_model_entity_RoleResultMapCollection" id="findRoleList">
+        select * from user_role left join role on(user_role.user_id=role.role_id) where user_role = #{user_id}
     </select>
 </mapper>

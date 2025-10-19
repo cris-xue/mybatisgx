@@ -36,4 +36,37 @@
             </trim>
         </where>
     </select>
+
+
+
+    <resultMap id="findTestSubQueryResultMap" type="com.lc.mybatisx.test.model.entity.User">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="age" column="age"/>
+        <result property="phone" column="phone"/>
+        <result property="email" column="email"/>
+        <result property="userName" column="user_name"/>
+        <result property="password" column="password"/>
+        <result property="status" column="status"/>
+        <result property="version" column="version"/>
+        <association property="userDetail" column="id" javaType="com.lc.mybatisx.test.model.entity.UserDetail" fetchType="lazy" select="findTestSubQueryChild"/>
+    </resultMap>
+
+    <resultMap id="findTestSubQueryChildResultMap" type="com.lc.mybatisx.test.model.entity.UserDetail">
+        <id property="id" column="id"/>
+        <result property="code" column="code"/>
+        <result property="user.id" column="user_id"/>
+    </resultMap>
+
+    <select id="findTestSubQuery" resultMap="findTestSubQueryResultMap">
+        select * from user
+    </select>
+
+    <select id="findTestSubQueryChild" resultMap="findTestSubQueryChildResultMap">
+        select * from user_detail
+        <where>
+            <!--user_id in <foreach item="item" index="index" collection="list" open="(" separator="," close=")">#{id}</foreach>-->
+            user_id = #{id}
+        </where>
+    </select>
 </mapper>

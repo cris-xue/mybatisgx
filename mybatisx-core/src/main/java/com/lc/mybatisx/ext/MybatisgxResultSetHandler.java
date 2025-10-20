@@ -15,7 +15,6 @@ import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.mapping.ResultMapping;
 import org.apache.ibatis.reflection.MetaObject;
-import org.apache.ibatis.reflection.factory.ObjectFactory;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
@@ -38,14 +37,12 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
 
     private Executor executor;
     private Configuration configuration;
-    private final ObjectFactory objectFactory;
     private Map<String, BatchResultSetContext> batchNestedQueryMap = new ConcurrentHashMap();
 
     public MybatisgxResultSetHandler(Executor executor, MappedStatement mappedStatement, ParameterHandler parameterHandler, ResultHandler<?> resultHandler, BoundSql boundSql, RowBounds rowBounds) {
         super(executor, mappedStatement, parameterHandler, resultHandler, boundSql, rowBounds);
         this.executor = executor;
         this.configuration = mappedStatement.getConfiguration();
-        this.objectFactory = configuration.getObjectFactory();
     }
 
     @Override
@@ -106,9 +103,7 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
             MetaObject leftMetaObject = leftMap.get(linkObjectKey);
             Object linkRightValue = rightMetaObject.getValue(property);
 
-            // leftMetaObject.setValue(property, linkRightValue);
             this.linkObjects(leftMetaObject, batchSelectResultMapping, linkRightValue);
-            // this.linkToParents();
         }
     }
 
@@ -163,9 +158,7 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
 
             // 把需要懒加载的数据放在第一个对象中，这样在后续遍历对象的时候就不会触发N+1问题
             if (nestedQueryId != null && propertyMapping.isLazy()) {
-                final List<Class<?>> constructorArgTypes = new ArrayList<>();
-                final List<Object> constructorArgs = new ArrayList<>();
-                // Object resultObject = configuration.getProxyFactory().createProxy(metaResultObject.getOriginalObject(), lazyLoader, configuration, objectFactory, constructorArgTypes, constructorArgs);
+                return DEFERRED;
             }
             return null;
         }

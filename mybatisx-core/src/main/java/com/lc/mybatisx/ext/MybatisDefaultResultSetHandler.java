@@ -34,7 +34,7 @@ import java.util.*;
 
 public class MybatisDefaultResultSetHandler extends org.apache.ibatis.executor.resultset.DefaultResultSetHandler {
 
-    private static final Object DEFERRED = new Object();
+    protected static final Object DEFERRED = new Object();
 
     private final Executor executor;
     private final Configuration configuration;

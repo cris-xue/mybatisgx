@@ -1,6 +1,7 @@
 package com.lc.mybatisx.ext;
 
 import com.lc.mybatisx.ext.mapping.BatchSelectResultMapping;
+import com.lc.mybatisx.utils.TypeUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.cache.CacheKey;
@@ -52,6 +53,9 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
         List<Object> leftList = super.handleResultSets(stmt);
         for (String nestedQueryId : this.batchNestedQueryMap.keySet()) {
             BatchResultSetContext batchResultSetContext = this.batchNestedQueryMap.get(nestedQueryId);
+            if (batchResultSetContext.getLazy()) {
+                continue;
+            }
             Map<String, List<Object>> nestedQueryParamMap = this.getNestedQueryParamMap(batchResultSetContext);
             if (ObjectUtils.isNotEmpty(nestedQueryParamMap)) {
                 Object nestedQuery = this.execute(nestedQueryId, nestedQueryParamMap);
@@ -66,12 +70,21 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
 
     @Override
     public Object createResultObject(ResultSetWrapper rsw, ResultMap resultMap, ResultLoaderMap lazyLoader, String columnPrefix) throws SQLException {
-        return super.createResultObject(rsw, resultMap, lazyLoader, columnPrefix);
-    }
-
-    @Override
-    public Object createResultObject(ResultSetWrapper rsw, ResultMap resultMap, List<Class<?>> constructorArgTypes, List<Object> constructorArgs, String columnPrefix) throws SQLException {
-        return super.createResultObject(rsw, resultMap, constructorArgTypes, constructorArgs, columnPrefix);
+        Object resultObject = super.createResultObject(rsw, resultMap, lazyLoader, columnPrefix);
+        List<ResultMapping> propertyResultMappings = resultMap.getPropertyResultMappings();
+        for (ResultMapping propertyResultMapping : propertyResultMappings) {
+            if (TypeUtils.typeEquals(propertyResultMapping, BatchSelectResultMapping.class)) {
+                String nestedQueryId = propertyResultMapping.getNestedQueryId();
+                if (nestedQueryId != null && propertyResultMapping.isLazy()) {
+                    BatchResultSetContext batchResultSetContext = this.batchNestedQueryMap.get(nestedQueryId);
+                    if (batchResultSetContext == null) {
+                        batchResultSetContext = new BatchResultSetContext(propertyResultMapping.isLazy());
+                        this.batchNestedQueryMap.put(nestedQueryId, batchResultSetContext);
+                    }
+                }
+            }
+        }
+        return resultObject;
     }
 
     private void leftJoin(BatchResultSetContext batchResultSetContext, List<Object> rightValueList) {
@@ -161,6 +174,8 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
 
     public static class BatchResultSetContext {
 
+        private Boolean isLazy;
+
         private ResultMapping propertyMapping;
 
         private ResultMap resultMap;
@@ -169,9 +184,17 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
 
         private List<Object> list = new ArrayList();
 
+        public BatchResultSetContext(Boolean isLazy) {
+            this.isLazy = isLazy;
+        }
+
         public BatchResultSetContext(ResultMapping propertyMapping, ResultMap resultMap) {
             this.propertyMapping = propertyMapping;
             this.resultMap = resultMap;
+        }
+
+        public Boolean getLazy() {
+            return isLazy;
         }
 
         public ResultMapping getPropertyMapping() {

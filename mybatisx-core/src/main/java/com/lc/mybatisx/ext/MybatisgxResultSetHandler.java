@@ -8,11 +8,13 @@ import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.loader.ResultLoader;
 import org.apache.ibatis.executor.loader.ResultLoaderMap;
 import org.apache.ibatis.executor.parameter.ParameterHandler;
+import org.apache.ibatis.executor.resultset.ResultSetWrapper;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.mapping.ResultMapping;
 import org.apache.ibatis.reflection.MetaObject;
+import org.apache.ibatis.reflection.factory.ObjectFactory;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
@@ -35,12 +37,14 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
 
     private Executor executor;
     private Configuration configuration;
+    private final ObjectFactory objectFactory;
     private Map<String, BatchResultSetContext> batchNestedQueryMap = new ConcurrentHashMap();
 
     public MybatisgxResultSetHandler(Executor executor, MappedStatement mappedStatement, ParameterHandler parameterHandler, ResultHandler<?> resultHandler, BoundSql boundSql, RowBounds rowBounds) {
         super(executor, mappedStatement, parameterHandler, resultHandler, boundSql, rowBounds);
         this.executor = executor;
         this.configuration = mappedStatement.getConfiguration();
+        this.objectFactory = configuration.getObjectFactory();
     }
 
     @Override
@@ -60,6 +64,16 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
         return leftList;
     }
 
+    @Override
+    public Object createResultObject(ResultSetWrapper rsw, ResultMap resultMap, ResultLoaderMap lazyLoader, String columnPrefix) throws SQLException {
+        return super.createResultObject(rsw, resultMap, lazyLoader, columnPrefix);
+    }
+
+    @Override
+    public Object createResultObject(ResultSetWrapper rsw, ResultMap resultMap, List<Class<?>> constructorArgTypes, List<Object> constructorArgs, String columnPrefix) throws SQLException {
+        return super.createResultObject(rsw, resultMap, constructorArgTypes, constructorArgs, columnPrefix);
+    }
+
     private void leftJoin(BatchResultSetContext batchResultSetContext, List<Object> rightValueList) {
         // 如果不存在连接值，不需要处理关联数据
         if (ObjectUtils.isEmpty(rightValueList)) {
@@ -67,27 +81,31 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
         }
 
         List<ResultMapping> idResultMappings = batchResultSetContext.getResultMap().getIdResultMappings();
-        Map<String, Object> leftMap = batchResultSetContext.getMap();
+        Map<String, MetaObject> leftMap = batchResultSetContext.getMap();
         BatchSelectResultMapping batchSelectResultMapping = (BatchSelectResultMapping) batchResultSetContext.getPropertyMapping();
         String property = batchSelectResultMapping.getProperty();
 
         // 处理主键和对象的映射关系
         for (Object rightValue : rightValueList) {
-            Object linkRightValue = this.configuration.newMetaObject(rightValue).getValue(property);
-            String objectKey = this.getObjectKey(idResultMappings, rightValue);
+            MetaObject rightMetaObject = this.configuration.newMetaObject(rightValue);
+            String linkObjectKey = this.getObjectKey(idResultMappings, rightMetaObject);
 
-            Object leftValue = leftMap.get(objectKey);
-            this.configuration.newMetaObject(leftValue).setValue(property, linkRightValue);
+            MetaObject leftMetaObject = leftMap.get(linkObjectKey);
+            Object linkRightValue = rightMetaObject.getValue(property);
+
+            // leftMetaObject.setValue(property, linkRightValue);
+            this.linkObjects(leftMetaObject, batchSelectResultMapping, linkRightValue);
+            // this.linkToParents();
         }
     }
 
-    private String getObjectKey(List<ResultMapping> idResultMappings, Object object) {
-        if (object == null) {
+    private String getObjectKey(List<ResultMapping> idResultMappings, MetaObject metaObject) {
+        if (metaObject.getOriginalObject() == null) {
             return "";
         }
         List<String> idValueList = new ArrayList<>();
         for (ResultMapping idResultMapping : idResultMappings) {
-            Object idValue = this.configuration.newMetaObject(object).getValue(idResultMapping.getProperty());
+            Object idValue = metaObject.getValue(idResultMapping.getProperty());
             idValueList.add(idValue instanceof Long ? idValue.toString() : (String) idValue);
         }
         return StringUtils.join(idValueList, "");
@@ -105,7 +123,6 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
 
     private Object execute(String nestedQueryId, Map<String, List<Object>> nestedQueryParamMap) throws SQLException {
         MappedStatement nestedQuery = configuration.getMappedStatement(nestedQueryId);
-        ResultMap resultMap = nestedQuery.getResultMaps().get(0);
         BoundSql nestedBoundSql = nestedQuery.getBoundSql(nestedQueryParamMap);
         CacheKey cacheKey = executor.createCacheKey(nestedQuery, nestedQueryParamMap, RowBounds.DEFAULT, nestedBoundSql);
         ResultLoader resultLoader = new ResultLoader(configuration, executor, nestedQuery, nestedQueryParamMap, List.class, cacheKey, nestedBoundSql);
@@ -126,9 +143,16 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
             }
 
             // 对象如果获取到的id值不为空，则将当前对象添加到batchResultSetContext中
-            String objectKey = this.getObjectKey(resultMap.getIdResultMappings(), metaResultObject.getOriginalObject());
+            String objectKey = this.getObjectKey(resultMap.getIdResultMappings(), metaResultObject);
             if (StringUtils.isNotBlank(objectKey)) {
-                batchResultSetContext.addMap(objectKey, metaResultObject.getOriginalObject());
+                batchResultSetContext.addMap(objectKey, metaResultObject);
+            }
+
+            // 把需要懒加载的数据放在第一个对象中，这样在后续遍历对象的时候就不会触发N+1问题
+            if (nestedQueryId != null && propertyMapping.isLazy()) {
+                final List<Class<?>> constructorArgTypes = new ArrayList<>();
+                final List<Object> constructorArgs = new ArrayList<>();
+                // Object resultObject = configuration.getProxyFactory().createProxy(metaResultObject.getOriginalObject(), lazyLoader, configuration, objectFactory, constructorArgTypes, constructorArgs);
             }
             return null;
         }
@@ -141,7 +165,7 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
 
         private ResultMap resultMap;
 
-        private Map<String, Object> map = new ConcurrentHashMap();
+        private Map<String, MetaObject> map = new ConcurrentHashMap();
 
         private List<Object> list = new ArrayList();
 
@@ -162,20 +186,16 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
             this.resultMap = resultMap;
         }
 
-        public Map<String, Object> getMap() {
-            return map;
-        }
-
-        public void setMap(Map<String, Object> map) {
-            this.map = map;
-        }
-
-        public void addMap(String key, Object object) {
-            if (object == null) {
+        public void addMap(String key, MetaObject metaObject) {
+            if (metaObject.getOriginalObject() == null) {
                 return;
             }
-            this.map.put(key, object);
-            this.list.add(object);
+            this.map.put(key, metaObject);
+            this.list.add(metaObject.getOriginalObject());
+        }
+
+        public Map<String, MetaObject> getMap() {
+            return map;
         }
 
         public List<Object> getList() {

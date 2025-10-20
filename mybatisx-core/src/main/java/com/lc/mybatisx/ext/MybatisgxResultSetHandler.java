@@ -37,7 +37,7 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
 
     private Executor executor;
     private Configuration configuration;
-    private Map<String, BatchResultSetContext> batchNestedQueryMap = new ConcurrentHashMap();
+    private Map<String, BatchResultLoader> batchResultLoaderMap = new ConcurrentHashMap();
 
     public MybatisgxResultSetHandler(Executor executor, MappedStatement mappedStatement, ParameterHandler parameterHandler, ResultHandler<?> resultHandler, BoundSql boundSql, RowBounds rowBounds) {
         super(executor, mappedStatement, parameterHandler, resultHandler, boundSql, rowBounds);
@@ -48,17 +48,17 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
     @Override
     public List<Object> handleResultSets(Statement stmt) throws SQLException {
         List<Object> leftList = super.handleResultSets(stmt);
-        for (String nestedQueryId : this.batchNestedQueryMap.keySet()) {
-            BatchResultSetContext batchResultSetContext = this.batchNestedQueryMap.get(nestedQueryId);
-            if (batchResultSetContext.getLazy()) {
+        for (String nestedQueryId : this.batchResultLoaderMap.keySet()) {
+            BatchResultLoader batchResultLoader = this.batchResultLoaderMap.get(nestedQueryId);
+            if (batchResultLoader.getLazy()) {
                 continue;
             }
-            Map<String, List<Object>> nestedQueryParamMap = this.getNestedQueryParamMap(batchResultSetContext);
+            Map<String, List<Object>> nestedQueryParamMap = this.getNestedQueryParamMap(batchResultLoader);
             if (ObjectUtils.isNotEmpty(nestedQueryParamMap)) {
                 Object nestedQuery = this.execute(nestedQueryId, nestedQueryParamMap);
                 if (nestedQuery instanceof List) {
                     List<Object> rightList = (List<Object>) nestedQuery;
-                    this.leftJoin(batchResultSetContext, rightList);
+                    this.leftJoin(batchResultLoader, rightList);
                 }
             }
         }
@@ -73,10 +73,10 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
             if (TypeUtils.typeEquals(propertyResultMapping, BatchSelectResultMapping.class)) {
                 String nestedQueryId = propertyResultMapping.getNestedQueryId();
                 if (nestedQueryId != null && propertyResultMapping.isLazy()) {
-                    BatchResultSetContext batchResultSetContext = this.batchNestedQueryMap.get(nestedQueryId);
-                    if (batchResultSetContext == null) {
-                        batchResultSetContext = new BatchResultSetContext(propertyResultMapping.isLazy());
-                        this.batchNestedQueryMap.put(nestedQueryId, batchResultSetContext);
+                    BatchResultLoader batchResultLoader = this.batchResultLoaderMap.get(nestedQueryId);
+                    if (batchResultLoader == null) {
+                        batchResultLoader = new BatchResultLoader(propertyResultMapping.isLazy());
+                        this.batchResultLoaderMap.put(nestedQueryId, batchResultLoader);
                     }
                 }
             }
@@ -84,15 +84,15 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
         return resultObject;
     }
 
-    private void leftJoin(BatchResultSetContext batchResultSetContext, List<Object> rightValueList) {
+    private void leftJoin(BatchResultLoader batchResultLoader, List<Object> rightValueList) {
         // 如果不存在连接值，不需要处理关联数据
         if (ObjectUtils.isEmpty(rightValueList)) {
             return;
         }
 
-        List<ResultMapping> idResultMappings = batchResultSetContext.getResultMap().getIdResultMappings();
-        Map<String, MetaObject> leftMap = batchResultSetContext.getMap();
-        BatchSelectResultMapping batchSelectResultMapping = (BatchSelectResultMapping) batchResultSetContext.getPropertyMapping();
+        List<ResultMapping> idResultMappings = batchResultLoader.getResultMap().getIdResultMappings();
+        Map<String, MetaObject> leftMap = batchResultLoader.getMap();
+        BatchSelectResultMapping batchSelectResultMapping = (BatchSelectResultMapping) batchResultLoader.getPropertyMapping();
         String property = batchSelectResultMapping.getProperty();
 
         // 处理主键和对象的映射关系
@@ -119,8 +119,8 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
         return StringUtils.join(idValueList, "");
     }
 
-    private Map<String, List<Object>> getNestedQueryParamMap(BatchResultSetContext batchResultSetContext) {
-        List<Object> list = batchResultSetContext.getList();
+    private Map<String, List<Object>> getNestedQueryParamMap(BatchResultLoader batchResultLoader) {
+        List<Object> list = batchResultLoader.getList();
         if (ObjectUtils.isEmpty(list)) {
             return null;
         }
@@ -144,20 +144,22 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
             MappedStatement nestedQuery = configuration.getMappedStatement(nestedQueryId);
             ResultMap resultMap = nestedQuery.getResultMaps().get(0);
 
-            BatchResultSetContext batchResultSetContext = batchNestedQueryMap.get(nestedQueryId);
-            if (batchResultSetContext == null) {
-                batchResultSetContext = new BatchResultSetContext(propertyMapping, resultMap);
-                batchNestedQueryMap.put(nestedQueryId, batchResultSetContext);
+            BatchResultLoader batchResultLoader = batchResultLoaderMap.get(nestedQueryId);
+            if (batchResultLoader == null) {
+                batchResultLoader = new BatchResultLoader(propertyMapping, resultMap);
+                batchResultLoaderMap.put(nestedQueryId, batchResultLoader);
             }
 
             // 对象如果获取到的id值不为空，则将当前对象添加到batchResultSetContext中
             String objectKey = this.getObjectKey(resultMap.getIdResultMappings(), metaResultObject);
             if (StringUtils.isNotBlank(objectKey)) {
-                batchResultSetContext.addMap(objectKey, metaResultObject);
+                batchResultLoader.addMap(objectKey, metaResultObject);
             }
 
             // 把需要懒加载的数据放在第一个对象中，这样在后续遍历对象的时候就不会触发N+1问题
             if (nestedQueryId != null && propertyMapping.isLazy()) {
+                final ResultLoader resultLoader = new ResultLoader(configuration, executor, nestedQuery, null, propertyMapping.getJavaType(), null, null);
+                lazyLoader.addLoader(propertyMapping.getProperty(), metaResultObject, resultLoader);
                 return DEFERRED;
             }
             return null;
@@ -165,7 +167,7 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
         return super.getNestedQueryMappingValue(rs, metaResultObject, propertyMapping, lazyLoader, columnPrefix);
     }
 
-    public static class BatchResultSetContext {
+    public static class BatchResultLoader extends ResultLoader {
 
         private Boolean isLazy;
 
@@ -177,11 +179,13 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
 
         private List<Object> list = new ArrayList();
 
-        public BatchResultSetContext(Boolean isLazy) {
+        public BatchResultLoader(Boolean isLazy) {
+            super(null, null, null, null, null, null, null);
             this.isLazy = isLazy;
         }
 
-        public BatchResultSetContext(ResultMapping propertyMapping, ResultMap resultMap) {
+        public BatchResultLoader(ResultMapping propertyMapping, ResultMap resultMap) {
+            super(null, null, null, null, null, null, null);
             this.propertyMapping = propertyMapping;
             this.resultMap = resultMap;
         }

@@ -66,11 +66,11 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
             if (TypeUtils.typeEquals(propertyResultMapping, BatchSelectResultMapping.class)) {
                 String nestedQueryId = propertyResultMapping.getNestedQueryId();
                 if (nestedQueryId != null && propertyResultMapping.isLazy()) {
-                    BatchResultLoader batchResultLoader = this.batchResultLoaderMap.get(nestedQueryId);
+                    /*BatchResultLoader batchResultLoader = this.batchResultLoaderMap.get(nestedQueryId);
                     if (batchResultLoader == null) {
-                        batchResultLoader = new BatchResultLoader(propertyResultMapping.isLazy());
+                        batchResultLoader = new BatchResultLoader();
                         this.batchResultLoaderMap.put(nestedQueryId, batchResultLoader);
-                    }
+                    }*/
                 }
             }
         }
@@ -84,7 +84,7 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
         }
 
         List<ResultMapping> idResultMappings = batchResultLoader.getResultMap().getIdResultMappings();
-        Map<String, MetaObject> leftMap = batchResultLoader.getMap();
+        Map<String, MetaObject> leftMap = batchResultLoader.getRightObjectMap();
         BatchSelectResultMapping batchSelectResultMapping = (BatchSelectResultMapping) batchResultLoader.getPropertyMapping();
         String property = batchSelectResultMapping.getProperty();
 
@@ -162,7 +162,7 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
         if (batchResultLoader == null) {
             MappedStatement nestedQuery = configuration.getMappedStatement(nestedQueryId);
             batchResultLoader = new BatchResultLoader(configuration, executor, nestedQuery, metaResultObject, List.class, null, null);
-            batchResultLoader.setLazy(propertyMapping.isLazy());
+            batchResultLoader.setPropertyMapping(propertyMapping);
             batchResultLoaderMap.put(nestedQueryId, batchResultLoader);
         }
 
@@ -175,37 +175,33 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
 
     public static class BatchResultLoader extends ResultLoader {
 
-        private Boolean isLazy;
-
         private ResultMapping propertyMapping;
 
         private ResultMap resultMap;
 
         private Map<String, MetaObject> rightObjectMap = new ConcurrentHashMap();
 
-        private Map<String, List<Object>> parameterObjectList = new ConcurrentHashMap();
-
-        public BatchResultLoader(Boolean isLazy) {
+        public BatchResultLoader() {
             super(null, null, null, null, null, null, null);
-            this.isLazy = isLazy;
         }
 
         public BatchResultLoader(Configuration configuration, Executor executor, MappedStatement mappedStatement, Object parameterObject1111, Class<?> targetType, CacheKey cacheKey, BoundSql boundSql) {
             super(configuration, executor, mappedStatement, new ConcurrentHashMap(), targetType, new BatchCacheKey(), new BatchBoundSql(configuration));
+            this.resultMap = mappedStatement.getResultMaps().get(0);
             Map<String, List<Object>> parameterObjectMap = (Map<String, List<Object>>) this.parameterObject;
             parameterObjectMap.put("nested_select_collection", new ArrayList());
         }
 
         public Boolean getLazy() {
-            return isLazy;
-        }
-
-        public void setLazy(Boolean lazy) {
-            isLazy = lazy;
+            return this.propertyMapping.isLazy();
         }
 
         public ResultMapping getPropertyMapping() {
             return propertyMapping;
+        }
+
+        public void setPropertyMapping(ResultMapping propertyMapping) {
+            this.propertyMapping = propertyMapping;
         }
 
         public ResultMap getResultMap() {
@@ -225,7 +221,11 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
             parameterObjectMap.get("nested_select_collection").add(metaObject.getOriginalObject());
         }
 
-        public Map<String, MetaObject> getMap() {
+        public Map<String, List<Object>> getParameterObject() {
+            return (Map<String, List<Object>>) this.parameterObject;
+        }
+
+        public Map<String, MetaObject> getRightObjectMap() {
             return rightObjectMap;
         }
 
@@ -235,6 +235,11 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
 
         @Override
         public Object loadResult() throws SQLException {
+            Map<String, List<Object>> parameterObject = this.getParameterObject();
+            if (ObjectUtils.isEmpty(parameterObject.get("nested_select_collection"))) {
+                return null;
+            }
+
             BatchBoundSql batchBoundSql = (BatchBoundSql) this.boundSql;
             batchBoundSql.setBoundSql(mappedStatement.getBoundSql(this.parameterObject));
 

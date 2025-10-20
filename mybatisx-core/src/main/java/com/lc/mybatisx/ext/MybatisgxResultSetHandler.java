@@ -4,12 +4,10 @@ import com.lc.mybatisx.ext.mapping.BatchSelectResultMapping;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.cache.CacheKey;
-import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.loader.ResultLoader;
 import org.apache.ibatis.executor.loader.ResultLoaderMap;
 import org.apache.ibatis.executor.parameter.ParameterHandler;
-import org.apache.ibatis.executor.resultset.ResultSetHandler;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.ResultMap;
@@ -19,7 +17,6 @@ import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 
-import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -29,9 +26,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * 一句话描述
+ * @author ccxuef
+ * @date 2025/10/20 10:20
+ */
 public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
 
-    private ResultSetHandler delegate;
     private Executor executor;
     private Configuration configuration;
     private Map<String, BatchResultSetContext> batchNestedQueryMap = new ConcurrentHashMap();
@@ -132,17 +133,6 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
             return null;
         }
         return super.getNestedQueryMappingValue(rs, metaResultObject, propertyMapping, lazyLoader, columnPrefix);
-    }
-
-    @Override
-    public <E> Cursor<E> handleCursorResultSets(Statement stmt) throws SQLException {
-        Cursor<E> cursor = this.delegate.handleCursorResultSets(stmt);
-        return cursor;
-    }
-
-    @Override
-    public void handleOutputParameters(CallableStatement cs) throws SQLException {
-        this.delegate.handleOutputParameters(cs);
     }
 
     public static class BatchResultSetContext {

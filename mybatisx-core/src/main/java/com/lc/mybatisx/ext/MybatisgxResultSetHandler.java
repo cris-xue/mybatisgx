@@ -13,6 +13,7 @@ import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.mapping.ResultMapping;
 import org.apache.ibatis.reflection.MetaObject;
+import org.apache.ibatis.reflection.SystemMetaObject;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
@@ -21,6 +22,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -34,6 +36,7 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
 
     private Executor executor;
     private Configuration configuration;
+    private BatchResultLoaderContext batchResultLoaderContext = new BatchResultLoaderContext();
     private Map<String, BatchResultLoader> batchResultLoaderMap = new ConcurrentHashMap();
 
     public MybatisgxResultSetHandler(Executor executor, MappedStatement mappedStatement, ParameterHandler parameterHandler, ResultHandler<?> resultHandler, BoundSql boundSql, RowBounds rowBounds) {
@@ -47,12 +50,10 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
         List<Object> leftList = super.handleResultSets(stmt);
         for (String nestedQueryId : this.batchResultLoaderMap.keySet()) {
             BatchResultLoader batchResultLoader = this.batchResultLoaderMap.get(nestedQueryId);
-            if (!batchResultLoader.getLazy()) {
-                Object nestedQuery = batchResultLoader.loadResult();
-                if (nestedQuery instanceof List) {
-                    List<Object> rightList = (List<Object>) nestedQuery;
-                    this.leftJoin(batchResultLoader, rightList);
-                }
+            Object nestedQuery = batchResultLoader.loadResultEager();
+            if (nestedQuery instanceof List) {
+                List<Object> rightList = (List<Object>) nestedQuery;
+                this.leftJoin(batchResultLoader, rightList);
             }
         }
         return leftList;
@@ -108,19 +109,65 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
     }
 
     private ResultLoader buildBatchResultLoader(ResultMap resultMap, ResultMapping propertyMapping, String nestedQueryId, MetaObject metaResultObject) {
-        BatchResultLoader batchResultLoader = batchResultLoaderMap.get(nestedQueryId);
-        if (batchResultLoader == null) {
+        MappedStatement nestedQuery = configuration.getMappedStatement(nestedQueryId);
+
+        BatchResultLoader batchResultLoader = new BatchResultLoader(configuration, executor, nestedQuery, metaResultObject.getOriginalObject(), List.class, this.batchResultLoaderContext);
+        batchResultLoader.setPropertyMapping(propertyMapping);
+        batchResultLoaderMap.put(nestedQueryId, batchResultLoader);
+        this.batchResultLoaderContext.addParameterObject(metaResultObject);
+        /*if (batchResultLoader == null) {
             MappedStatement nestedQuery = configuration.getMappedStatement(nestedQueryId);
             batchResultLoader = new BatchResultLoader(configuration, executor, nestedQuery, List.class);
             batchResultLoader.setPropertyMapping(propertyMapping);
             batchResultLoaderMap.put(nestedQueryId, batchResultLoader);
-        }
+        }*/
 
-        String objectKey = this.getObjectKey(resultMap.getIdResultMappings(), metaResultObject);
+        /*String objectKey = this.getObjectKey(resultMap.getIdResultMappings(), metaResultObject);
         if (StringUtils.isNotBlank(objectKey)) {
             batchResultLoader.addParameterObject(objectKey, metaResultObject);
-        }
+        }*/
         return batchResultLoader;
+    }
+
+    public static class BatchResultLoaderContext {
+
+        private volatile boolean isLoader = false;
+
+        private List<Object> parameterObjectList = new ArrayList();
+
+        private Map<String, Object> resultObjectMap = new ConcurrentHashMap();
+
+        public Map<String, List<Object>> getParameterObject() {
+            Map<String, List<Object>> parameterObjectMap = new HashMap();
+            parameterObjectMap.put(BatchResultLoader.NESTED_SELECT_PARAM_COLLECTION, this.parameterObjectList);
+            return parameterObjectMap;
+        }
+
+        public void addParameterObject(MetaObject parameterObject) {
+            this.parameterObjectList.add(parameterObject.getOriginalObject());
+        }
+
+        public BatchResultLoaderContext addResultObject(Object resultObject, List<ResultMapping> idResultMappings, ResultMapping propertyMapping) {
+            if (resultObject instanceof List) {
+                List<Object> rightValueList = (List<Object>) resultObject;
+                for (Object rightValue : rightValueList) {
+                    MetaObject rightValueMetaObject = SystemMetaObject.forObject(rightValue);
+                    List<String> idValueList = new ArrayList();
+                    for (ResultMapping idResultMapping : idResultMappings) {
+                        Object idValue = rightValueMetaObject.getValue(idResultMapping.getProperty());
+                        idValueList.add(idValue instanceof Long ? idValue.toString() : (String) idValue);
+                    }
+                    String objectKey = StringUtils.join(idValueList, "");
+                    Object linkRightValue = rightValueMetaObject.getValue(propertyMapping.getProperty());
+                    this.resultObjectMap.put(objectKey, linkRightValue);
+                }
+            }
+            return this;
+        }
+
+        public Map<String, Object> getResultObject() {
+            return this.resultObjectMap;
+        }
     }
 
     public static class BatchResultLoader extends ResultLoader {
@@ -135,11 +182,12 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
 
         private ResultLoader resultLoader;
 
-        public BatchResultLoader(Configuration configuration, Executor executor, MappedStatement mappedStatement, Class<?> targetType) {
-            super(configuration, executor, mappedStatement, new ConcurrentHashMap(), targetType, null, null);
+        private BatchResultLoaderContext batchResultLoaderContext;
+
+        public BatchResultLoader(Configuration configuration, Executor executor, MappedStatement mappedStatement, Object parameterObject, Class<?> targetType, BatchResultLoaderContext batchResultLoaderContext) {
+            super(configuration, executor, mappedStatement, parameterObject, targetType, null, null);
             this.resultMap = mappedStatement.getResultMaps().get(0);
-            Map<String, List<Object>> parameterObjectMap = (Map<String, List<Object>>) this.parameterObject;
-            parameterObjectMap.put(NESTED_SELECT_PARAM_COLLECTION, new ArrayList());
+            this.batchResultLoaderContext = batchResultLoaderContext;
         }
 
         public Boolean getLazy() {
@@ -181,14 +229,54 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
 
         @Override
         public Object loadResult() throws SQLException {
-            if (ObjectUtils.isEmpty(this.getParameterObject())) {
-                return null;
-            }
+            if (this.propertyMapping.isLazy()) {
+                Map<String, List<Object>> parameterObject = this.batchResultLoaderContext.getParameterObject();
+                if (parameterObject == null) {
+                    return null;
+                }
 
-            BoundSql boundSql = mappedStatement.getBoundSql(this.parameterObject);
-            CacheKey cacheKey = executor.createCacheKey(mappedStatement, this.parameterObject, RowBounds.DEFAULT, boundSql);
-            resultLoader = new ResultLoader(configuration, executor, mappedStatement, this.parameterObject, List.class, cacheKey, boundSql);
-            return this.resultLoader.loadResult();
+                Map<String, Object> resultObject = this.batchResultLoaderContext.getResultObject();
+                if (ObjectUtils.isEmpty(resultObject)) {
+                    BoundSql boundSql = mappedStatement.getBoundSql(parameterObject);
+                    CacheKey cacheKey = executor.createCacheKey(mappedStatement, this.parameterObject, RowBounds.DEFAULT, boundSql);
+                    resultLoader = new ResultLoader(configuration, executor, mappedStatement, this.parameterObject, List.class, cacheKey, boundSql);
+                    Object result = this.resultLoader.loadResult();
+                    List<ResultMapping> idResultMappings = resultMap.getIdResultMappings();
+                    resultObject = this.batchResultLoaderContext.addResultObject(result, idResultMappings, propertyMapping).getResultObject();
+                }
+                List<ResultMapping> idResultMappings = resultMap.getIdResultMappings();
+
+                MetaObject parameterObjectMetaObject = SystemMetaObject.forObject(this.parameterObject);
+                List<String> idValueList = new ArrayList();
+                for (ResultMapping idResultMapping : idResultMappings) {
+                    Object parameterObjectKey = parameterObjectMetaObject.getValue(idResultMapping.getProperty());
+                    idValueList.add(parameterObjectKey instanceof Long ? parameterObjectKey.toString() : (String) parameterObjectKey);
+                }
+                String objectKey = StringUtils.join(idValueList, "");
+                return resultObject.get(objectKey);
+            }
+            throw new RuntimeException("eager load not support");
+        }
+
+        public Object loadResultEager() throws SQLException {
+            if (!this.propertyMapping.isLazy()) {
+                Map<String, List<Object>> parameterObject = this.batchResultLoaderContext.getParameterObject();
+                if (parameterObject == null) {
+                    return null;
+                }
+
+                Map<String, Object> resultObject = this.batchResultLoaderContext.getResultObject();
+                if (ObjectUtils.isEmpty(resultObject)) {
+                    BoundSql boundSql = mappedStatement.getBoundSql(parameterObject);
+                    CacheKey cacheKey = executor.createCacheKey(mappedStatement, this.parameterObject, RowBounds.DEFAULT, boundSql);
+                    resultLoader = new ResultLoader(configuration, executor, mappedStatement, this.parameterObject, List.class, cacheKey, boundSql);
+                    Object result = this.resultLoader.loadResult();
+                    List<ResultMapping> idResultMappings = resultMap.getIdResultMappings();
+                    resultObject = this.batchResultLoaderContext.addResultObject(result, idResultMappings, propertyMapping).getResultObject();
+                }
+                return resultObject.get("");
+            }
+            return null;
         }
 
         @Override

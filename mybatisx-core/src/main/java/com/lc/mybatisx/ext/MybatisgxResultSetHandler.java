@@ -10,7 +10,10 @@ import org.apache.ibatis.executor.loader.ResultLoader;
 import org.apache.ibatis.executor.loader.ResultLoaderMap;
 import org.apache.ibatis.executor.parameter.ParameterHandler;
 import org.apache.ibatis.executor.resultset.ResultSetWrapper;
-import org.apache.ibatis.mapping.*;
+import org.apache.ibatis.mapping.BoundSql;
+import org.apache.ibatis.mapping.MappedStatement;
+import org.apache.ibatis.mapping.ResultMap;
+import org.apache.ibatis.mapping.ResultMapping;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.ResultHandler;
@@ -161,7 +164,7 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
         BatchResultLoader batchResultLoader = batchResultLoaderMap.get(nestedQueryId);
         if (batchResultLoader == null) {
             MappedStatement nestedQuery = configuration.getMappedStatement(nestedQueryId);
-            batchResultLoader = new BatchResultLoader(configuration, executor, nestedQuery, metaResultObject, List.class, null, null);
+            batchResultLoader = new BatchResultLoader(configuration, executor, nestedQuery, List.class);
             batchResultLoader.setPropertyMapping(propertyMapping);
             batchResultLoaderMap.put(nestedQueryId, batchResultLoader);
         }
@@ -181,12 +184,10 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
 
         private Map<String, MetaObject> rightObjectMap = new ConcurrentHashMap();
 
-        public BatchResultLoader() {
-            super(null, null, null, null, null, null, null);
-        }
+        private ResultLoader resultLoader;
 
-        public BatchResultLoader(Configuration configuration, Executor executor, MappedStatement mappedStatement, Object parameterObject1111, Class<?> targetType, CacheKey cacheKey, BoundSql boundSql) {
-            super(configuration, executor, mappedStatement, new ConcurrentHashMap(), targetType, new BatchCacheKey(), new BatchBoundSql(configuration));
+        public BatchResultLoader(Configuration configuration, Executor executor, MappedStatement mappedStatement, Class<?> targetType) {
+            super(configuration, executor, mappedStatement, new ConcurrentHashMap(), targetType, null, null);
             this.resultMap = mappedStatement.getResultMaps().get(0);
             Map<String, List<Object>> parameterObjectMap = (Map<String, List<Object>>) this.parameterObject;
             parameterObjectMap.put("nested_select_collection", new ArrayList());
@@ -221,8 +222,8 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
             parameterObjectMap.get("nested_select_collection").add(metaObject.getOriginalObject());
         }
 
-        public Map<String, List<Object>> getParameterObject() {
-            return (Map<String, List<Object>>) this.parameterObject;
+        private List<Object> getParameterObject() {
+            return ((Map<String, List<Object>>) this.parameterObject).get("nested_select_collection");
         }
 
         public Map<String, MetaObject> getRightObjectMap() {
@@ -235,113 +236,19 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
 
         @Override
         public Object loadResult() throws SQLException {
-            Map<String, List<Object>> parameterObject = this.getParameterObject();
-            if (ObjectUtils.isEmpty(parameterObject.get("nested_select_collection"))) {
+            if (ObjectUtils.isEmpty(this.getParameterObject())) {
                 return null;
             }
 
-            BatchBoundSql batchBoundSql = (BatchBoundSql) this.boundSql;
-            batchBoundSql.setBoundSql(mappedStatement.getBoundSql(this.parameterObject));
-
-            BatchCacheKey batchCacheKey = (BatchCacheKey) this.cacheKey;
-            batchCacheKey.setCacheKey(executor.createCacheKey(mappedStatement, this.parameterObject, RowBounds.DEFAULT, batchBoundSql));
-
-            return super.loadResult();
-        }
-    }
-
-    private static class BatchCacheKey extends CacheKey {
-
-        private CacheKey cacheKey;
-
-        public CacheKey getCacheKey() {
-            return cacheKey;
-        }
-
-        public void setCacheKey(CacheKey cacheKey) {
-            this.cacheKey = cacheKey;
+            BoundSql boundSql = mappedStatement.getBoundSql(this.parameterObject);
+            CacheKey cacheKey = executor.createCacheKey(mappedStatement, this.parameterObject, RowBounds.DEFAULT, boundSql);
+            resultLoader = new ResultLoader(configuration, executor, mappedStatement, this.parameterObject, propertyMapping.getJavaType(), cacheKey, boundSql);
+            return this.resultLoader.loadResult();
         }
 
         @Override
-        public int getUpdateCount() {
-            return cacheKey.getUpdateCount();
-        }
-
-        @Override
-        public void update(Object object) {
-            cacheKey.update(object);
-        }
-
-        @Override
-        public void updateAll(Object[] objects) {
-            cacheKey.updateAll(objects);
-        }
-
-        @Override
-        public boolean equals(Object object) {
-            return cacheKey.equals(object);
-        }
-
-        @Override
-        public int hashCode() {
-            return cacheKey.hashCode();
-        }
-
-        @Override
-        public String toString() {
-            return cacheKey.toString();
-        }
-
-        @Override
-        public CacheKey clone() throws CloneNotSupportedException {
-            return cacheKey.clone();
-        }
-    }
-
-    private static class BatchBoundSql extends BoundSql {
-
-        private BoundSql boundSql;
-
-        public BatchBoundSql(Configuration configuration) {
-            super(configuration, null, null, null);
-        }
-
-        public BoundSql getBoundSql() {
-            return boundSql;
-        }
-
-        public void setBoundSql(BoundSql boundSql) {
-            this.boundSql = boundSql;
-        }
-
-        @Override
-        public String getSql() {
-            return boundSql.getSql();
-        }
-
-        @Override
-        public List<ParameterMapping> getParameterMappings() {
-            return boundSql.getParameterMappings();
-        }
-
-        @Override
-        public Object getParameterObject() {
-            return boundSql.getParameterObject();
-        }
-
-        @Override
-        public boolean hasAdditionalParameter(String name) {
-            return boundSql.hasAdditionalParameter(name);
-        }
-
-        @Override
-        public void setAdditionalParameter(String name, Object value) {
-            boundSql.setAdditionalParameter(name, value);
-        }
-
-        @Override
-        public Object getAdditionalParameter(String name) {
-            return boundSql.getAdditionalParameter(name);
+        public boolean wasNull() {
+            return this.resultLoader.wasNull();
         }
     }
 }

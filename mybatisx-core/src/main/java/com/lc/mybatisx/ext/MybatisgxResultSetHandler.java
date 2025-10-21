@@ -1,7 +1,6 @@
 package com.lc.mybatisx.ext;
 
 import com.lc.mybatisx.ext.mapping.BatchSelectResultMapping;
-import com.lc.mybatisx.utils.TypeUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.cache.CacheKey;
@@ -9,7 +8,6 @@ import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.loader.ResultLoader;
 import org.apache.ibatis.executor.loader.ResultLoaderMap;
 import org.apache.ibatis.executor.parameter.ParameterHandler;
-import org.apache.ibatis.executor.resultset.ResultSetWrapper;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.ResultMap;
@@ -58,25 +56,6 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
             }
         }
         return leftList;
-    }
-
-    @Override
-    public Object createResultObject(ResultSetWrapper rsw, ResultMap resultMap, ResultLoaderMap lazyLoader, String columnPrefix) throws SQLException {
-        Object resultObject = super.createResultObject(rsw, resultMap, lazyLoader, columnPrefix);
-        List<ResultMapping> propertyResultMappings = resultMap.getPropertyResultMappings();
-        for (ResultMapping propertyResultMapping : propertyResultMappings) {
-            if (TypeUtils.typeEquals(propertyResultMapping, BatchSelectResultMapping.class)) {
-                String nestedQueryId = propertyResultMapping.getNestedQueryId();
-                if (nestedQueryId != null && propertyResultMapping.isLazy()) {
-                    /*BatchResultLoader batchResultLoader = this.batchResultLoaderMap.get(nestedQueryId);
-                    if (batchResultLoader == null) {
-                        batchResultLoader = new BatchResultLoader();
-                        this.batchResultLoaderMap.put(nestedQueryId, batchResultLoader);
-                    }*/
-                }
-            }
-        }
-        return resultObject;
     }
 
     private void leftJoin(BatchResultLoader batchResultLoader, List<Object> rightValueList) {
@@ -208,7 +187,7 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
 
             BoundSql boundSql = mappedStatement.getBoundSql(this.parameterObject);
             CacheKey cacheKey = executor.createCacheKey(mappedStatement, this.parameterObject, RowBounds.DEFAULT, boundSql);
-            resultLoader = new ResultLoader(configuration, executor, mappedStatement, this.parameterObject, propertyMapping.getJavaType(), cacheKey, boundSql);
+            resultLoader = new ResultLoader(configuration, executor, mappedStatement, this.parameterObject, List.class, cacheKey, boundSql);
             return this.resultLoader.loadResult();
         }
 

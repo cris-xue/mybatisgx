@@ -146,6 +146,8 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
 
     public static class BatchResultLoader extends ResultLoader {
 
+        public static final String NESTED_SELECT_PARAM_COLLECTION = "nested_select_param_collection";
+
         private ResultMapping propertyMapping;
 
         private ResultMap resultMap;
@@ -158,7 +160,7 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
             super(configuration, executor, mappedStatement, new ConcurrentHashMap(), targetType, null, null);
             this.resultMap = mappedStatement.getResultMaps().get(0);
             Map<String, List<Object>> parameterObjectMap = (Map<String, List<Object>>) this.parameterObject;
-            parameterObjectMap.put("nested_select_collection", new ArrayList());
+            parameterObjectMap.put(NESTED_SELECT_PARAM_COLLECTION, new ArrayList());
         }
 
         public Boolean getLazy() {
@@ -187,11 +189,11 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
             }
             this.rightObjectMap.put(key, metaObject);
             Map<String, List<Object>> parameterObjectMap = (Map<String, List<Object>>) this.parameterObject;
-            parameterObjectMap.get("nested_select_collection").add(metaObject.getOriginalObject());
+            parameterObjectMap.get(NESTED_SELECT_PARAM_COLLECTION).add(metaObject.getOriginalObject());
         }
 
         private List<Object> getParameterObject() {
-            return ((Map<String, List<Object>>) this.parameterObject).get("nested_select_collection");
+            return ((Map<String, List<Object>>) this.parameterObject).get(NESTED_SELECT_PARAM_COLLECTION);
         }
 
         public Map<String, MetaObject> getRightObjectMap() {

@@ -2,6 +2,7 @@ package com.lc.mybatisx.template.select;
 
 import com.lc.mybatisx.annotation.FetchMode;
 import com.lc.mybatisx.annotation.ManyToMany;
+import com.lc.mybatisx.ext.MybatisgxResultSetHandler;
 import com.lc.mybatisx.model.*;
 import com.lc.mybatisx.utils.TypeUtils;
 import com.lc.mybatisx.utils.XmlUtils;
@@ -280,6 +281,6 @@ public class ResultMapTemplateHandler {
     }
 
     private void addNestedSelectCollection(Map<String, String> column, String nestedSelectCollectionValue) {
-        column.put("nested_select_collection", nestedSelectCollectionValue);
+        column.put(MybatisgxResultSetHandler.BatchResultLoader.NESTED_SELECT_PARAM_COLLECTION, nestedSelectCollectionValue);
     }
 }

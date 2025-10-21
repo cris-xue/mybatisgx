@@ -23,7 +23,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -115,43 +114,12 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
         return StringUtils.join(idValueList, "");
     }
 
-    private Map<String, List<Object>> getNestedQueryParamMap(BatchResultLoader batchResultLoader) {
-        List<Object> list = batchResultLoader.getList();
-        if (ObjectUtils.isEmpty(list)) {
-            return null;
-        }
-        Map<String, List<Object>> nestedQueryParamMap = new HashMap();
-        nestedQueryParamMap.put("nested_select_collection", list);
-        return nestedQueryParamMap;
-    }
-
     @Override
     public Object getNestedQueryMappingValue(ResultSet rs, MetaObject metaResultObject, ResultMapping propertyMapping, ResultLoaderMap lazyLoader, String columnPrefix) throws SQLException {
         if (propertyMapping instanceof BatchSelectResultMapping) {
             String nestedQueryId = propertyMapping.getNestedQueryId();
             MappedStatement nestedQuery = configuration.getMappedStatement(nestedQueryId);
             ResultMap resultMap = nestedQuery.getResultMaps().get(0);
-
-            /*BatchResultLoader batchResultLoader = batchResultLoaderMap.get(nestedQueryId);
-            if (batchResultLoader == null) {
-                batchResultLoader = new BatchResultLoader(propertyMapping, resultMap);
-                batchResultLoaderMap.put(nestedQueryId, batchResultLoader);
-            }
-
-            // 对象如果获取到的id值不为空，则将当前对象添加到batchResultSetContext中
-            String objectKey = this.getObjectKey(resultMap.getIdResultMappings(), metaResultObject);
-            if (StringUtils.isNotBlank(objectKey)) {
-                batchResultLoader.addParameterObject(objectKey, metaResultObject);
-            }
-
-            // 把需要懒加载的数据放在第一个对象中，这样在后续遍历对象的时候就不会触发N+1问题
-            if (nestedQueryId != null && propertyMapping.isLazy()) {
-                this.buildBatchResultLoader();
-
-                final ResultLoader resultLoader = new ResultLoader(configuration, executor, nestedQuery, null, propertyMapping.getJavaType(), null, null);
-                lazyLoader.addLoader(propertyMapping.getProperty(), metaResultObject, resultLoader);
-                return DEFERRED;
-            }*/
 
             ResultLoader resultLoader = this.buildBatchResultLoader(resultMap, propertyMapping, nestedQueryId, metaResultObject);
             lazyLoader.addLoader(propertyMapping.getProperty(), metaResultObject, resultLoader);
@@ -228,10 +196,6 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
 
         public Map<String, MetaObject> getRightObjectMap() {
             return rightObjectMap;
-        }
-
-        public List<Object> getList() {
-            return null;
         }
 
         @Override

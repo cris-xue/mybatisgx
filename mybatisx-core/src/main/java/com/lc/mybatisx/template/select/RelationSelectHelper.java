@@ -1,5 +1,6 @@
 package com.lc.mybatisx.template.select;
 
+import com.lc.mybatisx.ext.MybatisgxResultSetHandler;
 import com.lc.mybatisx.model.BatchNestedResultMapInfo;
 import com.lc.mybatisx.model.RelationColumnInfo;
 import com.lc.mybatisx.model.ResultMapInfo;
@@ -47,7 +48,7 @@ public class RelationSelectHelper {
         Element foreachElement = whereElement.addElement("foreach");
         foreachElement.addAttribute("item", "item");
         foreachElement.addAttribute("index", "index");
-        foreachElement.addAttribute("collection", "nested_select_collection");
+        foreachElement.addAttribute("collection", MybatisgxResultSetHandler.BatchResultLoader.NESTED_SELECT_PARAM_COLLECTION);
         foreachElement.addAttribute("open", "(");
         foreachElement.addAttribute("separator", " or ");
         foreachElement.addAttribute("close", ")");

@@ -50,7 +50,7 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
                 if (!batchResultLoader.getLazy()) {
                     MetaObject parameterObjectMetaObject = batchResultLoader.getParameterObjectMetaObject();
                     Object linkRightValue = batchResultLoader.loadResult();
-                    this.linkObjects(parameterObjectMetaObject, batchResultLoader.getPropertyMapping(), linkRightValue);
+                    parameterObjectMetaObject.setValue(batchResultLoader.getPropertyMapping().getProperty(), linkRightValue);
                 }
             }
         }

@@ -2,6 +2,7 @@ package com.lc.mybatisx.ext;
 
 import com.lc.mybatisx.ext.mapping.BatchSelectResultMapping;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.loader.ResultLoader;
 import org.apache.ibatis.executor.loader.ResultLoaderMap;
@@ -59,24 +60,27 @@ public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
     @Override
     public Object getNestedQueryMappingValue(ResultSet rs, MetaObject metaResultObject, ResultMapping propertyMapping, ResultLoaderMap lazyLoader, String columnPrefix) throws SQLException {
         if (propertyMapping instanceof BatchSelectResultMapping) {
-            ResultLoader resultLoader = this.buildBatchResultLoader(propertyMapping, metaResultObject);
-            lazyLoader.addLoader(propertyMapping.getProperty(), metaResultObject, resultLoader);
+            String nestedQueryId = propertyMapping.getNestedQueryId();
+            MappedStatement nestedQuery = configuration.getMappedStatement(nestedQueryId);
+            List<ResultMapping> idResultMappings = nestedQuery.getResultMaps().get(0).getIdResultMappings();
+            String objectKey = LinkObjectHelper.getObjectKey(idResultMappings, metaResultObject);
+            if (StringUtils.isNotBlank(objectKey)) {
+                ResultLoader resultLoader = this.buildBatchResultLoader(propertyMapping, metaResultObject, nestedQueryId, nestedQuery, idResultMappings);
+                lazyLoader.addLoader(propertyMapping.getProperty(), metaResultObject, resultLoader);
+            }
             return DEFERRED;
         }
         return super.getNestedQueryMappingValue(rs, metaResultObject, propertyMapping, lazyLoader, columnPrefix);
     }
 
-    private ResultLoader buildBatchResultLoader(ResultMapping propertyMapping, MetaObject metaResultObject) {
-        String nestedQueryId = propertyMapping.getNestedQueryId();
-        MappedStatement nestedQuery = configuration.getMappedStatement(nestedQueryId);
+    private ResultLoader buildBatchResultLoader(ResultMapping propertyMapping, MetaObject metaResultObject, String nestedQueryId, MappedStatement nestedQuery, List<ResultMapping> idResultMappings) {
         BatchResultLoader.BatchResultLoaderContext batchResultLoaderContext = batchResultLoaderContextMap.get(nestedQueryId);
         if (batchResultLoaderContext == null) {
             batchResultLoaderContext = new BatchResultLoader.BatchResultLoaderContext();
             this.batchResultLoaderContextMap.put(nestedQueryId, batchResultLoaderContext);
         }
 
-        BatchResultLoader batchResultLoader = new BatchResultLoader(configuration, executor, nestedQuery, metaResultObject, List.class, batchResultLoaderContext);
-        batchResultLoader.setPropertyMapping(propertyMapping);
+        BatchResultLoader batchResultLoader = new BatchResultLoader(configuration, executor, nestedQuery, metaResultObject, List.class, idResultMappings, propertyMapping, batchResultLoaderContext);
         List<BatchResultLoader> batchResultLoaderList = this.batchResultLoaderMap.get(nestedQueryId);
         if (ObjectUtils.isEmpty(batchResultLoaderList)) {
             batchResultLoaderList = new ArrayList();

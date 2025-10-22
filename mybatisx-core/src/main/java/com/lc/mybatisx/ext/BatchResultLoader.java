@@ -6,7 +6,6 @@ import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.loader.ResultLoader;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
-import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.mapping.ResultMapping;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.SystemMetaObject;
@@ -28,16 +27,23 @@ public class BatchResultLoader extends ResultLoader {
 
     private ResultMapping propertyMapping;
 
-    private ResultMap resultMap;
-
-    private Map<String, MetaObject> rightObjectMap = new ConcurrentHashMap();
+    private List<ResultMapping> idResultMappings;
 
     private BatchResultLoaderContext batchResultLoaderContext;
 
-    public BatchResultLoader(Configuration configuration, Executor executor, MappedStatement mappedStatement, MetaObject parameterObject, Class<?> targetType, BatchResultLoaderContext batchResultLoaderContext) {
+    public BatchResultLoader(
+            Configuration configuration,
+            Executor executor,
+            MappedStatement mappedStatement,
+            MetaObject parameterObject,
+            Class<?> targetType,
+            List<ResultMapping> idResultMappings,
+            ResultMapping propertyMapping,
+            BatchResultLoaderContext batchResultLoaderContext) {
         super(configuration, executor, mappedStatement, parameterObject.getOriginalObject(), targetType, null, null);
-        this.resultMap = mappedStatement.getResultMaps().get(0);
+        this.idResultMappings = idResultMappings;
         this.parameterObjectMetaObject = parameterObject;
+        this.propertyMapping = propertyMapping;
         this.batchResultLoaderContext = batchResultLoaderContext;
         this.batchResultLoaderContext.addParameterObject(parameterObject);
     }
@@ -54,29 +60,13 @@ public class BatchResultLoader extends ResultLoader {
         return propertyMapping;
     }
 
-    public void setPropertyMapping(ResultMapping propertyMapping) {
-        this.propertyMapping = propertyMapping;
-    }
-
-    public ResultMap getResultMap() {
-        return resultMap;
-    }
-
-    public void setResultMap(ResultMap resultMap) {
-        this.resultMap = resultMap;
-    }
-
     public Object getParameterObject() {
         return this.parameterObject;
     }
 
-    public Map<String, MetaObject> getRightObjectMap() {
-        return rightObjectMap;
-    }
-
     @Override
     public Object loadResult() throws SQLException {
-        String objectKey = LinkObjectHelper.getObjectKey(resultMap.getIdResultMappings(), this.parameterObjectMetaObject);
+        String objectKey = LinkObjectHelper.getObjectKey(this.idResultMappings, this.parameterObjectMetaObject);
         Map<String, Object> resultObjectMap = this.loadResultBatch();
         return resultObject = resultObjectMap.get(objectKey);
     }
@@ -93,8 +83,7 @@ public class BatchResultLoader extends ResultLoader {
                 CacheKey cacheKey = executor.createCacheKey(mappedStatement, parameterObjectMap, RowBounds.DEFAULT, boundSql);
                 ResultLoader resultLoader = new ResultLoader(configuration, executor, mappedStatement, parameterObjectMap, List.class, cacheKey, boundSql);
                 Object result = resultLoader.loadResult();
-                List<ResultMapping> idResultMappings = resultMap.getIdResultMappings();
-                resultObjectMap = this.batchResultLoaderContext.addResultObject(result, idResultMappings, propertyMapping).getResultObject();
+                resultObjectMap = this.batchResultLoaderContext.addResultObject(result, this.idResultMappings, propertyMapping).getResultObject();
             }
         }
         return resultObjectMap;

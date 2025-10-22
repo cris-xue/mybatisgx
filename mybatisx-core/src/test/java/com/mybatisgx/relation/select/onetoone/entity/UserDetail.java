@@ -1,4 +1,4 @@
-package com.mybatisgx.onetoone.entity;
+package com.mybatisgx.relation.select.onetoone.entity;
 
 import com.lc.mybatisx.annotation.*;
 import com.mybatisgx.entity.EmbeddedIdBaseEntity;
@@ -11,16 +11,16 @@ public class UserDetail extends EmbeddedIdBaseEntity<Long> {
 
     private String code;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumns({
             @JoinColumn(name = "user_id1", referencedColumnName = "id1"),
             @JoinColumn(name = "user_id2", referencedColumnName = "id2")
     })
-    @Fetch(FetchMode.JOIN)
+    @Fetch(FetchMode.BATCH)
     private User user;
 
-    @OneToOne(mappedBy = "userDetail", fetch = FetchType.LAZY)
-    @Fetch(FetchMode.JOIN)
+    @OneToOne(mappedBy = "userDetail", fetch = FetchType.EAGER)
+    @Fetch(FetchMode.BATCH)
     private UserDetailItem1 userDetailItem1;
 
     public String getCode() {

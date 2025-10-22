@@ -1,6 +1,7 @@
 package com.mybatisgx.util;
 
 import com.alibaba.druid.pool.DruidDataSource;
+import com.google.common.collect.Sets;
 import com.lc.mybatisx.context.MybatisxContextLoader;
 import com.lc.mybatisx.ext.MybatisxConfiguration;
 import com.lc.mybatisx.template.StatementTemplateHandler;
@@ -66,7 +67,8 @@ public class DaoTestUtils {
         MybatisxConfiguration mybatisxConfiguration = new MybatisxConfiguration(environment);
         mybatisxConfiguration.setLogImpl(StdOutImpl.class);
         mybatisxConfiguration.setLazyLoadingEnabled(true);
-        mybatisxConfiguration.setAggressiveLazyLoading(true);
+        mybatisxConfiguration.setAggressiveLazyLoading(false);
+        mybatisxConfiguration.setLazyLoadTriggerMethods(Sets.newHashSet("get"));
 
         MybatisxContextLoader mybatisxContextLoader = new MybatisxContextLoader();
         mybatisxContextLoader.processEntityClass(entityClassList);

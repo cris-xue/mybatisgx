@@ -1,4 +1,4 @@
-package com.mybatisgx.manytomany.entity;
+package com.mybatisgx.relation.select.manytomany.entity;
 
 import com.lc.mybatisx.annotation.Entity;
 import com.lc.mybatisx.annotation.Table;

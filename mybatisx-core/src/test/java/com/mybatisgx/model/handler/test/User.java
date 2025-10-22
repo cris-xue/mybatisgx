@@ -2,7 +2,7 @@ package com.mybatisgx.model.handler.test;
 
 import com.lc.mybatisx.annotation.*;
 import com.mybatisgx.entity.BaseEntity;
-import com.mybatisgx.manytomany.entity.Role;
+import com.mybatisgx.relation.select.manytomany.entity.Role;
 
 import javax.persistence.FetchType;
 import java.util.List;

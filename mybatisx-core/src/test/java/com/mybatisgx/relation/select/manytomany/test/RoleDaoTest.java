@@ -1,12 +1,12 @@
-package com.mybatisgx.manytomany.test;
+package com.mybatisgx.relation.select.manytomany.test;
 
 import com.github.swierkosz.fixture.generator.FixtureGenerator;
-import com.mybatisgx.manytomany.dao.RoleDao;
-import com.mybatisgx.manytomany.dao.UserDao;
-import com.mybatisgx.manytomany.dao.UserRoleDao;
-import com.mybatisgx.manytomany.entity.Role;
-import com.mybatisgx.manytomany.entity.User;
-import com.mybatisgx.manytomany.entity.UserRole;
+import com.mybatisgx.relation.select.manytomany.dao.RoleDao;
+import com.mybatisgx.relation.select.manytomany.dao.UserDao;
+import com.mybatisgx.relation.select.manytomany.dao.UserRoleDao;
+import com.mybatisgx.relation.select.manytomany.entity.Role;
+import com.mybatisgx.relation.select.manytomany.entity.User;
+import com.mybatisgx.relation.select.manytomany.entity.UserRole;
 import com.mybatisgx.util.DaoTestUtils;
 import org.apache.ibatis.session.SqlSession;
 import org.junit.Assert;

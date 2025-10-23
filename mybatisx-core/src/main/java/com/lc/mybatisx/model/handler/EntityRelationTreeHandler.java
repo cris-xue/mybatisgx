@@ -232,7 +232,7 @@ public class EntityRelationTreeHandler {
         /**
          * 自依赖检测最大深度
          */
-        private static final int MAX_DEPTH = 5;
+        private static final int MAX_DEPTH = 3;
         /**
          * 父类
          */
@@ -289,7 +289,7 @@ public class EntityRelationTreeHandler {
         public Boolean cycleRefCheck(Class<?> subClazz) {
             // 自循环引用是可以允许的
             if (this.clazz == subClazz) {
-                return this.depth > MAX_DEPTH;
+                return this.depth >= MAX_DEPTH;
             }
             return this.path.contains(subClazz);
         }

@@ -111,46 +111,41 @@ public class WhereTemplateHandler {
 
         @Override
         public void process(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement) {
-            this.processId(whereElement, methodInfo, conditionInfo);
-        }
-
-        private void processId(Element whereElement, MethodInfo methodInfo, ConditionInfo conditionInfo) {
             IdColumnInfo idColumnInfo = (IdColumnInfo) conditionInfo.getColumnInfo();
-            List<ColumnInfo> composites = idColumnInfo.getComposites();
-            if (ObjectUtils.isEmpty(composites)) {
-                List<String> javaColumnPathList = Arrays.asList(idColumnInfo.getJavaColumnName());
-                ColumnInfo composite = new ColumnInfo.Builder().columnInfo(idColumnInfo).javaColumnPathList(javaColumnPathList).build();
-                this.processIdCondition(whereElement, methodInfo, composite);
+            if (ObjectUtils.isEmpty(idColumnInfo.getComposites())) {
+                processSimpleId(whereElement, methodInfo, idColumnInfo);
             } else {
-                for (ColumnInfo columnInfo : composites) {
-                    List<String> javaColumnPathList = Arrays.asList(conditionInfo.getConditionName(), columnInfo.getJavaColumnName());
-                    ColumnInfo composite = new ColumnInfo.Builder().columnInfo(columnInfo).javaColumnPathList(javaColumnPathList).build();
-                    this.processIdCondition(whereElement, methodInfo, composite);
-                }
+                processCompositeId(whereElement, methodInfo, idColumnInfo);
             }
         }
 
-        private void processIdCondition(Element whereElement, MethodInfo methodInfo, ColumnInfo columnInfo) {
-            List<String> javaColumnPathList = columnInfo.getJavaColumnPathList();
-            String javaColumnName = StringUtils.join(javaColumnPathList, ".");
-            String tableColumnName = columnInfo.getDbColumnName();
-            if (methodInfo.getDynamic()) {
-                List<String> testExpressionList = new ArrayList();
-                List<String> previousJavaColumnPath = new ArrayList();
-                for (String javaColumnPath : javaColumnPathList) {
-                    previousJavaColumnPath.add(javaColumnPath);
-                    javaColumnName = StringUtils.join(previousJavaColumnPath, ".");
-                    String testExpression = String.format("%s != null", javaColumnName);
-                    testExpressionList.add(testExpression);
-                }
-                String testExpressionString = StringUtils.join(testExpressionList, " and ");
+        private void processSimpleId(Element whereElement, MethodInfo methodInfo, IdColumnInfo idColumnInfo) {
+            String testExpression = String.format("%s != null", idColumnInfo.getJavaColumnName());
+            Element whereOrIfElement = ConditionUtils.createDynamicElementIfNeeded(whereElement, methodInfo.getDynamic(), testExpression);
+            whereOrIfElement.addText(String.format("and %s = #{%s}", idColumnInfo.getDbColumnName(), idColumnInfo.getJavaColumnName()));
+        }
 
-                Element ifElement = whereElement.addElement("if");
-                ifElement.addAttribute("test", testExpressionString);
-                ifElement.addText(String.format(" %s %s %s #{%s}", "and", tableColumnName, "=", javaColumnName));
-            } else {
-                whereElement.addText(String.format(" %s %s %s #{%s}", "and", tableColumnName, "=", javaColumnName));
+        private void processCompositeId(Element whereElement, MethodInfo methodInfo, IdColumnInfo idColumnInfo) {
+            String testExpression = this.getTestExpression(idColumnInfo);
+            Element whereOrIfElement = ConditionUtils.createDynamicElementIfNeeded(whereElement, methodInfo.getDynamic(), testExpression);
+            String conditionExpression = this.getConditionExpression(idColumnInfo);
+            whereOrIfElement.addText(conditionExpression);
+        }
+
+        private String getTestExpression(IdColumnInfo idColumnInfo) {
+            List<String> testExpressionList = new ArrayList();
+            for (ColumnInfo columnInfo : idColumnInfo.getComposites()) {
+                testExpressionList.add(String.format("%s != null and %s.%s != null", idColumnInfo.getJavaColumnName(), idColumnInfo.getJavaColumnName(), columnInfo.getJavaColumnName()));
             }
+            return StringUtils.join(testExpressionList, " and ");
+        }
+
+        private String getConditionExpression(IdColumnInfo idColumnInfo) {
+            List<String> conditionExpressionList = new ArrayList();
+            for (ColumnInfo columnInfo : idColumnInfo.getComposites()) {
+                conditionExpressionList.add(String.format("and %s = #{%s.%s} ", columnInfo.getDbColumnName(), idColumnInfo.getJavaColumnName(), columnInfo.getJavaColumnName()));
+            }
+            return StringUtils.join(conditionExpressionList, "");
         }
     }
 
@@ -167,21 +162,8 @@ public class WhereTemplateHandler {
 
         @Override
         public void process(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement) {
-            ConditionHandler conditionHandler = conditionHandlers.get(conditionInfo.getComparisonOp());
+            ConditionHandler conditionHandler = conditionHandlers.getOrDefault(conditionInfo.getComparisonOp(), conditionHandlers.get("default"));
             conditionHandler.handle(methodInfo, conditionInfo, whereElement);
-        }
-
-        private void processCondition(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement) {
-            /*String comparisonOp = conditionInfo.getComparisonOp();
-            if ("like".equals(comparisonOp)) {
-                whereLike(whereElement, methodInfo, conditionInfo);
-            } else if ("in".equals(comparisonOp)) {
-                whereIn(whereElement, methodInfo, conditionInfo);
-            } else if ("between".equals(comparisonOp)) {
-                whereBetween(whereElement, methodInfo, conditionInfo);
-            } else {
-                whereCommon(whereElement, methodInfo, conditionInfo);
-            }*/
         }
     }
 
@@ -198,7 +180,7 @@ public class WhereTemplateHandler {
 
         @Override
         public void process(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement) {
-            ConditionHandler conditionHandler = conditionHandlers.get(conditionInfo.getComparisonOp());
+            ConditionHandler conditionHandler = conditionHandlers.getOrDefault(conditionInfo.getComparisonOp(), conditionHandlers.get("default"));
             conditionHandler.handle(methodInfo, conditionInfo, whereElement);
         }
     }
@@ -340,6 +322,33 @@ public class WhereTemplateHandler {
                 String conditionOp = String.format(" %s %s %s #{%s}", logicOp, tableColumnName, comparisonOp, javaColumnName);
                 trimOrIfElement.addText(conditionOp);
             }
+        }
+    }
+
+    static class ConditionUtils {
+
+        /**
+         * 创建动态条件元素（if标签）
+         */
+        public static Element createDynamicElementIfNeeded(Element parent, boolean dynamic, String testExpression) {
+            if (dynamic) {
+                Element ifElement = parent.addElement("if");
+                ifElement.addAttribute("test", testExpression);
+                return ifElement;
+            }
+            return parent;
+        }
+
+        /**
+         * 创建带bind的动态元素
+         */
+        public static Element createBindDynamicElement(Element parent, boolean dynamic, String javaColumnName) {
+            if (dynamic) {
+                Element ifElement = parent.addElement("if");
+                ifElement.addAttribute("test", javaColumnName + " != null");
+                return ifElement;
+            }
+            return parent;
         }
     }
 }

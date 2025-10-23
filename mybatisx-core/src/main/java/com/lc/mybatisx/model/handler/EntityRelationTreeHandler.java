@@ -5,6 +5,7 @@ import com.lc.mybatisx.annotation.ManyToMany;
 import com.lc.mybatisx.context.EntityInfoContextHolder;
 import com.lc.mybatisx.model.*;
 import com.lc.mybatisx.utils.TypeUtils;
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -37,25 +38,27 @@ public class EntityRelationTreeHandler {
 
         // 解决循环引用问题
         EntityRelationDependencyTree entityRelationDependencyTree = EntityRelationDependencyTree.build(null, resultClass);
-        EntityRelationTree entityRelationInfo = this.buildRelationColumnInfo(null, entityInfo, entityRelationDependencyTree, 1);
+        EntityRelationTree entityRelationInfo = this.buildEntityRelationTree(null, entityInfo, entityRelationDependencyTree, 1, 1);
 
         mapperInfo.addEntityRelationTree(entityRelationInfo);
         return entityRelationInfo;
     }
 
-    private EntityRelationTree buildRelationColumnInfo(ColumnInfo columnInfo, EntityInfo entityInfo, EntityRelationDependencyTree entityRelationDependencyTree, int level) {
+    private EntityRelationTree buildEntityRelationTree(ColumnInfo columnInfo, EntityInfo entityInfo, EntityRelationDependencyTree entityRelationDependencyTree, int level, int index) {
         if (entityInfo == null) {
             return null;
         }
-        MiddleEntityInfo middleEntityInfo = this.buildMiddleEntityInfo(columnInfo, entityInfo);
+        MiddleEntityInfo middleEntityInfo = this.buildMiddleEntityInfo(columnInfo);
         EntityRelationTree entityRelationTree = new EntityRelationTree();
         entityRelationTree.setLevel(level);
         entityRelationTree.setColumnInfo(columnInfo);
         entityRelationTree.setMiddleEntityInfo(middleEntityInfo);
         entityRelationTree.setEntityInfo(entityInfo);
-        this.tableColumnNameAlias.process(level, entityInfo);
+        this.tableColumnNameAlias.process(level, index, entityInfo);
 
-        for (RelationColumnInfo relationColumnInfo : entityInfo.getRelationColumnInfoList()) {
+        List<RelationColumnInfo> relationColumnInfoList = entityInfo.getRelationColumnInfoList();
+        for (int i = 0; i < relationColumnInfoList.size(); i++) {
+            RelationColumnInfo relationColumnInfo = relationColumnInfoList.get(i);
             Class<?> javaType = relationColumnInfo.getJavaType();
             Boolean isCycleRef = entityRelationDependencyTree.cycleRefCheck(javaType);
             if (isCycleRef) {
@@ -70,15 +73,15 @@ public class EntityRelationTreeHandler {
             }
             EntityRelationDependencyTree childrenResultMapDependencyTree = EntityRelationDependencyTree.build(entityRelationDependencyTree, javaType);
             EntityInfo relationColumnEntityInfo = EntityInfoContextHolder.get(javaType);
-            EntityRelationTree subEntityRelationInfo = this.buildRelationColumnInfo(relationColumnInfo, relationColumnEntityInfo, childrenResultMapDependencyTree, level + 1);
-            if (subEntityRelationInfo != null) {
-                entityRelationTree.addEntityRelation(subEntityRelationInfo);
+            EntityRelationTree subEntityRelationTree = this.buildEntityRelationTree(relationColumnInfo, relationColumnEntityInfo, childrenResultMapDependencyTree, level + 1, i + 1);
+            if (subEntityRelationTree != null) {
+                entityRelationTree.addEntityRelation(subEntityRelationTree);
             }
         }
         return entityRelationTree;
     }
 
-    private MiddleEntityInfo buildMiddleEntityInfo(ColumnInfo columnInfo, EntityInfo entityInfo) {
+    private MiddleEntityInfo buildMiddleEntityInfo(ColumnInfo columnInfo) {
         if (columnInfo == null) {
             return null;
         }
@@ -127,6 +130,19 @@ public class EntityRelationTreeHandler {
         return middleEntityInfo;
     }
 
+    private EntityInfo getRelationColumnEntityInfo(Boolean isSelfRef, Class<?> javaType) {
+        EntityInfo relationColumnEntityInfo = EntityInfoContextHolder.get(javaType);
+        if (isSelfRef) {
+            try {
+                return (EntityInfo) BeanUtils.cloneBean(relationColumnEntityInfo);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            return relationColumnEntityInfo;
+        }
+    }
+
     /**
      * 表字段别名
      *
@@ -141,8 +157,10 @@ public class EntityRelationTreeHandler {
          * @param level
          * @param entityInfo
          */
-        private void process(int level, EntityInfo entityInfo) {
+        private void process(int level, int index, EntityInfo entityInfo) {
             String tableName = entityInfo.getTableName();
+            String tableNameAlias = String.format("%s_%s_%s", tableName, level, index);
+            entityInfo.setTableNameAlias(tableNameAlias);
             List<ColumnInfo> tableColumnInfoList = entityInfo.getTableColumnInfoList();
             for (int i = 0; i < tableColumnInfoList.size(); i++) {
                 ColumnInfo columnInfo = tableColumnInfoList.get(i);
@@ -151,42 +169,34 @@ public class EntityRelationTreeHandler {
                     List<ColumnInfo> columnInfoList = idColumnInfo.getComposites();
                     if (ObjectUtils.isEmpty(columnInfoList)) {
                         String dbColumnName = columnInfo.getDbColumnName();
-                        String dbColumnNameAlias = this.buildTableColumnNameAlias(tableName, dbColumnName, level, i);
+                        String dbColumnNameAlias = this.buildTableColumnNameAlias(tableName, dbColumnName, level, index, i);
                         columnInfo.setDbColumnNameAlias(dbColumnNameAlias);
                     } else {
                         for (ColumnInfo subColumnInfo : columnInfoList) {
                             String dbColumnName = subColumnInfo.getDbColumnName();
-                            String dbColumnNameAlias = this.buildTableColumnNameAlias(tableName, dbColumnName, level, i);
+                            String dbColumnNameAlias = this.buildTableColumnNameAlias(tableName, dbColumnName, level, index, i);
                             subColumnInfo.setDbColumnNameAlias(dbColumnNameAlias);
                         }
                     }
                 } else if (TypeUtils.typeEquals(columnInfo, ColumnInfo.class)) {
                     String dbColumnName = columnInfo.getDbColumnName();
-                    String dbColumnNameAlias = this.buildTableColumnNameAlias(tableName, dbColumnName, level, i);
+                    String dbColumnNameAlias = this.buildTableColumnNameAlias(tableName, dbColumnName, level, index, i);
                     columnInfo.setDbColumnNameAlias(dbColumnNameAlias);
                 } else if (TypeUtils.typeEquals(columnInfo, RelationColumnInfo.class)) {
                     RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
                     ManyToMany manyToMany = relationColumnInfo.getManyToMany();
                     if (manyToMany == null) {
                         List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
-                        this.processForeignKeyColumnAlias(inverseForeignKeyColumnInfoList, tableName, level, i);
+                        this.processForeignKeyColumnAlias(inverseForeignKeyColumnInfoList, tableName, level, index, i);
                     } else {
                         List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = relationColumnInfo.getForeignKeyColumnInfoList();
-                        this.processForeignKeyColumnAlias(foreignKeyColumnInfoList, tableName, level, i);
+                        this.processForeignKeyColumnAlias(foreignKeyColumnInfoList, tableName, level, index, i);
 
                         List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
-                        this.processForeignKeyColumnAlias(inverseForeignKeyColumnInfoList, tableName, level, i);
+                        this.processForeignKeyColumnAlias(inverseForeignKeyColumnInfoList, tableName, level, index, i);
                     }
                 }
             }
-        }
-
-        /**
-         * 处理列别名
-         *
-         * @param columnInfo
-         */
-        private void processColumnAlias(ColumnInfo columnInfo) {
         }
 
         /**
@@ -195,20 +205,21 @@ public class EntityRelationTreeHandler {
          * @param foreignKeyColumnInfoList
          * @param tableName
          * @param level
-         * @param index
+         * @param tableIndex
+         * @param columnIndex
          */
-        private void processForeignKeyColumnAlias(List<ForeignKeyColumnInfo> foreignKeyColumnInfoList, String tableName, int level, int index) {
+        private void processForeignKeyColumnAlias(List<ForeignKeyColumnInfo> foreignKeyColumnInfoList, String tableName, int level, int tableIndex, int columnIndex) {
             for (ForeignKeyColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
                 ColumnInfo columnInfo = foreignKeyColumnInfo.getColumnInfo();
                 String dbColumnName = columnInfo.getDbColumnName();
-                String dbColumnNameAlias = this.buildTableColumnNameAlias(tableName, dbColumnName, level, index);
+                String dbColumnNameAlias = this.buildTableColumnNameAlias(tableName, dbColumnName, level, tableIndex, columnIndex);
                 columnInfo.setDbColumnNameAlias(dbColumnNameAlias);
             }
         }
 
-        private String buildTableColumnNameAlias(String tableName, String name, int level, int index) {
+        private String buildTableColumnNameAlias(String tableName, String name, int level, int tableIndex, int columnIndex) {
             int randomIndex = RandomUtils.nextInt(0, 9);
-            return String.format("%s_%s_%s_%s_%s", tableName, name, level, index, randomIndex);
+            return String.format("%s_%s_%s_%s_%s_%s", tableName, name, level, tableIndex, columnIndex, randomIndex);
         }
     }
 

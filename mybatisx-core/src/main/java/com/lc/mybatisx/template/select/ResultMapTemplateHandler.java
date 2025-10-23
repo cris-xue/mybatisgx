@@ -101,10 +101,21 @@ public class ResultMapTemplateHandler {
                     for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : relationColumnInfo.getInverseForeignKeyColumnInfoList()) {
                         ColumnInfo foreignKeyColumnInfo = inverseForeignKeyColumnInfo.getColumnInfo();
                         ColumnInfo referencedColumnInfo = inverseForeignKeyColumnInfo.getReferencedColumnInfo();
-
-                        String javaColumnName = String.format("%s.%s", relationColumnInfo.getJavaColumnName(), referencedColumnInfo.getJavaColumnPath());
-                        ColumnInfo composite = new ColumnInfo.Builder().columnInfo(foreignKeyColumnInfo).javaColumnName(javaColumnName).build();
-                        ResultMapHelper.resultColumnElement(resultMapElement, composite);
+                        if (TypeUtils.typeEquals(referencedColumnInfo, IdColumnInfo.class)) {
+                            IdColumnInfo idColumnInfo = (IdColumnInfo) referencedColumnInfo;
+                            List<ColumnInfo> idColumnInfoComposites = idColumnInfo.getComposites();
+                            if (ObjectUtils.isEmpty(idColumnInfoComposites)) {
+                                String javaColumnName = String.format("%s.%s", relationColumnInfo.getJavaColumnName(), idColumnInfo.getJavaColumnName());
+                                ColumnInfo composite = new ColumnInfo.Builder().columnInfo(foreignKeyColumnInfo).javaColumnName(javaColumnName).build();
+                                ResultMapHelper.resultColumnElement(resultMapElement, composite);
+                            } else {
+                                for (ColumnInfo idColumnComposite : idColumnInfoComposites) {
+                                    String javaColumnName = String.format("%s.%s.%s", relationColumnInfo.getJavaColumnName(), idColumnInfo.getJavaColumnName(), idColumnComposite.getJavaColumnName());
+                                    ColumnInfo composite = new ColumnInfo.Builder().columnInfo(foreignKeyColumnInfo).javaColumnName(javaColumnName).build();
+                                    ResultMapHelper.resultColumnElement(resultMapElement, composite);
+                                }
+                            }
+                        }
                     }
                 }
             }

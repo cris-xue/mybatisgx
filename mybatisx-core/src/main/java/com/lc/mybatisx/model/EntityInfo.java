@@ -26,6 +26,10 @@ public class EntityInfo {
      */
     private String tableName;
     /**
+     * 表名称别名
+     */
+    private String tableNameAlias;
+    /**
      * 实体类型
      */
     private Class<?> clazz;
@@ -70,10 +74,6 @@ public class EntityInfo {
      */
     private List<RelationColumnInfo> relationColumnInfoList = new ArrayList<>();
     /**
-     * 一个实体可能对应多个Mapper
-     */
-    private List<MapperInfo> mapperInfoList = new ArrayList();
-    /**
      * 实体类泛型参数类型映射
      */
     private Map<Type, Class<?>> typeParameterMap;
@@ -84,6 +84,14 @@ public class EntityInfo {
 
     public void setTableName(String tableName) {
         this.tableName = tableName;
+    }
+
+    public String getTableNameAlias() {
+        return tableNameAlias;
+    }
+
+    public void setTableNameAlias(String tableNameAlias) {
+        this.tableNameAlias = tableNameAlias;
     }
 
     public Class<?> getClazz() {

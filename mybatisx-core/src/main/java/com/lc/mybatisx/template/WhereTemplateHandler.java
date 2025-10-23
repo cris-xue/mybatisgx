@@ -118,47 +118,6 @@ public class WhereTemplateHandler {
         }
     }
 
-    private void processMethodCondition(EntityInfo entityInfo, MethodInfo methodInfo, ColumnInfo columnInfo, ConditionInfo conditionInfo, Element trimElement) {
-        Boolean conditionEntity = conditionInfo.getConditionEntity();
-        if (conditionEntity) {
-            return;
-        }
-        if (methodInfo.getDynamic()) {
-            List<MethodParamInfo> methodParamInfoList = conditionInfo.getMethodParamInfoList();
-            Element ifElement = trimElement.addElement("if");
-            ifElement.addAttribute("test", String.format("%s != null", methodParamInfoList.get(0).getParamName()));
-            buildMethodCondition(ifElement, entityInfo, columnInfo, conditionInfo);
-        } else {
-            buildMethodCondition(trimElement, entityInfo, columnInfo, conditionInfo);
-        }
-    }
-
-    private void buildMethodCondition(Element parentElement, EntityInfo entityInfo, ColumnInfo columnInfo, ConditionInfo conditionInfo) {
-        List<MethodParamInfo> methodParamInfoList = conditionInfo.getMethodParamInfoList();
-        String comparisonOp = conditionInfo.getComparisonOp();
-        parentElement.addText(String.format(" %s %s %s ", conditionInfo.getLogicOp(), conditionInfo.getDbColumnName(), comparisonOp));
-        if ("in".equals(comparisonOp)) {
-            Element foreachElement = parentElement.addElement("foreach");
-            foreachElement.addAttribute("item", "item");
-            foreachElement.addAttribute("index", "index");
-            foreachElement.addAttribute("collection", methodParamInfoList.get(0).getParamName());
-            foreachElement.addAttribute("open", "(");
-            foreachElement.addAttribute("separator", ",");
-            foreachElement.addAttribute("close", ")");
-            foreachElement.addText("#{item}");
-        } else if ("between".equals(comparisonOp)) {
-            // 把between修改成大于和小于
-            // parentElement.addText(String.format("#{%s} and #{%s}", paramNameList.get(0), paramNameList.get(1)));
-        } else {
-            String typeHandler = columnInfo.getTypeHandler();
-            String typeHandlerTemplate = "";
-            if (StringUtils.isNotBlank(typeHandler)) {
-                typeHandlerTemplate = String.format(", typeHandler=%s", typeHandler);
-            }
-            parentElement.addText(String.format("#{%s%s}", methodParamInfoList.get(0).getParamName(), typeHandlerTemplate));
-        }
-    }
-
     private void processCondition(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement) {
         String comparisonOp = conditionInfo.getComparisonOp();
         if ("like".equals(comparisonOp)) {

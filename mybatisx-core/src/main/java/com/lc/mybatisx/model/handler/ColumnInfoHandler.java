@@ -250,9 +250,8 @@ public class ColumnInfoHandler {
     }
 
     public void processRelation(EntityInfo entityInfo) {
-        List<ColumnInfo> relationColumnInfoList = entityInfo.getRelationColumnInfoList();
-        for (ColumnInfo columnInfo : relationColumnInfoList) {
-            RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
+        List<RelationColumnInfo> relationColumnInfoList = entityInfo.getRelationColumnInfoList();
+        for (RelationColumnInfo relationColumnInfo : relationColumnInfoList) {
             String mappedBy = relationColumnInfo.getMappedBy();
             if (StringUtils.isNotBlank(mappedBy)) {
                 ColumnInfo mappedByRelationColumnInfo = this.validateEntityRelation(relationColumnInfo, mappedBy);

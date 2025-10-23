@@ -68,7 +68,7 @@ public class EntityInfo {
     /**
      * 关系字段信息
      */
-    private List<ColumnInfo> relationColumnInfoList = new ArrayList<>();
+    private List<RelationColumnInfo> relationColumnInfoList = new ArrayList<>();
     /**
      * 一个实体可能对应多个Mapper
      */
@@ -169,11 +169,11 @@ public class EntityInfo {
         this.lockColumnInfo = lockColumnInfo;
     }
 
-    public List<ColumnInfo> getRelationColumnInfoList() {
+    public List<RelationColumnInfo> getRelationColumnInfoList() {
         return relationColumnInfoList;
     }
 
-    public void setRelationColumnInfoList(List<ColumnInfo> relationColumnInfoList) {
+    public void setRelationColumnInfoList(List<RelationColumnInfo> relationColumnInfoList) {
         this.relationColumnInfoList = relationColumnInfoList;
     }
 
@@ -203,7 +203,7 @@ public class EntityInfo {
                 }
 
                 if (columnInfo instanceof RelationColumnInfo) {
-                    relationColumnInfoList.add(columnInfo);
+                    relationColumnInfoList.add((RelationColumnInfo) columnInfo);
                 }
 
                 this.processIdColumnInfo(columnInfo);

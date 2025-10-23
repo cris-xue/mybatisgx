@@ -213,9 +213,21 @@ public class InsertTemplateHandler {
                 for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : relationColumnInfo.getInverseForeignKeyColumnInfoList()) {
                     ColumnInfo foreignKeyColumnInfo = inverseForeignKeyColumnInfo.getColumnInfo();
                     ColumnInfo referencedColumnInfo = inverseForeignKeyColumnInfo.getReferencedColumnInfo();
-                    String javaColumnName = String.format("%s.%s", relationColumnInfo.getJavaColumnName(), referencedColumnInfo.getJavaColumnPath());
-                    ColumnInfo composite = new ColumnInfo.Builder().columnInfo(foreignKeyColumnInfo).javaColumnName(javaColumnName).build();
-                    this.handleMethodParam(methodInfo, methodParamInfo, composite, javaTrimElement);
+                    if (TypeUtils.typeEquals(referencedColumnInfo, IdColumnInfo.class)) {
+                        IdColumnInfo idColumnInfo = (IdColumnInfo) referencedColumnInfo;
+                        List<ColumnInfo> idColumnInfoComposites = idColumnInfo.getComposites();
+                        if (ObjectUtils.isEmpty(idColumnInfoComposites)) {
+                            String javaColumnName = String.format("%s.%s", relationColumnInfo.getJavaColumnName(), referencedColumnInfo.getJavaColumnName());
+                            ColumnInfo composite = new ColumnInfo.Builder().columnInfo(foreignKeyColumnInfo).javaColumnName(javaColumnName).build();
+                            this.handleMethodParam(methodInfo, methodParamInfo, composite, javaTrimElement);
+                        } else {
+                            for (ColumnInfo idColumnInfoComposite : idColumnInfoComposites) {
+                                String javaColumnName = String.format("%s.%s.%s", relationColumnInfo.getJavaColumnName(), referencedColumnInfo.getJavaColumnName(), idColumnInfoComposite.getJavaColumnName());
+                                ColumnInfo composite = new ColumnInfo.Builder().columnInfo(foreignKeyColumnInfo).javaColumnName(javaColumnName).build();
+                                this.handleMethodParam(methodInfo, methodParamInfo, composite, javaTrimElement);
+                            }
+                        }
+                    }
                 }
             }
         }

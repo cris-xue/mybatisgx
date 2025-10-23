@@ -22,7 +22,9 @@ public class WhereTemplateHandler {
         Element whereElement = parentElement.addElement("where");
         this.handleConditionGroup(methodInfo, whereElement, conditionInfoList);
 
-        // 查询不需要乐观锁版本条件
+        this.addOptimisticLockCondition(entityInfo, methodInfo, whereElement);
+        this.addLogicDeleteCondition(entityInfo, whereElement);
+        /*// 查询不需要乐观锁版本条件
         ColumnInfo lockColumnInfo = entityInfo.getLockColumnInfo();
         if (lockColumnInfo != null) {
             // 只有更新的场景才需要乐观锁，逻辑删除不需要乐观锁，因为逻辑删除直接改变逻辑删除字段，因为不管什么操作都一定需要逻辑删除字段
@@ -31,6 +33,26 @@ public class WhereTemplateHandler {
             }
         }
 
+        // 逻辑删除
+        ColumnInfo logicDeleteColumnInfo = entityInfo.getLogicDeleteColumnInfo();
+        if (logicDeleteColumnInfo != null) {
+            LogicDelete logicDelete = logicDeleteColumnInfo.getLogicDelete();
+            whereElement.addText(String.format(" and %s = '%s'", logicDeleteColumnInfo.getDbColumnName(), logicDelete.show()));
+        }*/
+    }
+
+    private void addOptimisticLockCondition(EntityInfo entityInfo, MethodInfo methodInfo, Element whereElement) {
+        // 查询不需要乐观锁版本条件
+        ColumnInfo lockColumnInfo = entityInfo.getLockColumnInfo();
+        if (lockColumnInfo != null) {
+            // 只有更新的场景才需要乐观锁，逻辑删除不需要乐观锁，因为逻辑删除直接改变逻辑删除字段，因为不管什么操作都一定需要逻辑删除字段
+            if ("update".equals(methodInfo.getAction())) {
+                whereElement.addText(String.format(" and %s = #{%s}", lockColumnInfo.getDbColumnName(), lockColumnInfo.getJavaColumnName()));
+            }
+        }
+    }
+
+    private void addLogicDeleteCondition(EntityInfo entityInfo, Element whereElement) {
         // 逻辑删除
         ColumnInfo logicDeleteColumnInfo = entityInfo.getLogicDeleteColumnInfo();
         if (logicDeleteColumnInfo != null) {
@@ -61,7 +83,9 @@ public class WhereTemplateHandler {
                     continue;
                 }
 
-                if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class)) {
+                ConditionProcessor conditionProcessor = this.processorFactory.getProcessor(columnInfo);
+                conditionProcessor.process(methodInfo, conditionInfo, whereElement);
+                /*if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class)) {
                     this.processId(whereElement, methodInfo, conditionInfo);
                 }
                 if (TypeUtils.typeEquals(columnInfo, ColumnInfo.class)) {
@@ -73,7 +97,7 @@ public class WhereTemplateHandler {
                     if (mappedByRelationColumnInfo == null) {
                         this.processCondition(methodInfo, conditionInfo, whereElement);
                     }
-                }
+                }*/
             }
         }
     }
@@ -276,7 +300,7 @@ public class WhereTemplateHandler {
 
         @Override
         public void process(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement) {
-
+            this.processId(whereElement, methodInfo, conditionInfo);
         }
 
         private void processId(Element whereElement, MethodInfo methodInfo, ConditionInfo conditionInfo) {
@@ -332,11 +356,12 @@ public class WhereTemplateHandler {
 
         @Override
         public void process(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement) {
-
+            ConditionHandler conditionHandler = conditionHandlers.get(conditionInfo.getComparisonOp());
+            conditionHandler.handle(methodInfo, conditionInfo, whereElement);
         }
 
         private void processCondition(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement) {
-            String comparisonOp = conditionInfo.getComparisonOp();
+            /*String comparisonOp = conditionInfo.getComparisonOp();
             if ("like".equals(comparisonOp)) {
                 whereLike(whereElement, methodInfo, conditionInfo);
             } else if ("in".equals(comparisonOp)) {
@@ -345,15 +370,25 @@ public class WhereTemplateHandler {
                 whereBetween(whereElement, methodInfo, conditionInfo);
             } else {
                 whereCommon(whereElement, methodInfo, conditionInfo);
-            }
+            }*/
         }
     }
 
     static class RelationConditionProcessor implements ConditionProcessor {
 
+        private final Map<String, ConditionHandler> conditionHandlers = new HashMap<>();
+
+        public RelationConditionProcessor() {
+            conditionHandlers.put("like", new LikeConditionHandler());
+            conditionHandlers.put("in", new InConditionHandler());
+            conditionHandlers.put("between", new BetweenConditionHandler());
+            conditionHandlers.put("default", new CommonConditionHandler());
+        }
+
         @Override
         public void process(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement) {
-
+            ConditionHandler conditionHandler = conditionHandlers.get(conditionInfo.getComparisonOp());
+            conditionHandler.handle(methodInfo, conditionInfo, whereElement);
         }
     }
 

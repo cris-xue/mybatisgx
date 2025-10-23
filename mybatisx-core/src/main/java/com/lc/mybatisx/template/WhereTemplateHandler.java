@@ -59,22 +59,22 @@ public class WhereTemplateHandler {
                 ColumnInfo columnInfo = conditionInfo.getColumnInfo();
                 LogicDelete logicDelete = columnInfo.getLogicDelete();
                 if (logicDelete != null) {
-                    return;
-                }
-
-                int methodParamCount = methodInfo.getMethodParamInfoList().size();
-                if (methodParamCount == 1) {
-                    MethodParamInfo methodParamInfo = methodInfo.getMethodParamInfoList().get(0);
-                    if (methodParamInfo.getBasicType()) {
-                    }
+                    continue;
                 }
 
                 if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class)) {
                     this.processId(whereElement, methodInfo, conditionInfo);
-                    return;
                 }
-
-                this.processCondition(methodInfo, conditionInfo, whereElement);
+                if (TypeUtils.typeEquals(columnInfo, ColumnInfo.class)) {
+                    this.processCondition(methodInfo, conditionInfo, whereElement);
+                }
+                if (TypeUtils.typeEquals(columnInfo, RelationColumnInfo.class)) {
+                    RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
+                    RelationColumnInfo mappedByRelationColumnInfo = relationColumnInfo.getMappedByRelationColumnInfo();
+                    if (mappedByRelationColumnInfo == null) {
+                        this.processCondition(methodInfo, conditionInfo, whereElement);
+                    }
+                }
             }
         }
     }
@@ -173,15 +173,32 @@ public class WhereTemplateHandler {
     }
 
     private void whereCommon(Element whereElement, MethodInfo methodInfo, ConditionInfo conditionInfo) {
-        /*String dbColumnName = conditionInfo.getDbColumnName();
-        String javaColumnName = conditionInfo.getConditionEntity() ? conditionInfo.getConditionEntityJavaColumnName() : conditionInfo.getJavaColumnName();*/
-        String tableColumnName = conditionInfo.getColumnInfo().getDbColumnName();
-        String javaColumnName = conditionInfo.getColumnInfo().getJavaColumnName();
-        String logicOp = this.getLogicOp(conditionInfo);
-        String comparisonOp = conditionInfo.getComparisonOp();
-        Element trimOrIfElement = whereOpDynamic(methodInfo.getDynamic(), whereElement, javaColumnName);
-        String conditionOp = String.format(" %s %s %s #{%s}", logicOp, tableColumnName, comparisonOp, javaColumnName);
-        trimOrIfElement.addText(conditionOp);
+        ColumnInfo columnInfo = conditionInfo.getColumnInfo();
+        if (TypeUtils.typeEquals(columnInfo, RelationColumnInfo.class)) {
+            RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
+            RelationColumnInfo mappedByRelationColumnInfo = relationColumnInfo.getMappedByRelationColumnInfo();
+            if (relationColumnInfo.getRelationType() != RelationType.MANY_TO_MANY && mappedByRelationColumnInfo == null) {
+                String tableColumnName = relationColumnInfo.getDbColumnName();
+                List<ForeignKeyColumnInfo> foreignKeyInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
+                for (ForeignKeyColumnInfo foreignKeyInfo : foreignKeyInfoList) {
+                    ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();
+                    String javaColumnName = relationColumnInfo.getJavaColumnName() + "." + referencedColumnInfo.getJavaColumnName();
+                    String logicOp = this.getLogicOp(conditionInfo);
+                    String comparisonOp = conditionInfo.getComparisonOp();
+                    Element trimOrIfElement = whereOpDynamic(methodInfo.getDynamic(), whereElement, javaColumnName);
+                    String conditionOp = String.format(" %s %s %s #{%s}", logicOp, tableColumnName, comparisonOp, javaColumnName);
+                    trimOrIfElement.addText(conditionOp);
+                }
+            }
+        } else {
+            String tableColumnName = conditionInfo.getColumnInfo().getDbColumnName();
+            String javaColumnName = conditionInfo.getColumnInfo().getJavaColumnName();
+            String logicOp = this.getLogicOp(conditionInfo);
+            String comparisonOp = conditionInfo.getComparisonOp();
+            Element trimOrIfElement = whereOpDynamic(methodInfo.getDynamic(), whereElement, javaColumnName);
+            String conditionOp = String.format(" %s %s %s #{%s}", logicOp, tableColumnName, comparisonOp, javaColumnName);
+            trimOrIfElement.addText(conditionOp);
+        }
     }
 
     /**

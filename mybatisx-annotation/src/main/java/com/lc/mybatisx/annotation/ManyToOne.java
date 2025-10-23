@@ -16,23 +16,9 @@ public @interface ManyToOne {
     FetchType fetch() default FetchType.LAZY;
 
     /**
-     * 抓取数量
-     *
-     * @return
-     */
-    int fetchSize() default 0;
-
-    /**
      * 关系维护方
      *
      * @return
      */
     String mappedBy() default "";
-
-    /**
-     * 加载策略
-     *
-     * @return
-     */
-    LoadStrategy loadStrategy() default LoadStrategy.SUB;
 }

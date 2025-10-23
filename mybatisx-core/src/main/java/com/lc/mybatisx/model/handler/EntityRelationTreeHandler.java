@@ -55,13 +55,17 @@ public class EntityRelationTreeHandler {
         entityRelationTree.setEntityInfo(entityInfo);
         this.tableColumnNameAlias.process(level, entityInfo);
 
-        List<ColumnInfo> relationColumnInfoList = entityInfo.getRelationColumnInfoList();
-        for (ColumnInfo relationColumnInfo : relationColumnInfoList) {
+        for (RelationColumnInfo relationColumnInfo : entityInfo.getRelationColumnInfoList()) {
             Class<?> javaType = relationColumnInfo.getJavaType();
             Boolean isCycleRef = entityRelationDependencyTree.cycleRefCheck(javaType);
             if (isCycleRef) {
                 String pathString = StringUtils.join(entityRelationDependencyTree.getPath(), "->");
                 LOGGER.debug("{}->{}存在循环引用，消除循环引用防止无限循环", pathString, javaType);
+                continue;
+            }
+            Boolean isSelfRef = entityRelationDependencyTree.selfRefCheck(javaType);
+            if (isSelfRef && relationColumnInfo.getRelationType() == RelationType.MANY_TO_ONE) {
+                LOGGER.debug("自引用忽略父引用");
                 continue;
             }
             EntityRelationDependencyTree childrenResultMapDependencyTree = EntityRelationDependencyTree.build(entityRelationDependencyTree, javaType);
@@ -286,12 +290,25 @@ public class EntityRelationTreeHandler {
             this.path = path;
         }
 
+        /**
+         * 自循环引用是可以允许的
+         * @param subClazz
+         * @return
+         */
         public Boolean cycleRefCheck(Class<?> subClazz) {
-            // 自循环引用是可以允许的
             if (this.clazz == subClazz) {
                 return this.depth >= MAX_DEPTH;
             }
             return this.path.contains(subClazz);
+        }
+
+        /**
+         * 自引用检查
+         * @param subClazz
+         * @return
+         */
+        public Boolean selfRefCheck(Class<?> subClazz) {
+            return this.clazz == subClazz;
         }
 
         public static EntityRelationDependencyTree build(EntityRelationDependencyTree entityRelationDependencyTree, Class<?> clazz) {

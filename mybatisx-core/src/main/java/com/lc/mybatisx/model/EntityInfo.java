@@ -82,10 +82,6 @@ public class EntityInfo {
         return tableName;
     }
 
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
-    }
-
     public String getTableNameAlias() {
         return tableNameAlias;
     }
@@ -98,34 +94,12 @@ public class EntityInfo {
         return clazz;
     }
 
-    public void setClazz(Class<?> clazz) {
-        this.clazz = clazz;
-    }
-
     public String getClazzName() {
         return clazzName;
     }
 
-    public void setClazzName(String clazzName) {
-        this.clazzName = clazzName;
-    }
-
     public List<ColumnInfo> getColumnInfoList() {
         return columnInfoList;
-    }
-
-    public void setColumnInfoList(List<ColumnInfo> columnInfoList) {
-        this.columnInfoList = columnInfoList;
-        EntityColumn entityColumn = new EntityColumn();
-        entityColumn.process(columnInfoList);
-    }
-
-    public Map<String, ColumnInfo> getColumnInfoMap() {
-        return columnInfoMap;
-    }
-
-    public void setColumnInfoMap(Map<String, ColumnInfo> columnInfoMap) {
-        this.columnInfoMap = columnInfoMap;
     }
 
     public ColumnInfo getColumnInfo(String javaColumnName) {
@@ -141,56 +115,28 @@ public class EntityInfo {
         return idColumnInfo;
     }
 
-    public void setIdColumnInfo(IdColumnInfo idColumnInfo) {
-        this.idColumnInfo = idColumnInfo;
-    }
-
     public List<ColumnInfo> getGenerateValueColumnInfoList() {
         return generateValueColumnInfoList;
-    }
-
-    public void setGenerateValueColumnInfoList(List<ColumnInfo> generateValueColumnInfoList) {
-        this.generateValueColumnInfoList = generateValueColumnInfoList;
     }
 
     public List<ColumnInfo> getTableColumnInfoList() {
         return tableColumnInfoList;
     }
 
-    public void setTableColumnInfoList(List<ColumnInfo> tableColumnInfoList) {
-        this.tableColumnInfoList = tableColumnInfoList;
-    }
-
     public ColumnInfo getLogicDeleteColumnInfo() {
         return logicDeleteColumnInfo;
-    }
-
-    public void setLogicDeleteColumnInfo(ColumnInfo logicDeleteColumnInfo) {
-        this.logicDeleteColumnInfo = logicDeleteColumnInfo;
     }
 
     public ColumnInfo getLockColumnInfo() {
         return lockColumnInfo;
     }
 
-    public void setLockColumnInfo(ColumnInfo lockColumnInfo) {
-        this.lockColumnInfo = lockColumnInfo;
-    }
-
     public List<RelationColumnInfo> getRelationColumnInfoList() {
         return relationColumnInfoList;
     }
 
-    public void setRelationColumnInfoList(List<RelationColumnInfo> relationColumnInfoList) {
-        this.relationColumnInfoList = relationColumnInfoList;
-    }
-
     public Map<Type, Class<?>> getTypeParameterMap() {
         return typeParameterMap;
-    }
-
-    public void setTypeParameterMap(Map<Type, Class<?>> typeParameterMap) {
-        this.typeParameterMap = typeParameterMap;
     }
 
     public static class Builder {
@@ -202,28 +148,28 @@ public class EntityInfo {
         }
 
         public Builder setTableName(String tableName) {
-            this.entityInfo.setTableName(tableName);
+            this.entityInfo.tableName = tableName;
             return this;
         }
 
         public Builder setClazz(Class<?> clazz) {
-            this.entityInfo.setClazz(clazz);
+            this.entityInfo.clazz = clazz;
             this.entityInfo.clazzName = clazz.getName();
             return this;
         }
 
         public Builder setColumnInfoList(List<ColumnInfo> columnInfoList) {
-            this.entityInfo.setColumnInfoList(columnInfoList);
+            this.entityInfo.columnInfoList = columnInfoList;
             return this;
         }
 
         public Builder setTypeParameterMap(Map<Type, Class<?>> typeParameterMap) {
-            this.entityInfo.setTypeParameterMap(typeParameterMap);
+            this.entityInfo.typeParameterMap = typeParameterMap;
             return this;
         }
 
-        public void process() {
-            for (ColumnInfo columnInfo : entityInfo.getColumnInfoList()) {
+        public Builder process() {
+            for (ColumnInfo columnInfo : this.entityInfo.columnInfoList) {
                 Lock lock = columnInfo.getLock();
                 if (lock != null) {
                     entityInfo.lockColumnInfo = columnInfo;
@@ -265,6 +211,7 @@ public class EntityInfo {
                 }
                 entityInfo.columnInfoMap.put(columnInfo.getJavaColumnName(), columnInfo);
             }
+            return this;
         }
 
         /**

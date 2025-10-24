@@ -1,8 +1,5 @@
 package com.lc.mybatisx.model;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class ConditionInfo {
 
     /**
@@ -16,12 +13,7 @@ public class ConditionInfo {
     /**
      * 逻辑操作符【And、Or】
      */
-    private String logicOp;
-    /**
-     * user_name
-     */
-    @Deprecated
-    private String dbColumnName;
+    private LogicOp logicOp;
     /**
      * 条件名，如：findByNameAndUserId，条件名为name、userId
      */
@@ -29,38 +21,23 @@ public class ConditionInfo {
     /**
      * 比较操作符【=、<=、!=】
      */
-    private String comparisonOp = "=";
-    /**
-     * [userName、Name]
-     */
-    @Deprecated
-    private String javaColumnName;
+    private ComparisonOp comparisonOp = ComparisonOp.EQ;
     /**
      * 是否是条件实体中的字段
      */
-    private Boolean conditionEntity = false;
+    private ConditionType conditionType = ConditionType.METHOD_NAME;
     /**
-     * 条件实体java字段名称，如nameLike、userIdEq，条件名为name、userId。后续废弃掉，采用[conditionName]字段
+     * 条件实体java字段名称，如nameLike、userIdEq，条件名为name、userId。
      */
     private String conditionEntityJavaColumnName;
     /**
      * 方法参数信息列表
      */
-    private List<MethodParamInfo> methodParamInfoList = new ArrayList<>();
-    /**
-     * 条件对应的方法中的参数
-     */
-    @Deprecated
-    private List<String> paramName = new ArrayList<>();
+    private MethodParamInfo methodParamInfo;
     /**
      * 条件字段关联的实体中的字段信息
      */
     private ColumnInfo columnInfo;
-    /**
-     * 条件字段关联的id字段信息列表
-     */
-    @Deprecated
-    private List<IdColumnInfo> idColumnInfoList = new ArrayList();
     /**
      * 左括号
      */
@@ -97,20 +74,12 @@ public class ConditionInfo {
         this.origin = origin;
     }
 
-    public String getLogicOp() {
+    public LogicOp getLogicOp() {
         return logicOp;
     }
 
-    public void setLogicOp(String logicOp) {
+    public void setLogicOp(LogicOp logicOp) {
         this.logicOp = logicOp;
-    }
-
-    public String getDbColumnName() {
-        return dbColumnName;
-    }
-
-    public void setDbColumnName(String dbColumnName) {
-        this.dbColumnName = dbColumnName;
     }
 
     public String getConditionName() {
@@ -121,29 +90,20 @@ public class ConditionInfo {
         this.conditionName = conditionName;
     }
 
-    public String getComparisonOp() {
+    public ComparisonOp getComparisonOp() {
         return comparisonOp;
     }
 
-    public void setComparisonOp(String comparisonOp) {
+    public void setComparisonOp(ComparisonOp comparisonOp) {
         this.comparisonOp = comparisonOp;
     }
 
-    @Deprecated
-    public String getJavaColumnName() {
-        return javaColumnName;
+    public ConditionType getConditionType() {
+        return conditionType;
     }
 
-    public void setJavaColumnName(String javaColumnName) {
-        this.javaColumnName = javaColumnName;
-    }
-
-    public Boolean getConditionEntity() {
-        return conditionEntity;
-    }
-
-    public void setConditionEntity(Boolean conditionEntity) {
-        this.conditionEntity = conditionEntity;
+    public void setConditionType(ConditionType conditionType) {
+        this.conditionType = conditionType;
     }
 
     public String getConditionEntityJavaColumnName() {
@@ -154,28 +114,12 @@ public class ConditionInfo {
         this.conditionEntityJavaColumnName = conditionEntityJavaColumnName;
     }
 
-    public List<MethodParamInfo> getMethodParamInfoList() {
-        return methodParamInfoList;
+    public MethodParamInfo getMethodParamInfo() {
+        return methodParamInfo;
     }
 
-    public void addMethodParamInfo(MethodParamInfo methodParamInfo) {
-        this.methodParamInfoList.add(methodParamInfo);
-    }
-
-    public void setMethodParamInfoList(List<MethodParamInfo> methodParamInfoList) {
-        this.methodParamInfoList = methodParamInfoList;
-    }
-
-    public List<String> getParamName() {
-        return paramName;
-    }
-
-    public void addParamName(String paramName) {
-        this.paramName.add(paramName);
-    }
-
-    public void setParamName(List<String> paramName) {
-        this.paramName = paramName;
+    public void setMethodParamInfo(MethodParamInfo methodParamInfo) {
+        this.methodParamInfo = methodParamInfo;
     }
 
     public ColumnInfo getColumnInfo() {
@@ -184,16 +128,6 @@ public class ConditionInfo {
 
     public void setColumnInfo(ColumnInfo columnInfo) {
         this.columnInfo = columnInfo;
-        /*this.dbColumnName = columnInfo.getDbColumnName();
-        this.javaColumnName = columnInfo.getJavaColumnName();*/
-    }
-
-    public List<IdColumnInfo> getIdColumnInfoList() {
-        return idColumnInfoList;
-    }
-
-    public void setIdColumnInfoList(List<IdColumnInfo> idColumnInfoList) {
-        this.idColumnInfoList = idColumnInfoList;
     }
 
     public String getLeftBracket() {

@@ -1,5 +1,7 @@
 package com.lc.mybatisx.model;
 
+import org.apache.ibatis.mapping.SqlCommandType;
+
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -17,7 +19,7 @@ public class MethodInfo {
     /**
      * sql动作，insert、delete、update、select
      */
-    private String action;
+    private SqlCommandType sqlCommandType;
     /**
      * 方法名
      */
@@ -25,7 +27,7 @@ public class MethodInfo {
     /**
      * 查询条件
      */
-    private String queryCondition;
+    private String conditionGroupExpression;
     /**
      * 是否动态参数
      */
@@ -63,12 +65,12 @@ public class MethodInfo {
         this.method = method;
     }
 
-    public String getAction() {
-        return action;
+    public SqlCommandType getSqlCommandType() {
+        return sqlCommandType;
     }
 
-    public void setAction(String action) {
-        this.action = action;
+    public void setSqlCommandType(SqlCommandType sqlCommandType) {
+        this.sqlCommandType = sqlCommandType;
     }
 
     public String getMethodName() {
@@ -79,12 +81,12 @@ public class MethodInfo {
         this.methodName = methodName;
     }
 
-    public String getQueryCondition() {
-        return queryCondition;
+    public String getConditionGroupExpression() {
+        return conditionGroupExpression;
     }
 
-    public void setQueryCondition(String queryCondition) {
-        this.queryCondition = queryCondition;
+    public void setConditionGroupExpression(String conditionGroupExpression) {
+        this.conditionGroupExpression = conditionGroupExpression;
     }
 
     public List<ConditionInfo> getConditionInfoList() {

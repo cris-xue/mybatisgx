@@ -193,6 +193,116 @@ public class EntityInfo {
         this.typeParameterMap = typeParameterMap;
     }
 
+    public static class Builder {
+
+        private EntityInfo entityInfo;
+
+        public Builder() {
+            this.entityInfo = new EntityInfo();
+        }
+
+        public Builder setTableName(String tableName) {
+            this.entityInfo.setTableName(tableName);
+            return this;
+        }
+
+        public Builder setClazz(Class<?> clazz) {
+            this.entityInfo.setClazz(clazz);
+            this.entityInfo.clazzName = clazz.getName();
+            return this;
+        }
+
+        public Builder setColumnInfoList(List<ColumnInfo> columnInfoList) {
+            this.entityInfo.setColumnInfoList(columnInfoList);
+            return this;
+        }
+
+        public Builder setTypeParameterMap(Map<Type, Class<?>> typeParameterMap) {
+            this.entityInfo.setTypeParameterMap(typeParameterMap);
+            return this;
+        }
+
+        public void process() {
+            for (ColumnInfo columnInfo : entityInfo.getColumnInfoList()) {
+                Lock lock = columnInfo.getLock();
+                if (lock != null) {
+                    entityInfo.lockColumnInfo = columnInfo;
+                }
+                LogicDelete logicDelete = columnInfo.getLogicDelete();
+                if (logicDelete != null) {
+                    entityInfo.logicDeleteColumnInfo = columnInfo;
+                }
+                GenerateValueHandler generateValueHandler = columnInfo.getGenerateValueHandler();
+                if (columnInfo instanceof IdColumnInfo || generateValueHandler != null) {
+                    entityInfo.generateValueColumnInfoList.add(columnInfo);
+                }
+
+                if (columnInfo instanceof RelationColumnInfo) {
+                    entityInfo.relationColumnInfoList.add((RelationColumnInfo) columnInfo);
+                }
+
+                this.processIdColumnInfo(columnInfo);
+
+                // 1、字段不存在关联实体为表字段
+                // 2、存在关联实体并且是关系维护方才是表字段【多对多关联字段在中间表，所以实体中是不存在表字段的】
+                ColumnInfo tableColumnInfo = null;
+                if (columnInfo instanceof RelationColumnInfo) {
+                    RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
+                    ManyToMany manyToMany = relationColumnInfo.getManyToMany();
+                    String mappedBy = relationColumnInfo.getMappedBy();
+                    if (manyToMany == null && StringUtils.isBlank(mappedBy)) {
+                        tableColumnInfo = columnInfo;
+                    }
+                } else {
+                    NonPersistent nonPersistent = columnInfo.getNonPersistent();
+                    if (nonPersistent == null) {
+                        tableColumnInfo = columnInfo;
+                    }
+                }
+                if (tableColumnInfo != null) {
+                    entityInfo.tableColumnInfoList.add(columnInfo);
+                    entityInfo.tableColumnInfoMap.put(columnInfo.getDbColumnName(), columnInfo.getJavaColumnName());
+                }
+                entityInfo.columnInfoMap.put(columnInfo.getJavaColumnName(), columnInfo);
+            }
+        }
+
+        /**
+         * id字段特殊，如果是联合主键，则自动生成一个id映射到联合主键
+         *
+         * @param columnInfo
+         */
+        private void processIdColumnInfo(ColumnInfo columnInfo) {
+            if (columnInfo instanceof IdColumnInfo) {
+                entityInfo.idColumnInfo = (IdColumnInfo) columnInfo;
+                entityInfo.columnInfoMap.put("id", columnInfo);
+                entityInfo.tableColumnInfoMap.put("id", columnInfo.getJavaColumnName());
+
+                List<ColumnInfo> composites = columnInfo.getComposites();
+                if (ObjectUtils.isEmpty(composites)) {
+                    return;
+                }
+                for (ColumnInfo composite : composites) {
+                    String javaColumnName = composite.getJavaColumnName();
+                    String javaColumnNameNew = String.format("%s.%s", columnInfo.getJavaColumnName(), javaColumnName);
+                    entityInfo.columnInfoMap.put(javaColumnName, composite);
+                    entityInfo.columnInfoMap.put(javaColumnNameNew, composite);
+
+                    entityInfo.tableColumnInfoMap.put(composite.getDbColumnName(), javaColumnNameNew);
+                }
+            }
+        }
+
+        public EntityInfo build() {
+            return entityInfo;
+        }
+
+        public EntityInfo copy(EntityInfo entityInfo) {
+            this.entityInfo.clazzName = entityInfo.clazzName;
+            return this.entityInfo;
+        }
+    }
+
     private class EntityColumn {
 
         public void process(List<ColumnInfo> columnInfoList) {

@@ -245,7 +245,11 @@ public class EntityInfo {
         }
 
         public EntityInfo copy(EntityInfo entityInfo) {
-            this.entityInfo.clazzName = entityInfo.clazzName;
+            this.setTableName(entityInfo.tableName);
+            this.setClazz(entityInfo.clazz);
+            this.setColumnInfoList(entityInfo.columnInfoList);
+            this.setTypeParameterMap(entityInfo.typeParameterMap);
+            this.process();
             return this.entityInfo;
         }
     }

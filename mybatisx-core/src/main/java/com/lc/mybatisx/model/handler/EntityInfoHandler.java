@@ -26,12 +26,18 @@ public class EntityInfoHandler {
     public EntityInfo execute(Class<?> entityClass) {
         Map<Type, Class<?>> typeParameterMap = TypeUtils.getTypeParameterMap(entityClass);
         List<ColumnInfo> columnInfoList = columnInfoHandler.getColumnInfoList(entityClass, typeParameterMap);
-        EntityInfo entityInfo = new EntityInfo();
-        entityInfo.setTableName(entityClass.getAnnotation(Table.class).name());
+        EntityInfo entityInfo = new EntityInfo.Builder()
+                .setTableName(entityClass.getAnnotation(Table.class).name())
+                .setClazz(entityClass)
+                .setColumnInfoList(columnInfoList)
+                .setTypeParameterMap(typeParameterMap)
+                .process()
+                .build();
+        /*entityInfo.setTableName(entityClass.getAnnotation(Table.class).name());
         entityInfo.setClazz(entityClass);
         entityInfo.setClazzName(entityClass.getName());
         entityInfo.setColumnInfoList(columnInfoList);
-        entityInfo.setTypeParameterMap(typeParameterMap);
+        entityInfo.setTypeParameterMap(typeParameterMap);*/
         return entityInfo;
     }
 

@@ -254,13 +254,20 @@ public class EntityInfo {
         public Builder selfRefEntityPropertyCopy(EntityInfo entityInfo) {
             this.setTableName(entityInfo.tableName);
             this.setClazz(entityInfo.clazz);
+            this.setColumnInfoList(this.cloneColumnInfoList(entityInfo));
+            this.setTypeParameterMap(entityInfo.typeParameterMap);
+            this.process();
+            return this;
+        }
+
+        private List<ColumnInfo> cloneColumnInfoList(EntityInfo entityInfo) {
             List<ColumnInfo> columnInfoList = new ArrayList();
             for (ColumnInfo columnInfo : entityInfo.columnInfoList) {
                 if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class) || TypeUtils.typeEquals(columnInfo, ColumnInfo.class)) {
                     columnInfoList.add(this.cloneBean(columnInfo));
                 }
                 if (TypeUtils.typeEquals(columnInfo, RelationColumnInfo.class)) {
-                    RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
+                    RelationColumnInfo relationColumnInfo = (RelationColumnInfo) this.cloneBean(columnInfo);
                     RelationColumnInfo mappedByRelationColumnInfo = relationColumnInfo.getMappedByRelationColumnInfo();
                     if (mappedByRelationColumnInfo != null) {
                         for (ForeignKeyColumnInfo foreignKeyInfo : mappedByRelationColumnInfo.getInverseForeignKeyColumnInfoList()) {
@@ -273,12 +280,10 @@ public class EntityInfo {
                             foreignKeyInfo.setReferencedColumnInfo(referencedColumnInfo);
                         }
                     }
+                    columnInfoList.add(relationColumnInfo);
                 }
             }
-            this.setColumnInfoList(columnInfoList);
-            this.setTypeParameterMap(entityInfo.typeParameterMap);
-            this.process();
-            return this;
+            return columnInfoList;
         }
 
         private ColumnInfo cloneBean(ColumnInfo columnInfo) {

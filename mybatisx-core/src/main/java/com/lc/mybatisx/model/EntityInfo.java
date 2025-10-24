@@ -11,10 +11,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author ：薛承城
@@ -223,21 +220,25 @@ public class EntityInfo {
          */
         private void processIdColumnInfo(ColumnInfo columnInfo) {
             if (columnInfo instanceof IdColumnInfo) {
-                entityInfo.idColumnInfo = (IdColumnInfo) columnInfo;
-                entityInfo.columnInfoMap.put("id", columnInfo);
-                entityInfo.tableColumnInfoMap.put("id", columnInfo.getJavaColumnName());
+                IdColumnInfo idColumnInfo = (IdColumnInfo) columnInfo;
+                entityInfo.idColumnInfo = idColumnInfo;
+                entityInfo.columnInfoMap.put("id", idColumnInfo);
+                entityInfo.tableColumnInfoMap.put("id", idColumnInfo.getJavaColumnName());
 
-                List<ColumnInfo> composites = columnInfo.getComposites();
+                List<ColumnInfo> composites = idColumnInfo.getComposites();
                 if (ObjectUtils.isEmpty(composites)) {
                     return;
                 }
                 for (ColumnInfo composite : composites) {
-                    String javaColumnName = composite.getJavaColumnName();
-                    String javaColumnNameNew = String.format("%s.%s", columnInfo.getJavaColumnName(), javaColumnName);
-                    entityInfo.columnInfoMap.put(javaColumnName, composite);
-                    entityInfo.columnInfoMap.put(javaColumnNameNew, composite);
+                    IdColumnInfo wrapIdColumnInfo = new IdColumnInfo();
+                    wrapIdColumnInfo.setJavaColumnName(idColumnInfo.getJavaColumnName());
+                    wrapIdColumnInfo.setDbColumnName(idColumnInfo.getDbColumnName());
+                    wrapIdColumnInfo.setEmbeddedId(idColumnInfo.getEmbeddedId());
+                    wrapIdColumnInfo.setComposites(Arrays.asList(composite));
+                    entityInfo.columnInfoMap.put(composite.getJavaColumnName(), wrapIdColumnInfo);
 
-                    entityInfo.tableColumnInfoMap.put(composite.getDbColumnName(), javaColumnNameNew);
+                    String wrapJavaColumnName = String.format("%s.%s", idColumnInfo.getJavaColumnName(), composite.getJavaColumnName());
+                    entityInfo.columnInfoMap.put(wrapJavaColumnName, wrapIdColumnInfo);
                 }
             }
         }

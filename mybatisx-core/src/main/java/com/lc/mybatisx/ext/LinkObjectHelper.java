@@ -16,7 +16,15 @@ public class LinkObjectHelper {
         List<String> idValueList = new ArrayList<>();
         for (ResultMapping idResultMapping : idResultMappings) {
             Object idValue = metaObject.getValue(idResultMapping.getProperty());
-            idValueList.add(idValue instanceof Long ? idValue.toString() : (String) idValue);
+            String idValueString;
+            if (idValue instanceof Integer) {
+                idValueString = idValue.toString();
+            } else if (idValue instanceof Long) {
+                idValueString = idValue.toString();
+            } else {
+                idValueString = (String) idValue;
+            }
+            idValueList.add(idValueString);
         }
         return StringUtils.join(idValueList, "");
     }

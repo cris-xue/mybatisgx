@@ -96,9 +96,9 @@ public class MethodInfoHandler {
             // 方法名解析
             this.methodNameParse(mapperInfo.getEntityInfo(), methodInfo, methodDeclaringClass);
             // 方法条件解析
-            QueryCondition queryCondition = method.getAnnotation(QueryCondition.class);
-            if (queryCondition != null) {
-                methodInfo.setQueryCondition(queryCondition.value());
+            ConditionGroup conditionGroup = method.getAnnotation(ConditionGroup.class);
+            if (conditionGroup != null) {
+                methodInfo.setConditionGroupExpression(conditionGroup.value());
                 this.queryConditionParse(mapperInfo.getEntityInfo(), methodInfo);
             }
 
@@ -196,7 +196,7 @@ public class MethodInfoHandler {
                     Entity entity = methodParamInfo.getType().getAnnotation(Entity.class);
                     if (entity != null) {
                         String entityCondition = this.entityCondition(methodInfo, methodParamInfo);
-                        methodNameAstHandler.execute(entityInfo, methodInfo, true, entityCondition);
+                        methodNameAstHandler.execute(entityInfo, methodInfo, ConditionType.ENTITY_FIELD, entityCondition);
                     }
                 }
             }
@@ -206,7 +206,7 @@ public class MethodInfoHandler {
                 QueryEntity isQueryEntity = methodParamInfo.getType().getAnnotation(QueryEntity.class);
                 if (isQueryEntity != null) {
                     String queryEntityCondition = this.entityCondition(methodInfo, methodParamInfo);
-                    methodNameAstHandler.execute(entityInfo, methodInfo, true, queryEntityCondition);
+                    methodNameAstHandler.execute(entityInfo, methodInfo, ConditionType.ENTITY_FIELD, queryEntityCondition);
                 }
             }
         }
@@ -225,7 +225,7 @@ public class MethodInfoHandler {
      * @return
      */
     private String entityCondition(MethodInfo methodInfo, MethodParamInfo methodParamInfo) {
-        StringBuilder stringBuilder = new StringBuilder(methodInfo.getAction()).append("By");
+        StringBuilder stringBuilder = new StringBuilder(methodInfo.getSqlCommandType().name().toLowerCase()).append("By");
         List<ColumnInfo> columnInfoList = methodParamInfo.getColumnInfoList();
         columnInfoList.forEach(columnInfo -> {
             String javaColumnName = CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, columnInfo.getJavaColumnName());
@@ -280,7 +280,7 @@ public class MethodInfoHandler {
                     // throw new RuntimeException("查询条件没有对应的参数");
                     continue;
                 }
-                conditionInfo.addMethodParamInfo(methodParamInfo);
+                conditionInfo.setMethodParamInfo(methodParamInfo);
             }
         }
     }
@@ -303,14 +303,14 @@ public class MethodInfoHandler {
             ConditionInfo conditionInfo = conditionInfoList.get(i);
             MethodParamInfo methodParamInfo = methodParamInfoMap.get(i);
 
-            String javaColumnName = conditionInfo.getJavaColumnName();
+            /*String javaColumnName = conditionInfo.getJavaColumnName();
             javaColumnName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, javaColumnName);
             ColumnInfo columnInfo = resultMapInfo.getColumnInfo(javaColumnName);
             if (columnInfo == null) {
                 throw new RuntimeException("方法名中的字段在实体类中不存在: " + javaColumnName);
             }
             conditionInfo.setDbColumnName(columnInfo.getDbColumnName());
-            conditionInfo.setJavaColumnName(methodParamInfo.getParamName());
+            conditionInfo.setJavaColumnName(methodParamInfo.getParamName());*/
         }
     }
 

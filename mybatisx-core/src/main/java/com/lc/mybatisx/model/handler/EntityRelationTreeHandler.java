@@ -5,7 +5,6 @@ import com.lc.mybatisx.annotation.ManyToMany;
 import com.lc.mybatisx.context.EntityInfoContextHolder;
 import com.lc.mybatisx.model.*;
 import com.lc.mybatisx.utils.TypeUtils;
-import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -72,7 +71,7 @@ public class EntityRelationTreeHandler {
                 continue;
             }
             EntityRelationDependencyTree childrenResultMapDependencyTree = EntityRelationDependencyTree.build(entityRelationDependencyTree, javaType);
-            EntityInfo relationColumnEntityInfo = EntityInfoContextHolder.get(javaType);
+            EntityInfo relationColumnEntityInfo = this.getRelationColumnEntityInfo(isSelfRef, javaType);
             EntityRelationTree subEntityRelationTree = this.buildEntityRelationTree(relationColumnInfo, relationColumnEntityInfo, childrenResultMapDependencyTree, level + 1, i + 1);
             if (subEntityRelationTree != null) {
                 entityRelationTree.addEntityRelation(subEntityRelationTree);
@@ -133,11 +132,7 @@ public class EntityRelationTreeHandler {
     private EntityInfo getRelationColumnEntityInfo(Boolean isSelfRef, Class<?> javaType) {
         EntityInfo relationColumnEntityInfo = EntityInfoContextHolder.get(javaType);
         if (isSelfRef) {
-            try {
-                return (EntityInfo) BeanUtils.cloneBean(relationColumnEntityInfo);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            return new EntityInfo.Builder().copy(relationColumnEntityInfo);
         } else {
             return relationColumnEntityInfo;
         }

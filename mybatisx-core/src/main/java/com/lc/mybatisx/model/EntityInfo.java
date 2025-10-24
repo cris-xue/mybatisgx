@@ -5,6 +5,7 @@ import com.lc.mybatisx.annotation.LogicDelete;
 import com.lc.mybatisx.annotation.ManyToMany;
 import com.lc.mybatisx.annotation.NonPersistent;
 import com.lc.mybatisx.annotation.handler.GenerateValueHandler;
+import com.lc.mybatisx.utils.TypeUtils;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -245,12 +246,34 @@ public class EntityInfo {
             return entityInfo;
         }
 
-        public EntityInfo copy(EntityInfo entityInfo) {
+        /**
+         * 自引用实体属性复制
+         * @param entityInfo
+         * @return
+         */
+        public Builder selfRefEntityPropertyCopy(EntityInfo entityInfo) {
             this.setTableName(entityInfo.tableName);
             this.setClazz(entityInfo.clazz);
             List<ColumnInfo> columnInfoList = new ArrayList();
             for (ColumnInfo columnInfo : entityInfo.columnInfoList) {
-                columnInfoList.add(this.cloneBean(columnInfo));
+                if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class) || TypeUtils.typeEquals(columnInfo, ColumnInfo.class)) {
+                    columnInfoList.add(this.cloneBean(columnInfo));
+                }
+                if (TypeUtils.typeEquals(columnInfo, RelationColumnInfo.class)) {
+                    RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
+                    RelationColumnInfo mappedByRelationColumnInfo = relationColumnInfo.getMappedByRelationColumnInfo();
+                    if (mappedByRelationColumnInfo != null) {
+                        for (ForeignKeyColumnInfo foreignKeyInfo : mappedByRelationColumnInfo.getInverseForeignKeyColumnInfoList()) {
+                            ColumnInfo referencedColumnInfo = this.cloneBean(foreignKeyInfo.getReferencedColumnInfo());
+                            foreignKeyInfo.setReferencedColumnInfo(referencedColumnInfo);
+                        }
+                    } else {
+                        for (ForeignKeyColumnInfo foreignKeyInfo : relationColumnInfo.getInverseForeignKeyColumnInfoList()) {
+                            ColumnInfo referencedColumnInfo = this.cloneBean(foreignKeyInfo.getReferencedColumnInfo());
+                            foreignKeyInfo.setReferencedColumnInfo(referencedColumnInfo);
+                        }
+                    }
+                }
             }
             this.setColumnInfoList(columnInfoList);
             this.setTypeParameterMap(entityInfo.typeParameterMap);

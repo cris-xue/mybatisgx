@@ -31,7 +31,7 @@ public class ConditionInfo {
      */
     private String conditionEntityJavaColumnName;
     /**
-     * 方法参数信息列表
+     * 条件绑定的方法参数信息
      */
     private MethodParamInfo methodParamInfo;
     /**

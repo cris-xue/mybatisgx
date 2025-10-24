@@ -2,6 +2,7 @@ package com.lc.mybatisx.model.handler;
 
 import com.google.common.base.CaseFormat;
 import com.lc.mybatisx.annotation.*;
+import com.lc.mybatisx.context.EntityInfoContextHolder;
 import com.lc.mybatisx.context.MethodInfoContextHolder;
 import com.lc.mybatisx.dao.Dao;
 import com.lc.mybatisx.dao.SimpleDao;
@@ -82,7 +83,7 @@ public class MethodInfoHandler {
                 continue;
             }
 
-            List<MethodParamInfo> methodParamInfoList = this.getMethodParam(mapperInfo, method);
+            List<MethodParamInfo> methodParamInfoList = this.getMethodParamList(mapperInfo, method);
             MethodReturnInfo methodReturnInfo = this.getMethodReturn(mapperInfo, method);
 
             MethodInfo methodInfo = new MethodInfo();
@@ -120,7 +121,7 @@ public class MethodInfoHandler {
      * @param method
      * @return
      */
-    private List<MethodParamInfo> getMethodParam(MapperInfo mapperInfo, Method method) {
+    private List<MethodParamInfo> getMethodParamList(MapperInfo mapperInfo, Method method) {
         // TODO 方法参数处理，批量操作的参数处理需要单独逻辑
         BatchOperation batchOperation = method.getAnnotation(BatchOperation.class);
         Parameter[] parameters = method.getParameters();
@@ -148,8 +149,15 @@ public class MethodInfoHandler {
             Boolean basicType = this.getBasicType(methodParamType);
             methodParamInfo.setBasicType(basicType);
             if (!basicType && methodParamType != Map.class) {
-                Map<Type, Class<?>> typeParameterMap = mapperInfo.getEntityInfo().getTypeParameterMap();
-                List<ColumnInfo> columnInfoList = columnInfoHandler.getColumnInfoList(methodParamType, typeParameterMap);
+                // 获取实体管理器中是否方法参数类型，如果不存在，使用字段处理器对方法参数类型进行字段处理
+                EntityInfo entityInfo = EntityInfoContextHolder.get(methodParamType);
+                List<ColumnInfo> columnInfoList;
+                if (entityInfo != null) {
+                    columnInfoList = entityInfo.getColumnInfoList();
+                } else {
+                    Map<Type, Class<?>> typeParameterMap = mapperInfo.getEntityInfo().getTypeParameterMap();
+                    columnInfoList = columnInfoHandler.getColumnInfoList(methodParamType, typeParameterMap);
+                }
                 methodParamInfo.setColumnInfoList(columnInfoList);
             }
             Class<?> collectionType = this.getCollectionType(parameter.getType());
@@ -260,7 +268,7 @@ public class MethodInfoHandler {
             if (conditionGroupInfo != null) {
                 this.bindConditionParam(methodInfo, conditionGroupInfo.getConditionInfoList());
             } else {
-                // 处理查询条件和参数之间的关系，需要对特殊操作符进行处理，如between
+                // 处理查询条件和参数之间的关系，查询条件和参数之间是1对1关系，不要设计一对多关系，后续绑定参数很难处理
                 Integer index = conditionInfo.getIndex();
                 String conditionName = conditionInfo.getConditionName();
 

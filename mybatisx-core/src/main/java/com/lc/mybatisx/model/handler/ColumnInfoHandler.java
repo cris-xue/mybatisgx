@@ -183,17 +183,17 @@ public class ColumnInfoHandler {
     private void setIdColumnInfo(Field field, IdColumnInfo idColumnInfo, Map<Type, Class<?>> typeParameterMap) {
         Id id = field.getAnnotation(Id.class);
         EmbeddedId embeddedId = field.getAnnotation(EmbeddedId.class);
-        List<ColumnInfo> composites = new ArrayList();
+        List<ColumnInfo> idColumnInfoComposites = new ArrayList();
         if (embeddedId != null) {
             Class<?> javaType = idColumnInfo.getJavaType();
-            composites = this.getColumnInfoList(javaType, typeParameterMap);
-            for (ColumnInfo columnInfo : composites) {
+            idColumnInfoComposites = this.getColumnInfoList(javaType, typeParameterMap);
+            /*for (ColumnInfo columnInfo : idColumnInfoComposites) {
                 columnInfo.setJavaColumnPath(idColumnInfo.getJavaColumnName() + "." + columnInfo.getJavaColumnName());
-            }
+            }*/
         }
         idColumnInfo.setId(id);
         idColumnInfo.setEmbeddedId(embeddedId);
-        idColumnInfo.setComposites(composites);
+        idColumnInfo.setComposites(idColumnInfoComposites);
     }
 
     private void setRelationColumnInfo(Field field, RelationColumnInfo relationColumnInfo) {

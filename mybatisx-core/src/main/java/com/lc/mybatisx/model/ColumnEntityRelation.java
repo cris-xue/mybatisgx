@@ -1,7 +1,5 @@
 package com.lc.mybatisx.model;
 
-import com.lc.mybatisx.annotation.ManyToMany;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -103,17 +101,15 @@ public class ColumnEntityRelation<T> {
      */
     public Boolean isManyToMany() {
         if (this.columnInfo instanceof RelationColumnInfo) {
-            RelationColumnInfo relationColumnInfo = (RelationColumnInfo) this.columnInfo;
-            ManyToMany manyToMany = relationColumnInfo.getManyToMany();
-            return manyToMany != null;
+            return ((RelationColumnInfo) this.columnInfo).getRelationType() == RelationType.MANY_TO_MANY;
         }
         return false;
     }
 
     public List<ForeignKeyColumnInfo> getForeignKeyColumnInfoList() {
         RelationColumnInfo relationColumnInfo = (RelationColumnInfo) this.columnInfo;
-        if (this.isMappedBy()) {
-            RelationColumnInfo mappedByRelationColumnInfo = (RelationColumnInfo) this.entityInfo.getColumnInfo(relationColumnInfo.getMappedBy());
+        RelationColumnInfo mappedByRelationColumnInfo = relationColumnInfo.getMappedByRelationColumnInfo();
+        if (mappedByRelationColumnInfo != null) {
             return mappedByRelationColumnInfo.getForeignKeyColumnInfoList();
         } else {
             return relationColumnInfo.getForeignKeyColumnInfoList();
@@ -122,8 +118,8 @@ public class ColumnEntityRelation<T> {
 
     public List<ForeignKeyColumnInfo> getInverseForeignKeyColumnInfoList() {
         RelationColumnInfo relationColumnInfo = (RelationColumnInfo) this.columnInfo;
-        if (this.isMappedBy()) {
-            RelationColumnInfo mappedByRelationColumnInfo = (RelationColumnInfo) this.entityInfo.getColumnInfo(relationColumnInfo.getMappedBy());
+        RelationColumnInfo mappedByRelationColumnInfo = relationColumnInfo.getMappedByRelationColumnInfo();
+        if (mappedByRelationColumnInfo != null) {
             return mappedByRelationColumnInfo.getInverseForeignKeyColumnInfoList();
         } else {
             return relationColumnInfo.getInverseForeignKeyColumnInfoList();

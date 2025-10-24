@@ -202,9 +202,11 @@ public class InsertTemplateHandler {
                         this.handleMethodParam(methodInfo, methodParamInfo, composite, javaTrimElement);
                     }
                 }
-            } else if (TypeUtils.typeEquals(tableColumnInfo, ColumnInfo.class)) {
+            }
+            if (TypeUtils.typeEquals(tableColumnInfo, ColumnInfo.class)) {
                 this.handleMethodParam(methodInfo, methodParamInfo, tableColumnInfo, javaTrimElement);
-            } else if (TypeUtils.typeEquals(tableColumnInfo, RelationColumnInfo.class)) {
+            }
+            if (TypeUtils.typeEquals(tableColumnInfo, RelationColumnInfo.class)) {
                 RelationColumnInfo relationColumnInfo = (RelationColumnInfo) tableColumnInfo;
                 RelationType relationType = relationColumnInfo.getRelationType();
                 if (relationType == RelationType.MANY_TO_MANY) {

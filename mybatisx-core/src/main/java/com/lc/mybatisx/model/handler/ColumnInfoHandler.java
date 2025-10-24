@@ -250,8 +250,7 @@ public class ColumnInfoHandler {
     }
 
     public void processRelation(EntityInfo entityInfo) {
-        List<RelationColumnInfo> relationColumnInfoList = entityInfo.getRelationColumnInfoList();
-        for (RelationColumnInfo relationColumnInfo : relationColumnInfoList) {
+        for (RelationColumnInfo relationColumnInfo : entityInfo.getRelationColumnInfoList()) {
             String mappedBy = relationColumnInfo.getMappedBy();
             if (StringUtils.isNotBlank(mappedBy)) {
                 ColumnInfo mappedByRelationColumnInfo = this.validateEntityRelation(relationColumnInfo, mappedBy);
@@ -265,7 +264,7 @@ public class ColumnInfoHandler {
                         EntityInfo relationColumnEntityInfo = EntityInfoContextHolder.get(javaType);
 
                         String referencedColumnName = inverseForeignKeyColumn.getReferencedColumnName();
-                        ColumnInfo referencedColumnInfo = relationColumnEntityInfo.getDbColumnInfo(referencedColumnName);
+                        ColumnInfo referencedColumnInfo = relationColumnEntityInfo.getColumnInfo(referencedColumnName);
                         inverseForeignKeyColumn.setReferencedColumnInfo(referencedColumnInfo);
 
                         // 补充外键字段信息

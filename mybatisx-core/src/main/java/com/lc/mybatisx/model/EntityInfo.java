@@ -278,7 +278,7 @@ public class EntityInfo {
             this.setColumnInfoList(columnInfoList);
             this.setTypeParameterMap(entityInfo.typeParameterMap);
             this.process();
-            return this.entityInfo;
+            return this;
         }
 
         private ColumnInfo cloneBean(ColumnInfo columnInfo) {

@@ -122,7 +122,9 @@ public class ColumnInfo {
 
     public void setCollectionType(Class<?> collectionType) {
         this.collectionType = collectionType;
-        this.collectionTypeName = collectionType.getName();
+        if (collectionType != null) {
+            this.collectionTypeName = collectionType.getName();
+        }
     }
 
     public String getCollectionTypeName() {

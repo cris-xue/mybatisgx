@@ -56,6 +56,10 @@ public class ResultMapInfo extends ColumnEntityRelation<ResultMapInfo> {
         return this.entityInfo.getTableName();
     }
 
+    public String getEntityTableNameAlias() {
+        return this.entityInfo.getTableNameAlias();
+    }
+
     public String getMiddleTableName() {
         return this.getMiddleEntityInfo().getTableName();
     }

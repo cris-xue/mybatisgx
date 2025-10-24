@@ -5,6 +5,7 @@ import com.lc.mybatisx.annotation.LogicDelete;
 import com.lc.mybatisx.annotation.ManyToMany;
 import com.lc.mybatisx.annotation.NonPersistent;
 import com.lc.mybatisx.annotation.handler.GenerateValueHandler;
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -247,10 +248,22 @@ public class EntityInfo {
         public EntityInfo copy(EntityInfo entityInfo) {
             this.setTableName(entityInfo.tableName);
             this.setClazz(entityInfo.clazz);
-            this.setColumnInfoList(entityInfo.columnInfoList);
+            List<ColumnInfo> columnInfoList = new ArrayList();
+            for (ColumnInfo columnInfo : entityInfo.columnInfoList) {
+                columnInfoList.add(this.cloneBean(columnInfo));
+            }
+            this.setColumnInfoList(columnInfoList);
             this.setTypeParameterMap(entityInfo.typeParameterMap);
             this.process();
             return this.entityInfo;
+        }
+
+        private ColumnInfo cloneBean(ColumnInfo columnInfo) {
+            try {
+                return (ColumnInfo) BeanUtils.cloneBean(columnInfo);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 

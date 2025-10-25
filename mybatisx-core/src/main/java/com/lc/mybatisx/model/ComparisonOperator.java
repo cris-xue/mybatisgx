@@ -27,7 +27,7 @@ public enum ComparisonOperator {
                 return comparisonOperator;
             }
         }
-        return null;
+        return ComparisonOperator.EQ;
     }
 
     public String getValue() {

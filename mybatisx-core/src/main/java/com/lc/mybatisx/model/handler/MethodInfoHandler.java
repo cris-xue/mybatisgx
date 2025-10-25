@@ -201,7 +201,7 @@ public class MethodInfoHandler {
      * @param methodDeclaringClass
      */
     public void methodNameParse(EntityInfo entityInfo, MethodInfo methodInfo, Class<?> methodDeclaringClass) {
-        methodNameAstHandler.execute(entityInfo, methodInfo);
+        methodNameAstHandler.execute(entityInfo, methodInfo, null, ConditionOriginType.METHOD_NAME, methodInfo.getMethodName());
         if (methodDeclaringClass == SimpleDao.class) {
             String methodName = methodInfo.getMethodName();
             if ("findOne".equals(methodName) || "findList".equals(methodName)) {
@@ -210,7 +210,7 @@ public class MethodInfoHandler {
                     Entity entity = methodParamInfo.getType().getAnnotation(Entity.class);
                     if (entity != null) {
                         String entityCondition = this.entityCondition(methodInfo, methodParamInfo);
-                        methodNameAstHandler.execute(entityInfo, methodInfo, ConditionOriginType.ENTITY_FIELD, entityCondition);
+                        methodNameAstHandler.execute(entityInfo, methodInfo, methodParamInfo, ConditionOriginType.ENTITY_FIELD, entityCondition);
                     }
                 }
             }
@@ -220,7 +220,7 @@ public class MethodInfoHandler {
                 QueryEntity isQueryEntity = methodParamInfo.getType().getAnnotation(QueryEntity.class);
                 if (isQueryEntity != null) {
                     String queryEntityCondition = this.entityCondition(methodInfo, methodParamInfo);
-                    methodNameAstHandler.execute(entityInfo, methodInfo, ConditionOriginType.ENTITY_FIELD, queryEntityCondition);
+                    methodNameAstHandler.execute(entityInfo, methodInfo, methodParamInfo, ConditionOriginType.ENTITY_FIELD, queryEntityCondition);
                 }
             }
         }

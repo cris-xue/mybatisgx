@@ -37,27 +37,19 @@ public class MethodNameAstHandler {
         TOKEN_MAP.put("Between", "between");
     }
 
-    public void execute(EntityInfo entityInfo, MethodInfo methodInfo) {
-        this.execute(entityInfo, methodInfo, ConditionOriginType.METHOD_NAME, methodInfo.getMethodName());
-    }
-
-    public void execute(EntityInfo entityInfo, MethodInfo methodInfo, ConditionOriginType conditionOriginType, String methodName) {
+    public void execute(EntityInfo entityInfo, MethodInfo methodInfo, MethodParamInfo methodParamInfo, ConditionOriginType conditionOriginType, String methodName) {
         CharStream charStream = CharStreams.fromString(methodName);
         MethodNameLexer methodNameLexer = new MethodNameLexer(charStream);
         CommonTokenStream commonStream = new CommonTokenStream(methodNameLexer);
         MethodNameParser methodNameParser = new MethodNameParser(commonStream);
         ParseTree sqlStatementContext = methodNameParser.sql_statement();
-        this.getTokens(entityInfo, methodInfo, conditionOriginType, sqlStatementContext);
+        this.getTokens(entityInfo, methodInfo, methodParamInfo, conditionOriginType, sqlStatementContext);
     }
 
-    private void getTokens(EntityInfo entityInfo, MethodInfo methodInfo, ConditionOriginType conditionOriginType, ParseTree parseTree) {
+    private void getTokens(EntityInfo entityInfo, MethodInfo methodInfo, MethodParamInfo methodParamInfo, ConditionOriginType conditionOriginType, ParseTree parseTree) {
         int childCount = parseTree.getChildCount();
         for (int i = 0; i < childCount; i++) {
             ParseTree parseTreeChild = parseTree.getChild(i);
-            String token = parseTreeChild.getText();
-            String parentSimpleName = parseTreeChild.getParent().getClass().getSimpleName();
-            String simpleName = parseTreeChild.getClass().getSimpleName();
-
             if (parseTreeChild instanceof TerminalNodeImpl) {
                 // methodNameInfo.addMethodNameWhereInfo(token);
             } else if (parseTreeChild instanceof MethodNameParser.Field_clauseContext) {
@@ -71,17 +63,17 @@ public class MethodNameAstHandler {
             } else if (parseTreeChild instanceof MethodNameParser.Select_clauseContext) {
                 methodInfo.setSqlCommandType(SqlCommandType.SELECT);
             } else if (parseTreeChild instanceof MethodNameParser.Where_clauseContext) {
-                List<ConditionInfo> conditionInfoList = this.parseWhereClause(entityInfo, conditionOriginType, parseTreeChild);
+                List<ConditionInfo> conditionInfoList = this.parseWhereClause(entityInfo, methodParamInfo, conditionOriginType, parseTreeChild);
                 methodInfo.setConditionInfoList(conditionInfoList);
             } else if (parseTreeChild instanceof MethodNameParser.EndContext) {
                 return;
             } else {
-                this.getTokens(entityInfo, methodInfo, conditionOriginType, parseTreeChild);
+                this.getTokens(entityInfo, methodInfo, methodParamInfo, conditionOriginType, parseTreeChild);
             }
         }
     }
 
-    private List<ConditionInfo> parseWhereClause(EntityInfo entityInfo, ConditionOriginType conditionOriginType, ParseTree whereClause) {
+    private List<ConditionInfo> parseWhereClause(EntityInfo entityInfo, MethodParamInfo methodParamInfo, ConditionOriginType conditionOriginType, ParseTree whereClause) {
         List<ConditionInfo> conditionInfoList = new ArrayList<>();
         Integer conditionCount = 0;
         int childCount = whereClause.getChildCount();
@@ -92,7 +84,7 @@ public class MethodNameAstHandler {
                     throw new RuntimeException("语法错误，条件必须以By开头");
                 }
             } else if (whereChildItem instanceof MethodNameParser.Condition_clauseContext) {
-                ConditionInfo conditionInfo = new ConditionInfo(conditionCount++, conditionOriginType);
+                ConditionInfo conditionInfo = new ConditionInfo(conditionCount++, conditionOriginType, methodParamInfo);
                 this.parseCondition(entityInfo, conditionInfo, conditionOriginType, whereChildItem);
                 conditionInfoList.add(conditionInfo);
             } else {
@@ -119,7 +111,6 @@ public class MethodNameAstHandler {
             ParseTree parseTreeChild = parseTree.getChild(i);
             String token = parseTreeChild.getText();
             if (parseTreeChild instanceof MethodNameParser.Logic_op_clauseContext) {
-                conditionInfo.setConditionOriginType(conditionOriginType);
                 conditionInfo.setLogicOperator(LogicOperator.getLogicOperator(token));
             } else if (parseTreeChild instanceof MethodNameParser.Field_condition_op_clauseContext) {
                 if (conditionOriginType == ConditionOriginType.ENTITY_FIELD) {

@@ -13,7 +13,7 @@ public class ConditionInfo {
     /**
      * 逻辑操作符【And、Or】
      */
-    private LogicOperator logicOperator;
+    private LogicOperator logicOperator = LogicOperator.NULL;
     /**
      * 条件字段名
      * 类型为方法名：findByNameAndUserId，条件名为name、userId
@@ -52,6 +52,12 @@ public class ConditionInfo {
     public ConditionInfo(Integer index, ConditionOriginType conditionOriginType) {
         this.index = index;
         this.conditionOriginType = conditionOriginType;
+    }
+
+    public ConditionInfo(Integer index, ConditionOriginType conditionOriginType, MethodParamInfo methodParamInfo) {
+        this.index = index;
+        this.conditionOriginType = conditionOriginType;
+        this.methodParamInfo = methodParamInfo;
     }
 
     public Integer getIndex() {

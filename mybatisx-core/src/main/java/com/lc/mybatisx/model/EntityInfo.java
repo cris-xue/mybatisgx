@@ -264,7 +264,7 @@ public class EntityInfo {
         private List<ColumnInfo> cloneColumnInfoList(EntityInfo entityInfo) {
             List<ColumnInfo> columnInfoList = new ArrayList();
             for (ColumnInfo columnInfo : entityInfo.columnInfoList) {
-                if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class) || TypeUtils.typeEquals(columnInfo, ColumnInfo.class)) {
+                if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class, ColumnInfo.class)) {
                     columnInfoList.add(this.cloneBean(columnInfo));
                 }
                 if (TypeUtils.typeEquals(columnInfo, RelationColumnInfo.class)) {

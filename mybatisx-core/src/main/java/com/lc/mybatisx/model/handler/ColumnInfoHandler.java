@@ -239,10 +239,7 @@ public class ColumnInfoHandler {
             ColumnInfo columnInfo = new ColumnInfo();
             columnInfo.setJavaColumnName(javaColumnName);
             columnInfo.setDbColumnName(dbColumnName);
-            columnInfo.setJavaColumnPath(relationColumnInfo.getJavaColumnName());
-
             String referencedColumnName = joinColumn.referencedColumnName();
-
             ForeignKeyColumnInfo foreignKeyColumnInfo = new ForeignKeyColumnInfo(columnInfo, referencedColumnName);
             foreignKeyColumnInfoList.add(foreignKeyColumnInfo);
         }

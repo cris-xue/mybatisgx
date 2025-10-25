@@ -3,7 +3,8 @@ package com.lc.mybatisx.model;
 public enum LogicOperator {
 
     AND("And", "And"),
-    OR("Or", "Or");
+    OR("Or", "Or"),
+    NULL("Null", "");
 
     private String key;
     private String value;
@@ -19,7 +20,7 @@ public enum LogicOperator {
                 return logicOperator;
             }
         }
-        return null;
+        return LogicOperator.NULL;
     }
 
     public String getValue() {

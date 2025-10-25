@@ -160,6 +160,15 @@ public class TypeUtils extends org.apache.commons.lang3.reflect.TypeUtils {
         return object.getClass().equals(clazz);
     }
 
+    public static Boolean typeEquals(Object object, Class<?>... clazzList) {
+        for (Class<?> clazz : clazzList) {
+            if (typeEquals(object, clazz)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static Boolean typeNotEquals(Object object, Class<?> clazz) {
         return !typeEquals(object, clazz);
     }

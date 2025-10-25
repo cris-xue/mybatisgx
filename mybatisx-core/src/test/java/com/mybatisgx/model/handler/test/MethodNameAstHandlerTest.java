@@ -22,7 +22,7 @@ public class MethodNameAstHandlerTest {
         // 测试方法名中只有条件
         EntityInfo entityInfo = entityInfoHandler.execute(User.class);
         MethodInfo methodInfo = new MethodInfo();
-        methodNameAstHandler.execute(entityInfo, methodInfo, ConditionOriginType.METHOD_NAME, "findByName");
+        methodNameAstHandler.execute(entityInfo, methodInfo, null, ConditionOriginType.METHOD_NAME, "findByName");
 
         Assert.assertEquals(SqlCommandType.SELECT, methodInfo.getSqlCommandType());
         List<ConditionInfo> conditionInfoList = methodInfo.getConditionInfoList();
@@ -36,7 +36,7 @@ public class MethodNameAstHandlerTest {
         // 测试方法名中存在多条件
         EntityInfo entityInfo = entityInfoHandler.execute(User.class);
         MethodInfo methodInfo = new MethodInfo();
-        methodNameAstHandler.execute(entityInfo, methodInfo, ConditionOriginType.METHOD_NAME, "findByIdAndNameOrNameEqAndNameLike");
+        methodNameAstHandler.execute(entityInfo, methodInfo, null, ConditionOriginType.METHOD_NAME, "findByIdAndNameOrNameEqAndNameLike");
 
         Assert.assertEquals(SqlCommandType.SELECT, methodInfo.getSqlCommandType());
         List<ConditionInfo> conditionInfoList = methodInfo.getConditionInfoList();
@@ -62,6 +62,6 @@ public class MethodNameAstHandlerTest {
         // 测试方法名中的条件在实体中不存在
         EntityInfo entityInfo = entityInfoHandler.execute(User.class);
         MethodInfo methodInfo = new MethodInfo();
-        methodNameAstHandler.execute(entityInfo, methodInfo, ConditionOriginType.METHOD_NAME, "findByName1");
+        methodNameAstHandler.execute(entityInfo, methodInfo, null, ConditionOriginType.METHOD_NAME, "findByName1");
     }
 }

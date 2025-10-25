@@ -193,9 +193,15 @@ public class MethodInfoHandler {
         return methodReturnInfo;
     }
 
+    /**
+     * 条件实体只有非SimpleDao方法才会处理，SimpleDao只有findOne、findList会特殊处理。
+     * 一个方法只允许定义一个条件实体，如果定义多个，只取最后一个条件实体。条件实体会把所有的方法名条件覆盖掉。
+     * @param entityInfo
+     * @param methodInfo
+     * @param methodDeclaringClass
+     */
     public void methodNameParse(EntityInfo entityInfo, MethodInfo methodInfo, Class<?> methodDeclaringClass) {
         methodNameAstHandler.execute(entityInfo, methodInfo);
-        // 条件实体只有非SimpleDao方法才会处理，SimpleDao只有findList会特殊处理
         if (methodDeclaringClass == SimpleDao.class) {
             String methodName = methodInfo.getMethodName();
             if ("findOne".equals(methodName) || "findList".equals(methodName)) {

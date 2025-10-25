@@ -8,7 +8,7 @@ import com.lc.mybatisx.template.select.SelectTemplateHandler;
 import com.lc.mybatisx.utils.FreeMarkerUtils;
 import com.lc.mybatisx.utils.XmlUtils;
 import freemarker.template.Template;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.parsing.XPathParser;
 import org.apache.ibatis.session.Configuration;
@@ -32,10 +32,9 @@ public class StatementTemplateHandler {
     public Map<String, XNode> execute(MapperInfo mapperInfo) {
         List<MethodInfo> methodInfoList = mapperInfo.getMethodInfoList();
         Map<String, XNode> xNodeMap = new HashMap(15);
-        for (int i = 0; i < methodInfoList.size(); i++) {
-            MethodInfo methodInfo = methodInfoList.get(i);
-            String action = methodInfo.getAction();
-            if (StringUtils.isNotBlank(action)) {
+        for (MethodInfo methodInfo : methodInfoList) {
+            SqlCommandType sqlCommandType = methodInfo.getSqlCommandType();
+            if (sqlCommandType != null) {
                 XNode xNode = complexTemplateHandle(mapperInfo, methodInfo);
                 xNodeMap.put(methodInfo.getMethodName(), xNode);
             }
@@ -45,16 +44,16 @@ public class StatementTemplateHandler {
 
     private XNode complexTemplateHandle(MapperInfo mapperInfo, MethodInfo methodInfo) {
         String xmlString;
-        if ("select".equals(methodInfo.getAction())) {
+        if (methodInfo.getSqlCommandType() == SqlCommandType.SELECT) {
             SelectTemplateHandler selectTemplateHandler = new SelectTemplateHandler();
             xmlString = selectTemplateHandler.execute(mapperInfo, methodInfo);
-        } else if ("insert".equals(methodInfo.getAction())) {
+        } else if (methodInfo.getSqlCommandType() == SqlCommandType.INSERT) {
             InsertTemplateHandler insertTemplateHandler = new InsertTemplateHandler();
             xmlString = insertTemplateHandler.execute(mapperInfo, methodInfo);
-        } else if ("delete".equals(methodInfo.getAction())) {
+        } else if (methodInfo.getSqlCommandType() == SqlCommandType.DELETE) {
             DeleteTemplateHandler deleteTemplateHandler = new DeleteTemplateHandler();
             xmlString = deleteTemplateHandler.execute(mapperInfo, methodInfo);
-        } else if ("update".equals(methodInfo.getAction())) {
+        } else if (methodInfo.getSqlCommandType() == SqlCommandType.UPDATE) {
             UpdateTemplateHandler updateTemplateHandler = new UpdateTemplateHandler();
             xmlString = updateTemplateHandler.execute(mapperInfo, methodInfo);
         } else {

@@ -30,10 +30,11 @@ public class ConditionInfo {
     private ConditionOriginType conditionOriginType = ConditionOriginType.METHOD_NAME;
     /**
      * 参数名，如：param1、param2、param3。如：arg0、arg1、arg2 。有@Param则使用@Param中的值
+     * 条件和参数来源于方法名和方法参数，只有按照规范命名，后续通过methodParamNameList中的值去匹配方法参数
      */
     private List<String> methodParamNameList;
     /**
-     * 条件绑定的实体中的字段信息
+     * 条件绑定的实体中的字段信息，条件字段必须都是实体中的字段，在解析完条件后这个字段是不能为空的
      */
     private ColumnInfo columnInfo;
     /**

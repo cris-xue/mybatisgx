@@ -37,7 +37,7 @@ public class MethodInfo {
      */
     private Boolean isBatch = false;
     /**
-     * 方法名查询信息
+     * 方法名条件信息【修改、删除、查询都可以存在条件】
      */
     private List<ConditionInfo> conditionInfoList = new ArrayList<>();
     /**

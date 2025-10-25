@@ -1,5 +1,7 @@
 package com.lc.mybatisx.model;
 
+import java.util.List;
+
 public class ConditionInfo {
 
     /**
@@ -7,35 +9,31 @@ public class ConditionInfo {
      */
     private Integer index;
     /**
-     * AndUserNameEq
+     * 条件原始片段，AndUserNameEq
      */
-    private String origin;
+    private String originSegment;
     /**
      * 逻辑操作符【And、Or】
      */
-    private LogicOp logicOp;
+    private LogicOperator logicOperator;
     /**
-     * 条件名，如：findByNameAndUserId，条件名为name、userId
+     * 条件字段名，如：findByNameAndUserId，条件名为name、userId
      */
-    private String conditionName;
+    private String columnName;
     /**
      * 比较操作符【=、<=、!=】
      */
-    private ComparisonOp comparisonOp = ComparisonOp.EQ;
+    private ComparisonOperator comparisonOperator = ComparisonOperator.EQ;
     /**
-     * 是否是条件实体中的字段
+     * 条件来源
      */
-    private ConditionType conditionType = ConditionType.METHOD_NAME;
+    private ConditionOriginType conditionOriginType = ConditionOriginType.METHOD_NAME;
     /**
-     * 条件实体java字段名称，如nameLike、userIdEq，条件名为name、userId。
+     * 参数名，如：param1、param2、param3。如：arg0、arg1、arg2 。有@Param则使用@Param中的值
      */
-    private String conditionEntityJavaColumnName;
+    private List<String> methodParamNameList;
     /**
-     * 条件绑定的方法参数信息
-     */
-    private MethodParamInfo methodParamInfo;
-    /**
-     * 条件字段关联的实体中的字段信息
+     * 条件绑定的实体中的字段信息
      */
     private ColumnInfo columnInfo;
     /**
@@ -51,13 +49,6 @@ public class ConditionInfo {
      */
     private ConditionGroupInfo conditionGroupInfo;
 
-    public ConditionInfo() {
-    }
-
-    public ConditionInfo(Integer index) {
-        this.index = index;
-    }
-
     public Integer getIndex() {
         return index;
     }
@@ -66,60 +57,52 @@ public class ConditionInfo {
         this.index = index;
     }
 
-    public String getOrigin() {
-        return origin;
+    public String getOriginSegment() {
+        return originSegment;
     }
 
-    public void setOrigin(String origin) {
-        this.origin = origin;
+    public void setOriginSegment(String originSegment) {
+        this.originSegment = originSegment;
     }
 
-    public LogicOp getLogicOp() {
-        return logicOp;
+    public LogicOperator getLogicOperator() {
+        return logicOperator;
     }
 
-    public void setLogicOp(LogicOp logicOp) {
-        this.logicOp = logicOp;
+    public void setLogicOperator(LogicOperator logicOperator) {
+        this.logicOperator = logicOperator;
     }
 
-    public String getConditionName() {
-        return conditionName;
+    public String getColumnName() {
+        return columnName;
     }
 
-    public void setConditionName(String conditionName) {
-        this.conditionName = conditionName;
+    public void setColumnName(String columnName) {
+        this.columnName = columnName;
     }
 
-    public ComparisonOp getComparisonOp() {
-        return comparisonOp;
+    public ComparisonOperator getComparisonOperator() {
+        return comparisonOperator;
     }
 
-    public void setComparisonOp(ComparisonOp comparisonOp) {
-        this.comparisonOp = comparisonOp;
+    public void setComparisonOperator(ComparisonOperator comparisonOperator) {
+        this.comparisonOperator = comparisonOperator;
     }
 
-    public ConditionType getConditionType() {
-        return conditionType;
+    public ConditionOriginType getConditionOriginType() {
+        return conditionOriginType;
     }
 
-    public void setConditionType(ConditionType conditionType) {
-        this.conditionType = conditionType;
+    public void setConditionOriginType(ConditionOriginType conditionOriginType) {
+        this.conditionOriginType = conditionOriginType;
     }
 
-    public String getConditionEntityJavaColumnName() {
-        return conditionEntityJavaColumnName;
+    public List<String> getMethodParamNameList() {
+        return methodParamNameList;
     }
 
-    public void setConditionEntityJavaColumnName(String conditionEntityJavaColumnName) {
-        this.conditionEntityJavaColumnName = conditionEntityJavaColumnName;
-    }
-
-    public MethodParamInfo getMethodParamInfo() {
-        return methodParamInfo;
-    }
-
-    public void setMethodParamInfo(MethodParamInfo methodParamInfo) {
-        this.methodParamInfo = methodParamInfo;
+    public void setMethodParamNameList(List<String> methodParamNameList) {
+        this.methodParamNameList = methodParamNameList;
     }
 
     public ColumnInfo getColumnInfo() {

@@ -45,34 +45,34 @@ public class QueryConditionAstHandler {
     }
 
     public void execute(EntityInfo entityInfo, MethodInfo methodInfo) {
-        this.execute(entityInfo, methodInfo, false, methodInfo.getQueryCondition());
+        this.execute(entityInfo, methodInfo, ConditionOriginType.METHOD_NAME, methodInfo.getConditionGroupExpression());
     }
 
-    public void execute(EntityInfo entityInfo, MethodInfo methodInfo, Boolean conditionEntity, String queryCondition) {
+    public void execute(EntityInfo entityInfo, MethodInfo methodInfo, ConditionOriginType conditionOriginType, String queryCondition) {
         CharStream charStream = CharStreams.fromString(queryCondition);
         QueryConditionLexer methodNameLexer = new QueryConditionLexer(charStream);
         CommonTokenStream commonStream = new CommonTokenStream(methodNameLexer);
         QueryConditionParser methodNameParser = new QueryConditionParser(commonStream);
         ParseTree sqlStatementContext = methodNameParser.query_condition_statement();
-        this.getTokens(entityInfo, methodInfo, conditionEntity, sqlStatementContext);
+        this.getTokens(entityInfo, methodInfo, conditionOriginType, sqlStatementContext);
     }
 
-    private void getTokens(EntityInfo entityInfo, MethodInfo methodInfo, Boolean conditionEntity, ParseTree parseTree) {
+    private void getTokens(EntityInfo entityInfo, MethodInfo methodInfo, ConditionOriginType conditionOriginType, ParseTree parseTree) {
         int childCount = parseTree.getChildCount();
         for (int i = 0; i < childCount; i++) {
             ParseTree parseTreeChild = parseTree.getChild(i);
             if (parseTreeChild instanceof QueryConditionParser.Condition_group_clauseContext) {
-                List<ConditionInfo> conditionInfoList = this.parseConditionGroupClause(entityInfo, conditionEntity, parseTreeChild);
+                List<ConditionInfo> conditionInfoList = this.parseConditionGroupClause(entityInfo, conditionOriginType, parseTreeChild);
                 methodInfo.setConditionInfoList(conditionInfoList);
             } else if (parseTreeChild instanceof QueryConditionParser.EndContext) {
                 return;
             } else {
-                this.getTokens(entityInfo, methodInfo, conditionEntity, parseTreeChild);
+                this.getTokens(entityInfo, methodInfo, conditionOriginType, parseTreeChild);
             }
         }
     }
 
-    private List<ConditionInfo> parseConditionGroupClause(EntityInfo entityInfo, Boolean conditionEntity, ParseTree whereClause) {
+    private List<ConditionInfo> parseConditionGroupClause(EntityInfo entityInfo, ConditionOriginType conditionOriginType, ParseTree whereClause) {
         List<ConditionInfo> conditionInfoList = new ArrayList<>();
         int childCount = whereClause.getChildCount();
         for (int i = 0; i < childCount; i++) {
@@ -80,7 +80,7 @@ public class QueryConditionAstHandler {
             if (whereChildItem instanceof QueryConditionParser.Condition_clauseContext) {
                 ConditionInfo conditionInfo = new ConditionInfo();
                 conditionInfo.setIndex(i);
-                this.parseCondition(entityInfo, conditionInfo, conditionEntity, whereChildItem);
+                this.parseCondition(entityInfo, conditionInfo, conditionOriginType, whereChildItem);
                 conditionInfoList.add(conditionInfo);
             } else {
                 throw new RuntimeException("不支持的语法");
@@ -89,35 +89,39 @@ public class QueryConditionAstHandler {
         return conditionInfoList;
     }
 
-    private void parseCondition(EntityInfo entityInfo, ConditionInfo conditionInfo, Boolean conditionEntity, ParseTree parseTree) {
+    private void parseCondition(EntityInfo entityInfo, ConditionInfo conditionInfo, ConditionOriginType conditionOriginType, ParseTree parseTree) {
         int childCount = parseTree.getChildCount();
         for (int i = 0; i < childCount; i++) {
             ParseTree parseTreeChild = parseTree.getChild(i);
             String token = parseTreeChild.getText();
             if (parseTreeChild instanceof QueryConditionParser.Logic_op_clauseContext) {
-                conditionInfo.setConditionEntity(conditionEntity);
-                conditionInfo.setOrigin(parseTreeChild.getText());
-                conditionInfo.setLogicOp(TOKEN_MAP.get(token));
+                conditionInfo.setConditionOriginType(conditionOriginType);
+                conditionInfo.setOriginSegment(parseTreeChild.getText());
+                conditionInfo.setLogicOperator(LogicOperator.getLogicOperator(token));
             } else if (parseTreeChild instanceof QueryConditionParser.Left_bracket_clauseContext) {
                 conditionInfo.setLeftBracket("(");
             } else if (parseTreeChild instanceof QueryConditionParser.Right_bracket_clauseContext) {
                 conditionInfo.setRightBracket(")");
             } else if (parseTreeChild instanceof QueryConditionParser.Field_condition_op_clauseContext) {
-                String javaColumnName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, token);
-                conditionInfo.setConditionEntityJavaColumnName(javaColumnName);
-                this.parseCondition(entityInfo, conditionInfo, conditionEntity, parseTreeChild);
-            } else if (parseTreeChild instanceof QueryConditionParser.Field_clauseContext) {
-                String javaColumnName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, token);
-                ColumnInfo columnInfo = entityInfo.getColumnInfo(javaColumnName);
-                if (columnInfo == null) {
-                    throw new RuntimeException("方法条件或者实体中条件与数据库库实体无法对应：" + javaColumnName);
+                if (conditionOriginType == ConditionOriginType.ENTITY_FIELD) {
+                    String conditionColumnName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, token);
+                    conditionInfo.setColumnName(conditionColumnName);
                 }
-                conditionInfo.setConditionName(javaColumnName);
+                this.parseCondition(entityInfo, conditionInfo, conditionOriginType, parseTreeChild);
+            } else if (parseTreeChild instanceof QueryConditionParser.Field_clauseContext) {
+                String conditionColumnName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, token);
+                ColumnInfo columnInfo = entityInfo.getColumnInfo(conditionColumnName);
+                if (columnInfo == null) {
+                    throw new RuntimeException("方法条件或者实体中条件与数据库库实体无法对应：" + conditionColumnName);
+                }
+                if (conditionOriginType == ConditionOriginType.METHOD_NAME) {
+                    conditionInfo.setColumnName(conditionColumnName);
+                }
                 conditionInfo.setColumnInfo(columnInfo);
             } else if (parseTreeChild instanceof QueryConditionParser.Comparison_op_clauseContext) {
-                conditionInfo.setComparisonOp(TOKEN_MAP.get(token));
+                conditionInfo.setComparisonOperator(ComparisonOperator.getComparisonOperator(token));
             } else if (parseTreeChild instanceof QueryConditionParser.Condition_group_clauseContext) {
-                List<ConditionInfo> conditionInfoList = this.parseConditionGroupClause(entityInfo, conditionEntity, parseTreeChild);
+                List<ConditionInfo> conditionInfoList = this.parseConditionGroupClause(entityInfo, conditionOriginType, parseTreeChild);
                 ConditionGroupInfo conditionGroupInfo = new ConditionGroupInfo();
                 conditionGroupInfo.setConditionInfoList(conditionInfoList);
                 conditionInfo.setConditionGroupInfo(conditionGroupInfo);

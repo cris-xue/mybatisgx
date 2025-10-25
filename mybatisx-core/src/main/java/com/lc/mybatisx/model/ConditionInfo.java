@@ -17,7 +17,9 @@ public class ConditionInfo {
      */
     private LogicOperator logicOperator;
     /**
-     * 条件字段名，如：findByNameAndUserId，条件名为name、userId
+     * 条件字段名
+     * 类型为方法名：findByNameAndUserId，条件名为name、userId
+     * 类型为实体字段：条件名为nameLike、userId、userId、timeBetween
      */
     private String columnName;
     /**
@@ -34,7 +36,7 @@ public class ConditionInfo {
      */
     private List<String> methodParamNameList;
     /**
-     * 条件绑定的实体中的字段信息，条件字段必须都是实体中的字段，在解析完条件后这个字段是不能为空的
+     * 条件绑定数据库表实体对应的字段信息，条件字段必须都是数据库表实体中的字段，在解析完条件后这个字段是不能为空的
      */
     private ColumnInfo columnInfo;
     /**

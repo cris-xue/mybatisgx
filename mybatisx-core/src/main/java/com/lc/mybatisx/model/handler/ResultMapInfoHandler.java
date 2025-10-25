@@ -40,7 +40,7 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
             return existResultMapInfo.getId();
         }
 
-        mapperInfo.addResultMapInfoList(resultMapInfoList);
+        mapperInfo.setResultMapInfoList(resultMapInfoList);
         return resultMapInfo.getId();
     }
 
@@ -102,7 +102,7 @@ public class ResultMapInfoHandler extends BasicInfoHandler {
          */
         protected List<ResultMapInfo> buildRelationResultMapInfo(ResultMapContext resultMapContext, EntityRelationTree entityRelationTree) {
             List<ResultMapInfo> resultMapInfoList = new ArrayList();
-            for (EntityRelationTree childEntityRelationTree : entityRelationTree.getEntityRelationList()) {
+            for (EntityRelationTree childEntityRelationTree : entityRelationTree.getComposites()) {
                 int level = childEntityRelationTree.getLevel();
                 RelationColumnInfo relationColumnInfo = (RelationColumnInfo) childEntityRelationTree.getColumnInfo();
 

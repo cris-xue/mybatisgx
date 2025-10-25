@@ -38,10 +38,10 @@ public class EntityRelationTreeHandler {
 
         // 解决循环引用问题
         EntityRelationDependencyTree entityRelationDependencyTree = EntityRelationDependencyTree.build(null, resultClass);
-        EntityRelationTree entityRelationInfo = this.buildEntityRelationTree(null, entityInfo, entityRelationDependencyTree, 1, 1);
+        EntityRelationTree entityRelationTree = this.buildEntityRelationTree(null, entityInfo, entityRelationDependencyTree, 1, 1);
 
-        mapperInfo.addEntityRelationTree(entityRelationInfo);
-        return entityRelationInfo;
+        mapperInfo.addEntityRelationTree(entityRelationTree);
+        return entityRelationTree;
     }
 
     private EntityRelationTree buildEntityRelationTree(ColumnInfo columnInfo, EntityInfo entityInfo, EntityRelationDependencyTree entityRelationDependencyTree, int level, int index) {
@@ -75,7 +75,7 @@ public class EntityRelationTreeHandler {
             EntityInfo relationColumnEntityInfo = this.getRelationColumnEntityInfo(isSelfRef, relationColumnJavaType);
             EntityRelationTree subEntityRelationTree = this.buildEntityRelationTree(relationColumnInfo, relationColumnEntityInfo, childrenResultMapDependencyTree, level + 1, i + 1);
             if (subEntityRelationTree != null) {
-                entityRelationTree.addEntityRelation(subEntityRelationTree);
+                entityRelationTree.addComposites(subEntityRelationTree);
             }
         }
         return entityRelationTree;

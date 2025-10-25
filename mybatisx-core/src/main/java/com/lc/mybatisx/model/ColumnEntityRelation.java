@@ -64,6 +64,10 @@ public class ColumnEntityRelation<T> {
         this.composites = composites;
     }
 
+    public void addComposites(T composite) {
+        this.composites.add(composite);
+    }
+
     public Class<?> getEntityClazz() {
         return this.entityInfo.getClazz();
     }

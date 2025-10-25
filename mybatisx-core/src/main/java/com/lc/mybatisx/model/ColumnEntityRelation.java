@@ -84,14 +84,8 @@ public class ColumnEntityRelation<T> {
     public Boolean isMappedBy() {
         RelationColumnInfo relationColumnInfo = (RelationColumnInfo) this.columnInfo;
         RelationColumnInfo mappedByRelationColumnInfo = relationColumnInfo.getMappedByRelationColumnInfo();
-        if (mappedByRelationColumnInfo == null) {
-            return false;
-        } else {
-            if (mappedByRelationColumnInfo != null) {
-                return true;
-            }
-        }
-        return false;
+        // 关联字段中mappedBy != null说明关系在实体中维护，那么当前实体就是关系维护方
+        return mappedByRelationColumnInfo != null;
     }
 
     /**

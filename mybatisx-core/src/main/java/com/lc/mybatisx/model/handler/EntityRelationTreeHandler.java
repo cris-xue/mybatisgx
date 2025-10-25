@@ -8,6 +8,7 @@ import com.lc.mybatisx.utils.TypeUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.ibatis.mapping.SqlCommandType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,8 +27,8 @@ public class EntityRelationTreeHandler {
     private TableColumnNameAlias tableColumnNameAlias = new TableColumnNameAlias();
 
     public EntityRelationTree execute(MapperInfo mapperInfo, MethodInfo methodInfo) {
-        String action = methodInfo.getAction();
-        if (Arrays.asList("insert", "delete", "update").contains(action)) {
+        SqlCommandType sqlCommandType = methodInfo.getSqlCommandType();
+        if (Arrays.asList(SqlCommandType.INSERT, SqlCommandType.DELETE, SqlCommandType.UPDATE).contains(sqlCommandType)) {
             return null;
         }
 

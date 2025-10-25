@@ -44,10 +44,6 @@ public class MapperInfo {
      * 结果集信息列表
      */
     private Map<String, ResultMapInfo> resultMapInfoMap = new LinkedHashMap();
-    /**
-     * 实体关联查询方法
-     */
-    private Map<String, EntityRelationSelectInfo> entityRelationSelectInfoMap = new LinkedHashMap();
 
     public Class<?> getIdClass() {
         return idClass;
@@ -122,23 +118,12 @@ public class MapperInfo {
         return resultMapInfoMap.get(resultMapId);
     }
 
-    public void addResultMapInfo(ResultMapInfo resultMapInfo) {
-        this.resultMapInfoMap.put(resultMapInfo.getId(), resultMapInfo);
-    }
-
-    public void addResultMapInfoList(List<ResultMapInfo> resultMapInfoList) {
+    public void setResultMapInfoList(List<ResultMapInfo> resultMapInfoList) {
         for (ResultMapInfo resultMapInfo : resultMapInfoList) {
-            this.addResultMapInfo(resultMapInfo);
-        }
-    }
-
-    public List<EntityRelationSelectInfo> getEntityRelationSelectInfoList() {
-        return new ArrayList(entityRelationSelectInfoMap.values());
-    }
-
-    public void setEntityRelationSelectInfoList(List<EntityRelationSelectInfo> entityRelationSelectInfoList) {
-        for (EntityRelationSelectInfo entityRelationSelectInfo : entityRelationSelectInfoList) {
-            this.entityRelationSelectInfoMap.put(entityRelationSelectInfo.getId(), entityRelationSelectInfo);
+            ResultMapInfo existResultMapInfo = this.resultMapInfoMap.get(resultMapInfo.getId());
+            if (existResultMapInfo == null) {
+                this.resultMapInfoMap.put(resultMapInfo.getId(), resultMapInfo);
+            }
         }
     }
 }

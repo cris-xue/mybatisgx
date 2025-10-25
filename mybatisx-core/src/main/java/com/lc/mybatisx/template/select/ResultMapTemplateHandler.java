@@ -27,7 +27,7 @@ public class ResultMapTemplateHandler {
         for (ResultMapInfo resultMapInfo : resultMapInfoList) {
             Document document = DocumentHelper.createDocument();
             Element resultMapElement = ResultMapHelper.addResultMapElement(document, resultMapInfo);
-            if (TypeUtils.typeEquals(resultMapInfo, ResultMapInfo.class) || TypeUtils.typeEquals(resultMapInfo, SimpleNestedResultMapInfo.class)) {
+            if (TypeUtils.typeEquals(resultMapInfo, ResultMapInfo.class, SimpleNestedResultMapInfo.class)) {
                 this.addIdColumnElement(resultMapElement, resultMapInfo.getEntityInfo());
                 this.addColumnElement(resultMapElement, resultMapInfo.getTableColumnInfoList());
                 this.addRelationColumnElement(resultMapElement, resultMapInfo);
@@ -35,7 +35,7 @@ public class ResultMapTemplateHandler {
             }
             if (TypeUtils.typeEquals(resultMapInfo, BatchNestedResultMapInfo.class)) {
                 this.addIdColumnElement(resultMapElement, resultMapInfo.getEntityInfo());
-                this.addRelationColumnElement(resultMapElement, resultMapInfo);
+                // this.addRelationColumnElement(resultMapElement, resultMapInfo);
                 this.addRelationResultMapElement(resultMapElement, resultMapInfo);
             }
             String resultMapXmlString = document.asXML();
@@ -167,6 +167,9 @@ public class ResultMapTemplateHandler {
             Element resultMapCollectionElement = ResultMapHelper.joinCollectionColumnElement(resultMapElement, resultMapInfo);
             this.addIdColumnElement(resultMapCollectionElement, resultMapInfo.getEntityInfo());
             this.addColumnElement(resultMapCollectionElement, resultMapInfo.getTableColumnInfoList());
+            if (resultMapInfo.isMappedBy()) {
+                this.addRelationColumnElement(resultMapCollectionElement, resultMapInfo);
+            }
             return resultMapCollectionElement;
         } else {
             throw new RuntimeException(relationColumnInfo.getJavaType() + "没有关联注解");
@@ -183,22 +186,22 @@ public class ResultMapTemplateHandler {
             for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
                 ColumnInfo foreignKeyColumnInfo = inverseForeignKeyColumnInfo.getColumnInfo();
                 ColumnInfo referencedColumnInfo = inverseForeignKeyColumnInfo.getReferencedColumnInfo();
-                String foreignKeyJavaColumnPath = foreignKeyColumnInfo.getJavaColumnPath();
-                String referencedJavaColumnPath = referencedColumnInfo.getJavaColumnPath();
-                String left = foreignKeyJavaColumnPath + "." + referencedJavaColumnPath;
+                /*String foreignKeyJavaColumnPath = foreignKeyColumnInfo.getJavaColumnPath();
+                String referencedJavaColumnPath = referencedColumnInfo.getJavaColumnPath();*/
+                /*String left = foreignKeyJavaColumnPath + "." + referencedJavaColumnPath;
                 String right = referencedJavaColumnPath;
-                relationProperty.put(left, right);
+                relationProperty.put(left, right);*/
             }
         } else {
             List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedByColumnRelationInfo.getInverseForeignKeyColumnInfoList();
             for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
                 ColumnInfo foreignKeyColumnInfo = inverseForeignKeyColumnInfo.getColumnInfo();
                 ColumnInfo referencedColumnInfo = inverseForeignKeyColumnInfo.getReferencedColumnInfo();
-                String foreignKeyJavaColumnPath = foreignKeyColumnInfo.getJavaColumnPath();
+                /*String foreignKeyJavaColumnPath = foreignKeyColumnInfo.getJavaColumnPath();
                 String referencedJavaColumnPath = referencedColumnInfo.getJavaColumnPath();
                 String left = referencedJavaColumnPath;
                 String right = foreignKeyJavaColumnPath + "." + referencedJavaColumnPath;
-                relationProperty.put(left, right);
+                relationProperty.put(left, right);*/
             }
         }
         return relationProperty.toString();

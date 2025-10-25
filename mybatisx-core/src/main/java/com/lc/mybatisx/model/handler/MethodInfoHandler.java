@@ -204,7 +204,7 @@ public class MethodInfoHandler {
                     Entity entity = methodParamInfo.getType().getAnnotation(Entity.class);
                     if (entity != null) {
                         String entityCondition = this.entityCondition(methodInfo, methodParamInfo);
-                        methodNameAstHandler.execute(entityInfo, methodInfo, ConditionType.ENTITY_FIELD, entityCondition);
+                        methodNameAstHandler.execute(entityInfo, methodInfo, ConditionOriginType.ENTITY_FIELD, entityCondition);
                     }
                 }
             }
@@ -214,7 +214,7 @@ public class MethodInfoHandler {
                 QueryEntity isQueryEntity = methodParamInfo.getType().getAnnotation(QueryEntity.class);
                 if (isQueryEntity != null) {
                     String queryEntityCondition = this.entityCondition(methodInfo, methodParamInfo);
-                    methodNameAstHandler.execute(entityInfo, methodInfo, ConditionType.ENTITY_FIELD, queryEntityCondition);
+                    methodNameAstHandler.execute(entityInfo, methodInfo, ConditionOriginType.ENTITY_FIELD, queryEntityCondition);
                 }
             }
         }
@@ -270,15 +270,15 @@ public class MethodInfoHandler {
             } else {
                 // 处理查询条件和参数之间的关系，查询条件和参数之间是1对1关系，不要设计一对多关系，后续绑定参数很难处理
                 Integer index = conditionInfo.getIndex();
-                String conditionName = conditionInfo.getConditionName();
+                String conditionColumnName = conditionInfo.getColumnName();
 
                 // 采用4种方式获取参数：argx -> conditionName -> conditionName.toLowerCase() -> paramx：【arg0 -> userName -> username -> param1】
                 MethodParamInfo methodParamInfo = methodInfo.getMethodParamInfo("arg" + index);
                 if (methodParamInfo == null) {
-                    methodParamInfo = methodInfo.getMethodParamInfo(conditionName);
+                    methodParamInfo = methodInfo.getMethodParamInfo(conditionColumnName);
                 }
                 if (methodParamInfo == null) {
-                    methodParamInfo = methodInfo.getMethodParamInfo(conditionName.toLowerCase());
+                    methodParamInfo = methodInfo.getMethodParamInfo(conditionColumnName.toLowerCase());
                 }
                 if (methodParamInfo == null) {
                     methodParamInfo = methodInfo.getMethodParamInfo("param" + (index + 1));

@@ -23,6 +23,6 @@ public enum LogicOperator {
     }
 
     public String getValue() {
-        return logicOp;
+        return value;
     }
 }

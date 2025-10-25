@@ -70,6 +70,16 @@ create table if not exists user_role_complex
 ) engine = InnoDB
   default charset = utf8mb4;
 
+create table if not exists test_org_complex
+(
+    id        varchar(64) not null,
+    code      varchar(64) null comment '',
+    parent_id varchar(64) not null comment '',
+
+    primary key (id)
+) engine = InnoDB
+  default charset = utf8mb4;
+
 create table if not exists role_complex
 (
     id1            bigint      not null,

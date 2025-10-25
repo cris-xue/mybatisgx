@@ -10,7 +10,7 @@ import com.lc.mybatisx.annotation.Id;
 public abstract class IdBaseEntity<ID> {
 
     @Id
-    private ID id;
+    protected ID id;
 
     public ID getId() {
         return id;

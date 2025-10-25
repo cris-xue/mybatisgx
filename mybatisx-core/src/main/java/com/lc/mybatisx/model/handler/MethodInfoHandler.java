@@ -264,6 +264,10 @@ public class MethodInfoHandler {
      */
     private void bindConditionParam(MethodInfo methodInfo, List<ConditionInfo> conditionInfoList) {
         for (ConditionInfo conditionInfo : conditionInfoList) {
+            // 条件来自于实体字段，就无法和参数进行绑定
+            if (conditionInfo.getConditionOriginType() == ConditionOriginType.ENTITY_FIELD) {
+                continue;
+            }
             ConditionGroupInfo conditionGroupInfo = conditionInfo.getConditionGroupInfo();
             if (conditionGroupInfo != null) {
                 this.bindConditionParam(methodInfo, conditionGroupInfo.getConditionInfoList());

@@ -92,8 +92,7 @@ public class MethodNameAstHandler {
                     throw new RuntimeException("语法错误，条件必须以By开头");
                 }
             } else if (whereChildItem instanceof MethodNameParser.Condition_clauseContext) {
-                ConditionInfo conditionInfo = new ConditionInfo();
-                conditionInfo.setIndex(conditionCount++);
+                ConditionInfo conditionInfo = new ConditionInfo(conditionCount++, conditionOriginType);
                 this.parseCondition(entityInfo, conditionInfo, conditionOriginType, whereChildItem);
                 conditionInfoList.add(conditionInfo);
             } else {

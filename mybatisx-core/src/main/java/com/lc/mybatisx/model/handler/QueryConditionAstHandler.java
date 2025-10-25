@@ -74,12 +74,12 @@ public class QueryConditionAstHandler {
 
     private List<ConditionInfo> parseConditionGroupClause(EntityInfo entityInfo, ConditionOriginType conditionOriginType, ParseTree whereClause) {
         List<ConditionInfo> conditionInfoList = new ArrayList<>();
+        Integer conditionCount = 0;
         int childCount = whereClause.getChildCount();
         for (int i = 0; i < childCount; i++) {
             ParseTree whereChildItem = whereClause.getChild(i);
             if (whereChildItem instanceof QueryConditionParser.Condition_clauseContext) {
-                ConditionInfo conditionInfo = new ConditionInfo();
-                conditionInfo.setIndex(i);
+                ConditionInfo conditionInfo = new ConditionInfo(conditionCount++, conditionOriginType);
                 this.parseCondition(entityInfo, conditionInfo, conditionOriginType, whereChildItem);
                 conditionInfoList.add(conditionInfo);
             } else {

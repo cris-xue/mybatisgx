@@ -27,7 +27,7 @@ public class ConditionInfo {
     /**
      * 条件来源
      */
-    private ConditionOriginType conditionOriginType = ConditionOriginType.METHOD_NAME;
+    private ConditionOriginType conditionOriginType;
     /**
      * 条件绑定的参数信息
      */
@@ -48,6 +48,11 @@ public class ConditionInfo {
      * 条件组信息，一个条件组包含多个条件，一个条件可能由一个条件组或者一个条件字段组成
      */
     private ConditionGroupInfo conditionGroupInfo;
+
+    public ConditionInfo(Integer index, ConditionOriginType conditionOriginType) {
+        this.index = index;
+        this.conditionOriginType = conditionOriginType;
+    }
 
     public Integer getIndex() {
         return index;

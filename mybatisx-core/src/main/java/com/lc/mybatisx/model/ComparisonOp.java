@@ -31,4 +31,8 @@ public enum ComparisonOp {
         }
         return null;
     }
+
+    public String getComparisonOp() {
+        return comparisonOp;
+    }
 }

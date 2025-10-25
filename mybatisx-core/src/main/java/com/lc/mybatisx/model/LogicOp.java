@@ -24,4 +24,8 @@ public enum LogicOp {
         }
         return null;
     }
+
+    public String getLogicOp() {
+        return logicOp;
+    }
 }

@@ -348,6 +348,7 @@ public class MethodInfoHandler {
         }
         methodParamInfo.setArgName(argName);
         methodParamInfo.setParamName("param" + (methodParamInfo.getIndex() + 1));
+        methodParamInfo.setParam(param);
     }
 
     private Class<?> getMethodReturnType(MapperInfo mapperInfo, Method method) {

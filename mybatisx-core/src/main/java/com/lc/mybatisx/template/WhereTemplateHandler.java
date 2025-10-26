@@ -6,6 +6,7 @@ import com.lc.mybatisx.utils.PropertyPlaceholderUtils;
 import com.lc.mybatisx.utils.TypeUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.ibatis.mapping.SqlCommandType;
 import org.dom4j.Element;
 
 import java.util.*;
@@ -31,7 +32,7 @@ public class WhereTemplateHandler {
         ColumnInfo lockColumnInfo = entityInfo.getLockColumnInfo();
         if (lockColumnInfo != null) {
             // 只有更新的场景才需要乐观锁，逻辑删除不需要乐观锁，因为逻辑删除直接改变逻辑删除字段，因为不管什么操作都一定需要逻辑删除字段
-            if ("update".equals(methodInfo.getAction())) {
+            if (methodInfo.getSqlCommandType() == SqlCommandType.UPDATE) {
                 whereElement.addText(String.format(" and %s = #{%s}", lockColumnInfo.getDbColumnName(), lockColumnInfo.getJavaColumnName()));
             }
         }
@@ -67,7 +68,7 @@ public class WhereTemplateHandler {
                 if (logicDelete != null) {
                     continue;
                 }
-                ConditionProcessor conditionProcessor = this.processorFactory.getProcessor(columnInfo);
+                ConditionProcessor conditionProcessor = new AbstractConditionProcessor();
                 conditionProcessor.process(methodInfo, conditionInfo, whereElement);
             }
         }
@@ -80,11 +81,11 @@ public class WhereTemplateHandler {
      * @return
      */
     private String getLogicOp(ConditionInfo conditionInfo) {
-        String logicOp = conditionInfo.getLogicOp();
-        if (StringUtils.isBlank(logicOp)) {
-            return "";
+        LogicOperator logicOperator = conditionInfo.getLogicOperator();
+        if (logicOperator != null) {
+            return logicOperator.getValue();
         }
-        return logicOp;
+        return "";
     }
 
     static class ConditionProcessorFactory {
@@ -107,15 +108,46 @@ public class WhereTemplateHandler {
         void process(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement);
     }
 
+    static class AbstractConditionProcessor implements ConditionProcessor {
+
+        protected final Map<String, ConditionHandler> conditionHandlers = new HashMap<>();
+
+        public AbstractConditionProcessor() {
+            conditionHandlers.put("like", new LikeConditionHandler());
+            conditionHandlers.put("in", new InConditionHandler());
+            conditionHandlers.put("between", new BetweenConditionHandler());
+            conditionHandlers.put("default", new CommonConditionHandler());
+        }
+
+        @Override
+        public void process(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement) {
+            ConditionHandler conditionHandler = conditionHandlers.getOrDefault(conditionInfo.getComparisonOperator().getValue(), conditionHandlers.get("default"));
+            conditionHandler.handle(methodInfo, conditionInfo, whereElement);
+        }
+    }
+
     static class IdConditionProcessor implements ConditionProcessor {
 
         @Override
         public void process(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement) {
-            IdColumnInfo idColumnInfo = (IdColumnInfo) conditionInfo.getColumnInfo();
-            if (ObjectUtils.isEmpty(idColumnInfo.getComposites())) {
-                processSimpleId(whereElement, methodInfo, idColumnInfo);
+            if (conditionInfo.getConditionOriginType() == ConditionOriginType.ENTITY_FIELD) {
+                IdColumnInfo idColumnInfo = (IdColumnInfo) conditionInfo.getColumnInfo();
+                if (ObjectUtils.isEmpty(idColumnInfo.getComposites())) {
+                    processSimpleId(whereElement, methodInfo, idColumnInfo);
+                } else {
+                    processCompositeId(whereElement, methodInfo, idColumnInfo);
+                }
             } else {
-                processCompositeId(whereElement, methodInfo, idColumnInfo);
+                //MethodParamInfo methodParamInfo = conditionInfo.getMethodParamInfoList().get(0);
+
+                /*methodParamInfo.getColumnInfoList().get(0);
+                if (methodParamInfo.getBasicType()) {
+                    // this.processSimpleId(whereElement, methodInfo, );
+                } else {
+
+                }
+                IdColumnInfo idColumnInfo = new IdColumnInfo();
+                idColumnInfo.setComposites(methodParamInfo.getColumnInfoList());*/
             }
         }
 
@@ -126,13 +158,13 @@ public class WhereTemplateHandler {
         }
 
         private void processCompositeId(Element whereElement, MethodInfo methodInfo, IdColumnInfo idColumnInfo) {
-            String testExpression = this.getTestExpression(idColumnInfo);
+            String testExpression = this.getCompositeIdTestExpression(idColumnInfo);
             Element whereOrIfElement = ConditionUtils.createDynamicElementIfNeeded(whereElement, methodInfo.getDynamic(), testExpression);
-            String conditionExpression = this.getConditionExpression(idColumnInfo);
+            String conditionExpression = this.getCompositeIdConditionExpression(idColumnInfo);
             whereOrIfElement.addText(conditionExpression);
         }
 
-        private String getTestExpression(IdColumnInfo idColumnInfo) {
+        private String getCompositeIdTestExpression(IdColumnInfo idColumnInfo) {
             List<String> testExpressionList = new ArrayList();
             for (ColumnInfo columnInfo : idColumnInfo.getComposites()) {
                 testExpressionList.add(String.format("%s != null and %s.%s != null", idColumnInfo.getJavaColumnName(), idColumnInfo.getJavaColumnName(), columnInfo.getJavaColumnName()));
@@ -140,7 +172,7 @@ public class WhereTemplateHandler {
             return StringUtils.join(testExpressionList, " and ");
         }
 
-        private String getConditionExpression(IdColumnInfo idColumnInfo) {
+        private String getCompositeIdConditionExpression(IdColumnInfo idColumnInfo) {
             List<String> conditionExpressionList = new ArrayList();
             for (ColumnInfo columnInfo : idColumnInfo.getComposites()) {
                 conditionExpressionList.add(String.format("and %s = #{%s.%s} ", columnInfo.getDbColumnName(), idColumnInfo.getJavaColumnName(), columnInfo.getJavaColumnName()));
@@ -149,40 +181,12 @@ public class WhereTemplateHandler {
         }
     }
 
-    static class CommonConditionProcessor implements ConditionProcessor {
+    static class CommonConditionProcessor extends AbstractConditionProcessor {
 
-        private final Map<String, ConditionHandler> conditionHandlers = new HashMap<>();
-
-        public CommonConditionProcessor() {
-            conditionHandlers.put("like", new LikeConditionHandler());
-            conditionHandlers.put("in", new InConditionHandler());
-            conditionHandlers.put("between", new BetweenConditionHandler());
-            conditionHandlers.put("default", new CommonConditionHandler());
-        }
-
-        @Override
-        public void process(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement) {
-            ConditionHandler conditionHandler = conditionHandlers.getOrDefault(conditionInfo.getComparisonOp(), conditionHandlers.get("default"));
-            conditionHandler.handle(methodInfo, conditionInfo, whereElement);
-        }
     }
 
-    static class RelationConditionProcessor implements ConditionProcessor {
+    static class RelationConditionProcessor extends AbstractConditionProcessor {
 
-        private final Map<String, ConditionHandler> conditionHandlers = new HashMap<>();
-
-        public RelationConditionProcessor() {
-            conditionHandlers.put("like", new LikeConditionHandler());
-            conditionHandlers.put("in", new InConditionHandler());
-            conditionHandlers.put("between", new BetweenConditionHandler());
-            conditionHandlers.put("default", new CommonConditionHandler());
-        }
-
-        @Override
-        public void process(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement) {
-            ConditionHandler conditionHandler = conditionHandlers.getOrDefault(conditionInfo.getComparisonOp(), conditionHandlers.get("default"));
-            conditionHandler.handle(methodInfo, conditionInfo, whereElement);
-        }
     }
 
     interface ConditionHandler {
@@ -192,15 +196,28 @@ public class WhereTemplateHandler {
 
     static abstract class AbstractConditionHandler implements ConditionHandler {
 
-        protected Element whereOpDynamic(Boolean dynamic, Element whereElement, String javaColumnName) {
-            if (dynamic) {
-                String testTemplate = "${test} != null";
-                Properties properties = new Properties();
-                properties.setProperty("test", javaColumnName);
-                String testValue = PropertyPlaceholderUtils.replace(testTemplate, properties);
+        /**
+         *
+         * @param logicOperator
+         * @param comparisonOperator
+         * @param columnInfo
+         * @param paramValueExpression #{userId} or #{user.userId}
+         * @return and user_id = #{userId} or and user_id = #{user.userId}
+         */
+        protected String getConditionExpression(LogicOperator logicOperator, ComparisonOperator comparisonOperator, ColumnInfo columnInfo, String paramValueExpression) {
+            return String.format(
+                    " %s %s %s #{%s}",
+                    logicOperator.getValue(),
+                    columnInfo.getDbColumnName(),
+                    comparisonOperator.getValue(),
+                    paramValueExpression
+            );
+        }
 
+        protected Element whereOpDynamic(Boolean dynamic, Element whereElement, String testExpression) {
+            if (dynamic) {
                 Element ifElement = whereElement.addElement("if");
-                ifElement.addAttribute("test", testValue);
+                ifElement.addAttribute("test", testExpression);
                 return ifElement;
             }
             return whereElement;
@@ -228,11 +245,11 @@ public class WhereTemplateHandler {
          * @return
          */
         protected String getLogicOp(ConditionInfo conditionInfo) {
-            String logicOp = conditionInfo.getLogicOp();
-            if (StringUtils.isBlank(logicOp)) {
-                return "";
+            LogicOperator logicOperator = conditionInfo.getLogicOperator();
+            if (logicOperator != null) {
+                return logicOperator.getValue();
             }
-            return logicOp;
+            return "";
         }
     }
 
@@ -240,7 +257,7 @@ public class WhereTemplateHandler {
 
         @Override
         public void handle(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement) {
-            String javaColumnName = conditionInfo.getConditionEntity() ? conditionInfo.getConditionEntityJavaColumnName() : conditionInfo.getColumnInfo().getJavaColumnName();
+            String javaColumnName = null;// conditionInfo.getConditionEntity() ? conditionInfo.getConditionEntityJavaColumnName() : conditionInfo.getColumnInfo().getJavaColumnName();
 
             String likeValueTemplate = "'%' + ${like} + '%'";
             Properties properties = new Properties();
@@ -253,7 +270,7 @@ public class WhereTemplateHandler {
             bindElement.addAttribute("value", likeValue);
 
             Element trimOrIfElement = whereOpDynamic(methodInfo.getDynamic(), whereElement, javaColumnName);
-            String conditionOp = String.format(" %s %s %s #{%s}", this.getLogicOp(conditionInfo), conditionInfo.getDbColumnName(), conditionInfo.getComparisonOp(), javaColumnName);
+            String conditionOp = String.format(" %s %s %s #{%s}", this.getLogicOp(conditionInfo), conditionInfo.getColumnName(), conditionInfo.getComparisonOperator().getValue(), javaColumnName);
             trimOrIfElement.addText(conditionOp);
         }
     }
@@ -262,7 +279,7 @@ public class WhereTemplateHandler {
 
         @Override
         public void handle(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement) {
-            String javaColumnName = conditionInfo.getConditionEntity() ? conditionInfo.getConditionEntityJavaColumnName() : conditionInfo.getJavaColumnName();
+            /*String javaColumnName = conditionInfo.getConditionEntity() ? conditionInfo.getConditionEntityJavaColumnName() : conditionInfo.getJavaColumnName();
 
             Element trimOrIfElement = whereOpDynamic(methodInfo.getDynamic(), whereElement, javaColumnName);
 
@@ -277,7 +294,7 @@ public class WhereTemplateHandler {
             foreachElement.addAttribute("open", "(");
             foreachElement.addAttribute("close", ")");
             foreachElement.addAttribute("separator", ",");
-            foreachElement.addText("#{item}");
+            foreachElement.addText("#{item}");*/
         }
     }
 
@@ -285,10 +302,10 @@ public class WhereTemplateHandler {
 
         @Override
         public void handle(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement) {
-            String javaColumnName = conditionInfo.getConditionEntity() ? conditionInfo.getConditionEntityJavaColumnName() : conditionInfo.getJavaColumnName();
+            /*String javaColumnName = conditionInfo.getConditionEntity() ? conditionInfo.getConditionEntityJavaColumnName() : conditionInfo.getJavaColumnName();
             Element trimOrIfElement = whereOpDynamic(methodInfo.getDynamic(), whereElement, javaColumnName);
             String conditionOp = String.format(" %s %s %s #{%s[0]} and #{%s[1]}", this.getLogicOp(conditionInfo), conditionInfo.getDbColumnName(), conditionInfo.getComparisonOp(), javaColumnName, javaColumnName);
-            trimOrIfElement.addText(conditionOp);
+            trimOrIfElement.addText(conditionOp);*/
         }
     }
 
@@ -296,32 +313,90 @@ public class WhereTemplateHandler {
 
         @Override
         public void handle(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement) {
-            ColumnInfo columnInfo = conditionInfo.getColumnInfo();
-            if (TypeUtils.typeEquals(columnInfo, RelationColumnInfo.class)) {
-                RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
-                RelationColumnInfo mappedByRelationColumnInfo = relationColumnInfo.getMappedByRelationColumnInfo();
-                if (relationColumnInfo.getRelationType() != RelationType.MANY_TO_MANY && mappedByRelationColumnInfo == null) {
-                    String tableColumnName = relationColumnInfo.getDbColumnName();
-                    List<ForeignKeyColumnInfo> foreignKeyInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
-                    for (ForeignKeyColumnInfo foreignKeyInfo : foreignKeyInfoList) {
-                        ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();
-                        String javaColumnName = relationColumnInfo.getJavaColumnName() + "." + referencedColumnInfo.getJavaColumnName();
-                        String logicOp = this.getLogicOp(conditionInfo);
-                        String comparisonOp = conditionInfo.getComparisonOp();
-                        Element trimOrIfElement = whereOpDynamic(methodInfo.getDynamic(), whereElement, javaColumnName);
-                        String conditionOp = String.format(" %s %s %s #{%s}", logicOp, tableColumnName, comparisonOp, javaColumnName);
-                        trimOrIfElement.addText(conditionOp);
+            int methodParamCount = methodInfo.getMethodParamInfoList().size();
+            if (methodParamCount == 1) {
+                ColumnInfo columnInfo = conditionInfo.getColumnInfo();
+                if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class, ColumnInfo.class)) {
+                    MethodParamInfo methodParamInfo = conditionInfo.getMethodParamInfo();
+                    LogicOperator logicOperator = conditionInfo.getLogicOperator();
+                    ComparisonOperator comparisonOperator = conditionInfo.getComparisonOperator();
+                    if (methodParamInfo.getBasicType()) {
+                        // findById(Long id) findById(@Param("id") Long id)
+                        String testExpression = String.format("%s != null", methodParamInfo.getArgName());
+                        String paramValueExpression = String.format("%s", methodParamInfo.getArgName());
+                        String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
+                        this.buildWhereItem(whereElement, methodInfo.getDynamic(), testExpression, conditionExpression);
+                    } else {
+                        // findById(MultiId id) findById(@Param("id") MultiId id)
+                        if (methodParamInfo.getParam() == null) {
+                            if (ObjectUtils.isEmpty(columnInfo.getComposites())) {
+                                String testExpression = String.format("%s != null", columnInfo.getJavaColumnName());
+                                String paramValueExpression = String.format("%s", columnInfo.getJavaColumnName());
+                                String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
+                                this.buildWhereItem(whereElement, methodInfo.getDynamic(), testExpression, conditionExpression);
+                            } else {
+                                for (ColumnInfo columnInfoComposite : columnInfo.getComposites()) {
+                                    String testExpression = String.format("%s != null and %s.%s != null", columnInfo.getJavaColumnName(), columnInfo.getJavaColumnName(), columnInfoComposite.getJavaColumnName());
+                                    String paramValueExpression = String.format("%s.%s", columnInfo.getJavaColumnName(), columnInfoComposite.getJavaColumnName());
+                                    String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, paramValueExpression);
+                                    this.buildWhereItem(whereElement, methodInfo.getDynamic(), testExpression, conditionExpression);
+                                }
+                            }
+                        } else {
+                            if (ObjectUtils.isEmpty(columnInfo.getComposites())) {
+                                String testExpression = String.format("%s.%s != null", methodParamInfo.getArgName(), columnInfo.getJavaColumnName());
+                                String paramValueExpression = String.format("%s.%s", methodParamInfo.getArgName(), columnInfo.getJavaColumnName());
+                                String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
+                                this.buildWhereItem(whereElement, methodInfo.getDynamic(), testExpression, conditionExpression);
+                            } else {
+                                for (ColumnInfo columnInfoComposite : columnInfo.getComposites()) {
+                                    String testExpression = String.format(
+                                            "%s.%s != null and %s.%s != null",
+                                            methodParamInfo.getArgName(),
+                                            columnInfo.getJavaColumnName(),
+                                            methodParamInfo.getArgName(),
+                                            columnInfoComposite.getJavaColumnName()
+                                    );
+                                    String paramValueExpression = String.format(
+                                            "%s.%s",
+                                            methodParamInfo.getArgName(),
+                                            columnInfoComposite.getJavaColumnName()
+                                    );
+                                    String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, paramValueExpression);
+                                    this.buildWhereItem(whereElement, methodInfo.getDynamic(), testExpression, conditionExpression);
+                                }
+                            }
+                        }
                     }
                 }
-            } else {
-                String tableColumnName = conditionInfo.getColumnInfo().getDbColumnName();
-                String javaColumnName = conditionInfo.getColumnInfo().getJavaColumnName();
-                String logicOp = this.getLogicOp(conditionInfo);
-                String comparisonOp = conditionInfo.getComparisonOp();
-                Element trimOrIfElement = whereOpDynamic(methodInfo.getDynamic(), whereElement, javaColumnName);
-                String conditionOp = String.format(" %s %s %s #{%s}", logicOp, tableColumnName, comparisonOp, javaColumnName);
-                trimOrIfElement.addText(conditionOp);
+                if (TypeUtils.typeEquals(columnInfo, RelationColumnInfo.class)) {
+                    LogicOperator logicOperator = conditionInfo.getLogicOperator();
+                    ComparisonOperator comparisonOperator = conditionInfo.getComparisonOperator();
+                    RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
+                    if (relationColumnInfo.getMappedByRelationColumnInfo() == null) {
+                        List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
+                        for (ForeignKeyColumnInfo foreignKeyInfo : inverseForeignKeyColumnInfoList) {
+                            ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();
+                            String testExpression = String.format(
+                                    "%s != null and %s.%s != null",
+                                    columnInfo.getJavaColumnName(),
+                                    columnInfo.getJavaColumnName(),
+                                    referencedColumnInfo.getJavaColumnName()
+                            );
+                            String paramValueExpression = String.format("%s.%s", columnInfo.getJavaColumnName(), referencedColumnInfo.getJavaColumnName());
+                            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, relationColumnInfo, paramValueExpression);
+                            this.buildWhereItem(whereElement, methodInfo.getDynamic(), testExpression, conditionExpression);
+                        }
+                    }
+                }
             }
+            if (methodParamCount > 1) {
+            }
+        }
+
+        private void buildWhereItem(Element whereElement, Boolean dynamic, String testExpression, String conditionExpression) {
+            Element whereOrIfElement = whereOpDynamic(dynamic, whereElement, testExpression);
+            whereOrIfElement.addText(conditionExpression);
         }
     }
 
@@ -334,18 +409,6 @@ public class WhereTemplateHandler {
             if (dynamic) {
                 Element ifElement = parent.addElement("if");
                 ifElement.addAttribute("test", testExpression);
-                return ifElement;
-            }
-            return parent;
-        }
-
-        /**
-         * 创建带bind的动态元素
-         */
-        public static Element createBindDynamicElement(Element parent, boolean dynamic, String javaColumnName) {
-            if (dynamic) {
-                Element ifElement = parent.addElement("if");
-                ifElement.addAttribute("test", javaColumnName + " != null");
                 return ifElement;
             }
             return parent;

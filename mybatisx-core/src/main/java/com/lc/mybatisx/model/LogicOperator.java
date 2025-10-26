@@ -2,9 +2,9 @@ package com.lc.mybatisx.model;
 
 public enum LogicOperator {
 
-    AND("And", "And"),
-    OR("Or", "Or"),
-    NULL("Null", "");
+    AND("And", "and"),
+    OR("Or", "or"),
+    NULL("Null", "and");
 
     private String key;
     private String value;

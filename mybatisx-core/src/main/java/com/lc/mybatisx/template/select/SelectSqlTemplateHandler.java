@@ -265,12 +265,14 @@ public class SelectSqlTemplateHandler {
         List<Expression> onExpressionList = new ArrayList<>();
         String leftEntityTableNameAlias = leftEntityRelationSelectInfo.getEntityTableNameAlias();
         String rightEntityTableNameAlias = rightEntityRelationSelectInfo.getEntityTableNameAlias();
-        Boolean isMappedBy = rightEntityRelationSelectInfo.isMappedBy();
         List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = rightEntityRelationSelectInfo.getInverseForeignKeyColumnInfoList();
-        if (isMappedBy) {
+        if (rightEntityRelationSelectInfo.isMappedBy()) {
             for (ForeignKeyInfo inverseForeignKeyInfo : inverseForeignKeyColumnInfoList) {
                 ColumnInfo foreignKeyColumnInfo = inverseForeignKeyInfo.getColumnInfo();
                 ColumnInfo referencedColumnInfo = inverseForeignKeyInfo.getReferencedColumnInfo();
+                if (ObjectUtils.isNotEmpty(referencedColumnInfo.getComposites())) {
+                    referencedColumnInfo = referencedColumnInfo.getComposites().get(0);
+                }
                 String leftExpression = String.format("%s.%s", leftEntityTableNameAlias, referencedColumnInfo.getDbColumnName());
                 String rightExpression = String.format("%s.%s", rightEntityTableNameAlias, foreignKeyColumnInfo.getDbColumnName());
                 EqualsTo onCondition = ConditionBuilder.eq(leftExpression, rightExpression);
@@ -280,6 +282,9 @@ public class SelectSqlTemplateHandler {
             for (ForeignKeyInfo inverseForeignKeyInfo : inverseForeignKeyColumnInfoList) {
                 ColumnInfo foreignKeyColumnInfo = inverseForeignKeyInfo.getColumnInfo();
                 ColumnInfo referencedColumnInfo = inverseForeignKeyInfo.getReferencedColumnInfo();
+                if (ObjectUtils.isNotEmpty(referencedColumnInfo.getComposites())) {
+                    referencedColumnInfo = referencedColumnInfo.getComposites().get(0);
+                }
                 String leftExpression = String.format("%s.%s", leftEntityTableNameAlias, foreignKeyColumnInfo.getDbColumnName());
                 String rightExpression = String.format("%s.%s", rightEntityTableNameAlias, referencedColumnInfo.getDbColumnName());
                 EqualsTo onCondition = ConditionBuilder.eq(leftExpression, rightExpression);

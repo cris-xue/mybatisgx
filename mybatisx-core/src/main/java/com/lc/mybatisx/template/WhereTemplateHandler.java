@@ -158,20 +158,6 @@ public class WhereTemplateHandler {
             }
             return dynamicElement;
         }
-
-        /**
-         * 获取逻辑运算符
-         *
-         * @param conditionInfo
-         * @return
-         */
-        protected String getLogicOp(ConditionInfo conditionInfo) {
-            LogicOperator logicOperator = conditionInfo.getLogicOperator();
-            if (logicOperator != null) {
-                return logicOperator.getValue();
-            }
-            return "";
-        }
     }
 
     static class LikeConditionHandler extends AbstractConditionHandler {
@@ -191,7 +177,7 @@ public class WhereTemplateHandler {
             bindElement.addAttribute("value", likeValue);
 
             Element trimOrIfElement = whereOpDynamic(methodInfo.getDynamic(), whereElement, javaColumnName);
-            String conditionOp = String.format(" %s %s %s #{%s}", this.getLogicOp(conditionInfo), conditionInfo.getColumnName(), conditionInfo.getComparisonOperator().getValue(), javaColumnName);
+            String conditionOp = String.format(" %s %s %s #{%s}", conditionInfo.getLogicOperator().getValue(), conditionInfo.getColumnName(), conditionInfo.getComparisonOperator().getValue(), javaColumnName);
             trimOrIfElement.addText(conditionOp);
         }
 

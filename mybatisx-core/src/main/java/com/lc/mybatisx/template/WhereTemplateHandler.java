@@ -126,6 +126,7 @@ public class WhereTemplateHandler {
 
     static abstract class AbstractConditionHandler implements ConditionHandler {
 
+        protected ConditionInfo conditionInfo;
         protected ColumnInfo columnInfo;
         protected MethodParamInfo methodParamInfo;
         protected LogicOperator logicOperator;
@@ -133,10 +134,11 @@ public class WhereTemplateHandler {
 
         @Override
         public void handle(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement) {
-            columnInfo = conditionInfo.getColumnInfo();
-            methodParamInfo = conditionInfo.getMethodParamInfo();
-            logicOperator = conditionInfo.getLogicOperator();
-            comparisonOperator = conditionInfo.getComparisonOperator();
+            this.conditionInfo = conditionInfo;
+            this.columnInfo = conditionInfo.getColumnInfo();
+            this.methodParamInfo = conditionInfo.getMethodParamInfo();
+            this.logicOperator = conditionInfo.getLogicOperator();
+            this.comparisonOperator = conditionInfo.getComparisonOperator();
 
             int paramCount = methodInfo.getMethodParamInfoList().size();
             if (paramCount == 1) {
@@ -454,8 +456,8 @@ public class WhereTemplateHandler {
 
         @Override
         public void handleObjectTypeNoAnnotationSingleParam(Element whereElement, Boolean dynamic) {
-            String testExpression = String.format("%1$s != null", columnInfo.getJavaColumnName());
-            String paramValueExpression = String.format("#{%1$s[0]} and #{%1$s[1]}", columnInfo.getJavaColumnName());
+            String testExpression = String.format("%1$s != null", conditionInfo.getColumnName());
+            String paramValueExpression = String.format("#{%1$s[0]} and #{%1$s[1]}", conditionInfo.getColumnName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
             Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
             this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);

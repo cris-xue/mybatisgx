@@ -98,17 +98,120 @@ public class WhereTemplateHandler {
         void singleParamHandle(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement);
 
         void multiParamHandle(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement);
+
+        void handleBasicTypeSingleParam(Element whereElement, Boolean dynamic);
+
+        void handleObjectTypeNoAnnotationSingleParam(Element whereElement, Boolean dynamic);
+
+        void handleCompositeObjectNoAnnotationSingleParam(Element whereElement, Boolean dynamic);
+
+        void handleObjectTypeWithAnnotationSingleParam(Element whereElement, Boolean dynamic);
+
+        void handleCompositeObjectWithAnnotationSingleParam(Element whereElement, Boolean dynamic);
+
+        void handleRelationColumnSingleParam(Element whereElement, RelationColumnInfo relationColumnInfo, Boolean dynamic);
+
+
+        void handleBasicTypeMultiParam(Element whereElement, Boolean dynamic);
+
+        void handleObjectTypeNoAnnotationMultiParam(Element whereElement, Boolean dynamic);
+
+        void handleCompositeObjectNoAnnotationMultiParam(Element whereElement, Boolean dynamic);
+
+        void handleObjectTypeWithAnnotationMultiParam(Element whereElement, Boolean dynamic);
+
+        void handleCompositeObjectWithAnnotationMultiParam(Element whereElement, Boolean dynamic);
+
+        void handleRelationColumnMultiParam(Element whereElement, RelationColumnInfo relationColumnInfo, Boolean dynamic);
     }
 
     static abstract class AbstractConditionHandler implements ConditionHandler {
 
+        protected ColumnInfo columnInfo;
+        protected MethodParamInfo methodParamInfo;
+        protected LogicOperator logicOperator;
+        protected ComparisonOperator comparisonOperator;
+
         @Override
         public void handle(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement) {
+            columnInfo = conditionInfo.getColumnInfo();
+            methodParamInfo = conditionInfo.getMethodParamInfo();
+            logicOperator = conditionInfo.getLogicOperator();
+            comparisonOperator = conditionInfo.getComparisonOperator();
+
             int paramCount = methodInfo.getMethodParamInfoList().size();
             if (paramCount == 1) {
                 singleParamHandle(methodInfo, conditionInfo, whereElement);
             } else {
                 multiParamHandle(methodInfo, conditionInfo, whereElement);
+            }
+        }
+
+        @Override
+        public void singleParamHandle(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement) {
+            Boolean dynamic = methodInfo.getDynamic();
+            ColumnInfo columnInfo = conditionInfo.getColumnInfo();
+            MethodParamInfo methodParamInfo = conditionInfo.getMethodParamInfo();
+            if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class, ColumnInfo.class)) {
+                if (methodParamInfo.getBasicType()) {
+                    // findById(Long id) findById(@Param("id") Long id)
+                    this.handleBasicTypeSingleParam(whereElement, dynamic);
+                } else {
+                    // findById(MultiId id) findById(@Param("id") MultiId id)
+                    if (methodParamInfo.getParam() == null) {
+                        if (ObjectUtils.isEmpty(columnInfo.getComposites())) {
+                            this.handleObjectTypeNoAnnotationSingleParam(whereElement, dynamic);
+                        } else {
+                            this.handleCompositeObjectNoAnnotationSingleParam(whereElement, dynamic);
+                        }
+                    } else {
+                        if (ObjectUtils.isEmpty(columnInfo.getComposites())) {
+                            this.handleObjectTypeWithAnnotationSingleParam(whereElement, dynamic);
+                        } else {
+                            this.handleCompositeObjectWithAnnotationSingleParam(whereElement, dynamic);
+                        }
+                    }
+                }
+            }
+            if (TypeUtils.typeEquals(columnInfo, RelationColumnInfo.class)) {
+                RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
+                if (relationColumnInfo.getMappedByRelationColumnInfo() == null) {
+                    this.handleRelationColumnSingleParam(whereElement, relationColumnInfo, dynamic);
+                }
+            }
+        }
+
+        @Override
+        public void multiParamHandle(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement) {
+            Boolean dynamic = methodInfo.getDynamic();
+            ColumnInfo columnInfo = conditionInfo.getColumnInfo();
+            MethodParamInfo methodParamInfo = conditionInfo.getMethodParamInfo();
+            if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class, ColumnInfo.class)) {
+                if (methodParamInfo.getBasicType()) {
+                    // findById(Long id) findById(@Param("id") Long id)
+                    this.handleBasicTypeMultiParam(whereElement, dynamic);
+                } else {
+                    // findById(MultiId id) findById(@Param("id") MultiId id)
+                    if (methodParamInfo.getParam() == null) {
+                        if (ObjectUtils.isEmpty(columnInfo.getComposites())) {
+                            this.handleObjectTypeNoAnnotationMultiParam(whereElement, dynamic);
+                        } else {
+                            this.handleCompositeObjectNoAnnotationMultiParam(whereElement, dynamic);
+                        }
+                    } else {
+                        if (ObjectUtils.isEmpty(columnInfo.getComposites())) {
+                            this.handleObjectTypeWithAnnotationMultiParam(whereElement, dynamic);
+                        } else {
+                            this.handleCompositeObjectWithAnnotationMultiParam(whereElement, dynamic);
+                        }
+                    }
+                }
+            }
+            if (TypeUtils.typeEquals(columnInfo, RelationColumnInfo.class)) {
+                RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
+                if (relationColumnInfo.getMappedByRelationColumnInfo() == null) {
+                    this.handleRelationColumnMultiParam(whereElement, relationColumnInfo, dynamic);
+                }
             }
         }
 
@@ -122,7 +225,7 @@ public class WhereTemplateHandler {
          */
         protected String getConditionExpression(LogicOperator logicOperator, ComparisonOperator comparisonOperator, ColumnInfo columnInfo, String paramValueExpression) {
             return String.format(
-                    " %s %s %s #{%s}",
+                    " %1s %2s %3s #{%4s}",
                     logicOperator.getValue(),
                     columnInfo.getDbColumnName(),
                     comparisonOperator.getValue(),
@@ -185,6 +288,66 @@ public class WhereTemplateHandler {
         public void multiParamHandle(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement) {
 
         }
+
+        @Override
+        public void handleBasicTypeSingleParam(Element whereElement, Boolean dynamic) {
+
+        }
+
+        @Override
+        public void handleObjectTypeNoAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+
+        }
+
+        @Override
+        public void handleCompositeObjectNoAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+
+        }
+
+        @Override
+        public void handleObjectTypeWithAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+
+        }
+
+        @Override
+        public void handleCompositeObjectWithAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+
+        }
+
+        @Override
+        public void handleRelationColumnSingleParam(Element whereElement, RelationColumnInfo relationColumnInfo, Boolean dynamic) {
+
+        }
+
+        @Override
+        public void handleBasicTypeMultiParam(Element whereElement, Boolean dynamic) {
+
+        }
+
+        @Override
+        public void handleObjectTypeNoAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+
+        }
+
+        @Override
+        public void handleCompositeObjectNoAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+
+        }
+
+        @Override
+        public void handleObjectTypeWithAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+
+        }
+
+        @Override
+        public void handleCompositeObjectWithAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+
+        }
+
+        @Override
+        public void handleRelationColumnMultiParam(Element whereElement, RelationColumnInfo relationColumnInfo, Boolean dynamic) {
+
+        }
     }
 
     static class InConditionHandler extends AbstractConditionHandler {
@@ -213,6 +376,66 @@ public class WhereTemplateHandler {
         public void multiParamHandle(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement) {
 
         }
+
+        @Override
+        public void handleBasicTypeSingleParam(Element whereElement, Boolean dynamic) {
+
+        }
+
+        @Override
+        public void handleObjectTypeNoAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+
+        }
+
+        @Override
+        public void handleCompositeObjectNoAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+
+        }
+
+        @Override
+        public void handleObjectTypeWithAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+
+        }
+
+        @Override
+        public void handleCompositeObjectWithAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+
+        }
+
+        @Override
+        public void handleRelationColumnSingleParam(Element whereElement, RelationColumnInfo relationColumnInfo, Boolean dynamic) {
+
+        }
+
+        @Override
+        public void handleBasicTypeMultiParam(Element whereElement, Boolean dynamic) {
+
+        }
+
+        @Override
+        public void handleObjectTypeNoAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+
+        }
+
+        @Override
+        public void handleCompositeObjectNoAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+
+        }
+
+        @Override
+        public void handleObjectTypeWithAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+
+        }
+
+        @Override
+        public void handleCompositeObjectWithAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+
+        }
+
+        @Override
+        public void handleRelationColumnMultiParam(Element whereElement, RelationColumnInfo relationColumnInfo, Boolean dynamic) {
+
+        }
     }
 
     static class BetweenConditionHandler extends AbstractConditionHandler {
@@ -229,11 +452,71 @@ public class WhereTemplateHandler {
         public void multiParamHandle(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement) {
 
         }
+
+        @Override
+        public void handleBasicTypeSingleParam(Element whereElement, Boolean dynamic) {
+
+        }
+
+        @Override
+        public void handleObjectTypeNoAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+
+        }
+
+        @Override
+        public void handleCompositeObjectNoAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+
+        }
+
+        @Override
+        public void handleObjectTypeWithAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+
+        }
+
+        @Override
+        public void handleCompositeObjectWithAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+
+        }
+
+        @Override
+        public void handleRelationColumnSingleParam(Element whereElement, RelationColumnInfo relationColumnInfo, Boolean dynamic) {
+
+        }
+
+        @Override
+        public void handleBasicTypeMultiParam(Element whereElement, Boolean dynamic) {
+
+        }
+
+        @Override
+        public void handleObjectTypeNoAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+
+        }
+
+        @Override
+        public void handleCompositeObjectNoAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+
+        }
+
+        @Override
+        public void handleObjectTypeWithAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+
+        }
+
+        @Override
+        public void handleCompositeObjectWithAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+
+        }
+
+        @Override
+        public void handleRelationColumnMultiParam(Element whereElement, RelationColumnInfo relationColumnInfo, Boolean dynamic) {
+
+        }
     }
 
     static class CommonConditionHandler extends AbstractConditionHandler {
 
-        @Override
+        /*@Override
         public void singleParamHandle(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement) {
             ColumnInfo columnInfo = conditionInfo.getColumnInfo();
             MethodParamInfo methodParamInfo = conditionInfo.getMethodParamInfo();
@@ -411,6 +694,177 @@ public class WhereTemplateHandler {
                         this.buildWhereItem(whereElement, methodInfo.getDynamic(), testExpression, conditionExpression);
                     }
                 }
+            }
+        }*/
+
+        @Override
+        public void handleBasicTypeSingleParam(Element whereElement, Boolean dynamic) {
+            String testExpression = String.format("%1s != null", methodParamInfo.getArgName());
+            String paramValueExpression = String.format("%1s", methodParamInfo.getArgName());
+            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
+            this.buildWhereItem(whereElement, dynamic, testExpression, conditionExpression);
+        }
+
+        @Override
+        public void handleObjectTypeNoAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+            String testExpression = String.format("%1s != null", columnInfo.getJavaColumnName());
+            String paramValueExpression = String.format("%1s", columnInfo.getJavaColumnName());
+            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
+            this.buildWhereItem(whereElement, dynamic, testExpression, conditionExpression);
+        }
+
+        @Override
+        public void handleCompositeObjectNoAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+            for (ColumnInfo columnInfoComposite : columnInfo.getComposites()) {
+                String testExpression = String.format("%1s != null and %1s.%2s != null", columnInfo.getJavaColumnName(), columnInfo.getJavaColumnName(), columnInfoComposite.getJavaColumnName());
+                String paramValueExpression = String.format("%1s.%2s", columnInfo.getJavaColumnName(), columnInfoComposite.getJavaColumnName());
+                String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, paramValueExpression);
+                this.buildWhereItem(whereElement, dynamic, testExpression, conditionExpression);
+            }
+        }
+
+        @Override
+        public void handleObjectTypeWithAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+            String testExpression = String.format("%1s.%2s != null", methodParamInfo.getArgName(), columnInfo.getJavaColumnName());
+            String paramValueExpression = String.format("%1s.%2s", methodParamInfo.getArgName(), columnInfo.getJavaColumnName());
+            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
+            this.buildWhereItem(whereElement, dynamic, testExpression, conditionExpression);
+        }
+
+        @Override
+        public void handleCompositeObjectWithAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+            for (ColumnInfo columnInfoComposite : columnInfo.getComposites()) {
+                String testExpression = String.format(
+                        "%1s != null and %1s.%2s != null and %1s.%2s.%3s != null",
+                        methodParamInfo.getArgName(),
+                        columnInfo.getJavaColumnName(),
+                        columnInfoComposite.getJavaColumnName()
+                );
+                String paramValueExpression = String.format(
+                        "%1s.%2s.%3s",
+                        methodParamInfo.getArgName(),
+                        columnInfo.getJavaColumnName(),
+                        columnInfoComposite.getJavaColumnName()
+                );
+                String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, paramValueExpression);
+                this.buildWhereItem(whereElement, dynamic, testExpression, conditionExpression);
+            }
+        }
+
+        @Override
+        public void handleRelationColumnSingleParam(Element whereElement, RelationColumnInfo relationColumnInfo, Boolean dynamic) {
+            List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
+            for (ForeignKeyColumnInfo foreignKeyInfo : inverseForeignKeyColumnInfoList) {
+                ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();
+                String testExpression = String.format(
+                        "%1s != null and %1s.%2s != null",
+                        columnInfo.getJavaColumnName(),
+                        referencedColumnInfo.getJavaColumnName()
+                );
+                String paramValueExpression = String.format("%1s.%2s", columnInfo.getJavaColumnName(), referencedColumnInfo.getJavaColumnName());
+                String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, relationColumnInfo, paramValueExpression);
+                this.buildWhereItem(whereElement, dynamic, testExpression, conditionExpression);
+            }
+        }
+
+        @Override
+        public void handleBasicTypeMultiParam(Element whereElement, Boolean dynamic) {
+            String testExpression = String.format("%1s != null", methodParamInfo.getArgName());
+            String paramValueExpression = String.format("%1s", methodParamInfo.getArgName());
+            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
+            this.buildWhereItem(whereElement, dynamic, testExpression, conditionExpression);
+        }
+
+        @Override
+        public void handleObjectTypeNoAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+            String testExpression = String.format(
+                    "%1s != null and %1s.%2s != null",
+                    methodParamInfo.getArgName(),
+                    columnInfo.getJavaColumnName()
+            );
+            String paramValueExpression = String.format(
+                    "%1s.%2s",
+                    methodParamInfo.getArgName(),
+                    columnInfo.getJavaColumnName()
+            );
+            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
+            this.buildWhereItem(whereElement, dynamic, testExpression, conditionExpression);
+        }
+
+        @Override
+        public void handleCompositeObjectNoAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+            for (ColumnInfo columnInfoComposite : columnInfo.getComposites()) {
+                String testExpression = String.format(
+                        "%1s != null and %1s.%2s != null and %1s.%2s.%3s != null",
+                        methodParamInfo.getArgName(),
+                        columnInfo.getJavaColumnName(),
+                        columnInfoComposite.getJavaColumnName()
+                );
+                String paramValueExpression = String.format(
+                        "%1s.%2s.%3s",
+                        methodParamInfo.getArgName(),
+                        columnInfo.getJavaColumnName(),
+                        columnInfoComposite.getJavaColumnName()
+                );
+                String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, paramValueExpression);
+                this.buildWhereItem(whereElement, dynamic, testExpression, conditionExpression);
+            }
+        }
+
+        @Override
+        public void handleObjectTypeWithAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+            String testExpression = String.format(
+                    "%1s != null and %1s.%2s != null",
+                    methodParamInfo.getArgName(),
+                    columnInfo.getJavaColumnName()
+            );
+            String paramValueExpression = String.format(
+                    "%1s.%2s",
+                    methodParamInfo.getArgName(),
+                    columnInfo.getJavaColumnName()
+            );
+            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
+            this.buildWhereItem(whereElement, dynamic, testExpression, conditionExpression);
+        }
+
+        @Override
+        public void handleCompositeObjectWithAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+            for (ColumnInfo columnInfoComposite : columnInfo.getComposites()) {
+                String testExpression = String.format(
+                        "%1s != null and %1s.%2s != null and %1s.%2s.%3s != null",
+                        methodParamInfo.getArgName(),
+                        columnInfo.getJavaColumnName(),
+                        columnInfoComposite.getJavaColumnName()
+                );
+                String paramValueExpression = String.format(
+                        "%1s.%2s.%3s",
+                        methodParamInfo.getArgName(),
+                        columnInfo.getJavaColumnName(),
+                        columnInfoComposite.getJavaColumnName()
+                );
+                String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, paramValueExpression);
+                this.buildWhereItem(whereElement, dynamic, testExpression, conditionExpression);
+            }
+        }
+
+        @Override
+        public void handleRelationColumnMultiParam(Element whereElement, RelationColumnInfo relationColumnInfo, Boolean dynamic) {
+            for (ForeignKeyColumnInfo foreignKeyInfo : relationColumnInfo.getInverseForeignKeyColumnInfoList()) {
+                ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();
+                String testExpression = String.format(
+                        "%1s != null and %1s.%2s != null and %1s.%2s.%3s != null",
+                        methodParamInfo.getArgName(),
+                        columnInfo.getJavaColumnName(),
+                        referencedColumnInfo.getJavaColumnName()
+                );
+                String paramValueExpression = String.format(
+                        "%1s.%2s.%3s",
+                        methodParamInfo.getArgName(),
+                        columnInfo.getJavaColumnName(),
+                        referencedColumnInfo.getJavaColumnName()
+                );
+                String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, relationColumnInfo, paramValueExpression);
+                this.buildWhereItem(whereElement, dynamic, testExpression, conditionExpression);
             }
         }
     }

@@ -2,16 +2,15 @@ package com.lc.mybatisx.template;
 
 import com.lc.mybatisx.annotation.LogicDelete;
 import com.lc.mybatisx.model.*;
-import com.lc.mybatisx.utils.PropertyPlaceholderUtils;
 import com.lc.mybatisx.utils.TypeUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.ibatis.mapping.SqlCommandType;
+import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 public class WhereTemplateHandler {
 
@@ -141,9 +140,9 @@ public class WhereTemplateHandler {
 
             int paramCount = methodInfo.getMethodParamInfoList().size();
             if (paramCount == 1) {
-                singleParamHandle(methodInfo, conditionInfo, whereElement);
+                this.singleParamHandle(methodInfo, conditionInfo, whereElement);
             } else {
-                multiParamHandle(methodInfo, conditionInfo, whereElement);
+                this.multiParamHandle(methodInfo, conditionInfo, whereElement);
             }
         }
 
@@ -225,7 +224,7 @@ public class WhereTemplateHandler {
          */
         protected String getConditionExpression(LogicOperator logicOperator, ComparisonOperator comparisonOperator, ColumnInfo columnInfo, String paramValueExpression) {
             return String.format(
-                    " %1s %2s %3s #{%4s}",
+                    " %1$s %2$s %3$s %4$s",
                     logicOperator.getValue(),
                     columnInfo.getDbColumnName(),
                     comparisonOperator.getValue(),
@@ -233,12 +232,7 @@ public class WhereTemplateHandler {
             );
         }
 
-        protected void buildWhereItem(Element whereElement, Boolean dynamic, String testExpression, String conditionExpression) {
-            Element whereOrIfElement = whereOpDynamic(dynamic, whereElement, testExpression);
-            whereOrIfElement.addText(conditionExpression);
-        }
-
-        protected Element whereOpDynamic(Boolean dynamic, Element whereElement, String testExpression) {
+        protected Element buildWhereOrIfElement(Element whereElement, Boolean dynamic, String testExpression) {
             if (dynamic) {
                 Element ifElement = whereElement.addElement("if");
                 ifElement.addAttribute("test", testExpression);
@@ -247,51 +241,44 @@ public class WhereTemplateHandler {
             return whereElement;
         }
 
-        protected Element whereBindDynamic(Boolean dynamic, Element whereElement, String javaColumnName) {
-            Element dynamicElement = whereElement;
-            if (dynamic) {
-                String testTemplate = "${test} != null";
-                Properties properties = new Properties();
-                properties.setProperty("test", javaColumnName);
-                String testValue = PropertyPlaceholderUtils.replace(testTemplate, properties);
+        protected Element buildBindElement(String name, String value) {
+            Element bindElement = DocumentHelper.createElement("bind");
+            bindElement.addAttribute("name", name);
+            bindElement.addAttribute("value", value);
+            return bindElement;
+        }
 
-                Element ifElement = whereElement.addElement("if");
-                ifElement.addAttribute("test", testValue);
-                dynamicElement = ifElement;
-            }
-            return dynamicElement;
+        protected void addWhereOrIfElementWithText(Element whereOrIfElement, String conditionExpression) {
+            whereOrIfElement.addText(conditionExpression);
+        }
+
+        protected void addWhereOrIfElementWithElement(Element whereOrIfElement, Element whereOrIfChildElement) {
+            whereOrIfElement.add(whereOrIfChildElement);
         }
     }
 
     static class LikeConditionHandler extends AbstractConditionHandler {
 
         @Override
-        public void singleParamHandle(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement) {
-            String javaColumnName = null;// conditionInfo.getConditionEntity() ? conditionInfo.getConditionEntityJavaColumnName() : conditionInfo.getColumnInfo().getJavaColumnName();
-
-            String likeValueTemplate = "'%' + ${like} + '%'";
-            Properties properties = new Properties();
-            properties.setProperty("like", javaColumnName);
-            String likeValue = PropertyPlaceholderUtils.replace(likeValueTemplate, properties);
-
-            Element whereOrIfElement = whereBindDynamic(methodInfo.getDynamic(), whereElement, javaColumnName);
-            Element bindElement = whereOrIfElement.addElement("bind");
-            bindElement.addAttribute("name", javaColumnName);
-            bindElement.addAttribute("value", likeValue);
-
-            Element trimOrIfElement = whereOpDynamic(methodInfo.getDynamic(), whereElement, javaColumnName);
-            String conditionOp = String.format(" %s %s %s #{%s}", conditionInfo.getLogicOperator().getValue(), conditionInfo.getColumnName(), conditionInfo.getComparisonOperator().getValue(), javaColumnName);
-            trimOrIfElement.addText(conditionOp);
-        }
-
-        @Override
-        public void multiParamHandle(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement) {
-
-        }
-
-        @Override
         public void handleBasicTypeSingleParam(Element whereElement, Boolean dynamic) {
+            /**
+             *             <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(likeClientCode)">
+             *                 <bind name="likeClientCode" value="'%' + likeClientCode + '%'"/>
+             *                 and act.client_code like #{likeClientCode}
+             *             </if>
+             */
 
+            String bindValue = "'%'+" + methodParamInfo.getArgName() + "+'%'";
+            Element bindElement = this.buildBindElement(methodParamInfo.getArgName(), bindValue);
+
+            String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
+            Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
+
+            String paramValueExpression = String.format("#{%1$s}", methodParamInfo.getArgName());
+            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
+
+            this.addWhereOrIfElementWithElement(whereOrIfElement, bindElement);
+            this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
         }
 
         @Override
@@ -321,7 +308,24 @@ public class WhereTemplateHandler {
 
         @Override
         public void handleBasicTypeMultiParam(Element whereElement, Boolean dynamic) {
+            /**
+             *             <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(likeClientCode)">
+             *                 <bind name="likeClientCode" value="'%' + likeClientCode + '%'"/>
+             *                 and act.client_code like #{likeClientCode}
+             *             </if>
+             */
 
+            String bindValue = "'%'+" + methodParamInfo.getArgName() + "+'%'";
+            Element bindElement = this.buildBindElement(methodParamInfo.getArgName(), bindValue);
+
+            String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
+            Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
+
+            String paramValueExpression = String.format("#{%1$s}", methodParamInfo.getArgName());
+            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
+
+            this.addWhereOrIfElementWithElement(whereOrIfElement, bindElement);
+            this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
         }
 
         @Override
@@ -353,33 +357,32 @@ public class WhereTemplateHandler {
     static class InConditionHandler extends AbstractConditionHandler {
 
         @Override
-        public void singleParamHandle(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement) {
-            /*String javaColumnName = conditionInfo.getConditionEntity() ? conditionInfo.getConditionEntityJavaColumnName() : conditionInfo.getJavaColumnName();
+        public void handleBasicTypeSingleParam(Element whereElement, Boolean dynamic) {
+            /**
+             *             <if test="terminal == @com.iss.dtg.idms.constant.Terminal@EBANK">
+             *                 and act.client_code in
+             *                 <foreach item="item" index="index" collection="unDraftClientCodeList" open="(" separator="," close=")">
+             *                     #{item}
+             * 				</foreach>
+             *             </if>
+             */
 
-            Element trimOrIfElement = whereOpDynamic(methodInfo.getDynamic(), whereElement, javaColumnName);
+            String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
+            Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
 
-            List<MethodParamInfo> methodParamInfoList = conditionInfo.getMethodParamInfoList();
-            String comparisonOp = conditionInfo.getComparisonOp();
-            trimOrIfElement.addText(String.format(" %s %s %s ", this.getLogicOp(conditionInfo), conditionInfo.getDbColumnName(), comparisonOp));
+            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, "");
 
-            Element foreachElement = trimOrIfElement.addElement("foreach");
+            Element foreachElement = DocumentHelper.createElement("foreach");
             foreachElement.addAttribute("index", "index");
             foreachElement.addAttribute("item", "item");
-            foreachElement.addAttribute("collection", javaColumnName);
+            foreachElement.addAttribute("collection", methodParamInfo.getArgName());
             foreachElement.addAttribute("open", "(");
             foreachElement.addAttribute("close", ")");
             foreachElement.addAttribute("separator", ",");
-            foreachElement.addText("#{item}");*/
-        }
+            foreachElement.addText("#{item}");
 
-        @Override
-        public void multiParamHandle(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement) {
-
-        }
-
-        @Override
-        public void handleBasicTypeSingleParam(Element whereElement, Boolean dynamic) {
-
+            this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
+            this.addWhereOrIfElementWithElement(whereOrIfElement, foreachElement);
         }
 
         @Override
@@ -441,21 +444,12 @@ public class WhereTemplateHandler {
     static class BetweenConditionHandler extends AbstractConditionHandler {
 
         @Override
-        public void singleParamHandle(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement) {
-            /*String javaColumnName = conditionInfo.getConditionEntity() ? conditionInfo.getConditionEntityJavaColumnName() : conditionInfo.getJavaColumnName();
-            Element trimOrIfElement = whereOpDynamic(methodInfo.getDynamic(), whereElement, javaColumnName);
-            String conditionOp = String.format(" %s %s %s #{%s[0]} and #{%s[1]}", this.getLogicOp(conditionInfo), conditionInfo.getDbColumnName(), conditionInfo.getComparisonOp(), javaColumnName, javaColumnName);
-            trimOrIfElement.addText(conditionOp);*/
-        }
-
-        @Override
-        public void multiParamHandle(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement) {
-
-        }
-
-        @Override
         public void handleBasicTypeSingleParam(Element whereElement, Boolean dynamic) {
-
+            String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
+            String paramValueExpression = String.format("#{%1$s[0]} and #{%1$s[1]}", methodParamInfo.getArgName());
+            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
+            Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
+            this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
         }
 
         @Override
@@ -516,238 +510,62 @@ public class WhereTemplateHandler {
 
     static class CommonConditionHandler extends AbstractConditionHandler {
 
-        /*@Override
-        public void singleParamHandle(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement) {
-            ColumnInfo columnInfo = conditionInfo.getColumnInfo();
-            MethodParamInfo methodParamInfo = conditionInfo.getMethodParamInfo();
-            LogicOperator logicOperator = conditionInfo.getLogicOperator();
-            ComparisonOperator comparisonOperator = conditionInfo.getComparisonOperator();
-            if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class, ColumnInfo.class)) {
-                if (methodParamInfo.getBasicType()) {
-                    // findById(Long id) findById(@Param("id") Long id)
-                    String testExpression = String.format("%1s != null", methodParamInfo.getArgName());
-                    String paramValueExpression = String.format("%1s", methodParamInfo.getArgName());
-                    String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
-                    this.buildWhereItem(whereElement, methodInfo.getDynamic(), testExpression, conditionExpression);
-                } else {
-                    // findById(MultiId id) findById(@Param("id") MultiId id)
-                    if (methodParamInfo.getParam() == null) {
-                        if (ObjectUtils.isEmpty(columnInfo.getComposites())) {
-                            String testExpression = String.format("%1s != null", columnInfo.getJavaColumnName());
-                            String paramValueExpression = String.format("%1s", columnInfo.getJavaColumnName());
-                            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
-                            this.buildWhereItem(whereElement, methodInfo.getDynamic(), testExpression, conditionExpression);
-                        } else {
-                            for (ColumnInfo columnInfoComposite : columnInfo.getComposites()) {
-                                String testExpression = String.format("%1s != null and %1s.%2s != null", columnInfo.getJavaColumnName(), columnInfo.getJavaColumnName(), columnInfoComposite.getJavaColumnName());
-                                String paramValueExpression = String.format("%1s.%2s", columnInfo.getJavaColumnName(), columnInfoComposite.getJavaColumnName());
-                                String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, paramValueExpression);
-                                this.buildWhereItem(whereElement, methodInfo.getDynamic(), testExpression, conditionExpression);
-                            }
-                        }
-                    } else {
-                        if (ObjectUtils.isEmpty(columnInfo.getComposites())) {
-                            String testExpression = String.format("%1s.%2s != null", methodParamInfo.getArgName(), columnInfo.getJavaColumnName());
-                            String paramValueExpression = String.format("%1s.%2s", methodParamInfo.getArgName(), columnInfo.getJavaColumnName());
-                            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
-                            this.buildWhereItem(whereElement, methodInfo.getDynamic(), testExpression, conditionExpression);
-                        } else {
-                            for (ColumnInfo columnInfoComposite : columnInfo.getComposites()) {
-                                String testExpression = String.format(
-                                        "%1s != null and %1s.%2s != null and %1s.%2s.%3s != null",
-                                        methodParamInfo.getArgName(),
-                                        columnInfo.getJavaColumnName(),
-                                        columnInfoComposite.getJavaColumnName()
-                                );
-                                String paramValueExpression = String.format(
-                                        "%1s.%2s.%3s",
-                                        methodParamInfo.getArgName(),
-                                        columnInfo.getJavaColumnName(),
-                                        columnInfoComposite.getJavaColumnName()
-                                );
-                                String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, paramValueExpression);
-                                this.buildWhereItem(whereElement, methodInfo.getDynamic(), testExpression, conditionExpression);
-                            }
-                        }
-                    }
-                }
-            }
-            if (TypeUtils.typeEquals(columnInfo, RelationColumnInfo.class)) {
-                RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
-                if (relationColumnInfo.getMappedByRelationColumnInfo() == null) {
-                    List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
-                    for (ForeignKeyColumnInfo foreignKeyInfo : inverseForeignKeyColumnInfoList) {
-                        ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();
-                        String testExpression = String.format(
-                                "%1s != null and %1s.%2s != null",
-                                columnInfo.getJavaColumnName(),
-                                referencedColumnInfo.getJavaColumnName()
-                        );
-                        String paramValueExpression = String.format("%1s.%2s", columnInfo.getJavaColumnName(), referencedColumnInfo.getJavaColumnName());
-                        String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, relationColumnInfo, paramValueExpression);
-                        this.buildWhereItem(whereElement, methodInfo.getDynamic(), testExpression, conditionExpression);
-                    }
-                }
-            }
-        }
-
-        @Override
-        public void multiParamHandle(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement) {
-            MethodParamInfo methodParamInfo = conditionInfo.getMethodParamInfo();
-            ColumnInfo columnInfo = conditionInfo.getColumnInfo();
-            LogicOperator logicOperator = conditionInfo.getLogicOperator();
-            ComparisonOperator comparisonOperator = conditionInfo.getComparisonOperator();
-            if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class, ColumnInfo.class)) {
-                if (methodParamInfo.getBasicType()) {
-                    // findByIdAndNameLike(Long id, String name) findByIdAndNameLike(@Param("id") Long id, @Param("name") String name)
-                    String testExpression = String.format("%1s != null", methodParamInfo.getArgName());
-                    String paramValueExpression = String.format("%1s", methodParamInfo.getArgName());
-                    String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
-                    this.buildWhereItem(whereElement, methodInfo.getDynamic(), testExpression, conditionExpression);
-                } else {
-                    // findByIdAndNameLike(MultiId id) findByIdAndNameLike(@Param("id") MultiId id)
-                    if (methodParamInfo.getParam() == null) {
-                        if (ObjectUtils.isEmpty(columnInfo.getComposites())) {
-                            String testExpression = String.format(
-                                    "%1s != null and %1s.%2s != null",
-                                    methodParamInfo.getArgName(),
-                                    columnInfo.getJavaColumnName()
-                            );
-                            String paramValueExpression = String.format(
-                                    "%1s.%2s",
-                                    methodParamInfo.getArgName(),
-                                    columnInfo.getJavaColumnName()
-                            );
-                            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
-                            this.buildWhereItem(whereElement, methodInfo.getDynamic(), testExpression, conditionExpression);
-                        } else {
-                            for (ColumnInfo columnInfoComposite : columnInfo.getComposites()) {
-                                String testExpression = String.format(
-                                        "%1s != null and %1s.%2s != null and %1s.%2s.%3s != null",
-                                        methodParamInfo.getArgName(),
-                                        columnInfo.getJavaColumnName(),
-                                        columnInfoComposite.getJavaColumnName()
-                                );
-                                String paramValueExpression = String.format(
-                                        "%1s.%2s.%3s",
-                                        methodParamInfo.getArgName(),
-                                        columnInfo.getJavaColumnName(),
-                                        columnInfoComposite.getJavaColumnName()
-                                );
-                                String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, paramValueExpression);
-                                this.buildWhereItem(whereElement, methodInfo.getDynamic(), testExpression, conditionExpression);
-                            }
-                        }
-                    } else {
-                        if (ObjectUtils.isEmpty(columnInfo.getComposites())) {
-                            String testExpression = String.format(
-                                    "%1s != null and %1s.%2s != null",
-                                    methodParamInfo.getArgName(),
-                                    columnInfo.getJavaColumnName()
-                            );
-                            String paramValueExpression = String.format(
-                                    "%1s.%2s",
-                                    methodParamInfo.getArgName(),
-                                    columnInfo.getJavaColumnName()
-                            );
-                            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
-                            this.buildWhereItem(whereElement, methodInfo.getDynamic(), testExpression, conditionExpression);
-                        } else {
-                            for (ColumnInfo columnInfoComposite : columnInfo.getComposites()) {
-                                String testExpression = String.format(
-                                        "%1s != null and %1s.%2s != null and %1s.%2s.%3s != null",
-                                        methodParamInfo.getArgName(),
-                                        columnInfo.getJavaColumnName(),
-                                        columnInfoComposite.getJavaColumnName()
-                                );
-                                String paramValueExpression = String.format(
-                                        "%1s.%2s.%3s",
-                                        methodParamInfo.getArgName(),
-                                        columnInfo.getJavaColumnName(),
-                                        columnInfoComposite.getJavaColumnName()
-                                );
-                                String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, paramValueExpression);
-                                this.buildWhereItem(whereElement, methodInfo.getDynamic(), testExpression, conditionExpression);
-                            }
-                        }
-                    }
-                }
-            }
-            if (TypeUtils.typeEquals(columnInfo, RelationColumnInfo.class)) {
-                RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
-                if (relationColumnInfo.getMappedByRelationColumnInfo() == null) {
-                    for (ForeignKeyColumnInfo foreignKeyInfo : relationColumnInfo.getInverseForeignKeyColumnInfoList()) {
-                        ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();
-                        String testExpression = String.format(
-                                "%1s != null and %1s.%2s != null and %1s.%2s.%3s != null",
-                                methodParamInfo.getArgName(),
-                                columnInfo.getJavaColumnName(),
-                                referencedColumnInfo.getJavaColumnName()
-                        );
-                        String paramValueExpression = String.format(
-                                "%1s.%2s.%3s",
-                                methodParamInfo.getArgName(),
-                                columnInfo.getJavaColumnName(),
-                                referencedColumnInfo.getJavaColumnName()
-                        );
-                        String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, relationColumnInfo, paramValueExpression);
-                        this.buildWhereItem(whereElement, methodInfo.getDynamic(), testExpression, conditionExpression);
-                    }
-                }
-            }
-        }*/
-
         @Override
         public void handleBasicTypeSingleParam(Element whereElement, Boolean dynamic) {
-            String testExpression = String.format("%1s != null", methodParamInfo.getArgName());
-            String paramValueExpression = String.format("%1s", methodParamInfo.getArgName());
+            String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
+            String paramValueExpression = String.format("#{%1$s}", methodParamInfo.getArgName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
-            this.buildWhereItem(whereElement, dynamic, testExpression, conditionExpression);
+            Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
+            this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
         }
 
         @Override
         public void handleObjectTypeNoAnnotationSingleParam(Element whereElement, Boolean dynamic) {
-            String testExpression = String.format("%1s != null", columnInfo.getJavaColumnName());
-            String paramValueExpression = String.format("%1s", columnInfo.getJavaColumnName());
+            String testExpression = String.format("%1$s != null", columnInfo.getJavaColumnName());
+            String paramValueExpression = String.format("#{%1$s}", columnInfo.getJavaColumnName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
-            this.buildWhereItem(whereElement, dynamic, testExpression, conditionExpression);
+            Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
+            this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
         }
 
         @Override
         public void handleCompositeObjectNoAnnotationSingleParam(Element whereElement, Boolean dynamic) {
             for (ColumnInfo columnInfoComposite : columnInfo.getComposites()) {
-                String testExpression = String.format("%1s != null and %1s.%2s != null", columnInfo.getJavaColumnName(), columnInfo.getJavaColumnName(), columnInfoComposite.getJavaColumnName());
-                String paramValueExpression = String.format("%1s.%2s", columnInfo.getJavaColumnName(), columnInfoComposite.getJavaColumnName());
+                String testExpression = String.format("%1$s != null and %1$s.%2$s != null", columnInfo.getJavaColumnName(), columnInfo.getJavaColumnName(), columnInfoComposite.getJavaColumnName());
+                String paramValueExpression = String.format("#{%1$s.%2$s}", columnInfo.getJavaColumnName(), columnInfoComposite.getJavaColumnName());
                 String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, paramValueExpression);
-                this.buildWhereItem(whereElement, dynamic, testExpression, conditionExpression);
+                Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
+                this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
             }
         }
 
         @Override
         public void handleObjectTypeWithAnnotationSingleParam(Element whereElement, Boolean dynamic) {
-            String testExpression = String.format("%1s.%2s != null", methodParamInfo.getArgName(), columnInfo.getJavaColumnName());
-            String paramValueExpression = String.format("%1s.%2s", methodParamInfo.getArgName(), columnInfo.getJavaColumnName());
+            String testExpression = String.format("%1$s.%2$s != null", methodParamInfo.getArgName(), columnInfo.getJavaColumnName());
+            String paramValueExpression = String.format("#{%1$s.%2$s}", methodParamInfo.getArgName(), columnInfo.getJavaColumnName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
-            this.buildWhereItem(whereElement, dynamic, testExpression, conditionExpression);
+            Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
+            this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
         }
 
         @Override
         public void handleCompositeObjectWithAnnotationSingleParam(Element whereElement, Boolean dynamic) {
             for (ColumnInfo columnInfoComposite : columnInfo.getComposites()) {
                 String testExpression = String.format(
-                        "%1s != null and %1s.%2s != null and %1s.%2s.%3s != null",
+                        "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
                         methodParamInfo.getArgName(),
                         columnInfo.getJavaColumnName(),
                         columnInfoComposite.getJavaColumnName()
                 );
                 String paramValueExpression = String.format(
-                        "%1s.%2s.%3s",
+                        "#{%1$s.%2$s.%3$s}",
                         methodParamInfo.getArgName(),
                         columnInfo.getJavaColumnName(),
                         columnInfoComposite.getJavaColumnName()
                 );
                 String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, paramValueExpression);
-                this.buildWhereItem(whereElement, dynamic, testExpression, conditionExpression);
+                Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
+                this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
             }
         }
 
@@ -757,93 +575,99 @@ public class WhereTemplateHandler {
             for (ForeignKeyColumnInfo foreignKeyInfo : inverseForeignKeyColumnInfoList) {
                 ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();
                 String testExpression = String.format(
-                        "%1s != null and %1s.%2s != null",
+                        "%1$s != null and %1$s.%2$s != null",
                         columnInfo.getJavaColumnName(),
                         referencedColumnInfo.getJavaColumnName()
                 );
-                String paramValueExpression = String.format("%1s.%2s", columnInfo.getJavaColumnName(), referencedColumnInfo.getJavaColumnName());
+                String paramValueExpression = String.format("#{%1$s.%2$s}", columnInfo.getJavaColumnName(), referencedColumnInfo.getJavaColumnName());
                 String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, relationColumnInfo, paramValueExpression);
-                this.buildWhereItem(whereElement, dynamic, testExpression, conditionExpression);
+                Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
+                this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
             }
         }
 
         @Override
         public void handleBasicTypeMultiParam(Element whereElement, Boolean dynamic) {
-            String testExpression = String.format("%1s != null", methodParamInfo.getArgName());
-            String paramValueExpression = String.format("%1s", methodParamInfo.getArgName());
+            String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
+            String paramValueExpression = String.format("#{%1$s}", methodParamInfo.getArgName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
-            this.buildWhereItem(whereElement, dynamic, testExpression, conditionExpression);
+            Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
+            this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
         }
 
         @Override
         public void handleObjectTypeNoAnnotationMultiParam(Element whereElement, Boolean dynamic) {
             String testExpression = String.format(
-                    "%1s != null and %1s.%2s != null",
+                    "%1$s != null and %1$s.%2$s != null",
                     methodParamInfo.getArgName(),
                     columnInfo.getJavaColumnName()
             );
             String paramValueExpression = String.format(
-                    "%1s.%2s",
+                    "#{%1$s.%2$s}",
                     methodParamInfo.getArgName(),
                     columnInfo.getJavaColumnName()
             );
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
-            this.buildWhereItem(whereElement, dynamic, testExpression, conditionExpression);
+            Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
+            this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
         }
 
         @Override
         public void handleCompositeObjectNoAnnotationMultiParam(Element whereElement, Boolean dynamic) {
             for (ColumnInfo columnInfoComposite : columnInfo.getComposites()) {
                 String testExpression = String.format(
-                        "%1s != null and %1s.%2s != null and %1s.%2s.%3s != null",
+                        "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
                         methodParamInfo.getArgName(),
                         columnInfo.getJavaColumnName(),
                         columnInfoComposite.getJavaColumnName()
                 );
                 String paramValueExpression = String.format(
-                        "%1s.%2s.%3s",
+                        "#{%1$s.%2$s.%3$s}",
                         methodParamInfo.getArgName(),
                         columnInfo.getJavaColumnName(),
                         columnInfoComposite.getJavaColumnName()
                 );
                 String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, paramValueExpression);
-                this.buildWhereItem(whereElement, dynamic, testExpression, conditionExpression);
+                Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
+                this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
             }
         }
 
         @Override
         public void handleObjectTypeWithAnnotationMultiParam(Element whereElement, Boolean dynamic) {
             String testExpression = String.format(
-                    "%1s != null and %1s.%2s != null",
+                    "%1$s != null and %1$s.%2$s != null",
                     methodParamInfo.getArgName(),
                     columnInfo.getJavaColumnName()
             );
             String paramValueExpression = String.format(
-                    "%1s.%2s",
+                    "#{%1$s.%2$s}",
                     methodParamInfo.getArgName(),
                     columnInfo.getJavaColumnName()
             );
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
-            this.buildWhereItem(whereElement, dynamic, testExpression, conditionExpression);
+            Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
+            this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
         }
 
         @Override
         public void handleCompositeObjectWithAnnotationMultiParam(Element whereElement, Boolean dynamic) {
             for (ColumnInfo columnInfoComposite : columnInfo.getComposites()) {
                 String testExpression = String.format(
-                        "%1s != null and %1s.%2s != null and %1s.%2s.%3s != null",
+                        "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
                         methodParamInfo.getArgName(),
                         columnInfo.getJavaColumnName(),
                         columnInfoComposite.getJavaColumnName()
                 );
                 String paramValueExpression = String.format(
-                        "%1s.%2s.%3s",
+                        "#{%1$s.%2$s.%3$s}",
                         methodParamInfo.getArgName(),
                         columnInfo.getJavaColumnName(),
                         columnInfoComposite.getJavaColumnName()
                 );
                 String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, paramValueExpression);
-                this.buildWhereItem(whereElement, dynamic, testExpression, conditionExpression);
+                Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
+                this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
             }
         }
 
@@ -852,19 +676,20 @@ public class WhereTemplateHandler {
             for (ForeignKeyColumnInfo foreignKeyInfo : relationColumnInfo.getInverseForeignKeyColumnInfoList()) {
                 ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();
                 String testExpression = String.format(
-                        "%1s != null and %1s.%2s != null and %1s.%2s.%3s != null",
+                        "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
                         methodParamInfo.getArgName(),
                         columnInfo.getJavaColumnName(),
                         referencedColumnInfo.getJavaColumnName()
                 );
                 String paramValueExpression = String.format(
-                        "%1s.%2s.%3s",
+                        "#{%1$s.%2$s.%3$s}",
                         methodParamInfo.getArgName(),
                         columnInfo.getJavaColumnName(),
                         referencedColumnInfo.getJavaColumnName()
                 );
                 String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, relationColumnInfo, paramValueExpression);
-                this.buildWhereItem(whereElement, dynamic, testExpression, conditionExpression);
+                Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
+                this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
             }
         }
     }

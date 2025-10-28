@@ -8,9 +8,7 @@ import org.apache.ibatis.mapping.SqlCommandType;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class WhereTemplateHandler {
 
@@ -94,34 +92,34 @@ public class WhereTemplateHandler {
 
         void handle(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement);
 
-        void singleParamHandle(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement);
+        List<WhereItemContext> singleParamHandle(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement);
 
-        void multiParamHandle(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement);
+        List<WhereItemContext> multiParamHandle(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement);
 
-        void handleBasicTypeSingleParam(Element whereElement, Boolean dynamic);
+        List<WhereItemContext> handleBasicTypeSingleParam(Element whereElement, Boolean dynamic);
 
-        void handleObjectTypeNoAnnotationSingleParam(Element whereElement, Boolean dynamic);
+        List<WhereItemContext> handleObjectTypeNoAnnotationSingleParam(Element whereElement, Boolean dynamic);
 
-        void handleCompositeObjectNoAnnotationSingleParam(Element whereElement, Boolean dynamic);
+        List<WhereItemContext> handleCompositeObjectNoAnnotationSingleParam(Element whereElement, Boolean dynamic);
 
-        void handleObjectTypeWithAnnotationSingleParam(Element whereElement, Boolean dynamic);
+        List<WhereItemContext> handleObjectTypeWithAnnotationSingleParam(Element whereElement, Boolean dynamic);
 
-        void handleCompositeObjectWithAnnotationSingleParam(Element whereElement, Boolean dynamic);
+        List<WhereItemContext> handleCompositeObjectWithAnnotationSingleParam(Element whereElement, Boolean dynamic);
 
-        void handleRelationColumnSingleParam(Element whereElement, RelationColumnInfo relationColumnInfo, Boolean dynamic);
+        List<WhereItemContext> handleRelationColumnSingleParam(Element whereElement, RelationColumnInfo relationColumnInfo, Boolean dynamic);
 
 
-        void handleBasicTypeMultiParam(Element whereElement, Boolean dynamic);
+        List<WhereItemContext> handleBasicTypeMultiParam(Element whereElement, Boolean dynamic);
 
-        void handleObjectTypeNoAnnotationMultiParam(Element whereElement, Boolean dynamic);
+        List<WhereItemContext> handleObjectTypeNoAnnotationMultiParam(Element whereElement, Boolean dynamic);
 
-        void handleCompositeObjectNoAnnotationMultiParam(Element whereElement, Boolean dynamic);
+        List<WhereItemContext> handleCompositeObjectNoAnnotationMultiParam(Element whereElement, Boolean dynamic);
 
-        void handleObjectTypeWithAnnotationMultiParam(Element whereElement, Boolean dynamic);
+        List<WhereItemContext> handleObjectTypeWithAnnotationMultiParam(Element whereElement, Boolean dynamic);
 
-        void handleCompositeObjectWithAnnotationMultiParam(Element whereElement, Boolean dynamic);
+        List<WhereItemContext> handleCompositeObjectWithAnnotationMultiParam(Element whereElement, Boolean dynamic);
 
-        void handleRelationColumnMultiParam(Element whereElement, RelationColumnInfo relationColumnInfo, Boolean dynamic);
+        List<WhereItemContext> handleRelationColumnMultiParam(Element whereElement, RelationColumnInfo relationColumnInfo, Boolean dynamic);
     }
 
     static abstract class AbstractConditionHandler implements ConditionHandler {
@@ -140,23 +138,51 @@ public class WhereTemplateHandler {
             this.logicOperator = conditionInfo.getLogicOperator();
             this.comparisonOperator = conditionInfo.getComparisonOperator();
 
+            List<WhereItemContext> whereItemContextList;
             int paramCount = methodInfo.getMethodParamInfoList().size();
             if (paramCount == 1) {
-                this.singleParamHandle(methodInfo, conditionInfo, whereElement);
+                whereItemContextList = this.singleParamHandle(methodInfo, conditionInfo, whereElement);
             } else {
-                this.multiParamHandle(methodInfo, conditionInfo, whereElement);
+                whereItemContextList = this.multiParamHandle(methodInfo, conditionInfo, whereElement);
+            }
+            this.processWhereItem(whereElement, methodInfo, whereItemContextList);
+        }
+
+        /**
+         * 处理条件，有特殊情况的可以在子类中重写
+         * @param whereElement
+         * @param methodInfo
+         * @param whereItemContextList
+         */
+        protected void processWhereItem(Element whereElement, MethodInfo methodInfo, List<WhereItemContext> whereItemContextList) {
+            if (ObjectUtils.isEmpty(whereItemContextList)) {
+                return;
+            }
+            for (WhereItemContext whereItemContext : whereItemContextList) {
+                String testExpression = whereItemContext.getTestExpression();
+                Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, methodInfo.getDynamic(), testExpression);
+                for (Object content : whereItemContext.getContentList()) {
+                    if (content instanceof String) {
+                        whereOrIfElement.addText((String) content);
+                    }
+                    if (content instanceof Element) {
+                        whereOrIfElement.add((Element) content);
+                    }
+                }
             }
         }
 
         @Override
-        public void singleParamHandle(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement) {
+        public List<WhereItemContext> singleParamHandle(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement) {
             Boolean dynamic = methodInfo.getDynamic();
             ColumnInfo columnInfo = conditionInfo.getColumnInfo();
             MethodParamInfo methodParamInfo = conditionInfo.getMethodParamInfo();
+
+            List<WhereItemContext> whereItemContextList = null;
             if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class, ColumnInfo.class)) {
                 if (methodParamInfo.getBasicType()) {
                     // findById(Long id) findById(@Param("id") Long id)
-                    this.handleBasicTypeSingleParam(whereElement, dynamic);
+                    whereItemContextList = this.handleBasicTypeSingleParam(whereElement, dynamic);
                 } else {
                     // findById(MultiId id) findById(@Param("id") MultiId id)
                     if (methodParamInfo.getParam() == null) {
@@ -180,17 +206,20 @@ public class WhereTemplateHandler {
                     this.handleRelationColumnSingleParam(whereElement, relationColumnInfo, dynamic);
                 }
             }
+            return whereItemContextList;
         }
 
         @Override
-        public void multiParamHandle(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement) {
+        public List<WhereItemContext> multiParamHandle(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement) {
             Boolean dynamic = methodInfo.getDynamic();
             ColumnInfo columnInfo = conditionInfo.getColumnInfo();
             MethodParamInfo methodParamInfo = conditionInfo.getMethodParamInfo();
+
+            List<WhereItemContext> whereItemContextList = null;
             if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class, ColumnInfo.class)) {
                 if (methodParamInfo.getBasicType()) {
                     // findById(Long id) findById(@Param("id") Long id)
-                    this.handleBasicTypeMultiParam(whereElement, dynamic);
+                    whereItemContextList = this.handleBasicTypeMultiParam(whereElement, dynamic);
                 } else {
                     // findById(MultiId id) findById(@Param("id") MultiId id)
                     if (methodParamInfo.getParam() == null) {
@@ -214,6 +243,7 @@ public class WhereTemplateHandler {
                     this.handleRelationColumnMultiParam(whereElement, relationColumnInfo, dynamic);
                 }
             }
+            return whereItemContextList;
         }
 
         /**
@@ -262,7 +292,7 @@ public class WhereTemplateHandler {
     static class LikeConditionHandler extends AbstractConditionHandler {
 
         @Override
-        public void handleBasicTypeSingleParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleBasicTypeSingleParam(Element whereElement, Boolean dynamic) {
             /**
              *             <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(likeClientCode)">
              *                 <bind name="likeClientCode" value="'%' + likeClientCode + '%'"/>
@@ -274,42 +304,44 @@ public class WhereTemplateHandler {
             Element bindElement = this.buildBindElement(methodParamInfo.getArgName(), bindValue);
 
             String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
-            Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
+            // Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
 
             String paramValueExpression = String.format("#{%1$s}", methodParamInfo.getArgName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
 
-            this.addWhereOrIfElementWithElement(whereOrIfElement, bindElement);
-            this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
+            /*this.addWhereOrIfElementWithElement(whereOrIfElement, bindElement);
+            this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);*/
+
+            return Arrays.asList(new WhereItemContext(testExpression, Arrays.asList(bindElement, conditionExpression)));
         }
 
         @Override
-        public void handleObjectTypeNoAnnotationSingleParam(Element whereElement, Boolean dynamic) {
-
+        public List<WhereItemContext> handleObjectTypeNoAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+            throw new UnsupportedOperationException("");
         }
 
         @Override
-        public void handleCompositeObjectNoAnnotationSingleParam(Element whereElement, Boolean dynamic) {
-
+        public List<WhereItemContext> handleCompositeObjectNoAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+            throw new UnsupportedOperationException("");
         }
 
         @Override
-        public void handleObjectTypeWithAnnotationSingleParam(Element whereElement, Boolean dynamic) {
-
+        public List<WhereItemContext> handleObjectTypeWithAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+            throw new UnsupportedOperationException("");
         }
 
         @Override
-        public void handleCompositeObjectWithAnnotationSingleParam(Element whereElement, Boolean dynamic) {
-
+        public List<WhereItemContext> handleCompositeObjectWithAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+            throw new UnsupportedOperationException("");
         }
 
         @Override
-        public void handleRelationColumnSingleParam(Element whereElement, RelationColumnInfo relationColumnInfo, Boolean dynamic) {
-
+        public List<WhereItemContext> handleRelationColumnSingleParam(Element whereElement, RelationColumnInfo relationColumnInfo, Boolean dynamic) {
+            throw new UnsupportedOperationException("");
         }
 
         @Override
-        public void handleBasicTypeMultiParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleBasicTypeMultiParam(Element whereElement, Boolean dynamic) {
             /**
              *             <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(likeClientCode)">
              *                 <bind name="likeClientCode" value="'%' + likeClientCode + '%'"/>
@@ -321,45 +353,47 @@ public class WhereTemplateHandler {
             Element bindElement = this.buildBindElement(methodParamInfo.getArgName(), bindValue);
 
             String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
-            Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
+            // Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
 
             String paramValueExpression = String.format("#{%1$s}", methodParamInfo.getArgName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
 
-            this.addWhereOrIfElementWithElement(whereOrIfElement, bindElement);
-            this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
+            /*this.addWhereOrIfElementWithElement(whereOrIfElement, bindElement);
+            this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);*/
+
+            return Arrays.asList(new WhereItemContext(testExpression, Arrays.asList(bindElement, conditionExpression)));
         }
 
         @Override
-        public void handleObjectTypeNoAnnotationMultiParam(Element whereElement, Boolean dynamic) {
-
+        public List<WhereItemContext> handleObjectTypeNoAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+            throw new UnsupportedOperationException("");
         }
 
         @Override
-        public void handleCompositeObjectNoAnnotationMultiParam(Element whereElement, Boolean dynamic) {
-
+        public List<WhereItemContext> handleCompositeObjectNoAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+            throw new UnsupportedOperationException("");
         }
 
         @Override
-        public void handleObjectTypeWithAnnotationMultiParam(Element whereElement, Boolean dynamic) {
-
+        public List<WhereItemContext> handleObjectTypeWithAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+            throw new UnsupportedOperationException("");
         }
 
         @Override
-        public void handleCompositeObjectWithAnnotationMultiParam(Element whereElement, Boolean dynamic) {
-
+        public List<WhereItemContext> handleCompositeObjectWithAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+            throw new UnsupportedOperationException("");
         }
 
         @Override
-        public void handleRelationColumnMultiParam(Element whereElement, RelationColumnInfo relationColumnInfo, Boolean dynamic) {
-
+        public List<WhereItemContext> handleRelationColumnMultiParam(Element whereElement, RelationColumnInfo relationColumnInfo, Boolean dynamic) {
+            throw new UnsupportedOperationException("");
         }
     }
 
     static class InConditionHandler extends AbstractConditionHandler {
 
         @Override
-        public void handleBasicTypeSingleParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleBasicTypeSingleParam(Element whereElement, Boolean dynamic) {
             /**
              *             <if test="terminal == @com.iss.dtg.idms.constant.Terminal@EBANK">
              *                 and act.client_code in
@@ -370,7 +404,7 @@ public class WhereTemplateHandler {
              */
 
             String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
-            Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
+            // Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
 
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, "");
 
@@ -383,165 +417,175 @@ public class WhereTemplateHandler {
             foreachElement.addAttribute("separator", ",");
             foreachElement.addText("#{item}");
 
-            this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
-            this.addWhereOrIfElementWithElement(whereOrIfElement, foreachElement);
+            /*this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
+            this.addWhereOrIfElementWithElement(whereOrIfElement, foreachElement);*/
+
+            return Arrays.asList(new WhereItemContext(testExpression, Arrays.asList(conditionExpression, foreachElement)));
         }
 
         @Override
-        public void handleObjectTypeNoAnnotationSingleParam(Element whereElement, Boolean dynamic) {
-
+        public List<WhereItemContext> handleObjectTypeNoAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+            throw new UnsupportedOperationException("");
         }
 
         @Override
-        public void handleCompositeObjectNoAnnotationSingleParam(Element whereElement, Boolean dynamic) {
-
+        public List<WhereItemContext> handleCompositeObjectNoAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+            throw new UnsupportedOperationException("");
         }
 
         @Override
-        public void handleObjectTypeWithAnnotationSingleParam(Element whereElement, Boolean dynamic) {
-
+        public List<WhereItemContext> handleObjectTypeWithAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+            throw new UnsupportedOperationException("");
         }
 
         @Override
-        public void handleCompositeObjectWithAnnotationSingleParam(Element whereElement, Boolean dynamic) {
-
+        public List<WhereItemContext> handleCompositeObjectWithAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+            throw new UnsupportedOperationException("");
         }
 
         @Override
-        public void handleRelationColumnSingleParam(Element whereElement, RelationColumnInfo relationColumnInfo, Boolean dynamic) {
-
+        public List<WhereItemContext> handleRelationColumnSingleParam(Element whereElement, RelationColumnInfo relationColumnInfo, Boolean dynamic) {
+            throw new UnsupportedOperationException("");
         }
 
         @Override
-        public void handleBasicTypeMultiParam(Element whereElement, Boolean dynamic) {
-
+        public List<WhereItemContext> handleBasicTypeMultiParam(Element whereElement, Boolean dynamic) {
+            throw new UnsupportedOperationException();
         }
 
         @Override
-        public void handleObjectTypeNoAnnotationMultiParam(Element whereElement, Boolean dynamic) {
-
+        public List<WhereItemContext> handleObjectTypeNoAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+            throw new UnsupportedOperationException("");
         }
 
         @Override
-        public void handleCompositeObjectNoAnnotationMultiParam(Element whereElement, Boolean dynamic) {
-
+        public List<WhereItemContext> handleCompositeObjectNoAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+            throw new UnsupportedOperationException("");
         }
 
         @Override
-        public void handleObjectTypeWithAnnotationMultiParam(Element whereElement, Boolean dynamic) {
-
+        public List<WhereItemContext> handleObjectTypeWithAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+            throw new UnsupportedOperationException("");
         }
 
         @Override
-        public void handleCompositeObjectWithAnnotationMultiParam(Element whereElement, Boolean dynamic) {
-
+        public List<WhereItemContext> handleCompositeObjectWithAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+            throw new UnsupportedOperationException("");
         }
 
         @Override
-        public void handleRelationColumnMultiParam(Element whereElement, RelationColumnInfo relationColumnInfo, Boolean dynamic) {
-
+        public List<WhereItemContext> handleRelationColumnMultiParam(Element whereElement, RelationColumnInfo relationColumnInfo, Boolean dynamic) {
+            throw new UnsupportedOperationException("");
         }
     }
 
     static class BetweenConditionHandler extends AbstractConditionHandler {
 
         @Override
-        public void handleBasicTypeSingleParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleBasicTypeSingleParam(Element whereElement, Boolean dynamic) {
             String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
             String paramValueExpression = String.format("#{%1$s[0]} and #{%1$s[1]}", methodParamInfo.getArgName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
-            Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
-            this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
+            // Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
+            // this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
+            return Arrays.asList(new WhereItemContext(testExpression, Arrays.asList(conditionExpression)));
         }
 
         @Override
-        public void handleObjectTypeNoAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleObjectTypeNoAnnotationSingleParam(Element whereElement, Boolean dynamic) {
             String testExpression = String.format("%1$s != null", conditionInfo.getColumnName());
             String paramValueExpression = String.format("#{%1$s[0]} and #{%1$s[1]}", conditionInfo.getColumnName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
-            Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
-            this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
+            // Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
+            // this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
+            return Arrays.asList(new WhereItemContext(testExpression, Arrays.asList(conditionExpression)));
         }
 
         @Override
-        public void handleCompositeObjectNoAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleCompositeObjectNoAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+            List<WhereItemContext> whereItemContextList = new ArrayList<>();
             for (ColumnInfo columnInfoComposite : columnInfo.getComposites()) {
                 String testExpression = String.format("%1$s != null and %1$s.%2$s != null", columnInfo.getJavaColumnName(), columnInfoComposite.getJavaColumnName());
                 String paramValueExpression = String.format("#{%1$s.%2$s[0]} and #{%1$s.%2$s[1]}", columnInfo.getJavaColumnName());
                 String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
-                Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
-                this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
+                // Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
+                // this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
+                whereItemContextList.add(new WhereItemContext(testExpression, Arrays.asList(conditionExpression)));
             }
+            return whereItemContextList;
         }
 
         @Override
-        public void handleObjectTypeWithAnnotationSingleParam(Element whereElement, Boolean dynamic) {
-
+        public List<WhereItemContext> handleObjectTypeWithAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+            throw new UnsupportedOperationException("");
         }
 
         @Override
-        public void handleCompositeObjectWithAnnotationSingleParam(Element whereElement, Boolean dynamic) {
-
+        public List<WhereItemContext> handleCompositeObjectWithAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+            throw new UnsupportedOperationException("");
         }
 
         @Override
-        public void handleRelationColumnSingleParam(Element whereElement, RelationColumnInfo relationColumnInfo, Boolean dynamic) {
-
+        public List<WhereItemContext> handleRelationColumnSingleParam(Element whereElement, RelationColumnInfo relationColumnInfo, Boolean dynamic) {
+            throw new UnsupportedOperationException("");
         }
 
         @Override
-        public void handleBasicTypeMultiParam(Element whereElement, Boolean dynamic) {
-
+        public List<WhereItemContext> handleBasicTypeMultiParam(Element whereElement, Boolean dynamic) {
+            throw new UnsupportedOperationException();
         }
 
         @Override
-        public void handleObjectTypeNoAnnotationMultiParam(Element whereElement, Boolean dynamic) {
-
+        public List<WhereItemContext> handleObjectTypeNoAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+            throw new UnsupportedOperationException("");
         }
 
         @Override
-        public void handleCompositeObjectNoAnnotationMultiParam(Element whereElement, Boolean dynamic) {
-
+        public List<WhereItemContext> handleCompositeObjectNoAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+            throw new UnsupportedOperationException("");
         }
 
         @Override
-        public void handleObjectTypeWithAnnotationMultiParam(Element whereElement, Boolean dynamic) {
-
+        public List<WhereItemContext> handleObjectTypeWithAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+            throw new UnsupportedOperationException("");
         }
 
         @Override
-        public void handleCompositeObjectWithAnnotationMultiParam(Element whereElement, Boolean dynamic) {
-
+        public List<WhereItemContext> handleCompositeObjectWithAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+            throw new UnsupportedOperationException("");
         }
 
         @Override
-        public void handleRelationColumnMultiParam(Element whereElement, RelationColumnInfo relationColumnInfo, Boolean dynamic) {
-
+        public List<WhereItemContext> handleRelationColumnMultiParam(Element whereElement, RelationColumnInfo relationColumnInfo, Boolean dynamic) {
+            throw new UnsupportedOperationException("");
         }
     }
 
     static class CommonConditionHandler extends AbstractConditionHandler {
 
         @Override
-        public void handleBasicTypeSingleParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleBasicTypeSingleParam(Element whereElement, Boolean dynamic) {
             String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
             String paramValueExpression = String.format("#{%1$s}", methodParamInfo.getArgName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
-            Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
-            this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
+            // Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
+            // this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
+            return Arrays.asList(new WhereItemContext(testExpression, Arrays.asList(conditionExpression)));
         }
 
         @Override
-        public void handleObjectTypeNoAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleObjectTypeNoAnnotationSingleParam(Element whereElement, Boolean dynamic) {
             String testExpression = String.format("%1$s != null", columnInfo.getJavaColumnName());
             String paramValueExpression = String.format("#{%1$s}", columnInfo.getJavaColumnName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
-            Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
-            this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
+            // Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
+            // this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
+            return Arrays.asList(new WhereItemContext(testExpression, Arrays.asList(conditionExpression)));
         }
 
         @Override
-        public void handleCompositeObjectNoAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleCompositeObjectNoAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+            List<WhereItemContext> whereItemContextList = new ArrayList<>();
             for (ColumnInfo columnInfoComposite : columnInfo.getComposites()) {
                 String testExpression = String.format(
                         "%1$s != null and %1$s.%2$s != null",
@@ -554,22 +598,26 @@ public class WhereTemplateHandler {
                         columnInfoComposite.getJavaColumnName()
                 );
                 String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, paramValueExpression);
-                Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
-                this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
+                // Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
+                // this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
+                whereItemContextList.add(new WhereItemContext(testExpression, Arrays.asList(conditionExpression)));
             }
+            return whereItemContextList;
         }
 
         @Override
-        public void handleObjectTypeWithAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleObjectTypeWithAnnotationSingleParam(Element whereElement, Boolean dynamic) {
             String testExpression = String.format("%1$s.%2$s != null", methodParamInfo.getArgName(), columnInfo.getJavaColumnName());
             String paramValueExpression = String.format("#{%1$s.%2$s}", methodParamInfo.getArgName(), columnInfo.getJavaColumnName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
-            Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
-            this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
+            /*Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
+            this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);*/
+            return Arrays.asList(new WhereItemContext(testExpression, Arrays.asList(conditionExpression)));
         }
 
         @Override
-        public void handleCompositeObjectWithAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleCompositeObjectWithAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+            List<WhereItemContext> whereItemContextList = new ArrayList<>();
             for (ColumnInfo columnInfoComposite : columnInfo.getComposites()) {
                 String testExpression = String.format(
                         "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
@@ -584,15 +632,17 @@ public class WhereTemplateHandler {
                         columnInfoComposite.getJavaColumnName()
                 );
                 String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, paramValueExpression);
-                Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
-                this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
+                // Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
+                // this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
+                whereItemContextList.add(new WhereItemContext(testExpression, Arrays.asList(conditionExpression)));
             }
+            return whereItemContextList;
         }
 
         @Override
-        public void handleRelationColumnSingleParam(Element whereElement, RelationColumnInfo relationColumnInfo, Boolean dynamic) {
-            List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
-            for (ForeignKeyColumnInfo foreignKeyInfo : inverseForeignKeyColumnInfoList) {
+        public List<WhereItemContext> handleRelationColumnSingleParam(Element whereElement, RelationColumnInfo relationColumnInfo, Boolean dynamic) {
+            List<WhereItemContext> whereItemContextList = new ArrayList<>();
+            for (ForeignKeyColumnInfo foreignKeyInfo : relationColumnInfo.getInverseForeignKeyColumnInfoList()) {
                 ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();
                 String testExpression = String.format(
                         "%1$s != null and %1$s.%2$s != null",
@@ -601,22 +651,25 @@ public class WhereTemplateHandler {
                 );
                 String paramValueExpression = String.format("#{%1$s.%2$s}", columnInfo.getJavaColumnName(), referencedColumnInfo.getJavaColumnName());
                 String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, relationColumnInfo, paramValueExpression);
-                Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
-                this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
+                // Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
+                // this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
+                whereItemContextList.add(new WhereItemContext(testExpression, Arrays.asList(conditionExpression)));
             }
+            return whereItemContextList;
         }
 
         @Override
-        public void handleBasicTypeMultiParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleBasicTypeMultiParam(Element whereElement, Boolean dynamic) {
             String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
             String paramValueExpression = String.format("#{%1$s}", methodParamInfo.getArgName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
-            Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
-            this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
+            // Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
+            // this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
+            return Arrays.asList(new WhereItemContext(testExpression, Arrays.asList(conditionExpression)));
         }
 
         @Override
-        public void handleObjectTypeNoAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleObjectTypeNoAnnotationMultiParam(Element whereElement, Boolean dynamic) {
             String testExpression = String.format(
                     "%1$s != null and %1$s.%2$s != null",
                     methodParamInfo.getArgName(),
@@ -628,12 +681,14 @@ public class WhereTemplateHandler {
                     columnInfo.getJavaColumnName()
             );
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
-            Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
-            this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
+            // Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
+            // this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
+            return Arrays.asList(new WhereItemContext(testExpression, Arrays.asList(conditionExpression)));
         }
 
         @Override
-        public void handleCompositeObjectNoAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleCompositeObjectNoAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+            List<WhereItemContext> whereItemContextList = new ArrayList<>();
             for (ColumnInfo columnInfoComposite : columnInfo.getComposites()) {
                 String testExpression = String.format(
                         "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
@@ -648,13 +703,15 @@ public class WhereTemplateHandler {
                         columnInfoComposite.getJavaColumnName()
                 );
                 String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, paramValueExpression);
-                Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
-                this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
+                // Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
+                // this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
+                whereItemContextList.add(new WhereItemContext(testExpression, Arrays.asList(conditionExpression)));
             }
+            return whereItemContextList;
         }
 
         @Override
-        public void handleObjectTypeWithAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleObjectTypeWithAnnotationMultiParam(Element whereElement, Boolean dynamic) {
             String testExpression = String.format(
                     "%1$s != null and %1$s.%2$s != null",
                     methodParamInfo.getArgName(),
@@ -666,12 +723,14 @@ public class WhereTemplateHandler {
                     columnInfo.getJavaColumnName()
             );
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
-            Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
-            this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
+            // Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
+            // this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
+            return Arrays.asList(new WhereItemContext(testExpression, Arrays.asList(conditionExpression)));
         }
 
         @Override
-        public void handleCompositeObjectWithAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleCompositeObjectWithAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+            List<WhereItemContext> whereItemContextList = new ArrayList<>();
             for (ColumnInfo columnInfoComposite : columnInfo.getComposites()) {
                 String testExpression = String.format(
                         "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
@@ -686,13 +745,16 @@ public class WhereTemplateHandler {
                         columnInfoComposite.getJavaColumnName()
                 );
                 String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, paramValueExpression);
-                Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
-                this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
+                // Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
+                // this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
+                whereItemContextList.add(new WhereItemContext(testExpression, Arrays.asList(conditionExpression)));
             }
+            return whereItemContextList;
         }
 
         @Override
-        public void handleRelationColumnMultiParam(Element whereElement, RelationColumnInfo relationColumnInfo, Boolean dynamic) {
+        public List<WhereItemContext> handleRelationColumnMultiParam(Element whereElement, RelationColumnInfo relationColumnInfo, Boolean dynamic) {
+            List<WhereItemContext> whereItemContextList = new ArrayList<>();
             for (ForeignKeyColumnInfo foreignKeyInfo : relationColumnInfo.getInverseForeignKeyColumnInfoList()) {
                 ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();
                 String testExpression = String.format(
@@ -708,9 +770,31 @@ public class WhereTemplateHandler {
                         referencedColumnInfo.getJavaColumnName()
                 );
                 String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, relationColumnInfo, paramValueExpression);
-                Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
-                this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
+                // Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
+                // this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
+                whereItemContextList.add(new WhereItemContext(testExpression, Arrays.asList(conditionExpression)));
             }
+            return whereItemContextList;
+        }
+    }
+
+    static class WhereItemContext {
+
+        private String testExpression;
+
+        private List<Object> contentList;
+
+        public WhereItemContext(String testExpression, List<Object> contentList) {
+            this.testExpression = testExpression;
+            this.contentList = contentList;
+        }
+
+        public String getTestExpression() {
+            return testExpression;
+        }
+
+        public List<Object> getContentList() {
+            return contentList;
         }
     }
 }

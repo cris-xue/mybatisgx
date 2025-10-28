@@ -279,14 +279,6 @@ public class WhereTemplateHandler {
             bindElement.addAttribute("value", value);
             return bindElement;
         }
-
-        protected void addWhereOrIfElementWithText(Element whereOrIfElement, String conditionExpression) {
-            whereOrIfElement.addText(conditionExpression);
-        }
-
-        protected void addWhereOrIfElementWithElement(Element whereOrIfElement, Element whereOrIfChildElement) {
-            whereOrIfElement.add(whereOrIfChildElement);
-        }
     }
 
     static class LikeConditionHandler extends AbstractConditionHandler {
@@ -304,13 +296,9 @@ public class WhereTemplateHandler {
             Element bindElement = this.buildBindElement(methodParamInfo.getArgName(), bindValue);
 
             String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
-            // Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
 
             String paramValueExpression = String.format("#{%1$s}", methodParamInfo.getArgName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
-
-            /*this.addWhereOrIfElementWithElement(whereOrIfElement, bindElement);
-            this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);*/
 
             return Arrays.asList(new WhereItemContext(testExpression, Arrays.asList(bindElement, conditionExpression)));
         }
@@ -353,14 +341,9 @@ public class WhereTemplateHandler {
             Element bindElement = this.buildBindElement(methodParamInfo.getArgName(), bindValue);
 
             String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
-            // Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
 
             String paramValueExpression = String.format("#{%1$s}", methodParamInfo.getArgName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
-
-            /*this.addWhereOrIfElementWithElement(whereOrIfElement, bindElement);
-            this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);*/
-
             return Arrays.asList(new WhereItemContext(testExpression, Arrays.asList(bindElement, conditionExpression)));
         }
 
@@ -404,7 +387,6 @@ public class WhereTemplateHandler {
              */
 
             String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
-            // Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
 
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, "");
 
@@ -416,10 +398,6 @@ public class WhereTemplateHandler {
             foreachElement.addAttribute("close", ")");
             foreachElement.addAttribute("separator", ",");
             foreachElement.addText("#{item}");
-
-            /*this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
-            this.addWhereOrIfElementWithElement(whereOrIfElement, foreachElement);*/
-
             return Arrays.asList(new WhereItemContext(testExpression, Arrays.asList(conditionExpression, foreachElement)));
         }
 
@@ -486,8 +464,6 @@ public class WhereTemplateHandler {
             String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
             String paramValueExpression = String.format("#{%1$s[0]} and #{%1$s[1]}", methodParamInfo.getArgName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
-            // Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
-            // this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
             return Arrays.asList(new WhereItemContext(testExpression, Arrays.asList(conditionExpression)));
         }
 
@@ -496,8 +472,6 @@ public class WhereTemplateHandler {
             String testExpression = String.format("%1$s != null", conditionInfo.getColumnName());
             String paramValueExpression = String.format("#{%1$s[0]} and #{%1$s[1]}", conditionInfo.getColumnName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
-            // Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
-            // this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
             return Arrays.asList(new WhereItemContext(testExpression, Arrays.asList(conditionExpression)));
         }
 
@@ -508,8 +482,6 @@ public class WhereTemplateHandler {
                 String testExpression = String.format("%1$s != null and %1$s.%2$s != null", columnInfo.getJavaColumnName(), columnInfoComposite.getJavaColumnName());
                 String paramValueExpression = String.format("#{%1$s.%2$s[0]} and #{%1$s.%2$s[1]}", columnInfo.getJavaColumnName());
                 String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
-                // Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
-                // this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
                 whereItemContextList.add(new WhereItemContext(testExpression, Arrays.asList(conditionExpression)));
             }
             return whereItemContextList;
@@ -568,8 +540,6 @@ public class WhereTemplateHandler {
             String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
             String paramValueExpression = String.format("#{%1$s}", methodParamInfo.getArgName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
-            // Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
-            // this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
             return Arrays.asList(new WhereItemContext(testExpression, Arrays.asList(conditionExpression)));
         }
 
@@ -578,8 +548,6 @@ public class WhereTemplateHandler {
             String testExpression = String.format("%1$s != null", columnInfo.getJavaColumnName());
             String paramValueExpression = String.format("#{%1$s}", columnInfo.getJavaColumnName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
-            // Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
-            // this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
             return Arrays.asList(new WhereItemContext(testExpression, Arrays.asList(conditionExpression)));
         }
 
@@ -598,8 +566,6 @@ public class WhereTemplateHandler {
                         columnInfoComposite.getJavaColumnName()
                 );
                 String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, paramValueExpression);
-                // Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
-                // this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
                 whereItemContextList.add(new WhereItemContext(testExpression, Arrays.asList(conditionExpression)));
             }
             return whereItemContextList;
@@ -610,8 +576,6 @@ public class WhereTemplateHandler {
             String testExpression = String.format("%1$s.%2$s != null", methodParamInfo.getArgName(), columnInfo.getJavaColumnName());
             String paramValueExpression = String.format("#{%1$s.%2$s}", methodParamInfo.getArgName(), columnInfo.getJavaColumnName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
-            /*Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
-            this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);*/
             return Arrays.asList(new WhereItemContext(testExpression, Arrays.asList(conditionExpression)));
         }
 
@@ -632,8 +596,6 @@ public class WhereTemplateHandler {
                         columnInfoComposite.getJavaColumnName()
                 );
                 String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, paramValueExpression);
-                // Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
-                // this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
                 whereItemContextList.add(new WhereItemContext(testExpression, Arrays.asList(conditionExpression)));
             }
             return whereItemContextList;
@@ -651,8 +613,6 @@ public class WhereTemplateHandler {
                 );
                 String paramValueExpression = String.format("#{%1$s.%2$s}", columnInfo.getJavaColumnName(), referencedColumnInfo.getJavaColumnName());
                 String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, relationColumnInfo, paramValueExpression);
-                // Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
-                // this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
                 whereItemContextList.add(new WhereItemContext(testExpression, Arrays.asList(conditionExpression)));
             }
             return whereItemContextList;
@@ -663,8 +623,6 @@ public class WhereTemplateHandler {
             String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
             String paramValueExpression = String.format("#{%1$s}", methodParamInfo.getArgName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
-            // Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
-            // this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
             return Arrays.asList(new WhereItemContext(testExpression, Arrays.asList(conditionExpression)));
         }
 
@@ -681,8 +639,6 @@ public class WhereTemplateHandler {
                     columnInfo.getJavaColumnName()
             );
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
-            // Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
-            // this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
             return Arrays.asList(new WhereItemContext(testExpression, Arrays.asList(conditionExpression)));
         }
 
@@ -703,8 +659,6 @@ public class WhereTemplateHandler {
                         columnInfoComposite.getJavaColumnName()
                 );
                 String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, paramValueExpression);
-                // Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
-                // this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
                 whereItemContextList.add(new WhereItemContext(testExpression, Arrays.asList(conditionExpression)));
             }
             return whereItemContextList;
@@ -723,8 +677,6 @@ public class WhereTemplateHandler {
                     columnInfo.getJavaColumnName()
             );
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
-            // Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
-            // this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
             return Arrays.asList(new WhereItemContext(testExpression, Arrays.asList(conditionExpression)));
         }
 
@@ -745,8 +697,6 @@ public class WhereTemplateHandler {
                         columnInfoComposite.getJavaColumnName()
                 );
                 String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, paramValueExpression);
-                // Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
-                // this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
                 whereItemContextList.add(new WhereItemContext(testExpression, Arrays.asList(conditionExpression)));
             }
             return whereItemContextList;
@@ -770,8 +720,6 @@ public class WhereTemplateHandler {
                         referencedColumnInfo.getJavaColumnName()
                 );
                 String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, relationColumnInfo, paramValueExpression);
-                // Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
-                // this.addWhereOrIfElementWithText(whereOrIfElement, conditionExpression);
                 whereItemContextList.add(new WhereItemContext(testExpression, Arrays.asList(conditionExpression)));
             }
             return whereItemContextList;

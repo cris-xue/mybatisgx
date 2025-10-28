@@ -12,15 +12,10 @@ import java.util.*;
 
 public class WhereTemplateHandler {
 
-    private final ConditionProcessorFactory conditionProcessorFactory = new ConditionProcessorFactory();
-
     public void execute(Element parentElement, EntityInfo entityInfo, MethodInfo methodInfo) {
-        this.execute(parentElement, entityInfo, methodInfo, methodInfo.getConditionInfoList());
-    }
-
-    public void execute(Element parentElement, EntityInfo entityInfo, MethodInfo methodInfo, List<ConditionInfo> conditionInfoList) {
+        ConditionProcessorFactory factory = new ConditionProcessorFactory();
         Element whereElement = parentElement.addElement("where");
-        this.handleConditionGroup(methodInfo, whereElement, conditionInfoList);
+        this.handleConditionGroup(methodInfo, whereElement, methodInfo.getConditionInfoList(), factory);
         this.addOptimisticLockCondition(entityInfo, methodInfo, whereElement);
         this.addLogicDeleteCondition(entityInfo, whereElement);
     }
@@ -52,13 +47,13 @@ public class WhereTemplateHandler {
      * @param whereElement
      * @param conditionInfoList
      */
-    private void handleConditionGroup(MethodInfo methodInfo, Element whereElement, List<ConditionInfo> conditionInfoList) {
+    private void handleConditionGroup(MethodInfo methodInfo, Element whereElement, List<ConditionInfo> conditionInfoList, ConditionProcessorFactory factory) {
         for (ConditionInfo conditionInfo : conditionInfoList) {
             ConditionGroupInfo conditionGroupInfo = conditionInfo.getConditionGroupInfo();
             if (conditionGroupInfo != null) {
                 // 处理分组的括号
                 whereElement.addText(String.format(" %s %s", conditionInfo.getLogicOperator(), conditionInfo.getLeftBracket()));
-                this.handleConditionGroup(methodInfo, whereElement, conditionGroupInfo.getConditionInfoList());
+                this.handleConditionGroup(methodInfo, whereElement, conditionGroupInfo.getConditionInfoList(), factory);
                 whereElement.addText(conditionInfo.getRightBracket());
             } else {
                 ColumnInfo columnInfo = conditionInfo.getColumnInfo();
@@ -66,7 +61,7 @@ public class WhereTemplateHandler {
                 if (logicDelete != null) {
                     continue;
                 }
-                conditionProcessorFactory.process(methodInfo, conditionInfo, whereElement);
+                factory.process(methodInfo, conditionInfo, whereElement);
             }
         }
     }
@@ -92,34 +87,34 @@ public class WhereTemplateHandler {
 
         void handle(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement);
 
-        List<WhereItemContext> singleParamHandle(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement);
+        List<WhereItemContext> singleParamHandle();
 
-        List<WhereItemContext> multiParamHandle(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement);
+        List<WhereItemContext> multiParamHandle();
 
-        List<WhereItemContext> handleBasicTypeSingleParam(Element whereElement, Boolean dynamic);
+        List<WhereItemContext> handleBasicTypeSingleParam();
 
-        List<WhereItemContext> handleObjectTypeNoAnnotationSingleParam(Element whereElement, Boolean dynamic);
+        List<WhereItemContext> handleObjectTypeNoAnnotationSingleParam();
 
-        List<WhereItemContext> handleCompositeObjectNoAnnotationSingleParam(Element whereElement, Boolean dynamic);
+        List<WhereItemContext> handleCompositeObjectNoAnnotationSingleParam();
 
-        List<WhereItemContext> handleObjectTypeWithAnnotationSingleParam(Element whereElement, Boolean dynamic);
+        List<WhereItemContext> handleObjectTypeWithAnnotationSingleParam();
 
-        List<WhereItemContext> handleCompositeObjectWithAnnotationSingleParam(Element whereElement, Boolean dynamic);
+        List<WhereItemContext> handleCompositeObjectWithAnnotationSingleParam();
 
-        List<WhereItemContext> handleRelationColumnSingleParam(Element whereElement, RelationColumnInfo relationColumnInfo, Boolean dynamic);
+        List<WhereItemContext> handleRelationColumnSingleParam(RelationColumnInfo relationColumnInfo);
 
 
-        List<WhereItemContext> handleBasicTypeMultiParam(Element whereElement, Boolean dynamic);
+        List<WhereItemContext> handleBasicTypeMultiParam();
 
-        List<WhereItemContext> handleObjectTypeNoAnnotationMultiParam(Element whereElement, Boolean dynamic);
+        List<WhereItemContext> handleObjectTypeNoAnnotationMultiParam();
 
-        List<WhereItemContext> handleCompositeObjectNoAnnotationMultiParam(Element whereElement, Boolean dynamic);
+        List<WhereItemContext> handleCompositeObjectNoAnnotationMultiParam();
 
-        List<WhereItemContext> handleObjectTypeWithAnnotationMultiParam(Element whereElement, Boolean dynamic);
+        List<WhereItemContext> handleObjectTypeWithAnnotationMultiParam();
 
-        List<WhereItemContext> handleCompositeObjectWithAnnotationMultiParam(Element whereElement, Boolean dynamic);
+        List<WhereItemContext> handleCompositeObjectWithAnnotationMultiParam();
 
-        List<WhereItemContext> handleRelationColumnMultiParam(Element whereElement, RelationColumnInfo relationColumnInfo, Boolean dynamic);
+        List<WhereItemContext> handleRelationColumnMultiParam(RelationColumnInfo relationColumnInfo);
     }
 
     static abstract class AbstractConditionHandler implements ConditionHandler {
@@ -141,26 +136,26 @@ public class WhereTemplateHandler {
             List<WhereItemContext> whereItemContextList;
             int paramCount = methodInfo.getMethodParamInfoList().size();
             if (paramCount == 1) {
-                whereItemContextList = this.singleParamHandle(methodInfo, conditionInfo, whereElement);
+                whereItemContextList = this.singleParamHandle();
             } else {
-                whereItemContextList = this.multiParamHandle(methodInfo, conditionInfo, whereElement);
+                whereItemContextList = this.multiParamHandle();
             }
-            this.processWhereItem(whereElement, methodInfo, whereItemContextList);
+            this.processWhereItem(whereElement, methodInfo.getDynamic(), whereItemContextList);
         }
 
         /**
          * 处理条件，有特殊情况的可以在子类中重写
          * @param whereElement
-         * @param methodInfo
+         * @param dynamic
          * @param whereItemContextList
          */
-        protected void processWhereItem(Element whereElement, MethodInfo methodInfo, List<WhereItemContext> whereItemContextList) {
+        protected void processWhereItem(Element whereElement, Boolean dynamic, List<WhereItemContext> whereItemContextList) {
             if (ObjectUtils.isEmpty(whereItemContextList)) {
                 return;
             }
             for (WhereItemContext whereItemContext : whereItemContextList) {
                 String testExpression = whereItemContext.getTestExpression();
-                Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, methodInfo.getDynamic(), testExpression);
+                Element whereOrIfElement = this.buildWhereOrIfElement(whereElement, dynamic, testExpression);
                 for (Object content : whereItemContext.getContentList()) {
                     if (content instanceof String) {
                         whereOrIfElement.addText((String) content);
@@ -173,29 +168,25 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public List<WhereItemContext> singleParamHandle(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement) {
-            Boolean dynamic = methodInfo.getDynamic();
-            ColumnInfo columnInfo = conditionInfo.getColumnInfo();
-            MethodParamInfo methodParamInfo = conditionInfo.getMethodParamInfo();
-
+        public List<WhereItemContext> singleParamHandle() {
             List<WhereItemContext> whereItemContextList = null;
             if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class, ColumnInfo.class)) {
                 if (methodParamInfo.getBasicType()) {
                     // findById(Long id) findById(@Param("id") Long id)
-                    whereItemContextList = this.handleBasicTypeSingleParam(whereElement, dynamic);
+                    whereItemContextList = this.handleBasicTypeSingleParam();
                 } else {
                     // findById(MultiId id) findById(@Param("id") MultiId id)
                     if (methodParamInfo.getParam() == null) {
                         if (ObjectUtils.isEmpty(columnInfo.getComposites())) {
-                            whereItemContextList = this.handleObjectTypeNoAnnotationSingleParam(whereElement, dynamic);
+                            whereItemContextList = this.handleObjectTypeNoAnnotationSingleParam();
                         } else {
-                            whereItemContextList = this.handleCompositeObjectNoAnnotationSingleParam(whereElement, dynamic);
+                            whereItemContextList = this.handleCompositeObjectNoAnnotationSingleParam();
                         }
                     } else {
                         if (ObjectUtils.isEmpty(columnInfo.getComposites())) {
-                            whereItemContextList = this.handleObjectTypeWithAnnotationSingleParam(whereElement, dynamic);
+                            whereItemContextList = this.handleObjectTypeWithAnnotationSingleParam();
                         } else {
-                            whereItemContextList = this.handleCompositeObjectWithAnnotationSingleParam(whereElement, dynamic);
+                            whereItemContextList = this.handleCompositeObjectWithAnnotationSingleParam();
                         }
                     }
                 }
@@ -203,36 +194,32 @@ public class WhereTemplateHandler {
             if (TypeUtils.typeEquals(columnInfo, RelationColumnInfo.class)) {
                 RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
                 if (relationColumnInfo.getMappedByRelationColumnInfo() == null) {
-                    whereItemContextList = this.handleRelationColumnSingleParam(whereElement, relationColumnInfo, dynamic);
+                    whereItemContextList = this.handleRelationColumnSingleParam(relationColumnInfo);
                 }
             }
             return whereItemContextList;
         }
 
         @Override
-        public List<WhereItemContext> multiParamHandle(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement) {
-            Boolean dynamic = methodInfo.getDynamic();
-            ColumnInfo columnInfo = conditionInfo.getColumnInfo();
-            MethodParamInfo methodParamInfo = conditionInfo.getMethodParamInfo();
-
+        public List<WhereItemContext> multiParamHandle() {
             List<WhereItemContext> whereItemContextList = null;
             if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class, ColumnInfo.class)) {
                 if (methodParamInfo.getBasicType()) {
                     // findById(Long id) findById(@Param("id") Long id)
-                    whereItemContextList = this.handleBasicTypeMultiParam(whereElement, dynamic);
+                    whereItemContextList = this.handleBasicTypeMultiParam();
                 } else {
                     // findById(MultiId id) findById(@Param("id") MultiId id)
                     if (methodParamInfo.getParam() == null) {
                         if (ObjectUtils.isEmpty(columnInfo.getComposites())) {
-                            whereItemContextList = this.handleObjectTypeNoAnnotationMultiParam(whereElement, dynamic);
+                            whereItemContextList = this.handleObjectTypeNoAnnotationMultiParam();
                         } else {
-                            whereItemContextList = this.handleCompositeObjectNoAnnotationMultiParam(whereElement, dynamic);
+                            whereItemContextList = this.handleCompositeObjectNoAnnotationMultiParam();
                         }
                     } else {
                         if (ObjectUtils.isEmpty(columnInfo.getComposites())) {
-                            whereItemContextList = this.handleObjectTypeWithAnnotationMultiParam(whereElement, dynamic);
+                            whereItemContextList = this.handleObjectTypeWithAnnotationMultiParam();
                         } else {
-                            whereItemContextList = this.handleCompositeObjectWithAnnotationMultiParam(whereElement, dynamic);
+                            whereItemContextList = this.handleCompositeObjectWithAnnotationMultiParam();
                         }
                     }
                 }
@@ -240,7 +227,7 @@ public class WhereTemplateHandler {
             if (TypeUtils.typeEquals(columnInfo, RelationColumnInfo.class)) {
                 RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
                 if (relationColumnInfo.getMappedByRelationColumnInfo() == null) {
-                    whereItemContextList = this.handleRelationColumnMultiParam(whereElement, relationColumnInfo, dynamic);
+                    whereItemContextList = this.handleRelationColumnMultiParam(relationColumnInfo);
                 }
             }
             return whereItemContextList;
@@ -284,7 +271,7 @@ public class WhereTemplateHandler {
     static class LikeConditionHandler extends AbstractConditionHandler {
 
         @Override
-        public List<WhereItemContext> handleBasicTypeSingleParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleBasicTypeSingleParam() {
             /**
              *             <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(likeClientCode)">
              *                 <bind name="likeClientCode" value="'%' + likeClientCode + '%'"/>
@@ -292,10 +279,10 @@ public class WhereTemplateHandler {
              *             </if>
              */
 
+            String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
+
             String bindValue = "'%'+" + methodParamInfo.getArgName() + "+'%'";
             Element bindElement = this.buildBindElement(methodParamInfo.getArgName(), bindValue);
-
-            String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
 
             String paramValueExpression = String.format("#{%1$s}", methodParamInfo.getArgName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
@@ -304,32 +291,32 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public List<WhereItemContext> handleObjectTypeNoAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleObjectTypeNoAnnotationSingleParam() {
             throw new UnsupportedOperationException("");
         }
 
         @Override
-        public List<WhereItemContext> handleCompositeObjectNoAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleCompositeObjectNoAnnotationSingleParam() {
             throw new UnsupportedOperationException("");
         }
 
         @Override
-        public List<WhereItemContext> handleObjectTypeWithAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleObjectTypeWithAnnotationSingleParam() {
             throw new UnsupportedOperationException("");
         }
 
         @Override
-        public List<WhereItemContext> handleCompositeObjectWithAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleCompositeObjectWithAnnotationSingleParam() {
             throw new UnsupportedOperationException("");
         }
 
         @Override
-        public List<WhereItemContext> handleRelationColumnSingleParam(Element whereElement, RelationColumnInfo relationColumnInfo, Boolean dynamic) {
+        public List<WhereItemContext> handleRelationColumnSingleParam(RelationColumnInfo relationColumnInfo) {
             throw new UnsupportedOperationException("");
         }
 
         @Override
-        public List<WhereItemContext> handleBasicTypeMultiParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleBasicTypeMultiParam() {
             /**
              *             <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(likeClientCode)">
              *                 <bind name="likeClientCode" value="'%' + likeClientCode + '%'"/>
@@ -337,10 +324,10 @@ public class WhereTemplateHandler {
              *             </if>
              */
 
+            String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
+
             String bindValue = "'%'+" + methodParamInfo.getArgName() + "+'%'";
             Element bindElement = this.buildBindElement(methodParamInfo.getArgName(), bindValue);
-
-            String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
 
             String paramValueExpression = String.format("#{%1$s}", methodParamInfo.getArgName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
@@ -348,27 +335,27 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public List<WhereItemContext> handleObjectTypeNoAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleObjectTypeNoAnnotationMultiParam() {
             throw new UnsupportedOperationException("");
         }
 
         @Override
-        public List<WhereItemContext> handleCompositeObjectNoAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleCompositeObjectNoAnnotationMultiParam() {
             throw new UnsupportedOperationException("");
         }
 
         @Override
-        public List<WhereItemContext> handleObjectTypeWithAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleObjectTypeWithAnnotationMultiParam() {
             throw new UnsupportedOperationException("");
         }
 
         @Override
-        public List<WhereItemContext> handleCompositeObjectWithAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleCompositeObjectWithAnnotationMultiParam() {
             throw new UnsupportedOperationException("");
         }
 
         @Override
-        public List<WhereItemContext> handleRelationColumnMultiParam(Element whereElement, RelationColumnInfo relationColumnInfo, Boolean dynamic) {
+        public List<WhereItemContext> handleRelationColumnMultiParam(RelationColumnInfo relationColumnInfo) {
             throw new UnsupportedOperationException("");
         }
     }
@@ -376,7 +363,7 @@ public class WhereTemplateHandler {
     static class InConditionHandler extends AbstractConditionHandler {
 
         @Override
-        public List<WhereItemContext> handleBasicTypeSingleParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleBasicTypeSingleParam() {
             /**
              *             <if test="terminal == @com.iss.dtg.idms.constant.Terminal@EBANK">
              *                 and act.client_code in
@@ -402,57 +389,57 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public List<WhereItemContext> handleObjectTypeNoAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleObjectTypeNoAnnotationSingleParam() {
             throw new UnsupportedOperationException("");
         }
 
         @Override
-        public List<WhereItemContext> handleCompositeObjectNoAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleCompositeObjectNoAnnotationSingleParam() {
             throw new UnsupportedOperationException("");
         }
 
         @Override
-        public List<WhereItemContext> handleObjectTypeWithAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleObjectTypeWithAnnotationSingleParam() {
             throw new UnsupportedOperationException("");
         }
 
         @Override
-        public List<WhereItemContext> handleCompositeObjectWithAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleCompositeObjectWithAnnotationSingleParam() {
             throw new UnsupportedOperationException("");
         }
 
         @Override
-        public List<WhereItemContext> handleRelationColumnSingleParam(Element whereElement, RelationColumnInfo relationColumnInfo, Boolean dynamic) {
+        public List<WhereItemContext> handleRelationColumnSingleParam(RelationColumnInfo relationColumnInfo) {
             throw new UnsupportedOperationException("");
         }
 
         @Override
-        public List<WhereItemContext> handleBasicTypeMultiParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleBasicTypeMultiParam() {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public List<WhereItemContext> handleObjectTypeNoAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleObjectTypeNoAnnotationMultiParam() {
             throw new UnsupportedOperationException("");
         }
 
         @Override
-        public List<WhereItemContext> handleCompositeObjectNoAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleCompositeObjectNoAnnotationMultiParam() {
             throw new UnsupportedOperationException("");
         }
 
         @Override
-        public List<WhereItemContext> handleObjectTypeWithAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleObjectTypeWithAnnotationMultiParam() {
             throw new UnsupportedOperationException("");
         }
 
         @Override
-        public List<WhereItemContext> handleCompositeObjectWithAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleCompositeObjectWithAnnotationMultiParam() {
             throw new UnsupportedOperationException("");
         }
 
         @Override
-        public List<WhereItemContext> handleRelationColumnMultiParam(Element whereElement, RelationColumnInfo relationColumnInfo, Boolean dynamic) {
+        public List<WhereItemContext> handleRelationColumnMultiParam(RelationColumnInfo relationColumnInfo) {
             throw new UnsupportedOperationException("");
         }
     }
@@ -460,7 +447,7 @@ public class WhereTemplateHandler {
     static class BetweenConditionHandler extends AbstractConditionHandler {
 
         @Override
-        public List<WhereItemContext> handleBasicTypeSingleParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleBasicTypeSingleParam() {
             String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
             String paramValueExpression = String.format("#{%1$s[0]} and #{%1$s[1]}", methodParamInfo.getArgName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
@@ -468,7 +455,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public List<WhereItemContext> handleObjectTypeNoAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleObjectTypeNoAnnotationSingleParam() {
             String testExpression = String.format("%1$s != null", conditionInfo.getColumnName());
             String paramValueExpression = String.format("#{%1$s[0]} and #{%1$s[1]}", conditionInfo.getColumnName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
@@ -476,7 +463,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public List<WhereItemContext> handleCompositeObjectNoAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleCompositeObjectNoAnnotationSingleParam() {
             List<WhereItemContext> whereItemContextList = new ArrayList<>();
             for (ColumnInfo columnInfoComposite : columnInfo.getComposites()) {
                 String testExpression = String.format("%1$s != null and %1$s.%2$s != null", columnInfo.getJavaColumnName(), columnInfoComposite.getJavaColumnName());
@@ -488,47 +475,47 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public List<WhereItemContext> handleObjectTypeWithAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleObjectTypeWithAnnotationSingleParam() {
             throw new UnsupportedOperationException("");
         }
 
         @Override
-        public List<WhereItemContext> handleCompositeObjectWithAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleCompositeObjectWithAnnotationSingleParam() {
             throw new UnsupportedOperationException("");
         }
 
         @Override
-        public List<WhereItemContext> handleRelationColumnSingleParam(Element whereElement, RelationColumnInfo relationColumnInfo, Boolean dynamic) {
+        public List<WhereItemContext> handleRelationColumnSingleParam(RelationColumnInfo relationColumnInfo) {
             throw new UnsupportedOperationException("");
         }
 
         @Override
-        public List<WhereItemContext> handleBasicTypeMultiParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleBasicTypeMultiParam() {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public List<WhereItemContext> handleObjectTypeNoAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleObjectTypeNoAnnotationMultiParam() {
             throw new UnsupportedOperationException("");
         }
 
         @Override
-        public List<WhereItemContext> handleCompositeObjectNoAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleCompositeObjectNoAnnotationMultiParam() {
             throw new UnsupportedOperationException("");
         }
 
         @Override
-        public List<WhereItemContext> handleObjectTypeWithAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleObjectTypeWithAnnotationMultiParam() {
             throw new UnsupportedOperationException("");
         }
 
         @Override
-        public List<WhereItemContext> handleCompositeObjectWithAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleCompositeObjectWithAnnotationMultiParam() {
             throw new UnsupportedOperationException("");
         }
 
         @Override
-        public List<WhereItemContext> handleRelationColumnMultiParam(Element whereElement, RelationColumnInfo relationColumnInfo, Boolean dynamic) {
+        public List<WhereItemContext> handleRelationColumnMultiParam(RelationColumnInfo relationColumnInfo) {
             throw new UnsupportedOperationException("");
         }
     }
@@ -536,7 +523,7 @@ public class WhereTemplateHandler {
     static class CommonConditionHandler extends AbstractConditionHandler {
 
         @Override
-        public List<WhereItemContext> handleBasicTypeSingleParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleBasicTypeSingleParam() {
             String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
             String paramValueExpression = String.format("#{%1$s}", methodParamInfo.getArgName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
@@ -544,7 +531,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public List<WhereItemContext> handleObjectTypeNoAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleObjectTypeNoAnnotationSingleParam() {
             String testExpression = String.format("%1$s != null", columnInfo.getJavaColumnName());
             String paramValueExpression = String.format("#{%1$s}", columnInfo.getJavaColumnName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
@@ -552,7 +539,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public List<WhereItemContext> handleCompositeObjectNoAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleCompositeObjectNoAnnotationSingleParam() {
             List<WhereItemContext> whereItemContextList = new ArrayList<>();
             for (ColumnInfo columnInfoComposite : columnInfo.getComposites()) {
                 String testExpression = String.format(
@@ -572,7 +559,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public List<WhereItemContext> handleObjectTypeWithAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleObjectTypeWithAnnotationSingleParam() {
             String testExpression = String.format("%1$s.%2$s != null", methodParamInfo.getArgName(), columnInfo.getJavaColumnName());
             String paramValueExpression = String.format("#{%1$s.%2$s}", methodParamInfo.getArgName(), columnInfo.getJavaColumnName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
@@ -580,7 +567,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public List<WhereItemContext> handleCompositeObjectWithAnnotationSingleParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleCompositeObjectWithAnnotationSingleParam() {
             List<WhereItemContext> whereItemContextList = new ArrayList<>();
             for (ColumnInfo columnInfoComposite : columnInfo.getComposites()) {
                 String testExpression = String.format(
@@ -602,7 +589,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public List<WhereItemContext> handleRelationColumnSingleParam(Element whereElement, RelationColumnInfo relationColumnInfo, Boolean dynamic) {
+        public List<WhereItemContext> handleRelationColumnSingleParam(RelationColumnInfo relationColumnInfo) {
             List<WhereItemContext> whereItemContextList = new ArrayList<>();
             for (ForeignKeyColumnInfo foreignKeyInfo : relationColumnInfo.getInverseForeignKeyColumnInfoList()) {
                 ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();
@@ -619,7 +606,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public List<WhereItemContext> handleBasicTypeMultiParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleBasicTypeMultiParam() {
             String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
             String paramValueExpression = String.format("#{%1$s}", methodParamInfo.getArgName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
@@ -627,7 +614,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public List<WhereItemContext> handleObjectTypeNoAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleObjectTypeNoAnnotationMultiParam() {
             String testExpression = String.format(
                     "%1$s != null and %1$s.%2$s != null",
                     methodParamInfo.getArgName(),
@@ -643,7 +630,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public List<WhereItemContext> handleCompositeObjectNoAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleCompositeObjectNoAnnotationMultiParam() {
             List<WhereItemContext> whereItemContextList = new ArrayList<>();
             for (ColumnInfo columnInfoComposite : columnInfo.getComposites()) {
                 String testExpression = String.format(
@@ -665,7 +652,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public List<WhereItemContext> handleObjectTypeWithAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleObjectTypeWithAnnotationMultiParam() {
             String testExpression = String.format(
                     "%1$s != null and %1$s.%2$s != null",
                     methodParamInfo.getArgName(),
@@ -681,7 +668,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public List<WhereItemContext> handleCompositeObjectWithAnnotationMultiParam(Element whereElement, Boolean dynamic) {
+        public List<WhereItemContext> handleCompositeObjectWithAnnotationMultiParam() {
             List<WhereItemContext> whereItemContextList = new ArrayList<>();
             for (ColumnInfo columnInfoComposite : columnInfo.getComposites()) {
                 String testExpression = String.format(
@@ -703,7 +690,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public List<WhereItemContext> handleRelationColumnMultiParam(Element whereElement, RelationColumnInfo relationColumnInfo, Boolean dynamic) {
+        public List<WhereItemContext> handleRelationColumnMultiParam(RelationColumnInfo relationColumnInfo) {
             List<WhereItemContext> whereItemContextList = new ArrayList<>();
             for (ForeignKeyColumnInfo foreignKeyInfo : relationColumnInfo.getInverseForeignKeyColumnInfoList()) {
                 ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();

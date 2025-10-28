@@ -217,8 +217,8 @@ public class MethodInfoHandler {
         } else {
             List<MethodParamInfo> methodParamInfoList = methodInfo.getMethodParamInfoList();
             for (MethodParamInfo methodParamInfo : methodParamInfoList) {
-                QueryEntity isQueryEntity = methodParamInfo.getType().getAnnotation(QueryEntity.class);
-                if (isQueryEntity != null) {
+                ConditionEntity isConditionEntity = methodParamInfo.getType().getAnnotation(ConditionEntity.class);
+                if (isConditionEntity != null) {
                     String queryEntityCondition = this.entityCondition(methodInfo, methodParamInfo);
                     methodNameAstHandler.execute(entityInfo, methodInfo, methodParamInfo, ConditionOriginType.ENTITY_FIELD, queryEntityCondition);
                 }

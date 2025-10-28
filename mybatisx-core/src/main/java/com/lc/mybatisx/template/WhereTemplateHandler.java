@@ -233,6 +233,19 @@ public class WhereTemplateHandler {
             return whereItemContextList;
         }
 
+        protected String getTestExpression(String... paths) {
+            if (paths.length == 1) {
+                return String.format("%1$s != null", paths);
+            }
+            if (paths.length == 2) {
+                return String.format("%1$s != null and %1$s.%2$s != null", paths);
+            }
+            if (paths.length == 3) {
+                return String.format("%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null", paths);
+            }
+            return "";
+        }
+
         /**
          *
          * @param logicOperator

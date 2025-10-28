@@ -294,7 +294,8 @@ public class WhereTemplateHandler {
         @Override
         public List<WhereItemContext> handleBasicTypeSingleParam() {
             String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
-            Element likeBindElement = this.buildLikeBindElement();
+            String bindValuePath = String.format("%1$s", methodParamInfo.getArgName());
+            Element likeBindElement = this.buildLikeBindElement(bindValuePath);
             String paramValueExpression = String.format("#{%1$s}", methodParamInfo.getArgName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
             return Arrays.asList(new WhereItemContext(testExpression, Arrays.asList(likeBindElement, conditionExpression)));
@@ -303,7 +304,8 @@ public class WhereTemplateHandler {
         @Override
         public List<WhereItemContext> handleObjectTypeNoAnnotationSingleParam() {
             String testExpression = String.format("%1$s != null", columnInfo.getJavaColumnName());
-            Element likeBindElement = this.buildLikeBindElement();
+            String bindValuePath = String.format("%1$s", columnInfo.getJavaColumnName());
+            Element likeBindElement = this.buildLikeBindElement(bindValuePath);
             String paramValueExpression = String.format("#{%1$s}", columnInfo.getJavaColumnName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
             return Arrays.asList(new WhereItemContext(testExpression, Arrays.asList(likeBindElement, conditionExpression)));
@@ -318,7 +320,12 @@ public class WhereTemplateHandler {
                         columnInfo.getJavaColumnName(),
                         columnInfoComposite.getJavaColumnName()
                 );
-                Element likeBindElement = this.buildLikeBindElement();
+                String bindValuePath = String.format(
+                        "%1$s.%2$s",
+                        columnInfo.getJavaColumnName(),
+                        columnInfoComposite.getJavaColumnName()
+                );
+                Element likeBindElement = this.buildLikeBindElement(bindValuePath);
                 String paramValueExpression = String.format(
                         "#{%1$s.%2$s}",
                         columnInfo.getJavaColumnName(),
@@ -337,7 +344,12 @@ public class WhereTemplateHandler {
                     methodParamInfo.getArgName(),
                     columnInfo.getJavaColumnName()
             );
-            Element likeBindElement = this.buildLikeBindElement();
+            String bindValuePath = String.format(
+                    "%1$s.%2$s",
+                    methodParamInfo.getArgName(),
+                    columnInfo.getJavaColumnName()
+            );
+            Element likeBindElement = this.buildLikeBindElement(bindValuePath);
             String paramValueExpression = String.format(
                     "#{%1$s.%2$s}",
                     methodParamInfo.getArgName(),
@@ -357,7 +369,13 @@ public class WhereTemplateHandler {
                         columnInfo.getJavaColumnName(),
                         columnInfoComposite.getJavaColumnName()
                 );
-                Element likeBindElement = this.buildLikeBindElement();
+                String bindValuePath = String.format(
+                        "%1$s.%2$s.%3$s",
+                        methodParamInfo.getArgName(),
+                        columnInfo.getJavaColumnName(),
+                        columnInfoComposite.getJavaColumnName()
+                );
+                Element likeBindElement = this.buildLikeBindElement(bindValuePath);
                 String paramValueExpression = String.format(
                         "#{%1$s.%2$s.%3$s}",
                         methodParamInfo.getArgName(),
@@ -380,7 +398,12 @@ public class WhereTemplateHandler {
                         columnInfo.getJavaColumnName(),
                         referencedColumnInfo.getJavaColumnName()
                 );
-                Element likeBindElement = this.buildLikeBindElement();
+                String bindValuePath = String.format(
+                        "%1$s.%2$s",
+                        columnInfo.getJavaColumnName(),
+                        referencedColumnInfo.getJavaColumnName()
+                );
+                Element likeBindElement = this.buildLikeBindElement(bindValuePath);
                 String paramValueExpression = String.format(
                         "#{%1$s.%2$s}",
                         columnInfo.getJavaColumnName(),
@@ -395,7 +418,8 @@ public class WhereTemplateHandler {
         @Override
         public List<WhereItemContext> handleBasicTypeMultiParam() {
             String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
-            Element likeBindElement = this.buildLikeBindElement();
+            String bindValuePath = String.format("%1$s", methodParamInfo.getArgName());
+            Element likeBindElement = this.buildLikeBindElement(bindValuePath);
             String paramValueExpression = String.format("#{%1$s}", methodParamInfo.getArgName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
             return Arrays.asList(new WhereItemContext(testExpression, Arrays.asList(likeBindElement, conditionExpression)));
@@ -408,7 +432,12 @@ public class WhereTemplateHandler {
                     methodParamInfo.getArgName(),
                     columnInfo.getJavaColumnName()
             );
-            Element likeBindElement = this.buildLikeBindElement();
+            String bindValuePath = String.format(
+                    "%1$s.%2$s",
+                    methodParamInfo.getArgName(),
+                    columnInfo.getJavaColumnName()
+            );
+            Element likeBindElement = this.buildLikeBindElement(bindValuePath);
             String paramValueExpression = String.format(
                     "#{%1$s.%2$s}",
                     methodParamInfo.getArgName(),
@@ -428,7 +457,13 @@ public class WhereTemplateHandler {
                         columnInfo.getJavaColumnName(),
                         columnInfoComposite.getJavaColumnName()
                 );
-                Element likeBindElement = this.buildLikeBindElement();
+                String bindValuePath = String.format(
+                        "%1$s.%2$s.%3$s",
+                        methodParamInfo.getArgName(),
+                        columnInfo.getJavaColumnName(),
+                        columnInfoComposite.getJavaColumnName()
+                );
+                Element likeBindElement = this.buildLikeBindElement(bindValuePath);
                 String paramValueExpression = String.format(
                         "#{%1$s.%2$s.%3$s}",
                         methodParamInfo.getArgName(),
@@ -448,7 +483,12 @@ public class WhereTemplateHandler {
                     methodParamInfo.getArgName(),
                     columnInfo.getJavaColumnName()
             );
-            Element likeBindElement = this.buildLikeBindElement();
+            String bindValuePath = String.format(
+                    "%1$s.%2$s",
+                    methodParamInfo.getArgName(),
+                    columnInfo.getJavaColumnName()
+            );
+            Element likeBindElement = this.buildLikeBindElement(bindValuePath);
             String paramValueExpression = String.format(
                     "#{%1$s.%2$s}",
                     methodParamInfo.getArgName(),
@@ -468,7 +508,13 @@ public class WhereTemplateHandler {
                         columnInfo.getJavaColumnName(),
                         columnInfoComposite.getJavaColumnName()
                 );
-                Element likeBindElement = this.buildLikeBindElement();
+                String bindValuePath = String.format(
+                        "%1$s.%2$s.%3$s",
+                        methodParamInfo.getArgName(),
+                        columnInfo.getJavaColumnName(),
+                        columnInfoComposite.getJavaColumnName()
+                );
+                Element likeBindElement = this.buildLikeBindElement(bindValuePath);
                 String paramValueExpression = String.format(
                         "#{%1$s.%2$s.%3$s}",
                         methodParamInfo.getArgName(),
@@ -492,7 +538,13 @@ public class WhereTemplateHandler {
                         columnInfo.getJavaColumnName(),
                         referencedColumnInfo.getJavaColumnName()
                 );
-                Element likeBindElement = this.buildLikeBindElement();
+                String bindValuePath = String.format(
+                        "%1$s.%2$s.%3$s",
+                        methodParamInfo.getArgName(),
+                        columnInfo.getJavaColumnName(),
+                        referencedColumnInfo.getJavaColumnName()
+                );
+                Element likeBindElement = this.buildLikeBindElement(bindValuePath);
                 String paramValueExpression = String.format(
                         "#{%1$s.%2$s.%3$s}",
                         methodParamInfo.getArgName(),
@@ -505,9 +557,9 @@ public class WhereTemplateHandler {
             return whereItemContextList;
         }
 
-        private Element buildLikeBindElement() {
-            String bindValue = "'%'+" + methodParamInfo.getArgName() + "+'%'";
-            return this.buildBindElement(methodParamInfo.getArgName(), bindValue);
+        private Element buildLikeBindElement(String bindValuePath) {
+            String bindValue = "'%'+" + bindValuePath + "+'%'";
+            return this.buildBindElement(bindValuePath, bindValue);
         }
     }
 

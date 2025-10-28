@@ -187,15 +187,15 @@ public class WhereTemplateHandler {
                     // findById(MultiId id) findById(@Param("id") MultiId id)
                     if (methodParamInfo.getParam() == null) {
                         if (ObjectUtils.isEmpty(columnInfo.getComposites())) {
-                            this.handleObjectTypeNoAnnotationSingleParam(whereElement, dynamic);
+                            whereItemContextList = this.handleObjectTypeNoAnnotationSingleParam(whereElement, dynamic);
                         } else {
-                            this.handleCompositeObjectNoAnnotationSingleParam(whereElement, dynamic);
+                            whereItemContextList = this.handleCompositeObjectNoAnnotationSingleParam(whereElement, dynamic);
                         }
                     } else {
                         if (ObjectUtils.isEmpty(columnInfo.getComposites())) {
-                            this.handleObjectTypeWithAnnotationSingleParam(whereElement, dynamic);
+                            whereItemContextList = this.handleObjectTypeWithAnnotationSingleParam(whereElement, dynamic);
                         } else {
-                            this.handleCompositeObjectWithAnnotationSingleParam(whereElement, dynamic);
+                            whereItemContextList = this.handleCompositeObjectWithAnnotationSingleParam(whereElement, dynamic);
                         }
                     }
                 }
@@ -203,7 +203,7 @@ public class WhereTemplateHandler {
             if (TypeUtils.typeEquals(columnInfo, RelationColumnInfo.class)) {
                 RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
                 if (relationColumnInfo.getMappedByRelationColumnInfo() == null) {
-                    this.handleRelationColumnSingleParam(whereElement, relationColumnInfo, dynamic);
+                    whereItemContextList = this.handleRelationColumnSingleParam(whereElement, relationColumnInfo, dynamic);
                 }
             }
             return whereItemContextList;
@@ -224,15 +224,15 @@ public class WhereTemplateHandler {
                     // findById(MultiId id) findById(@Param("id") MultiId id)
                     if (methodParamInfo.getParam() == null) {
                         if (ObjectUtils.isEmpty(columnInfo.getComposites())) {
-                            this.handleObjectTypeNoAnnotationMultiParam(whereElement, dynamic);
+                            whereItemContextList = this.handleObjectTypeNoAnnotationMultiParam(whereElement, dynamic);
                         } else {
-                            this.handleCompositeObjectNoAnnotationMultiParam(whereElement, dynamic);
+                            whereItemContextList = this.handleCompositeObjectNoAnnotationMultiParam(whereElement, dynamic);
                         }
                     } else {
                         if (ObjectUtils.isEmpty(columnInfo.getComposites())) {
-                            this.handleObjectTypeWithAnnotationMultiParam(whereElement, dynamic);
+                            whereItemContextList = this.handleObjectTypeWithAnnotationMultiParam(whereElement, dynamic);
                         } else {
-                            this.handleCompositeObjectWithAnnotationMultiParam(whereElement, dynamic);
+                            whereItemContextList = this.handleCompositeObjectWithAnnotationMultiParam(whereElement, dynamic);
                         }
                     }
                 }
@@ -240,7 +240,7 @@ public class WhereTemplateHandler {
             if (TypeUtils.typeEquals(columnInfo, RelationColumnInfo.class)) {
                 RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
                 if (relationColumnInfo.getMappedByRelationColumnInfo() == null) {
-                    this.handleRelationColumnMultiParam(whereElement, relationColumnInfo, dynamic);
+                    whereItemContextList = this.handleRelationColumnMultiParam(whereElement, relationColumnInfo, dynamic);
                 }
             }
             return whereItemContextList;

@@ -281,179 +281,472 @@ public class WhereTemplateHandler {
         }
     }
 
+    /**
+     *                           <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(likeClientCode)">
+     *                               <bind name="likeClientCode" value="'%' + likeClientCode + '%'"/>
+     *                               and act.client_code like #{likeClientCode}
+     *                           </if>
+     * @author ccxuef
+     * @date 2025/10/28 18:39
+     */
     static class LikeConditionHandler extends AbstractConditionHandler {
 
         @Override
         public List<WhereItemContext> handleBasicTypeSingleParam() {
-            /**
-             *             <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(likeClientCode)">
-             *                 <bind name="likeClientCode" value="'%' + likeClientCode + '%'"/>
-             *                 and act.client_code like #{likeClientCode}
-             *             </if>
-             */
-
             String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
-
-            String bindValue = "'%'+" + methodParamInfo.getArgName() + "+'%'";
-            Element bindElement = this.buildBindElement(methodParamInfo.getArgName(), bindValue);
-
+            Element likeBindElement = this.buildLikeBindElement();
             String paramValueExpression = String.format("#{%1$s}", methodParamInfo.getArgName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
-
-            return Arrays.asList(new WhereItemContext(testExpression, Arrays.asList(bindElement, conditionExpression)));
+            return Arrays.asList(new WhereItemContext(testExpression, Arrays.asList(likeBindElement, conditionExpression)));
         }
 
         @Override
         public List<WhereItemContext> handleObjectTypeNoAnnotationSingleParam() {
-            throw new UnsupportedOperationException("");
+            String testExpression = String.format("%1$s != null", columnInfo.getJavaColumnName());
+            Element likeBindElement = this.buildLikeBindElement();
+            String paramValueExpression = String.format("#{%1$s}", columnInfo.getJavaColumnName());
+            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
+            return Arrays.asList(new WhereItemContext(testExpression, Arrays.asList(likeBindElement, conditionExpression)));
         }
 
         @Override
         public List<WhereItemContext> handleCompositeObjectNoAnnotationSingleParam() {
-            throw new UnsupportedOperationException("");
+            List<WhereItemContext> whereItemContextList = new ArrayList<>();
+            for (ColumnInfo columnInfoComposite : columnInfo.getComposites()) {
+                String testExpression = String.format(
+                        "%1$s != null and %1$s.%2$s != null",
+                        columnInfo.getJavaColumnName(),
+                        columnInfoComposite.getJavaColumnName()
+                );
+                Element likeBindElement = this.buildLikeBindElement();
+                String paramValueExpression = String.format(
+                        "#{%1$s.%2$s}",
+                        columnInfo.getJavaColumnName(),
+                        columnInfoComposite.getJavaColumnName()
+                );
+                String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, paramValueExpression);
+                whereItemContextList.add(new WhereItemContext(testExpression, Arrays.asList(likeBindElement, conditionExpression)));
+            }
+            return whereItemContextList;
         }
 
         @Override
         public List<WhereItemContext> handleObjectTypeWithAnnotationSingleParam() {
-            throw new UnsupportedOperationException("");
+            String testExpression = String.format(
+                    "%1$s != null and %1$s.%2$s != null",
+                    methodParamInfo.getArgName(),
+                    columnInfo.getJavaColumnName()
+            );
+            Element likeBindElement = this.buildLikeBindElement();
+            String paramValueExpression = String.format(
+                    "#{%1$s.%2$s}",
+                    methodParamInfo.getArgName(),
+                    columnInfo.getJavaColumnName()
+            );
+            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
+            return Arrays.asList(new WhereItemContext(testExpression, Arrays.asList(likeBindElement, conditionExpression)));
         }
 
         @Override
         public List<WhereItemContext> handleCompositeObjectWithAnnotationSingleParam() {
-            throw new UnsupportedOperationException("");
+            List<WhereItemContext> whereItemContextList = new ArrayList<>();
+            for (ColumnInfo columnInfoComposite : columnInfo.getComposites()) {
+                String testExpression = String.format(
+                        "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
+                        methodParamInfo.getArgName(),
+                        columnInfo.getJavaColumnName(),
+                        columnInfoComposite.getJavaColumnName()
+                );
+                Element likeBindElement = this.buildLikeBindElement();
+                String paramValueExpression = String.format(
+                        "#{%1$s.%2$s.%3$s}",
+                        methodParamInfo.getArgName(),
+                        columnInfo.getJavaColumnName(),
+                        columnInfoComposite.getJavaColumnName()
+                );
+                String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, paramValueExpression);
+                whereItemContextList.add(new WhereItemContext(testExpression, Arrays.asList(likeBindElement, conditionExpression)));
+            }
+            return whereItemContextList;
         }
 
         @Override
         public List<WhereItemContext> handleRelationColumnSingleParam(RelationColumnInfo relationColumnInfo) {
-            throw new UnsupportedOperationException("");
+            List<WhereItemContext> whereItemContextList = new ArrayList<>();
+            for (ForeignKeyColumnInfo foreignKeyInfo : relationColumnInfo.getInverseForeignKeyColumnInfoList()) {
+                ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();
+                String testExpression = String.format(
+                        "%1$s != null and %1$s.%2$s != null",
+                        columnInfo.getJavaColumnName(),
+                        referencedColumnInfo.getJavaColumnName()
+                );
+                Element likeBindElement = this.buildLikeBindElement();
+                String paramValueExpression = String.format(
+                        "#{%1$s.%2$s}",
+                        columnInfo.getJavaColumnName(),
+                        referencedColumnInfo.getJavaColumnName()
+                );
+                String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, relationColumnInfo, paramValueExpression);
+                whereItemContextList.add(new WhereItemContext(testExpression, Arrays.asList(likeBindElement, conditionExpression)));
+            }
+            return whereItemContextList;
         }
 
         @Override
         public List<WhereItemContext> handleBasicTypeMultiParam() {
-            /**
-             *             <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(likeClientCode)">
-             *                 <bind name="likeClientCode" value="'%' + likeClientCode + '%'"/>
-             *                 and act.client_code like #{likeClientCode}
-             *             </if>
-             */
-
             String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
-
-            String bindValue = "'%'+" + methodParamInfo.getArgName() + "+'%'";
-            Element bindElement = this.buildBindElement(methodParamInfo.getArgName(), bindValue);
-
+            Element likeBindElement = this.buildLikeBindElement();
             String paramValueExpression = String.format("#{%1$s}", methodParamInfo.getArgName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
-            return Arrays.asList(new WhereItemContext(testExpression, Arrays.asList(bindElement, conditionExpression)));
+            return Arrays.asList(new WhereItemContext(testExpression, Arrays.asList(likeBindElement, conditionExpression)));
         }
 
         @Override
         public List<WhereItemContext> handleObjectTypeNoAnnotationMultiParam() {
-            throw new UnsupportedOperationException("");
+            String testExpression = String.format(
+                    "%1$s != null and %1$s.%2$s != null",
+                    methodParamInfo.getArgName(),
+                    columnInfo.getJavaColumnName()
+            );
+            Element likeBindElement = this.buildLikeBindElement();
+            String paramValueExpression = String.format(
+                    "#{%1$s.%2$s}",
+                    methodParamInfo.getArgName(),
+                    columnInfo.getJavaColumnName()
+            );
+            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
+            return Arrays.asList(new WhereItemContext(testExpression, Arrays.asList(likeBindElement, conditionExpression)));
         }
 
         @Override
         public List<WhereItemContext> handleCompositeObjectNoAnnotationMultiParam() {
-            throw new UnsupportedOperationException("");
+            List<WhereItemContext> whereItemContextList = new ArrayList<>();
+            for (ColumnInfo columnInfoComposite : columnInfo.getComposites()) {
+                String testExpression = String.format(
+                        "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
+                        methodParamInfo.getArgName(),
+                        columnInfo.getJavaColumnName(),
+                        columnInfoComposite.getJavaColumnName()
+                );
+                Element likeBindElement = this.buildLikeBindElement();
+                String paramValueExpression = String.format(
+                        "#{%1$s.%2$s.%3$s}",
+                        methodParamInfo.getArgName(),
+                        columnInfo.getJavaColumnName(),
+                        columnInfoComposite.getJavaColumnName()
+                );
+                String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, paramValueExpression);
+                whereItemContextList.add(new WhereItemContext(testExpression, Arrays.asList(likeBindElement, conditionExpression)));
+            }
+            return whereItemContextList;
         }
 
         @Override
         public List<WhereItemContext> handleObjectTypeWithAnnotationMultiParam() {
-            throw new UnsupportedOperationException("");
+            String testExpression = String.format(
+                    "%1$s != null and %1$s.%2$s != null",
+                    methodParamInfo.getArgName(),
+                    columnInfo.getJavaColumnName()
+            );
+            Element likeBindElement = this.buildLikeBindElement();
+            String paramValueExpression = String.format(
+                    "#{%1$s.%2$s}",
+                    methodParamInfo.getArgName(),
+                    columnInfo.getJavaColumnName()
+            );
+            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
+            return Arrays.asList(new WhereItemContext(testExpression, Arrays.asList(likeBindElement, conditionExpression)));
         }
 
         @Override
         public List<WhereItemContext> handleCompositeObjectWithAnnotationMultiParam() {
-            throw new UnsupportedOperationException("");
+            List<WhereItemContext> whereItemContextList = new ArrayList<>();
+            for (ColumnInfo columnInfoComposite : columnInfo.getComposites()) {
+                String testExpression = String.format(
+                        "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
+                        methodParamInfo.getArgName(),
+                        columnInfo.getJavaColumnName(),
+                        columnInfoComposite.getJavaColumnName()
+                );
+                Element likeBindElement = this.buildLikeBindElement();
+                String paramValueExpression = String.format(
+                        "#{%1$s.%2$s.%3$s}",
+                        methodParamInfo.getArgName(),
+                        columnInfo.getJavaColumnName(),
+                        columnInfoComposite.getJavaColumnName()
+                );
+                String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, paramValueExpression);
+                whereItemContextList.add(new WhereItemContext(testExpression, Arrays.asList(likeBindElement, conditionExpression)));
+            }
+            return whereItemContextList;
         }
 
         @Override
         public List<WhereItemContext> handleRelationColumnMultiParam(RelationColumnInfo relationColumnInfo) {
-            throw new UnsupportedOperationException("");
+            List<WhereItemContext> whereItemContextList = new ArrayList<>();
+            for (ForeignKeyColumnInfo foreignKeyInfo : relationColumnInfo.getInverseForeignKeyColumnInfoList()) {
+                ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();
+                String testExpression = String.format(
+                        "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
+                        methodParamInfo.getArgName(),
+                        columnInfo.getJavaColumnName(),
+                        referencedColumnInfo.getJavaColumnName()
+                );
+                Element likeBindElement = this.buildLikeBindElement();
+                String paramValueExpression = String.format(
+                        "#{%1$s.%2$s.%3$s}",
+                        methodParamInfo.getArgName(),
+                        columnInfo.getJavaColumnName(),
+                        referencedColumnInfo.getJavaColumnName()
+                );
+                String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, relationColumnInfo, paramValueExpression);
+                whereItemContextList.add(new WhereItemContext(testExpression, Arrays.asList(likeBindElement, conditionExpression)));
+            }
+            return whereItemContextList;
+        }
+
+        private Element buildLikeBindElement() {
+            String bindValue = "'%'+" + methodParamInfo.getArgName() + "+'%'";
+            return this.buildBindElement(methodParamInfo.getArgName(), bindValue);
         }
     }
 
+    /**
+     *                           <if test="terminal == @com.iss.dtg.idms.constant.Terminal@EBANK">
+     *                               and act.client_code in
+     *                               <foreach item="item" index="index" collection="unDraftClientCodeList" open="(" separator="," close=")">
+     *                                   #{item}
+     *               				</foreach>
+     *                           </if>
+     * @author ccxuef
+     * @date 2025/10/28 18:41
+     */
     static class InConditionHandler extends AbstractConditionHandler {
 
         @Override
         public List<WhereItemContext> handleBasicTypeSingleParam() {
-            /**
-             *             <if test="terminal == @com.iss.dtg.idms.constant.Terminal@EBANK">
-             *                 and act.client_code in
-             *                 <foreach item="item" index="index" collection="unDraftClientCodeList" open="(" separator="," close=")">
-             *                     #{item}
-             * 				</foreach>
-             *             </if>
-             */
-
             String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
-
+            String paramValueExpression = String.format("%1$s", methodParamInfo.getArgName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, "");
-
-            Element foreachElement = DocumentHelper.createElement("foreach");
-            foreachElement.addAttribute("index", "index");
-            foreachElement.addAttribute("item", "item");
-            foreachElement.addAttribute("collection", methodParamInfo.getArgName());
-            foreachElement.addAttribute("open", "(");
-            foreachElement.addAttribute("close", ")");
-            foreachElement.addAttribute("separator", ",");
-            foreachElement.addText("#{item}");
+            Element foreachElement = this.buildForeachElement(paramValueExpression);
             return Arrays.asList(new WhereItemContext(testExpression, Arrays.asList(conditionExpression, foreachElement)));
         }
 
         @Override
         public List<WhereItemContext> handleObjectTypeNoAnnotationSingleParam() {
-            throw new UnsupportedOperationException("");
+            String testExpression = String.format("%1$s != null", columnInfo.getJavaColumnName());
+            String paramValueExpression = String.format("%1$s", columnInfo.getJavaColumnName());
+            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, "");
+            Element foreachElement = this.buildForeachElement(paramValueExpression);
+            return Arrays.asList(new WhereItemContext(testExpression, Arrays.asList(conditionExpression, foreachElement)));
         }
 
         @Override
         public List<WhereItemContext> handleCompositeObjectNoAnnotationSingleParam() {
-            throw new UnsupportedOperationException("");
+            List<WhereItemContext> whereItemContextList = new ArrayList<>();
+            for (ColumnInfo columnInfoComposite : columnInfo.getComposites()) {
+                String testExpression = String.format(
+                        "%1$s != null and %1$s.%2$s != null",
+                        columnInfo.getJavaColumnName(),
+                        columnInfoComposite.getJavaColumnName()
+                );
+                String paramValueExpression = String.format(
+                        "%1$s.%2$s",
+                        columnInfo.getJavaColumnName(),
+                        columnInfoComposite.getJavaColumnName()
+                );
+                String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, "");
+                Element foreachElement = this.buildForeachElement(paramValueExpression);
+                whereItemContextList.add(new WhereItemContext(testExpression, Arrays.asList(conditionExpression, foreachElement)));
+            }
+            return whereItemContextList;
         }
 
         @Override
         public List<WhereItemContext> handleObjectTypeWithAnnotationSingleParam() {
-            throw new UnsupportedOperationException("");
+            String testExpression = String.format(
+                    "%1$s != null and %1$s.%2$s != null",
+                    methodParamInfo.getArgName(),
+                    columnInfo.getJavaColumnName()
+            );
+            String paramValueExpression = String.format(
+                    "%1$s.%2$s",
+                    methodParamInfo.getArgName(),
+                    columnInfo.getJavaColumnName()
+            );
+            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, "");
+            Element foreachElement = this.buildForeachElement(paramValueExpression);
+            return Arrays.asList(new WhereItemContext(testExpression, Arrays.asList(conditionExpression, foreachElement)));
         }
 
         @Override
         public List<WhereItemContext> handleCompositeObjectWithAnnotationSingleParam() {
-            throw new UnsupportedOperationException("");
+            List<WhereItemContext> whereItemContextList = new ArrayList<>();
+            for (ColumnInfo columnInfoComposite : columnInfo.getComposites()) {
+                String testExpression = String.format(
+                        "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
+                        methodParamInfo.getArgName(),
+                        columnInfo.getJavaColumnName(),
+                        columnInfoComposite.getJavaColumnName()
+                );
+                String paramValueExpression = String.format(
+                        "%1$s.%2$s.%3$s",
+                        methodParamInfo.getArgName(),
+                        columnInfo.getJavaColumnName(),
+                        columnInfoComposite.getJavaColumnName()
+                );
+                String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, "");
+                Element foreachElement = this.buildForeachElement(paramValueExpression);
+                whereItemContextList.add(new WhereItemContext(testExpression, Arrays.asList(conditionExpression, foreachElement)));
+            }
+            return whereItemContextList;
         }
 
         @Override
         public List<WhereItemContext> handleRelationColumnSingleParam(RelationColumnInfo relationColumnInfo) {
-            throw new UnsupportedOperationException("");
+            List<WhereItemContext> whereItemContextList = new ArrayList<>();
+            for (ForeignKeyColumnInfo foreignKeyInfo : relationColumnInfo.getInverseForeignKeyColumnInfoList()) {
+                ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();
+                String testExpression = String.format(
+                        "%1$s != null and %1$s.%2$s != null",
+                        columnInfo.getJavaColumnName(),
+                        referencedColumnInfo.getJavaColumnName()
+                );
+                String paramValueExpression = String.format(
+                        "%1$s.%2$s",
+                        columnInfo.getJavaColumnName(),
+                        referencedColumnInfo.getJavaColumnName()
+                );
+                String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, relationColumnInfo, "");
+                Element foreachElement = this.buildForeachElement(paramValueExpression);
+                whereItemContextList.add(new WhereItemContext(testExpression, Arrays.asList(conditionExpression, foreachElement)));
+            }
+            return whereItemContextList;
         }
 
         @Override
         public List<WhereItemContext> handleBasicTypeMultiParam() {
-            throw new UnsupportedOperationException();
+            String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
+            String paramValueExpression = String.format("%1$s", methodParamInfo.getArgName());
+            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, "");
+            Element foreachElement = this.buildForeachElement(paramValueExpression);
+            return Arrays.asList(new WhereItemContext(testExpression, Arrays.asList(conditionExpression, foreachElement)));
         }
 
         @Override
         public List<WhereItemContext> handleObjectTypeNoAnnotationMultiParam() {
-            throw new UnsupportedOperationException("");
+            String testExpression = String.format(
+                    "%1$s != null and %1$s.%2$s != null",
+                    methodParamInfo.getArgName(),
+                    columnInfo.getJavaColumnName()
+            );
+            String paramValueExpression = String.format(
+                    "%1$s.%2$s",
+                    methodParamInfo.getArgName(),
+                    columnInfo.getJavaColumnName()
+            );
+            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, "");
+            Element foreachElement = this.buildForeachElement(paramValueExpression);
+            return Arrays.asList(new WhereItemContext(testExpression, Arrays.asList(conditionExpression, foreachElement)));
         }
 
         @Override
         public List<WhereItemContext> handleCompositeObjectNoAnnotationMultiParam() {
-            throw new UnsupportedOperationException("");
+            List<WhereItemContext> whereItemContextList = new ArrayList<>();
+            for (ColumnInfo columnInfoComposite : columnInfo.getComposites()) {
+                String testExpression = String.format(
+                        "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
+                        methodParamInfo.getArgName(),
+                        columnInfo.getJavaColumnName(),
+                        columnInfoComposite.getJavaColumnName()
+                );
+                String paramValueExpression = String.format(
+                        "%1$s.%2$s.%3$s",
+                        methodParamInfo.getArgName(),
+                        columnInfo.getJavaColumnName(),
+                        columnInfoComposite.getJavaColumnName()
+                );
+                String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, "");
+                Element foreachElement = this.buildForeachElement(paramValueExpression);
+                whereItemContextList.add(new WhereItemContext(testExpression, Arrays.asList(conditionExpression, foreachElement)));
+            }
+            return whereItemContextList;
         }
 
         @Override
         public List<WhereItemContext> handleObjectTypeWithAnnotationMultiParam() {
-            throw new UnsupportedOperationException("");
+            String testExpression = String.format(
+                    "%1$s != null and %1$s.%2$s != null",
+                    methodParamInfo.getArgName(),
+                    columnInfo.getJavaColumnName()
+            );
+            String paramValueExpression = String.format(
+                    "%1$s.%2$s",
+                    methodParamInfo.getArgName(),
+                    columnInfo.getJavaColumnName()
+            );
+            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, "");
+            Element foreachElement = this.buildForeachElement(paramValueExpression);
+            return Arrays.asList(new WhereItemContext(testExpression, Arrays.asList(conditionExpression, foreachElement)));
         }
 
         @Override
         public List<WhereItemContext> handleCompositeObjectWithAnnotationMultiParam() {
-            throw new UnsupportedOperationException("");
+            List<WhereItemContext> whereItemContextList = new ArrayList<>();
+            for (ColumnInfo columnInfoComposite : columnInfo.getComposites()) {
+                String testExpression = String.format(
+                        "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
+                        methodParamInfo.getArgName(),
+                        columnInfo.getJavaColumnName(),
+                        columnInfoComposite.getJavaColumnName()
+                );
+                String paramValueExpression = String.format(
+                        "%1$s.%2$s.%3$s",
+                        methodParamInfo.getArgName(),
+                        columnInfo.getJavaColumnName(),
+                        columnInfoComposite.getJavaColumnName()
+                );
+                String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, "");
+                Element foreachElement = this.buildForeachElement(paramValueExpression);
+                whereItemContextList.add(new WhereItemContext(testExpression, Arrays.asList(conditionExpression, foreachElement)));
+            }
+            return whereItemContextList;
         }
 
         @Override
         public List<WhereItemContext> handleRelationColumnMultiParam(RelationColumnInfo relationColumnInfo) {
-            throw new UnsupportedOperationException("");
+            List<WhereItemContext> whereItemContextList = new ArrayList<>();
+            for (ForeignKeyColumnInfo foreignKeyInfo : relationColumnInfo.getInverseForeignKeyColumnInfoList()) {
+                ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();
+                String testExpression = String.format(
+                        "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
+                        methodParamInfo.getArgName(),
+                        columnInfo.getJavaColumnName(),
+                        referencedColumnInfo.getJavaColumnName()
+                );
+                String paramValueExpression = String.format(
+                        "%1$s.%2$s.%3$s",
+                        methodParamInfo.getArgName(),
+                        columnInfo.getJavaColumnName(),
+                        referencedColumnInfo.getJavaColumnName()
+                );
+                String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, relationColumnInfo, "");
+                Element foreachElement = this.buildForeachElement(paramValueExpression);
+                whereItemContextList.add(new WhereItemContext(testExpression, Arrays.asList(conditionExpression, foreachElement)));
+            }
+            return whereItemContextList;
+        }
+
+        private Element buildForeachElement(String collection) {
+            Element foreachElement = DocumentHelper.createElement("foreach");
+            foreachElement.addAttribute("index", "index");
+            foreachElement.addAttribute("item", "item");
+            foreachElement.addAttribute("collection", collection);
+            foreachElement.addAttribute("open", "(");
+            foreachElement.addAttribute("close", ")");
+            foreachElement.addAttribute("separator", ",");
+            foreachElement.addText("#{item}");
+            return foreachElement;
         }
     }
 
@@ -469,8 +762,8 @@ public class WhereTemplateHandler {
 
         @Override
         public List<WhereItemContext> handleObjectTypeNoAnnotationSingleParam() {
-            String testExpression = String.format("%1$s != null", conditionInfo.getColumnName());
-            String paramValueExpression = String.format("#{%1$s[0]} and #{%1$s[1]}", conditionInfo.getColumnName());
+            String testExpression = String.format("%1$s != null", columnInfo.getJavaColumnName());
+            String paramValueExpression = String.format("#{%1$s[0]} and #{%1$s[1]}", columnInfo.getJavaColumnName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
             return Arrays.asList(new WhereItemContext(testExpression, Arrays.asList(conditionExpression)));
         }
@@ -479,9 +772,17 @@ public class WhereTemplateHandler {
         public List<WhereItemContext> handleCompositeObjectNoAnnotationSingleParam() {
             List<WhereItemContext> whereItemContextList = new ArrayList<>();
             for (ColumnInfo columnInfoComposite : columnInfo.getComposites()) {
-                String testExpression = String.format("%1$s != null and %1$s.%2$s != null", columnInfo.getJavaColumnName(), columnInfoComposite.getJavaColumnName());
-                String paramValueExpression = String.format("#{%1$s.%2$s[0]} and #{%1$s.%2$s[1]}", columnInfo.getJavaColumnName());
-                String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
+                String testExpression = String.format(
+                        "%1$s != null and %1$s.%2$s != null",
+                        columnInfo.getJavaColumnName(),
+                        columnInfoComposite.getJavaColumnName()
+                );
+                String paramValueExpression = String.format(
+                        "#{%1$s.%2$s[0]} and #{%1$s.%2$s[1]}",
+                        columnInfo.getJavaColumnName(),
+                        columnInfoComposite.getJavaColumnName()
+                );
+                String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, paramValueExpression);
                 whereItemContextList.add(new WhereItemContext(testExpression, Arrays.asList(conditionExpression)));
             }
             return whereItemContextList;
@@ -489,47 +790,168 @@ public class WhereTemplateHandler {
 
         @Override
         public List<WhereItemContext> handleObjectTypeWithAnnotationSingleParam() {
-            throw new UnsupportedOperationException("");
+            String testExpression = String.format(
+                    "%1$s != null and %1$s.%2$s != null",
+                    methodParamInfo.getArgName(),
+                    columnInfo.getJavaColumnName()
+            );
+            String paramValueExpression = String.format(
+                    "#{%1$s.%2$s[0]} and #{%1$s.%2$s[1]}",
+                    methodParamInfo.getArgName(),
+                    columnInfo.getJavaColumnName()
+            );
+            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
+            return Arrays.asList(new WhereItemContext(testExpression, Arrays.asList(conditionExpression)));
         }
 
         @Override
         public List<WhereItemContext> handleCompositeObjectWithAnnotationSingleParam() {
-            throw new UnsupportedOperationException("");
+            List<WhereItemContext> whereItemContextList = new ArrayList<>();
+            for (ColumnInfo columnInfoComposite : columnInfo.getComposites()) {
+                String testExpression = String.format(
+                        "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
+                        methodParamInfo.getArgName(),
+                        columnInfo.getJavaColumnName(),
+                        columnInfoComposite.getJavaColumnName()
+                );
+                String paramValueExpression = String.format(
+                        "#{%1$s.%2$s.%3$s[0]} and #{%1$s.%2$s.%3$s[1]}",
+                        methodParamInfo.getArgName(),
+                        columnInfo.getJavaColumnName(),
+                        columnInfoComposite.getJavaColumnName()
+                );
+                String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, paramValueExpression);
+                whereItemContextList.add(new WhereItemContext(testExpression, Arrays.asList(conditionExpression)));
+            }
+            return whereItemContextList;
         }
 
         @Override
         public List<WhereItemContext> handleRelationColumnSingleParam(RelationColumnInfo relationColumnInfo) {
-            throw new UnsupportedOperationException("");
+            List<WhereItemContext> whereItemContextList = new ArrayList<>();
+            for (ForeignKeyColumnInfo foreignKeyInfo : relationColumnInfo.getInverseForeignKeyColumnInfoList()) {
+                ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();
+                String testExpression = String.format(
+                        "%1$s != null and %1$s.%2$s != null",
+                        columnInfo.getJavaColumnName(),
+                        referencedColumnInfo.getJavaColumnName()
+                );
+                String paramValueExpression = String.format(
+                        "#{%1$s.%2$s[0]} and #{%1$s.%2$s[1]}",
+                        columnInfo.getJavaColumnName(),
+                        referencedColumnInfo.getJavaColumnName()
+                );
+                String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, relationColumnInfo, paramValueExpression);
+                whereItemContextList.add(new WhereItemContext(testExpression, Arrays.asList(conditionExpression)));
+            }
+            return whereItemContextList;
         }
 
         @Override
         public List<WhereItemContext> handleBasicTypeMultiParam() {
-            throw new UnsupportedOperationException();
+            String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
+            String paramValueExpression = String.format("#{%1$s[0]} and #{%1$s[1]}", methodParamInfo.getArgName());
+            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
+            return Arrays.asList(new WhereItemContext(testExpression, Arrays.asList(conditionExpression)));
         }
 
         @Override
         public List<WhereItemContext> handleObjectTypeNoAnnotationMultiParam() {
-            throw new UnsupportedOperationException("");
+            String testExpression = String.format(
+                    "%1$s != null and %1$s.%2$s != null",
+                    methodParamInfo.getArgName(),
+                    columnInfo.getJavaColumnName()
+            );
+            String paramValueExpression = String.format(
+                    "#{%1$s.%2$s[0]} and #{%1$s.%2$s[1]}",
+                    methodParamInfo.getArgName(),
+                    columnInfo.getJavaColumnName()
+            );
+            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
+            return Arrays.asList(new WhereItemContext(testExpression, Arrays.asList(conditionExpression)));
         }
 
         @Override
         public List<WhereItemContext> handleCompositeObjectNoAnnotationMultiParam() {
-            throw new UnsupportedOperationException("");
+            List<WhereItemContext> whereItemContextList = new ArrayList<>();
+            for (ColumnInfo columnInfoComposite : columnInfo.getComposites()) {
+                String testExpression = String.format(
+                        "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
+                        methodParamInfo.getArgName(),
+                        columnInfo.getJavaColumnName(),
+                        columnInfoComposite.getJavaColumnName()
+                );
+                String paramValueExpression = String.format(
+                        "#{%1$s.%2$s.%3$s[0]} and #{%1$s.%2$s.%3$s[1]}",
+                        methodParamInfo.getArgName(),
+                        columnInfo.getJavaColumnName(),
+                        columnInfoComposite.getJavaColumnName()
+                );
+                String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, paramValueExpression);
+                whereItemContextList.add(new WhereItemContext(testExpression, Arrays.asList(conditionExpression)));
+            }
+            return whereItemContextList;
         }
 
         @Override
         public List<WhereItemContext> handleObjectTypeWithAnnotationMultiParam() {
-            throw new UnsupportedOperationException("");
+            String testExpression = String.format(
+                    "%1$s != null and %1$s.%2$s != null",
+                    methodParamInfo.getArgName(),
+                    columnInfo.getJavaColumnName()
+            );
+            String paramValueExpression = String.format(
+                    "#{%1$s.%2$s[0]} and #{%1$s.%2$s[1]}",
+                    methodParamInfo.getArgName(),
+                    columnInfo.getJavaColumnName()
+            );
+            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
+            return Arrays.asList(new WhereItemContext(testExpression, Arrays.asList(conditionExpression)));
         }
 
         @Override
         public List<WhereItemContext> handleCompositeObjectWithAnnotationMultiParam() {
-            throw new UnsupportedOperationException("");
+            List<WhereItemContext> whereItemContextList = new ArrayList<>();
+            for (ColumnInfo columnInfoComposite : columnInfo.getComposites()) {
+                String testExpression = String.format(
+                        "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
+                        methodParamInfo.getArgName(),
+                        columnInfo.getJavaColumnName(),
+                        columnInfoComposite.getJavaColumnName()
+                );
+                String paramValueExpression = String.format(
+                        "#{%1$s.%2$s.%3$s[0]} and #{%1$s.%2$s.%3$s[1]}",
+                        methodParamInfo.getArgName(),
+                        columnInfo.getJavaColumnName(),
+                        columnInfoComposite.getJavaColumnName()
+                );
+                String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, paramValueExpression);
+                whereItemContextList.add(new WhereItemContext(testExpression, Arrays.asList(conditionExpression)));
+            }
+            return whereItemContextList;
         }
 
         @Override
         public List<WhereItemContext> handleRelationColumnMultiParam(RelationColumnInfo relationColumnInfo) {
-            throw new UnsupportedOperationException("");
+            List<WhereItemContext> whereItemContextList = new ArrayList<>();
+            for (ForeignKeyColumnInfo foreignKeyInfo : relationColumnInfo.getInverseForeignKeyColumnInfoList()) {
+                ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();
+                String testExpression = String.format(
+                        "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
+                        methodParamInfo.getArgName(),
+                        columnInfo.getJavaColumnName(),
+                        referencedColumnInfo.getJavaColumnName()
+                );
+                String paramValueExpression = String.format(
+                        "#{%1$s.%2$s.%3$s[0]} and #{%1$s.%2$s.%3$s[1]}",
+                        methodParamInfo.getArgName(),
+                        columnInfo.getJavaColumnName(),
+                        referencedColumnInfo.getJavaColumnName()
+                );
+                String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, relationColumnInfo, paramValueExpression);
+                whereItemContextList.add(new WhereItemContext(testExpression, Arrays.asList(conditionExpression)));
+            }
+            return whereItemContextList;
         }
     }
 
@@ -573,8 +995,16 @@ public class WhereTemplateHandler {
 
         @Override
         public List<WhereItemContext> handleObjectTypeWithAnnotationSingleParam() {
-            String testExpression = String.format("%1$s.%2$s != null", methodParamInfo.getArgName(), columnInfo.getJavaColumnName());
-            String paramValueExpression = String.format("#{%1$s.%2$s}", methodParamInfo.getArgName(), columnInfo.getJavaColumnName());
+            String testExpression = String.format(
+                    "%1$s != null and %1$s.%2$s != null",
+                    methodParamInfo.getArgName(),
+                    columnInfo.getJavaColumnName()
+            );
+            String paramValueExpression = String.format(
+                    "#{%1$s.%2$s}",
+                    methodParamInfo.getArgName(),
+                    columnInfo.getJavaColumnName()
+            );
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
             return Arrays.asList(new WhereItemContext(testExpression, Arrays.asList(conditionExpression)));
         }
@@ -611,7 +1041,11 @@ public class WhereTemplateHandler {
                         columnInfo.getJavaColumnName(),
                         referencedColumnInfo.getJavaColumnName()
                 );
-                String paramValueExpression = String.format("#{%1$s.%2$s}", columnInfo.getJavaColumnName(), referencedColumnInfo.getJavaColumnName());
+                String paramValueExpression = String.format(
+                        "#{%1$s.%2$s}",
+                        columnInfo.getJavaColumnName(),
+                        referencedColumnInfo.getJavaColumnName()
+                );
                 String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, relationColumnInfo, paramValueExpression);
                 whereItemContextList.add(new WhereItemContext(testExpression, Arrays.asList(conditionExpression)));
             }

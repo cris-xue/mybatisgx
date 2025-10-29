@@ -8,23 +8,20 @@ options {
 
 sql_statement: (insert_statement | delete_statement | update_statement | select_statement) end ;
 
-insert_statement: insert_clause dynamic_condition_clause ;
+insert_statement: insert_clause ;
 insert_clause: INSERT_ACTION ignore_reserved_word_clause ;
 
-delete_statement: delete_clause where_clause dynamic_condition_clause ;
+delete_statement: delete_clause where_clause ;
 delete_clause: DELETE_ACTION ignore_reserved_word_clause ;
 
-update_statement: update_clause where_clause dynamic_condition_clause ;
+update_statement: update_clause where_clause ;
 update_clause: UPDATE_ACTION ignore_reserved_word_clause ;
 
-select_statement: select_clause where_clause group_clause order_clause ;
+select_statement: select_clause where_clause group_by_clause order_by_clause ;
 select_clause: SELECT_ACTION ignore_reserved_word_clause ;
 
 // 忽略保留关键字
 ignore_reserved_word_clause: (RESERVED_WORD)*;
-
-// 动态条件
-dynamic_condition_clause: (DYNAMIC_CONDITION)? ;
 
 // 条件语法   ByNameLikeAndAgeEq
 where_clause: (where_start_clause (condition_clause)*)? ;
@@ -39,13 +36,13 @@ field_condition_op_clause: field_clause comparison_op_clause? ;
 comparison_op_clause: COMPARISON_OP ;
 
 // 分组
-group_clause: (group_op_clause field_clause)? ;
-group_op_clause: GROUP_OP ;
+group_by_clause: (group_by_op_clause field_clause)? ;
+group_by_op_clause: GROUP_BY_OP ;
 
 // 排序 OrderByNameDesc、OrderByName
-order_clause: (order_op_clause (field_clause order_op_direction_clause?)*)? ;
-order_op_clause: ORDER_OP ;
-order_op_direction_clause: ORDER_OP_DIRECTION ;
+order_by_clause: (order_by_op_clause (field_clause order_by_op_direction_clause?)*)? ;
+order_by_op_clause: ORDER_BY_OP ;
+order_by_op_direction_clause: ORDER_BY_OP_DIRECTION ;
 
 // 聚合函数
 aggregate_function_clause: AGGREGATE_FUNCTION ;

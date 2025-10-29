@@ -8,9 +8,6 @@ options {
 
 sql_statement: (insert_statement | delete_statement | update_statement | select_statement) end ;
 
-// EOF(end of file)表示文件结束符，这个是Antlr中已经定义好的
-end: EOF ;
-
 insert_statement: insert_clause dynamic_condition_clause ;
 insert_clause: INSERT_ACTION ignore_reserved_word_clause ;
 
@@ -54,3 +51,6 @@ order_op_direction_clause: ORDER_OP_DIRECTION ;
 aggregate_function_clause: AGGREGATE_FUNCTION ;
 
 field_clause: (FIELD | RESERVED_WORD)+ ;
+
+// EOF(end of file)表示文件结束符，这个是Antlr中已经定义好的
+end: EOF ;

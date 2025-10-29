@@ -12,30 +12,9 @@ import org.antlr.v4.runtime.tree.TerminalNodeImpl;
 import org.apache.ibatis.mapping.SqlCommandType;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class MethodNameAstHandler {
-
-    private static final Map<String, String> TOKEN_MAP = new HashMap<>();
-
-    static {
-        TOKEN_MAP.put("By", "");
-        TOKEN_MAP.put("And", "and");
-        TOKEN_MAP.put("Or", "or");
-
-        TOKEN_MAP.put("Lt", "<");
-        TOKEN_MAP.put("Lteq", "<=");
-        TOKEN_MAP.put("Gt", ">");
-        TOKEN_MAP.put("Gteq", ">=");
-        TOKEN_MAP.put("In", "in");
-        TOKEN_MAP.put("Is", "=");
-        TOKEN_MAP.put("Eq", "=");
-        TOKEN_MAP.put("Not", "<>");
-        TOKEN_MAP.put("Like", "like");
-        TOKEN_MAP.put("Between", "between");
-    }
 
     public void execute(EntityInfo entityInfo, MethodInfo methodInfo, MethodParamInfo methodParamInfo, ConditionOriginType conditionOriginType, String methodName) {
         CharStream charStream = CharStreams.fromString(methodName);

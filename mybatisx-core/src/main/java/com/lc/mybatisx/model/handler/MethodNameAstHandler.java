@@ -69,6 +69,8 @@ public class MethodNameAstHandler {
                 }
             } else if (whereChildItem instanceof MethodNameParser.Condition_group_clauseContext) {
                 conditionInfoList = this.parseConditionGroupClause(entityInfo, methodParamInfo, conditionOriginType, whereChildItem);
+            } else if (whereChildItem instanceof MethodNameParser.Ignore_reserved_word_clauseContext) {
+                LOGGER.info("忽略保留字：{}", whereChildItem.getText());
             } else {
                 throw new RuntimeException("不支持的语法");
             }

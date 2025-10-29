@@ -5,13 +5,14 @@ import com.lc.mybatisx.ext.MybatisgxXMLMapperBuilder;
 import com.lc.mybatisx.model.MapperInfo;
 import com.lc.mybatisx.model.MethodInfo;
 import com.lc.mybatisx.template.select.SelectTemplateHandler;
-import com.lc.mybatisx.utils.FreeMarkerUtils;
 import com.lc.mybatisx.utils.XmlUtils;
-import freemarker.template.Template;
 import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.parsing.XPathParser;
 import org.apache.ibatis.session.Configuration;
+import org.dom4j.Document;
+import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.InputStreamResource;
@@ -109,9 +110,10 @@ public class StatementTemplateHandler {
     }
 
     private String createMapperXml(String namespace) {
-        Template template = FreeMarkerUtils.getTemplate("mapper/base.ftl");
-        Map<String, Object> templateData = new HashMap<>();
-        templateData.put("namespace", namespace);
-        return FreeMarkerUtils.processTemplate(templateData, template);
+        Document document = DocumentHelper.createDocument();
+        document.addDocType("mapper", "-//mybatis.org//DTD Mapper 3.0//EN", "http://mybatis.org/dtd/mybatis-3-mapper.dtd");
+        Element element = document.addElement("mapper");
+        element.addAttribute("namespace", namespace);
+        return document.asXML();
     }
 }

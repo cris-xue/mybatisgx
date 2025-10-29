@@ -10,11 +10,26 @@ BY: 'By' ;
 AND: 'And' ;
 OR: 'Or' ;
 // 比较运算符
-COMPARISON_OP: 'Lt' | 'Lteq' | 'Gt' | 'Gteq' | 'In' | 'Is' | 'Eq' | 'Not' | 'Like' | 'Between';
+COMPARISON_OP: 'Lt'
+    | 'Lteq'
+    | 'Gt'
+    | 'Gteq'
+    | 'In' | 'NotIn'
+    | 'Eq' | 'Equal' | 'Not' | 'NotEq' | 'NotEqual'
+    | 'Like' | 'NotLike' | 'StartingWith' | 'EndingWith'
+    | 'Between' | 'NotBetween'
+    | 'IsNull' | 'IsNotNull' | 'NotNull'
+    ;
 GROUP_BY_OP: 'GroupBy' ;
 ORDER_BY_OP: 'OrderBy' ;
 ORDER_BY_OP_DIRECTION: 'Desc' | 'Asc' ;
-AGGREGATE_FUNCTION: 'Sum' | 'Count' | 'Avg' | 'Max' | 'Min' |'top' | 'last' | 'first' ;
+AGGREGATE_FUNCTION: 'Sum'
+    | 'Count'
+    | 'Avg'
+    | 'Max'
+    | 'Min'
+    | 'Distinct'
+    ;
 // 左括号
 LEFT_BRACKET: '(' ;
 // 右括号

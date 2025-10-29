@@ -23,7 +23,7 @@ select_clause: SELECT_ACTION ignore_reserved_word_clause ;
 aggregate_operation_clause: (aggregate_function_clause field_clause)? ;
 
 // 条件语法   ByNameLikeAndAgeEq
-where_clause: (where_start_clause condition_group_clause)? ;
+where_clause: (where_start_clause condition_group_clause)? ignore_reserved_word_clause? ;
 // NameLikeAndAgeEq
 // condition_clause: condition_item_clause ;
 // 条件组：由多个条件单元和逻辑运算符组成
@@ -54,7 +54,7 @@ order_by_op_clause: ORDER_BY_OP ;
 order_by_op_direction_clause: ORDER_BY_OP_DIRECTION ;
 // 聚合函数
 aggregate_function_clause: AGGREGATE_FUNCTION ;
-field_clause: (FIELD | RESERVED_WORD)+ ;
+field_clause: (FIELD)+ ;
 left_bracket_clause: LEFT_BRACKET ;
 right_bracket_clause: RIGHT_BRACKET ;
 // EOF(end of file)表示文件结束符，这个是Antlr中已经定义好的

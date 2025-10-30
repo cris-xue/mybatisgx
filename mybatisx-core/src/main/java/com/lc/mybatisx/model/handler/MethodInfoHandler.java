@@ -227,8 +227,7 @@ public class MethodInfoHandler {
     }
 
     public void queryConditionParse(EntityInfo entityInfo, MethodInfo methodInfo) {
-        methodInfo.setConditionInfoList(new ArrayList());
-        this.queryConditionAstHandler.execute(entityInfo, methodInfo);
+        this.methodNameAstHandler.execute(entityInfo, methodInfo, null, ConditionOriginType.METHOD_NAME, methodInfo.getConditionGroupExpression());
     }
 
     /**

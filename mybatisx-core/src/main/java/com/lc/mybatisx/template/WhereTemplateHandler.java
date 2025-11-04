@@ -173,12 +173,6 @@ public class WhereTemplateHandler {
                 } else {
                     // findById(MultiId id) findById(@Param("id") MultiId id)
                     if (methodParamInfo.getParam() == null) {
-                        if (ObjectUtils.isEmpty(columnInfo.getComposites())) {
-                            // whereItemContextList = this.handleObjectTypeNoAnnotationSingleParam();
-                        } else {
-                            // whereItemContextList = this.handleCompositeObjectNoAnnotationSingleParam();
-                        }
-
                         for (ColumnInfo columnInfo : methodParamInfo.getColumnInfoList()) {
                             WhereItemContext whereItemContext;
                             List<ColumnInfo> columnInfoComposites = columnInfo.getComposites();
@@ -193,12 +187,6 @@ public class WhereTemplateHandler {
                             }
                         }
                     } else {
-                        /*if (ObjectUtils.isEmpty(columnInfo.getComposites())) {
-                            whereItemContextList = this.handleObjectTypeWithAnnotationSingleParam();
-                        } else {
-                            whereItemContextList = this.handleCompositeObjectWithAnnotationSingleParam();
-                        }*/
-
                         for (ColumnInfo columnInfo : methodParamInfo.getColumnInfoList()) {
                             WhereItemContext whereItemContext;
                             List<ColumnInfo> columnInfoComposites = columnInfo.getComposites();
@@ -237,12 +225,6 @@ public class WhereTemplateHandler {
                 } else {
                     // findById(MultiId id) findById(@Param("id") MultiId id)
                     if (methodParamInfo.getParam() == null) {
-                        /*if (ObjectUtils.isEmpty(columnInfo.getComposites())) {
-                            whereItemContextList = this.handleObjectTypeNoAnnotationMultiParam();
-                        } else {
-                            whereItemContextList = this.handleCompositeObjectNoAnnotationMultiParam();
-                        }*/
-
                         for (ColumnInfo columnInfo : methodParamInfo.getColumnInfoList()) {
                             List<ColumnInfo> columnInfoComposites = columnInfo.getComposites();
                             if (ObjectUtils.isEmpty(columnInfoComposites)) {
@@ -256,12 +238,6 @@ public class WhereTemplateHandler {
                             }
                         }
                     } else {
-                        /*if (ObjectUtils.isEmpty(columnInfo.getComposites())) {
-                            whereItemContextList = this.handleObjectTypeWithAnnotationMultiParam();
-                        } else {
-                            whereItemContextList = this.handleCompositeObjectWithAnnotationMultiParam();
-                        }*/
-
                         for (ColumnInfo columnInfo : methodParamInfo.getColumnInfoList()) {
                             List<ColumnInfo> columnInfoComposites = columnInfo.getComposites();
                             if (ObjectUtils.isEmpty(columnInfoComposites)) {
@@ -461,12 +437,12 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleBasicTypeMultiParam() {
-            String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
+            /*String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
             String bindValuePath = String.format("%1$s", methodParamInfo.getArgName());
             Element likeBindElement = this.buildLikeBindElement(bindValuePath);
             String paramValueExpression = String.format("#{%1$s}", methodParamInfo.getArgName());
-            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
-            return new WhereItemContext(testExpression, Arrays.asList(likeBindElement, conditionExpression));
+            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);*/
+            return this.handleBasicTypeSingleParam();
         }
 
         @Override
@@ -698,11 +674,11 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleBasicTypeMultiParam() {
-            String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
+            /*String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
             String paramValueExpression = String.format("%1$s", methodParamInfo.getArgName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, "");
-            Element foreachElement = this.buildForeachElement(paramValueExpression);
-            return new WhereItemContext(testExpression, Arrays.asList(conditionExpression, foreachElement));
+            Element foreachElement = this.buildForeachElement(paramValueExpression);*/
+            return this.handleBasicTypeSingleParam();
         }
 
         @Override
@@ -897,10 +873,10 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleBasicTypeMultiParam() {
-            String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
+            /*String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
             String paramValueExpression = String.format("#{%1$s[0]} and #{%1$s[1]}", methodParamInfo.getArgName());
-            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
-            return new WhereItemContext(testExpression, Arrays.asList(conditionExpression));
+            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);*/
+            return this.handleBasicTypeSingleParam();
         }
 
         @Override
@@ -1078,10 +1054,10 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleBasicTypeMultiParam() {
-            String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
+            /*String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
             String paramValueExpression = String.format("#{%1$s}", methodParamInfo.getArgName());
-            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
-            return new WhereItemContext(testExpression, Arrays.asList(conditionExpression));
+            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);*/
+            return this.handleBasicTypeSingleParam();
         }
 
         @Override

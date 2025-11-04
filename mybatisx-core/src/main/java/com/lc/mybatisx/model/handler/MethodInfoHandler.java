@@ -11,6 +11,7 @@ import com.lc.mybatisx.utils.GenericUtils;
 import com.lc.mybatisx.utils.TypeUtils;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.annotations.Param;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -236,15 +237,17 @@ public class MethodInfoHandler {
      * @return
      */
     private String entityCondition(MethodInfo methodInfo, MethodParamInfo methodParamInfo) {
-        StringBuilder stringBuilder = new StringBuilder(methodInfo.getSqlCommandType().name().toLowerCase()).append("By");
-        List<ColumnInfo> columnInfoList = methodParamInfo.getColumnInfoList();
-        columnInfoList.forEach(columnInfo -> {
-            String javaColumnName = CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, columnInfo.getJavaColumnName());
-            if (!stringBuilder.toString().endsWith("By")) {
-                stringBuilder.append("And");
+        List<String> columnConditionList = new ArrayList<>();
+        for (ColumnInfo columnInfo : methodParamInfo.getColumnInfoList()) {
+            if (TypeUtils.typeEquals(columnInfo, RelationColumnInfo.class)) {
+                continue;
             }
-            stringBuilder.append(javaColumnName);
-        });
+            String javaColumnName = CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, columnInfo.getJavaColumnName());
+            columnConditionList.add(javaColumnName);
+        }
+        StringBuilder stringBuilder = new StringBuilder(methodInfo.getSqlCommandType().name().toLowerCase())
+                .append("By")
+                .append(StringUtils.join(columnConditionList, "And"));
         LOGGER.debug(stringBuilder.toString());
         return stringBuilder.toString();
     }

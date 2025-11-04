@@ -41,7 +41,6 @@ public class MethodInfoHandler {
 
     private ColumnInfoHandler columnInfoHandler = new ColumnInfoHandler();
     private MethodNameAstHandler methodNameAstHandler = new MethodNameAstHandler();
-    private QueryConditionAstHandler queryConditionAstHandler = new QueryConditionAstHandler();
     private EntityRelationTreeHandler entityRelationTreeHandler = new EntityRelationTreeHandler();
     private ResultMapInfoHandler resultMapInfoHandler = new ResultMapInfoHandler();
 
@@ -62,8 +61,7 @@ public class MethodInfoHandler {
         processMethod(declaredMethods, mapperInfo, methodInfoMap);
 
         Type[] superInterfaces = daoClass.getGenericInterfaces();
-        for (int i = 0; i < superInterfaces.length; i++) {
-            Type type = superInterfaces[i];
+        for (Type type : superInterfaces) {
             if (type instanceof ParameterizedType) {
                 ParameterizedType parameterizedType = (ParameterizedType) type;
                 Class<?> superInterface = (Class<?>) parameterizedType.getRawType();

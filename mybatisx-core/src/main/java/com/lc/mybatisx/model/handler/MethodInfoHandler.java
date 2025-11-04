@@ -204,8 +204,7 @@ public class MethodInfoHandler {
         if (methodDeclaringClass == SimpleDao.class) {
             String methodName = methodInfo.getMethodName();
             if ("findOne".equals(methodName) || "findList".equals(methodName)) {
-                List<MethodParamInfo> methodParamInfoList = methodInfo.getMethodParamInfoList();
-                for (MethodParamInfo methodParamInfo : methodParamInfoList) {
+                for (MethodParamInfo methodParamInfo : methodInfo.getMethodParamInfoList()) {
                     Entity entity = methodParamInfo.getType().getAnnotation(Entity.class);
                     if (entity != null) {
                         String entityCondition = this.entityCondition(methodInfo, methodParamInfo);
@@ -214,8 +213,7 @@ public class MethodInfoHandler {
                 }
             }
         } else {
-            List<MethodParamInfo> methodParamInfoList = methodInfo.getMethodParamInfoList();
-            for (MethodParamInfo methodParamInfo : methodParamInfoList) {
+            for (MethodParamInfo methodParamInfo : methodInfo.getMethodParamInfoList()) {
                 ConditionEntity isConditionEntity = methodParamInfo.getType().getAnnotation(ConditionEntity.class);
                 if (isConditionEntity != null) {
                     String queryEntityCondition = this.entityCondition(methodInfo, methodParamInfo);

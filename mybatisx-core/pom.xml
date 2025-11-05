@@ -30,13 +30,6 @@
 			<version>3.5.6</version>
 		</dependency>
 		
-		<!--freemarker模板引擎的作用是生成mybatis mapper文件-->
-		<dependency>
-			<groupId>org.freemarker</groupId>
-			<artifactId>freemarker</artifactId>
-			<version>2.3.30</version>
-		</dependency>
-
 		<dependency>
 			<groupId>javax.persistence</groupId>
 			<artifactId>javax.persistence-api</artifactId>

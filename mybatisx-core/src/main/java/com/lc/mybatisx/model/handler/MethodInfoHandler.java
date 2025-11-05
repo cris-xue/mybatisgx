@@ -106,7 +106,7 @@ public class MethodInfoHandler {
             String resultMapId = resultMapInfoHandler.execute(mapperInfo, methodInfo);
             methodInfo.setResultMapId(resultMapId);
 
-            this.handleConditionParamInfo(methodInfo);
+            this.bindConditionParam(methodInfo, methodInfo.getConditionInfoList());
             // check(resultMapInfo, methodInfo);
 
             methodInfoMap.put(methodName, methodInfo);
@@ -255,16 +255,6 @@ public class MethodInfoHandler {
     }
 
     /**
-     * 处理查询条件和方法参数的关联
-     *
-     * @param methodInfo
-     */
-    public void handleConditionParamInfo(MethodInfo methodInfo) {
-        List<ConditionInfo> conditionInfoList = methodInfo.getConditionInfoList();
-        this.bindConditionParam(methodInfo, conditionInfoList);
-    }
-
-    /**
      * 绑定和条件和参数
      *
      * @param methodInfo
@@ -295,10 +285,10 @@ public class MethodInfoHandler {
                 if (methodParamInfo == null) {
                     methodParamInfo = methodInfo.getMethodParamInfo("param" + (index + 1));
                 }
+
+                // 校验条件是否可以关联到参数，如果无法关联，后续执行数据库操作会报错
                 if (methodParamInfo == null) {
-                    // TODO 这里还需校验条件实体的参数    暂时先不校验
-                    // throw new RuntimeException("查询条件没有对应的参数");
-                    continue;
+                    throw new RuntimeException("查询条件没有对应的参数");
                 }
                 conditionInfo.setMethodParamInfo(methodParamInfo);
             }

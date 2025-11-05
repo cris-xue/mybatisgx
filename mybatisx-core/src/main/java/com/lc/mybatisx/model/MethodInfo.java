@@ -41,6 +41,12 @@ public class MethodInfo {
      */
     private List<ConditionInfo> conditionInfoList = new ArrayList<>();
     /**
+     * 实体参数
+     * 1、如果存在实体参数，那么条件只能使用实体参数，如果不存在实体参数，那么条件只能使用方法参数列表
+     * 2、方法参数中只要有一个是实体，就存在实体参数，如果存在多个实体参数，只取最后一个实体参数
+     */
+    private MethodParamInfo entityParamInfo;
+    /**
      * 方法参数信息
      */
     private List<MethodParamInfo> methodParamInfoList;
@@ -111,6 +117,14 @@ public class MethodInfo {
 
     public void setBatch(Boolean batch) {
         isBatch = batch;
+    }
+
+    public MethodParamInfo getEntityParamInfo() {
+        return entityParamInfo;
+    }
+
+    public void setEntityParamInfo(MethodParamInfo entityParamInfo) {
+        this.entityParamInfo = entityParamInfo;
     }
 
     public List<MethodParamInfo> getMethodParamInfoList() {

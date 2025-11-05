@@ -7,7 +7,6 @@ import com.lc.mybatisx.context.MethodInfoContextHolder;
 import com.lc.mybatisx.dao.Dao;
 import com.lc.mybatisx.dao.SimpleDao;
 import com.lc.mybatisx.model.*;
-import com.lc.mybatisx.utils.GenericUtils;
 import com.lc.mybatisx.utils.TypeUtils;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -358,7 +357,7 @@ public class MethodInfoHandler {
     }
 
     private Class<?> getMethodType(MapperInfo mapperInfo, Type type) {
-        Type actualType = GenericUtils.getGenericType(type);
+        Type actualType = TypeUtils.getGenericType(type);
         String actualTypeName = actualType.getTypeName();
         if ("ID".equals(actualTypeName)) {
             return mapperInfo.getIdClass();

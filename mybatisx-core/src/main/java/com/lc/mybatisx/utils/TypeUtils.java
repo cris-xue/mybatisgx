@@ -12,6 +12,30 @@ import java.util.Map;
 
 public class TypeUtils extends org.apache.commons.lang3.reflect.TypeUtils {
 
+    public static Type getGenericType(Type type) {
+        if (type instanceof TypeVariable<?>) {
+            TypeVariable<?> typeVariable = (TypeVariable<?>) type;
+            return typeVariable;
+        } else if (type instanceof ParameterizedType) {
+            ParameterizedType parameterizedType = (ParameterizedType) type;
+            Type[] actualTypes = parameterizedType.getActualTypeArguments();
+            Class<?> rawType = (Class<?>) parameterizedType.getRawType();
+            if (rawType == List.class) {
+                Type actualType = actualTypes[0];
+                return getGenericType(actualType);
+            } else if (rawType == Page.class) {
+                Type actualType = actualTypes[0];
+                return getGenericType(actualType);
+            } else if (rawType == Map.class) {
+                return rawType;
+            }
+        } else if (type instanceof Class<?>) {
+            Class<?> clazz = (Class<?>) type;
+            return clazz;
+        }
+        return null;
+    }
+
     public static Type getActualTypeArgument(Type type) {
         if (type instanceof TypeVariable<?>) {
             TypeVariable<?> typeVariable = (TypeVariable<?>) type;
@@ -45,7 +69,7 @@ public class TypeUtils extends org.apache.commons.lang3.reflect.TypeUtils {
     }
 
     public static Type getRawType(ParameterizedType parameterizedType) {
-        return (Class<?>) parameterizedType.getRawType();
+        return parameterizedType.getRawType();
     }
 
     public static Type getActualType(ParameterizedType parameterizedType) {
@@ -121,41 +145,6 @@ public class TypeUtils extends org.apache.commons.lang3.reflect.TypeUtils {
         return null;
     }
 
-    /**
-     * 获取字段的泛型名称
-     * @param type
-     * @return
-     */
-    public static String getTypeParameterName(Type type) {
-        if (type instanceof TypeVariable) {
-            TypeVariable typeVariable = (TypeVariable) type;
-            Class genericDeclaration = (Class) typeVariable.getGenericDeclaration();
-            return genericDeclaration.getName() + type.getTypeName();
-        }
-        return null;
-    }
-
-    /**
-     * 获取泛型参数和真实类型的映射关系
-     * @param clazz
-     * @return
-     */
-    /*public static Map<String, Class<?>> getTypeParameterMap(Class<?> clazz) {
-        Type type = clazz.getGenericSuperclass();
-        if (!(type instanceof ParameterizedType)) {
-            return new HashMap();
-        }
-        ParameterizedType parameterizedType = (ParameterizedType) type;
-        Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
-        TypeVariable[] typeParameters = clazz.getSuperclass().getTypeParameters();
-        Map<String, Class<?>> typeParameterMap = new HashMap();
-        for (int i = 0; i < actualTypeArguments.length; i++) {
-            Type actualTypeArgument = actualTypeArguments[i];
-            TypeVariable typeParameter = typeParameters[i];
-            typeParameterMap.put(typeParameter.getName(), (Class<?>) actualTypeArgument);
-        }
-        return typeParameterMap;
-    }*/
     public static Boolean typeEquals(Object object, Class<?> clazz) {
         return object.getClass().equals(clazz);
     }

@@ -12,6 +12,7 @@ import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.mapping.SqlCommandType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -194,12 +195,16 @@ public class MethodInfoHandler {
     /**
      * 条件实体只有非SimpleDao方法才会处理，SimpleDao只有findOne、findList会特殊处理。
      * 一个方法只允许定义一个条件实体，如果定义多个，只取最后一个条件实体。条件实体会把所有的方法名条件覆盖掉。
+     * 实体作为条件只支持查询方法，修改和删除不支持。
      * @param entityInfo
      * @param methodInfo
      * @param methodDeclaringClass
      */
     public void methodNameParse(EntityInfo entityInfo, MethodInfo methodInfo, Class<?> methodDeclaringClass) {
         methodNameAstHandler.execute(entityInfo, methodInfo, null, ConditionOriginType.METHOD_NAME, methodInfo.getMethodName());
+        if (methodInfo.getSqlCommandType() != SqlCommandType.SELECT) {
+            return;
+        }
         if (methodDeclaringClass == SimpleDao.class) {
             String methodName = methodInfo.getMethodName();
             if ("findOne".equals(methodName) || "findList".equals(methodName)) {

@@ -96,7 +96,7 @@ public class ColumnInfoHandler {
 
     private void processColumnType(Field field, ColumnInfo columnInfo, Map<Type, Class<?>> typeParameterMap) {
         Type type = field.getGenericType();
-        this.processColumnTypeNew(type, columnInfo, typeParameterMap);
+        this.processColumnType(type, columnInfo, typeParameterMap);
         TypeHandler typeHandler = field.getAnnotation(TypeHandler.class);
         if (typeHandler != null) {
             columnInfo.setTypeHandler(typeHandler.value().getTypeName());
@@ -110,7 +110,7 @@ public class ColumnInfoHandler {
      * @param columnInfo
      * @param typeParameterMap
      */
-    private void processColumnTypeNew(Type type, ColumnInfo columnInfo, Map<Type, Class<?>> typeParameterMap) {
+    private void processColumnType(Type type, ColumnInfo columnInfo, Map<Type, Class<?>> typeParameterMap) {
         Class<?> collectionType = null;
         Class<?> javaType = null;
         if (type instanceof TypeVariable) {
@@ -187,9 +187,6 @@ public class ColumnInfoHandler {
         if (embeddedId != null) {
             Class<?> javaType = idColumnInfo.getJavaType();
             idColumnInfoComposites = this.getColumnInfoList(javaType, typeParameterMap);
-            /*for (ColumnInfo columnInfo : idColumnInfoComposites) {
-                columnInfo.setJavaColumnPath(idColumnInfo.getJavaColumnName() + "." + columnInfo.getJavaColumnName());
-            }*/
         }
         idColumnInfo.setId(id);
         idColumnInfo.setEmbeddedId(embeddedId);
@@ -206,17 +203,17 @@ public class ColumnInfoHandler {
         List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = new ArrayList();
         if (joinColumn != null) {
             JoinColumn[] joinColumnList = new JoinColumn[]{joinColumn};
-            inverseForeignKeyColumnInfoList = this.getForeignKeyList(joinColumnList, relationColumnInfo);
+            inverseForeignKeyColumnInfoList = this.getForeignKeyList(joinColumnList);
         }
         if (joinColumns != null) {
             JoinColumn[] joinColumnList = joinColumns.value();
-            inverseForeignKeyColumnInfoList = this.getForeignKeyList(joinColumnList, relationColumnInfo);
+            inverseForeignKeyColumnInfoList = this.getForeignKeyList(joinColumnList);
         }
         if (joinTable != null) {
             JoinColumn[] joinColumnList = joinTable.joinColumns();
-            foreignKeyColumnInfoList = this.getForeignKeyList(joinColumnList, relationColumnInfo);
+            foreignKeyColumnInfoList = this.getForeignKeyList(joinColumnList);
             JoinColumn[] inverseJoinColumnList = joinTable.inverseJoinColumns();
-            inverseForeignKeyColumnInfoList = this.getForeignKeyList(inverseJoinColumnList, relationColumnInfo);
+            inverseForeignKeyColumnInfoList = this.getForeignKeyList(inverseJoinColumnList);
         }
 
         relationColumnInfo.setJoinColumn(joinColumn);
@@ -227,7 +224,7 @@ public class ColumnInfoHandler {
         relationColumnInfo.setInverseForeignKeyColumnInfoList(inverseForeignKeyColumnInfoList);
     }
 
-    private List<ForeignKeyColumnInfo> getForeignKeyList(JoinColumn[] joinColumnList, RelationColumnInfo relationColumnInfo) {
+    private List<ForeignKeyColumnInfo> getForeignKeyList(JoinColumn[] joinColumnList) {
         List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = new ArrayList(5);
         for (JoinColumn joinColumn : joinColumnList) {
             String name = joinColumn.name();

@@ -1,4 +1,9 @@
 package com.mybatisgx.exception;
 
-public class MybatisgxException {
+/**
+ * mybatisgx基础异常
+ * @author ccxuef
+ * @date 2025/11/5 11:33
+ */
+public class MybatisgxException extends RuntimeException {
 }

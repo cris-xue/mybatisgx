@@ -8,6 +8,7 @@ import com.lc.mybatisx.dao.Dao;
 import com.lc.mybatisx.dao.SimpleDao;
 import com.lc.mybatisx.model.*;
 import com.lc.mybatisx.utils.TypeUtils;
+import com.mybatisgx.annotation.IdClass;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -82,7 +83,7 @@ public class MethodInfoHandler {
                 continue;
             }
 
-            List<MethodParamInfo> methodParamInfoList = this.getMethodParamList(mapperInfo, method);
+            MethodParamContext methodParamContext = this.getMethodParam(mapperInfo, method);
             MethodReturnInfo methodReturnInfo = this.getMethodReturn(mapperInfo, method);
 
             MethodInfo methodInfo = new MethodInfo();
@@ -90,7 +91,8 @@ public class MethodInfoHandler {
             methodInfo.setMethodName(methodName);
             methodInfo.setDynamic(method.getAnnotation(Dynamic.class) != null);
             methodInfo.setBatch(method.getAnnotation(BatchOperation.class) != null);
-            methodInfo.setMethodParamInfoList(methodParamInfoList);
+            methodInfo.setEntityParamInfo(methodParamContext.getEntityParamInfo());
+            methodInfo.setMethodParamInfoList(methodParamContext.getMethodParamInfoList());
             methodInfo.setMethodReturnInfo(methodReturnInfo);
 
             // 方法名解析
@@ -120,10 +122,10 @@ public class MethodInfoHandler {
      * @param method
      * @return
      */
-    private List<MethodParamInfo> getMethodParamList(MapperInfo mapperInfo, Method method) {
-        // TODO 方法参数处理，批量操作的参数处理需要单独逻辑
+    private MethodParamContext getMethodParam(MapperInfo mapperInfo, Method method) {
         BatchOperation batchOperation = method.getAnnotation(BatchOperation.class);
         Parameter[] parameters = method.getParameters();
+        MethodParamInfo entityParamInfo = null;
         List<MethodParamInfo> methodParamInfoList = new ArrayList<>();
         for (int i = 0; i < parameters.length; i++) {
             Parameter parameter = parameters[i];
@@ -148,16 +150,27 @@ public class MethodInfoHandler {
             Boolean basicType = this.getBasicType(methodParamType);
             methodParamInfo.setBasicType(basicType);
             if (!basicType && methodParamType != Map.class) {
-                // 获取实体管理器中是否方法参数类型，如果不存在，使用字段处理器对方法参数类型进行字段处理
-                EntityInfo entityInfo = EntityInfoContextHolder.get(methodParamType);
-                List<ColumnInfo> columnInfoList;
-                if (entityInfo != null) {
-                    columnInfoList = entityInfo.getColumnInfoList();
-                } else {
+                IdClass idClass = methodParamType.getAnnotation(IdClass.class);
+                if (idClass != null) {
                     Map<Type, Class<?>> typeParameterMap = mapperInfo.getEntityInfo().getTypeParameterMap();
-                    columnInfoList = columnInfoHandler.getColumnInfoList(methodParamType, typeParameterMap);
+                    List<ColumnInfo> columnInfoList = columnInfoHandler.getColumnInfoList(methodParamType, typeParameterMap);
+                    methodParamInfo.setColumnInfoList(columnInfoList);
                 }
-                methodParamInfo.setColumnInfoList(columnInfoList);
+                // 获取实体管理器中是否方法参数类型，如果不存在，使用字段处理器对方法参数类型进行字段处理
+                Entity entity = methodParamType.getAnnotation(Entity.class);
+                if (entity != null) {
+                    EntityInfo entityInfo = EntityInfoContextHolder.get(methodParamType);
+                    List<ColumnInfo> columnInfoList = entityInfo.getColumnInfoList();
+                    methodParamInfo.setColumnInfoList(columnInfoList);
+                    entityParamInfo = methodParamInfo;
+                }
+                QueryEntity queryEntity = methodParamType.getAnnotation(QueryEntity.class);
+                if (queryEntity != null) {
+                    Map<Type, Class<?>> typeParameterMap = mapperInfo.getEntityInfo().getTypeParameterMap();
+                    List<ColumnInfo> columnInfoList = columnInfoHandler.getColumnInfoList(methodParamType, typeParameterMap);
+                    methodParamInfo.setColumnInfoList(columnInfoList);
+                    entityParamInfo = methodParamInfo;
+                }
             }
             Class<?> collectionType = this.getCollectionType(parameter.getType());
             if (collectionType != null) {
@@ -167,7 +180,7 @@ public class MethodInfoHandler {
 
             methodParamInfoList.add(methodParamInfo);
         }
-        return methodParamInfoList;
+        return new MethodParamContext(entityParamInfo, methodParamInfoList);
     }
 
     private MethodReturnInfo getMethodReturn(MapperInfo mapperInfo, Method method) {
@@ -218,8 +231,8 @@ public class MethodInfoHandler {
             }
         } else {
             for (MethodParamInfo methodParamInfo : methodInfo.getMethodParamInfoList()) {
-                ConditionEntity isConditionEntity = methodParamInfo.getType().getAnnotation(ConditionEntity.class);
-                if (isConditionEntity != null) {
+                QueryEntity isQueryEntity = methodParamInfo.getType().getAnnotation(QueryEntity.class);
+                if (isQueryEntity != null) {
                     String queryEntityCondition = this.entityCondition(methodInfo, methodParamInfo);
                     methodNameAstHandler.execute(entityInfo, methodInfo, methodParamInfo, ConditionOriginType.ENTITY_FIELD, queryEntityCondition);
                 }
@@ -377,5 +390,33 @@ public class MethodInfoHandler {
             }
         }
         return false;
+    }
+
+    private static class MethodParamContext {
+
+        private MethodParamInfo entityParamInfo;
+
+        private List<MethodParamInfo> methodParamInfoList;
+
+        public MethodParamContext(MethodParamInfo entityParamInfo, List<MethodParamInfo> methodParamInfoList) {
+            this.entityParamInfo = entityParamInfo;
+            this.methodParamInfoList = methodParamInfoList;
+        }
+
+        public MethodParamInfo getEntityParamInfo() {
+            return entityParamInfo;
+        }
+
+        public void setEntityParamInfo(MethodParamInfo entityParamInfo) {
+            this.entityParamInfo = entityParamInfo;
+        }
+
+        public List<MethodParamInfo> getMethodParamInfoList() {
+            return methodParamInfoList;
+        }
+
+        public void setMethodParamInfoList(List<MethodParamInfo> methodParamInfoList) {
+            this.methodParamInfoList = methodParamInfoList;
+        }
     }
 }

@@ -50,7 +50,7 @@ public class UpdateTemplateHandler {
     private void setValue(EntityInfo entityInfo, MethodInfo methodInfo, Element setTrimElement) {
         List<MethodParamInfo> methodParamInfoList = methodInfo.getMethodParamInfoList();
         for (MethodParamInfo methodParamInfo : methodParamInfoList) {
-            if (methodParamInfo.getBasicType()) {
+            if (methodParamInfo.getClassCategory() == ClassCategory.SIMPLE) {
                 continue;
             }
             this.setValue(methodInfo, methodParamInfo, setTrimElement);

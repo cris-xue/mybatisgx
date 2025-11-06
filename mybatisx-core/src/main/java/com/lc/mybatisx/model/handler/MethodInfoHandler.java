@@ -21,6 +21,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -32,13 +34,18 @@ public class MethodInfoHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MethodInfoHandler.class);
 
-    private static final List<Class<?>> basicTypeList = new ArrayList<>();
+    private static final List<Class<?>> SIMPLE_TYPE_LIST = new ArrayList<>();
 
     static {
-        basicTypeList.add(int.class);
-        basicTypeList.add(Integer.class);
-        basicTypeList.add(Long.class);
-        basicTypeList.add(String.class);
+        SIMPLE_TYPE_LIST.add(int.class);
+        SIMPLE_TYPE_LIST.add(Integer.class);
+        SIMPLE_TYPE_LIST.add(Long.class);
+        SIMPLE_TYPE_LIST.add(String.class);
+        SIMPLE_TYPE_LIST.add(Double.class);
+        SIMPLE_TYPE_LIST.add(Boolean.class);
+        SIMPLE_TYPE_LIST.add(Date.class);
+        SIMPLE_TYPE_LIST.add(LocalDate.class);
+        SIMPLE_TYPE_LIST.add(LocalDateTime.class);
     }
 
     private ColumnInfoHandler columnInfoHandler = new ColumnInfoHandler();
@@ -147,9 +154,9 @@ public class MethodInfoHandler {
                 methodParamInfo.setBatchSize(true);
             }
 
-            Boolean basicType = this.getBasicType(methodParamType);
-            methodParamInfo.setBasicType(basicType);
-            if (!basicType && methodParamType != Map.class) {
+            ClassCategory classCategory = this.getBasicType(methodParamType);
+            methodParamInfo.setClassCategory(classCategory);
+            if (classCategory == ClassCategory.COMPLEX && methodParamType != Map.class) {
                 IdClass idClass = methodParamType.getAnnotation(IdClass.class);
                 if (idClass != null) {
                     Map<Type, Class<?>> typeParameterMap = mapperInfo.getEntityInfo().getTypeParameterMap();
@@ -185,13 +192,13 @@ public class MethodInfoHandler {
 
     private MethodReturnInfo getMethodReturn(MapperInfo mapperInfo, Method method) {
         Class<?> methodReturnType = this.getMethodReturnType(mapperInfo, method);
-        Boolean basicType = this.getBasicType(methodReturnType);
+        ClassCategory classCategory = this.getBasicType(methodReturnType);
 
         MethodReturnInfo methodReturnInfo = new MethodReturnInfo();
-        methodReturnInfo.setBasicType(basicType);
+        methodReturnInfo.setClassCategory(classCategory);
         methodReturnInfo.setType(methodReturnType);
         methodReturnInfo.setTypeName(methodReturnType.getName());
-        if (!basicType && methodReturnType != Map.class) {
+        if (classCategory == ClassCategory.COMPLEX && methodReturnType != Map.class) {
             Map<Type, Class<?>> typeParameterMap = mapperInfo.getEntityInfo().getTypeParameterMap();
             List<ColumnInfo> columnInfoList = columnInfoHandler.getColumnInfoList(methodReturnType, typeParameterMap);
             methodReturnInfo.setColumnInfoList(columnInfoList);
@@ -383,13 +390,13 @@ public class MethodInfoHandler {
         return null;
     }
 
-    public Boolean getBasicType(Type type) {
-        for (Class<?> basicType : basicTypeList) {
-            if (type == basicType) {
-                return true;
+    public ClassCategory getBasicType(Type type) {
+        for (Class<?> simpleType : SIMPLE_TYPE_LIST) {
+            if (type == simpleType) {
+                return ClassCategory.SIMPLE;
             }
         }
-        return false;
+        return ClassCategory.COMPLEX;
     }
 
     private static class MethodParamContext {

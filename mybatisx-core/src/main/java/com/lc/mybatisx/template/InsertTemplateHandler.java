@@ -102,7 +102,7 @@ public class InsertTemplateHandler {
             if (methodParamInfo.getBatchSize()) {
                 continue;
             }
-            if (methodParamInfo.getBasicType()) {
+            if (methodParamInfo.getClassCategory() == ClassCategory.SIMPLE) {
                 continue;
             }
             this.setColumn(methodInfo, methodParamInfo, dbTrimElement);
@@ -175,8 +175,7 @@ public class InsertTemplateHandler {
             if (isBatch && methodParamInfo.getBatchSize()) {
                 continue;
             }
-            Boolean isBasicType = methodParamInfo.getBasicType();
-            if (isBasicType) {
+            if (methodParamInfo.getClassCategory() == ClassCategory.SIMPLE) {
                 throw new RuntimeException("新增方法参数不支持定义基础类型");
             }
 

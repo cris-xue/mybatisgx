@@ -277,11 +277,11 @@ public class MethodInfoHandler {
      * @param conditionInfoList
      */
     private void bindConditionParam(MethodInfo methodInfo, List<ConditionInfo> conditionInfoList) {
+        // 如果没有实体参数，则不需要绑定参数
+        if (methodInfo.getEntityParamInfo() == null) {
+            return;
+        }
         for (ConditionInfo conditionInfo : conditionInfoList) {
-            // 条件来自于实体字段，就无法和参数进行绑定
-            if (conditionInfo.getConditionOriginType() == ConditionOriginType.ENTITY_FIELD) {
-                continue;
-            }
             ConditionGroupInfo conditionGroupInfo = conditionInfo.getConditionGroupInfo();
             if (conditionGroupInfo != null) {
                 this.bindConditionParam(methodInfo, conditionGroupInfo.getConditionInfoList());
@@ -290,13 +290,13 @@ public class MethodInfoHandler {
                 Integer index = conditionInfo.getIndex();
                 String conditionColumnName = conditionInfo.getColumnName();
 
-                // 采用4种方式获取参数：argx -> conditionName -> conditionName.toLowerCase() -> paramx：【arg0 -> userName -> username -> param1】
-                MethodParamInfo methodParamInfo = methodInfo.getMethodParamInfo("arg" + index);
-                if (methodParamInfo == null) {
-                    methodParamInfo = methodInfo.getMethodParamInfo(conditionColumnName);
-                }
+                // 采用4种方式获取参数：conditionName -> conditionName.toLowerCase() -> argx -> paramx：【userName -> username -> arg0 -> param1】
+                MethodParamInfo methodParamInfo = methodInfo.getMethodParamInfo(conditionColumnName);
                 if (methodParamInfo == null) {
                     methodParamInfo = methodInfo.getMethodParamInfo(conditionColumnName.toLowerCase());
+                }
+                if (methodParamInfo == null) {
+                    methodParamInfo = methodInfo.getMethodParamInfo("arg" + index);
                 }
                 if (methodParamInfo == null) {
                     methodParamInfo = methodInfo.getMethodParamInfo("param" + (index + 1));

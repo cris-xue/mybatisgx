@@ -3,6 +3,7 @@ package com.lc.mybatisx.model;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author ：薛承城
@@ -51,6 +52,10 @@ public class MethodParamInfo {
      * 字段信息
      */
     private List<ColumnInfo> columnInfoList;
+    /**
+     * 字段信息Map
+     */
+    private Map<String, ColumnInfo> columnInfoMap;
     /**
      * 是否批量参数
      */
@@ -142,6 +147,13 @@ public class MethodParamInfo {
 
     public void setColumnInfoList(List<ColumnInfo> columnInfoList) {
         this.columnInfoList = columnInfoList;
+        for (ColumnInfo columnInfo : columnInfoList) {
+            this.columnInfoMap.put(columnInfo.getJavaColumnName(), columnInfo);
+        }
+    }
+
+    public ColumnInfo getColumnInfo(String javaColumnName) {
+        return this.columnInfoMap.get(javaColumnName);
     }
 
     public Boolean getBatchSize() {

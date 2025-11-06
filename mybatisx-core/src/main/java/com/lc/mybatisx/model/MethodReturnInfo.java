@@ -10,9 +10,9 @@ import java.util.List;
 public class MethodReturnInfo {
 
     /**
-     * 是否基础类型
+     * 类型分类
      */
-    private Boolean isBasicType;
+    private ClassCategory classCategory;
     /**
      * 类型，Integer、User
      */
@@ -34,12 +34,12 @@ public class MethodReturnInfo {
      */
     List<ColumnInfo> columnInfoList;
 
-    public Boolean getBasicType() {
-        return isBasicType;
+    public ClassCategory getClassCategory() {
+        return classCategory;
     }
 
-    public void setBasicType(Boolean basicType) {
-        isBasicType = basicType;
+    public void setClassCategory(ClassCategory classCategory) {
+        this.classCategory = classCategory;
     }
 
     public Class<?> getType() {

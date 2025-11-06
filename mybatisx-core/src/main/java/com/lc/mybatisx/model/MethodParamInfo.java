@@ -16,9 +16,9 @@ public class MethodParamInfo {
      */
     private Integer index;
     /**
-     * 是否基础类型
+     * 类型分类
      */
-    private Boolean isBasicType;
+    private ClassCategory classCategory;
     /**
      * 类型，Integer、User、Map
      */
@@ -72,12 +72,12 @@ public class MethodParamInfo {
         this.index = index;
     }
 
-    public Boolean getBasicType() {
-        return isBasicType;
+    public ClassCategory getClassCategory() {
+        return classCategory;
     }
 
-    public void setBasicType(Boolean basicType) {
-        isBasicType = basicType;
+    public void setClassCategory(ClassCategory classCategory) {
+        this.classCategory = classCategory;
     }
 
     public Class<?> getType() {

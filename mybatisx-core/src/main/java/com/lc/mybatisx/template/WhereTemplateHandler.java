@@ -92,7 +92,7 @@ public class WhereTemplateHandler {
 
         void handle(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement);
 
-        WhereItemContext handleSimpleTypeSingleParam();
+        WhereItemContext handleSimpleTypeSingleParam(ColumnInfo columnInfo);
 
         WhereItemContext handleSimpleTypeNoAnnotationSingleParam(ColumnInfo columnInfo);
 
@@ -105,7 +105,7 @@ public class WhereTemplateHandler {
         WhereItemContext handleRelationColumnSingleParam(RelationColumnInfo relationColumnInfo, ForeignKeyColumnInfo foreignKeyInfo);
 
 
-        WhereItemContext handleSimpleTypeMultiParam();
+        WhereItemContext handleSimpleTypeMultiParam(ColumnInfo columnInfo);
 
         WhereItemContext handleSimpleTypeNoAnnotationMultiParam(ColumnInfo columnInfo);
 
@@ -359,7 +359,7 @@ public class WhereTemplateHandler {
     static class LikeConditionHandler extends AbstractConditionHandler {
 
         @Override
-        public WhereItemContext handleSimpleTypeSingleParam() {
+        public WhereItemContext handleSimpleTypeSingleParam(ColumnInfo columnInfo) {
             String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
             String bindValuePath = String.format("%1$s", methodParamInfo.getArgName());
             Element likeBindElement = this.buildLikeBindElement(bindValuePath);
@@ -452,18 +452,18 @@ public class WhereTemplateHandler {
             ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();
             String testExpression = String.format(
                     "%1$s != null and %1$s.%2$s != null",
-                    columnInfo.getJavaColumnName(),
+                    relationColumnInfo.getJavaColumnName(),
                     referencedColumnInfo.getJavaColumnName()
             );
             String bindValuePath = String.format(
                     "%1$s.%2$s",
-                    columnInfo.getJavaColumnName(),
+                    relationColumnInfo.getJavaColumnName(),
                     referencedColumnInfo.getJavaColumnName()
             );
             Element likeBindElement = this.buildLikeBindElement(bindValuePath);
             String paramValueExpression = String.format(
                     "#{%1$s.%2$s}",
-                    columnInfo.getJavaColumnName(),
+                    relationColumnInfo.getJavaColumnName(),
                     referencedColumnInfo.getJavaColumnName()
             );
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, relationColumnInfo, paramValueExpression);
@@ -471,13 +471,13 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleSimpleTypeMultiParam() {
+        public WhereItemContext handleSimpleTypeMultiParam(ColumnInfo columnInfo) {
             /*String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
             String bindValuePath = String.format("%1$s", methodParamInfo.getArgName());
             Element likeBindElement = this.buildLikeBindElement(bindValuePath);
             String paramValueExpression = String.format("#{%1$s}", methodParamInfo.getArgName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);*/
-            return this.handleSimpleTypeSingleParam();
+            return this.handleSimpleTypeSingleParam(columnInfo);
         }
 
         @Override
@@ -580,20 +580,20 @@ public class WhereTemplateHandler {
             String testExpression = String.format(
                     "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
                     methodParamInfo.getArgName(),
-                    columnInfo.getJavaColumnName(),
+                    relationColumnInfo.getJavaColumnName(),
                     referencedColumnInfo.getJavaColumnName()
             );
             String bindValuePath = String.format(
                     "%1$s.%2$s.%3$s",
                     methodParamInfo.getArgName(),
-                    columnInfo.getJavaColumnName(),
+                    relationColumnInfo.getJavaColumnName(),
                     referencedColumnInfo.getJavaColumnName()
             );
             Element likeBindElement = this.buildLikeBindElement(bindValuePath);
             String paramValueExpression = String.format(
                     "#{%1$s.%2$s.%3$s}",
                     methodParamInfo.getArgName(),
-                    columnInfo.getJavaColumnName(),
+                    relationColumnInfo.getJavaColumnName(),
                     referencedColumnInfo.getJavaColumnName()
             );
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, relationColumnInfo, paramValueExpression);
@@ -619,7 +619,7 @@ public class WhereTemplateHandler {
     static class InConditionHandler extends AbstractConditionHandler {
 
         @Override
-        public WhereItemContext handleSimpleTypeSingleParam() {
+        public WhereItemContext handleSimpleTypeSingleParam(ColumnInfo columnInfo) {
             String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
             String paramValueExpression = String.format("%1$s", methodParamInfo.getArgName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, "");
@@ -694,12 +694,12 @@ public class WhereTemplateHandler {
             ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();
             String testExpression = String.format(
                     "%1$s != null and %1$s.%2$s != null",
-                    columnInfo.getJavaColumnName(),
+                    relationColumnInfo.getJavaColumnName(),
                     referencedColumnInfo.getJavaColumnName()
             );
             String paramValueExpression = String.format(
                     "%1$s.%2$s",
-                    columnInfo.getJavaColumnName(),
+                    relationColumnInfo.getJavaColumnName(),
                     referencedColumnInfo.getJavaColumnName()
             );
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, relationColumnInfo, "");
@@ -708,12 +708,12 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleSimpleTypeMultiParam() {
+        public WhereItemContext handleSimpleTypeMultiParam(ColumnInfo columnInfo) {
             /*String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
             String paramValueExpression = String.format("%1$s", methodParamInfo.getArgName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, "");
             Element foreachElement = this.buildForeachElement(paramValueExpression);*/
-            return this.handleSimpleTypeSingleParam();
+            return this.handleSimpleTypeSingleParam(columnInfo);
         }
 
         @Override
@@ -794,13 +794,13 @@ public class WhereTemplateHandler {
             String testExpression = String.format(
                     "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
                     methodParamInfo.getArgName(),
-                    columnInfo.getJavaColumnName(),
+                    relationColumnInfo.getJavaColumnName(),
                     referencedColumnInfo.getJavaColumnName()
             );
             String paramValueExpression = String.format(
                     "%1$s.%2$s.%3$s",
                     methodParamInfo.getArgName(),
-                    columnInfo.getJavaColumnName(),
+                    relationColumnInfo.getJavaColumnName(),
                     referencedColumnInfo.getJavaColumnName()
             );
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, relationColumnInfo, "");
@@ -824,7 +824,7 @@ public class WhereTemplateHandler {
     static class BetweenConditionHandler extends AbstractConditionHandler {
 
         @Override
-        public WhereItemContext handleSimpleTypeSingleParam() {
+        public WhereItemContext handleSimpleTypeSingleParam(ColumnInfo columnInfo) {
             String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
             String paramValueExpression = String.format("#{%1$s[0]} and #{%1$s[1]}", methodParamInfo.getArgName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
@@ -894,12 +894,12 @@ public class WhereTemplateHandler {
             ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();
             String testExpression = String.format(
                     "%1$s != null and %1$s.%2$s != null",
-                    columnInfo.getJavaColumnName(),
+                    relationColumnInfo.getJavaColumnName(),
                     referencedColumnInfo.getJavaColumnName()
             );
             String paramValueExpression = String.format(
                     "#{%1$s.%2$s[0]} and #{%1$s.%2$s[1]}",
-                    columnInfo.getJavaColumnName(),
+                    relationColumnInfo.getJavaColumnName(),
                     referencedColumnInfo.getJavaColumnName()
             );
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, relationColumnInfo, paramValueExpression);
@@ -907,11 +907,11 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleSimpleTypeMultiParam() {
+        public WhereItemContext handleSimpleTypeMultiParam(ColumnInfo columnInfo) {
             /*String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
             String paramValueExpression = String.format("#{%1$s[0]} and #{%1$s[1]}", methodParamInfo.getArgName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);*/
-            return this.handleSimpleTypeSingleParam();
+            return this.handleSimpleTypeSingleParam(columnInfo);
         }
 
         @Override
@@ -988,13 +988,13 @@ public class WhereTemplateHandler {
             String testExpression = String.format(
                     "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
                     methodParamInfo.getArgName(),
-                    columnInfo.getJavaColumnName(),
+                    relationColumnInfo.getJavaColumnName(),
                     referencedColumnInfo.getJavaColumnName()
             );
             String paramValueExpression = String.format(
                     "#{%1$s.%2$s.%3$s[0]} and #{%1$s.%2$s.%3$s[1]}",
                     methodParamInfo.getArgName(),
-                    columnInfo.getJavaColumnName(),
+                    relationColumnInfo.getJavaColumnName(),
                     referencedColumnInfo.getJavaColumnName()
             );
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, relationColumnInfo, paramValueExpression);
@@ -1005,7 +1005,7 @@ public class WhereTemplateHandler {
     static class CommonConditionHandler extends AbstractConditionHandler {
 
         @Override
-        public WhereItemContext handleSimpleTypeSingleParam() {
+        public WhereItemContext handleSimpleTypeSingleParam(ColumnInfo columnInfo) {
             String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
             String paramValueExpression = String.format("#{%1$s}", methodParamInfo.getArgName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
@@ -1075,12 +1075,12 @@ public class WhereTemplateHandler {
             ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();
             String testExpression = String.format(
                     "%1$s != null and %1$s.%2$s != null",
-                    columnInfo.getJavaColumnName(),
+                    relationColumnInfo.getJavaColumnName(),
                     referencedColumnInfo.getJavaColumnName()
             );
             String paramValueExpression = String.format(
                     "#{%1$s.%2$s}",
-                    columnInfo.getJavaColumnName(),
+                    relationColumnInfo.getJavaColumnName(),
                     referencedColumnInfo.getJavaColumnName()
             );
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, relationColumnInfo, paramValueExpression);
@@ -1088,11 +1088,11 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleSimpleTypeMultiParam() {
+        public WhereItemContext handleSimpleTypeMultiParam(ColumnInfo columnInfo) {
             /*String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
             String paramValueExpression = String.format("#{%1$s}", methodParamInfo.getArgName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);*/
-            return this.handleSimpleTypeSingleParam();
+            return this.handleSimpleTypeSingleParam(columnInfo);
         }
 
         @Override
@@ -1169,13 +1169,13 @@ public class WhereTemplateHandler {
             String testExpression = String.format(
                     "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
                     methodParamInfo.getArgName(),
-                    columnInfo.getJavaColumnName(),
+                    relationColumnInfo.getJavaColumnName(),
                     referencedColumnInfo.getJavaColumnName()
             );
             String paramValueExpression = String.format(
                     "#{%1$s.%2$s.%3$s}",
                     methodParamInfo.getArgName(),
-                    columnInfo.getJavaColumnName(),
+                    relationColumnInfo.getJavaColumnName(),
                     referencedColumnInfo.getJavaColumnName()
             );
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, relationColumnInfo, paramValueExpression);

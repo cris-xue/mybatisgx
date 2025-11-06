@@ -10,6 +10,11 @@ import org.dom4j.Element;
 
 import java.util.*;
 
+/**
+ * 条件模板处理器。修改和删除的条件只能采用方法名定义，不能使用查询实体作为修改和删除方法的条件。
+ * @author ccxuef
+ * @date 2025/11/5 19:26
+ */
 public class WhereTemplateHandler {
 
     public void execute(Element parentElement, EntityInfo entityInfo, MethodInfo methodInfo) {

@@ -173,7 +173,7 @@ public class WhereTemplateHandler {
             if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class, ColumnInfo.class)) {
                 if (methodParamInfo.getBasicType()) {
                     // findById(Long id) findById(@Param("id") Long id)
-                    WhereItemContext whereItemContext = this.handleSimpleTypeSingleParam();
+                    WhereItemContext whereItemContext = this.handleSimpleTypeSingleParam(columnInfo);
                     whereItemContextList.add(whereItemContext);
                 } else {
                     // findById(MultiId id) findById(@Param("id") MultiId id)
@@ -239,7 +239,7 @@ public class WhereTemplateHandler {
             if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class, ColumnInfo.class)) {
                 if (methodParamInfo.getBasicType()) {
                     // findById(Long id) findById(@Param("id") Long id)
-                    WhereItemContext whereItemContext = this.handleSimpleTypeMultiParam();
+                    WhereItemContext whereItemContext = this.handleSimpleTypeMultiParam(columnInfo);
                     whereItemContextList.add(whereItemContext);
                 } else {
                     // findById(MultiId id) findById(@Param("id") MultiId id)

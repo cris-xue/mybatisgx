@@ -92,28 +92,28 @@ public class WhereTemplateHandler {
 
         void handle(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement);
 
-        WhereItemContext handleBasicTypeSingleParam();
+        WhereItemContext handleSimpleTypeSingleParam();
 
-        WhereItemContext handleObjectTypeNoAnnotationSingleParam(ColumnInfo columnInfo);
+        WhereItemContext handleSimpleTypeNoAnnotationSingleParam(ColumnInfo columnInfo);
 
-        WhereItemContext handleObjectTypeNoAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite);
+        WhereItemContext handleComplexTypeNoAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite);
 
-        WhereItemContext handleObjectTypeWithAnnotationSingleParam(ColumnInfo columnInfo);
+        WhereItemContext handleSimpleTypeWithAnnotationSingleParam(ColumnInfo columnInfo);
 
-        WhereItemContext handleObjectTypeWithAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite);
+        WhereItemContext handleComplexTypeWithAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite);
 
         WhereItemContext handleRelationColumnSingleParam(RelationColumnInfo relationColumnInfo, ForeignKeyColumnInfo foreignKeyInfo);
 
 
-        WhereItemContext handleBasicTypeMultiParam();
+        WhereItemContext handleSimpleTypeMultiParam();
 
-        WhereItemContext handleObjectTypeNoAnnotationMultiParam(ColumnInfo columnInfo);
+        WhereItemContext handleSimpleTypeNoAnnotationMultiParam(ColumnInfo columnInfo);
 
-        WhereItemContext handleObjectTypeNoAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite);
+        WhereItemContext handleComplexTypeNoAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite);
 
-        WhereItemContext handleObjectTypeWithAnnotationMultiParam(ColumnInfo columnInfo);
+        WhereItemContext handleSimpleTypeWithAnnotationMultiParam(ColumnInfo columnInfo);
 
-        WhereItemContext handleObjectTypeWithAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite);
+        WhereItemContext handleComplexTypeWithAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite);
 
         WhereItemContext handleRelationColumnMultiParam(RelationColumnInfo relationColumnInfo, ForeignKeyColumnInfo foreignKeyInfo);
     }
@@ -173,7 +173,7 @@ public class WhereTemplateHandler {
             if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class, ColumnInfo.class)) {
                 if (methodParamInfo.getBasicType()) {
                     // findById(Long id) findById(@Param("id") Long id)
-                    WhereItemContext whereItemContext = this.handleBasicTypeSingleParam();
+                    WhereItemContext whereItemContext = this.handleSimpleTypeSingleParam();
                     whereItemContextList.add(whereItemContext);
                 } else {
                     // findById(MultiId id) findById(@Param("id") MultiId id)
@@ -211,11 +211,11 @@ public class WhereTemplateHandler {
         private void processSingleParamNoAnnotation(List<WhereItemContext> whereItemContextList, ColumnInfo columnInfo) {
             List<ColumnInfo> columnInfoComposites = columnInfo.getComposites();
             if (ObjectUtils.isEmpty(columnInfoComposites)) {
-                WhereItemContext whereItemContext = this.handleObjectTypeNoAnnotationSingleParam(columnInfo);
+                WhereItemContext whereItemContext = this.handleSimpleTypeNoAnnotationSingleParam(columnInfo);
                 whereItemContextList.add(whereItemContext);
             } else {
                 for (ColumnInfo columnInfoComposite : columnInfoComposites) {
-                    WhereItemContext whereItemContext = this.handleObjectTypeNoAnnotationSingleParam(columnInfo, columnInfoComposite);
+                    WhereItemContext whereItemContext = this.handleComplexTypeNoAnnotationSingleParam(columnInfo, columnInfoComposite);
                     whereItemContextList.add(whereItemContext);
                 }
             }
@@ -224,11 +224,11 @@ public class WhereTemplateHandler {
         private void processSingleParamWithAnnotation(List<WhereItemContext> whereItemContextList, ColumnInfo columnInfo) {
             List<ColumnInfo> columnInfoComposites = columnInfo.getComposites();
             if (ObjectUtils.isEmpty(columnInfoComposites)) {
-                WhereItemContext whereItemContext = this.handleObjectTypeWithAnnotationSingleParam(columnInfo);
+                WhereItemContext whereItemContext = this.handleSimpleTypeWithAnnotationSingleParam(columnInfo);
                 whereItemContextList.add(whereItemContext);
             } else {
                 for (ColumnInfo columnInfoComposite : columnInfoComposites) {
-                    WhereItemContext whereItemContext = this.handleObjectTypeWithAnnotationSingleParam(columnInfo, columnInfoComposite);
+                    WhereItemContext whereItemContext = this.handleComplexTypeWithAnnotationSingleParam(columnInfo, columnInfoComposite);
                     whereItemContextList.add(whereItemContext);
                 }
             }
@@ -239,7 +239,7 @@ public class WhereTemplateHandler {
             if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class, ColumnInfo.class)) {
                 if (methodParamInfo.getBasicType()) {
                     // findById(Long id) findById(@Param("id") Long id)
-                    WhereItemContext whereItemContext = this.handleBasicTypeMultiParam();
+                    WhereItemContext whereItemContext = this.handleSimpleTypeMultiParam();
                     whereItemContextList.add(whereItemContext);
                 } else {
                     // findById(MultiId id) findById(@Param("id") MultiId id)
@@ -277,11 +277,11 @@ public class WhereTemplateHandler {
         private void processMultiParamNoAnnotation(List<WhereItemContext> whereItemContextList, ColumnInfo columnInfo) {
             List<ColumnInfo> columnInfoComposites = columnInfo.getComposites();
             if (ObjectUtils.isEmpty(columnInfoComposites)) {
-                WhereItemContext whereItemContext = this.handleObjectTypeNoAnnotationMultiParam(columnInfo);
+                WhereItemContext whereItemContext = this.handleSimpleTypeNoAnnotationMultiParam(columnInfo);
                 whereItemContextList.add(whereItemContext);
             } else {
                 for (ColumnInfo columnInfoComposite : columnInfoComposites) {
-                    WhereItemContext whereItemContext = this.handleObjectTypeNoAnnotationMultiParam(columnInfo, columnInfoComposite);
+                    WhereItemContext whereItemContext = this.handleComplexTypeNoAnnotationMultiParam(columnInfo, columnInfoComposite);
                     whereItemContextList.add(whereItemContext);
                 }
             }
@@ -290,11 +290,11 @@ public class WhereTemplateHandler {
         private void processMultiParamWithAnnotation(List<WhereItemContext> whereItemContextList, ColumnInfo columnInfo) {
             List<ColumnInfo> columnInfoComposites = columnInfo.getComposites();
             if (ObjectUtils.isEmpty(columnInfoComposites)) {
-                WhereItemContext whereItemContext = this.handleObjectTypeWithAnnotationMultiParam(columnInfo);
+                WhereItemContext whereItemContext = this.handleSimpleTypeWithAnnotationMultiParam(columnInfo);
                 whereItemContextList.add(whereItemContext);
             } else {
                 for (ColumnInfo columnInfoComposite : columnInfoComposites) {
-                    WhereItemContext whereItemContext = this.handleObjectTypeWithAnnotationMultiParam(columnInfo, columnInfoComposite);
+                    WhereItemContext whereItemContext = this.handleComplexTypeWithAnnotationMultiParam(columnInfo, columnInfoComposite);
                     whereItemContextList.add(whereItemContext);
                 }
             }
@@ -359,7 +359,7 @@ public class WhereTemplateHandler {
     static class LikeConditionHandler extends AbstractConditionHandler {
 
         @Override
-        public WhereItemContext handleBasicTypeSingleParam() {
+        public WhereItemContext handleSimpleTypeSingleParam() {
             String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
             String bindValuePath = String.format("%1$s", methodParamInfo.getArgName());
             Element likeBindElement = this.buildLikeBindElement(bindValuePath);
@@ -369,7 +369,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleObjectTypeNoAnnotationSingleParam(ColumnInfo columnInfo) {
+        public WhereItemContext handleSimpleTypeNoAnnotationSingleParam(ColumnInfo columnInfo) {
             String testExpression = String.format("%1$s != null", conditionInfo.getColumnName());
             String bindValuePath = String.format("%1$s", conditionInfo.getColumnName());
             Element likeBindElement = this.buildLikeBindElement(bindValuePath);
@@ -379,7 +379,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleObjectTypeNoAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
+        public WhereItemContext handleComplexTypeNoAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
             String testExpression = String.format(
                     "%1$s != null and %1$s.%2$s != null",
                     columnInfo.getJavaColumnName(),
@@ -401,7 +401,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleObjectTypeWithAnnotationSingleParam(ColumnInfo columnInfo) {
+        public WhereItemContext handleSimpleTypeWithAnnotationSingleParam(ColumnInfo columnInfo) {
             String testExpression = String.format(
                     "%1$s != null and %1$s.%2$s != null",
                     methodParamInfo.getArgName(),
@@ -423,7 +423,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleObjectTypeWithAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
+        public WhereItemContext handleComplexTypeWithAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
             String testExpression = String.format(
                     "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
                     methodParamInfo.getArgName(),
@@ -471,17 +471,17 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleBasicTypeMultiParam() {
+        public WhereItemContext handleSimpleTypeMultiParam() {
             /*String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
             String bindValuePath = String.format("%1$s", methodParamInfo.getArgName());
             Element likeBindElement = this.buildLikeBindElement(bindValuePath);
             String paramValueExpression = String.format("#{%1$s}", methodParamInfo.getArgName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);*/
-            return this.handleBasicTypeSingleParam();
+            return this.handleSimpleTypeSingleParam();
         }
 
         @Override
-        public WhereItemContext handleObjectTypeNoAnnotationMultiParam(ColumnInfo columnInfo) {
+        public WhereItemContext handleSimpleTypeNoAnnotationMultiParam(ColumnInfo columnInfo) {
             String testExpression = String.format(
                     "%1$s != null and %1$s.%2$s != null",
                     methodParamInfo.getArgName(),
@@ -503,7 +503,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleObjectTypeNoAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
+        public WhereItemContext handleComplexTypeNoAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
             String testExpression = String.format(
                     "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
                     methodParamInfo.getArgName(),
@@ -528,7 +528,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleObjectTypeWithAnnotationMultiParam(ColumnInfo columnInfo) {
+        public WhereItemContext handleSimpleTypeWithAnnotationMultiParam(ColumnInfo columnInfo) {
             String testExpression = String.format(
                     "%1$s != null and %1$s.%2$s != null",
                     methodParamInfo.getArgName(),
@@ -550,7 +550,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleObjectTypeWithAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
+        public WhereItemContext handleComplexTypeWithAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
             String testExpression = String.format(
                     "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
                     methodParamInfo.getArgName(),
@@ -619,7 +619,7 @@ public class WhereTemplateHandler {
     static class InConditionHandler extends AbstractConditionHandler {
 
         @Override
-        public WhereItemContext handleBasicTypeSingleParam() {
+        public WhereItemContext handleSimpleTypeSingleParam() {
             String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
             String paramValueExpression = String.format("%1$s", methodParamInfo.getArgName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, "");
@@ -628,7 +628,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleObjectTypeNoAnnotationSingleParam(ColumnInfo columnInfo) {
+        public WhereItemContext handleSimpleTypeNoAnnotationSingleParam(ColumnInfo columnInfo) {
             String testExpression = String.format("%1$s != null", conditionInfo.getColumnName());
             String paramValueExpression = String.format("%1$s", conditionInfo.getColumnName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, "");
@@ -637,7 +637,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleObjectTypeNoAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
+        public WhereItemContext handleComplexTypeNoAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
             String testExpression = String.format(
                     "%1$s != null and %1$s.%2$s != null",
                     columnInfo.getJavaColumnName(),
@@ -654,7 +654,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleObjectTypeWithAnnotationSingleParam(ColumnInfo columnInfo) {
+        public WhereItemContext handleSimpleTypeWithAnnotationSingleParam(ColumnInfo columnInfo) {
             String testExpression = String.format(
                     "%1$s != null and %1$s.%2$s != null",
                     methodParamInfo.getArgName(),
@@ -671,7 +671,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleObjectTypeWithAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
+        public WhereItemContext handleComplexTypeWithAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
             String testExpression = String.format(
                     "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
                     methodParamInfo.getArgName(),
@@ -708,16 +708,16 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleBasicTypeMultiParam() {
+        public WhereItemContext handleSimpleTypeMultiParam() {
             /*String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
             String paramValueExpression = String.format("%1$s", methodParamInfo.getArgName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, "");
             Element foreachElement = this.buildForeachElement(paramValueExpression);*/
-            return this.handleBasicTypeSingleParam();
+            return this.handleSimpleTypeSingleParam();
         }
 
         @Override
-        public WhereItemContext handleObjectTypeNoAnnotationMultiParam(ColumnInfo columnInfo) {
+        public WhereItemContext handleSimpleTypeNoAnnotationMultiParam(ColumnInfo columnInfo) {
             String testExpression = String.format(
                     "%1$s != null and %1$s.%2$s != null",
                     methodParamInfo.getArgName(),
@@ -734,7 +734,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleObjectTypeNoAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
+        public WhereItemContext handleComplexTypeNoAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
             String testExpression = String.format(
                     "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
                     methodParamInfo.getArgName(),
@@ -753,7 +753,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleObjectTypeWithAnnotationMultiParam(ColumnInfo columnInfo) {
+        public WhereItemContext handleSimpleTypeWithAnnotationMultiParam(ColumnInfo columnInfo) {
             String testExpression = String.format(
                     "%1$s != null and %1$s.%2$s != null",
                     methodParamInfo.getArgName(),
@@ -770,7 +770,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleObjectTypeWithAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
+        public WhereItemContext handleComplexTypeWithAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
             String testExpression = String.format(
                     "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
                     methodParamInfo.getArgName(),
@@ -824,7 +824,7 @@ public class WhereTemplateHandler {
     static class BetweenConditionHandler extends AbstractConditionHandler {
 
         @Override
-        public WhereItemContext handleBasicTypeSingleParam() {
+        public WhereItemContext handleSimpleTypeSingleParam() {
             String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
             String paramValueExpression = String.format("#{%1$s[0]} and #{%1$s[1]}", methodParamInfo.getArgName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
@@ -832,7 +832,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleObjectTypeNoAnnotationSingleParam(ColumnInfo columnInfo) {
+        public WhereItemContext handleSimpleTypeNoAnnotationSingleParam(ColumnInfo columnInfo) {
             String testExpression = String.format("%1$s != null", conditionInfo.getColumnName());
             String paramValueExpression = String.format("#{%1$s[0]} and #{%1$s[1]}", conditionInfo.getColumnName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
@@ -840,7 +840,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleObjectTypeNoAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
+        public WhereItemContext handleComplexTypeNoAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
             String testExpression = String.format(
                     "%1$s != null and %1$s.%2$s != null",
                     columnInfo.getJavaColumnName(),
@@ -856,7 +856,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleObjectTypeWithAnnotationSingleParam(ColumnInfo columnInfo) {
+        public WhereItemContext handleSimpleTypeWithAnnotationSingleParam(ColumnInfo columnInfo) {
             String testExpression = String.format(
                     "%1$s != null and %1$s.%2$s != null",
                     methodParamInfo.getArgName(),
@@ -872,7 +872,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleObjectTypeWithAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
+        public WhereItemContext handleComplexTypeWithAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
             String testExpression = String.format(
                     "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
                     methodParamInfo.getArgName(),
@@ -907,15 +907,15 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleBasicTypeMultiParam() {
+        public WhereItemContext handleSimpleTypeMultiParam() {
             /*String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
             String paramValueExpression = String.format("#{%1$s[0]} and #{%1$s[1]}", methodParamInfo.getArgName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);*/
-            return this.handleBasicTypeSingleParam();
+            return this.handleSimpleTypeSingleParam();
         }
 
         @Override
-        public WhereItemContext handleObjectTypeNoAnnotationMultiParam(ColumnInfo columnInfo) {
+        public WhereItemContext handleSimpleTypeNoAnnotationMultiParam(ColumnInfo columnInfo) {
             String testExpression = String.format(
                     "%1$s != null and %1$s.%2$s != null",
                     methodParamInfo.getArgName(),
@@ -931,7 +931,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleObjectTypeNoAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
+        public WhereItemContext handleComplexTypeNoAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
             String testExpression = String.format(
                     "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
                     methodParamInfo.getArgName(),
@@ -949,7 +949,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleObjectTypeWithAnnotationMultiParam(ColumnInfo columnInfo) {
+        public WhereItemContext handleSimpleTypeWithAnnotationMultiParam(ColumnInfo columnInfo) {
             String testExpression = String.format(
                     "%1$s != null and %1$s.%2$s != null",
                     methodParamInfo.getArgName(),
@@ -965,7 +965,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleObjectTypeWithAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
+        public WhereItemContext handleComplexTypeWithAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
             String testExpression = String.format(
                     "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
                     methodParamInfo.getArgName(),
@@ -1005,7 +1005,7 @@ public class WhereTemplateHandler {
     static class CommonConditionHandler extends AbstractConditionHandler {
 
         @Override
-        public WhereItemContext handleBasicTypeSingleParam() {
+        public WhereItemContext handleSimpleTypeSingleParam() {
             String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
             String paramValueExpression = String.format("#{%1$s}", methodParamInfo.getArgName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
@@ -1013,7 +1013,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleObjectTypeNoAnnotationSingleParam(ColumnInfo columnInfo) {
+        public WhereItemContext handleSimpleTypeNoAnnotationSingleParam(ColumnInfo columnInfo) {
             String testExpression = String.format("%1$s != null", conditionInfo.getColumnName());
             String paramValueExpression = String.format("#{%1$s}", conditionInfo.getColumnName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
@@ -1021,7 +1021,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleObjectTypeNoAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
+        public WhereItemContext handleComplexTypeNoAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
             String testExpression = String.format(
                     "%1$s != null and %1$s.%2$s != null",
                     columnInfo.getJavaColumnName(),
@@ -1037,7 +1037,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleObjectTypeWithAnnotationSingleParam(ColumnInfo columnInfo) {
+        public WhereItemContext handleSimpleTypeWithAnnotationSingleParam(ColumnInfo columnInfo) {
             String testExpression = String.format(
                     "%1$s != null and %1$s.%2$s != null",
                     methodParamInfo.getArgName(),
@@ -1053,7 +1053,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleObjectTypeWithAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
+        public WhereItemContext handleComplexTypeWithAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
             String testExpression = String.format(
                     "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
                     methodParamInfo.getArgName(),
@@ -1088,15 +1088,15 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleBasicTypeMultiParam() {
+        public WhereItemContext handleSimpleTypeMultiParam() {
             /*String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
             String paramValueExpression = String.format("#{%1$s}", methodParamInfo.getArgName());
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);*/
-            return this.handleBasicTypeSingleParam();
+            return this.handleSimpleTypeSingleParam();
         }
 
         @Override
-        public WhereItemContext handleObjectTypeNoAnnotationMultiParam(ColumnInfo columnInfo) {
+        public WhereItemContext handleSimpleTypeNoAnnotationMultiParam(ColumnInfo columnInfo) {
             String testExpression = String.format(
                     "%1$s != null and %1$s.%2$s != null",
                     methodParamInfo.getArgName(),
@@ -1112,7 +1112,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleObjectTypeNoAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
+        public WhereItemContext handleComplexTypeNoAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
             String testExpression = String.format(
                     "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
                     methodParamInfo.getArgName(),
@@ -1130,7 +1130,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleObjectTypeWithAnnotationMultiParam(ColumnInfo columnInfo) {
+        public WhereItemContext handleSimpleTypeWithAnnotationMultiParam(ColumnInfo columnInfo) {
             String testExpression = String.format(
                     "%1$s != null and %1$s.%2$s != null",
                     methodParamInfo.getArgName(),
@@ -1146,7 +1146,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleObjectTypeWithAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
+        public WhereItemContext handleComplexTypeWithAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
             String testExpression = String.format(
                     "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
                     methodParamInfo.getArgName(),

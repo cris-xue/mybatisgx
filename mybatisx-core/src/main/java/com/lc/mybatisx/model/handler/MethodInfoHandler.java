@@ -228,21 +228,17 @@ public class MethodInfoHandler {
         if (methodDeclaringClass == SimpleDao.class) {
             String methodName = methodInfo.getMethodName();
             if ("findOne".equals(methodName) || "findList".equals(methodName)) {
-                for (MethodParamInfo methodParamInfo : methodInfo.getMethodParamInfoList()) {
-                    Entity entity = methodParamInfo.getType().getAnnotation(Entity.class);
-                    if (entity != null) {
-                        String entityCondition = this.entityCondition(methodInfo, methodParamInfo);
-                        methodNameAstHandler.execute(entityInfo, methodInfo, methodParamInfo, ConditionOriginType.ENTITY_FIELD, entityCondition);
-                    }
+                MethodParamInfo entityParamInfo = methodInfo.getEntityParamInfo();
+                if (entityParamInfo != null) {
+                    String entityCondition = this.entityCondition(methodInfo, entityParamInfo);
+                    methodNameAstHandler.execute(entityInfo, methodInfo, entityParamInfo, ConditionOriginType.ENTITY_FIELD, entityCondition);
                 }
             }
         } else {
-            for (MethodParamInfo methodParamInfo : methodInfo.getMethodParamInfoList()) {
-                QueryEntity isQueryEntity = methodParamInfo.getType().getAnnotation(QueryEntity.class);
-                if (isQueryEntity != null) {
-                    String queryEntityCondition = this.entityCondition(methodInfo, methodParamInfo);
-                    methodNameAstHandler.execute(entityInfo, methodInfo, methodParamInfo, ConditionOriginType.ENTITY_FIELD, queryEntityCondition);
-                }
+            MethodParamInfo entityParamInfo = methodInfo.getEntityParamInfo();
+            if (entityParamInfo != null) {
+                String queryEntityCondition = this.entityCondition(methodInfo, entityParamInfo);
+                methodNameAstHandler.execute(entityInfo, methodInfo, entityParamInfo, ConditionOriginType.ENTITY_FIELD, queryEntityCondition);
             }
         }
     }

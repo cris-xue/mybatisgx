@@ -277,36 +277,44 @@ public class MethodInfoHandler {
      * @param conditionInfoList
      */
     private void bindConditionParam(MethodInfo methodInfo, List<ConditionInfo> conditionInfoList) {
-        // 如果没有实体参数，则不需要绑定参数
-        if (methodInfo.getEntityParamInfo() == null) {
-            return;
-        }
         for (ConditionInfo conditionInfo : conditionInfoList) {
             ConditionGroupInfo conditionGroupInfo = conditionInfo.getConditionGroupInfo();
             if (conditionGroupInfo != null) {
                 this.bindConditionParam(methodInfo, conditionGroupInfo.getConditionInfoList());
             } else {
                 // 处理查询条件和参数之间的关系，查询条件和参数之间是1对1关系，不要设计一对多关系，后续绑定参数很难处理
-                Integer index = conditionInfo.getIndex();
                 String conditionColumnName = conditionInfo.getColumnName();
+                MethodParamInfo entityParamInfo = methodInfo.getEntityParamInfo();
+                if (entityParamInfo != null) {
+                    ColumnInfo columnInfo = entityParamInfo.getColumnInfo(conditionColumnName);
+                    MethodParamInfo methodParamInfo = new MethodParamInfo();
+                    methodParamInfo.setType(columnInfo.getJavaType());
+                    methodParamInfo.setCollectionType(columnInfo.getCollectionType());
+                    methodParamInfo.setArgName(columnInfo.getJavaColumnName());
+                    if (ObjectUtils.isNotEmpty(columnInfo.getComposites())) {
+                        methodParamInfo.setColumnInfoList(columnInfo.getComposites());
+                    }
+                    conditionInfo.setMethodParamInfo(methodParamInfo);
+                } else {
+                    // 采用4种方式获取参数：conditionName -> conditionName.toLowerCase() -> argx -> paramx：【userName -> username -> arg0 -> param1】
+                    Integer index = conditionInfo.getIndex();
+                    MethodParamInfo methodParamInfo = methodInfo.getMethodParamInfo(conditionColumnName);
+                    if (methodParamInfo == null) {
+                        methodParamInfo = methodInfo.getMethodParamInfo(conditionColumnName.toLowerCase());
+                    }
+                    if (methodParamInfo == null) {
+                        methodParamInfo = methodInfo.getMethodParamInfo("arg" + index);
+                    }
+                    if (methodParamInfo == null) {
+                        methodParamInfo = methodInfo.getMethodParamInfo("param" + (index + 1));
+                    }
 
-                // 采用4种方式获取参数：conditionName -> conditionName.toLowerCase() -> argx -> paramx：【userName -> username -> arg0 -> param1】
-                MethodParamInfo methodParamInfo = methodInfo.getMethodParamInfo(conditionColumnName);
-                if (methodParamInfo == null) {
-                    methodParamInfo = methodInfo.getMethodParamInfo(conditionColumnName.toLowerCase());
+                    // 校验条件是否可以关联到参数，如果无法关联，后续执行数据库操作会报错
+                    if (methodParamInfo == null) {
+                        throw new RuntimeException("查询条件没有对应的参数");
+                    }
+                    conditionInfo.setMethodParamInfo(methodParamInfo);
                 }
-                if (methodParamInfo == null) {
-                    methodParamInfo = methodInfo.getMethodParamInfo("arg" + index);
-                }
-                if (methodParamInfo == null) {
-                    methodParamInfo = methodInfo.getMethodParamInfo("param" + (index + 1));
-                }
-
-                // 校验条件是否可以关联到参数，如果无法关联，后续执行数据库操作会报错
-                if (methodParamInfo == null) {
-                    throw new RuntimeException("查询条件没有对应的参数");
-                }
-                conditionInfo.setMethodParamInfo(methodParamInfo);
             }
         }
     }

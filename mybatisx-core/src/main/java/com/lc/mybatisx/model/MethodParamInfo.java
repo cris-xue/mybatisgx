@@ -1,7 +1,9 @@
 package com.lc.mybatisx.model;
 
+import com.lc.mybatisx.utils.TypeUtils;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -55,7 +57,7 @@ public class MethodParamInfo {
     /**
      * 字段信息Map
      */
-    private Map<String, ColumnInfo> columnInfoMap;
+    private Map<String, ColumnInfo> columnInfoMap = new HashMap();
     /**
      * 是否批量参数
      */
@@ -148,6 +150,9 @@ public class MethodParamInfo {
     public void setColumnInfoList(List<ColumnInfo> columnInfoList) {
         this.columnInfoList = columnInfoList;
         for (ColumnInfo columnInfo : columnInfoList) {
+            if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class)) {
+                this.columnInfoMap.put("id", columnInfo);
+            }
             this.columnInfoMap.put(columnInfo.getJavaColumnName(), columnInfo);
         }
     }

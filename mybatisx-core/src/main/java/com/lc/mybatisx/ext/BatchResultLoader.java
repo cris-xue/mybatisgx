@@ -110,7 +110,9 @@ public class BatchResultLoader extends ResultLoader {
                     MetaObject rightValueMetaObject = SystemMetaObject.forObject(rightValue);
                     String objectKey = LinkObjectHelper.getObjectKey(idResultMappings, rightValueMetaObject);
                     Object linkRightValue = rightValueMetaObject.getValue(propertyMapping.getProperty());
-                    this.rightResultObjectMap.put(objectKey, linkRightValue);
+                    if (ObjectUtils.isNotEmpty(linkRightValue)) {
+                        this.rightResultObjectMap.put(objectKey, linkRightValue);
+                    }
                 }
             }
             return this;

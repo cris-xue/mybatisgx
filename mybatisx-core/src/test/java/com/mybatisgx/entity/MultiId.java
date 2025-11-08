@@ -1,7 +1,10 @@
 package com.mybatisgx.entity;
 
+import com.mybatisgx.annotation.IdClass;
+
 import java.io.Serializable;
 
+@IdClass(MultiId.class)
 public class MultiId<ID> implements Serializable {
 
     private ID id1;

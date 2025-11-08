@@ -412,25 +412,6 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleComplexTypeWithAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            /*String testExpression = String.format(
-                    "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
-                    methodParamInfo.getArgName(),
-                    columnInfo.getJavaColumnName(),
-                    columnInfoComposite.getJavaColumnName()
-            );
-            String bindValuePath = String.format(
-                    "%1$s.%2$s.%3$s",
-                    methodParamInfo.getArgName(),
-                    columnInfo.getJavaColumnName(),
-                    columnInfoComposite.getJavaColumnName()
-            );
-            Element likeBindElement = this.buildLikeBindElement(bindValuePath);
-            String paramValueExpression = String.format(
-                    "#{%1$s.%2$s.%3$s}",
-                    methodParamInfo.getArgName(),
-                    columnInfo.getJavaColumnName(),
-                    columnInfoComposite.getJavaColumnName()
-            );*/
             List<String> paramValueCommonPathItemList = Lists.newArrayList(conditionInfo.getParamValueCommonPathItemList());
             paramValueCommonPathItemList.add(columnInfoComposite.getJavaColumnName());
             String testExpression = this.getTestExpression(paramValueCommonPathItemList);
@@ -466,11 +447,6 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleSimpleTypeMultiParam(ColumnInfo columnInfo) {
-            /*String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
-            String bindValuePath = String.format("%1$s", methodParamInfo.getArgName());
-            Element likeBindElement = this.buildLikeBindElement(bindValuePath);
-            String paramValueExpression = String.format("#{%1$s}", methodParamInfo.getArgName());
-            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);*/
             return this.handleSimpleTypeSingleParam(columnInfo);
         }
 
@@ -486,25 +462,6 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleComplexTypeNoAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            /*String testExpression = String.format(
-                    "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
-                    methodParamInfo.getArgName(),
-                    columnInfo.getJavaColumnName(),
-                    columnInfoComposite.getJavaColumnName()
-            );
-            String bindValuePath = String.format(
-                    "%1$s.%2$s.%3$s",
-                    methodParamInfo.getArgName(),
-                    columnInfo.getJavaColumnName(),
-                    columnInfoComposite.getJavaColumnName()
-            );
-            Element likeBindElement = this.buildLikeBindElement(bindValuePath);
-            String paramValueExpression = String.format(
-                    "#{%1$s.%2$s.%3$s}",
-                    methodParamInfo.getArgName(),
-                    columnInfo.getJavaColumnName(),
-                    columnInfoComposite.getJavaColumnName()
-            );*/
             List<String> paramValueCommonPathItemList = Lists.newArrayList(conditionInfo.getParamValueCommonPathItemList());
             paramValueCommonPathItemList.add(columnInfoComposite.getJavaColumnName());
             String testExpression = this.getTestExpression(paramValueCommonPathItemList);
@@ -527,25 +484,6 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleComplexTypeWithAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            /*String testExpression = String.format(
-                    "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
-                    methodParamInfo.getArgName(),
-                    columnInfo.getJavaColumnName(),
-                    columnInfoComposite.getJavaColumnName()
-            );
-            String bindValuePath = String.format(
-                    "%1$s.%2$s.%3$s",
-                    methodParamInfo.getArgName(),
-                    columnInfo.getJavaColumnName(),
-                    columnInfoComposite.getJavaColumnName()
-            );
-            Element likeBindElement = this.buildLikeBindElement(bindValuePath);
-            String paramValueExpression = String.format(
-                    "#{%1$s.%2$s.%3$s}",
-                    methodParamInfo.getArgName(),
-                    columnInfo.getJavaColumnName(),
-                    columnInfoComposite.getJavaColumnName()
-            );*/
             List<String> paramValueCommonPathItemList = Lists.newArrayList(conditionInfo.getParamValueCommonPathItemList());
             paramValueCommonPathItemList.add(columnInfoComposite.getJavaColumnName());
             String testExpression = this.getTestExpression(paramValueCommonPathItemList);
@@ -642,18 +580,6 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleComplexTypeWithAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            /*String testExpression = String.format(
-                    "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
-                    methodParamInfo.getArgName(),
-                    columnInfo.getJavaColumnName(),
-                    columnInfoComposite.getJavaColumnName()
-            );
-            String paramValueExpression = String.format(
-                    "%1$s.%2$s.%3$s",
-                    methodParamInfo.getArgName(),
-                    columnInfo.getJavaColumnName(),
-                    columnInfoComposite.getJavaColumnName()
-            );*/
             List<String> paramValueCommonPathItemList = Lists.newArrayList(conditionInfo.getParamValueCommonPathItemList());
             paramValueCommonPathItemList.add(columnInfoComposite.getJavaColumnName());
             String testExpression = this.getTestExpression(paramValueCommonPathItemList);
@@ -701,18 +627,6 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleComplexTypeNoAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            /*String testExpression = String.format(
-                    "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
-                    methodParamInfo.getArgName(),
-                    columnInfo.getJavaColumnName(),
-                    columnInfoComposite.getJavaColumnName()
-            );
-            String paramValueExpression = String.format(
-                    "%1$s.%2$s.%3$s",
-                    methodParamInfo.getArgName(),
-                    columnInfo.getJavaColumnName(),
-                    columnInfoComposite.getJavaColumnName()
-            );*/
             List<String> paramValueCommonPathItemList = Lists.newArrayList(conditionInfo.getParamValueCommonPathItemList());
             paramValueCommonPathItemList.add(columnInfoComposite.getJavaColumnName());
             String testExpression = this.getTestExpression(paramValueCommonPathItemList);
@@ -733,18 +647,6 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleComplexTypeWithAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            /*String testExpression = String.format(
-                    "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
-                    methodParamInfo.getArgName(),
-                    columnInfo.getJavaColumnName(),
-                    columnInfoComposite.getJavaColumnName()
-            );
-            String paramValueExpression = String.format(
-                    "%1$s.%2$s.%3$s",
-                    methodParamInfo.getArgName(),
-                    columnInfo.getJavaColumnName(),
-                    columnInfoComposite.getJavaColumnName()
-            );*/
             List<String> paramValueCommonPathItemList = Lists.newArrayList(conditionInfo.getParamValueCommonPathItemList());
             paramValueCommonPathItemList.add(columnInfoComposite.getJavaColumnName());
             String testExpression = this.getTestExpression(paramValueCommonPathItemList);
@@ -823,18 +725,6 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleComplexTypeWithAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            /*String testExpression = String.format(
-                    "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
-                    methodParamInfo.getArgName(),
-                    columnInfo.getJavaColumnName(),
-                    columnInfoComposite.getJavaColumnName()
-            );
-            String paramValueExpression = String.format(
-                    "#{%1$s.%2$s.%3$s[0]} and #{%1$s.%2$s.%3$s[1]}",
-                    methodParamInfo.getArgName(),
-                    columnInfo.getJavaColumnName(),
-                    columnInfoComposite.getJavaColumnName()
-            );*/
             List<String> paramValueCommonPathItemList = Lists.newArrayList(conditionInfo.getParamValueCommonPathItemList());
             paramValueCommonPathItemList.add(columnInfoComposite.getJavaColumnName());
             String testExpression = this.getTestExpression(paramValueCommonPathItemList);
@@ -862,9 +752,6 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleSimpleTypeMultiParam(ColumnInfo columnInfo) {
-            /*String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
-            String paramValueExpression = String.format("#{%1$s[0]} and #{%1$s[1]}", methodParamInfo.getArgName());
-            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);*/
             return this.handleSimpleTypeSingleParam(columnInfo);
         }
 
@@ -878,19 +765,6 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleComplexTypeNoAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            /*String testExpression = String.format(
-                    "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
-                    methodParamInfo.getArgName(),
-                    columnInfo.getJavaColumnName(),
-                    columnInfoComposite.getJavaColumnName()
-            );
-            String paramValueExpression = String.format(
-                    "#{%1$s.%2$s.%3$s[0]} and #{%1$s.%2$s.%3$s[1]}",
-                    methodParamInfo.getArgName(),
-                    columnInfo.getJavaColumnName(),
-                    columnInfoComposite.getJavaColumnName()
-            );*/
-
             List<String> paramValueCommonPathItemList = Lists.newArrayList(conditionInfo.getParamValueCommonPathItemList());
             paramValueCommonPathItemList.add(columnInfoComposite.getJavaColumnName());
             String testExpression = this.getTestExpression(paramValueCommonPathItemList);
@@ -909,19 +783,6 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleComplexTypeWithAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            /*String testExpression = String.format(
-                    "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
-                    methodParamInfo.getArgName(),
-                    columnInfo.getJavaColumnName(),
-                    columnInfoComposite.getJavaColumnName()
-            );
-            String paramValueExpression = String.format(
-                    "#{%1$s.%2$s.%3$s[0]} and #{%1$s.%2$s.%3$s[1]}",
-                    methodParamInfo.getArgName(),
-                    columnInfo.getJavaColumnName(),
-                    columnInfoComposite.getJavaColumnName()
-            );*/
-
             List<String> paramValueCommonPathItemList = Lists.newArrayList(conditionInfo.getParamValueCommonPathItemList());
             paramValueCommonPathItemList.add(columnInfoComposite.getJavaColumnName());
             String testExpression = this.getTestExpression(paramValueCommonPathItemList);
@@ -968,10 +829,6 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleSimpleTypeNoAnnotationSingleParam(ColumnInfo columnInfo) {
-            /*String testExpression = String.format("%1$s != null", conditionInfo.getColumnName());
-            String paramValueExpression = String.format("#{%1$s}", conditionInfo.getColumnName());
-            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
-            return new WhereItemContext(testExpression, Arrays.asList(conditionExpression));*/
             return handleSimpleTypeSingleParam(columnInfo);
         }
 
@@ -993,18 +850,6 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleComplexTypeWithAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            /*String testExpression = String.format(
-                    "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
-                    methodParamInfo.getArgName(),
-                    columnInfo.getJavaColumnName(),
-                    columnInfoComposite.getJavaColumnName()
-            );
-            String paramValueExpression = String.format(
-                    "#{%1$s.%2$s.%3$s}",
-                    methodParamInfo.getArgName(),
-                    columnInfo.getJavaColumnName(),
-                    columnInfoComposite.getJavaColumnName()
-            );*/
             List<String> paramValueCommonPathItemList = Lists.newArrayList(conditionInfo.getParamValueCommonPathItemList());
             paramValueCommonPathItemList.add(columnInfoComposite.getJavaColumnName());
             String testExpression = this.getTestExpression(paramValueCommonPathItemList);
@@ -1032,9 +877,6 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleSimpleTypeMultiParam(ColumnInfo columnInfo) {
-            /*String testExpression = String.format("%1$s != null", methodParamInfo.getArgName());
-            String paramValueExpression = String.format("#{%1$s}", methodParamInfo.getArgName());
-            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);*/
             return this.handleSimpleTypeSingleParam(columnInfo);
         }
 
@@ -1048,18 +890,6 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleComplexTypeNoAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            /*String testExpression = String.format(
-                    "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
-                    methodParamInfo.getArgName(),
-                    columnInfo.getJavaColumnName(),
-                    columnInfoComposite.getJavaColumnName()
-            );
-            String paramValueExpression = String.format(
-                    "#{%1$s.%2$s.%3$s}",
-                    methodParamInfo.getArgName(),
-                    columnInfo.getJavaColumnName(),
-                    columnInfoComposite.getJavaColumnName()
-            );*/
             List<String> paramValueCommonPathItemList = Lists.newArrayList(conditionInfo.getParamValueCommonPathItemList());
             paramValueCommonPathItemList.add(columnInfoComposite.getJavaColumnName());
             String testExpression = this.getTestExpression(paramValueCommonPathItemList);
@@ -1078,18 +908,6 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleComplexTypeWithAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            /*String testExpression = String.format(
-                    "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
-                    methodParamInfo.getArgName(),
-                    columnInfo.getJavaColumnName(),
-                    columnInfoComposite.getJavaColumnName()
-            );
-            String paramValueExpression = String.format(
-                    "#{%1$s.%2$s.%3$s}",
-                    methodParamInfo.getArgName(),
-                    columnInfo.getJavaColumnName(),
-                    columnInfoComposite.getJavaColumnName()
-            );*/
             List<String> paramValueCommonPathItemList = Lists.newArrayList(conditionInfo.getParamValueCommonPathItemList());
             paramValueCommonPathItemList.add(columnInfoComposite.getJavaColumnName());
             String testExpression = this.getTestExpression(paramValueCommonPathItemList);

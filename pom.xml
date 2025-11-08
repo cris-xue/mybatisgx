@@ -3,12 +3,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	
-	<groupId>com.lc</groupId>
-	<artifactId>mybatisx</artifactId>
+	<groupId>com.mybatisgx</groupId>
+	<artifactId>mybatisgx</artifactId>
 	<packaging>pom</packaging>
 	<version>1.0.0-SNAPSHOT</version>
-	<name>mybatisx</name>
-	<url>http://www.example.com</url>
+	<name>mybatisgx</name>
+	<url>http://www.mybatisgx.com</url>
 	
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -21,7 +21,6 @@
 		<module>mybatisx-annotation</module>
 		<module>mybatisx-core</module>
 		<module>mybatisx-spring-boot-starter</module>
-		<module>mybatisgx-query-entity-processor</module>
 	</modules>
 	
 	<dependencies>

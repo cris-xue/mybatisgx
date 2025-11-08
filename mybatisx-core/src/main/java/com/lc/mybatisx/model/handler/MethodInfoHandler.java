@@ -21,8 +21,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -34,7 +32,7 @@ public class MethodInfoHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MethodInfoHandler.class);
 
-    private static final List<Class<?>> SIMPLE_TYPE_LIST = new ArrayList<>();
+    /*private static final List<Class<?>> SIMPLE_TYPE_LIST = new ArrayList<>();
 
     static {
         SIMPLE_TYPE_LIST.add(int.class);
@@ -46,9 +44,10 @@ public class MethodInfoHandler {
         SIMPLE_TYPE_LIST.add(Date.class);
         SIMPLE_TYPE_LIST.add(LocalDate.class);
         SIMPLE_TYPE_LIST.add(LocalDateTime.class);
-    }
+    }*/
 
     private ColumnInfoHandler columnInfoHandler = new ColumnInfoHandler();
+    private ColumnTypeHandler columnTypeHandler = new ColumnTypeHandler();
     private MethodNameAstHandler methodNameAstHandler = new MethodNameAstHandler();
     private EntityRelationTreeHandler entityRelationTreeHandler = new EntityRelationTreeHandler();
     private ResultMapInfoHandler resultMapInfoHandler = new ResultMapInfoHandler();
@@ -286,33 +285,81 @@ public class MethodInfoHandler {
                 String conditionColumnName = conditionInfo.getColumnName();
                 MethodParamInfo entityParamInfo = methodInfo.getEntityParamInfo();
                 if (entityParamInfo != null) {
+                    // 如果存在条件实体，则把条件实体字段转换成参数名称
+                    Param param = entityParamInfo.getParam();
                     ColumnInfo columnInfo = entityParamInfo.getColumnInfo(conditionColumnName);
+                    List<ColumnInfo> composites = columnInfo.getComposites();
+                    ClassCategory classCategory = ObjectUtils.isEmpty(composites) ? ClassCategory.SIMPLE : ClassCategory.COMPLEX;
+
                     MethodParamInfo methodParamInfo = new MethodParamInfo();
+                    methodParamInfo.setClassCategory(classCategory);
                     methodParamInfo.setType(columnInfo.getJavaType());
                     methodParamInfo.setCollectionType(columnInfo.getCollectionType());
-                    methodParamInfo.setArgName(columnInfo.getJavaColumnName());
-                    if (ObjectUtils.isNotEmpty(columnInfo.getComposites())) {
-                        methodParamInfo.setColumnInfoList(columnInfo.getComposites());
+                    if (ObjectUtils.isNotEmpty(composites)) {
+                        methodParamInfo.setColumnInfoList(composites);
                     }
-                    conditionInfo.setMethodParamInfo(methodParamInfo);
-                } else {
-                    // 采用4种方式获取参数：conditionName -> conditionName.toLowerCase() -> argx -> paramx：【userName -> username -> arg0 -> param1】
-                    Integer index = conditionInfo.getIndex();
-                    MethodParamInfo methodParamInfo = methodInfo.getMethodParamInfo(conditionColumnName);
-                    if (methodParamInfo == null) {
-                        methodParamInfo = methodInfo.getMethodParamInfo(conditionColumnName.toLowerCase());
-                    }
-                    if (methodParamInfo == null) {
-                        methodParamInfo = methodInfo.getMethodParamInfo("arg" + index);
-                    }
-                    if (methodParamInfo == null) {
-                        methodParamInfo = methodInfo.getMethodParamInfo("param" + (index + 1));
+
+                    List<String> paramValueCommonPathItemList = new ArrayList();
+                    if (methodInfo.getMethodParamInfoList().size() == 1 && param == null) {
+                        paramValueCommonPathItemList.add(columnInfo.getJavaColumnName());
+                    } else {
+                        paramValueCommonPathItemList.add(entityParamInfo.getArgName());
+                        paramValueCommonPathItemList.add(columnInfo.getJavaColumnName());
                     }
 
                     // 校验条件是否可以关联到参数，如果无法关联，后续执行数据库操作会报错
                     if (methodParamInfo == null) {
                         throw new RuntimeException("查询条件没有对应的参数");
                     }
+                    conditionInfo.setParamValueCommonPathItemList(paramValueCommonPathItemList);
+                    conditionInfo.setMethodParamInfo(methodParamInfo);
+                } else {
+                    // 采用4种方式获取参数：conditionName -> conditionName.toLowerCase() -> argx -> paramx：【userName -> username -> arg0 -> param1】
+                    MethodParamInfo methodParamInfo = methodInfo.getMethodParamInfo(conditionColumnName);
+                    if (methodParamInfo == null) {
+                        methodParamInfo = methodInfo.getMethodParamInfo(conditionColumnName.toLowerCase());
+                    }
+                    if (methodParamInfo == null) {
+                        String argName = String.format("arg%1$s", conditionInfo.getIndex());
+                        methodParamInfo = methodInfo.getMethodParamInfo(argName);
+                    }
+                    /*if (methodParamInfo == null) {
+                        methodParamInfo = methodInfo.getMethodParamInfo("param" + (index + 1));
+                    }*/
+
+                    // 校验条件是否可以关联到参数，如果无法关联，后续执行数据库操作会报错
+                    if (methodParamInfo == null) {
+                        throw new RuntimeException("查询条件没有对应的参数");
+                    }
+
+                    Param param = methodParamInfo.getParam();
+                    List<String> paramValueCommonPathItemList = new ArrayList();
+                    if (methodInfo.getMethodParamInfoList().size() == 1) {
+                        List<ColumnInfo> columnInfoList = methodParamInfo.getColumnInfoList();
+                        if (ObjectUtils.isEmpty(columnInfoList)) {
+                            // findById(Long id)   findById(@Param("id") Long id)
+                            paramValueCommonPathItemList.add(methodParamInfo.getArgName());
+                        } else {
+                            // findById(ComplexId complexId)    findById(@Param("id") ComplexId complexId)
+                            if (param == null) {
+
+                            } else {
+                                paramValueCommonPathItemList.add(methodParamInfo.getArgName());
+                            }
+                        }
+                    }
+                    if (methodInfo.getMethodParamInfoList().size() > 1) {
+                        List<ColumnInfo> columnInfoList = methodParamInfo.getColumnInfoList();
+                        if (ObjectUtils.isEmpty(columnInfoList)) {
+                            // findByIdAndName(Long id, String name)   findByIdAndName(@Param("id") Long id, String name)
+                            paramValueCommonPathItemList.add(methodParamInfo.getArgName());
+                        } else {
+                            // findByIdAndName(ComplexId complexId, String name)    findByIdAndName(@Param("id") ComplexId complexId, String name)
+                            paramValueCommonPathItemList.add(methodParamInfo.getArgName());
+                        }
+                    }
+
+                    conditionInfo.setParamValueCommonPathItemList(paramValueCommonPathItemList);
                     conditionInfo.setMethodParamInfo(methodParamInfo);
                 }
             }
@@ -395,12 +442,7 @@ public class MethodInfoHandler {
     }
 
     public ClassCategory getBasicType(Type type) {
-        for (Class<?> simpleType : SIMPLE_TYPE_LIST) {
-            if (type == simpleType) {
-                return ClassCategory.SIMPLE;
-            }
-        }
-        return ClassCategory.COMPLEX;
+        return columnTypeHandler.getClassCategory(type);
     }
 
     private static class MethodParamContext {

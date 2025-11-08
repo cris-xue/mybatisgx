@@ -181,19 +181,25 @@ public class WhereTemplateHandler {
                 if (methodParamInfo.getClassCategory() == ClassCategory.COMPLEX) {
                     // findById(MultiId id) findById(@Param("id") MultiId id)
                     if (methodParamInfo.getParam() == null) {
-                        if (conditionInfo.getConditionOriginType() == ConditionOriginType.ENTITY_FIELD) {
-                            this.processSingleParamNoAnnotation(whereItemContextList, columnInfo);
+                        List<ColumnInfo> columnInfoComposites = methodParamInfo.getColumnInfoList();
+                        if (ObjectUtils.isEmpty(columnInfoComposites)) {
+                            WhereItemContext whereItemContext = this.handleSimpleTypeNoAnnotationSingleParam(columnInfo);
+                            whereItemContextList.add(whereItemContext);
                         } else {
-                            for (ColumnInfo columnInfo : methodParamInfo.getColumnInfoList()) {
-                                this.processSingleParamNoAnnotation(whereItemContextList, columnInfo);
+                            for (ColumnInfo columnInfoComposite : columnInfoComposites) {
+                                WhereItemContext whereItemContext = this.handleComplexTypeNoAnnotationSingleParam(columnInfo, columnInfoComposite);
+                                whereItemContextList.add(whereItemContext);
                             }
                         }
                     } else {
-                        if (conditionInfo.getConditionOriginType() == ConditionOriginType.ENTITY_FIELD) {
-                            this.processSingleParamWithAnnotation(whereItemContextList, columnInfo);
+                        List<ColumnInfo> columnInfoComposites = methodParamInfo.getColumnInfoList();
+                        if (ObjectUtils.isEmpty(columnInfoComposites)) {
+                            WhereItemContext whereItemContext = this.handleSimpleTypeWithAnnotationSingleParam(columnInfo);
+                            whereItemContextList.add(whereItemContext);
                         } else {
-                            for (ColumnInfo columnInfo : methodParamInfo.getColumnInfoList()) {
-                                this.processSingleParamWithAnnotation(whereItemContextList, columnInfo);
+                            for (ColumnInfo columnInfoComposite : columnInfoComposites) {
+                                WhereItemContext whereItemContext = this.handleComplexTypeWithAnnotationSingleParam(columnInfo, columnInfoComposite);
+                                whereItemContextList.add(whereItemContext);
                             }
                         }
                     }
@@ -248,19 +254,25 @@ public class WhereTemplateHandler {
                 if (methodParamInfo.getClassCategory() == ClassCategory.COMPLEX) {
                     // findById(MultiId id) findById(@Param("id") MultiId id)
                     if (methodParamInfo.getParam() == null) {
-                        if (conditionInfo.getConditionOriginType() == ConditionOriginType.ENTITY_FIELD) {
-                            this.processMultiParamNoAnnotation(whereItemContextList, columnInfo);
+                        List<ColumnInfo> columnInfoComposites = methodParamInfo.getColumnInfoList();
+                        if (ObjectUtils.isEmpty(columnInfoComposites)) {
+                            WhereItemContext whereItemContext = this.handleSimpleTypeNoAnnotationMultiParam(columnInfo);
+                            whereItemContextList.add(whereItemContext);
                         } else {
-                            for (ColumnInfo columnInfo : methodParamInfo.getColumnInfoList()) {
-                                this.processMultiParamNoAnnotation(whereItemContextList, columnInfo);
+                            for (ColumnInfo columnInfoComposite : columnInfoComposites) {
+                                WhereItemContext whereItemContext = this.handleComplexTypeNoAnnotationMultiParam(columnInfo, columnInfoComposite);
+                                whereItemContextList.add(whereItemContext);
                             }
                         }
                     } else {
-                        if (conditionInfo.getConditionOriginType() == ConditionOriginType.ENTITY_FIELD) {
-                            this.processMultiParamWithAnnotation(whereItemContextList, columnInfo);
+                        List<ColumnInfo> columnInfoComposites = methodParamInfo.getColumnInfoList();
+                        if (ObjectUtils.isEmpty(columnInfoComposites)) {
+                            WhereItemContext whereItemContext = this.handleSimpleTypeWithAnnotationMultiParam(columnInfo);
+                            whereItemContextList.add(whereItemContext);
                         } else {
-                            for (ColumnInfo columnInfo : methodParamInfo.getColumnInfoList()) {
-                                this.processMultiParamWithAnnotation(whereItemContextList, columnInfo);
+                            for (ColumnInfo columnInfoComposite : columnInfoComposites) {
+                                WhereItemContext whereItemContext = this.handleComplexTypeWithAnnotationMultiParam(columnInfo, columnInfoComposite);
+                                whereItemContextList.add(whereItemContext);
                             }
                         }
                     }

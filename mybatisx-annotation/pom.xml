@@ -4,15 +4,15 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>com.lc</groupId>
-		<artifactId>mybatisx</artifactId>
+		<groupId>com.mybatisgx</groupId>
+		<artifactId>mybatisgx</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<artifactId>mybatisx-annotation</artifactId>
-	<name>mybatisx-annotation</name>
-	<url>http://www.example.com</url>
+	<artifactId>mybatisgx-annotation</artifactId>
+	<name>mybatisgx-annotation</name>
+	<url>http://www.mybatisgx.com</url>
 	
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

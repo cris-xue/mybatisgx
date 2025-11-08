@@ -60,7 +60,7 @@ public class UpdateTemplateHandler {
     private void setValue(MethodInfo methodInfo, MethodParamInfo methodParamInfo, Element setTrimElement) {
         List<ColumnInfo> tableColumnInfoList = this.getTableColumnInfoList(methodParamInfo);
         if (ObjectUtils.isEmpty(tableColumnInfoList)) {
-            throw new RuntimeException("实体表字段不存在");
+            throw new RuntimeException("实体表字段不存在" + methodParamInfo.getType());
         }
         for (ColumnInfo tableColumnInfo : tableColumnInfoList) {
             String javaColumnName = tableColumnInfo.getJavaColumnName();

@@ -217,32 +217,6 @@ public class WhereTemplateHandler {
             return whereItemContextList;
         }
 
-        private void processSingleParamNoAnnotation(List<WhereItemContext> whereItemContextList, ColumnInfo columnInfo) {
-            List<ColumnInfo> columnInfoComposites = columnInfo.getComposites();
-            if (ObjectUtils.isEmpty(columnInfoComposites)) {
-                WhereItemContext whereItemContext = this.handleSimpleTypeNoAnnotationSingleParam(columnInfo);
-                whereItemContextList.add(whereItemContext);
-            } else {
-                for (ColumnInfo columnInfoComposite : columnInfoComposites) {
-                    WhereItemContext whereItemContext = this.handleComplexTypeNoAnnotationSingleParam(columnInfo, columnInfoComposite);
-                    whereItemContextList.add(whereItemContext);
-                }
-            }
-        }
-
-        private void processSingleParamWithAnnotation(List<WhereItemContext> whereItemContextList, ColumnInfo columnInfo) {
-            List<ColumnInfo> columnInfoComposites = columnInfo.getComposites();
-            if (ObjectUtils.isEmpty(columnInfoComposites)) {
-                WhereItemContext whereItemContext = this.handleSimpleTypeWithAnnotationSingleParam(columnInfo);
-                whereItemContextList.add(whereItemContext);
-            } else {
-                for (ColumnInfo columnInfoComposite : columnInfoComposites) {
-                    WhereItemContext whereItemContext = this.handleComplexTypeWithAnnotationSingleParam(columnInfo, columnInfoComposite);
-                    whereItemContextList.add(whereItemContext);
-                }
-            }
-        }
-
         public List<WhereItemContext> multiParamHandle() {
             List<WhereItemContext> whereItemContextList = new ArrayList();
             if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class, ColumnInfo.class)) {
@@ -290,37 +264,8 @@ public class WhereTemplateHandler {
             return whereItemContextList;
         }
 
-        private void processMultiParamNoAnnotation(List<WhereItemContext> whereItemContextList, ColumnInfo columnInfo) {
-            List<ColumnInfo> columnInfoComposites = columnInfo.getComposites();
-            if (ObjectUtils.isEmpty(columnInfoComposites)) {
-                WhereItemContext whereItemContext = this.handleSimpleTypeNoAnnotationMultiParam(columnInfo);
-                whereItemContextList.add(whereItemContext);
-            } else {
-                for (ColumnInfo columnInfoComposite : columnInfoComposites) {
-                    WhereItemContext whereItemContext = this.handleComplexTypeNoAnnotationMultiParam(columnInfo, columnInfoComposite);
-                    whereItemContextList.add(whereItemContext);
-                }
-            }
-        }
-
-        private void processMultiParamWithAnnotation(List<WhereItemContext> whereItemContextList, ColumnInfo columnInfo) {
-            List<ColumnInfo> columnInfoComposites = columnInfo.getComposites();
-            if (ObjectUtils.isEmpty(columnInfoComposites)) {
-                WhereItemContext whereItemContext = this.handleSimpleTypeWithAnnotationMultiParam(columnInfo);
-                whereItemContextList.add(whereItemContext);
-            } else {
-                for (ColumnInfo columnInfoComposite : columnInfoComposites) {
-                    WhereItemContext whereItemContext = this.handleComplexTypeWithAnnotationMultiParam(columnInfo, columnInfoComposite);
-                    whereItemContextList.add(whereItemContext);
-                }
-            }
-        }
-
         protected String getTestExpression(List<String> pathItemList) {
-            return this.getTestExpression(pathItemList.toArray(new String[pathItemList.size()]));
-        }
-
-        protected String getTestExpression(String... paths) {
+            String[] paths = pathItemList.toArray(new String[pathItemList.size()]);
             if (paths.length == 1) {
                 return String.format("%1$s != null", paths);
             }

@@ -1,7 +1,6 @@
 package com.mybatisgx.model.handler;
 
 import com.mybatisgx.annotation.FetchMode;
-import com.lc.mybatisx.model.*;
 import com.mybatisgx.model.*;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;

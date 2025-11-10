@@ -1,6 +1,5 @@
 package com.mybatisgx.template.select;
 
-import com.lc.mybatisx.model.*;
 import com.mybatisgx.model.*;
 import com.mybatisgx.template.ConditionBuilder;
 import com.mybatisgx.utils.TypeUtils;

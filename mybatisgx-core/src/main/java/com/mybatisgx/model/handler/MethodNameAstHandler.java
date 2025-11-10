@@ -1,7 +1,6 @@
 package com.mybatisgx.model.handler;
 
 import com.google.common.base.CaseFormat;
-import com.lc.mybatisx.model.*;
 import com.mybatisgx.model.*;
 import com.mybatisgx.syntax.MethodNameLexer;
 import com.mybatisgx.syntax.MethodNameParser;

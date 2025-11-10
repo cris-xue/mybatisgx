@@ -1,7 +1,6 @@
 package com.mybatisgx.template.select;
 
 import com.mybatisgx.annotation.ManyToMany;
-import com.lc.mybatisx.model.*;
 import com.mybatisgx.model.*;
 import com.mybatisgx.utils.TypeUtils;
 import com.mybatisgx.utils.XmlUtils;

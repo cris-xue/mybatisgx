@@ -5,7 +5,6 @@ import com.google.common.collect.Maps;
 import com.mybatisgx.annotation.*;
 import com.mybatisgx.annotation.handler.GenerateValueHandler;
 import com.mybatisgx.context.EntityInfoContextHolder;
-import com.lc.mybatisx.model.*;
 import com.mybatisgx.model.*;
 import com.mybatisgx.utils.TypeUtils;
 import org.apache.commons.lang3.StringUtils;

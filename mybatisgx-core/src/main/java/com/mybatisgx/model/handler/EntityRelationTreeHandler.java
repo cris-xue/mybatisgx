@@ -3,7 +3,6 @@ package com.mybatisgx.model.handler;
 import com.mybatisgx.annotation.JoinTable;
 import com.mybatisgx.annotation.ManyToMany;
 import com.mybatisgx.context.EntityInfoContextHolder;
-import com.lc.mybatisx.model.*;
 import com.mybatisgx.model.*;
 import com.mybatisgx.utils.TypeUtils;
 import org.apache.commons.lang3.ObjectUtils;

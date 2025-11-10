@@ -9,6 +9,8 @@ import com.lc.mybatisx.annotation.handler.JavaColumnInfo;
 import com.lc.mybatisx.context.EntityInfoContextHolder;
 import com.lc.mybatisx.model.ColumnInfo;
 import com.lc.mybatisx.model.EntityInfo;
+import com.lc.mybatisx.model.IdColumnInfo;
+import com.lc.mybatisx.utils.TypeUtils;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.reflection.MetaObject;
@@ -55,14 +57,7 @@ public class MybatisxParameterHandler {
     }
 
     private Object next(SqlCommandType sqlCommandType, ColumnInfo columnInfo, Class<?> javaColumnType, Object originalValue) {
-        JavaColumnInfo javaColumnInfo = new JavaColumnInfo();
-        javaColumnInfo.setType(javaColumnType);
-        javaColumnInfo.setColumnName(columnInfo.getJavaColumnName());
-        javaColumnInfo.setId(columnInfo.getId());
-        javaColumnInfo.setLock(columnInfo.getLock());
-        javaColumnInfo.setLogicDelete(columnInfo.getLogicDelete());
-        javaColumnInfo.setGenerateValue(columnInfo.getGenerateValue());
-
+        JavaColumnInfo javaColumnInfo = this.buildJavaColumnInfo(columnInfo, javaColumnType);
         GenerateValue generateValue = columnInfo.getGenerateValue();
         if (generateValue != null) {
             GenerateValueHandler generateValueHandler = columnInfo.getGenerateValueHandler();
@@ -75,7 +70,7 @@ public class MybatisxParameterHandler {
                 return generateValueHandler.update(javaColumnInfo, originalValue);
             }
         }
-        Id id = columnInfo.getId();
+        Id id = javaColumnInfo.getId();
         if (id != null && sqlCommandType == SqlCommandType.INSERT) {
             return this.idGenerateValueHandler.insert(javaColumnInfo, originalValue);
         }
@@ -84,5 +79,19 @@ public class MybatisxParameterHandler {
             return this.idGenerateValueHandler.insert(javaColumnInfo, originalValue);
         }
         return originalValue;
+    }
+
+    private JavaColumnInfo buildJavaColumnInfo(ColumnInfo columnInfo, Class<?> javaColumnType) {
+        JavaColumnInfo javaColumnInfo = new JavaColumnInfo();
+        javaColumnInfo.setType(javaColumnType);
+        javaColumnInfo.setColumnName(columnInfo.getJavaColumnName());
+        javaColumnInfo.setLock(columnInfo.getLock());
+        javaColumnInfo.setLogicDelete(columnInfo.getLogicDelete());
+        javaColumnInfo.setGenerateValue(columnInfo.getGenerateValue());
+        if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class)) {
+            IdColumnInfo idColumnInfo = (IdColumnInfo) columnInfo;
+            javaColumnInfo.setId(idColumnInfo.getId());
+        }
+        return javaColumnInfo;
     }
 }

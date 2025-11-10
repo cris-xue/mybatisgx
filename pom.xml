@@ -18,9 +18,9 @@
 	</properties>
 	
 	<modules>
-		<module>mybatisx-annotation</module>
-		<module>mybatisx-core</module>
-		<module>mybatisx-spring-boot-starter</module>
+		<module>mybatisgx-annotation</module>
+		<module>mybatisgx-core</module>
+		<module>mybatisgx-spring-boot-starter</module>
 	</modules>
 	
 	<dependencies>

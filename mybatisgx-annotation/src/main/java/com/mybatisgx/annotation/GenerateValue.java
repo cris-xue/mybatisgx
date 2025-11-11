@@ -17,5 +17,4 @@ public @interface GenerateValue {
     boolean insert() default false;
 
     boolean update() default false;
-
 }

@@ -11,5 +11,4 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 public @interface TypeHandler {
 
     Class<?> value();
-
 }

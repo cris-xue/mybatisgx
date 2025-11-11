@@ -18,5 +18,4 @@ public @interface LogicDelete {
     String show() default "1";
 
     String hide() default "0";
-
 }

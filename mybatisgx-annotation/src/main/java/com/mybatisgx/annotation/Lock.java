@@ -13,5 +13,4 @@ public @interface Lock {
     int initValue() default 0;
 
     int increment() default 1;
-
 }

@@ -11,5 +11,4 @@ import static javax.persistence.GenerationType.AUTO;
 public @interface Id {
 
     GenerationType strategy() default AUTO;
-
 }

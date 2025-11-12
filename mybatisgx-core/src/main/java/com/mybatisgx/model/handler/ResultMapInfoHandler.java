@@ -13,7 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ResultMapInfoHandler extends BasicInfoHandler {
+public class ResultMapInfoHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResultMapInfoHandler.class);
 

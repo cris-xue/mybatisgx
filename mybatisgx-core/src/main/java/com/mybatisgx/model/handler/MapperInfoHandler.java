@@ -21,7 +21,7 @@ import java.util.List;
  * @description：用于解析mybatis接口
  * @date ：2023/12/1
  */
-public class MapperInfoHandler extends BasicInfoHandler {
+public class MapperInfoHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(MapperInfoHandler.class);
 
@@ -29,7 +29,7 @@ public class MapperInfoHandler extends BasicInfoHandler {
 
     public MapperInfo execute(MapperBuilderAssistant builderAssistant) {
         String namespace = builderAssistant.getCurrentNamespace();
-        Class<?> daoInterface = getDaoInterface(namespace);
+        Class<?> daoInterface = this.getDaoInterface(namespace);
         return MapperInfoContextHolder.get(daoInterface);
     }
 
@@ -68,5 +68,13 @@ public class MapperInfoHandler extends BasicInfoHandler {
         }
         logger.info("{} un extend {}", SimpleDao.class.getName());
         return null;
+    }
+
+    private Class<?> getDaoInterface(String namespace) {
+        try {
+            return Class.forName(namespace);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException("namespace not found");
+        }
     }
 }

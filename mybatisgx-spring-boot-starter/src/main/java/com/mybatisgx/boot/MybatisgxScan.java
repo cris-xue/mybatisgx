@@ -18,8 +18,8 @@ import java.lang.annotation.*;
 @Documented
 @Inherited
 @MapperScan
-@Import({MybatisxRegistrar.class})
-public @interface MybatisxScan {
+@Import({MybatisgxRegistrar.class})
+public @interface MybatisgxScan {
 
     String[] entityBasePackages();
 

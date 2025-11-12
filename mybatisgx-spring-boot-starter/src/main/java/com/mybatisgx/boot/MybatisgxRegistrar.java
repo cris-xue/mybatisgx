@@ -27,9 +27,9 @@ import java.util.List;
  * @description：一句话描述
  * @date ：2020/1/8 18:06
  */
-public class MybatisxRegistrar implements ImportBeanDefinitionRegistrar {
+public class MybatisgxRegistrar implements ImportBeanDefinitionRegistrar {
 
-    private static final Logger logger = LoggerFactory.getLogger(MybatisxRegistrar.class);
+    private static final Logger logger = LoggerFactory.getLogger(MybatisgxRegistrar.class);
 
     private static final ResourcePatternResolver RESOURCE_PATTERN_RESOLVER = new PathMatchingResourcePatternResolver();
     private static final MetadataReaderFactory METADATA_READER_FACTORY = new CachingMetadataReaderFactory();

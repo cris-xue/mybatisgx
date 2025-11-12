@@ -17,9 +17,9 @@ import java.util.Set;
  * @description：一句话描述
  * @date ：2020/8/7 10:27
  */
-public class MybatisxExcludeAutoConfigFilter implements AutoConfigurationImportFilter, EnvironmentAware {
+public class MybatisgxExcludeAutoConfigFilter implements AutoConfigurationImportFilter, EnvironmentAware {
 
-    private static Logger logger = LoggerFactory.getLogger(MybatisxExcludeAutoConfigFilter.class);
+    private static Logger logger = LoggerFactory.getLogger(MybatisgxExcludeAutoConfigFilter.class);
 
     private final Set<String> EXCLUDE_AUTOCONFIG = new HashSet<>(
             Arrays.asList(MybatisAutoConfiguration.class.getName())
@@ -38,5 +38,4 @@ public class MybatisxExcludeAutoConfigFilter implements AutoConfigurationImportF
     public void setEnvironment(Environment environment) {
 
     }
-
 }

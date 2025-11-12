@@ -100,6 +100,7 @@ public class MethodNameAstHandler {
             ParseTree conditionGroupChild = conditionGroup.getChild(i);
             if (conditionGroupChild instanceof MethodNameParser.Condition_item_clauseContext) {
                 ConditionInfo conditionInfo = new ConditionInfo(conditionCount++, conditionOriginType, methodParamInfo);
+                conditionInfo.setOriginSegment(conditionGroupChild.getText());
                 this.parseConditionItem(conditionContext, conditionInfo, conditionGroupChild);
                 conditionInfoList.add(conditionInfo);
             } else {

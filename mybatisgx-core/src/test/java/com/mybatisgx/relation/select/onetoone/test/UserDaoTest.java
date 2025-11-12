@@ -60,6 +60,12 @@ public class UserDaoTest {
                 user.setMultiId(multiId);
             }
             UserDetail userDetail = user.getUserDetail();
+            if (i == 0) {
+                MultiId<Long> multiId = new MultiId();
+                multiId.setId1(111111L);
+                multiId.setId2(111111L);
+                userDetail.setMultiId(multiId);
+            }
             userDetail.setUser(user);
 
             userList.add(user);
@@ -68,7 +74,7 @@ public class UserDaoTest {
     }
 
     @Test
-    public void testFindById() {
+    public void testUserFindById() {
         MultiId<Long> multiId = new MultiId();
         multiId.setId1(111111L);
         multiId.setId2(111111L);
@@ -83,7 +89,7 @@ public class UserDaoTest {
     }
 
     @Test
-    public void testFindList() {
+    public void testUserFindList() {
         List<User> dbUserList = userDao.findList(new User());
         Assert.assertNotNull(dbUserList);
         for (int i = 0; i < count; i++) {
@@ -94,6 +100,39 @@ public class UserDaoTest {
             Assert.assertEquals(user.getMultiId().getId2(), dbUser.getMultiId().getId2());
             Assert.assertEquals(user.getUserDetail().getMultiId().getId1(), dbUser.getUserDetail().getMultiId().getId1());
             Assert.assertEquals(user.getUserDetail().getMultiId().getId2(), dbUser.getUserDetail().getMultiId().getId2());
+        }
+    }
+
+    @Test
+    public void testUserDetailFindById() {
+        MultiId<Long> multiId = new MultiId();
+        multiId.setId1(111111L);
+        multiId.setId2(111111L);
+        UserDetail dbUserDetail = userDetailDao.findById(multiId);
+        Assert.assertNotNull(dbUserDetail);
+
+        UserDetail userDetail = userDetailList.get(0);
+        Assert.assertEquals(userDetail.getMultiId().getId1(), dbUserDetail.getMultiId().getId1());
+        Assert.assertEquals(userDetail.getMultiId().getId2(), dbUserDetail.getMultiId().getId2());
+        Assert.assertEquals(userDetail.getUser().getMultiId().getId1(), dbUserDetail.getUser().getMultiId().getId1());
+        Assert.assertEquals(userDetail.getUser().getMultiId().getId2(), dbUserDetail.getUser().getMultiId().getId2());
+    }
+
+    @Test
+    public void testUserDetailFindList() {
+        List<UserDetail> dbUserDetailList = userDetailDao.findList(new UserDetail());
+        Assert.assertNotNull(dbUserDetailList);
+
+        for (int i = 0; i < count; i++) {
+            UserDetail userDetail = userDetailList.get(i);
+            UserDetail dbUserDetail = dbUserDetailList.get(i);
+
+            Assert.assertNotNull(dbUserDetail);
+            Assert.assertNotNull(dbUserDetail.getUser());
+            Assert.assertEquals(userDetail.getMultiId().getId1(), dbUserDetail.getMultiId().getId1());
+            Assert.assertEquals(userDetail.getMultiId().getId2(), dbUserDetail.getMultiId().getId2());
+            Assert.assertEquals(userDetail.getUser().getMultiId().getId1(), dbUserDetail.getUser().getMultiId().getId1());
+            Assert.assertEquals(userDetail.getUser().getMultiId().getId2(), dbUserDetail.getUser().getMultiId().getId2());
         }
     }
 }

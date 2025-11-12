@@ -64,7 +64,7 @@ public class ColumnInfo {
     /**
      * 非持久化字段
      */
-    private NonPersistent nonPersistent;
+    private Transient nonPersistent;
     /**
      * 是否是乐观锁字段
      */
@@ -182,11 +182,11 @@ public class ColumnInfo {
         this.column = column;
     }
 
-    public NonPersistent getNonPersistent() {
+    public Transient getNonPersistent() {
         return nonPersistent;
     }
 
-    public void setNonPersistent(NonPersistent nonPersistent) {
+    public void setNonPersistent(Transient nonPersistent) {
         this.nonPersistent = nonPersistent;
     }
 

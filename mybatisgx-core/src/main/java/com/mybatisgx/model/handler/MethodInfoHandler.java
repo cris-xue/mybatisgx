@@ -103,9 +103,9 @@ public class MethodInfoHandler {
             // 方法名解析
             this.methodNameParse(mapperInfo.getEntityInfo(), methodInfo, methodDeclaringClass);
             // 方法条件解析
-            ConditionGroup conditionGroup = method.getAnnotation(ConditionGroup.class);
-            if (conditionGroup != null) {
-                methodInfo.setConditionGroupExpression(conditionGroup.value());
+            Sql sql = method.getAnnotation(Sql.class);
+            if (sql != null) {
+                methodInfo.setConditionGroupExpression(sql.value());
                 this.queryConditionParse(mapperInfo.getEntityInfo(), methodInfo);
             }
 

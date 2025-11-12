@@ -3,7 +3,7 @@ package com.mybatisgx.model;
 import com.mybatisgx.annotation.Lock;
 import com.mybatisgx.annotation.LogicDelete;
 import com.mybatisgx.annotation.ManyToMany;
-import com.mybatisgx.annotation.NonPersistent;
+import com.mybatisgx.annotation.Transient;
 import com.mybatisgx.annotation.handler.GenerateValueHandler;
 import com.mybatisgx.utils.TypeUtils;
 import org.apache.commons.beanutils.BeanUtils;
@@ -199,7 +199,7 @@ public class EntityInfo {
                         tableColumnInfo = columnInfo;
                     }
                 } else {
-                    NonPersistent nonPersistent = columnInfo.getNonPersistent();
+                    Transient nonPersistent = columnInfo.getNonPersistent();
                     if (nonPersistent == null) {
                         tableColumnInfo = columnInfo;
                     }

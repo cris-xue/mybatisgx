@@ -37,7 +37,7 @@ public class MybatisgxRegistrar implements ImportBeanDefinitionRegistrar {
     @Override
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
         AnnotationAttributes annotationAttributes = AnnotationAttributes
-                .fromMap(importingClassMetadata.getAnnotationAttributes(MybatisxScan.class.getName()));
+                .fromMap(importingClassMetadata.getAnnotationAttributes(MybatisgxScan.class.getName()));
         MybatisxContextLoader mybatisxContextLoader = new MybatisxContextLoader();
         if (annotationAttributes != null) {
             String[] entityBasePackages = (String[]) annotationAttributes.get("entityBasePackages");

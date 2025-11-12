@@ -22,7 +22,7 @@ import java.util.List;
  * create time: 2019/5/9 17:54
  */
 @Import({MetaObjectHandlerConverter.class, MybatisgxConfiguration.class})
-@EnableConfigurationProperties(MybatisxProperties.class)
+@EnableConfigurationProperties(MybatisgxProperties.class)
 public class MybatisxAutoConfiguration extends MybatisAutoConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(MybatisxAutoConfiguration.class);

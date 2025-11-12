@@ -8,8 +8,8 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty;
 /**
  * MybatisxProperties
  */
-@ConfigurationProperties(prefix = MybatisxProperties.MYBATIS_PREFIX)
-public class MybatisxProperties extends MybatisProperties {
+@ConfigurationProperties(prefix = MybatisgxProperties.MYBATIS_PREFIX)
+public class MybatisgxProperties extends MybatisProperties {
 
     public static final String MYBATIS_PREFIX = "mybatisx";
 

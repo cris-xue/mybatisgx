@@ -40,8 +40,8 @@ public class SqlSessionFactoryBeanPostProcessor implements BeanPostProcessor {
                 mybatisxConfiguration.setIdGenerateValueHandler(idGenerateValueHandler);
             }
         }
-        if (bean instanceof MybatisxProperties) {
-            MybatisxProperties mybatisxProperties = (MybatisxProperties) bean;
+        if (bean instanceof MybatisgxProperties) {
+            MybatisgxProperties mybatisxProperties = (MybatisgxProperties) bean;
         }
         if (bean instanceof MybatisxConfiguration) {
             MybatisxConfiguration mybatisxConfiguration = (MybatisxConfiguration) bean;

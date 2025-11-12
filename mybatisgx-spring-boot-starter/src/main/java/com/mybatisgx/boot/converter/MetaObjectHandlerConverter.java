@@ -1,4 +1,4 @@
-package com.mybatisgx.converter;
+package com.mybatisgx.boot.converter;
 
 import com.mybatisgx.scripting.MetaObjectHandler;
 import org.springframework.boot.context.properties.ConfigurationPropertiesBinding;

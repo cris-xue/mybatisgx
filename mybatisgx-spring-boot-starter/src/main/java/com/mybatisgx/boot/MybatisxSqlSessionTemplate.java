@@ -1,4 +1,4 @@
-package com.mybatisgx;
+package com.mybatisgx.boot;
 
 import com.mybatisgx.context.MethodInfoContextHolder;
 import com.mybatisgx.model.MethodInfo;

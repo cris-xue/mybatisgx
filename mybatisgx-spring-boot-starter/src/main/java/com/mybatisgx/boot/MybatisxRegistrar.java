@@ -1,4 +1,4 @@
-package com.mybatisgx;
+package com.mybatisgx.boot;
 
 import com.mybatisgx.context.MybatisxContextLoader;
 import com.mybatisgx.dao.Dao;

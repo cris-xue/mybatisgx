@@ -1,4 +1,4 @@
-package com.mybatisgx;
+package com.mybatisgx.boot;
 
 import org.mybatis.spring.annotation.MapperScan;
 import org.mybatis.spring.mapper.MapperFactoryBean;

@@ -1,6 +1,6 @@
-package com.mybatisgx;
+package com.mybatisgx.boot;
 
-import com.mybatisgx.converter.MetaObjectHandlerConverter;
+import com.mybatisgx.boot.converter.MetaObjectHandlerConverter;
 import org.apache.ibatis.mapping.DatabaseIdProvider;
 import org.apache.ibatis.plugin.Interceptor;
 import org.apache.ibatis.scripting.LanguageDriver;

@@ -1,4 +1,4 @@
-package com.mybatisgx;
+package com.mybatisgx.boot;
 
 import com.mybatisgx.ext.MybatisxConfiguration;
 import org.mybatis.spring.boot.autoconfigure.MybatisProperties;

@@ -1,4 +1,4 @@
-package com.mybatisgx;
+package com.mybatisgx.boot;
 
 import com.mybatisgx.annotation.handler.IdGenerateValueHandler;
 import com.mybatisgx.ext.MybatisxConfiguration;

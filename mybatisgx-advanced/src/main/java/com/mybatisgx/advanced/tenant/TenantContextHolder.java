@@ -1,4 +1,4 @@
-package com.mybatisgx.sql;
+package com.mybatisgx.advanced.tenant;
 
 public class TenantContextHolder {
 

@@ -1,4 +1,4 @@
-package com.mybatisgx.sql;
+package com.mybatisgx.advanced.tenant;
 
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.StringValue;

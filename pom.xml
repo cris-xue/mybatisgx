@@ -21,6 +21,7 @@
 		<module>mybatisgx-annotation</module>
 		<module>mybatisgx-core</module>
 		<module>mybatisgx-core-patch</module>
+		<module>mybatisgx-advanced</module>
 		<module>mybatisgx-spring-boot-starter</module>
 	</modules>
 	

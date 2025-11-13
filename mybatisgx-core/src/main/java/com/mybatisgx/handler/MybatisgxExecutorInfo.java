@@ -1,4 +1,4 @@
-package com.mybatisgx.sql;
+package com.mybatisgx.handler;
 
 import com.mybatisgx.handler.page.MybatisxSqlCommandType;
 import org.apache.ibatis.cache.CacheKey;

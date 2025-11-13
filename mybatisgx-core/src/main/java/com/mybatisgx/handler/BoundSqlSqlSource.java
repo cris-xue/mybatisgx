@@ -1,4 +1,4 @@
-package com.mybatisgx.sql;
+package com.mybatisgx.handler;
 
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.SqlSource;

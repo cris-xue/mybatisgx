@@ -1,4 +1,4 @@
-package com.mybatisgx.sql;
+package com.mybatisgx.handler;
 
 import com.mybatisgx.annotation.handler.IdGenerateValueHandler;
 import com.mybatisgx.scripting.MybatisxParameterHandler;

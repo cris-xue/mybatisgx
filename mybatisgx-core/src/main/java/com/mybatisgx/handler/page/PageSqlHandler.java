@@ -2,9 +2,9 @@ package com.mybatisgx.handler.page;
 
 import com.mybatisgx.dao.Page;
 import com.mybatisgx.dao.Pageable;
-import com.mybatisgx.sql.MappedStatementHelper;
-import com.mybatisgx.sql.MybatisgxExecutorInfo;
-import com.mybatisgx.sql.SqlHandler;
+import com.mybatisgx.handler.MappedStatementHelper;
+import com.mybatisgx.handler.MybatisgxExecutorInfo;
+import com.mybatisgx.handler.SqlHandler;
 import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.mapping.BoundSql;

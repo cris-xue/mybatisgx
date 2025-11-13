@@ -1,6 +1,6 @@
 package com.mybatisgx.boot;
 
-import com.mybatisgx.ext.MybatisxConfiguration;
+import com.mybatisgx.ext.session.MybatisxConfiguration;
 import org.mybatis.spring.boot.autoconfigure.MybatisProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;

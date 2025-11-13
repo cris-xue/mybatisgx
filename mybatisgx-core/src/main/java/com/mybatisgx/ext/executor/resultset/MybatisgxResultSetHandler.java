@@ -1,5 +1,7 @@
-package com.mybatisgx.ext;
+package com.mybatisgx.ext.executor.resultset;
 
+import com.mybatisgx.ext.LinkObjectHelper;
+import com.mybatisgx.ext.executor.loader.BatchResultLoader;
 import com.mybatisgx.ext.mapping.BatchSelectResultMapping;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;

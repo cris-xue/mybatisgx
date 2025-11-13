@@ -1,6 +1,6 @@
 package com.mybatisgx.template.select;
 
-import com.mybatisgx.ext.BatchResultLoader;
+import com.mybatisgx.ext.executor.loader.BatchResultLoader;
 import com.mybatisgx.model.BatchNestedResultMapInfo;
 import com.mybatisgx.model.RelationColumnInfo;
 import com.mybatisgx.model.ResultMapInfo;

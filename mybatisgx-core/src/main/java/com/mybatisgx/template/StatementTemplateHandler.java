@@ -1,7 +1,7 @@
 package com.mybatisgx.template;
 
 import com.mybatisgx.context.MapperInfoContextHolder;
-import com.mybatisgx.ext.MybatisgxXMLMapperBuilder;
+import com.mybatisgx.ext.builder.MybatisgxXMLMapperBuilder;
 import com.mybatisgx.model.MapperInfo;
 import com.mybatisgx.model.MethodInfo;
 import com.mybatisgx.template.select.SelectTemplateHandler;

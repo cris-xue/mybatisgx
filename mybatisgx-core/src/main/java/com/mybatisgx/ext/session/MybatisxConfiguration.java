@@ -1,8 +1,9 @@
-package com.mybatisgx.ext;
+package com.mybatisgx.ext.session;
 
 import com.mybatisgx.annotation.handler.IdGenerateValueHandler;
 import com.mybatisgx.ext.executor.MybatisgxBatchExecutor;
 import com.mybatisgx.ext.executor.MybatisgxMixExecutor;
+import com.mybatisgx.ext.executor.resultset.MybatisgxResultSetHandler;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.parameter.ParameterHandler;
 import org.apache.ibatis.executor.resultset.ResultSetHandler;

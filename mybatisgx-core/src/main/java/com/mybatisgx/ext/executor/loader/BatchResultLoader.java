@@ -1,5 +1,6 @@
-package com.mybatisgx.ext;
+package com.mybatisgx.ext.executor.loader;
 
+import com.mybatisgx.ext.LinkObjectHelper;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.executor.Executor;

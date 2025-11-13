@@ -3,7 +3,7 @@ package com.mybatisgx.util;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.google.common.collect.Sets;
 import com.mybatisgx.context.MybatisxContextLoader;
-import com.mybatisgx.ext.MybatisxConfiguration;
+import com.mybatisgx.ext.session.MybatisxConfiguration;
 import com.mybatisgx.template.StatementTemplateHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.logging.stdout.StdOutImpl;

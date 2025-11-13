@@ -1,4 +1,4 @@
-package com.mybatisgx.ext;
+package com.mybatisgx.ext.builder;
 
 import com.mybatisgx.annotation.FetchMode;
 import com.mybatisgx.ext.mapping.BatchSelectResultMapping;

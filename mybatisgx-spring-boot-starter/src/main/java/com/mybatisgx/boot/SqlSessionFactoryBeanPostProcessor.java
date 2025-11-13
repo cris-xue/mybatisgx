@@ -1,7 +1,7 @@
 package com.mybatisgx.boot;
 
 import com.mybatisgx.annotation.handler.IdGenerateValueHandler;
-import com.mybatisgx.ext.MybatisxConfiguration;
+import com.mybatisgx.ext.session.MybatisxConfiguration;
 import com.mybatisgx.template.StatementTemplateHandler;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSessionFactory;

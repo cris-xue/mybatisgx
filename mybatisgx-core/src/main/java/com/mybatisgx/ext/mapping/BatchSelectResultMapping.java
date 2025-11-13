@@ -1,15 +1,15 @@
 package com.mybatisgx.ext.mapping;
 
+import org.apache.ibatis.mapping.PatchResultMapping;
 import org.apache.ibatis.mapping.ResultFlag;
 import org.apache.ibatis.mapping.ResultMapping;
-import org.apache.ibatis.mapping.ResultMappingAdapter;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
 
 import java.util.List;
 import java.util.Set;
 
-public class BatchSelectResultMapping extends ResultMappingAdapter {
+public class BatchSelectResultMapping extends PatchResultMapping {
 
     private ResultMapping resultMapping;
 

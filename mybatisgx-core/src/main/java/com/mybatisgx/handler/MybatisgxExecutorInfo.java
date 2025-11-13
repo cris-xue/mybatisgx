@@ -1,6 +1,5 @@
 package com.mybatisgx.handler;
 
-import com.mybatisgx.handler.page.MybatisxSqlCommandType;
 import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
@@ -14,10 +13,6 @@ public class MybatisgxExecutorInfo {
      * 参数数量
      */
     private Integer count;
-    /**
-     * 类型   update select/select cache
-     */
-    private MybatisxSqlCommandType sqlCommandType;
 
     private Boolean isCache = false;
 
@@ -54,14 +49,6 @@ public class MybatisgxExecutorInfo {
 
     public void setCount(Integer count) {
         this.count = count;
-    }
-
-    public MybatisxSqlCommandType getSqlCommandType() {
-        return sqlCommandType;
-    }
-
-    public void setSqlCommandType(MybatisxSqlCommandType sqlCommandType) {
-        this.sqlCommandType = sqlCommandType;
     }
 
     public Boolean getCache() {

@@ -3,11 +3,11 @@ package com.mybatisgx.handler;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.SqlSource;
 
-public class BoundSqlSqlSource implements SqlSource {
+public class BoundSqlSource implements SqlSource {
 
     private final BoundSql boundSql;
 
-    public BoundSqlSqlSource(BoundSql boundSql) {
+    public BoundSqlSource(BoundSql boundSql) {
         this.boundSql = boundSql;
     }
 

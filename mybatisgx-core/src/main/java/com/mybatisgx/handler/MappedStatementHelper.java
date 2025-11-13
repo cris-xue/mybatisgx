@@ -6,12 +6,12 @@ import org.apache.ibatis.mapping.MappedStatement;
 public class MappedStatementHelper {
 
     public static MappedStatement copy(MappedStatement mappedStatement, BoundSql boundSql, String methodSuffixName) {
-        BoundSqlSqlSource boundSqlSqlSource = new BoundSqlSqlSource(boundSql);
+        BoundSqlSource boundSqlSource = new BoundSqlSource(boundSql);
         // 1. 获取原始MappedStatement的构建器
         MappedStatement.Builder builder = new MappedStatement.Builder(
                 mappedStatement.getConfiguration(),
                 mappedStatement.getId() + methodSuffixName,  // 新ID，避免与原ID冲突
-                boundSqlSqlSource,                    // 注入新SQLSource
+                boundSqlSource,                    // 注入新SQLSource
                 mappedStatement.getSqlCommandType()           // 保留原SQL命令类型
         );
 

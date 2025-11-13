@@ -1,8 +1,5 @@
 package com.mybatisgx.sql;
 
-import org.apache.ibatis.mapping.BoundSql;
-import org.apache.ibatis.mapping.MappedStatement;
-
 /**
  * sql处理器
  * @author 薛承城
@@ -10,5 +7,5 @@ import org.apache.ibatis.mapping.MappedStatement;
  */
 public interface SqlHandler {
 
-    BoundSql process(MappedStatement mappedStatement, Object parameter);
+    void process(MybatisgxExecutorInfo mybatisgxExecutorInfo);
 }

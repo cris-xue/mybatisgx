@@ -1,8 +1,10 @@
 package com.mybatisgx.sql;
 
+import com.mybatisgx.handler.page.MybatisxSqlCommandType;
 import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
+import org.apache.ibatis.plugin.Invocation;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 
@@ -19,6 +21,7 @@ public class MybatisgxExecutorInfo {
 
     private Boolean isCache = false;
 
+    private Invocation invocation;
     private Object[] args;
     private MappedStatement mappedStatement;
     private Object parameterObject;
@@ -67,6 +70,14 @@ public class MybatisgxExecutorInfo {
 
     public void setCache(Boolean cache) {
         isCache = cache;
+    }
+
+    public Invocation getInvocation() {
+        return invocation;
+    }
+
+    public void setInvocation(Invocation invocation) {
+        this.invocation = invocation;
     }
 
     public MappedStatement getMappedStatement() {

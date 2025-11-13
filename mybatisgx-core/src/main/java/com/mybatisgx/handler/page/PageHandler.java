@@ -1,4 +1,4 @@
-package com.mybatisgx.sql;
+package com.mybatisgx.handler.page;
 
 import com.github.pagehelper.BoundSqlInterceptor;
 import com.github.pagehelper.Dialect;

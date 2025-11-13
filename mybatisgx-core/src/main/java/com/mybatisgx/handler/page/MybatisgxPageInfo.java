@@ -1,4 +1,4 @@
-package com.mybatisgx.sql;
+package com.mybatisgx.handler.page;
 
 import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.executor.Executor;

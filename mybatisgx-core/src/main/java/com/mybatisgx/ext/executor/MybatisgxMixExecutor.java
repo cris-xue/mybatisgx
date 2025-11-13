@@ -1,6 +1,9 @@
 package com.mybatisgx.ext.executor;
 
+import com.github.pagehelper.PageHelper;
 import com.mybatisgx.context.MethodInfoContextHolder;
+import com.mybatisgx.dao.Page;
+import com.mybatisgx.dao.Pageable;
 import com.mybatisgx.model.MethodInfo;
 import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.cursor.Cursor;
@@ -14,7 +17,10 @@ import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.transaction.Transaction;
 
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * mybatisgx混合执行器
@@ -48,7 +54,28 @@ public class MybatisgxMixExecutor implements Executor {
     @Override
     public <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler) throws SQLException {
         this.newExecutor(ms);
-        return this.delegate.query(ms, parameter, rowBounds, resultHandler);
+        Pageable pageable = this.getPageable(parameter);
+        if (pageable != null) {
+            com.github.pagehelper.Page page111 = PageHelper.startPage(pageable.getPageNo(), pageable.getPageSize());
+            List<Object> list = this.delegate.query(ms, parameter, rowBounds, resultHandler);
+            Page<Object> page = new Page(page111.getTotal(), list);
+            return (List<E>) Arrays.asList(page);
+        } else {
+            return this.delegate.query(ms, parameter, rowBounds, resultHandler);
+        }
+    }
+
+    private Pageable getPageable(Object parameterObject) {
+        if (parameterObject instanceof Map) {
+            Map<String, Object> parameterObjectMap = (Map<String, Object>) parameterObject;
+            Collection<Object> parameterObjectCollection = parameterObjectMap.values();
+            for (Object object : parameterObjectCollection) {
+                if (object instanceof Pageable) {
+                    return (Pageable) object;
+                }
+            }
+        }
+        return null;
     }
 
     @Override

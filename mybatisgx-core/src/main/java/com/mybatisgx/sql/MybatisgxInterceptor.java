@@ -43,6 +43,8 @@ public class MybatisgxInterceptor implements Interceptor {
     private IdGenerateValueHandler idGenerateValueHandler;
     private String tenantId = "";
 
+    private SqlHandler sqlHandler;
+
     public MybatisgxInterceptor(IdGenerateValueHandler idGenerateValueHandler) {
         this.idGenerateValueHandler = idGenerateValueHandler;
     }
@@ -64,7 +66,6 @@ public class MybatisgxInterceptor implements Interceptor {
 
         // 租户功能会改变sql
         if (StringUtils.isNotBlank(tenantId)) {
-            SqlHandler sqlHandler = new SqlHandler();
             boundSql = sqlHandler.process(mappedStatement, parameterObject);
             // 替换原MappedStatement和parameterObject。
             MappedStatement newMappedStatement = MappedStatementHelper.copy(mappedStatement, boundSql, "TenantId");

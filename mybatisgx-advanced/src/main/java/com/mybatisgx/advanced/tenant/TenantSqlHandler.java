@@ -1,5 +1,6 @@
 package com.mybatisgx.advanced.tenant;
 
+import com.mybatisgx.sql.SqlHandler;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.Statement;
@@ -14,7 +15,7 @@ import org.apache.ibatis.session.Configuration;
 
 import java.util.List;
 
-public class SqlHandler {
+public class TenantSqlHandler implements SqlHandler {
 
     /**
      * mappedStatement参数不能直接修改，这个参数都是从【MybatisxConfiguration.getMappedStatement();】中获取的。直接修改等于把元数据进行了修改

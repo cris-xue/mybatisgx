@@ -3,7 +3,7 @@ package com.mybatisgx.util;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.google.common.collect.Sets;
 import com.mybatisgx.context.MybatisxContextLoader;
-import com.mybatisgx.ext.session.MybatisxConfiguration;
+import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.template.StatementTemplateHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.logging.stdout.StdOutImpl;
@@ -56,7 +56,7 @@ public class DaoTestUtils {
         return dataSource;
     }
 
-    protected static MybatisxConfiguration context(List<Class<?>> entityClassList, List<Class<?>> daoClassList) {
+    protected static MybatisgxConfiguration context(List<Class<?>> entityClassList, List<Class<?>> daoClassList) {
         DataSource dataSource = dataSource();
         flywayInit(dataSource);
 
@@ -64,11 +64,11 @@ public class DaoTestUtils {
                 .transactionFactory(new JdbcTransactionFactory())
                 .dataSource(dataSource)
                 .build();
-        MybatisxConfiguration mybatisxConfiguration = new MybatisxConfiguration(environment);
-        mybatisxConfiguration.setLogImpl(StdOutImpl.class);
-        mybatisxConfiguration.setLazyLoadingEnabled(true);
-        mybatisxConfiguration.setAggressiveLazyLoading(false);
-        mybatisxConfiguration.setLazyLoadTriggerMethods(Sets.newHashSet("get"));
+        MybatisgxConfiguration mybatisgxConfiguration = new MybatisgxConfiguration(environment);
+        mybatisgxConfiguration.setLogImpl(StdOutImpl.class);
+        mybatisgxConfiguration.setLazyLoadingEnabled(true);
+        mybatisgxConfiguration.setAggressiveLazyLoading(false);
+        mybatisgxConfiguration.setLazyLoadTriggerMethods(Sets.newHashSet("get"));
 
         MybatisxContextLoader mybatisxContextLoader = new MybatisxContextLoader();
         mybatisxContextLoader.processEntityClass(entityClassList);
@@ -76,8 +76,8 @@ public class DaoTestUtils {
         mybatisxContextLoader.processTemplate();
 
         StatementTemplateHandler statementTemplateHandler = new StatementTemplateHandler();
-        statementTemplateHandler.curdMethod(mybatisxConfiguration);
-        return mybatisxConfiguration;
+        statementTemplateHandler.curdMethod(mybatisgxConfiguration);
+        return mybatisgxConfiguration;
     }
 
     public static <T> T getDao(Class<?> entityClass, Class<T> daoclass) {
@@ -85,15 +85,15 @@ public class DaoTestUtils {
     }
 
     public static <T> T getDao(List<Class<?>> entityClassList, List<Class<?>> daoClassList, Class<T> targetDaoclass) {
-        MybatisxConfiguration mybatisxConfiguration = context(entityClassList, daoClassList);
-        SqlSessionFactory sqlSessionFactory = new DefaultSqlSessionFactory(mybatisxConfiguration);
+        MybatisgxConfiguration mybatisgxConfiguration = context(entityClassList, daoClassList);
+        SqlSessionFactory sqlSessionFactory = new DefaultSqlSessionFactory(mybatisgxConfiguration);
         SqlSession sqlSession = sqlSessionFactory.openSession();
         return sqlSession.getMapper(targetDaoclass);
     }
 
     public static SqlSession getSqlSession(List<Class<?>> entityClassList, List<Class<?>> daoClassList) {
-        MybatisxConfiguration mybatisxConfiguration = context(entityClassList, daoClassList);
-        SqlSessionFactory sqlSessionFactory = new DefaultSqlSessionFactory(mybatisxConfiguration);
+        MybatisgxConfiguration mybatisgxConfiguration = context(entityClassList, daoClassList);
+        SqlSessionFactory sqlSessionFactory = new DefaultSqlSessionFactory(mybatisgxConfiguration);
         return sqlSessionFactory.openSession();
     }
 }

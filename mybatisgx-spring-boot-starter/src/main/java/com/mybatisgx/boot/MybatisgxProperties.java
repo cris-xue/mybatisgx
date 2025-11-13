@@ -1,6 +1,6 @@
 package com.mybatisgx.boot;
 
-import com.mybatisgx.ext.session.MybatisxConfiguration;
+import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import org.mybatis.spring.boot.autoconfigure.MybatisProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
@@ -14,14 +14,14 @@ public class MybatisgxProperties extends MybatisProperties {
     public static final String MYBATIS_PREFIX = "mybatisx";
 
     @NestedConfigurationProperty
-    private MybatisxConfiguration configuration = new MybatisxConfiguration();
+    private MybatisgxConfiguration configuration = new MybatisgxConfiguration();
 
     @Override
-    public MybatisxConfiguration getConfiguration() {
+    public MybatisgxConfiguration getConfiguration() {
         return configuration;
     }
 
-    public void setConfiguration(MybatisxConfiguration configuration) {
+    public void setConfiguration(MybatisgxConfiguration configuration) {
         this.configuration = configuration;
         super.setConfiguration(configuration);
     }

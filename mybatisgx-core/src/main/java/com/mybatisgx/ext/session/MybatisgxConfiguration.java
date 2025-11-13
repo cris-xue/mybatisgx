@@ -17,13 +17,13 @@ import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.transaction.Transaction;
 
-public class MybatisxConfiguration extends Configuration {
+public class MybatisgxConfiguration extends Configuration {
 
-    public MybatisxConfiguration() {
+    public MybatisgxConfiguration() {
         super();
     }
 
-    public MybatisxConfiguration(Environment environment) {
+    public MybatisgxConfiguration(Environment environment) {
         super(environment);
     }
 

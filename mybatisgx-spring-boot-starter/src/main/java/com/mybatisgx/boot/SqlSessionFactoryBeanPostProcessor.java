@@ -1,7 +1,7 @@
 package com.mybatisgx.boot;
 
 import com.mybatisgx.annotation.handler.IdGenerateValueHandler;
-import com.mybatisgx.ext.session.MybatisxConfiguration;
+import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.template.StatementTemplateHandler;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -35,16 +35,16 @@ public class SqlSessionFactoryBeanPostProcessor implements BeanPostProcessor {
             Configuration configuration = sqlSessionFactory.getConfiguration();
             statementTemplateHandler.curdMethod(configuration);
 
-            if (configuration instanceof MybatisxConfiguration) {
-                MybatisxConfiguration mybatisxConfiguration = (MybatisxConfiguration) configuration;
-                mybatisxConfiguration.setIdGenerateValueHandler(idGenerateValueHandler);
+            if (configuration instanceof MybatisgxConfiguration) {
+                MybatisgxConfiguration mybatisgxConfiguration = (MybatisgxConfiguration) configuration;
+                mybatisgxConfiguration.setIdGenerateValueHandler(idGenerateValueHandler);
             }
         }
         if (bean instanceof MybatisgxProperties) {
             MybatisgxProperties mybatisxProperties = (MybatisgxProperties) bean;
         }
-        if (bean instanceof MybatisxConfiguration) {
-            MybatisxConfiguration mybatisxConfiguration = (MybatisxConfiguration) bean;
+        if (bean instanceof MybatisgxConfiguration) {
+            MybatisgxConfiguration mybatisgxConfiguration = (MybatisgxConfiguration) bean;
         }
         return bean;
     }

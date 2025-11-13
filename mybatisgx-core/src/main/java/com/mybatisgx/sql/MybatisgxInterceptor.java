@@ -38,12 +38,12 @@ import java.util.List;
                 args = {MappedStatement.class, Object.class, RowBounds.class, ResultHandler.class, CacheKey.class, BoundSql.class}
         )
 })
-public class MybatisxExecutorInterceptor implements Interceptor {
+public class MybatisgxInterceptor implements Interceptor {
 
     private IdGenerateValueHandler idGenerateValueHandler;
     private String tenantId = "";
 
-    public MybatisxExecutorInterceptor(IdGenerateValueHandler idGenerateValueHandler) {
+    public MybatisgxInterceptor(IdGenerateValueHandler idGenerateValueHandler) {
         this.idGenerateValueHandler = idGenerateValueHandler;
     }
 

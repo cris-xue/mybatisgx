@@ -1,10 +1,13 @@
 package com.mybatisgx.simple.test;
 
 import com.github.swierkosz.fixture.generator.FixtureGenerator;
+import com.mybatisgx.dao.Page;
+import com.mybatisgx.dao.Pageable;
 import com.mybatisgx.simple.dao.UserDao;
 import com.mybatisgx.simple.entity.User;
 import com.mybatisgx.util.DaoTestUtils;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -12,9 +15,26 @@ import java.util.List;
 
 public class UserDaoTest {
 
+    private static UserDao userDao;
+    private static List<User> userList = new ArrayList<>();
+
+    @BeforeClass
+    public static void beforeClass() {
+        userDao = DaoTestUtils.getDao(User.class, UserDao.class);
+
+        FixtureGenerator fixtureGenerator = new FixtureGenerator();
+        fixtureGenerator.configure().ignoreCyclicReferences();
+
+        int count = 100;
+        for (int i = 0; i < count; i++) {
+            User user = fixtureGenerator.createRandomized(User.class);
+            userList.add(user);
+        }
+        userDao.insertBatch(userList, 3000);
+    }
+
     @Test
     public void testInsert() {
-        UserDao userDao = DaoTestUtils.getDao(User.class, UserDao.class);
         FixtureGenerator fixtureGenerator = new FixtureGenerator();
         fixtureGenerator.configure().ignoreCyclicReferences();
         User user = fixtureGenerator.createRandomized(User.class);
@@ -27,8 +47,27 @@ public class UserDaoTest {
     }
 
     @Test
+    public void testInsertBatch() {
+        FixtureGenerator fixtureGenerator = new FixtureGenerator();
+        fixtureGenerator.configure().ignoreCyclicReferences();
+
+        int count = 100;
+        List<User> userList = new ArrayList(count);
+        for (int i = 0; i < count; i++) {
+            User user = fixtureGenerator.createRandomized(User.class);
+            userList.add(user);
+        }
+
+        long startTime = System.currentTimeMillis();
+        int insertBatchCount = userDao.insertBatch(userList, 3000);
+        long endTime = System.currentTimeMillis();
+
+        Assert.assertEquals(count, insertBatchCount);
+        System.out.println("insertBatchCount: " + insertBatchCount + ", time: " + (endTime - startTime));
+    }
+
+    @Test
     public void testDeleteById() {
-        UserDao userDao = DaoTestUtils.getDao(User.class, UserDao.class);
         FixtureGenerator fixtureGenerator = new FixtureGenerator();
         fixtureGenerator.configure().ignoreCyclicReferences();
         User user = fixtureGenerator.createRandomized(User.class);
@@ -44,7 +83,6 @@ public class UserDaoTest {
 
     @Test
     public void testUpdateById() {
-        UserDao userDao = DaoTestUtils.getDao(User.class, UserDao.class);
         FixtureGenerator fixtureGenerator = new FixtureGenerator();
         fixtureGenerator.configure().ignoreCyclicReferences();
         User user = fixtureGenerator.createRandomized(User.class);
@@ -62,7 +100,6 @@ public class UserDaoTest {
 
     @Test
     public void testFindById() {
-        UserDao userDao = DaoTestUtils.getDao(User.class, UserDao.class);
         FixtureGenerator fixtureGenerator = new FixtureGenerator();
         fixtureGenerator.configure().ignoreCyclicReferences();
         User user = fixtureGenerator.createRandomized(User.class);
@@ -75,23 +112,11 @@ public class UserDaoTest {
     }
 
     @Test
-    public void testInsertBatch() {
-        UserDao userDao = DaoTestUtils.getDao(User.class, UserDao.class);
-        FixtureGenerator fixtureGenerator = new FixtureGenerator();
-        fixtureGenerator.configure().ignoreCyclicReferences();
-
-        int count = 100;
-        List<User> userList = new ArrayList(count);
-        for (int i = 0; i < count; i++) {
-            User user = fixtureGenerator.createRandomized(User.class);
-            userList.add(user);
-        }
-
-        long startTime = System.currentTimeMillis();
-        int insertBatchCount = userDao.insertBatch(userList, 3000);
-        long endTime = System.currentTimeMillis();
-
-        Assert.assertEquals(count, insertBatchCount);
-        System.out.println("insertBatchCount: " + insertBatchCount + ", time: " + (endTime - startTime));
+    public void testFindPage() {
+        Pageable pageable = new Pageable();
+        pageable.setPageNo(1);
+        pageable.setPageSize(10);
+        Page<User> page2 = userDao.findPage(new User(), pageable);
+        Assert.assertNotNull(page2);
     }
 }

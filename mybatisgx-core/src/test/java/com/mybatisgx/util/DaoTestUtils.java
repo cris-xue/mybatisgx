@@ -1,9 +1,11 @@
 package com.mybatisgx.util;
 
 import com.alibaba.druid.pool.DruidDataSource;
+import com.github.pagehelper.PageInterceptor;
 import com.google.common.collect.Sets;
 import com.mybatisgx.context.MybatisxContextLoader;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
+import com.mybatisgx.ext.session.defaults.MybatisgxDefaultSqlSessionFactory;
 import com.mybatisgx.template.StatementTemplateHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.logging.stdout.StdOutImpl;
@@ -69,6 +71,7 @@ public class DaoTestUtils {
         mybatisgxConfiguration.setLazyLoadingEnabled(true);
         mybatisgxConfiguration.setAggressiveLazyLoading(false);
         mybatisgxConfiguration.setLazyLoadTriggerMethods(Sets.newHashSet("get"));
+        mybatisgxConfiguration.addInterceptor(new PageInterceptor());
 
         MybatisxContextLoader mybatisxContextLoader = new MybatisxContextLoader();
         mybatisxContextLoader.processEntityClass(entityClassList);
@@ -85,15 +88,14 @@ public class DaoTestUtils {
     }
 
     public static <T> T getDao(List<Class<?>> entityClassList, List<Class<?>> daoClassList, Class<T> targetDaoclass) {
-        MybatisgxConfiguration mybatisgxConfiguration = context(entityClassList, daoClassList);
-        SqlSessionFactory sqlSessionFactory = new DefaultSqlSessionFactory(mybatisgxConfiguration);
-        SqlSession sqlSession = sqlSessionFactory.openSession();
+        SqlSession sqlSession = getSqlSession(entityClassList, daoClassList);
         return sqlSession.getMapper(targetDaoclass);
     }
 
     public static SqlSession getSqlSession(List<Class<?>> entityClassList, List<Class<?>> daoClassList) {
         MybatisgxConfiguration mybatisgxConfiguration = context(entityClassList, daoClassList);
         SqlSessionFactory sqlSessionFactory = new DefaultSqlSessionFactory(mybatisgxConfiguration);
-        return sqlSessionFactory.openSession();
+        MybatisgxDefaultSqlSessionFactory mybatisgxDefaultSqlSessionFactory = new MybatisgxDefaultSqlSessionFactory(sqlSessionFactory);
+        return mybatisgxDefaultSqlSessionFactory.openSession();
     }
 }

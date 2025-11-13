@@ -7,6 +7,7 @@ import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.loader.ResultLoader;
 import org.apache.ibatis.executor.loader.ResultLoaderMap;
 import org.apache.ibatis.executor.parameter.ParameterHandler;
+import org.apache.ibatis.executor.resultset.PatchDefaultResultSetHandler;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.ResultMapping;
@@ -28,7 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author ccxuef
  * @date 2025/10/20 10:20
  */
-public class MybatisgxResultSetHandler extends MybatisDefaultResultSetHandler {
+public class MybatisgxResultSetHandler extends PatchDefaultResultSetHandler {
 
     private Executor executor;
     private Configuration configuration;

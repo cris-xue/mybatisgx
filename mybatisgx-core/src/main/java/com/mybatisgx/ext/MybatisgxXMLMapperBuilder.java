@@ -3,6 +3,7 @@ package com.mybatisgx.ext;
 import com.mybatisgx.annotation.FetchMode;
 import com.mybatisgx.ext.mapping.BatchSelectResultMapping;
 import com.mybatisgx.template.TemplateHandler;
+import org.apache.ibatis.builder.PatchXMLMapperBuilder;
 import org.apache.ibatis.mapping.ResultFlag;
 import org.apache.ibatis.mapping.ResultMapping;
 import org.apache.ibatis.parsing.XNode;
@@ -17,7 +18,7 @@ import java.util.Map;
  * @author ccxuef
  * @date 2025/9/5 18:40
  */
-public class MybatisgxXMLMapperBuilder extends XMLMapperBuilder {
+public class MybatisgxXMLMapperBuilder extends PatchXMLMapperBuilder {
 
     public MybatisgxXMLMapperBuilder(InputStream inputStream, Configuration configuration, String resource, Map<String, XNode> sqlFragments) {
         super(inputStream, configuration, resource, sqlFragments);

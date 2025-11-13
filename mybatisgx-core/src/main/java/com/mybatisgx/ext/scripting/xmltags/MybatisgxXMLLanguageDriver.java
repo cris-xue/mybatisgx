@@ -1,4 +1,4 @@
-package com.mybatisgx.ext;
+package com.mybatisgx.ext.scripting.xmltags;
 
 import org.apache.ibatis.executor.parameter.ParameterHandler;
 import org.apache.ibatis.mapping.BoundSql;
@@ -11,7 +11,7 @@ import org.apache.ibatis.scripting.xmltags.XMLLanguageDriver;
  * @description：一句话描述
  * @date ：2020/8/17 17:48
  */
-public class MybatisxXMLLanguageDriver extends XMLLanguageDriver {
+public class MybatisgxXMLLanguageDriver extends XMLLanguageDriver {
 
     @Override
     public ParameterHandler createParameterHandler(MappedStatement mappedStatement, Object parameterObject, BoundSql boundSql) {

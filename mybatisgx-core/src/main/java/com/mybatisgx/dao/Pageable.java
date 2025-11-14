@@ -1,5 +1,7 @@
 package com.mybatisgx.dao;
 
+import java.util.List;
+
 /**
  * 分页排序接口
  *
@@ -12,7 +14,7 @@ public class Pageable {
 
     private Integer pageSize;
 
-    private String orderBy;
+    private List<Sort> sorts;
 
     public Integer getPageNo() {
         return pageNo;
@@ -30,11 +32,16 @@ public class Pageable {
         this.pageSize = pageSize;
     }
 
-    public String getOrderBy() {
-        return orderBy;
+    public List<Sort> getSorts() {
+        return sorts;
     }
 
-    public void setOrderBy(String orderBy) {
-        this.orderBy = orderBy;
+    public void setSorts(List<Sort> sorts) {
+        this.sorts = sorts;
+    }
+
+    public class Sort {
+        private String column;
+        private String order;
     }
 }

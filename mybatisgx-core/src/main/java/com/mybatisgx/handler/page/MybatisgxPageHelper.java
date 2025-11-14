@@ -1,5 +1,6 @@
 package com.mybatisgx.handler.page;
 
+import com.github.pagehelper.PageHelper;
 import com.mybatisgx.dao.Page;
 import com.mybatisgx.dao.Pageable;
 
@@ -18,7 +19,8 @@ public class MybatisgxPageHelper {
     }
 
     public static <T> Page<T> startPage(Pageable pageable, Supplier<List<T>> target) {
+        com.github.pagehelper.Page page = PageHelper.startPage(pageable.getPageNo(), pageable.getPageSize());
         List<T> list = target.get();
-        return new Page<>(list.size(), list);
+        return new Page<>(page.size(), list);
     }
 }

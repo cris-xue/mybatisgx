@@ -48,7 +48,12 @@ public class MybatisgxMixExecutor implements Executor {
     @Override
     public <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, CacheKey cacheKey, BoundSql boundSql) throws SQLException {
         this.newExecutor(ms);
-        return this.delegate.query(ms, parameter, rowBounds, resultHandler, cacheKey, boundSql);
+        Pageable pageable = this.getPageable(parameter);
+        if (pageable != null) {
+            return this.query(ms, parameter, rowBounds, resultHandler, cacheKey, boundSql, pageable);
+        } else {
+            return this.delegate.query(ms, parameter, rowBounds, resultHandler, cacheKey, boundSql);
+        }
     }
 
     @Override
@@ -56,13 +61,22 @@ public class MybatisgxMixExecutor implements Executor {
         this.newExecutor(ms);
         Pageable pageable = this.getPageable(parameter);
         if (pageable != null) {
-            com.github.pagehelper.Page page111 = PageHelper.startPage(pageable.getPageNo(), pageable.getPageSize());
-            List<Object> list = this.delegate.query(ms, parameter, rowBounds, resultHandler);
-            Page<Object> page = new Page(page111.getTotal(), list);
-            return (List<E>) Arrays.asList(page);
+            return this.query(ms, parameter, rowBounds, resultHandler, null, null, pageable);
         } else {
             return this.delegate.query(ms, parameter, rowBounds, resultHandler);
         }
+    }
+
+    private <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, CacheKey cacheKey, BoundSql boundSql, Pageable pageable) throws SQLException {
+        com.github.pagehelper.Page pagehelperPage = PageHelper.startPage(pageable.getPageNo(), pageable.getPageSize());
+        List<Object> list;
+        if (cacheKey != null && boundSql != null) {
+            list = this.delegate.query(ms, parameter, rowBounds, resultHandler, cacheKey, boundSql);
+        } else {
+            list = this.delegate.query(ms, parameter, rowBounds, resultHandler);
+        }
+        Page<Object> page = new Page(pagehelperPage.getTotal(), list);
+        return (List<E>) Arrays.asList(page);
     }
 
     private Pageable getPageable(Object parameterObject) {

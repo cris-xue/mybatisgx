@@ -344,7 +344,14 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleComplexTypeNoAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            return this.handleSimpleTypeSingleParam(columnInfo);
+            List<String> paramValueCommonPathItemList = Lists.newArrayList(conditionInfo.getParamValueCommonPathItemList());
+            paramValueCommonPathItemList.add(columnInfoComposite.getJavaColumnName());
+            String testExpression = this.getTestExpression(paramValueCommonPathItemList);
+            String bindValuePath = this.getBindValuePath(paramValueCommonPathItemList);
+            Element likeBindElement = this.buildLikeBindElement(bindValuePath);
+            String paramValueExpression = this.getParamValueExpression(paramValueCommonPathItemList);
+            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, paramValueExpression);
+            return new WhereItemContext(testExpression, Arrays.asList(likeBindElement, conditionExpression));
         }
 
         @Override
@@ -354,14 +361,7 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleComplexTypeWithAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            List<String> paramValueCommonPathItemList = Lists.newArrayList(conditionInfo.getParamValueCommonPathItemList());
-            paramValueCommonPathItemList.add(columnInfoComposite.getJavaColumnName());
-            String testExpression = this.getTestExpression(paramValueCommonPathItemList);
-            String bindValuePath = this.getBindValuePath(paramValueCommonPathItemList);
-            Element likeBindElement = this.buildLikeBindElement(bindValuePath);
-            String paramValueExpression = this.getParamValueExpression(paramValueCommonPathItemList);
-            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, paramValueExpression);
-            return new WhereItemContext(testExpression, Arrays.asList(likeBindElement, conditionExpression));
+            return this.handleComplexTypeNoAnnotationSingleParam(columnInfo, columnInfoComposite);
         }
 
         @Override
@@ -399,7 +399,7 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleComplexTypeNoAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            return this.handleComplexTypeWithAnnotationSingleParam(columnInfo, columnInfoComposite);
+            return this.handleComplexTypeNoAnnotationSingleParam(columnInfo, columnInfoComposite);
         }
 
         @Override
@@ -409,7 +409,7 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleComplexTypeWithAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            return this.handleComplexTypeWithAnnotationSingleParam(columnInfo, columnInfoComposite);
+            return this.handleComplexTypeNoAnnotationSingleParam(columnInfo, columnInfoComposite);
         }
 
         @Override
@@ -476,7 +476,13 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleComplexTypeNoAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            return this.handleSimpleTypeSingleParam(columnInfo);
+            List<String> paramValueCommonPathItemList = Lists.newArrayList(conditionInfo.getParamValueCommonPathItemList());
+            paramValueCommonPathItemList.add(columnInfoComposite.getJavaColumnName());
+            String testExpression = this.getTestExpression(paramValueCommonPathItemList);
+            String paramValueExpression = this.getParamValueExpression(paramValueCommonPathItemList);
+            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, "");
+            Element foreachElement = this.buildForeachElement(paramValueExpression);
+            return new WhereItemContext(testExpression, Arrays.asList(conditionExpression, foreachElement));
         }
 
         @Override
@@ -486,13 +492,7 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleComplexTypeWithAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            List<String> paramValueCommonPathItemList = Lists.newArrayList(conditionInfo.getParamValueCommonPathItemList());
-            paramValueCommonPathItemList.add(columnInfoComposite.getJavaColumnName());
-            String testExpression = this.getTestExpression(paramValueCommonPathItemList);
-            String paramValueExpression = this.getParamValueExpression(paramValueCommonPathItemList);
-            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, "");
-            Element foreachElement = this.buildForeachElement(paramValueExpression);
-            return new WhereItemContext(testExpression, Arrays.asList(conditionExpression, foreachElement));
+            return this.handleComplexTypeNoAnnotationSingleParam(columnInfo, columnInfoComposite);
         }
 
         @Override
@@ -525,7 +525,7 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleComplexTypeNoAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            return this.handleComplexTypeWithAnnotationSingleParam(columnInfo, columnInfoComposite);
+            return this.handleComplexTypeNoAnnotationSingleParam(columnInfo, columnInfoComposite);
         }
 
         @Override
@@ -535,7 +535,7 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleComplexTypeWithAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            return this.handleComplexTypeWithAnnotationSingleParam(columnInfo, columnInfoComposite);
+            return this.handleComplexTypeNoAnnotationSingleParam(columnInfo, columnInfoComposite);
         }
 
         @Override
@@ -588,7 +588,12 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleComplexTypeNoAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            return this.handleSimpleTypeSingleParam(columnInfo);
+            List<String> paramValueCommonPathItemList = Lists.newArrayList(conditionInfo.getParamValueCommonPathItemList());
+            paramValueCommonPathItemList.add(columnInfoComposite.getJavaColumnName());
+            String testExpression = this.getTestExpression(paramValueCommonPathItemList);
+            String paramValueExpression = this.getParamValueExpression(paramValueCommonPathItemList);
+            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, paramValueExpression);
+            return new WhereItemContext(testExpression, Arrays.asList(conditionExpression));
         }
 
         @Override
@@ -598,12 +603,7 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleComplexTypeWithAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            List<String> paramValueCommonPathItemList = Lists.newArrayList(conditionInfo.getParamValueCommonPathItemList());
-            paramValueCommonPathItemList.add(columnInfoComposite.getJavaColumnName());
-            String testExpression = this.getTestExpression(paramValueCommonPathItemList);
-            String paramValueExpression = this.getParamValueExpression(paramValueCommonPathItemList);
-            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, paramValueExpression);
-            return new WhereItemContext(testExpression, Arrays.asList(conditionExpression));
+            return this.handleComplexTypeNoAnnotationSingleParam(columnInfo, columnInfoComposite);
         }
 
         @Override
@@ -635,7 +635,7 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleComplexTypeNoAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            return handleComplexTypeWithAnnotationSingleParam(columnInfo, columnInfoComposite);
+            return handleComplexTypeNoAnnotationSingleParam(columnInfo, columnInfoComposite);
         }
 
         @Override
@@ -645,7 +645,7 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleComplexTypeWithAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            return handleComplexTypeWithAnnotationSingleParam(columnInfo, columnInfoComposite);
+            return handleComplexTypeNoAnnotationSingleParam(columnInfo, columnInfoComposite);
         }
 
         @Override
@@ -691,7 +691,12 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleComplexTypeNoAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            return handleSimpleTypeSingleParam(columnInfo);
+            List<String> paramValueCommonPathItemList = Lists.newArrayList(conditionInfo.getParamValueCommonPathItemList());
+            paramValueCommonPathItemList.add(columnInfoComposite.getJavaColumnName());
+            String testExpression = this.getTestExpression(paramValueCommonPathItemList);
+            String paramValueExpression = this.getParamValueExpression(paramValueCommonPathItemList);
+            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, paramValueExpression);
+            return new WhereItemContext(testExpression, Arrays.asList(conditionExpression));
         }
 
         @Override
@@ -701,12 +706,7 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleComplexTypeWithAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            List<String> paramValueCommonPathItemList = Lists.newArrayList(conditionInfo.getParamValueCommonPathItemList());
-            paramValueCommonPathItemList.add(columnInfoComposite.getJavaColumnName());
-            String testExpression = this.getTestExpression(paramValueCommonPathItemList);
-            String paramValueExpression = this.getParamValueExpression(paramValueCommonPathItemList);
-            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, paramValueExpression);
-            return new WhereItemContext(testExpression, Arrays.asList(conditionExpression));
+            return this.handleComplexTypeNoAnnotationSingleParam(columnInfo, columnInfoComposite);
         }
 
         @Override
@@ -738,7 +738,7 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleComplexTypeNoAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            return handleComplexTypeWithAnnotationSingleParam(columnInfoComposite, columnInfoComposite);
+            return handleComplexTypeNoAnnotationSingleParam(columnInfoComposite, columnInfoComposite);
         }
 
         @Override
@@ -748,7 +748,7 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleComplexTypeWithAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            return handleComplexTypeWithAnnotationSingleParam(columnInfoComposite, columnInfoComposite);
+            return handleComplexTypeNoAnnotationSingleParam(columnInfoComposite, columnInfoComposite);
         }
 
         @Override

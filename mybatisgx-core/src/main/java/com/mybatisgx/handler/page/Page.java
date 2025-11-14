@@ -1,4 +1,4 @@
-package com.mybatisgx.dao;
+package com.mybatisgx.handler.page;
 
 import java.util.List;
 

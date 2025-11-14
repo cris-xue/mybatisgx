@@ -1,8 +1,6 @@
 package com.mybatisgx.handler.page;
 
 import com.github.pagehelper.PageHelper;
-import com.mybatisgx.dao.Page;
-import com.mybatisgx.dao.Pageable;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -15,6 +13,7 @@ import java.util.function.Supplier;
 public class MybatisgxPageHelper {
 
     public static <T> T startPage(Pageable pageable, T target) {
+        PageHelper.startPage(pageable.getPageNo(), pageable.getPageSize());
         return target;
     }
 
@@ -22,5 +21,10 @@ public class MybatisgxPageHelper {
         com.github.pagehelper.Page page = PageHelper.startPage(pageable.getPageNo(), pageable.getPageSize());
         List<T> list = target.get();
         return new Page<>(page.size(), list);
+    }
+
+    public static <T> Page<T> startPage(Pageable pageable) {
+        PageHelper.startPage(pageable.getPageNo(), pageable.getPageSize());
+        return new Page();
     }
 }

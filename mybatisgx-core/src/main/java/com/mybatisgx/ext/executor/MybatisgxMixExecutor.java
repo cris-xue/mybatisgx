@@ -2,8 +2,8 @@ package com.mybatisgx.ext.executor;
 
 import com.github.pagehelper.PageHelper;
 import com.mybatisgx.context.MethodInfoContextHolder;
-import com.mybatisgx.dao.Page;
-import com.mybatisgx.dao.Pageable;
+import com.mybatisgx.handler.page.Page;
+import com.mybatisgx.handler.page.Pageable;
 import com.mybatisgx.model.MethodInfo;
 import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.cursor.Cursor;

@@ -1,6 +1,6 @@
 package com.mybatisgx.utils;
 
-import com.mybatisgx.dao.Page;
+import com.mybatisgx.handler.page.Page;
 import org.apache.commons.lang3.ObjectUtils;
 
 import java.lang.reflect.ParameterizedType;

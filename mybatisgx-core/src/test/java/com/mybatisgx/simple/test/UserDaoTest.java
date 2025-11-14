@@ -1,8 +1,8 @@
 package com.mybatisgx.simple.test;
 
 import com.github.swierkosz.fixture.generator.FixtureGenerator;
-import com.mybatisgx.dao.Page;
-import com.mybatisgx.dao.Pageable;
+import com.mybatisgx.handler.page.Page;
+import com.mybatisgx.handler.page.Pageable;
 import com.mybatisgx.simple.dao.UserDao;
 import com.mybatisgx.simple.entity.User;
 import com.mybatisgx.util.DaoTestUtils;
@@ -113,9 +113,7 @@ public class UserDaoTest {
 
     @Test
     public void testFindPage() {
-        Pageable pageable = new Pageable();
-        pageable.setPageNo(1);
-        pageable.setPageSize(10);
+        Pageable pageable = new Pageable(1, 10);
         Page<User> page2 = userDao.findPage(new User(), pageable);
         Assert.assertNotNull(page2);
     }

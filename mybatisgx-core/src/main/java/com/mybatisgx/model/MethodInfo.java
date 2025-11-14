@@ -44,6 +44,7 @@ public class MethodInfo {
      * 实体参数
      * 1、如果存在实体参数，那么条件只能使用实体参数，如果不存在实体参数，那么条件只能使用方法参数列表
      * 2、方法参数中只要有一个是实体，就存在实体参数，如果存在多个实体参数，只取最后一个实体参数
+     * 3、新增、修改、删除、查询都只允许一个实体参数
      */
     private MethodParamInfo entityParamInfo;
     /**
@@ -135,9 +136,8 @@ public class MethodInfo {
         this.methodParamInfoList = methodParamInfoList;
         // 写字段的时候在参数或者方法名中可能出现user_name写成username、userName两种情况
         for (MethodParamInfo methodParamInfo : methodParamInfoList) {
-            methodParamInfoMap.put(methodParamInfo.getParamName(), methodParamInfo);
-            methodParamInfoMap.put(methodParamInfo.getParamName().toLowerCase(), methodParamInfo);
             methodParamInfoMap.put(methodParamInfo.getArgName(), methodParamInfo);
+            methodParamInfoMap.put(methodParamInfo.getArgName().toLowerCase(), methodParamInfo);
         }
     }
 

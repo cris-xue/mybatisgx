@@ -45,8 +45,8 @@ public class MybatisgxBatchExecutor implements Executor {
             }
 
             MapperMethod.ParamMap<Object> mapperMethodParam = (MapperMethod.ParamMap<Object>) parameter;
-            Collection batchDataCollection = (Collection) mapperMethodParam.get(dataMethodParamInfo.getParamName());
-            int batchSize = (int) mapperMethodParam.get(batchSizeMethodParamInfo.getParamName());
+            Collection batchDataCollection = (Collection) mapperMethodParam.get(dataMethodParamInfo.getArgName());
+            int batchSize = (int) mapperMethodParam.get(batchSizeMethodParamInfo.getArgName());
             List<Object> batchDataList = (List<Object>) batchDataCollection;
             for (int i = 0; i < batchDataList.size(); i++) {
                 Object batchData = batchDataList.get(i);

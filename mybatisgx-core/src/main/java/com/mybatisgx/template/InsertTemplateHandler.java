@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class InsertTemplateHandler {
@@ -220,39 +221,27 @@ public class InsertTemplateHandler {
 
         Boolean isBatch = methodInfo.getBatch();
         if (isBatch) {
-            this.handleBatchValue(methodInfo, methodParamInfo, columnInfo, javaTrimElement);
-            return;
-        }
-
-        this.handleSingleBusinessObjectParam(methodInfo, columnInfo, javaTrimElement);
-    }
-
-    private void handleBatchValue(MethodInfo methodInfo, MethodParamInfo methodParamInfo, ColumnInfo tableColumnInfo, Element javaTrimElement) {
-        String batchItemName = methodParamInfo.getBatchItemName();
-        Boolean dynamic = methodInfo.getDynamic();
-        String javaColumnName = tableColumnInfo.getJavaColumnName();
-
-        String nestedJavaColumnName = String.format("%s.%s", batchItemName, javaColumnName);
-        if (dynamic) {
-            Element javaTrimIfElement = javaTrimElement.addElement("if");
-            javaTrimIfElement.addAttribute("test", buildTestNotNull(nestedJavaColumnName));
-            String javaColumn = String.format("#{%s%s},", nestedJavaColumnName, buildTypeHandler(tableColumnInfo));
-            javaTrimIfElement.addText(javaColumn);
+            // int insertBatch(@BatchData List<ENTITY> entityList, @BatchSize int batchSize);
+            String batchItemName = methodParamInfo.getBatchItemName();
+            String javaColumnName = columnInfo.getJavaColumnName();
+            List<String> paramValuePathList = Arrays.asList(batchItemName, javaColumnName);
+            this.handleEntityParam(methodInfo, columnInfo, javaTrimElement, paramValuePathList);
         } else {
-            String javaColumn = String.format("#{%s%s},", nestedJavaColumnName, buildTypeHandler(tableColumnInfo));
-            javaTrimElement.addText(javaColumn);
+            String javaColumnName = columnInfo.getJavaColumnName();
+            List<String> paramValuePathList = Arrays.asList(javaColumnName);
+            this.handleEntityParam(methodInfo, columnInfo, javaTrimElement, paramValuePathList);
         }
     }
 
-    private void handleSingleBusinessObjectParam(MethodInfo methodInfo, ColumnInfo tableColumnInfo, Element javaTrimElement) {
-        String javaColumnName = tableColumnInfo.getJavaColumnName();
+    private void handleEntityParam(MethodInfo methodInfo, ColumnInfo tableColumnInfo, Element javaTrimElement, List<String> paramValuePathList) {
+        String paramValuePath = StringUtils.join(paramValuePathList, ".");
         if (methodInfo.getDynamic()) {
             Element javaTrimIfElement = javaTrimElement.addElement("if");
-            javaTrimIfElement.addAttribute("test", buildTestNotNull(javaColumnName));
-            String javaColumn = String.format("#{%s%s},", javaColumnName, buildTypeHandler(tableColumnInfo));
+            javaTrimIfElement.addAttribute("test", buildTestNotNull(paramValuePath));
+            String javaColumn = String.format("#{%s%s},", paramValuePath, buildTypeHandler(tableColumnInfo));
             javaTrimIfElement.addText(javaColumn);
         } else {
-            String javaColumn = String.format("#{%s%s},", javaColumnName, buildTypeHandler(tableColumnInfo));
+            String javaColumn = String.format("#{%s%s},", paramValuePath, buildTypeHandler(tableColumnInfo));
             javaTrimElement.addText(javaColumn);
         }
     }

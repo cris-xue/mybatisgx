@@ -97,20 +97,8 @@ public class InsertTemplateHandler {
     }
 
     private void setColumn(MethodInfo methodInfo, Element dbTrimElement) {
-        List<MethodParamInfo> methodParamInfoList = methodInfo.getMethodParamInfoList();
-        for (MethodParamInfo methodParamInfo : methodParamInfoList) {
-            if (methodParamInfo.getBatchSize()) {
-                continue;
-            }
-            if (methodParamInfo.getClassCategory() == ClassCategory.SIMPLE) {
-                continue;
-            }
-            this.setColumn(methodInfo, methodParamInfo, dbTrimElement);
-        }
-    }
-
-    private void setColumn(MethodInfo methodInfo, MethodParamInfo methodParamInfo, Element dbTrimElement) {
-        List<ColumnInfo> tableColumnInfoList = this.getTableColumnInfoList(methodParamInfo.getType());
+        MethodParamInfo entityParamInfo = methodInfo.getEntityParamInfo();
+        List<ColumnInfo> tableColumnInfoList = this.getTableColumnInfoList(entityParamInfo.getType());
         for (ColumnInfo tableColumnInfo : tableColumnInfoList) {
             if (TypeUtils.typeEquals(tableColumnInfo, IdColumnInfo.class)) {
                 IdColumnInfo idColumnInfo = (IdColumnInfo) tableColumnInfo;
@@ -124,9 +112,11 @@ public class InsertTemplateHandler {
                         this.setColumn(methodInfo, composite, dbTrimElement);
                     }
                 }
-            } else if (TypeUtils.typeEquals(tableColumnInfo, ColumnInfo.class)) {
+            }
+            if (TypeUtils.typeEquals(tableColumnInfo, ColumnInfo.class)) {
                 this.setColumn(methodInfo, tableColumnInfo, dbTrimElement);
-            } else if (TypeUtils.typeEquals(tableColumnInfo, RelationColumnInfo.class)) {
+            }
+            if (TypeUtils.typeEquals(tableColumnInfo, RelationColumnInfo.class)) {
                 RelationColumnInfo relationColumnInfo = (RelationColumnInfo) tableColumnInfo;
                 RelationType relationType = relationColumnInfo.getRelationType();
                 if (relationType == RelationType.MANY_TO_MANY) {
@@ -169,22 +159,8 @@ public class InsertTemplateHandler {
     }
 
     private void setValue(MethodInfo methodInfo, Element javaTrimElement) {
-        Boolean isBatch = methodInfo.getBatch();
-        List<MethodParamInfo> methodParamInfoList = methodInfo.getMethodParamInfoList();
-        for (MethodParamInfo methodParamInfo : methodParamInfoList) {
-            if (isBatch && methodParamInfo.getBatchSize()) {
-                continue;
-            }
-            if (methodParamInfo.getClassCategory() == ClassCategory.SIMPLE) {
-                throw new RuntimeException("新增方法参数不支持定义基础类型");
-            }
-
-            this.handleMethodParam(methodInfo, methodParamInfo, javaTrimElement);
-        }
-    }
-
-    private void handleMethodParam(MethodInfo methodInfo, MethodParamInfo methodParamInfo, Element javaTrimElement) {
-        List<ColumnInfo> tableColumnInfoList = this.getTableColumnInfoList(methodParamInfo.getType());
+        MethodParamInfo entityParamInfo = methodInfo.getEntityParamInfo();
+        List<ColumnInfo> tableColumnInfoList = this.getTableColumnInfoList(entityParamInfo.getType());
         if (ObjectUtils.isEmpty(tableColumnInfoList)) {
             throw new RuntimeException("实体表字段不存在");
         }
@@ -193,17 +169,17 @@ public class InsertTemplateHandler {
                 IdColumnInfo idColumnInfo = (IdColumnInfo) tableColumnInfo;
                 List<ColumnInfo> columnInfoList = idColumnInfo.getComposites();
                 if (ObjectUtils.isEmpty(columnInfoList)) {
-                    this.handleMethodParam(methodInfo, methodParamInfo, idColumnInfo, javaTrimElement);
+                    this.handleMethodParam(methodInfo, entityParamInfo, idColumnInfo, javaTrimElement);
                 } else {
                     for (ColumnInfo columnInfo : columnInfoList) {
                         String javaColumnName = String.format("%s.%s", idColumnInfo.getJavaColumnName(), columnInfo.getJavaColumnName());
                         ColumnInfo composite = new ColumnInfo.Builder().columnInfo(columnInfo).javaColumnName(javaColumnName).build();
-                        this.handleMethodParam(methodInfo, methodParamInfo, composite, javaTrimElement);
+                        this.handleMethodParam(methodInfo, entityParamInfo, composite, javaTrimElement);
                     }
                 }
             }
             if (TypeUtils.typeEquals(tableColumnInfo, ColumnInfo.class)) {
-                this.handleMethodParam(methodInfo, methodParamInfo, tableColumnInfo, javaTrimElement);
+                this.handleMethodParam(methodInfo, entityParamInfo, tableColumnInfo, javaTrimElement);
             }
             if (TypeUtils.typeEquals(tableColumnInfo, RelationColumnInfo.class)) {
                 RelationColumnInfo relationColumnInfo = (RelationColumnInfo) tableColumnInfo;
@@ -220,12 +196,12 @@ public class InsertTemplateHandler {
                         if (ObjectUtils.isEmpty(idColumnInfoComposites)) {
                             String javaColumnName = String.format("%s.%s", relationColumnInfo.getJavaColumnName(), referencedColumnInfo.getJavaColumnName());
                             ColumnInfo composite = new ColumnInfo.Builder().columnInfo(foreignKeyColumnInfo).javaColumnName(javaColumnName).build();
-                            this.handleMethodParam(methodInfo, methodParamInfo, composite, javaTrimElement);
+                            this.handleMethodParam(methodInfo, entityParamInfo, composite, javaTrimElement);
                         } else {
                             for (ColumnInfo idColumnInfoComposite : idColumnInfoComposites) {
                                 String javaColumnName = String.format("%s.%s.%s", relationColumnInfo.getJavaColumnName(), referencedColumnInfo.getJavaColumnName(), idColumnInfoComposite.getJavaColumnName());
                                 ColumnInfo composite = new ColumnInfo.Builder().columnInfo(foreignKeyColumnInfo).javaColumnName(javaColumnName).build();
-                                this.handleMethodParam(methodInfo, methodParamInfo, composite, javaTrimElement);
+                                this.handleMethodParam(methodInfo, entityParamInfo, composite, javaTrimElement);
                             }
                         }
                     }

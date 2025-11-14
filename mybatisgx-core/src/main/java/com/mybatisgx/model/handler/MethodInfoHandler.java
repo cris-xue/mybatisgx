@@ -225,7 +225,7 @@ public class MethodInfoHandler {
         }
         if (methodDeclaringClass == SimpleDao.class) {
             String methodName = methodInfo.getMethodName();
-            if ("findOne".equals(methodName) || "findList".equals(methodName)) {
+            if ("findOne".equals(methodName) || "findList".equals(methodName) || "findPage".equals(methodName)) {
                 MethodParamInfo entityParamInfo = methodInfo.getEntityParamInfo();
                 if (entityParamInfo != null) {
                     String entityCondition = this.entityCondition(methodInfo, entityParamInfo);

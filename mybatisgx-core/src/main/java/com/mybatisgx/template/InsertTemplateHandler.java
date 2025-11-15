@@ -32,16 +32,13 @@ public class InsertTemplateHandler {
     }
 
     private String buildInsertSelectiveXNode(MapperInfo mapperInfo, MethodInfo methodInfo) {
+        AbstractInsertHandler insertHandler = this.getInsertHandler(methodInfo);
+
         Document document = DocumentHelper.createDocument();
         Element mapperElement = document.addElement("mapper");
         Element insertElement = mapperElement.addElement("insert");
         insertElement.addAttribute("id", methodInfo.getMethodName());
-        String keyProperty;
-        if (methodInfo.getBatch()) {
-            keyProperty = batchInsertHandler.getKeyProperty(methodInfo);
-        } else {
-            keyProperty = simpleInsertHandler.getKeyProperty(methodInfo);
-        }
+        String keyProperty = insertHandler.getKeyProperty(methodInfo);
         insertElement.addAttribute("keyProperty", keyProperty);
         insertElement.addAttribute("useGeneratedKeys", "true");
         insertElement.addText(String.format("insert into %s", mapperInfo.getEntityInfo().getTableName()));
@@ -51,23 +48,24 @@ public class InsertTemplateHandler {
         dbTrimElement.addAttribute("suffix", ")");
         dbTrimElement.addAttribute("suffixOverrides", ",");
 
-        if (methodInfo.getBatch()) {
-            batchInsertHandler.setColumn(methodInfo, dbTrimElement);
-        } else {
-            simpleInsertHandler.setColumn(methodInfo, dbTrimElement);
-        }
+        insertHandler.setColumn(methodInfo, dbTrimElement);
 
         Element javaTrimElement = insertElement.addElement("trim");
         javaTrimElement.addAttribute("prefix", "values (");
         javaTrimElement.addAttribute("suffix", ")");
         javaTrimElement.addAttribute("suffixOverrides", ",");
 
-        if (methodInfo.getBatch()) {
-            batchInsertHandler.setValue(methodInfo, javaTrimElement);
-        } else {
-            simpleInsertHandler.setValue(methodInfo, javaTrimElement);
-        }
+        insertHandler.setValue(methodInfo, javaTrimElement);
+
         return document.asXML();
+    }
+
+    private AbstractInsertHandler getInsertHandler(MethodInfo methodInfo) {
+        if (methodInfo.getBatch()) {
+            return batchInsertHandler;
+        } else {
+            return simpleInsertHandler;
+        }
     }
 
     private static abstract class AbstractInsertHandler {
@@ -119,8 +117,10 @@ public class InsertTemplateHandler {
             }
 
             if (methodInfo.getDynamic()) {
+                List<String> paramValuePathItemList = this.getParamValuePathItemList(entityParamInfo, columnInfo, columnInfoComposite);
+                String testExpression = this.getTestExpression(paramValuePathItemList);
                 Element javaTrimIfElement = dbTrimElement.addElement("if");
-                javaTrimIfElement.addAttribute("test", buildTestNotNull(javaColumnName));
+                javaTrimIfElement.addAttribute("test", testExpression);
                 String dbColumn = String.format("%s,", dbColumnName);
                 javaTrimIfElement.addText(dbColumn);
             } else {
@@ -188,8 +188,9 @@ public class InsertTemplateHandler {
             List<String> paramValuePathItemList = this.getParamValuePathItemList(methodParamInfo, columnInfo, columnInfoComposite);
             String paramValuePath = StringUtils.join(paramValuePathItemList, ".");
             if (methodInfo.getDynamic()) {
+                String testExpression = this.getTestExpression(paramValuePathItemList);
                 Element javaTrimIfElement = javaTrimElement.addElement("if");
-                javaTrimIfElement.addAttribute("test", buildTestNotNull(paramValuePath));
+                javaTrimIfElement.addAttribute("test", testExpression);
                 String javaColumn = String.format("#{%s%s},", paramValuePath, buildTypeHandler(columnInfo));
                 javaTrimIfElement.addText(javaColumn);
             } else {
@@ -206,8 +207,18 @@ public class InsertTemplateHandler {
             return "";
         }
 
-        protected String buildTestNotNull(String javaColumnName) {
-            return String.format("%s != null", javaColumnName);
+        protected String getTestExpression(List<String> pathItemList) {
+            String[] paths = pathItemList.toArray(new String[pathItemList.size()]);
+            if (paths.length == 1) {
+                return String.format("%1$s != null", paths);
+            }
+            if (paths.length == 2) {
+                return String.format("%1$s != null and %1$s.%2$s != null", paths);
+            }
+            if (paths.length == 3) {
+                return String.format("%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null", paths);
+            }
+            return "";
         }
 
         protected List<ColumnInfo> getTableColumnInfoList(Class<?> entityClass) {

@@ -316,11 +316,11 @@ public class WhereTemplateHandler {
         }
 
         protected List<String> getParamValuePathItemList(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            List<String> paramValuePathItemList = new ArrayList<>();
-            if (methodParamInfo.getWrapper()) {
+            List<String> argValueCommonPathItemList = methodParamInfo.getArgValueCommonPathItemList();
+            /*if (methodParamInfo.getWrapper()) {
                 paramValuePathItemList.add(methodParamInfo.getParamName());
-            }
-            if (columnInfo != null) {
+            }*/
+            /*if (columnInfo != null) {
                 ConditionOriginType conditionOriginType = this.conditionInfo.getConditionOriginType();
                 if (conditionOriginType == ConditionOriginType.METHOD_NAME) {
                     paramValuePathItemList.add(columnInfo.getJavaColumnName());
@@ -328,11 +328,11 @@ public class WhereTemplateHandler {
                 if (conditionOriginType == ConditionOriginType.ENTITY_FIELD) {
                     paramValuePathItemList.add(this.conditionInfo.getColumnName());
                 }
-            }
+            }*/
             if (columnInfoComposite != null) {
-                paramValuePathItemList.add(columnInfoComposite.getJavaColumnName());
+                argValueCommonPathItemList.add(columnInfoComposite.getJavaColumnName());
             }
-            return paramValuePathItemList;
+            return argValueCommonPathItemList;
         }
     }
 

@@ -302,6 +302,8 @@ public class MethodInfoHandler {
                 if (conditionParamContext == null) {
                     throw new RuntimeException("查询条件没有对应的参数");
                 }
+
+                // TODO 只要知道参数是否会包装就行
                 conditionInfo.setParamValueCommonPathItemList(conditionParamContext.getParamValueCommonPathItemList());
                 conditionInfo.setMethodParamInfo(conditionParamContext.getMethodParamInfo());
             }
@@ -327,14 +329,16 @@ public class MethodInfoHandler {
             methodParamInfo.setColumnInfoList(composites);
         }
 
-        int parameterCount = methodInfo.getMethodParamInfoList().size();
+        int paramCount = methodInfo.getMethodParamInfoList().size();
         Param param = entityParamInfo.getParam();
         List<String> paramValueCommonPathItemList = new ArrayList();
-        if (parameterCount == 1 && param == null) {
-            paramValueCommonPathItemList.add(columnInfo.getJavaColumnName());
+        if (!(paramCount == 1 && param == null)) {
+            methodParamInfo.setParamName(entityParamInfo.getArgName());
+            methodParamInfo.setWrapper(true);
+            // paramValueCommonPathItemList.add(columnInfo.getJavaColumnName());
         } else {
-            paramValueCommonPathItemList.add(entityParamInfo.getArgName());
-            paramValueCommonPathItemList.add(columnInfo.getJavaColumnName());
+            /*paramValueCommonPathItemList.add(entityParamInfo.getArgName());
+            paramValueCommonPathItemList.add(columnInfo.getJavaColumnName());*/
         }
         return new ConditionParamContext(methodParamInfo, paramValueCommonPathItemList);
     }
@@ -352,32 +356,24 @@ public class MethodInfoHandler {
             throw new RuntimeException("查询条件不能关联到复杂类型参数" + methodParamInfo.getArgName());
         }
 
-        int parameterCount = methodInfo.getMethodParamInfoList().size();
+        int paramCount = methodInfo.getMethodParamInfoList().size();
+        List<ColumnInfo> columnInfoList = methodParamInfo.getColumnInfoList();
         Param param = methodParamInfo.getParam();
         List<String> paramValueCommonPathItemList = new ArrayList();
-        if (parameterCount == 1) {
-            List<ColumnInfo> columnInfoList = methodParamInfo.getColumnInfoList();
-            if (ObjectUtils.isEmpty(columnInfoList)) {
-                // findById(Long id)   findById(@Param("id") Long id)
-                paramValueCommonPathItemList.add(methodParamInfo.getArgName());
-            } else {
-                // findById(ComplexId complexId)    findById(@Param("id") ComplexId complexId)
-                if (param == null) {
-
-                } else {
-                    paramValueCommonPathItemList.add(methodParamInfo.getArgName());
-                }
-            }
-        }
-        if (parameterCount > 1) {
-            List<ColumnInfo> columnInfoList = methodParamInfo.getColumnInfoList();
-            if (ObjectUtils.isEmpty(columnInfoList)) {
-                // findByIdAndName(Long id, String name)   findByIdAndName(@Param("id") Long id, String name)
-                paramValueCommonPathItemList.add(methodParamInfo.getArgName());
-            } else {
-                // findByIdAndName(ComplexId complexId, String name)    findByIdAndName(@Param("id") ComplexId complexId, String name)
-                paramValueCommonPathItemList.add(methodParamInfo.getArgName());
-            }
+        if (!(paramCount == 1 && ObjectUtils.isNotEmpty(columnInfoList) && param == null)) {
+            // mybatis在[单参数、复合类型、无注解]情况下为了获取参数方便，不会对参数进行包装，所以不会生成argx这种参数
+            /**
+             * findById(ComplexObject complexObject)
+             */
+            /**
+             * findById(Long id)   findById(@Param("id") Long id)
+             * findById(@Param("id") ComplexId complexId)
+             * findByIdAndName(Long id, String name)   findByIdAndName(@Param("id") Long id, String name)
+             * findByIdAndName(ComplexId complexId, String name)    findByIdAndName(@Param("id") ComplexId complexId, String name)
+             */
+            methodParamInfo.setParamName(methodParamInfo.getArgName());
+            methodParamInfo.setWrapper(true);
+            // paramValueCommonPathItemList.add(methodParamInfo.getArgName());
         }
         return new ConditionParamContext(methodParamInfo, paramValueCommonPathItemList);
     }

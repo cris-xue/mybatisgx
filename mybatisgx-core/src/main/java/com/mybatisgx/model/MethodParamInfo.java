@@ -35,7 +35,7 @@ public class MethodParamInfo {
      */
     private Param param;
     /**
-     * 参数名，如：param1、param2、param3
+     * 参数名，单参数实体无注解参数为空
      */
     private String paramName;
     /**
@@ -70,6 +70,10 @@ public class MethodParamInfo {
      * 批量参数名称
      */
     private String batchItemName;
+    /**
+     * 是否被包装过，mybatis只有单参数实体无注解参数才不会包装
+     */
+    private Boolean isWrapper = false;
 
     public Integer getIndex() {
         return index;
@@ -183,5 +187,13 @@ public class MethodParamInfo {
 
     public void setBatchItemName(String batchItemName) {
         this.batchItemName = batchItemName;
+    }
+
+    public Boolean getWrapper() {
+        return isWrapper;
+    }
+
+    public void setWrapper(Boolean wrapper) {
+        isWrapper = wrapper;
     }
 }

@@ -3,6 +3,7 @@ package com.mybatisgx.model;
 import com.mybatisgx.utils.TypeUtils;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +43,10 @@ public class MethodParamInfo {
      * 参数索引名称，如：arg0、arg1、arg2 。有@Param则使用@Param中的值
      */
     private String argName;
+    /**
+     * 方法参数或者方法参数实体，需要提前计算出公共取值路径，模板渲染的时候就不再需要多重逻辑判断
+     */
+    private List<String> argValueCommonPathItemList = new ArrayList<>();
     /**
      * 容器类型，List
      */
@@ -129,6 +134,14 @@ public class MethodParamInfo {
 
     public void setArgName(String argName) {
         this.argName = argName;
+    }
+
+    public List<String> getArgValueCommonPathItemList() {
+        return argValueCommonPathItemList;
+    }
+
+    public void setArgValueCommonPathItemList(List<String> argValueCommonPathItemList) {
+        this.argValueCommonPathItemList = argValueCommonPathItemList;
     }
 
     public Class<?> getCollectionType() {

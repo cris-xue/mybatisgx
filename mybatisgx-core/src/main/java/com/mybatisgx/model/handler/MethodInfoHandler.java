@@ -1,6 +1,7 @@
 package com.mybatisgx.model.handler;
 
 import com.google.common.base.CaseFormat;
+import com.google.common.collect.Lists;
 import com.mybatisgx.annotation.*;
 import com.mybatisgx.context.EntityInfoContextHolder;
 import com.mybatisgx.context.MethodInfoContextHolder;
@@ -314,11 +315,16 @@ public class MethodInfoHandler {
 
         int paramCount = methodInfo.getMethodParamInfoList().size();
         Param param = entityParamInfo.getParam();
-        if (!(paramCount == 1 && classCategory == ClassCategory.COMPLEX && param == null)) {
+        List<String> paramValueCommonPathItemList = new ArrayList<>();
+        if (paramCount == 1 && param == null) {
             // mybatis在[单参数、复合类型、无注解]情况下为了获取参数方便，不会对参数进行包装，所以不会生成argx这种参数
-            methodParamInfo.setParamName(entityParamInfo.getArgName());
-            methodParamInfo.setWrapper(true);
+            paramValueCommonPathItemList.add(columnInfo.getJavaColumnName());
+        } else {
+            paramValueCommonPathItemList.add(entityParamInfo.getArgName());
+            paramValueCommonPathItemList.add(columnInfo.getJavaColumnName());
         }
+        methodParamInfo.setArgValueCommonPathItemList(paramValueCommonPathItemList);
+        methodParamInfo.setWrapper(true);
         return methodParamInfo;
     }
 
@@ -388,7 +394,7 @@ public class MethodInfoHandler {
         methodParamInfo.setArgName(argName);
         methodParamInfo.setParam(param);
         if (!(parameterCount == 1 && classCategory == ClassCategory.COMPLEX && param == null)) {
-            methodParamInfo.setParamName(argName);
+            methodParamInfo.setArgValueCommonPathItemList(Lists.newArrayList(argName));
             methodParamInfo.setWrapper(true);
         }
     }

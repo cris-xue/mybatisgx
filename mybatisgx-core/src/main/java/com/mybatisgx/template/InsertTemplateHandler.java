@@ -103,9 +103,10 @@ public class InsertTemplateHandler {
                                 List<String> paramValuePathItemList = this.getParamValuePathItemList(entityParamInfo, referencedColumnInfo, null, relationColumnInfo);
                                 this.setColumn(methodInfo, foreignKeyColumnInfo, paramValuePathItemList, dbTrimElement);
                             } else {
-                                ColumnInfo referencedColumnInfoComposite = referencedColumnInfo.getComposites().get(0);
-                                List<String> paramValuePathItemList = this.getParamValuePathItemList(entityParamInfo, referencedColumnInfo, referencedColumnInfoComposite, relationColumnInfo);
-                                this.setColumn(methodInfo, foreignKeyColumnInfo, paramValuePathItemList, dbTrimElement);
+                                for (ColumnInfo referencedColumnInfoComposite : referencedColumnInfoComposites) {
+                                    List<String> paramValuePathItemList = this.getParamValuePathItemList(entityParamInfo, referencedColumnInfo, referencedColumnInfoComposite, relationColumnInfo);
+                                    this.setColumn(methodInfo, foreignKeyColumnInfo, paramValuePathItemList, dbTrimElement);
+                                }
                             }
                         }
                     }

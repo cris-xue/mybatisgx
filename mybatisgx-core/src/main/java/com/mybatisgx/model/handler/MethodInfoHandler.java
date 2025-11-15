@@ -31,20 +31,6 @@ public class MethodInfoHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MethodInfoHandler.class);
 
-    /*private static final List<Class<?>> SIMPLE_TYPE_LIST = new ArrayList<>();
-
-    static {
-        SIMPLE_TYPE_LIST.add(int.class);
-        SIMPLE_TYPE_LIST.add(Integer.class);
-        SIMPLE_TYPE_LIST.add(Long.class);
-        SIMPLE_TYPE_LIST.add(String.class);
-        SIMPLE_TYPE_LIST.add(Double.class);
-        SIMPLE_TYPE_LIST.add(Boolean.class);
-        SIMPLE_TYPE_LIST.add(Date.class);
-        SIMPLE_TYPE_LIST.add(LocalDate.class);
-        SIMPLE_TYPE_LIST.add(LocalDateTime.class);
-    }*/
-
     private ColumnInfoHandler columnInfoHandler = new ColumnInfoHandler();
     private ColumnTypeHandler columnTypeHandler = new ColumnTypeHandler();
     private MethodNameAstHandler methodNameAstHandler = new MethodNameAstHandler();
@@ -133,15 +119,16 @@ public class MethodInfoHandler {
         int parameterCount = parameters.length;
         MethodParamInfo entityParamInfo = null;
         List<MethodParamInfo> methodParamInfoList = new ArrayList<>();
-        for (int i = 0; i < parameters.length; i++) {
+        for (int i = 0; i < parameterCount; i++) {
             Parameter parameter = parameters[i];
             Class<?> methodParamType = this.getMethodParamType(mapperInfo, parameter);
+            ClassCategory classCategory = this.getClassCategory(methodParamType);
 
             MethodParamInfo methodParamInfo = new MethodParamInfo();
             methodParamInfo.setIndex(i);
             methodParamInfo.setType(methodParamType);
             methodParamInfo.setTypeName(methodParamType.getName());
-            this.processMethodParamName(methodParamInfo, parameter);
+            this.processMethodParamName(methodParamInfo, parameter, parameterCount, classCategory);
 
             BatchData batchData = parameter.getAnnotation(BatchData.class);
             if (batchOperation != null && batchData != null) {
@@ -153,7 +140,6 @@ public class MethodInfoHandler {
                 methodParamInfo.setBatchSize(true);
             }
 
-            ClassCategory classCategory = this.getClassCategory(methodParamType);
             methodParamInfo.setClassCategory(classCategory);
             if (classCategory == ClassCategory.COMPLEX && methodParamType != Map.class) {
                 IdClass idClass = methodParamType.getAnnotation(IdClass.class);
@@ -284,33 +270,30 @@ public class MethodInfoHandler {
                 // 处理查询条件和参数之间的关系，查询条件和参数之间是1对1关系，不要设计一对多关系，后续绑定参数很难处理
                 // 条件优先级是    方法简单参数有@Param注解(id条件支持复合类型) > 方法简单参数有@Param注解全小写(id条件支持复合类型) > 实体字段 > 方法简单参数无@Param注解
                 String conditionColumnName = conditionInfo.getColumnName();
-                ConditionParamContext conditionParamContext = this.getSimpleTypeConditionParam(methodInfo, conditionInfo, conditionColumnName);
-                if (conditionParamContext == null) {
-                    conditionParamContext = this.getSimpleTypeConditionParam(methodInfo, conditionInfo, conditionColumnName.toLowerCase());
+                MethodParamInfo methodParamInfo = this.getSimpleTypeConditionParam(methodInfo, conditionInfo, conditionColumnName);
+                if (methodParamInfo == null) {
+                    methodParamInfo = this.getSimpleTypeConditionParam(methodInfo, conditionInfo, conditionColumnName.toLowerCase());
                 }
-                if (conditionParamContext == null) {
+                if (methodParamInfo == null) {
                     MethodParamInfo entityParamInfo = methodInfo.getEntityParamInfo();
                     if (entityParamInfo != null) {
-                        conditionParamContext = this.getEntityTypeConditionParam(methodInfo, conditionInfo, entityParamInfo);
+                        methodParamInfo = this.getEntityTypeConditionParam(methodInfo, conditionInfo, entityParamInfo);
                     }
                 }
-                if (conditionParamContext == null) {
+                if (methodParamInfo == null) {
                     String argName = String.format("arg%1$s", conditionInfo.getIndex());
-                    conditionParamContext = this.getSimpleTypeConditionParam(methodInfo, conditionInfo, argName);
+                    methodParamInfo = this.getSimpleTypeConditionParam(methodInfo, conditionInfo, argName);
                 }
                 // 校验条件是否可以关联到参数，如果无法关联，后续执行数据库操作会报错
-                if (conditionParamContext == null) {
+                if (methodParamInfo == null) {
                     throw new RuntimeException("查询条件没有对应的参数");
                 }
-
-                // TODO 只要知道参数是否会包装就行
-                conditionInfo.setParamValueCommonPathItemList(conditionParamContext.getParamValueCommonPathItemList());
-                conditionInfo.setMethodParamInfo(conditionParamContext.getMethodParamInfo());
+                conditionInfo.setMethodParamInfo(methodParamInfo);
             }
         }
     }
 
-    private ConditionParamContext getEntityTypeConditionParam(MethodInfo methodInfo, ConditionInfo conditionInfo, MethodParamInfo entityParamInfo) {
+    private MethodParamInfo getEntityTypeConditionParam(MethodInfo methodInfo, ConditionInfo conditionInfo, MethodParamInfo entityParamInfo) {
         // 如果存在条件实体，则把条件实体字段转换成参数名称
         String conditionColumnName = conditionInfo.getColumnName();
         ColumnInfo columnInfo = entityParamInfo.getColumnInfo(conditionColumnName);
@@ -331,51 +314,25 @@ public class MethodInfoHandler {
 
         int paramCount = methodInfo.getMethodParamInfoList().size();
         Param param = entityParamInfo.getParam();
-        List<String> paramValueCommonPathItemList = new ArrayList();
-        if (!(paramCount == 1 && param == null)) {
+        if (!(paramCount == 1 && classCategory == ClassCategory.COMPLEX && param == null)) {
+            // mybatis在[单参数、复合类型、无注解]情况下为了获取参数方便，不会对参数进行包装，所以不会生成argx这种参数
             methodParamInfo.setParamName(entityParamInfo.getArgName());
             methodParamInfo.setWrapper(true);
-            // paramValueCommonPathItemList.add(columnInfo.getJavaColumnName());
-        } else {
-            /*paramValueCommonPathItemList.add(entityParamInfo.getArgName());
-            paramValueCommonPathItemList.add(columnInfo.getJavaColumnName());*/
         }
-        return new ConditionParamContext(methodParamInfo, paramValueCommonPathItemList);
+        return methodParamInfo;
     }
 
-    private ConditionParamContext getSimpleTypeConditionParam(MethodInfo methodInfo, ConditionInfo conditionInfo, String paramName) {
+    private MethodParamInfo getSimpleTypeConditionParam(MethodInfo methodInfo, ConditionInfo conditionInfo, String paramName) {
         // 采用3种方式获取参数：conditionName -> conditionName.toLowerCase() -> argx：【userName -> username -> arg0】
         MethodParamInfo methodParamInfo = methodInfo.getMethodParamInfo(paramName);
         // 校验条件是否可以关联到参数，如果无法关联，后续执行数据库操作会报错
         if (methodParamInfo == null) {
             return null;
         }
-        if (methodParamInfo.getClassCategory() == ClassCategory.COMPLEX
-                && TypeUtils.typeEquals(conditionInfo.getColumnInfo(), ColumnInfo.class)
-        ) {
+        if (methodParamInfo.getClassCategory() == ClassCategory.COMPLEX && TypeUtils.typeEquals(conditionInfo.getColumnInfo(), ColumnInfo.class)) {
             throw new RuntimeException("查询条件不能关联到复杂类型参数" + methodParamInfo.getArgName());
         }
-
-        int paramCount = methodInfo.getMethodParamInfoList().size();
-        List<ColumnInfo> columnInfoList = methodParamInfo.getColumnInfoList();
-        Param param = methodParamInfo.getParam();
-        List<String> paramValueCommonPathItemList = new ArrayList();
-        if (!(paramCount == 1 && ObjectUtils.isNotEmpty(columnInfoList) && param == null)) {
-            // mybatis在[单参数、复合类型、无注解]情况下为了获取参数方便，不会对参数进行包装，所以不会生成argx这种参数
-            /**
-             * findById(ComplexObject complexObject)
-             */
-            /**
-             * findById(Long id)   findById(@Param("id") Long id)
-             * findById(@Param("id") ComplexId complexId)
-             * findByIdAndName(Long id, String name)   findByIdAndName(@Param("id") Long id, String name)
-             * findByIdAndName(ComplexId complexId, String name)    findByIdAndName(@Param("id") ComplexId complexId, String name)
-             */
-            methodParamInfo.setParamName(methodParamInfo.getArgName());
-            methodParamInfo.setWrapper(true);
-            // paramValueCommonPathItemList.add(methodParamInfo.getArgName());
-        }
-        return new ConditionParamContext(methodParamInfo, paramValueCommonPathItemList);
+        return methodParamInfo;
     }
 
     /**
@@ -415,15 +372,25 @@ public class MethodInfoHandler {
         return getMethodType(mapperInfo, type);
     }
 
-    private void processMethodParamName(MethodParamInfo methodParamInfo, Parameter parameter) {
+    /**
+     * mybatis在[单参数、复合类型、无注解]情况下为了获取参数方便，不会对参数进行包装，所以不会生成argx这种参数
+     * @param methodParamInfo
+     * @param parameter
+     * @param parameterCount
+     * @param classCategory
+     */
+    private void processMethodParamName(MethodParamInfo methodParamInfo, Parameter parameter, int parameterCount, ClassCategory classCategory) {
         String argName = parameter.getName();
         Param param = parameter.getAnnotation(Param.class);
         if (param != null) {
             argName = param.value();
         }
         methodParamInfo.setArgName(argName);
-        // methodParamInfo.setParamName("param" + (methodParamInfo.getIndex() + 1));
         methodParamInfo.setParam(param);
+        if (!(parameterCount == 1 && classCategory == ClassCategory.COMPLEX && param == null)) {
+            methodParamInfo.setParamName(argName);
+            methodParamInfo.setWrapper(true);
+        }
     }
 
     private Class<?> getMethodReturnType(MapperInfo mapperInfo, Method method) {

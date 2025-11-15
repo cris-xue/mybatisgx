@@ -1,5 +1,6 @@
 package com.mybatisgx.template;
 
+import com.google.common.collect.Lists;
 import com.mybatisgx.annotation.LogicDelete;
 import com.mybatisgx.context.EntityInfoContextHolder;
 import com.mybatisgx.model.*;
@@ -252,20 +253,17 @@ public class InsertTemplateHandler {
 
         @Override
         protected List<String> getParamValuePathItemList(MethodParamInfo methodParamInfo, ColumnInfo columnInfo, ColumnInfo columnInfoComposite, ColumnInfo relationColumnInfo) {
-            List<String> paramValuePathItemList = new ArrayList<>();
-            if (methodParamInfo.getWrapper()) {
-                paramValuePathItemList.add(methodParamInfo.getParamName());
-            }
+            List<String> argValueCommonPathItemList = Lists.newArrayList(methodParamInfo.getArgValueCommonPathItemList());
             if (relationColumnInfo != null) {
-                paramValuePathItemList.add(relationColumnInfo.getJavaColumnName());
+                argValueCommonPathItemList.add(relationColumnInfo.getJavaColumnName());
             }
             if (columnInfo != null) {
-                paramValuePathItemList.add(columnInfo.getJavaColumnName());
+                argValueCommonPathItemList.add(columnInfo.getJavaColumnName());
             }
             if (columnInfoComposite != null) {
-                paramValuePathItemList.add(columnInfoComposite.getJavaColumnName());
+                argValueCommonPathItemList.add(columnInfoComposite.getJavaColumnName());
             }
-            return paramValuePathItemList;
+            return argValueCommonPathItemList;
         }
     }
 

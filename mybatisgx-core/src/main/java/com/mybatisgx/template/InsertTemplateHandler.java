@@ -14,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class InsertTemplateHandler {
@@ -80,12 +79,12 @@ public class InsertTemplateHandler {
                 if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class, ColumnInfo.class)) {
                     List<ColumnInfo> columnInfoComposites = columnInfo.getComposites();
                     if (ObjectUtils.isEmpty(columnInfoComposites)) {
-                        this.setColumn(methodInfo, entityParamInfo, columnInfo, null, dbTrimElement);
+                        List<String> paramValuePathItemList = this.getParamValuePathItemList(entityParamInfo, columnInfo, null);
+                        this.setColumn(methodInfo, columnInfo, paramValuePathItemList, dbTrimElement);
                     } else {
                         for (ColumnInfo columnInfoComposite : columnInfoComposites) {
-                            String javaColumnName = String.format("%s.%s", columnInfo.getJavaColumnName(), columnInfoComposite.getJavaColumnName());
-                            ColumnInfo composite = new ColumnInfo.Builder().columnInfo(columnInfo).javaColumnName(javaColumnName).build();
-                            this.setColumn(methodInfo, entityParamInfo, columnInfo, columnInfoComposite, dbTrimElement);
+                            List<String> paramValuePathItemList = this.getParamValuePathItemList(entityParamInfo, columnInfo, columnInfoComposite);
+                            this.setColumn(methodInfo, columnInfoComposite, paramValuePathItemList, dbTrimElement);
                         }
                     }
                 }
@@ -96,28 +95,26 @@ public class InsertTemplateHandler {
                     }
                     ColumnInfo mappedByRelationColumnInfo = relationColumnInfo.getMappedByRelationColumnInfo();
                     if (mappedByRelationColumnInfo == null) {
-                        List<ForeignKeyColumnInfo> inverseForeignKeyInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
-                        for (ForeignKeyColumnInfo inverseForeignKeyInfo : inverseForeignKeyInfoList) {
-                            ColumnInfo foreignKeyColumnInfo = inverseForeignKeyInfo.getColumnInfo();
-                            this.setColumn(methodInfo, entityParamInfo, foreignKeyColumnInfo, columnInfo, dbTrimElement);
+                        for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : relationColumnInfo.getInverseForeignKeyColumnInfoList()) {
+                            ColumnInfo foreignKeyColumnInfo = inverseForeignKeyColumnInfo.getColumnInfo();
+                            ColumnInfo referencedColumnInfo = inverseForeignKeyColumnInfo.getReferencedColumnInfo();
+                            ColumnInfo referencedColumnInfoComposite = referencedColumnInfo.getComposites().get(0);
+                            List<String> paramValuePathItemList = this.getParamValuePathItemList(entityParamInfo, referencedColumnInfo, referencedColumnInfoComposite, relationColumnInfo);
+                            this.setColumn(methodInfo, foreignKeyColumnInfo, paramValuePathItemList, dbTrimElement);
                         }
                     }
                 }
             }
         }
 
-        private void setColumn(MethodInfo methodInfo, MethodParamInfo entityParamInfo, ColumnInfo columnInfo, ColumnInfo columnInfoComposite, Element dbTrimElement) {
-            String javaColumnName = columnInfo.getJavaColumnName();
+        private void setColumn(MethodInfo methodInfo, ColumnInfo columnInfo, List<String> paramValuePathItemList, Element dbTrimElement) {
             String dbColumnName = columnInfo.getDbColumnName();
-
             LogicDelete logicDelete = columnInfo.getLogicDelete();
             if (logicDelete != null) {
                 String javaColumn = String.format("%s,", dbColumnName);
                 dbTrimElement.addText(javaColumn);
                 return;
             }
-
-            List<String> paramValuePathItemList = this.getParamValuePathItemList(entityParamInfo, columnInfo, columnInfoComposite);
             String testExpression = this.getTestExpression(paramValuePathItemList);
             Element trimOrIfElement = this.buildTrimOrIfElement(methodInfo.getDynamic(), dbTrimElement, testExpression);
             String dbColumn = String.format("%s,", dbColumnName);
@@ -293,8 +290,17 @@ public class InsertTemplateHandler {
         protected List<String> getParamValuePathItemList(MethodParamInfo methodParamInfo, ColumnInfo columnInfo, ColumnInfo columnInfoComposite, ColumnInfo relationColumnInfo) {
             // int insertBatch(@BatchData List<ENTITY> entityList, @BatchSize int batchSize);
             String batchItemName = methodParamInfo.getBatchItemName();
-            String javaColumnName = columnInfo.getJavaColumnName();
-            return Arrays.asList(batchItemName, javaColumnName);
+            List<String> argValueCommonPathItemList = Lists.newArrayList(batchItemName);
+            if (relationColumnInfo != null) {
+                argValueCommonPathItemList.add(relationColumnInfo.getJavaColumnName());
+            }
+            if (columnInfo != null) {
+                argValueCommonPathItemList.add(columnInfo.getJavaColumnName());
+            }
+            if (columnInfoComposite != null) {
+                argValueCommonPathItemList.add(columnInfoComposite.getJavaColumnName());
+            }
+            return argValueCommonPathItemList;
         }
     }
 }

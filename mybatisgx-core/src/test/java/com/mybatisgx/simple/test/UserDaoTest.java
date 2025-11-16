@@ -47,6 +47,19 @@ public class UserDaoTest {
     }
 
     @Test
+    public void testInsertSelective() {
+        FixtureGenerator fixtureGenerator = new FixtureGenerator();
+        fixtureGenerator.configure().ignoreCyclicReferences();
+        User user = fixtureGenerator.createRandomized(User.class);
+        int count = userDao.insertSelective(user);
+        Assert.assertEquals(1, count);
+
+        User dbUser = userDao.findById(user.getId());
+        Assert.assertNotNull(dbUser);
+        Assert.assertEquals(user.getId(), dbUser.getId());
+    }
+
+    @Test
     public void testInsertBatch() {
         FixtureGenerator fixtureGenerator = new FixtureGenerator();
         fixtureGenerator.configure().ignoreCyclicReferences();
@@ -114,6 +127,23 @@ public class UserDaoTest {
     }
 
     @Test
+    public void testUpdateByIdSelective() {
+        FixtureGenerator fixtureGenerator = new FixtureGenerator();
+        fixtureGenerator.configure().ignoreCyclicReferences();
+        User user = fixtureGenerator.createRandomized(User.class);
+        int insertCount = userDao.insert(user);
+        Assert.assertEquals(1, insertCount);
+
+        user.setName("test");
+        int updateCount = userDao.updateByIdSelective(user);
+        Assert.assertEquals(1, updateCount);
+
+        User dbUser = userDao.findById(user.getId());
+        Assert.assertNotNull(dbUser);
+        Assert.assertEquals(user.getName(), dbUser.getName());
+    }
+
+    @Test
     public void testUpdateBatchById() {
         int updateCount = userDao.updateBatchById(userList, 3000);
         Assert.assertEquals(userList.size(), updateCount);
@@ -133,9 +163,32 @@ public class UserDaoTest {
     }
 
     @Test
+    public void testFindByOne() {
+        FixtureGenerator fixtureGenerator = new FixtureGenerator();
+        fixtureGenerator.configure().ignoreCyclicReferences();
+        User user = fixtureGenerator.createRandomized(User.class);
+        int insertCount = userDao.insert(user);
+        Assert.assertEquals(1, insertCount);
+
+        User queryUser = new User();
+        queryUser.setId(user.getId());
+        User dbUser = userDao.findOne(queryUser);
+        Assert.assertNotNull(dbUser);
+        Assert.assertEquals(user.getName(), dbUser.getName());
+    }
+
+    @Test
     public void testFindPage() {
         Pageable pageable = new Pageable(1, 10);
         Page<User> page2 = userDao.findPage(new User(), pageable);
         Assert.assertNotNull(page2);
+    }
+
+    @Test
+    public void testFindList() {
+        FixtureGenerator fixtureGenerator = new FixtureGenerator();
+        fixtureGenerator.configure().ignoreCyclicReferences();
+        User user = fixtureGenerator.createRandomized(User.class);
+        userDao.findList(user);
     }
 }

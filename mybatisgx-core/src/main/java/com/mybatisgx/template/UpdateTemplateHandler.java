@@ -1,5 +1,6 @@
 package com.mybatisgx.template;
 
+import com.google.common.collect.Lists;
 import com.mybatisgx.annotation.Lock;
 import com.mybatisgx.annotation.LogicDelete;
 import com.mybatisgx.context.EntityInfoContextHolder;
@@ -13,7 +14,6 @@ import org.dom4j.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
 import java.util.List;
 
 public class UpdateTemplateHandler {
@@ -192,7 +192,17 @@ public class UpdateTemplateHandler {
 
         @Override
         protected List<String> getParamValuePathItemList(MethodParamInfo methodParamInfo, ColumnInfo columnInfo, ColumnInfo columnInfoComposite, ColumnInfo relationColumnInfo) {
-            return Collections.emptyList();
+            List<String> argValueCommonPathItemList = Lists.newArrayList(methodParamInfo.getArgValueCommonPathItemList());
+            if (relationColumnInfo != null) {
+                argValueCommonPathItemList.add(relationColumnInfo.getJavaColumnName());
+            }
+            if (columnInfo != null) {
+                argValueCommonPathItemList.add(columnInfo.getJavaColumnName());
+            }
+            if (columnInfoComposite != null) {
+                argValueCommonPathItemList.add(columnInfoComposite.getJavaColumnName());
+            }
+            return argValueCommonPathItemList;
         }
     }
 
@@ -200,7 +210,19 @@ public class UpdateTemplateHandler {
 
         @Override
         protected List<String> getParamValuePathItemList(MethodParamInfo methodParamInfo, ColumnInfo columnInfo, ColumnInfo columnInfoComposite, ColumnInfo relationColumnInfo) {
-            return Collections.emptyList();
+            //    int updateBatchById(@BatchData List<ENTITY> entityList, @BatchSize int batchSize);
+            String batchItemName = methodParamInfo.getBatchItemName();
+            List<String> argValueCommonPathItemList = Lists.newArrayList(batchItemName);
+            if (relationColumnInfo != null) {
+                argValueCommonPathItemList.add(relationColumnInfo.getJavaColumnName());
+            }
+            if (columnInfo != null) {
+                argValueCommonPathItemList.add(columnInfo.getJavaColumnName());
+            }
+            if (columnInfoComposite != null) {
+                argValueCommonPathItemList.add(columnInfoComposite.getJavaColumnName());
+            }
+            return argValueCommonPathItemList;
         }
     }
 }

@@ -118,14 +118,14 @@ public class InsertTemplateHandler {
             String dbColumnName = columnInfo.getDbColumnName();
             LogicDelete logicDelete = columnInfo.getLogicDelete();
             if (logicDelete != null) {
-                String javaColumn = String.format("%s,", dbColumnName);
-                dbTrimElement.addText(javaColumn);
+                String columnExpression = String.format("%s,", dbColumnName);
+                dbTrimElement.addText(columnExpression);
                 return;
             }
             String testExpression = this.getTestExpression(paramValuePathItemList);
+            String columnExpression = String.format("%s,", dbColumnName);
             Element trimOrIfElement = this.buildTrimOrIfElement(methodInfo.getDynamic(), dbTrimElement, testExpression);
-            String dbColumn = String.format("%s,", dbColumnName);
-            trimOrIfElement.addText(dbColumn);
+            trimOrIfElement.addText(columnExpression);
         }
 
         public void setValue(MethodInfo methodInfo, Element javaTrimElement) {
@@ -172,20 +172,17 @@ public class InsertTemplateHandler {
             }
         }
 
-        private void setValue(MethodInfo methodInfo, ColumnInfo columnInfo, List<String> paramValuePathItemList, Element javaTrimElement) {
+        private void setValue(MethodInfo methodInfo, ColumnInfo columnInfo, List<String> paramValuePathItemList, Element trimElement) {
             LogicDelete logicDelete = columnInfo.getLogicDelete();
             if (logicDelete != null) {
                 String javaColumn = String.format("'%s'%s,", logicDelete.show(), buildTypeHandler(columnInfo));
-                javaTrimElement.addText(javaColumn);
+                trimElement.addText(javaColumn);
                 return;
             }
-
             String testExpression = this.getTestExpression(paramValuePathItemList);
-            Element javaTrimOrIfElement = this.buildTrimOrIfElement(methodInfo.getDynamic(), javaTrimElement, testExpression);
-
-            String paramValuePath = StringUtils.join(paramValuePathItemList, ".");
-            String javaColumn = String.format("#{%s%s},", paramValuePath, buildTypeHandler(columnInfo));
-            javaTrimOrIfElement.addText(javaColumn);
+            String valueExpression = this.getValueExpression(paramValuePathItemList, columnInfo);
+            Element trimOrIfElement = this.buildTrimOrIfElement(methodInfo.getDynamic(), trimElement, testExpression);
+            trimOrIfElement.addText(valueExpression);
         }
 
         private Element buildTrimOrIfElement(Boolean dynamic, Element parentElement, String testExpression) {
@@ -195,14 +192,6 @@ public class InsertTemplateHandler {
                 return ifElement;
             }
             return parentElement;
-        }
-
-        protected String buildTypeHandler(ColumnInfo columnInfo) {
-            String typeHandler = columnInfo.getTypeHandler();
-            if (StringUtils.isNotBlank(typeHandler)) {
-                return String.format(", typeHandler=%s", typeHandler);
-            }
-            return "";
         }
 
         protected String getTestExpression(List<String> pathItemList) {
@@ -215,6 +204,19 @@ public class InsertTemplateHandler {
             }
             if (paths.length == 3) {
                 return String.format("%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null", paths);
+            }
+            return "";
+        }
+
+        protected String getValueExpression(List<String> pathItemList, ColumnInfo columnInfo) {
+            String valuePath = StringUtils.join(pathItemList, ".");
+            return String.format("#{%s%s},", valuePath, buildTypeHandler(columnInfo));
+        }
+
+        protected String buildTypeHandler(ColumnInfo columnInfo) {
+            String typeHandler = columnInfo.getTypeHandler();
+            if (StringUtils.isNotBlank(typeHandler)) {
+                return String.format(", typeHandler=%s", typeHandler);
             }
             return "";
         }

@@ -32,7 +32,7 @@ public class DeleteTemplateHandler {
         if (logicDeleteColumnInfo == null) {
             deleteElement = delete(mapperElement, entityInfo, methodInfo);
         } else {
-            deleteElement = update(mapperElement, entityInfo, methodInfo, logicDeleteColumnInfo);
+            deleteElement = logicDelete(mapperElement, entityInfo, methodInfo, logicDeleteColumnInfo);
         }
         whereTemplateHandler.execute(deleteElement, mapperInfo.getEntityInfo(), methodInfo);
         return document.asXML();
@@ -45,7 +45,7 @@ public class DeleteTemplateHandler {
         return deleteElement;
     }
 
-    private Element update(Element mapperElement, EntityInfo entityInfo, MethodInfo methodInfo, ColumnInfo logicDeleteColumnInfo) {
+    private Element logicDelete(Element mapperElement, EntityInfo entityInfo, MethodInfo methodInfo, ColumnInfo logicDeleteColumnInfo) {
         String dbColumnName = logicDeleteColumnInfo.getDbColumnName();
         LogicDelete logicDelete = logicDeleteColumnInfo.getLogicDelete();
 
@@ -53,9 +53,8 @@ public class DeleteTemplateHandler {
         updateElement.addAttribute("id", methodInfo.getMethodName());
         updateElement.addText(String.format("update %s", entityInfo.getTableName()));
         Element setElement = updateElement.addElement("set");
-        String javaColumn = String.format("%s = '%s'", dbColumnName, logicDelete.hide());
-        setElement.addText(javaColumn);
+        String columnValueExpression = String.format("%s = '%s'", dbColumnName, logicDelete.hide());
+        setElement.addText(columnValueExpression);
         return updateElement;
     }
-
 }

@@ -40,7 +40,8 @@ field_comparison_op_clause: field_clause comparison_op_clause? ;
 group_by_clause: (group_by_op_clause field_clause)? ;
 
 // 排序 OrderByNameDesc、OrderByName
-order_by_clause: (order_by_op_clause (field_clause order_by_op_direction_clause?)*)? ;
+order_by_clause: (order_by_op_clause order_by_item_clause*)? ;
+order_by_item_clause: field_clause order_by_op_direction_clause ;
 
 // 忽略保留关键字
 ignore_reserved_word_clause: (RESERVED_WORD)*;

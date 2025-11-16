@@ -12,6 +12,9 @@ import java.util.List;
 @Mapper
 public interface UserDao extends SimpleDao<User, Long> {
 
+    @Dynamic
+    int insertNew(User user, User user1);
+
     User findByNameLike(String name);
 
     @Dynamic
@@ -25,5 +28,8 @@ public interface UserDao extends SimpleDao<User, Long> {
     List<User> findListNew(UserQuery userQuery);
 
     @Dynamic
-    List<User> findListNew1111(Long id, UserQuery userQuery);
+    List<User> findListNew1111(@Param("id") Long id, UserQuery userQuery);
+
+    @Dynamic
+    List<User> findListNew2222(Long id, UserQuery userQuery);
 }

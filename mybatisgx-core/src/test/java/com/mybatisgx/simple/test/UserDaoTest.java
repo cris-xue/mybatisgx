@@ -82,6 +82,21 @@ public class UserDaoTest {
     }
 
     @Test
+    public void testDeleteBatchById() {
+        List<Long> deleteList = new ArrayList<>();
+        int count = userList.size() / 2;
+        for (int index = count - 1; index < userList.size(); index++) {
+            deleteList.add(userList.get(index).getId());
+        }
+
+        int deleteCount = userDao.deleteBatchById(deleteList, 100);
+        Assert.assertEquals(deleteList.size(), deleteCount);
+
+        User dbUser = userDao.findById(deleteList.get(0));
+        Assert.assertNull(dbUser);
+    }
+
+    @Test
     public void testUpdateById() {
         FixtureGenerator fixtureGenerator = new FixtureGenerator();
         fixtureGenerator.configure().ignoreCyclicReferences();
@@ -96,6 +111,12 @@ public class UserDaoTest {
         User dbUser = userDao.findById(user.getId());
         Assert.assertNotNull(dbUser);
         Assert.assertEquals(user.getName(), dbUser.getName());
+    }
+
+    @Test
+    public void testUpdateBatchById() {
+        int updateCount = userDao.updateBatchById(userList, 3000);
+        Assert.assertEquals(userList.size(), updateCount);
     }
 
     @Test

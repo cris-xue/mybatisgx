@@ -13,6 +13,7 @@ import org.dom4j.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.List;
 
 public class UpdateTemplateHandler {
@@ -63,12 +64,12 @@ public class UpdateTemplateHandler {
             if (ObjectUtils.isEmpty(tableColumnInfoList)) {
                 throw new RuntimeException("实体表字段不存在" + entityParamInfo.getType());
             }
-            for (ColumnInfo tableColumnInfo : tableColumnInfoList) {
-                String javaColumnName = tableColumnInfo.getJavaColumnName();
-                String dbColumnName = tableColumnInfo.getDbColumnName();
-                String typeHandler = tableColumnInfo.getTypeHandler();
-                Lock lock = tableColumnInfo.getLock();
-                LogicDelete logicDelete = tableColumnInfo.getLogicDelete();
+            for (ColumnInfo columnInfo : tableColumnInfoList) {
+                String javaColumnName = columnInfo.getJavaColumnName();
+                String dbColumnName = columnInfo.getDbColumnName();
+                String typeHandler = columnInfo.getTypeHandler();
+                Lock lock = columnInfo.getLock();
+                LogicDelete logicDelete = columnInfo.getLogicDelete();
 
                 if (lock != null) {
                     String javaColumn = String.format("%s = #{%s} + %s, ", dbColumnName, javaColumnName, lock.increment());
@@ -82,31 +83,50 @@ public class UpdateTemplateHandler {
                     continue;
                 }
 
-                if (TypeUtils.typeEquals(tableColumnInfo, IdColumnInfo.class, ColumnInfo.class)) {
-                    if (methodInfo.getDynamic()) {
-                        Element setTrimIfElement = setTrimElement.addElement("if");
-                        setTrimIfElement.addAttribute("test", buildTestNotNull(javaColumnName));
-                        String javaColumn = String.format("#{%s%s},", javaColumnName, buildTypeHandler(typeHandler));
-                        setTrimIfElement.addText(String.format("%s = %s", dbColumnName, javaColumn));
+                if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class, ColumnInfo.class)) {
+                    List<ColumnInfo> columnInfoComposites = columnInfo.getComposites();
+                    if (ObjectUtils.isEmpty(columnInfoComposites)) {
+                        List<String> paramValuePathItemList = this.getParamValuePathItemList(entityParamInfo, columnInfo, null);
+                        String testExpression = this.getTestExpression(paramValuePathItemList);
+                        String valueExpression = this.getValueExpression(paramValuePathItemList, typeHandler);
+                        Element trimOrIfElement = this.buildTrimOrIfElement(methodInfo.getDynamic(), setTrimElement, testExpression);
+                        trimOrIfElement.addText(String.format("%s = %s", dbColumnName, valueExpression));
                     } else {
-                        String javaColumn = String.format("#{%s%s},", javaColumnName, buildTypeHandler(typeHandler));
-                        setTrimElement.addText(String.format("%s = %s", dbColumnName, javaColumn));
+                        for (ColumnInfo columnInfoComposite : columnInfoComposites) {
+                            List<String> paramValuePathItemList = this.getParamValuePathItemList(entityParamInfo, columnInfo, columnInfoComposite);
+                            String testExpression = this.getTestExpression(paramValuePathItemList);
+                            String valueExpression = this.getValueExpression(paramValuePathItemList, typeHandler);
+                            Element trimOrIfElement = this.buildTrimOrIfElement(methodInfo.getDynamic(), setTrimElement, testExpression);
+                            trimOrIfElement.addText(String.format("%s = %s", dbColumnName, valueExpression));
+                        }
                     }
                 }
-                if (TypeUtils.typeEquals(tableColumnInfo, RelationColumnInfo.class)) {
-                    RelationColumnInfo relationColumnInfo = (RelationColumnInfo) tableColumnInfo;
-                    List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
-                    for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
-                        String referencedColumnName = inverseForeignKeyColumnInfo.getReferencedColumnName();
-                        String nestedJavaColumnName = javaColumnName + "." + referencedColumnName;
-                        if (methodInfo.getDynamic()) {
-                            Element setTrimIfElement = setTrimElement.addElement("if");
-                            setTrimIfElement.addAttribute("test", buildTestNotNull(nestedJavaColumnName));
-                            String nestedJavaColumn = String.format("#{%s%s},", nestedJavaColumnName, buildTypeHandler(typeHandler));
-                            setTrimIfElement.addText(String.format("%s = %s", dbColumnName, nestedJavaColumn));
-                        } else {
-                            String nestedJavaColumn = String.format("#{%s%s},", nestedJavaColumnName, buildTypeHandler(typeHandler));
-                            setTrimElement.addText(String.format("%s = %s", dbColumnName, nestedJavaColumn));
+                if (TypeUtils.typeEquals(columnInfo, RelationColumnInfo.class)) {
+                    RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
+                    if (relationColumnInfo.getRelationType() == RelationType.MANY_TO_MANY) {
+                        continue;
+                    }
+                    ColumnInfo mappedByRelationColumnInfo = relationColumnInfo.getMappedByRelationColumnInfo();
+                    if (mappedByRelationColumnInfo == null) {
+                        for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : relationColumnInfo.getInverseForeignKeyColumnInfoList()) {
+                            ColumnInfo foreignKeyColumnInfo = inverseForeignKeyColumnInfo.getColumnInfo();
+                            ColumnInfo referencedColumnInfo = inverseForeignKeyColumnInfo.getReferencedColumnInfo();
+                            List<ColumnInfo> referencedColumnInfoComposites = referencedColumnInfo.getComposites();
+                            if (ObjectUtils.isEmpty(referencedColumnInfoComposites)) {
+                                List<String> paramValuePathItemList = this.getParamValuePathItemList(entityParamInfo, referencedColumnInfo, null, relationColumnInfo);
+                                String testExpression = this.getTestExpression(paramValuePathItemList);
+                                String valueExpression = this.getValueExpression(paramValuePathItemList, typeHandler);
+                                Element trimOrIfElement = this.buildTrimOrIfElement(methodInfo.getDynamic(), setTrimElement, testExpression);
+                                trimOrIfElement.addText(String.format("%s = %s", foreignKeyColumnInfo.getDbColumnName(), valueExpression));
+                            } else {
+                                for (ColumnInfo referencedColumnInfoComposite : referencedColumnInfoComposites) {
+                                    List<String> paramValuePathItemList = this.getParamValuePathItemList(entityParamInfo, referencedColumnInfo, referencedColumnInfoComposite, relationColumnInfo);
+                                    String testExpression = this.getTestExpression(paramValuePathItemList);
+                                    String valueExpression = this.getValueExpression(paramValuePathItemList, typeHandler);
+                                    Element trimOrIfElement = this.buildTrimOrIfElement(methodInfo.getDynamic(), setTrimElement, testExpression);
+                                    trimOrIfElement.addText(String.format("%s = %s", foreignKeyColumnInfo.getDbColumnName(), valueExpression));
+                                }
+                            }
                         }
                     }
                 }
@@ -117,6 +137,15 @@ public class UpdateTemplateHandler {
             whereTemplateHandler.execute(updateElement, entityInfo, methodInfo);
         }
 
+        private Element buildTrimOrIfElement(Boolean dynamic, Element parentElement, String testExpression) {
+            if (dynamic) {
+                Element ifElement = parentElement.addElement("if");
+                ifElement.addAttribute("test", testExpression);
+                return ifElement;
+            }
+            return parentElement;
+        }
+
         private String buildTypeHandler(String typeHandler) {
             if (StringUtils.isNotBlank(typeHandler)) {
                 return String.format(", typeHandler=%s", typeHandler);
@@ -124,8 +153,23 @@ public class UpdateTemplateHandler {
             return "";
         }
 
-        private String buildTestNotNull(String javaColumnName) {
-            return String.format("%s != null", javaColumnName);
+        protected String getTestExpression(List<String> pathItemList) {
+            String[] paths = pathItemList.toArray(new String[pathItemList.size()]);
+            if (paths.length == 1) {
+                return String.format("%1$s != null", paths);
+            }
+            if (paths.length == 2) {
+                return String.format("%1$s != null and %1$s.%2$s != null", paths);
+            }
+            if (paths.length == 3) {
+                return String.format("%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null", paths);
+            }
+            return "";
+        }
+
+        protected String getValueExpression(List<String> pathItemList, String typeHandler) {
+            String valuePath = StringUtils.join(pathItemList, ".");
+            return String.format("#{%s%s},", valuePath, buildTypeHandler(typeHandler));
         }
 
         private List<ColumnInfo> getTableColumnInfoList(MethodParamInfo methodParamInfo) {
@@ -136,13 +180,27 @@ public class UpdateTemplateHandler {
             }
             return methodParamInfo.getColumnInfoList();
         }
+
+        protected List<String> getParamValuePathItemList(MethodParamInfo methodParamInfo, ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
+            return this.getParamValuePathItemList(methodParamInfo, columnInfo, columnInfoComposite, null);
+        }
+
+        abstract protected List<String> getParamValuePathItemList(MethodParamInfo methodParamInfo, ColumnInfo columnInfo, ColumnInfo columnInfoComposite, ColumnInfo relationColumnInfo);
     }
 
     private static class SimpleUpdateHandler extends AbstractUpdateHandler {
 
+        @Override
+        protected List<String> getParamValuePathItemList(MethodParamInfo methodParamInfo, ColumnInfo columnInfo, ColumnInfo columnInfoComposite, ColumnInfo relationColumnInfo) {
+            return Collections.emptyList();
+        }
     }
 
     private static class BatchUpdateHandler extends AbstractUpdateHandler {
 
+        @Override
+        protected List<String> getParamValuePathItemList(MethodParamInfo methodParamInfo, ColumnInfo columnInfo, ColumnInfo columnInfoComposite, ColumnInfo relationColumnInfo) {
+            return Collections.emptyList();
+        }
     }
 }

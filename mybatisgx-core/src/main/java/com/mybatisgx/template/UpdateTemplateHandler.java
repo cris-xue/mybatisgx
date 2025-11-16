@@ -104,20 +104,20 @@ public class UpdateTemplateHandler {
         }
 
         private void setValue(MethodInfo methodInfo, ColumnInfo columnInfo, List<String> paramValuePathItemList, Element trimElement) {
-            String javaColumnName = columnInfo.getJavaColumnName();
             String dbColumnName = columnInfo.getDbColumnName();
             Lock lock = columnInfo.getLock();
             LogicDelete logicDelete = columnInfo.getLogicDelete();
 
             if (lock != null) {
-                String javaColumn = String.format("%s = #{%s} + %s, ", dbColumnName, javaColumnName, lock.increment());
-                trimElement.addText(javaColumn);
+                String valuePath = StringUtils.join(paramValuePathItemList, ".");
+                String columnValueExpression = String.format("%s = #{%s} + %s, ", dbColumnName, valuePath, lock.increment());
+                trimElement.addText(columnValueExpression);
                 return;
             }
 
             if (logicDelete != null) {
-                String javaColumn = String.format("%s = '%s', ", dbColumnName, logicDelete.show());
-                trimElement.addText(javaColumn);
+                String columnValueExpression = String.format("%s = '%s', ", dbColumnName, logicDelete.show());
+                trimElement.addText(columnValueExpression);
                 return;
             }
 

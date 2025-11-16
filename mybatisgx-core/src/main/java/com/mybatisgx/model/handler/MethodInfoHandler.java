@@ -320,8 +320,14 @@ public class MethodInfoHandler {
             // mybatis在[单参数、复合类型、无注解]情况下为了获取参数方便，不会对参数进行包装，所以不会生成argx这种参数
             paramValueCommonPathItemList.add(columnInfo.getJavaColumnName());
         } else {
-            paramValueCommonPathItemList.add(entityParamInfo.getArgName());
-            paramValueCommonPathItemList.add(columnInfo.getJavaColumnName());
+            if (methodInfo.getBatch()) {
+                // 批量操作条件
+                paramValueCommonPathItemList.add(entityParamInfo.getBatchItemName());
+                paramValueCommonPathItemList.add(columnInfo.getJavaColumnName());
+            } else {
+                paramValueCommonPathItemList.add(entityParamInfo.getArgName());
+                paramValueCommonPathItemList.add(columnInfo.getJavaColumnName());
+            }
         }
         methodParamInfo.setArgValueCommonPathItemList(paramValueCommonPathItemList);
         methodParamInfo.setWrapper(true);

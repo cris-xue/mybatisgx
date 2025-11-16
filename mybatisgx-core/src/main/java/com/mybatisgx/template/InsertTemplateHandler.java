@@ -247,8 +247,7 @@ public class InsertTemplateHandler {
                 keyPropertyList.add(keyProperty);
             } else {
                 for (ColumnInfo idColumnComposite : idColumnComposites) {
-                    String javaColumnName = String.format("%s.%s", idColumnInfo.getJavaColumnName(), idColumnComposite.getJavaColumnName());
-                    String keyProperty = String.format("%s", javaColumnName);
+                    String keyProperty = String.format("%s.%s", idColumnInfo.getJavaColumnName(), idColumnComposite.getJavaColumnName());
                     keyPropertyList.add(keyProperty);
                 }
             }

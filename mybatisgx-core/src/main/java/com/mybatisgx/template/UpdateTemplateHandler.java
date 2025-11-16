@@ -65,39 +65,15 @@ public class UpdateTemplateHandler {
                 throw new RuntimeException("实体表字段不存在" + entityParamInfo.getType());
             }
             for (ColumnInfo columnInfo : tableColumnInfoList) {
-                String javaColumnName = columnInfo.getJavaColumnName();
-                String dbColumnName = columnInfo.getDbColumnName();
-                String typeHandler = columnInfo.getTypeHandler();
-                Lock lock = columnInfo.getLock();
-                LogicDelete logicDelete = columnInfo.getLogicDelete();
-
-                if (lock != null) {
-                    String javaColumn = String.format("%s = #{%s} + %s, ", dbColumnName, javaColumnName, lock.increment());
-                    setTrimElement.addText(javaColumn);
-                    continue;
-                }
-
-                if (logicDelete != null) {
-                    String javaColumn = String.format("%s = '%s', ", dbColumnName, logicDelete.show());
-                    setTrimElement.addText(javaColumn);
-                    continue;
-                }
-
                 if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class, ColumnInfo.class)) {
                     List<ColumnInfo> columnInfoComposites = columnInfo.getComposites();
                     if (ObjectUtils.isEmpty(columnInfoComposites)) {
                         List<String> paramValuePathItemList = this.getParamValuePathItemList(entityParamInfo, columnInfo, null);
-                        String testExpression = this.getTestExpression(paramValuePathItemList);
-                        String valueExpression = this.getValueExpression(paramValuePathItemList, typeHandler);
-                        Element trimOrIfElement = this.buildTrimOrIfElement(methodInfo.getDynamic(), setTrimElement, testExpression);
-                        trimOrIfElement.addText(String.format("%s = %s", dbColumnName, valueExpression));
+                        this.setValue(methodInfo, columnInfo, paramValuePathItemList, setTrimElement);
                     } else {
                         for (ColumnInfo columnInfoComposite : columnInfoComposites) {
                             List<String> paramValuePathItemList = this.getParamValuePathItemList(entityParamInfo, columnInfo, columnInfoComposite);
-                            String testExpression = this.getTestExpression(paramValuePathItemList);
-                            String valueExpression = this.getValueExpression(paramValuePathItemList, typeHandler);
-                            Element trimOrIfElement = this.buildTrimOrIfElement(methodInfo.getDynamic(), setTrimElement, testExpression);
-                            trimOrIfElement.addText(String.format("%s = %s", dbColumnName, valueExpression));
+                            this.setValue(methodInfo, columnInfoComposite, paramValuePathItemList, setTrimElement);
                         }
                     }
                 }
@@ -114,23 +90,41 @@ public class UpdateTemplateHandler {
                             List<ColumnInfo> referencedColumnInfoComposites = referencedColumnInfo.getComposites();
                             if (ObjectUtils.isEmpty(referencedColumnInfoComposites)) {
                                 List<String> paramValuePathItemList = this.getParamValuePathItemList(entityParamInfo, referencedColumnInfo, null, relationColumnInfo);
-                                String testExpression = this.getTestExpression(paramValuePathItemList);
-                                String valueExpression = this.getValueExpression(paramValuePathItemList, typeHandler);
-                                Element trimOrIfElement = this.buildTrimOrIfElement(methodInfo.getDynamic(), setTrimElement, testExpression);
-                                trimOrIfElement.addText(String.format("%s = %s", foreignKeyColumnInfo.getDbColumnName(), valueExpression));
+                                this.setValue(methodInfo, foreignKeyColumnInfo, paramValuePathItemList, setTrimElement);
                             } else {
                                 for (ColumnInfo referencedColumnInfoComposite : referencedColumnInfoComposites) {
                                     List<String> paramValuePathItemList = this.getParamValuePathItemList(entityParamInfo, referencedColumnInfo, referencedColumnInfoComposite, relationColumnInfo);
-                                    String testExpression = this.getTestExpression(paramValuePathItemList);
-                                    String valueExpression = this.getValueExpression(paramValuePathItemList, typeHandler);
-                                    Element trimOrIfElement = this.buildTrimOrIfElement(methodInfo.getDynamic(), setTrimElement, testExpression);
-                                    trimOrIfElement.addText(String.format("%s = %s", foreignKeyColumnInfo.getDbColumnName(), valueExpression));
+                                    this.setValue(methodInfo, foreignKeyColumnInfo, paramValuePathItemList, setTrimElement);
                                 }
                             }
                         }
                     }
                 }
             }
+        }
+
+        private void setValue(MethodInfo methodInfo, ColumnInfo columnInfo, List<String> paramValuePathItemList, Element trimElement) {
+            String javaColumnName = columnInfo.getJavaColumnName();
+            String dbColumnName = columnInfo.getDbColumnName();
+            Lock lock = columnInfo.getLock();
+            LogicDelete logicDelete = columnInfo.getLogicDelete();
+
+            if (lock != null) {
+                String javaColumn = String.format("%s = #{%s} + %s, ", dbColumnName, javaColumnName, lock.increment());
+                trimElement.addText(javaColumn);
+                return;
+            }
+
+            if (logicDelete != null) {
+                String javaColumn = String.format("%s = '%s', ", dbColumnName, logicDelete.show());
+                trimElement.addText(javaColumn);
+                return;
+            }
+
+            String testExpression = this.getTestExpression(paramValuePathItemList);
+            String valueExpression = this.getValueExpression(paramValuePathItemList, columnInfo);
+            Element trimOrIfElement = this.buildTrimOrIfElement(methodInfo.getDynamic(), trimElement, testExpression);
+            trimOrIfElement.addText(String.format("%s = %s", columnInfo.getDbColumnName(), valueExpression));
         }
 
         private void setWhere(Element updateElement, EntityInfo entityInfo, MethodInfo methodInfo) {
@@ -146,7 +140,8 @@ public class UpdateTemplateHandler {
             return parentElement;
         }
 
-        private String buildTypeHandler(String typeHandler) {
+        private String buildTypeHandler(ColumnInfo columnInfo) {
+            String typeHandler = columnInfo.getTypeHandler();
             if (StringUtils.isNotBlank(typeHandler)) {
                 return String.format(", typeHandler=%s", typeHandler);
             }
@@ -167,9 +162,9 @@ public class UpdateTemplateHandler {
             return "";
         }
 
-        protected String getValueExpression(List<String> pathItemList, String typeHandler) {
+        protected String getValueExpression(List<String> pathItemList, ColumnInfo columnInfo) {
             String valuePath = StringUtils.join(pathItemList, ".");
-            return String.format("#{%s%s},", valuePath, buildTypeHandler(typeHandler));
+            return String.format("#{%s%s},", valuePath, buildTypeHandler(columnInfo));
         }
 
         private List<ColumnInfo> getTableColumnInfoList(MethodParamInfo methodParamInfo) {

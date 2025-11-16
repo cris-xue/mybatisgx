@@ -13,10 +13,6 @@ public class UserQuery extends User {
 
     private List<Long> idIn;
 
-    /*private Long idIsNull;
-
-    private Long idIsNotNull;*/
-
     public String getNameLike() {
         return nameLike;
     }
@@ -40,20 +36,4 @@ public class UserQuery extends User {
     public void setIdIn(List<Long> idIn) {
         this.idIn = idIn;
     }
-
-    /*public Long getIdIsNull() {
-        return idIsNull;
-    }
-
-    public void setIdIsNull(Long idIsNull) {
-        this.idIsNull = idIsNull;
-    }
-
-    public Long getIdIsNotNull() {
-        return idIsNotNull;
-    }
-
-    public void setIdIsNotNull(Long idIsNotNull) {
-        this.idIsNotNull = idIsNotNull;
-    }*/
 }

@@ -7,6 +7,7 @@ import com.mybatisgx.simple.entity.UserQuery;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Mapper
@@ -15,14 +16,14 @@ public interface UserDao extends SimpleDao<User, Long> {
     @Dynamic
     int insertNew(User user, User user1);
 
-    User findByNameLike(String name);
+    List<User> findByNameLike(String name);
 
     @Dynamic
     User findByNameLikeAndId(@Param("name") String name, Long id);
 
-    User findByIdIn(List<Long> ids);
+    List<User> findByIdIn(List<Long> ids);
 
-    User findByIdBetween(List<Long> ids);
+    List<User> findByInputTimeBetween(List<LocalDateTime> inputTimeList);
 
     @Dynamic
     List<User> findListNew(UserQuery userQuery);

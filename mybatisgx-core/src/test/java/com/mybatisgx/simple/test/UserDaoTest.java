@@ -5,12 +5,15 @@ import com.mybatisgx.handler.page.Page;
 import com.mybatisgx.handler.page.Pageable;
 import com.mybatisgx.simple.dao.UserDao;
 import com.mybatisgx.simple.entity.User;
+import com.mybatisgx.simple.entity.UserQuery;
 import com.mybatisgx.util.DaoTestUtils;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class UserDaoTest {
@@ -185,10 +188,36 @@ public class UserDaoTest {
     }
 
     @Test
+    public void testFindPageParamNotNull() {
+        FixtureGenerator fixtureGenerator = new FixtureGenerator();
+        fixtureGenerator.configure().ignoreCyclicReferences();
+        User user = fixtureGenerator.createRandomized(User.class);
+        Pageable pageable = new Pageable(1, 10);
+        userDao.findPage(user, pageable);
+    }
+
+    @Test
     public void testFindList() {
         FixtureGenerator fixtureGenerator = new FixtureGenerator();
         fixtureGenerator.configure().ignoreCyclicReferences();
         User user = fixtureGenerator.createRandomized(User.class);
         userDao.findList(user);
+    }
+
+    @Test
+    public void testCustomQuery() {
+        FixtureGenerator fixtureGenerator = new FixtureGenerator();
+        fixtureGenerator.configure().ignoreCyclicReferences();
+        User user = fixtureGenerator.createRandomized(User.class);
+        UserQuery userQuery = fixtureGenerator.createRandomized(UserQuery.class);
+
+        userDao.insertNew(user, user);
+        userDao.findByNameLike("name");
+        userDao.findByNameLikeAndId(user.getName(), user.getId());
+        userDao.findByInputTimeBetween(Arrays.asList(LocalDateTime.now(), LocalDateTime.now()));
+        userDao.findByIdIn(Arrays.asList(111L, 2222L));
+        userDao.findListNew(userQuery);
+        userDao.findListNew1111(1111L, userQuery);
+        userDao.findListNew2222(1111L, userQuery);
     }
 }

@@ -156,16 +156,14 @@ public class InsertTemplateHandler {
                     if (mappedByRelationColumnInfo == null) {
                         for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : relationColumnInfo.getInverseForeignKeyColumnInfoList()) {
                             ColumnInfo referencedColumnInfo = inverseForeignKeyColumnInfo.getReferencedColumnInfo();
-                            if (TypeUtils.typeEquals(referencedColumnInfo, IdColumnInfo.class)) {
-                                List<ColumnInfo> referencedColumnComposites = referencedColumnInfo.getComposites();
-                                if (ObjectUtils.isEmpty(referencedColumnComposites)) {
-                                    List<String> paramValuePathItemList = this.getParamValuePathItemList(entityParamInfo, referencedColumnInfo, null, relationColumnInfo);
-                                    this.setValue(methodInfo, referencedColumnInfo, paramValuePathItemList, javaTrimElement);
-                                } else {
-                                    for (ColumnInfo referencedColumnComposite : referencedColumnComposites) {
-                                        List<String> paramValuePathItemList = this.getParamValuePathItemList(entityParamInfo, referencedColumnInfo, referencedColumnComposite, relationColumnInfo);
-                                        this.setValue(methodInfo, referencedColumnComposite, paramValuePathItemList, javaTrimElement);
-                                    }
+                            List<ColumnInfo> referencedColumnComposites = referencedColumnInfo.getComposites();
+                            if (ObjectUtils.isEmpty(referencedColumnComposites)) {
+                                List<String> paramValuePathItemList = this.getParamValuePathItemList(entityParamInfo, referencedColumnInfo, null, relationColumnInfo);
+                                this.setValue(methodInfo, referencedColumnInfo, paramValuePathItemList, javaTrimElement);
+                            } else {
+                                for (ColumnInfo referencedColumnComposite : referencedColumnComposites) {
+                                    List<String> paramValuePathItemList = this.getParamValuePathItemList(entityParamInfo, referencedColumnInfo, referencedColumnComposite, relationColumnInfo);
+                                    this.setValue(methodInfo, referencedColumnComposite, paramValuePathItemList, javaTrimElement);
                                 }
                             }
                         }

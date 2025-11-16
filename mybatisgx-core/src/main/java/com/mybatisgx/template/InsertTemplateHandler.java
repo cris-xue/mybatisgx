@@ -238,16 +238,20 @@ public class InsertTemplateHandler {
         @Override
         String getKeyProperty(MethodInfo methodInfo) {
             MethodParamInfo entityParamInfo = methodInfo.getEntityParamInfo();
+            List<String> argValeueCommonPathItemList = Lists.newArrayList(entityParamInfo.getArgValueCommonPathItemList());
             List<String> keyPropertyList = new ArrayList();
             EntityInfo entityInfo = EntityInfoContextHolder.get(entityParamInfo.getType());
             IdColumnInfo idColumnInfo = entityInfo.getIdColumnInfo();
             List<ColumnInfo> idColumnComposites = idColumnInfo.getComposites();
             if (ObjectUtils.isEmpty(idColumnComposites)) {
-                String keyProperty = String.format("%s", idColumnInfo.getJavaColumnName());
+                argValeueCommonPathItemList.add(idColumnInfo.getJavaColumnName());
+                String keyProperty = StringUtils.join(argValeueCommonPathItemList, ".");
                 keyPropertyList.add(keyProperty);
             } else {
                 for (ColumnInfo idColumnComposite : idColumnComposites) {
-                    String keyProperty = String.format("%s.%s", idColumnInfo.getJavaColumnName(), idColumnComposite.getJavaColumnName());
+                    argValeueCommonPathItemList.add(idColumnInfo.getJavaColumnName());
+                    argValeueCommonPathItemList.add(idColumnComposite.getJavaColumnName());
+                    String keyProperty = StringUtils.join(argValeueCommonPathItemList, ".");
                     keyPropertyList.add(keyProperty);
                 }
             }

@@ -346,9 +346,10 @@ public class WhereTemplateHandler {
         public WhereItemContext handleSimpleTypeSingleParam(ColumnInfo columnInfo) {
             List<String> paramValuePathItemList = this.getParamValuePathItemList(columnInfo, null);
             String testExpression = this.getTestExpression(paramValuePathItemList);
+            String bindKey = this.getBindKey(paramValuePathItemList);
             String bindValuePath = this.getBindValuePath(paramValuePathItemList);
-            Element likeBindElement = this.buildLikeBindElement(bindValuePath);
-            String paramValueExpression = this.getParamValueExpression(paramValuePathItemList);
+            Element likeBindElement = this.buildLikeBindElement(bindKey, bindValuePath);
+            String paramValueExpression = this.getParamValueExpression(Arrays.asList(bindKey));
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
             return new WhereItemContext(testExpression, Arrays.asList(likeBindElement, conditionExpression));
         }
@@ -362,9 +363,10 @@ public class WhereTemplateHandler {
         public WhereItemContext handleComplexTypeNoAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
             List<String> paramValuePathItemList = this.getParamValuePathItemList(columnInfo, columnInfoComposite);
             String testExpression = this.getTestExpression(paramValuePathItemList);
+            String bindKey = this.getBindKey(paramValuePathItemList);
             String bindValuePath = this.getBindValuePath(paramValuePathItemList);
-            Element likeBindElement = this.buildLikeBindElement(bindValuePath);
-            String paramValueExpression = this.getParamValueExpression(paramValuePathItemList);
+            Element likeBindElement = this.buildLikeBindElement(bindKey, bindValuePath);
+            String paramValueExpression = this.getParamValueExpression(Arrays.asList(bindKey));
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, paramValueExpression);
             return new WhereItemContext(testExpression, Arrays.asList(likeBindElement, conditionExpression));
         }
@@ -387,17 +389,18 @@ public class WhereTemplateHandler {
                     relationColumnInfo.getJavaColumnName(),
                     referencedColumnInfo.getJavaColumnName()
             );
+            String bindKey = String.format(
+                    "%1$s_%2$s",
+                    relationColumnInfo.getJavaColumnName(),
+                    referencedColumnInfo.getJavaColumnName()
+            );
             String bindValuePath = String.format(
                     "%1$s.%2$s",
                     relationColumnInfo.getJavaColumnName(),
                     referencedColumnInfo.getJavaColumnName()
             );
-            Element likeBindElement = this.buildLikeBindElement(bindValuePath);
-            String paramValueExpression = String.format(
-                    "#{%1$s.%2$s}",
-                    relationColumnInfo.getJavaColumnName(),
-                    referencedColumnInfo.getJavaColumnName()
-            );
+            Element likeBindElement = this.buildLikeBindElement(bindKey, bindValuePath);
+            String paramValueExpression = bindKey;
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, relationColumnInfo, paramValueExpression);
             return new WhereItemContext(testExpression, Arrays.asList(likeBindElement, conditionExpression));
         }
@@ -436,30 +439,35 @@ public class WhereTemplateHandler {
                     relationColumnInfo.getJavaColumnName(),
                     referencedColumnInfo.getJavaColumnName()
             );
+            String bindKey = String.format(
+                    "%1$s_%2$s_%3$s",
+                    methodParamInfo.getArgName(),
+                    relationColumnInfo.getJavaColumnName(),
+                    referencedColumnInfo.getJavaColumnName()
+            );
             String bindValuePath = String.format(
                     "%1$s.%2$s.%3$s",
                     methodParamInfo.getArgName(),
                     relationColumnInfo.getJavaColumnName(),
                     referencedColumnInfo.getJavaColumnName()
             );
-            Element likeBindElement = this.buildLikeBindElement(bindValuePath);
-            String paramValueExpression = String.format(
-                    "#{%1$s.%2$s.%3$s}",
-                    methodParamInfo.getArgName(),
-                    relationColumnInfo.getJavaColumnName(),
-                    referencedColumnInfo.getJavaColumnName()
-            );
+            Element likeBindElement = this.buildLikeBindElement(bindKey, bindValuePath);
+            String paramValueExpression = bindKey;
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, relationColumnInfo, paramValueExpression);
             return new WhereItemContext(testExpression, Arrays.asList(likeBindElement, conditionExpression));
+        }
+
+        private String getBindKey(List<String> pathItemList) {
+            return StringUtils.join(pathItemList, "_");
         }
 
         private String getBindValuePath(List<String> pathItemList) {
             return StringUtils.join(pathItemList, ".");
         }
 
-        private Element buildLikeBindElement(String bindValuePath) {
-            String bindValue = "'%'+" + bindValuePath + "+'%'";
-            return this.buildBindElement(bindValuePath, bindValue);
+        private Element buildLikeBindElement(String bindKey, String bindValuePath) {
+            String likeExpression = "'%'+" + bindValuePath + "+'%'";
+            return this.buildBindElement(bindKey, likeExpression);
         }
     }
 

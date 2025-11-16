@@ -70,10 +70,10 @@ public class MybatisgxMixExecutor implements Executor {
     private <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, CacheKey cacheKey, BoundSql boundSql, Pageable pageable) throws SQLException {
         com.github.pagehelper.Page pagehelperPage = PageHelper.startPage(pageable.getPageNo(), pageable.getPageSize());
         List<Object> list;
-        if (cacheKey != null && boundSql != null) {
-            list = this.delegate.query(ms, parameter, rowBounds, resultHandler, cacheKey, boundSql);
-        } else {
+        if (cacheKey == null && boundSql == null) {
             list = this.delegate.query(ms, parameter, rowBounds, resultHandler);
+        } else {
+            list = this.delegate.query(ms, parameter, rowBounds, resultHandler, cacheKey, boundSql);
         }
         Page<Object> page = new Page(pagehelperPage.getTotal(), list);
         return (List<E>) Arrays.asList(page);

@@ -33,24 +33,24 @@ public class MybatisgxBatchExecutor implements Executor {
         MethodInfo methodInfo = MethodInfoContextHolder.get(ms.getId());
         if (methodInfo.getBatch()) {
             List<MethodParamInfo> methodParamInfoList = methodInfo.getMethodParamInfoList();
-            MethodParamInfo dataMethodParamInfo = null;
+            MethodParamInfo batchDataMethodParamInfo = null;
             MethodParamInfo batchSizeMethodParamInfo = null;
             for (MethodParamInfo methodParamInfo : methodParamInfoList) {
+                if (methodParamInfo.getBatchData()) {
+                    batchDataMethodParamInfo = methodParamInfo;
+                }
                 if (methodParamInfo.getBatchSize()) {
                     batchSizeMethodParamInfo = methodParamInfo;
-                }
-                if (methodParamInfo.getBatchData()) {
-                    dataMethodParamInfo = methodParamInfo;
                 }
             }
 
             MapperMethod.ParamMap<Object> mapperMethodParam = (MapperMethod.ParamMap<Object>) parameter;
-            Collection batchDataCollection = (Collection) mapperMethodParam.get(dataMethodParamInfo.getArgName());
+            Collection batchDataCollection = (Collection) mapperMethodParam.get(batchDataMethodParamInfo.getArgName());
             int batchSize = (int) mapperMethodParam.get(batchSizeMethodParamInfo.getArgName());
             List<Object> batchDataList = (List<Object>) batchDataCollection;
             for (int i = 0; i < batchDataList.size(); i++) {
                 Object batchData = batchDataList.get(i);
-                mapperMethodParam.put(dataMethodParamInfo.getBatchItemName(), batchData);
+                mapperMethodParam.put(batchDataMethodParamInfo.getBatchItemName(), batchData);
                 this.delegate.update(ms, mapperMethodParam);
                 if ((i + 1) % batchSize == 0 || (i + 1) == batchDataList.size()) {
                     this.flushStatements();

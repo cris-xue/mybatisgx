@@ -344,6 +344,11 @@ public class MethodInfoHandler {
         if (methodParamInfo.getClassCategory() == ClassCategory.COMPLEX && TypeUtils.typeEquals(conditionInfo.getColumnInfo(), ColumnInfo.class)) {
             throw new RuntimeException("查询条件不能关联到复杂类型参数" + methodParamInfo.getArgName());
         }
+        if (methodInfo.getBatch()) {
+            // 简单类型批量操作需要重写参数节点   【int deleteBatchById(@BatchData List<ID> ids, @BatchSize int batchSize);】
+            List<String> argValueCommonPathItemList = Lists.newArrayList(methodParamInfo.getBatchItemName());
+            methodParamInfo.setArgValueCommonPathItemList(argValueCommonPathItemList);
+        }
         return methodParamInfo;
     }
 

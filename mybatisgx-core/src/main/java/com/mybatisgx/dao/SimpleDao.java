@@ -28,6 +28,9 @@ public interface SimpleDao<ENTITY, ID extends Serializable> extends Dao {
 
     int deleteById(@Param("id") ID id);
 
+    @BatchOperation
+    int deleteBatchById(@BatchData List<ID> ids, @BatchSize int batchSize);
+
     int updateById(ENTITY entity);
 
     @BatchOperation

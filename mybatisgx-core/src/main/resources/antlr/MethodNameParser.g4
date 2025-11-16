@@ -48,7 +48,7 @@ where_start_clause: BY ;
 logic_op_clause: AND | OR ;
 logic_op_and_clause: AND ;
 logic_op_or_clause: OR ;
-comparison_op_clause: COMPARISON_OP ;
+comparison_op_clause: (COMPARISON_NOT_OP COMPARISON_OP) | COMPARISON_NULL_OP ;
 group_by_op_clause: GROUP_BY_OP ;
 order_by_op_clause: ORDER_BY_OP ;
 order_by_op_direction_clause: ORDER_BY_OP_DIRECTION ;

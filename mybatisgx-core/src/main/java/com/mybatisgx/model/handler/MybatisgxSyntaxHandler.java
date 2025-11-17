@@ -1,9 +1,11 @@
 package com.mybatisgx.model.handler;
 
 import com.google.common.base.CaseFormat;
+import com.google.common.collect.Maps;
 import com.mybatisgx.model.*;
 import com.mybatisgx.syntax.MethodNameLexer;
 import com.mybatisgx.syntax.MethodNameParser;
+import com.mybatisgx.syntax.MethodNameParserBaseVisitor;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -14,7 +16,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * mybatisgx语法处理器
@@ -156,6 +161,200 @@ public class MybatisgxSyntaxHandler {
                 LOGGER.error("不支持的语法:{} -- {}", conditionItem.getText(), token);
                 throw new RuntimeException("不支持的语法");
             }
+        }
+    }
+
+    /**
+     * 语法节点处理器接口
+     * @author 薛承城
+     * @date 2025/11/17 10:47
+     */
+    public interface SyntaxNodeHandler {
+
+        int getOrder();
+
+        boolean support(ParseTree node);
+
+        void handle(ParseTree node, ParserContext context);
+    }
+
+    private static class SqlCommandTypeHandler implements SyntaxNodeHandler {
+
+        private static final Map<Class<?>, SqlCommandType> COMMAND_MAPPINGS = Maps.newHashMap();
+
+        static {
+            COMMAND_MAPPINGS.put(MethodNameParser.Insert_clauseContext.class, SqlCommandType.INSERT);
+            COMMAND_MAPPINGS.put(MethodNameParser.Delete_clauseContext.class, SqlCommandType.DELETE);
+            COMMAND_MAPPINGS.put(MethodNameParser.Update_clauseContext.class, SqlCommandType.UPDATE);
+            COMMAND_MAPPINGS.put(MethodNameParser.Select_clauseContext.class, SqlCommandType.SELECT);
+        }
+
+        @Override
+        public int getOrder() {
+            return 0;
+        }
+
+        @Override
+        public boolean support(ParseTree node) {
+            return COMMAND_MAPPINGS.containsKey(node.getClass());
+        }
+
+        @Override
+        public void handle(ParseTree node, ParserContext context) {
+            SqlCommandType commandType = COMMAND_MAPPINGS.get(node.getClass());
+            context.getMethodInfo().setSqlCommandType(commandType);
+        }
+    }
+
+    private static class WhereClauseHandler implements SyntaxNodeHandler {
+
+        @Override
+        public int getOrder() {
+            return 0;
+        }
+
+        @Override
+        public boolean support(ParseTree node) {
+            return node instanceof MethodNameParser.Where_clauseContext;
+        }
+
+        @Override
+        public void handle(ParseTree node, ParserContext context) {
+            WhereClauseVisitor visitor = new WhereClauseVisitor(context);
+            List<ConditionInfo> conditions = visitor.visit((MethodNameParser.Where_clauseContext) node);
+            context.getMethodInfo().setConditionInfoList(conditions);
+        }
+    }
+
+    private static class AggregateHandler implements SyntaxNodeHandler {
+
+        @Override
+        public int getOrder() {
+            return 0;
+        }
+
+        @Override
+        public boolean support(ParseTree node) {
+            return node instanceof MethodNameParser.Aggregate_operation_clauseContext;
+        }
+
+        @Override
+        public void handle(ParseTree node, ParserContext context) {
+            // 聚合函数处理逻辑
+            LOGGER.info("处理聚合函数: {}", node.getText());
+        }
+    }
+
+    private static class WhereClauseVisitor extends MethodNameParserBaseVisitor<List<ConditionInfo>> {
+
+        private ParserContext context;
+        private ConditionParser conditionParser;
+
+        public WhereClauseVisitor(ParserContext context) {
+            this.context = context;
+            this.conditionParser = new ConditionParser(context);
+        }
+
+        @Override
+        public List<ConditionInfo> visitCondition_group_clause(MethodNameParser.Condition_group_clauseContext ctx) {
+            return ctx.condition_item_clause().stream()
+                    .map(this::parseConditionItem)
+                    .collect(Collectors.toList());
+        }
+
+        private ConditionInfo parseConditionItem(MethodNameParser.Condition_item_clauseContext ctx) {
+            return conditionParser.parse(ctx);
+        }
+    }
+
+    private static class ConditionParser {
+
+        private ParserContext context;
+        private Map<Class<?>, ConditionStrategy> strategies = new HashMap<>();
+
+        public ConditionParser(ParserContext context) {
+            this.context = context;
+            /*this.strategies.put(MethodNameParser.Field_clauseContext.class, new FieldConditionStrategy());
+            this.strategies.put(MethodNameParser.Comparison_op_clauseContext.class, new ComparisonStrategy());
+            this.strategies.put(MethodNameParser.Logic_op_clauseContext.class, new LogicOperatorStrategy());*/
+        }
+
+        public ConditionInfo parse(MethodNameParser.Condition_item_clauseContext ctx) {
+            ConditionInfo conditionInfo = null; // new ConditionInfo();
+
+            for (int i = 0; i < ctx.getChildCount(); i++) {
+                ParseTree child = ctx.getChild(i);
+                ConditionStrategy strategy = strategies.get(child.getClass());
+                if (strategy != null) {
+                    strategy.apply(child, conditionInfo, context);
+                }
+            }
+
+            return conditionInfo;
+        }
+    }
+
+    // 策略接口
+    public interface ConditionStrategy {
+        void apply(ParseTree node, ConditionInfo conditionInfo, ParserContext context);
+    }
+
+    public static class ParserContext {
+
+        private EntityInfo entityInfo;
+        private MethodInfo methodInfo;
+        private MethodParamInfo methodParamInfo;
+        private ConditionOriginType conditionOriginType;
+        private String methodName;
+
+        public ParserContext(EntityInfo entityInfo, MethodInfo methodInfo,
+                             MethodParamInfo methodParamInfo, ConditionOriginType conditionOriginType,
+                             String methodName) {
+            this.entityInfo = entityInfo;
+            this.methodInfo = methodInfo;
+            this.methodParamInfo = methodParamInfo;
+            this.conditionOriginType = conditionOriginType;
+            this.methodName = methodName;
+        }
+
+        public EntityInfo getEntityInfo() {
+            return entityInfo;
+        }
+
+        public void setEntityInfo(EntityInfo entityInfo) {
+            this.entityInfo = entityInfo;
+        }
+
+        public MethodInfo getMethodInfo() {
+            return methodInfo;
+        }
+
+        public void setMethodInfo(MethodInfo methodInfo) {
+            this.methodInfo = methodInfo;
+        }
+
+        public MethodParamInfo getMethodParamInfo() {
+            return methodParamInfo;
+        }
+
+        public void setMethodParamInfo(MethodParamInfo methodParamInfo) {
+            this.methodParamInfo = methodParamInfo;
+        }
+
+        public ConditionOriginType getConditionOriginType() {
+            return conditionOriginType;
+        }
+
+        public void setConditionOriginType(ConditionOriginType conditionOriginType) {
+            this.conditionOriginType = conditionOriginType;
+        }
+
+        public String getMethodName() {
+            return methodName;
+        }
+
+        public void setMethodName(String methodName) {
+            this.methodName = methodName;
         }
     }
 

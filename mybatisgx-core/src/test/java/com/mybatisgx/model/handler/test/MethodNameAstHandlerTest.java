@@ -5,7 +5,7 @@ import com.mybatisgx.model.ConditionOriginType;
 import com.mybatisgx.model.EntityInfo;
 import com.mybatisgx.model.MethodInfo;
 import com.mybatisgx.model.handler.EntityInfoHandler;
-import com.mybatisgx.model.handler.MethodNameAstHandler;
+import com.mybatisgx.model.handler.MybatisgxSyntaxHandler;
 import org.apache.ibatis.mapping.SqlCommandType;
 import org.junit.Assert;
 import org.junit.Test;
@@ -15,14 +15,14 @@ import java.util.List;
 public class MethodNameAstHandlerTest {
 
     private EntityInfoHandler entityInfoHandler = new EntityInfoHandler();
-    private MethodNameAstHandler methodNameAstHandler = new MethodNameAstHandler();
+    private MybatisgxSyntaxHandler mybatisgxSyntaxHandler = new MybatisgxSyntaxHandler();
 
     @Test
     public void test01() {
         // 测试方法名中只有条件
         EntityInfo entityInfo = entityInfoHandler.execute(User.class);
         MethodInfo methodInfo = new MethodInfo();
-        methodNameAstHandler.execute(entityInfo, methodInfo, null, ConditionOriginType.METHOD_NAME, "findByName");
+        mybatisgxSyntaxHandler.execute(entityInfo, methodInfo, null, ConditionOriginType.METHOD_NAME, "findByName");
 
         Assert.assertEquals(SqlCommandType.SELECT, methodInfo.getSqlCommandType());
         List<ConditionInfo> conditionInfoList = methodInfo.getConditionInfoList();
@@ -36,7 +36,7 @@ public class MethodNameAstHandlerTest {
         // 测试方法名中存在多条件
         EntityInfo entityInfo = entityInfoHandler.execute(User.class);
         MethodInfo methodInfo = new MethodInfo();
-        methodNameAstHandler.execute(entityInfo, methodInfo, null, ConditionOriginType.METHOD_NAME, "findByIdAndNameOrNameEqAndNameLike");
+        mybatisgxSyntaxHandler.execute(entityInfo, methodInfo, null, ConditionOriginType.METHOD_NAME, "findByIdAndNameOrNameEqAndNameLike");
 
         Assert.assertEquals(SqlCommandType.SELECT, methodInfo.getSqlCommandType());
         List<ConditionInfo> conditionInfoList = methodInfo.getConditionInfoList();
@@ -62,6 +62,6 @@ public class MethodNameAstHandlerTest {
         // 测试方法名中的条件在实体中不存在
         EntityInfo entityInfo = entityInfoHandler.execute(User.class);
         MethodInfo methodInfo = new MethodInfo();
-        methodNameAstHandler.execute(entityInfo, methodInfo, null, ConditionOriginType.METHOD_NAME, "findByName1");
+        mybatisgxSyntaxHandler.execute(entityInfo, methodInfo, null, ConditionOriginType.METHOD_NAME, "findByName1");
     }
 }

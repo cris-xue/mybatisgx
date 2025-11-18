@@ -2,6 +2,11 @@ package com.mybatisgx.model;
 
 import java.util.List;
 
+/**
+ * 方法名条件信息【修改、删除、查询都可以存在条件】
+ * @author 薛承城
+ * @date 2025/11/18 12:04
+ */
 public class ConditionInfo {
 
     /**

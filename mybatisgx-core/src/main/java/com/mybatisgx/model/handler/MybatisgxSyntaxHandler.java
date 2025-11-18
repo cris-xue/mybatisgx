@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * mybatisgx语法处理器
@@ -178,7 +177,7 @@ public class MybatisgxSyntaxHandler {
         void handle(ParseTree node, ParserContext context);
     }
 
-    private static class SqlCommandTypeHandler implements SyntaxNodeHandler {
+    public static class SqlCommandTypeHandler implements SyntaxNodeHandler {
 
         private static final Map<Class<?>, SqlCommandType> COMMAND_MAPPINGS = Maps.newHashMap();
 
@@ -206,7 +205,7 @@ public class MybatisgxSyntaxHandler {
         }
     }
 
-    private static class WhereClauseHandler implements SyntaxNodeHandler {
+    public static class WhereClauseHandler implements SyntaxNodeHandler {
 
         @Override
         public int getOrder() {
@@ -220,13 +219,14 @@ public class MybatisgxSyntaxHandler {
 
         @Override
         public void handle(ParseTree node, ParserContext context) {
-            WhereClauseVisitor visitor = new WhereClauseVisitor(context);
-            List<ConditionInfo> conditions = visitor.visit((MethodNameParser.Where_clauseContext) node);
-            context.getMethodInfo().setConditionInfoList(conditions);
+            LOGGER.info("处理where条件: {}", node.getText());
+            WhereClauseVisitor whereClauseVisitor = new WhereClauseVisitor(context);
+            List<ConditionInfo> conditionInfoList = whereClauseVisitor.visit(node);
+            context.getMethodInfo().setConditionInfoList(conditionInfoList);
         }
     }
 
-    private static class AggregateHandler implements SyntaxNodeHandler {
+    public static class AggregateHandler implements SyntaxNodeHandler {
 
         @Override
         public int getOrder() {
@@ -245,8 +245,45 @@ public class MybatisgxSyntaxHandler {
         }
     }
 
-    private static class WhereClauseVisitor extends MethodNameParserBaseVisitor<List<ConditionInfo>> {
+    public static class GroupByHandler implements SyntaxNodeHandler {
 
+        @Override
+        public int getOrder() {
+            return 0;
+        }
+
+        @Override
+        public boolean support(ParseTree node) {
+            return node instanceof MethodNameParser.Group_by_clauseContext;
+        }
+
+        @Override
+        public void handle(ParseTree node, ParserContext context) {
+            LOGGER.info("分组聚合函数: {}", node.getText());
+        }
+    }
+
+    public static class OrderByHandler implements SyntaxNodeHandler {
+
+        @Override
+        public int getOrder() {
+            return 0;
+        }
+
+        @Override
+        public boolean support(ParseTree node) {
+            return node instanceof MethodNameParser.Order_by_clauseContext;
+        }
+
+        @Override
+        public void handle(ParseTree node, ParserContext context) {
+            LOGGER.info("排序聚合函数: {}", node.getText());
+        }
+    }
+
+    public static class WhereClauseVisitor extends MethodNameParserBaseVisitor<List<ConditionInfo>> {
+
+        private Integer conditionIndex = 0;
         private ParserContext context;
         private ConditionParser conditionParser;
 
@@ -257,31 +294,32 @@ public class MybatisgxSyntaxHandler {
 
         @Override
         public List<ConditionInfo> visitCondition_group_clause(MethodNameParser.Condition_group_clauseContext ctx) {
-            return ctx.condition_item_clause().stream()
-                    .map(this::parseConditionItem)
-                    .collect(Collectors.toList());
-        }
-
-        private ConditionInfo parseConditionItem(MethodNameParser.Condition_item_clauseContext ctx) {
-            return conditionParser.parse(ctx);
+            LOGGER.info("处理条件组: {}", ctx.getText());
+            List<ConditionInfo> conditionInfoList = new ArrayList();
+            for (MethodNameParser.Condition_item_clauseContext conditionItem : ctx.condition_item_clause()) {
+                conditionIndex = conditionIndex + 1;
+                ConditionInfo conditionInfo = conditionParser.parse(conditionIndex, conditionItem);
+                conditionInfoList.add(conditionInfo);
+            }
+            return conditionInfoList;
         }
     }
 
-    private static class ConditionParser {
+    public static class ConditionParser {
 
         private ParserContext context;
         private Map<Class<?>, ConditionStrategy> strategies = new HashMap<>();
 
         public ConditionParser(ParserContext context) {
             this.context = context;
-            /*this.strategies.put(MethodNameParser.Field_clauseContext.class, new FieldConditionStrategy());
-            this.strategies.put(MethodNameParser.Comparison_op_clauseContext.class, new ComparisonStrategy());
-            this.strategies.put(MethodNameParser.Logic_op_clauseContext.class, new LogicOperatorStrategy());*/
+            this.strategies.put(MethodNameParser.Field_clauseContext.class, new FieldStrategyHandler());
+            this.strategies.put(MethodNameParser.Comparison_op_clauseContext.class, new ComparisonOperatorStrategyHandler());
+            this.strategies.put(MethodNameParser.Logic_op_clauseContext.class, new LogicOperatorStrategyHandler());
         }
 
-        public ConditionInfo parse(MethodNameParser.Condition_item_clauseContext ctx) {
-            ConditionInfo conditionInfo = null; // new ConditionInfo();
-
+        public ConditionInfo parse(int index, MethodNameParser.Condition_item_clauseContext ctx) {
+            LOGGER.info("处理条件: {}", ctx.getText());
+            ConditionInfo conditionInfo = new ConditionInfo(index, context.conditionOriginType, context.methodParamInfo);
             for (int i = 0; i < ctx.getChildCount(); i++) {
                 ParseTree child = ctx.getChild(i);
                 ConditionStrategy strategy = strategies.get(child.getClass());
@@ -289,14 +327,40 @@ public class MybatisgxSyntaxHandler {
                     strategy.apply(child, conditionInfo, context);
                 }
             }
-
             return conditionInfo;
         }
     }
 
-    // 策略接口
+    /**
+     * 策略接口
+     */
     public interface ConditionStrategy {
+
         void apply(ParseTree node, ConditionInfo conditionInfo, ParserContext context);
+    }
+
+    private static class FieldStrategyHandler implements ConditionStrategy {
+
+        @Override
+        public void apply(ParseTree node, ConditionInfo conditionInfo, ParserContext context) {
+
+        }
+    }
+
+    private static class ComparisonOperatorStrategyHandler implements ConditionStrategy {
+
+        @Override
+        public void apply(ParseTree node, ConditionInfo conditionInfo, ParserContext context) {
+
+        }
+    }
+
+    private static class LogicOperatorStrategyHandler implements ConditionStrategy {
+
+        @Override
+        public void apply(ParseTree node, ConditionInfo conditionInfo, ParserContext context) {
+
+        }
     }
 
     public static class ParserContext {

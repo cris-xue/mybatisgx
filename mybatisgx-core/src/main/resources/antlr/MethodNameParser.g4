@@ -24,14 +24,10 @@ aggregate_operation_clause: (aggregate_function_clause field_clause)? ;
 
 // 条件语法   ByNameLikeAndAgeEq
 where_clause: (where_start_clause condition_group_clause)? ignore_reserved_word_clause? ;
-// NameLikeAndAgeEq
-// condition_clause: condition_item_clause ;
 // 条件组：由多个条件单元和逻辑运算符组成
 condition_group_clause: condition_item_clause* ;
 // 条件单元：单个条件 或 括号内的子组
 condition_item_clause: logic_op_clause? (field_comparison_op_clause | (left_bracket_clause condition_group_clause right_bracket_clause)) ;
-// NameLike
-// condition_item_clause: logic_op_clause? field_condition_op_clause ;
 
 // 解析方法名和实体字段
 field_comparison_op_clause: field_clause comparison_op_clause? ;

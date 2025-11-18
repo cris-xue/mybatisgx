@@ -1,4 +1,4 @@
-// Generated from F:/devops/mybatisgx/mybatisx/mybatisx-core/src/main/resources/antlr/MethodNameParser.g4 by ANTLR 4.13.2
+// Generated from F:/devops/mybatisgx/mybatisgx/mybatisgx-core/src/main/resources/antlr/MethodNameParser.g4 by ANTLR 4.13.2
 package com.mybatisgx.syntax;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
@@ -118,25 +118,45 @@ public interface MethodNameParserListener extends ParseTreeListener {
 	 */
 	void exitWhere_clause(MethodNameParser.Where_clauseContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#condition_group_clause}.
+	 * Enter a parse tree produced by {@link MethodNameParser#condition_expression}.
 	 * @param ctx the parse tree
 	 */
-	void enterCondition_group_clause(MethodNameParser.Condition_group_clauseContext ctx);
+	void enterCondition_expression(MethodNameParser.Condition_expressionContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#condition_group_clause}.
+	 * Exit a parse tree produced by {@link MethodNameParser#condition_expression}.
 	 * @param ctx the parse tree
 	 */
-	void exitCondition_group_clause(MethodNameParser.Condition_group_clauseContext ctx);
+	void exitCondition_expression(MethodNameParser.Condition_expressionContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#condition_item_clause}.
+	 * Enter a parse tree produced by {@link MethodNameParser#or_expression}.
 	 * @param ctx the parse tree
 	 */
-	void enterCondition_item_clause(MethodNameParser.Condition_item_clauseContext ctx);
+	void enterOr_expression(MethodNameParser.Or_expressionContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#condition_item_clause}.
+	 * Exit a parse tree produced by {@link MethodNameParser#or_expression}.
 	 * @param ctx the parse tree
 	 */
-	void exitCondition_item_clause(MethodNameParser.Condition_item_clauseContext ctx);
+	void exitOr_expression(MethodNameParser.Or_expressionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MethodNameParser#and_expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterAnd_expression(MethodNameParser.And_expressionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MethodNameParser#and_expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitAnd_expression(MethodNameParser.And_expressionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MethodNameParser#condition_term}.
+	 * @param ctx the parse tree
+	 */
+	void enterCondition_term(MethodNameParser.Condition_termContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MethodNameParser#condition_term}.
+	 * @param ctx the parse tree
+	 */
+	void exitCondition_term(MethodNameParser.Condition_termContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MethodNameParser#field_comparison_op_clause}.
 	 * @param ctx the parse tree
@@ -167,6 +187,16 @@ public interface MethodNameParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitOrder_by_clause(MethodNameParser.Order_by_clauseContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MethodNameParser#order_by_item_clause}.
+	 * @param ctx the parse tree
+	 */
+	void enterOrder_by_item_clause(MethodNameParser.Order_by_item_clauseContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MethodNameParser#order_by_item_clause}.
+	 * @param ctx the parse tree
+	 */
+	void exitOrder_by_item_clause(MethodNameParser.Order_by_item_clauseContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MethodNameParser#ignore_reserved_word_clause}.
 	 * @param ctx the parse tree

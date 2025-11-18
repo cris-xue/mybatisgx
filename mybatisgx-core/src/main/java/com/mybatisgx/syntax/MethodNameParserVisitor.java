@@ -1,4 +1,4 @@
-// Generated from F:/devops/mybatisgx/mybatisx/mybatisx-core/src/main/resources/antlr/MethodNameParser.g4 by ANTLR 4.13.2
+// Generated from F:/devops/mybatisgx/mybatisgx/mybatisgx-core/src/main/resources/antlr/MethodNameParser.g4 by ANTLR 4.13.2
 package com.mybatisgx.syntax;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
@@ -77,17 +77,29 @@ public interface MethodNameParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitWhere_clause(MethodNameParser.Where_clauseContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MethodNameParser#condition_group_clause}.
+	 * Visit a parse tree produced by {@link MethodNameParser#condition_expression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitCondition_group_clause(MethodNameParser.Condition_group_clauseContext ctx);
+	T visitCondition_expression(MethodNameParser.Condition_expressionContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MethodNameParser#condition_item_clause}.
+	 * Visit a parse tree produced by {@link MethodNameParser#or_expression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitCondition_item_clause(MethodNameParser.Condition_item_clauseContext ctx);
+	T visitOr_expression(MethodNameParser.Or_expressionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MethodNameParser#and_expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAnd_expression(MethodNameParser.And_expressionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MethodNameParser#condition_term}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCondition_term(MethodNameParser.Condition_termContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MethodNameParser#field_comparison_op_clause}.
 	 * @param ctx the parse tree
@@ -106,6 +118,12 @@ public interface MethodNameParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitOrder_by_clause(MethodNameParser.Order_by_clauseContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MethodNameParser#order_by_item_clause}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitOrder_by_item_clause(MethodNameParser.Order_by_item_clauseContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MethodNameParser#ignore_reserved_word_clause}.
 	 * @param ctx the parse tree

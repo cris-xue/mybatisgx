@@ -1,4 +1,4 @@
-// Generated from F:/devops/mybatisgx/mybatisx/mybatisx-core/src/main/resources/antlr/MethodNameParser.g4 by ANTLR 4.13.2
+// Generated from F:/devops/mybatisgx/mybatisgx/mybatisgx-core/src/main/resources/antlr/MethodNameParser.g4 by ANTLR 4.13.2
 package com.mybatisgx.syntax;
 
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -149,25 +149,49 @@ public class MethodNameParserBaseListener implements MethodNameParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterCondition_group_clause(MethodNameParser.Condition_group_clauseContext ctx) { }
+	@Override public void enterCondition_expression(MethodNameParser.Condition_expressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitCondition_group_clause(MethodNameParser.Condition_group_clauseContext ctx) { }
+	@Override public void exitCondition_expression(MethodNameParser.Condition_expressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterCondition_item_clause(MethodNameParser.Condition_item_clauseContext ctx) { }
+	@Override public void enterOr_expression(MethodNameParser.Or_expressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitCondition_item_clause(MethodNameParser.Condition_item_clauseContext ctx) { }
+	@Override public void exitOr_expression(MethodNameParser.Or_expressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterAnd_expression(MethodNameParser.And_expressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitAnd_expression(MethodNameParser.And_expressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterCondition_term(MethodNameParser.Condition_termContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitCondition_term(MethodNameParser.Condition_termContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -204,6 +228,18 @@ public class MethodNameParserBaseListener implements MethodNameParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitOrder_by_clause(MethodNameParser.Order_by_clauseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterOrder_by_item_clause(MethodNameParser.Order_by_item_clauseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitOrder_by_item_clause(MethodNameParser.Order_by_item_clauseContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

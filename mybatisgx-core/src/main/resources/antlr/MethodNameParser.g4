@@ -23,11 +23,23 @@ select_clause: SELECT_ACTION ignore_reserved_word_clause ;
 aggregate_operation_clause: (aggregate_function_clause field_clause)? ;
 
 // 条件语法   ByNameLikeAndAgeEq
-where_clause: (where_start_clause condition_group_clause)? ignore_reserved_word_clause? ;
+where_clause: (where_start_clause condition_expression)? ignore_reserved_word_clause? ;
 // 条件组：由多个条件单元和逻辑运算符组成
-condition_group_clause: condition_item_clause* ;
+// condition_group_clause: condition_item_clause* ;
 // 条件单元：单个条件 或 括号内的子组
-condition_item_clause: logic_op_clause? (field_comparison_op_clause | (left_bracket_clause condition_group_clause right_bracket_clause)) ;
+// condition_item_clause: logic_op_clause? (field_comparison_op_clause | (left_bracket_clause condition_group_clause right_bracket_clause)) ;
+
+// 分层处理条件表达式，明确运算符优先级
+condition_expression: or_expression ;
+
+// OR 运算符 (最低优先级)
+or_expression: and_expression (logic_op_or_clause and_expression)* ;
+
+// AND 运算符 (较高优先级)
+and_expression: condition_term (logic_op_and_clause condition_term)* ;
+
+// 条件项：基础条件或括号表达式
+condition_term: field_comparison_op_clause | (left_bracket_clause condition_expression right_bracket_clause) ;
 
 // 解析方法名和实体字段
 field_comparison_op_clause: field_clause comparison_op_clause? ;

@@ -7,16 +7,23 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class MybatisgxSyntaxProcessor {
 
-    private final List<MybatisgxSyntaxNewHandler.SyntaxNodeHandler> handlers;
+    private final List<MybatisgxSyntaxNewHandler.SyntaxNodeHandler> handlers = Arrays.asList(
+            new MybatisgxSyntaxNewHandler.SqlCommandTypeHandler(),
+            new MybatisgxSyntaxNewHandler.AggregateHandler(),
+            new MybatisgxSyntaxNewHandler.WhereClauseHandler(),
+            new MybatisgxSyntaxNewHandler.GroupByHandler(),
+            new MybatisgxSyntaxNewHandler.OrderByHandler()
+    );
 
-    public MybatisgxSyntaxProcessor(List<MybatisgxSyntaxNewHandler.SyntaxNodeHandler> handlers) {
-        this.handlers = handlers.stream()
+    public MybatisgxSyntaxProcessor() {
+        this.handlers.stream()
                 .sorted(Comparator.comparingInt(MybatisgxSyntaxNewHandler.SyntaxNodeHandler::getOrder))
                 .collect(Collectors.toList());
     }

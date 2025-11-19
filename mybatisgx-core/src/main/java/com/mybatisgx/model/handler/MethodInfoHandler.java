@@ -96,9 +96,11 @@ public class MethodInfoHandler {
                 this.queryConditionParse(mapperInfo.getEntityInfo(), methodInfo);
             }
 
-            this.entityRelationTreeHandler.execute(mapperInfo, methodInfo);
-            String resultMapId = resultMapInfoHandler.execute(mapperInfo, methodInfo);
-            methodInfo.setResultMapId(resultMapId);
+            if (methodInfo.getSelectType() == SelectType.GENERAL) {
+                this.entityRelationTreeHandler.execute(mapperInfo, methodInfo);
+                String resultMapId = resultMapInfoHandler.execute(mapperInfo, methodInfo);
+                methodInfo.setResultMapId(resultMapId);
+            }
 
             this.bindConditionParam(methodInfo, methodInfo.getConditionInfoList());
             // check(resultMapInfo, methodInfo);

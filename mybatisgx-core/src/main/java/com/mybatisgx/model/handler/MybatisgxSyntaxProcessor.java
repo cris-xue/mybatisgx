@@ -13,15 +13,15 @@ import java.util.stream.Collectors;
 
 public class MybatisgxSyntaxProcessor {
 
-    private final List<MybatisgxSyntaxHandler.SyntaxNodeHandler> handlers;
+    private final List<MybatisgxSyntaxNewHandler.SyntaxNodeHandler> handlers;
 
-    public MybatisgxSyntaxProcessor(List<MybatisgxSyntaxHandler.SyntaxNodeHandler> handlers) {
+    public MybatisgxSyntaxProcessor(List<MybatisgxSyntaxNewHandler.SyntaxNodeHandler> handlers) {
         this.handlers = handlers.stream()
-                .sorted(Comparator.comparingInt(MybatisgxSyntaxHandler.SyntaxNodeHandler::getOrder))
+                .sorted(Comparator.comparingInt(MybatisgxSyntaxNewHandler.SyntaxNodeHandler::getOrder))
                 .collect(Collectors.toList());
     }
 
-    public void execute(MybatisgxSyntaxHandler.ParserContext context) {
+    public void execute(MybatisgxSyntaxNewHandler.ParserContext context) {
         ParseTree parseTree = parseMethodName(context.getMethodName());
         traverseSyntaxTree(parseTree, context);
     }
@@ -34,8 +34,8 @@ public class MybatisgxSyntaxProcessor {
         return methodNameParser.sql_statement();
     }
 
-    private void traverseSyntaxTree(ParseTree node, MybatisgxSyntaxHandler.ParserContext context) {
-        for (MybatisgxSyntaxHandler.SyntaxNodeHandler handler : handlers) {
+    private void traverseSyntaxTree(ParseTree node, MybatisgxSyntaxNewHandler.ParserContext context) {
+        for (MybatisgxSyntaxNewHandler.SyntaxNodeHandler handler : handlers) {
             if (handler.support(node)) {
                 handler.handle(node, context);
                 break;

@@ -219,5 +219,6 @@ public class UserDaoTest {
         userDao.findListNew(userQuery);
         userDao.findListNew1111(1111L, userQuery);
         userDao.findListNew2222(1111L, userQuery);
+        userDao.findCountNameByName("name");
     }
 }

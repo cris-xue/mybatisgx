@@ -1,5 +1,9 @@
 package com.mybatisgx.model.handler;
 
+import com.mybatisgx.model.ConditionOriginType;
+import com.mybatisgx.model.EntityInfo;
+import com.mybatisgx.model.MethodInfo;
+import com.mybatisgx.model.MethodParamInfo;
 import com.mybatisgx.syntax.MethodNameLexer;
 import com.mybatisgx.syntax.MethodNameParser;
 import org.antlr.v4.runtime.CharStream;
@@ -28,9 +32,16 @@ public class MybatisgxSyntaxProcessor {
                 .collect(Collectors.toList());
     }
 
-    public void execute(MybatisgxSyntaxNewHandler.ParserContext context) {
-        ParseTree parseTree = parseMethodName(context.getMethodName());
-        traverseSyntaxTree(parseTree, context);
+    public void execute(EntityInfo entityInfo, MethodInfo methodInfo, MethodParamInfo methodParamInfo, ConditionOriginType conditionOriginType, String methodName) {
+        ParseTree parseTree = this.parseMethodName(methodName);
+        MybatisgxSyntaxNewHandler.ParserContext parserContext = new MybatisgxSyntaxNewHandler.ParserContext(
+                entityInfo,
+                methodInfo,
+                methodParamInfo,
+                ConditionOriginType.METHOD_NAME,
+                methodName
+        );
+        traverseSyntaxTree(parseTree, parserContext);
     }
 
     private ParseTree parseMethodName(String methodName) {

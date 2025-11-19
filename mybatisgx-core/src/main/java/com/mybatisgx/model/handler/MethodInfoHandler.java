@@ -34,7 +34,7 @@ public class MethodInfoHandler {
 
     private ColumnInfoHandler columnInfoHandler = new ColumnInfoHandler();
     private ColumnTypeHandler columnTypeHandler = new ColumnTypeHandler();
-    private MybatisgxSyntaxHandler mybatisgxSyntaxHandler = new MybatisgxSyntaxHandler();
+    private MybatisgxSyntaxProcessor mybatisgxSyntaxProcessor = new MybatisgxSyntaxProcessor();
     private EntityRelationTreeHandler entityRelationTreeHandler = new EntityRelationTreeHandler();
     private ResultMapInfoHandler resultMapInfoHandler = new ResultMapInfoHandler();
 
@@ -207,7 +207,8 @@ public class MethodInfoHandler {
      * @param methodDeclaringClass
      */
     public void methodNameParse(EntityInfo entityInfo, MethodInfo methodInfo, Class<?> methodDeclaringClass) {
-        mybatisgxSyntaxHandler.execute(entityInfo, methodInfo, null, ConditionOriginType.METHOD_NAME, methodInfo.getMethodName());
+        mybatisgxSyntaxProcessor.execute(entityInfo, methodInfo, null, ConditionOriginType.METHOD_NAME, methodInfo.getMethodName());
+        // mybatisgxSyntaxHandler.execute(entityInfo, methodInfo, null, ConditionOriginType.METHOD_NAME, methodInfo.getMethodName());
         if (methodInfo.getSqlCommandType() != SqlCommandType.SELECT) {
             return;
         }
@@ -217,20 +218,20 @@ public class MethodInfoHandler {
                 MethodParamInfo entityParamInfo = methodInfo.getEntityParamInfo();
                 if (entityParamInfo != null) {
                     String entityCondition = this.entityCondition(methodInfo, entityParamInfo);
-                    mybatisgxSyntaxHandler.execute(entityInfo, methodInfo, entityParamInfo, ConditionOriginType.ENTITY_FIELD, entityCondition);
+                    mybatisgxSyntaxProcessor.execute(entityInfo, methodInfo, entityParamInfo, ConditionOriginType.ENTITY_FIELD, entityCondition);
                 }
             }
         } else {
             MethodParamInfo entityParamInfo = methodInfo.getEntityParamInfo();
             if (entityParamInfo != null) {
                 String queryEntityCondition = this.entityCondition(methodInfo, entityParamInfo);
-                mybatisgxSyntaxHandler.execute(entityInfo, methodInfo, entityParamInfo, ConditionOriginType.ENTITY_FIELD, queryEntityCondition);
+                mybatisgxSyntaxProcessor.execute(entityInfo, methodInfo, entityParamInfo, ConditionOriginType.ENTITY_FIELD, queryEntityCondition);
             }
         }
     }
 
     public void queryConditionParse(EntityInfo entityInfo, MethodInfo methodInfo) {
-        this.mybatisgxSyntaxHandler.execute(entityInfo, methodInfo, null, ConditionOriginType.METHOD_NAME, methodInfo.getConditionGroupExpression());
+        mybatisgxSyntaxProcessor.execute(entityInfo, methodInfo, null, ConditionOriginType.METHOD_NAME, methodInfo.getConditionGroupExpression());
     }
 
     /**

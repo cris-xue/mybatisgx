@@ -35,9 +35,9 @@ public class SelectTemplateHandler {
         Element mapperElement = document.addElement("mapper");
         Element selectElement = mapperElement.addElement("select");
         selectElement.addAttribute("id", methodInfo.getMethodName());
-        selectElement.addAttribute("resultMap", methodInfo.getResultMapId());
 
         if (methodInfo.getSelectType() == SelectType.GENERAL) {
+            selectElement.addAttribute("resultMap", methodInfo.getResultMapId());
             Class<?> methodReturnType = methodInfo.getMethodReturnInfo().getType();
             EntityInfo entityInfo = EntityInfoContextHolder.get(methodReturnType);
             PlainSelect plainSelect = generalSelectSqlTemplateHandler.buildSelectSql(entityInfo);
@@ -45,6 +45,7 @@ public class SelectTemplateHandler {
             whereTemplateHandler.execute(selectElement, entityInfo, methodInfo);
         }
         if (methodInfo.getSelectType() == SelectType.AGGREGATE) {
+            selectElement.addAttribute("resultType", "int");
             EntityInfo entityInfo = mapperInfo.getEntityInfo();
             PlainSelect plainSelect = aggregateSelectSqlTemplateHandler.buildSelectSql();
             selectElement.addText(plainSelect.toString());

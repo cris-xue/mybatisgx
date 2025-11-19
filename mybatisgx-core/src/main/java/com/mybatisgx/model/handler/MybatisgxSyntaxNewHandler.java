@@ -281,7 +281,7 @@ public class MybatisgxSyntaxNewHandler {
             String conditionColumnName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, token);
             ColumnInfo columnInfo = context.getEntityInfo().getColumnInfo(conditionColumnName);
             if (columnInfo == null) {
-                // throw new RuntimeException("方法条件或者实体中条件与数据库库实体无法对应：" + conditionColumnName);
+                throw new RuntimeException("方法条件或者实体中条件与数据库库实体无法对应：" + conditionColumnName);
             }
             if (context.getConditionOriginType() == ConditionOriginType.METHOD_NAME) {
                 conditionInfo.setColumnName(conditionColumnName);

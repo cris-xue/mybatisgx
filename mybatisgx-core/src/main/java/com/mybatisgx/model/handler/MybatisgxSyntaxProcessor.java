@@ -38,7 +38,7 @@ public class MybatisgxSyntaxProcessor {
                 entityInfo,
                 methodInfo,
                 methodParamInfo,
-                ConditionOriginType.METHOD_NAME,
+                conditionOriginType,
                 methodName
         );
         traverseSyntaxTree(parseTree, parserContext);

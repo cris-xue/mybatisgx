@@ -102,8 +102,8 @@ public class MybatisgxSyntaxNewHandler {
 
         @Override
         public void handle(ParseTree node, ParserContext context) {
-            // 聚合函数处理逻辑
             LOGGER.info("处理聚合函数: {}", node.getText());
+            context.getMethodInfo().setSelectType(SelectType.AGGREGATE);
         }
     }
 
@@ -254,6 +254,10 @@ public class MybatisgxSyntaxNewHandler {
         public ConditionInfo parse(int index, MethodNameParser.Field_comparison_op_clauseContext ctx) {
             LOGGER.info("处理条件: {}", ctx.getText());
             ConditionInfo conditionInfo = new ConditionInfo(index, context.conditionOriginType, context.methodParamInfo);
+            if (context.conditionOriginType == ConditionOriginType.ENTITY_FIELD) {
+                String conditionColumnName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, ctx.getText());
+                conditionInfo.setColumnName(conditionColumnName);
+            }
             for (int i = 0; i < ctx.getChildCount(); i++) {
                 ParseTree child = ctx.getChild(i);
                 ConditionStrategy strategy = strategies.get(child.getClass());

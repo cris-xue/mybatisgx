@@ -17,10 +17,10 @@ delete_clause: DELETE_ACTION ignore_reserved_word_clause ;
 update_statement: update_clause where_clause ;
 update_clause: UPDATE_ACTION ignore_reserved_word_clause ;
 
-select_statement: select_clause aggregate_operation_clause where_clause group_by_clause order_by_clause ;
+select_statement: select_clause aggregate_operation_clause? where_clause group_by_clause? order_by_clause? ;
 select_clause: SELECT_ACTION ignore_reserved_word_clause ;
 
-aggregate_operation_clause: (aggregate_function_clause field_clause)? ;
+aggregate_operation_clause: aggregate_function_clause field_clause ;
 
 // 条件语法   ByNameLikeAndAgeEq
 where_clause: (where_start_clause condition_expression)? ignore_reserved_word_clause? ;
@@ -45,10 +45,10 @@ condition_term: field_comparison_op_clause | (left_bracket_clause condition_expr
 field_comparison_op_clause: field_clause comparison_op_clause? ;
 
 // 分组
-group_by_clause: (group_by_op_clause field_clause)? ;
+group_by_clause: group_by_op_clause field_clause ;
 
 // 排序 OrderByNameDesc、OrderByName
-order_by_clause: (order_by_op_clause order_by_item_clause*)? ;
+order_by_clause: order_by_op_clause order_by_item_clause* ;
 order_by_item_clause: field_clause order_by_op_direction_clause ;
 
 // 忽略保留关键字

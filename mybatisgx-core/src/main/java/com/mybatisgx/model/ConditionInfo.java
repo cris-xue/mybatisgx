@@ -55,6 +55,7 @@ public class ConditionInfo {
      * 条件组信息，一个条件组包含多个条件，一个条件可能由一个条件组或者一个条件字段组成
      */
     private ConditionGroupInfo conditionGroupInfo;
+    private List<ConditionInfo> conditionInfoList;
     /**
      * 条件值来源于方法参数或者方法参数实体，需要提前计算出公共取值路径，模板渲染的时候就不再需要多重逻辑判断
      */
@@ -157,6 +158,14 @@ public class ConditionInfo {
 
     public void setConditionGroupInfo(ConditionGroupInfo conditionGroupInfo) {
         this.conditionGroupInfo = conditionGroupInfo;
+    }
+
+    public List<ConditionInfo> getConditionInfoList() {
+        return conditionInfoList;
+    }
+
+    public void setConditionInfoList(List<ConditionInfo> conditionInfoList) {
+        this.conditionInfoList = conditionInfoList;
     }
 
     public List<String> getParamValueCommonPathItemList() {

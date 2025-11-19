@@ -21,6 +21,10 @@ public class MethodInfo {
      */
     private SqlCommandType sqlCommandType;
     /**
+     * 查询类型
+     */
+    private SelectType selectType = SelectType.GENERAL;
+    /**
      * 方法名
      */
     private String methodName;
@@ -78,6 +82,14 @@ public class MethodInfo {
 
     public void setSqlCommandType(SqlCommandType sqlCommandType) {
         this.sqlCommandType = sqlCommandType;
+    }
+
+    public SelectType getSelectType() {
+        return selectType;
+    }
+
+    public void setSelectType(SelectType selectType) {
+        this.selectType = selectType;
     }
 
     public String getMethodName() {

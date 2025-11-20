@@ -7,8 +7,8 @@ DELETE_ACTION: 'delete' | 'remove' ;
 UPDATE_ACTION: 'update' | 'update' | 'modify' ;
 SELECT_ACTION: 'find' | 'get' | 'select' | 'query' ;
 BY: 'By' ;
-AND: 'And' ;
-OR: 'Or' ;
+LOGIC_OP_AND: 'And' ;
+LOGIC_OP_OR: 'Or' ;
 // 比较运算符
 COMPARISON_NOT_OP: 'Not';
 COMPARISON_OP: 'Lt'
@@ -30,10 +30,8 @@ AGGREGATE_FUNCTION: 'Sum'
     | 'Max'
     | 'Min'
     | 'Distinct'
-    | 'Top'
-    | 'Last'
-    | 'First'
     ;
+LIMIT_OP: 'Limit' | 'Top' | 'Last' | 'First' ;
 // 左括号
 LEFT_BRACKET: '(' ;
 // 右括号

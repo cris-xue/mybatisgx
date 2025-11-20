@@ -54,7 +54,7 @@ order_by_clause: order_by_op order_by_item_clause* ;
 order_by_item_clause: field_clause order_by_op_direction ;
 
 // 分页
-limit_op_expression: limit_op ;
+limit_op_expression: limit_op number ;
 
 // 忽略保留关键字
 ignore_reserved_word: (RESERVED_WORD)*;
@@ -67,8 +67,9 @@ order_by_op: ORDER_BY_OP ;
 order_by_op_direction: ORDER_BY_OP_DIRECTION ;
 // 聚合函数
 aggregate_function: AGGREGATE_FUNCTION ;
-field_clause: (FIELD)+ ;
 limit_op: LIMIT_OP ;
+field_clause: (FIELD)+ ;
+number: NUMBER ;
 left_bracket: LEFT_BRACKET ;
 right_bracket: RIGHT_BRACKET ;
 // EOF(end of file)表示文件结束符，这个是Antlr中已经定义好的

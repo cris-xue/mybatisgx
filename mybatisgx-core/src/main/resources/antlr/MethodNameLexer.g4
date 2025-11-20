@@ -42,4 +42,4 @@ NUMBER: [0-9]+ ;
 // antlr是从上向下解析的，常量一定要放在正则的上面
 FIELD: [A-Z]+[a-z0-9]+ ;
 // 忽略空白符
-WS: [ \t\r\n]+ -> skip;
+WS: [ \t\r\n]+ -> skip ;

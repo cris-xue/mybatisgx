@@ -20,9 +20,8 @@ public class MybatisgxSyntaxProcessor {
 
     private final List<MybatisgxSyntaxNewHandler.SyntaxNodeHandler> handlers = Arrays.asList(
             new MybatisgxSyntaxNewHandler.SqlCommandTypeHandler(),
-            new MybatisgxSyntaxNewHandler.AggregateHandler(),
+            new MybatisgxSyntaxNewHandler.SelectItemHandler(),
             new MybatisgxSyntaxNewHandler.WhereClauseHandler(),
-            new MybatisgxSyntaxNewHandler.GroupByHandler(),
             new MybatisgxSyntaxNewHandler.OrderByHandler()
     );
 

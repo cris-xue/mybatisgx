@@ -16,6 +16,11 @@ public class SelectPageInfo {
      */
     private Integer size = 10;
 
+    public SelectPageInfo(Integer index, Integer size) {
+        this.index = index;
+        this.size = size;
+    }
+
     public Integer getIndex() {
         return index;
     }

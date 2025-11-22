@@ -45,7 +45,7 @@ public class SelectTemplateHandler {
             whereTemplateHandler.execute(selectElement, entityInfo, methodInfo);
         }
         if (methodInfo.getSelectType() == SelectType.AGGREGATE) {
-            selectElement.addAttribute("resultType", "int");
+            selectElement.addAttribute("resultType", methodInfo.getMethodReturnInfo().getTypeName());
             EntityInfo entityInfo = mapperInfo.getEntityInfo();
             PlainSelect plainSelect = aggregateSelectSqlTemplateHandler.buildSelectSql();
             selectElement.addText(plainSelect.toString());

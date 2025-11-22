@@ -16,6 +16,11 @@ public class SelectOrderByInfo {
      */
     private String direction;
 
+    public SelectOrderByInfo(String column, String direction) {
+        this.column = column;
+        this.direction = direction;
+    }
+
     public String getColumn() {
         return column;
     }

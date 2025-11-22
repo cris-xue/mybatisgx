@@ -21,17 +21,13 @@ public class MethodInfo {
      */
     private SqlCommandType sqlCommandType;
     /**
-     * 查询类型
-     */
-    private SelectType selectType = SelectType.GENERAL;
-    /**
      * 方法名
      */
     private String methodName;
     /**
-     * 查询条件
+     * 语法表达式
      */
-    private String conditionGroupExpression;
+    private String syntaxExpression;
     /**
      * 是否动态参数
      */
@@ -40,6 +36,10 @@ public class MethodInfo {
      * 是否批量操作
      */
     private Boolean isBatch = false;
+    /**
+     * 查询节点信息
+     */
+    private SelectItemInfo selectItemInfo;
     /**
      * 方法名条件信息【修改、删除、查询都可以存在条件】
      */
@@ -84,14 +84,6 @@ public class MethodInfo {
         this.sqlCommandType = sqlCommandType;
     }
 
-    public SelectType getSelectType() {
-        return selectType;
-    }
-
-    public void setSelectType(SelectType selectType) {
-        this.selectType = selectType;
-    }
-
     public String getMethodName() {
         return methodName;
     }
@@ -100,20 +92,12 @@ public class MethodInfo {
         this.methodName = methodName;
     }
 
-    public String getConditionGroupExpression() {
-        return conditionGroupExpression;
+    public String getSyntaxExpression() {
+        return syntaxExpression;
     }
 
-    public void setConditionGroupExpression(String conditionGroupExpression) {
-        this.conditionGroupExpression = conditionGroupExpression;
-    }
-
-    public List<ConditionInfo> getConditionInfoList() {
-        return conditionInfoList;
-    }
-
-    public void setConditionInfoList(List<ConditionInfo> conditionInfoList) {
-        this.conditionInfoList = conditionInfoList;
+    public void setSyntaxExpression(String syntaxExpression) {
+        this.syntaxExpression = syntaxExpression;
     }
 
     public Boolean getDynamic() {
@@ -130,6 +114,22 @@ public class MethodInfo {
 
     public void setBatch(Boolean batch) {
         isBatch = batch;
+    }
+
+    public SelectItemInfo getSelectItemInfo() {
+        return selectItemInfo;
+    }
+
+    public void setSelectItemInfo(SelectItemInfo selectItemInfo) {
+        this.selectItemInfo = selectItemInfo;
+    }
+
+    public List<ConditionInfo> getConditionInfoList() {
+        return conditionInfoList;
+    }
+
+    public void setConditionInfoList(List<ConditionInfo> conditionInfoList) {
+        this.conditionInfoList = conditionInfoList;
     }
 
     public MethodParamInfo getEntityParamInfo() {

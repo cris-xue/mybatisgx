@@ -4,7 +4,7 @@ import java.util.List;
 
 /**
  * @author ：薛承城
- * @description：一句话描述
+ * @description：方法返回信息
  * @date ：2021/7/9 17:14
  */
 public class MethodReturnInfo {

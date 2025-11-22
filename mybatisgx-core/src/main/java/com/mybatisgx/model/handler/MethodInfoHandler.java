@@ -92,11 +92,12 @@ public class MethodInfoHandler {
             // 方法条件解析
             Sql sql = method.getAnnotation(Sql.class);
             if (sql != null) {
-                methodInfo.setConditionGroupExpression(sql.value());
+                methodInfo.setSyntaxExpression(sql.value());
                 this.queryConditionParse(mapperInfo.getEntityInfo(), methodInfo);
             }
 
-            if (methodInfo.getSelectType() == SelectType.GENERAL) {
+            SelectItemInfo selectItemInfo = methodInfo.getSelectItemInfo();
+            if (selectItemInfo.getSelectItemType() == SelectItemType.COLUMN) {
                 this.entityRelationTreeHandler.execute(mapperInfo, methodInfo);
                 String resultMapId = resultMapInfoHandler.execute(mapperInfo, methodInfo);
                 methodInfo.setResultMapId(resultMapId);
@@ -233,7 +234,7 @@ public class MethodInfoHandler {
     }
 
     public void queryConditionParse(EntityInfo entityInfo, MethodInfo methodInfo) {
-        mybatisgxSyntaxProcessor.execute(entityInfo, methodInfo, null, ConditionOriginType.METHOD_NAME, methodInfo.getConditionGroupExpression());
+        mybatisgxSyntaxProcessor.execute(entityInfo, methodInfo, null, ConditionOriginType.METHOD_NAME, methodInfo.getSyntaxExpression());
     }
 
     /**

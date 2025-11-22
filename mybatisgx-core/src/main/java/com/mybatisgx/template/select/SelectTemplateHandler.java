@@ -48,7 +48,7 @@ public class SelectTemplateHandler {
             selectElement.addText(plainSelect.toString());
         }
         if (selectItemInfo.getSelectItemType() == SelectItemType.COUNT) {
-            selectElement.addAttribute("resultType", "long");
+            selectElement.addAttribute("resultType", methodInfo.getMethodReturnInfo().getTypeName());
             entityInfo = mapperInfo.getEntityInfo();
             PlainSelect plainSelect = selectCountSqlTemplateHandler.buildSelectSql(entityInfo);
             selectElement.addText(plainSelect.toString());

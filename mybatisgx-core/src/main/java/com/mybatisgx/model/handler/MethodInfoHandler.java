@@ -97,7 +97,8 @@ public class MethodInfoHandler {
             }
 
             SelectItemInfo selectItemInfo = methodInfo.getSelectItemInfo();
-            if (selectItemInfo.getSelectItemType() == SelectItemType.COLUMN) {
+            if (methodInfo.getSqlCommandType() == SqlCommandType.SELECT
+                    && selectItemInfo.getSelectItemType() == SelectItemType.COLUMN) {
                 this.entityRelationTreeHandler.execute(mapperInfo, methodInfo);
                 String resultMapId = resultMapInfoHandler.execute(mapperInfo, methodInfo);
                 methodInfo.setResultMapId(resultMapId);

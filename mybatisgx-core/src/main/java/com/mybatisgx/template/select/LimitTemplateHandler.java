@@ -10,6 +10,6 @@ import com.mybatisgx.model.SelectPageInfo;
 public class LimitTemplateHandler {
 
     public String execute(SelectPageInfo selectPageInfo) {
-        return String.format(" limit %s %s", selectPageInfo.getIndex(), selectPageInfo.getSize());
+        return String.format(" limit %s, %s", selectPageInfo.getIndex(), selectPageInfo.getSize());
     }
 }

@@ -10,6 +10,7 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.RuleNode;
 import org.antlr.v4.runtime.tree.TerminalNodeImpl;
 import org.apache.ibatis.mapping.SqlCommandType;
 import org.slf4j.Logger;
@@ -87,9 +88,9 @@ public class MybatisgxSyntaxHandler {
                 if (i != 0) {
                     throw new RuntimeException("语法错误，条件必须以By开头");
                 }
-            } else if (whereChildItem instanceof MethodNameParser.Condition_group_clauseContext) {
+            } /*else if (whereChildItem instanceof MethodNameParser.Condition_group_clauseContext) {
                 conditionInfoList = this.parseConditionGroup(conditionContext, whereChildItem);
-            } else if (whereChildItem instanceof MethodNameParser.Ignore_reserved_word_clauseContext) {
+            }*/ else if (whereChildItem instanceof MethodNameParser.Ignore_reserved_word_clauseContext) {
                 LOGGER.info("忽略保留字：{}", whereChildItem.getText());
             } else {
                 throw new RuntimeException("不支持的语法");
@@ -107,14 +108,14 @@ public class MybatisgxSyntaxHandler {
         int childCount = conditionGroup.getChildCount();
         for (int i = 0; i < childCount; i++) {
             ParseTree conditionGroupChild = conditionGroup.getChild(i);
-            if (conditionGroupChild instanceof MethodNameParser.Condition_item_clauseContext) {
+            /*if (conditionGroupChild instanceof MethodNameParser.Condition_item_clauseContext) {
                 ConditionInfo conditionInfo = new ConditionInfo(conditionCount++, conditionOriginType, methodParamInfo);
                 conditionInfo.setOriginSegment(conditionGroupChild.getText());
                 this.parseConditionItem(conditionContext, conditionInfo, conditionGroupChild);
                 conditionInfoList.add(conditionInfo);
             } else {
                 throw new RuntimeException("不支持的语法");
-            }
+            }*/
         }
         return conditionInfoList;
     }
@@ -151,12 +152,12 @@ public class MybatisgxSyntaxHandler {
                 conditionInfo.setColumnInfo(columnInfo);
             } else if (conditionItemChild instanceof MethodNameParser.Comparison_op_clauseContext) {
                 conditionInfo.setComparisonOperator(ComparisonOperator.getComparisonOperator(token));
-            } else if (conditionItemChild instanceof MethodNameParser.Condition_group_clauseContext) {
+            } /*else if (conditionItemChild instanceof MethodNameParser.Condition_group_clauseContext) {
                 List<ConditionInfo> conditionInfoList = this.parseConditionGroup(conditionContext, conditionItemChild);
-                ConditionGroupInfo conditionGroupInfo = new ConditionGroupInfo();
+                ConditionGroupInfo conditionGroupInfo = new ConditionGroupInfo(null);
                 conditionGroupInfo.setConditionInfoList(conditionInfoList);
                 conditionInfo.setConditionGroupInfo(conditionGroupInfo);
-            } else {
+            }*/ else {
                 LOGGER.error("不支持的语法:{} -- {}", conditionItem.getText(), token);
                 throw new RuntimeException("不支持的语法");
             }
@@ -285,39 +286,75 @@ public class MybatisgxSyntaxHandler {
 
         private Integer conditionIndex = 0;
         private ParserContext context;
-        private ConditionParser conditionParser;
+        private ConditionTermParser conditionTermParser;
 
         public WhereClauseVisitor(ParserContext context) {
             this.context = context;
-            this.conditionParser = new ConditionParser(context);
+            this.conditionTermParser = new ConditionTermParser(context);
         }
 
         @Override
-        public List<ConditionInfo> visitCondition_group_clause(MethodNameParser.Condition_group_clauseContext ctx) {
-            LOGGER.info("处理条件组: {}", ctx.getText());
+        public List<ConditionInfo> visitCondition_expression(MethodNameParser.Condition_expressionContext ctx) {
+            LOGGER.info("处理条件表达式: {}", ctx.getText());
             List<ConditionInfo> conditionInfoList = new ArrayList();
-            for (MethodNameParser.Condition_item_clauseContext conditionItem : ctx.condition_item_clause()) {
-                conditionIndex = conditionIndex + 1;
-                ConditionInfo conditionInfo = conditionParser.parse(conditionIndex, conditionItem);
-                conditionInfoList.add(conditionInfo);
+            MethodNameParser.Or_expressionContext orExpressionContext = ctx.or_expression();
+            List<MethodNameParser.And_expressionContext> andExpressionContextList = orExpressionContext.and_expression();
+            for (MethodNameParser.And_expressionContext andExpressionContext : andExpressionContextList) {
+                List<MethodNameParser.Condition_termContext> conditionTermContextList = andExpressionContext.condition_term();
+                for (MethodNameParser.Condition_termContext conditionTermContext : conditionTermContextList) {
+                    ConditionInfo conditionInfo = conditionTermParser.parse(conditionIndex++, null);
+                    conditionInfoList.add(conditionInfo);
+                }
             }
             return conditionInfoList;
         }
+
+        @Override
+        public List<ConditionInfo> visitCondition_term(MethodNameParser.Condition_termContext ctx) {
+            LOGGER.info("处理条件单元: {}", ctx.getText());
+            MethodNameParser.Condition_expressionContext conditionExpressionContext = ctx.condition_expression();
+            if (conditionExpressionContext != null) {
+                this.visitCondition_expression(conditionExpressionContext);
+            } else {
+                MethodNameParser.Left_bracket_clauseContext leftBracketClauseContext = ctx.left_bracket_clause();
+                MethodNameParser.Field_comparison_op_clauseContext fieldComparisonOpClauseContext = ctx.field_comparison_op_clause();
+                MethodNameParser.Right_bracket_clauseContext rightBracketClauseContext = ctx.right_bracket_clause();
+            }
+
+            /*for (MethodNameParser.Condition_item_clauseContext conditionItem : ctx.condition_item_clause()) {
+
+            }*/
+            /*List<ConditionInfo> conditionInfoList = new ArrayList();
+            for (MethodNameParser.Condition_item_clauseContext conditionItem : ctx.condition_item_clause()) {
+                ConditionInfo conditionInfo = conditionParser.parse(conditionIndex++, conditionItem);
+                conditionInfoList.add(conditionInfo);
+                MethodNameParser.Condition_group_clauseContext conditionGroupClauseContext = conditionItem.condition_group_clause();
+                if (conditionGroupClauseContext != null) {
+                    ConditionGroupInfo conditionGroupInfo = this.visitCondition_group_clause(conditionGroupClauseContext);
+                    conditionInfo.setConditionGroupInfo(conditionGroupInfo);
+                }
+            }*/
+            return super.visitCondition_term(ctx);
+        }
+
+        @Override
+        protected boolean shouldVisitNextChild(RuleNode node, List<ConditionInfo> currentResult) {
+            return node instanceof MethodNameParser.Where_clauseContext && currentResult == null;
+        }
     }
 
-    public static class ConditionParser {
+    public static class ConditionTermParser {
 
         private ParserContext context;
         private Map<Class<?>, ConditionStrategy> strategies = new HashMap<>();
 
-        public ConditionParser(ParserContext context) {
+        public ConditionTermParser(ParserContext context) {
             this.context = context;
             this.strategies.put(MethodNameParser.Field_clauseContext.class, new FieldStrategyHandler());
             this.strategies.put(MethodNameParser.Comparison_op_clauseContext.class, new ComparisonOperatorStrategyHandler());
-            this.strategies.put(MethodNameParser.Logic_op_clauseContext.class, new LogicOperatorStrategyHandler());
         }
 
-        public ConditionInfo parse(int index, MethodNameParser.Condition_item_clauseContext ctx) {
+        public ConditionInfo parse(int index, MethodNameParser.Field_comparison_op_clauseContext ctx) {
             LOGGER.info("处理条件: {}", ctx.getText());
             ConditionInfo conditionInfo = new ConditionInfo(index, context.conditionOriginType, context.methodParamInfo);
             for (int i = 0; i < ctx.getChildCount(); i++) {
@@ -343,7 +380,16 @@ public class MybatisgxSyntaxHandler {
 
         @Override
         public void apply(ParseTree node, ConditionInfo conditionInfo, ParserContext context) {
-
+            String token = node.getText();
+            String conditionColumnName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, token);
+            ColumnInfo columnInfo = context.getEntityInfo().getColumnInfo(conditionColumnName);
+            if (columnInfo == null) {
+                throw new RuntimeException("方法条件或者实体中条件与数据库库实体无法对应：" + conditionColumnName);
+            }
+            if (context.getConditionOriginType() == ConditionOriginType.METHOD_NAME) {
+                conditionInfo.setColumnName(conditionColumnName);
+            }
+            conditionInfo.setColumnInfo(columnInfo);
         }
     }
 
@@ -351,7 +397,8 @@ public class MybatisgxSyntaxHandler {
 
         @Override
         public void apply(ParseTree node, ConditionInfo conditionInfo, ParserContext context) {
-
+            String token = node.getText();
+            conditionInfo.setComparisonOperator(ComparisonOperator.getComparisonOperator(token));
         }
     }
 
@@ -359,7 +406,8 @@ public class MybatisgxSyntaxHandler {
 
         @Override
         public void apply(ParseTree node, ConditionInfo conditionInfo, ParserContext context) {
-
+            String token = node.getText();
+            conditionInfo.setLogicOperator(LogicOperator.getLogicOperator(token));
         }
     }
 

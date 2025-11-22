@@ -137,11 +137,11 @@ public interface MethodNameParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitOrder_by_item_clause(MethodNameParser.Order_by_item_clauseContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MethodNameParser#limit_op_expression}.
+	 * Visit a parse tree produced by {@link MethodNameParser#limit}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitLimit_op_expression(MethodNameParser.Limit_op_expressionContext ctx);
+	T visitLimit(MethodNameParser.LimitContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MethodNameParser#ignore_reserved_word}.
 	 * @param ctx the parse tree
@@ -173,29 +173,41 @@ public interface MethodNameParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitComparison_op(MethodNameParser.Comparison_opContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MethodNameParser#group_by_op}.
+	 * Visit a parse tree produced by {@link MethodNameParser#group_by}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitGroup_by_op(MethodNameParser.Group_by_opContext ctx);
+	T visitGroup_by(MethodNameParser.Group_byContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MethodNameParser#order_by_op}.
+	 * Visit a parse tree produced by {@link MethodNameParser#order_by}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitOrder_by_op(MethodNameParser.Order_by_opContext ctx);
+	T visitOrder_by(MethodNameParser.Order_byContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MethodNameParser#order_by_op_direction}.
+	 * Visit a parse tree produced by {@link MethodNameParser#order_by_direction}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitOrder_by_op_direction(MethodNameParser.Order_by_op_directionContext ctx);
+	T visitOrder_by_direction(MethodNameParser.Order_by_directionContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MethodNameParser#limit_op}.
+	 * Visit a parse tree produced by {@link MethodNameParser#limit_top}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitLimit_op(MethodNameParser.Limit_opContext ctx);
+	T visitLimit_top(MethodNameParser.Limit_topContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MethodNameParser#limit_first}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLimit_first(MethodNameParser.Limit_firstContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MethodNameParser#limit_last}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLimit_last(MethodNameParser.Limit_lastContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MethodNameParser#field_clause}.
 	 * @param ctx the parse tree

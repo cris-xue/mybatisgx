@@ -165,7 +165,7 @@ public class MethodNameParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> 
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitLimit_op_expression(MethodNameParser.Limit_op_expressionContext ctx) { return visitChildren(ctx); }
+	@Override public T visitLimit(MethodNameParser.LimitContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -207,28 +207,42 @@ public class MethodNameParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> 
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitGroup_by_op(MethodNameParser.Group_by_opContext ctx) { return visitChildren(ctx); }
+	@Override public T visitGroup_by(MethodNameParser.Group_byContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitOrder_by_op(MethodNameParser.Order_by_opContext ctx) { return visitChildren(ctx); }
+	@Override public T visitOrder_by(MethodNameParser.Order_byContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitOrder_by_op_direction(MethodNameParser.Order_by_op_directionContext ctx) { return visitChildren(ctx); }
+	@Override public T visitOrder_by_direction(MethodNameParser.Order_by_directionContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitLimit_op(MethodNameParser.Limit_opContext ctx) { return visitChildren(ctx); }
+	@Override public T visitLimit_top(MethodNameParser.Limit_topContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitLimit_first(MethodNameParser.Limit_firstContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitLimit_last(MethodNameParser.Limit_lastContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *

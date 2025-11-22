@@ -269,13 +269,13 @@ public class MethodNameParserBaseListener implements MethodNameParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterLimit_op_expression(MethodNameParser.Limit_op_expressionContext ctx) { }
+	@Override public void enterLimit(MethodNameParser.LimitContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitLimit_op_expression(MethodNameParser.Limit_op_expressionContext ctx) { }
+	@Override public void exitLimit(MethodNameParser.LimitContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -341,49 +341,73 @@ public class MethodNameParserBaseListener implements MethodNameParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterGroup_by_op(MethodNameParser.Group_by_opContext ctx) { }
+	@Override public void enterGroup_by(MethodNameParser.Group_byContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitGroup_by_op(MethodNameParser.Group_by_opContext ctx) { }
+	@Override public void exitGroup_by(MethodNameParser.Group_byContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterOrder_by_op(MethodNameParser.Order_by_opContext ctx) { }
+	@Override public void enterOrder_by(MethodNameParser.Order_byContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitOrder_by_op(MethodNameParser.Order_by_opContext ctx) { }
+	@Override public void exitOrder_by(MethodNameParser.Order_byContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterOrder_by_op_direction(MethodNameParser.Order_by_op_directionContext ctx) { }
+	@Override public void enterOrder_by_direction(MethodNameParser.Order_by_directionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitOrder_by_op_direction(MethodNameParser.Order_by_op_directionContext ctx) { }
+	@Override public void exitOrder_by_direction(MethodNameParser.Order_by_directionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterLimit_op(MethodNameParser.Limit_opContext ctx) { }
+	@Override public void enterLimit_top(MethodNameParser.Limit_topContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitLimit_op(MethodNameParser.Limit_opContext ctx) { }
+	@Override public void exitLimit_top(MethodNameParser.Limit_topContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterLimit_first(MethodNameParser.Limit_firstContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitLimit_first(MethodNameParser.Limit_firstContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterLimit_last(MethodNameParser.Limit_lastContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitLimit_last(MethodNameParser.Limit_lastContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

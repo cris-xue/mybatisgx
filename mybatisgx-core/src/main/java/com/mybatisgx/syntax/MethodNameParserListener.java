@@ -218,15 +218,15 @@ public interface MethodNameParserListener extends ParseTreeListener {
 	 */
 	void exitOrder_by_item_clause(MethodNameParser.Order_by_item_clauseContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#limit_op_expression}.
+	 * Enter a parse tree produced by {@link MethodNameParser#limit}.
 	 * @param ctx the parse tree
 	 */
-	void enterLimit_op_expression(MethodNameParser.Limit_op_expressionContext ctx);
+	void enterLimit(MethodNameParser.LimitContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#limit_op_expression}.
+	 * Exit a parse tree produced by {@link MethodNameParser#limit}.
 	 * @param ctx the parse tree
 	 */
-	void exitLimit_op_expression(MethodNameParser.Limit_op_expressionContext ctx);
+	void exitLimit(MethodNameParser.LimitContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MethodNameParser#ignore_reserved_word}.
 	 * @param ctx the parse tree
@@ -278,45 +278,65 @@ public interface MethodNameParserListener extends ParseTreeListener {
 	 */
 	void exitComparison_op(MethodNameParser.Comparison_opContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#group_by_op}.
+	 * Enter a parse tree produced by {@link MethodNameParser#group_by}.
 	 * @param ctx the parse tree
 	 */
-	void enterGroup_by_op(MethodNameParser.Group_by_opContext ctx);
+	void enterGroup_by(MethodNameParser.Group_byContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#group_by_op}.
+	 * Exit a parse tree produced by {@link MethodNameParser#group_by}.
 	 * @param ctx the parse tree
 	 */
-	void exitGroup_by_op(MethodNameParser.Group_by_opContext ctx);
+	void exitGroup_by(MethodNameParser.Group_byContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#order_by_op}.
+	 * Enter a parse tree produced by {@link MethodNameParser#order_by}.
 	 * @param ctx the parse tree
 	 */
-	void enterOrder_by_op(MethodNameParser.Order_by_opContext ctx);
+	void enterOrder_by(MethodNameParser.Order_byContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#order_by_op}.
+	 * Exit a parse tree produced by {@link MethodNameParser#order_by}.
 	 * @param ctx the parse tree
 	 */
-	void exitOrder_by_op(MethodNameParser.Order_by_opContext ctx);
+	void exitOrder_by(MethodNameParser.Order_byContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#order_by_op_direction}.
+	 * Enter a parse tree produced by {@link MethodNameParser#order_by_direction}.
 	 * @param ctx the parse tree
 	 */
-	void enterOrder_by_op_direction(MethodNameParser.Order_by_op_directionContext ctx);
+	void enterOrder_by_direction(MethodNameParser.Order_by_directionContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#order_by_op_direction}.
+	 * Exit a parse tree produced by {@link MethodNameParser#order_by_direction}.
 	 * @param ctx the parse tree
 	 */
-	void exitOrder_by_op_direction(MethodNameParser.Order_by_op_directionContext ctx);
+	void exitOrder_by_direction(MethodNameParser.Order_by_directionContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#limit_op}.
+	 * Enter a parse tree produced by {@link MethodNameParser#limit_top}.
 	 * @param ctx the parse tree
 	 */
-	void enterLimit_op(MethodNameParser.Limit_opContext ctx);
+	void enterLimit_top(MethodNameParser.Limit_topContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#limit_op}.
+	 * Exit a parse tree produced by {@link MethodNameParser#limit_top}.
 	 * @param ctx the parse tree
 	 */
-	void exitLimit_op(MethodNameParser.Limit_opContext ctx);
+	void exitLimit_top(MethodNameParser.Limit_topContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MethodNameParser#limit_first}.
+	 * @param ctx the parse tree
+	 */
+	void enterLimit_first(MethodNameParser.Limit_firstContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MethodNameParser#limit_first}.
+	 * @param ctx the parse tree
+	 */
+	void exitLimit_first(MethodNameParser.Limit_firstContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MethodNameParser#limit_last}.
+	 * @param ctx the parse tree
+	 */
+	void enterLimit_last(MethodNameParser.Limit_lastContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MethodNameParser#limit_last}.
+	 * @param ctx the parse tree
+	 */
+	void exitLimit_last(MethodNameParser.Limit_lastContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MethodNameParser#field_clause}.
 	 * @param ctx the parse tree

@@ -17,13 +17,11 @@ delete_clause: DELETE_ACTION ignore_reserved_word ;
 update_statement: update_clause where_clause ;
 update_clause: UPDATE_ACTION ignore_reserved_word ;
 
-select_statement: (select_item_clause limit_op? | select_count_clause | select_exist_clause)
-    where_clause
-    order_by_clause?
-    ;
-select_item_clause: SELECT_ACTION ignore_reserved_word ;
-select_count_clause: SELECT_COUNT_ACTION ignore_reserved_word ;
-select_exist_clause: SELECT_EXIST_ACTION ignore_reserved_word ;
+select_statement: select_item where_clause order_by_clause? ;
+select_item: (select_column limit_op? | select_count | select_exist) ignore_reserved_word ;
+select_column: SELECT_COLUMN_ACTION ;
+select_count: SELECT_COUNT_ACTION ;
+select_exist: SELECT_EXIST_ACTION ;
 
 // 条件语法   ByNameLikeAndAgeEq
 where_clause: (where_start condition_expression)? ignore_reserved_word? ;

@@ -5,7 +5,7 @@ import MethodNameLexerStatus;
 INSERT_ACTION: 'insert' | 'add' ;
 DELETE_ACTION: 'delete' | 'remove' ;
 UPDATE_ACTION: 'update' | 'update' | 'modify' ;
-SELECT_ACTION: 'find' | 'get' | 'select' | 'query' ;
+SELECT_COLUMN_ACTION: 'find' | 'get' | 'select' | 'query' ;
 SELECT_COUNT_ACTION: 'count' ;
 SELECT_EXIST_ACTION: 'exist' ;
 BY: 'By' ;

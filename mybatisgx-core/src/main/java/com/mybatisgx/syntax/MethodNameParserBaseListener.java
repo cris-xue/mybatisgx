@@ -113,25 +113,37 @@ public class MethodNameParserBaseListener implements MethodNameParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterSelect_clause(MethodNameParser.Select_clauseContext ctx) { }
+	@Override public void enterSelect_item_clause(MethodNameParser.Select_item_clauseContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitSelect_clause(MethodNameParser.Select_clauseContext ctx) { }
+	@Override public void exitSelect_item_clause(MethodNameParser.Select_item_clauseContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterAggregate_operation_clause(MethodNameParser.Aggregate_operation_clauseContext ctx) { }
+	@Override public void enterSelect_count_clause(MethodNameParser.Select_count_clauseContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitAggregate_operation_clause(MethodNameParser.Aggregate_operation_clauseContext ctx) { }
+	@Override public void exitSelect_count_clause(MethodNameParser.Select_count_clauseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterSelect_exist_clause(MethodNameParser.Select_exist_clauseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSelect_exist_clause(MethodNameParser.Select_exist_clauseContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -245,121 +257,121 @@ public class MethodNameParserBaseListener implements MethodNameParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterIgnore_reserved_word_clause(MethodNameParser.Ignore_reserved_word_clauseContext ctx) { }
+	@Override public void enterLimit_op_expression(MethodNameParser.Limit_op_expressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitIgnore_reserved_word_clause(MethodNameParser.Ignore_reserved_word_clauseContext ctx) { }
+	@Override public void exitLimit_op_expression(MethodNameParser.Limit_op_expressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterWhere_start_clause(MethodNameParser.Where_start_clauseContext ctx) { }
+	@Override public void enterIgnore_reserved_word(MethodNameParser.Ignore_reserved_wordContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitWhere_start_clause(MethodNameParser.Where_start_clauseContext ctx) { }
+	@Override public void exitIgnore_reserved_word(MethodNameParser.Ignore_reserved_wordContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterLogic_op_clause(MethodNameParser.Logic_op_clauseContext ctx) { }
+	@Override public void enterWhere_start(MethodNameParser.Where_startContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitLogic_op_clause(MethodNameParser.Logic_op_clauseContext ctx) { }
+	@Override public void exitWhere_start(MethodNameParser.Where_startContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterLogic_op_and_clause(MethodNameParser.Logic_op_and_clauseContext ctx) { }
+	@Override public void enterLogic_op_and(MethodNameParser.Logic_op_andContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitLogic_op_and_clause(MethodNameParser.Logic_op_and_clauseContext ctx) { }
+	@Override public void exitLogic_op_and(MethodNameParser.Logic_op_andContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterLogic_op_or_clause(MethodNameParser.Logic_op_or_clauseContext ctx) { }
+	@Override public void enterLogic_op_or(MethodNameParser.Logic_op_orContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitLogic_op_or_clause(MethodNameParser.Logic_op_or_clauseContext ctx) { }
+	@Override public void exitLogic_op_or(MethodNameParser.Logic_op_orContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterComparison_op_clause(MethodNameParser.Comparison_op_clauseContext ctx) { }
+	@Override public void enterComparison_op(MethodNameParser.Comparison_opContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitComparison_op_clause(MethodNameParser.Comparison_op_clauseContext ctx) { }
+	@Override public void exitComparison_op(MethodNameParser.Comparison_opContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterGroup_by_op_clause(MethodNameParser.Group_by_op_clauseContext ctx) { }
+	@Override public void enterGroup_by_op(MethodNameParser.Group_by_opContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitGroup_by_op_clause(MethodNameParser.Group_by_op_clauseContext ctx) { }
+	@Override public void exitGroup_by_op(MethodNameParser.Group_by_opContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterOrder_by_op_clause(MethodNameParser.Order_by_op_clauseContext ctx) { }
+	@Override public void enterOrder_by_op(MethodNameParser.Order_by_opContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitOrder_by_op_clause(MethodNameParser.Order_by_op_clauseContext ctx) { }
+	@Override public void exitOrder_by_op(MethodNameParser.Order_by_opContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterOrder_by_op_direction_clause(MethodNameParser.Order_by_op_direction_clauseContext ctx) { }
+	@Override public void enterOrder_by_op_direction(MethodNameParser.Order_by_op_directionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitOrder_by_op_direction_clause(MethodNameParser.Order_by_op_direction_clauseContext ctx) { }
+	@Override public void exitOrder_by_op_direction(MethodNameParser.Order_by_op_directionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterAggregate_function_clause(MethodNameParser.Aggregate_function_clauseContext ctx) { }
+	@Override public void enterLimit_op(MethodNameParser.Limit_opContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitAggregate_function_clause(MethodNameParser.Aggregate_function_clauseContext ctx) { }
+	@Override public void exitLimit_op(MethodNameParser.Limit_opContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -377,25 +389,25 @@ public class MethodNameParserBaseListener implements MethodNameParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterLeft_bracket_clause(MethodNameParser.Left_bracket_clauseContext ctx) { }
+	@Override public void enterLeft_bracket(MethodNameParser.Left_bracketContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitLeft_bracket_clause(MethodNameParser.Left_bracket_clauseContext ctx) { }
+	@Override public void exitLeft_bracket(MethodNameParser.Left_bracketContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterRight_bracket_clause(MethodNameParser.Right_bracket_clauseContext ctx) { }
+	@Override public void enterRight_bracket(MethodNameParser.Right_bracketContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitRight_bracket_clause(MethodNameParser.Right_bracket_clauseContext ctx) { }
+	@Override public void exitRight_bracket(MethodNameParser.Right_bracketContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

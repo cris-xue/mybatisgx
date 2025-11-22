@@ -74,14 +74,21 @@ public class MethodNameParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> 
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitSelect_clause(MethodNameParser.Select_clauseContext ctx) { return visitChildren(ctx); }
+	@Override public T visitSelect_item_clause(MethodNameParser.Select_item_clauseContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitAggregate_operation_clause(MethodNameParser.Aggregate_operation_clauseContext ctx) { return visitChildren(ctx); }
+	@Override public T visitSelect_count_clause(MethodNameParser.Select_count_clauseContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitSelect_exist_clause(MethodNameParser.Select_exist_clauseContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -151,70 +158,70 @@ public class MethodNameParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> 
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitIgnore_reserved_word_clause(MethodNameParser.Ignore_reserved_word_clauseContext ctx) { return visitChildren(ctx); }
+	@Override public T visitLimit_op_expression(MethodNameParser.Limit_op_expressionContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitWhere_start_clause(MethodNameParser.Where_start_clauseContext ctx) { return visitChildren(ctx); }
+	@Override public T visitIgnore_reserved_word(MethodNameParser.Ignore_reserved_wordContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitLogic_op_clause(MethodNameParser.Logic_op_clauseContext ctx) { return visitChildren(ctx); }
+	@Override public T visitWhere_start(MethodNameParser.Where_startContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitLogic_op_and_clause(MethodNameParser.Logic_op_and_clauseContext ctx) { return visitChildren(ctx); }
+	@Override public T visitLogic_op_and(MethodNameParser.Logic_op_andContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitLogic_op_or_clause(MethodNameParser.Logic_op_or_clauseContext ctx) { return visitChildren(ctx); }
+	@Override public T visitLogic_op_or(MethodNameParser.Logic_op_orContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitComparison_op_clause(MethodNameParser.Comparison_op_clauseContext ctx) { return visitChildren(ctx); }
+	@Override public T visitComparison_op(MethodNameParser.Comparison_opContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitGroup_by_op_clause(MethodNameParser.Group_by_op_clauseContext ctx) { return visitChildren(ctx); }
+	@Override public T visitGroup_by_op(MethodNameParser.Group_by_opContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitOrder_by_op_clause(MethodNameParser.Order_by_op_clauseContext ctx) { return visitChildren(ctx); }
+	@Override public T visitOrder_by_op(MethodNameParser.Order_by_opContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitOrder_by_op_direction_clause(MethodNameParser.Order_by_op_direction_clauseContext ctx) { return visitChildren(ctx); }
+	@Override public T visitOrder_by_op_direction(MethodNameParser.Order_by_op_directionContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitAggregate_function_clause(MethodNameParser.Aggregate_function_clauseContext ctx) { return visitChildren(ctx); }
+	@Override public T visitLimit_op(MethodNameParser.Limit_opContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -228,14 +235,14 @@ public class MethodNameParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> 
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitLeft_bracket_clause(MethodNameParser.Left_bracket_clauseContext ctx) { return visitChildren(ctx); }
+	@Override public T visitLeft_bracket(MethodNameParser.Left_bracketContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitRight_bracket_clause(MethodNameParser.Right_bracket_clauseContext ctx) { return visitChildren(ctx); }
+	@Override public T visitRight_bracket(MethodNameParser.Right_bracketContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *

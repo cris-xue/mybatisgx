@@ -59,17 +59,23 @@ public interface MethodNameParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitSelect_statement(MethodNameParser.Select_statementContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MethodNameParser#select_clause}.
+	 * Visit a parse tree produced by {@link MethodNameParser#select_item_clause}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitSelect_clause(MethodNameParser.Select_clauseContext ctx);
+	T visitSelect_item_clause(MethodNameParser.Select_item_clauseContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MethodNameParser#aggregate_operation_clause}.
+	 * Visit a parse tree produced by {@link MethodNameParser#select_count_clause}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitAggregate_operation_clause(MethodNameParser.Aggregate_operation_clauseContext ctx);
+	T visitSelect_count_clause(MethodNameParser.Select_count_clauseContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MethodNameParser#select_exist_clause}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSelect_exist_clause(MethodNameParser.Select_exist_clauseContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MethodNameParser#where_clause}.
 	 * @param ctx the parse tree
@@ -125,65 +131,65 @@ public interface MethodNameParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitOrder_by_item_clause(MethodNameParser.Order_by_item_clauseContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MethodNameParser#ignore_reserved_word_clause}.
+	 * Visit a parse tree produced by {@link MethodNameParser#limit_op_expression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitIgnore_reserved_word_clause(MethodNameParser.Ignore_reserved_word_clauseContext ctx);
+	T visitLimit_op_expression(MethodNameParser.Limit_op_expressionContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MethodNameParser#where_start_clause}.
+	 * Visit a parse tree produced by {@link MethodNameParser#ignore_reserved_word}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitWhere_start_clause(MethodNameParser.Where_start_clauseContext ctx);
+	T visitIgnore_reserved_word(MethodNameParser.Ignore_reserved_wordContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MethodNameParser#logic_op_clause}.
+	 * Visit a parse tree produced by {@link MethodNameParser#where_start}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitLogic_op_clause(MethodNameParser.Logic_op_clauseContext ctx);
+	T visitWhere_start(MethodNameParser.Where_startContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MethodNameParser#logic_op_and_clause}.
+	 * Visit a parse tree produced by {@link MethodNameParser#logic_op_and}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitLogic_op_and_clause(MethodNameParser.Logic_op_and_clauseContext ctx);
+	T visitLogic_op_and(MethodNameParser.Logic_op_andContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MethodNameParser#logic_op_or_clause}.
+	 * Visit a parse tree produced by {@link MethodNameParser#logic_op_or}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitLogic_op_or_clause(MethodNameParser.Logic_op_or_clauseContext ctx);
+	T visitLogic_op_or(MethodNameParser.Logic_op_orContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MethodNameParser#comparison_op_clause}.
+	 * Visit a parse tree produced by {@link MethodNameParser#comparison_op}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitComparison_op_clause(MethodNameParser.Comparison_op_clauseContext ctx);
+	T visitComparison_op(MethodNameParser.Comparison_opContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MethodNameParser#group_by_op_clause}.
+	 * Visit a parse tree produced by {@link MethodNameParser#group_by_op}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitGroup_by_op_clause(MethodNameParser.Group_by_op_clauseContext ctx);
+	T visitGroup_by_op(MethodNameParser.Group_by_opContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MethodNameParser#order_by_op_clause}.
+	 * Visit a parse tree produced by {@link MethodNameParser#order_by_op}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitOrder_by_op_clause(MethodNameParser.Order_by_op_clauseContext ctx);
+	T visitOrder_by_op(MethodNameParser.Order_by_opContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MethodNameParser#order_by_op_direction_clause}.
+	 * Visit a parse tree produced by {@link MethodNameParser#order_by_op_direction}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitOrder_by_op_direction_clause(MethodNameParser.Order_by_op_direction_clauseContext ctx);
+	T visitOrder_by_op_direction(MethodNameParser.Order_by_op_directionContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MethodNameParser#aggregate_function_clause}.
+	 * Visit a parse tree produced by {@link MethodNameParser#limit_op}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitAggregate_function_clause(MethodNameParser.Aggregate_function_clauseContext ctx);
+	T visitLimit_op(MethodNameParser.Limit_opContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MethodNameParser#field_clause}.
 	 * @param ctx the parse tree
@@ -191,17 +197,17 @@ public interface MethodNameParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitField_clause(MethodNameParser.Field_clauseContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MethodNameParser#left_bracket_clause}.
+	 * Visit a parse tree produced by {@link MethodNameParser#left_bracket}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitLeft_bracket_clause(MethodNameParser.Left_bracket_clauseContext ctx);
+	T visitLeft_bracket(MethodNameParser.Left_bracketContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MethodNameParser#right_bracket_clause}.
+	 * Visit a parse tree produced by {@link MethodNameParser#right_bracket}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitRight_bracket_clause(MethodNameParser.Right_bracket_clauseContext ctx);
+	T visitRight_bracket(MethodNameParser.Right_bracketContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MethodNameParser#end}.
 	 * @param ctx the parse tree

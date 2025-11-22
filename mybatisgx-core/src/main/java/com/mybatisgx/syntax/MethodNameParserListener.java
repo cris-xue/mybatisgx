@@ -88,25 +88,35 @@ public interface MethodNameParserListener extends ParseTreeListener {
 	 */
 	void exitSelect_statement(MethodNameParser.Select_statementContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#select_clause}.
+	 * Enter a parse tree produced by {@link MethodNameParser#select_item_clause}.
 	 * @param ctx the parse tree
 	 */
-	void enterSelect_clause(MethodNameParser.Select_clauseContext ctx);
+	void enterSelect_item_clause(MethodNameParser.Select_item_clauseContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#select_clause}.
+	 * Exit a parse tree produced by {@link MethodNameParser#select_item_clause}.
 	 * @param ctx the parse tree
 	 */
-	void exitSelect_clause(MethodNameParser.Select_clauseContext ctx);
+	void exitSelect_item_clause(MethodNameParser.Select_item_clauseContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#aggregate_operation_clause}.
+	 * Enter a parse tree produced by {@link MethodNameParser#select_count_clause}.
 	 * @param ctx the parse tree
 	 */
-	void enterAggregate_operation_clause(MethodNameParser.Aggregate_operation_clauseContext ctx);
+	void enterSelect_count_clause(MethodNameParser.Select_count_clauseContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#aggregate_operation_clause}.
+	 * Exit a parse tree produced by {@link MethodNameParser#select_count_clause}.
 	 * @param ctx the parse tree
 	 */
-	void exitAggregate_operation_clause(MethodNameParser.Aggregate_operation_clauseContext ctx);
+	void exitSelect_count_clause(MethodNameParser.Select_count_clauseContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MethodNameParser#select_exist_clause}.
+	 * @param ctx the parse tree
+	 */
+	void enterSelect_exist_clause(MethodNameParser.Select_exist_clauseContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MethodNameParser#select_exist_clause}.
+	 * @param ctx the parse tree
+	 */
+	void exitSelect_exist_clause(MethodNameParser.Select_exist_clauseContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MethodNameParser#where_clause}.
 	 * @param ctx the parse tree
@@ -198,105 +208,105 @@ public interface MethodNameParserListener extends ParseTreeListener {
 	 */
 	void exitOrder_by_item_clause(MethodNameParser.Order_by_item_clauseContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#ignore_reserved_word_clause}.
+	 * Enter a parse tree produced by {@link MethodNameParser#limit_op_expression}.
 	 * @param ctx the parse tree
 	 */
-	void enterIgnore_reserved_word_clause(MethodNameParser.Ignore_reserved_word_clauseContext ctx);
+	void enterLimit_op_expression(MethodNameParser.Limit_op_expressionContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#ignore_reserved_word_clause}.
+	 * Exit a parse tree produced by {@link MethodNameParser#limit_op_expression}.
 	 * @param ctx the parse tree
 	 */
-	void exitIgnore_reserved_word_clause(MethodNameParser.Ignore_reserved_word_clauseContext ctx);
+	void exitLimit_op_expression(MethodNameParser.Limit_op_expressionContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#where_start_clause}.
+	 * Enter a parse tree produced by {@link MethodNameParser#ignore_reserved_word}.
 	 * @param ctx the parse tree
 	 */
-	void enterWhere_start_clause(MethodNameParser.Where_start_clauseContext ctx);
+	void enterIgnore_reserved_word(MethodNameParser.Ignore_reserved_wordContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#where_start_clause}.
+	 * Exit a parse tree produced by {@link MethodNameParser#ignore_reserved_word}.
 	 * @param ctx the parse tree
 	 */
-	void exitWhere_start_clause(MethodNameParser.Where_start_clauseContext ctx);
+	void exitIgnore_reserved_word(MethodNameParser.Ignore_reserved_wordContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#logic_op_clause}.
+	 * Enter a parse tree produced by {@link MethodNameParser#where_start}.
 	 * @param ctx the parse tree
 	 */
-	void enterLogic_op_clause(MethodNameParser.Logic_op_clauseContext ctx);
+	void enterWhere_start(MethodNameParser.Where_startContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#logic_op_clause}.
+	 * Exit a parse tree produced by {@link MethodNameParser#where_start}.
 	 * @param ctx the parse tree
 	 */
-	void exitLogic_op_clause(MethodNameParser.Logic_op_clauseContext ctx);
+	void exitWhere_start(MethodNameParser.Where_startContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#logic_op_and_clause}.
+	 * Enter a parse tree produced by {@link MethodNameParser#logic_op_and}.
 	 * @param ctx the parse tree
 	 */
-	void enterLogic_op_and_clause(MethodNameParser.Logic_op_and_clauseContext ctx);
+	void enterLogic_op_and(MethodNameParser.Logic_op_andContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#logic_op_and_clause}.
+	 * Exit a parse tree produced by {@link MethodNameParser#logic_op_and}.
 	 * @param ctx the parse tree
 	 */
-	void exitLogic_op_and_clause(MethodNameParser.Logic_op_and_clauseContext ctx);
+	void exitLogic_op_and(MethodNameParser.Logic_op_andContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#logic_op_or_clause}.
+	 * Enter a parse tree produced by {@link MethodNameParser#logic_op_or}.
 	 * @param ctx the parse tree
 	 */
-	void enterLogic_op_or_clause(MethodNameParser.Logic_op_or_clauseContext ctx);
+	void enterLogic_op_or(MethodNameParser.Logic_op_orContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#logic_op_or_clause}.
+	 * Exit a parse tree produced by {@link MethodNameParser#logic_op_or}.
 	 * @param ctx the parse tree
 	 */
-	void exitLogic_op_or_clause(MethodNameParser.Logic_op_or_clauseContext ctx);
+	void exitLogic_op_or(MethodNameParser.Logic_op_orContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#comparison_op_clause}.
+	 * Enter a parse tree produced by {@link MethodNameParser#comparison_op}.
 	 * @param ctx the parse tree
 	 */
-	void enterComparison_op_clause(MethodNameParser.Comparison_op_clauseContext ctx);
+	void enterComparison_op(MethodNameParser.Comparison_opContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#comparison_op_clause}.
+	 * Exit a parse tree produced by {@link MethodNameParser#comparison_op}.
 	 * @param ctx the parse tree
 	 */
-	void exitComparison_op_clause(MethodNameParser.Comparison_op_clauseContext ctx);
+	void exitComparison_op(MethodNameParser.Comparison_opContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#group_by_op_clause}.
+	 * Enter a parse tree produced by {@link MethodNameParser#group_by_op}.
 	 * @param ctx the parse tree
 	 */
-	void enterGroup_by_op_clause(MethodNameParser.Group_by_op_clauseContext ctx);
+	void enterGroup_by_op(MethodNameParser.Group_by_opContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#group_by_op_clause}.
+	 * Exit a parse tree produced by {@link MethodNameParser#group_by_op}.
 	 * @param ctx the parse tree
 	 */
-	void exitGroup_by_op_clause(MethodNameParser.Group_by_op_clauseContext ctx);
+	void exitGroup_by_op(MethodNameParser.Group_by_opContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#order_by_op_clause}.
+	 * Enter a parse tree produced by {@link MethodNameParser#order_by_op}.
 	 * @param ctx the parse tree
 	 */
-	void enterOrder_by_op_clause(MethodNameParser.Order_by_op_clauseContext ctx);
+	void enterOrder_by_op(MethodNameParser.Order_by_opContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#order_by_op_clause}.
+	 * Exit a parse tree produced by {@link MethodNameParser#order_by_op}.
 	 * @param ctx the parse tree
 	 */
-	void exitOrder_by_op_clause(MethodNameParser.Order_by_op_clauseContext ctx);
+	void exitOrder_by_op(MethodNameParser.Order_by_opContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#order_by_op_direction_clause}.
+	 * Enter a parse tree produced by {@link MethodNameParser#order_by_op_direction}.
 	 * @param ctx the parse tree
 	 */
-	void enterOrder_by_op_direction_clause(MethodNameParser.Order_by_op_direction_clauseContext ctx);
+	void enterOrder_by_op_direction(MethodNameParser.Order_by_op_directionContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#order_by_op_direction_clause}.
+	 * Exit a parse tree produced by {@link MethodNameParser#order_by_op_direction}.
 	 * @param ctx the parse tree
 	 */
-	void exitOrder_by_op_direction_clause(MethodNameParser.Order_by_op_direction_clauseContext ctx);
+	void exitOrder_by_op_direction(MethodNameParser.Order_by_op_directionContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#aggregate_function_clause}.
+	 * Enter a parse tree produced by {@link MethodNameParser#limit_op}.
 	 * @param ctx the parse tree
 	 */
-	void enterAggregate_function_clause(MethodNameParser.Aggregate_function_clauseContext ctx);
+	void enterLimit_op(MethodNameParser.Limit_opContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#aggregate_function_clause}.
+	 * Exit a parse tree produced by {@link MethodNameParser#limit_op}.
 	 * @param ctx the parse tree
 	 */
-	void exitAggregate_function_clause(MethodNameParser.Aggregate_function_clauseContext ctx);
+	void exitLimit_op(MethodNameParser.Limit_opContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MethodNameParser#field_clause}.
 	 * @param ctx the parse tree
@@ -308,25 +318,25 @@ public interface MethodNameParserListener extends ParseTreeListener {
 	 */
 	void exitField_clause(MethodNameParser.Field_clauseContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#left_bracket_clause}.
+	 * Enter a parse tree produced by {@link MethodNameParser#left_bracket}.
 	 * @param ctx the parse tree
 	 */
-	void enterLeft_bracket_clause(MethodNameParser.Left_bracket_clauseContext ctx);
+	void enterLeft_bracket(MethodNameParser.Left_bracketContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#left_bracket_clause}.
+	 * Exit a parse tree produced by {@link MethodNameParser#left_bracket}.
 	 * @param ctx the parse tree
 	 */
-	void exitLeft_bracket_clause(MethodNameParser.Left_bracket_clauseContext ctx);
+	void exitLeft_bracket(MethodNameParser.Left_bracketContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#right_bracket_clause}.
+	 * Enter a parse tree produced by {@link MethodNameParser#right_bracket}.
 	 * @param ctx the parse tree
 	 */
-	void enterRight_bracket_clause(MethodNameParser.Right_bracket_clauseContext ctx);
+	void enterRight_bracket(MethodNameParser.Right_bracketContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#right_bracket_clause}.
+	 * Exit a parse tree produced by {@link MethodNameParser#right_bracket}.
 	 * @param ctx the parse tree
 	 */
-	void exitRight_bracket_clause(MethodNameParser.Right_bracket_clauseContext ctx);
+	void exitRight_bracket(MethodNameParser.Right_bracketContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MethodNameParser#end}.
 	 * @param ctx the parse tree

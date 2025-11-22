@@ -1,6 +1,6 @@
 lexer grammar MethodNameLexer;
 
-import MethodNameLexerStatus;
+// import MethodNameLexerStatus;
 
 INSERT_ACTION: 'insert' | 'add' ;
 DELETE_ACTION: 'delete' | 'remove' ;

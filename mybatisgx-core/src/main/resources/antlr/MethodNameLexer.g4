@@ -23,10 +23,12 @@ COMPARISON_OP: 'Lt'
     | 'Between'
     ;
 COMPARISON_NULL_OP: 'Null' | 'IsNull' | 'IsNotNull' | 'NotNull' ;
-GROUP_BY_OP: 'GroupBy' ;
-ORDER_BY_OP: 'OrderBy' ;
-ORDER_BY_OP_DIRECTION: 'Desc' | 'Asc' ;
-LIMIT_OP: 'Top'[0-9]+ | 'First'[0-9]+ | 'Last'[0-9]+ ;
+GROUP_BY: 'GroupBy' ;
+ORDER_BY: 'OrderBy' ;
+ORDER_BY_DIRECTION: 'Desc' | 'Asc' ;
+LIMIT_TOP: 'Top'[0-9]+ ;
+LIMIT_FIRST: 'First'[0-9]+ ;
+LIMIT_LAST: 'Last'[0-9]+ ;
 // 左括号
 LEFT_BRACKET: '(' ;
 // 右括号

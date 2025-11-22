@@ -88,35 +88,45 @@ public interface MethodNameParserListener extends ParseTreeListener {
 	 */
 	void exitSelect_statement(MethodNameParser.Select_statementContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#select_item_clause}.
+	 * Enter a parse tree produced by {@link MethodNameParser#select_item}.
 	 * @param ctx the parse tree
 	 */
-	void enterSelect_item_clause(MethodNameParser.Select_item_clauseContext ctx);
+	void enterSelect_item(MethodNameParser.Select_itemContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#select_item_clause}.
+	 * Exit a parse tree produced by {@link MethodNameParser#select_item}.
 	 * @param ctx the parse tree
 	 */
-	void exitSelect_item_clause(MethodNameParser.Select_item_clauseContext ctx);
+	void exitSelect_item(MethodNameParser.Select_itemContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#select_count_clause}.
+	 * Enter a parse tree produced by {@link MethodNameParser#select_column}.
 	 * @param ctx the parse tree
 	 */
-	void enterSelect_count_clause(MethodNameParser.Select_count_clauseContext ctx);
+	void enterSelect_column(MethodNameParser.Select_columnContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#select_count_clause}.
+	 * Exit a parse tree produced by {@link MethodNameParser#select_column}.
 	 * @param ctx the parse tree
 	 */
-	void exitSelect_count_clause(MethodNameParser.Select_count_clauseContext ctx);
+	void exitSelect_column(MethodNameParser.Select_columnContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#select_exist_clause}.
+	 * Enter a parse tree produced by {@link MethodNameParser#select_count}.
 	 * @param ctx the parse tree
 	 */
-	void enterSelect_exist_clause(MethodNameParser.Select_exist_clauseContext ctx);
+	void enterSelect_count(MethodNameParser.Select_countContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#select_exist_clause}.
+	 * Exit a parse tree produced by {@link MethodNameParser#select_count}.
 	 * @param ctx the parse tree
 	 */
-	void exitSelect_exist_clause(MethodNameParser.Select_exist_clauseContext ctx);
+	void exitSelect_count(MethodNameParser.Select_countContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MethodNameParser#select_exist}.
+	 * @param ctx the parse tree
+	 */
+	void enterSelect_exist(MethodNameParser.Select_existContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MethodNameParser#select_exist}.
+	 * @param ctx the parse tree
+	 */
+	void exitSelect_exist(MethodNameParser.Select_existContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MethodNameParser#where_clause}.
 	 * @param ctx the parse tree

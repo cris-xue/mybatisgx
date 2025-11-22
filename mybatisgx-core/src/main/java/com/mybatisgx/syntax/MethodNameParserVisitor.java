@@ -59,23 +59,29 @@ public interface MethodNameParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitSelect_statement(MethodNameParser.Select_statementContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MethodNameParser#select_item_clause}.
+	 * Visit a parse tree produced by {@link MethodNameParser#select_item}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitSelect_item_clause(MethodNameParser.Select_item_clauseContext ctx);
+	T visitSelect_item(MethodNameParser.Select_itemContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MethodNameParser#select_count_clause}.
+	 * Visit a parse tree produced by {@link MethodNameParser#select_column}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitSelect_count_clause(MethodNameParser.Select_count_clauseContext ctx);
+	T visitSelect_column(MethodNameParser.Select_columnContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MethodNameParser#select_exist_clause}.
+	 * Visit a parse tree produced by {@link MethodNameParser#select_count}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitSelect_exist_clause(MethodNameParser.Select_exist_clauseContext ctx);
+	T visitSelect_count(MethodNameParser.Select_countContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MethodNameParser#select_exist}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSelect_exist(MethodNameParser.Select_existContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MethodNameParser#where_clause}.
 	 * @param ctx the parse tree

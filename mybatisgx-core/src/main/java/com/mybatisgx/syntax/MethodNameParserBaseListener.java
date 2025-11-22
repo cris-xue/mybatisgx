@@ -113,37 +113,49 @@ public class MethodNameParserBaseListener implements MethodNameParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterSelect_item_clause(MethodNameParser.Select_item_clauseContext ctx) { }
+	@Override public void enterSelect_item(MethodNameParser.Select_itemContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitSelect_item_clause(MethodNameParser.Select_item_clauseContext ctx) { }
+	@Override public void exitSelect_item(MethodNameParser.Select_itemContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterSelect_count_clause(MethodNameParser.Select_count_clauseContext ctx) { }
+	@Override public void enterSelect_column(MethodNameParser.Select_columnContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitSelect_count_clause(MethodNameParser.Select_count_clauseContext ctx) { }
+	@Override public void exitSelect_column(MethodNameParser.Select_columnContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterSelect_exist_clause(MethodNameParser.Select_exist_clauseContext ctx) { }
+	@Override public void enterSelect_count(MethodNameParser.Select_countContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitSelect_exist_clause(MethodNameParser.Select_exist_clauseContext ctx) { }
+	@Override public void exitSelect_count(MethodNameParser.Select_countContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterSelect_exist(MethodNameParser.Select_existContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSelect_exist(MethodNameParser.Select_existContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

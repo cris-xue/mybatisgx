@@ -8,9 +8,9 @@ package com.mybatisgx.model;
 public class SelectPageInfo {
 
     /**
-     * 分页位置
+     * 分页位置，从1开始
      */
-    private Integer index = 0;
+    private Integer index = 1;
     /**
      * 每一页大小
      */

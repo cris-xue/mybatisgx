@@ -103,7 +103,7 @@ public class MybatisgxSyntaxNewHandler {
                 MethodNameParser.Limit_topContext limitTopContext = limitContext.limit_top();
                 if (limitTopContext != null) {
                     String limitCount = StringUtils.remove(limitTopContext.getText(), "Top");
-                    SelectPageInfo selectPageInfo = new SelectPageInfo(0, Integer.parseInt(limitCount));
+                    SelectPageInfo selectPageInfo = new SelectPageInfo(1, Integer.parseInt(limitCount));
                     methodInfo.setSelectPageInfo(selectPageInfo);
                 } else {
                     throw new UnsupportedOperationException("暂不支持" + limitContext.getText());

@@ -1,10 +1,7 @@
 package com.mybatisgx.template.select;
 
 import com.mybatisgx.context.EntityInfoContextHolder;
-import com.mybatisgx.model.EntityInfo;
-import com.mybatisgx.model.MapperInfo;
-import com.mybatisgx.model.MethodInfo;
-import com.mybatisgx.model.SelectType;
+import com.mybatisgx.model.*;
 import com.mybatisgx.template.WhereTemplateHandler;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import org.dom4j.Document;
@@ -23,8 +20,8 @@ public class SelectTemplateHandler {
     private static final Logger logger = LoggerFactory.getLogger(SelectTemplateHandler.class);
 
     private WhereTemplateHandler whereTemplateHandler = new WhereTemplateHandler();
-    private GeneralSelectSqlTemplateHandler generalSelectSqlTemplateHandler = new GeneralSelectSqlTemplateHandler();
-    private AggregateSelectSqlTemplateHandler aggregateSelectSqlTemplateHandler = new AggregateSelectSqlTemplateHandler();
+    private SelectColumnSqlTemplateHandler selectColumnSqlTemplateHandler = new SelectColumnSqlTemplateHandler();
+    private SelectCountSqlTemplateHandler selectCountSqlTemplateHandler = new SelectCountSqlTemplateHandler();
 
     public String execute(MapperInfo mapperInfo, MethodInfo methodInfo) {
         return buildSelectXNode(mapperInfo, methodInfo);
@@ -36,18 +33,19 @@ public class SelectTemplateHandler {
         Element selectElement = mapperElement.addElement("select");
         selectElement.addAttribute("id", methodInfo.getMethodName());
 
-        if (methodInfo.getSelectType() == SelectType.GENERAL) {
+        SelectItemInfo selectItemInfo = methodInfo.getSelectItemInfo();
+        if (selectItemInfo.getSelectItemType() == SelectItemType.COLUMN) {
             selectElement.addAttribute("resultMap", methodInfo.getResultMapId());
             Class<?> methodReturnType = methodInfo.getMethodReturnInfo().getType();
             EntityInfo entityInfo = EntityInfoContextHolder.get(methodReturnType);
-            PlainSelect plainSelect = generalSelectSqlTemplateHandler.buildSelectSql(entityInfo);
+            PlainSelect plainSelect = selectColumnSqlTemplateHandler.buildSelectSql(entityInfo);
             selectElement.addText(plainSelect.toString());
             whereTemplateHandler.execute(selectElement, entityInfo, methodInfo);
         }
-        if (methodInfo.getSelectType() == SelectType.AGGREGATE) {
-            selectElement.addAttribute("resultType", methodInfo.getMethodReturnInfo().getTypeName());
+        if (selectItemInfo.getSelectItemType() == SelectItemType.COUNT) {
+            selectElement.addAttribute("resultType", "long");
             EntityInfo entityInfo = mapperInfo.getEntityInfo();
-            PlainSelect plainSelect = aggregateSelectSqlTemplateHandler.buildSelectSql();
+            PlainSelect plainSelect = selectCountSqlTemplateHandler.buildSelectSql(entityInfo);
             selectElement.addText(plainSelect.toString());
             whereTemplateHandler.execute(selectElement, entityInfo, methodInfo);
         }

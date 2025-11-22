@@ -1,6 +1,7 @@
 package com.mybatisgx.template.select;
 
 import com.mybatisgx.context.EntityInfoContextHolder;
+import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.model.*;
 import com.mybatisgx.template.WhereTemplateHandler;
 import net.sf.jsqlparser.statement.select.PlainSelect;
@@ -27,7 +28,13 @@ public class SelectTemplateHandler {
     private SelectCountSqlTemplateHandler selectCountSqlTemplateHandler = new SelectCountSqlTemplateHandler();
     private WhereTemplateHandler whereTemplateHandler = new WhereTemplateHandler();
     private OrderByTemplateHandler orderByTemplateHandler = new OrderByTemplateHandler();
-    private LimitTemplateHandler limitTemplateHandler = new LimitTemplateHandler();
+    private LimitTemplateHandler limitTemplateHandler;
+    private MybatisgxConfiguration configuration;
+
+    public SelectTemplateHandler(MybatisgxConfiguration configuration) {
+        this.configuration = configuration;
+        this.limitTemplateHandler = new LimitTemplateHandler(configuration);
+    }
 
     public String execute(MapperInfo mapperInfo, MethodInfo methodInfo) {
         return buildSelectXNode(mapperInfo, methodInfo);

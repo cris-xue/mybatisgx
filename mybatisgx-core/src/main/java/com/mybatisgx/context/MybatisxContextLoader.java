@@ -2,6 +2,7 @@ package com.mybatisgx.context;
 
 import com.mybatisgx.annotation.Entity;
 import com.mybatisgx.dao.Dao;
+import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.model.EntityInfo;
 import com.mybatisgx.model.MapperInfo;
 import com.mybatisgx.model.MapperTemplateInfo;
@@ -43,6 +44,13 @@ public class MybatisxContextLoader {
 
     private static final EntityInfoHandler entityInfoHandler = new EntityInfoHandler();
     private static final MapperInfoHandler mapperInfoHandler = new MapperInfoHandler();
+    private StatementTemplateHandler statementTemplateHandler;
+    private MybatisgxConfiguration configuration;
+
+    public MybatisxContextLoader(MybatisgxConfiguration configuration) {
+        this.configuration = configuration;
+        statementTemplateHandler = new StatementTemplateHandler(configuration);
+    }
 
     public void load(String[] entityBasePackages, String[] daoBasePackages, List<Resource> repositoryResourceList) {
         for (String entityBasePackage : entityBasePackages) {
@@ -136,7 +144,6 @@ public class MybatisxContextLoader {
     }
 
     public void processTemplate() {
-        StatementTemplateHandler statementTemplateHandler = new StatementTemplateHandler();
         ResultMapTemplateHandler resultMapTemplateHandler = new ResultMapTemplateHandler();
         RelationSelectTemplateHandler relationSelectTemplateHandler = new RelationSelectTemplateHandler();
         List<MapperInfo> mapperInfoList = MapperInfoContextHolder.getMapperInfoList();

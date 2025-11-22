@@ -1,5 +1,6 @@
 package com.mybatisgx.template.select;
 
+import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.model.SelectPageInfo;
 
 import java.util.List;
@@ -11,9 +12,25 @@ import java.util.List;
  */
 public class LimitTemplateHandler {
 
+    private MybatisgxConfiguration configuration;
+
+    public LimitTemplateHandler(MybatisgxConfiguration configuration) {
+        this.configuration = configuration;
+    }
+
     public void execute(List<Object> selectXmlItemList, SelectPageInfo selectPageInfo) {
-        OrderLimitHandler orderLimitHandler = new OrderLimitHandler();
-        orderLimitHandler.execute(selectXmlItemList, selectPageInfo);
+        if ("mysql".equals(configuration.getDatabaseId())) {
+            MysqlLimitHandler mysqlLimitHandler = new MysqlLimitHandler();
+            mysqlLimitHandler.execute(selectXmlItemList, selectPageInfo);
+        }
+        if ("oracle".equals(configuration.getDatabaseId())) {
+            OracleLimitHandler oracleLimitHandler = new OracleLimitHandler();
+            oracleLimitHandler.execute(selectXmlItemList, selectPageInfo);
+        }
+        if ("pgsql".equals(configuration.getDatabaseId())) {
+            PgsqlLimitHandler pgsqlLimitHandler = new PgsqlLimitHandler();
+            pgsqlLimitHandler.execute(selectXmlItemList, selectPageInfo);
+        }
     }
 
     public static class MysqlLimitHandler {
@@ -21,12 +38,14 @@ public class LimitTemplateHandler {
         private static final String LIMIT_SQL_EXPRESSION = " limit %s, %s";
 
         public void execute(List<Object> selectXmlItemList, SelectPageInfo selectPageInfo) {
-            String limitSqlExpression = String.format(LIMIT_SQL_EXPRESSION, selectPageInfo.getIndex(), selectPageInfo.getSize());
+            Integer index = selectPageInfo.getIndex();
+            Integer size = selectPageInfo.getSize();
+            String limitSqlExpression = String.format(LIMIT_SQL_EXPRESSION, index * size, size);
             selectXmlItemList.add(limitSqlExpression);
         }
     }
 
-    public static class OrderLimitHandler {
+    public static class OracleLimitHandler {
 
         private static final String LIMIT_SQL_EXPRESSION_START = "SELECT * FROM (SELECT t.*, ROWNUM AS rn FROM (";
         private static final String LIMIT_SQL_EXPRESSION_END = ") t WHERE ROWNUM <= %s) WHERE rn > %s";
@@ -35,8 +54,20 @@ public class LimitTemplateHandler {
             selectXmlItemList.add(0, LIMIT_SQL_EXPRESSION_START);
             Integer index = selectPageInfo.getIndex();
             Integer size = selectPageInfo.getSize();
-            String limitSqlExpressionEnd = String.format(LIMIT_SQL_EXPRESSION_END, index * size, (index - 1) * size);
+            String limitSqlExpressionEnd = String.format(LIMIT_SQL_EXPRESSION_END, (index + 1) * size, index * size);
             selectXmlItemList.add(limitSqlExpressionEnd);
+        }
+    }
+
+    public static class PgsqlLimitHandler {
+
+        private static final String LIMIT_SQL_EXPRESSION = " limit %s OFFSET %s";
+
+        public void execute(List<Object> selectXmlItemList, SelectPageInfo selectPageInfo) {
+            Integer index = selectPageInfo.getIndex();
+            Integer size = selectPageInfo.getSize();
+            String limitSqlExpression = String.format(LIMIT_SQL_EXPRESSION, size, index * size);
+            selectXmlItemList.add(limitSqlExpression);
         }
     }
 }

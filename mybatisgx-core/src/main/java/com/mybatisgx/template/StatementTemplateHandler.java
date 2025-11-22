@@ -2,6 +2,7 @@ package com.mybatisgx.template;
 
 import com.mybatisgx.context.MapperInfoContextHolder;
 import com.mybatisgx.ext.builder.MybatisgxXMLMapperBuilder;
+import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.model.MapperInfo;
 import com.mybatisgx.model.MethodInfo;
 import com.mybatisgx.template.select.SelectTemplateHandler;
@@ -30,6 +31,14 @@ public class StatementTemplateHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(StatementTemplateHandler.class);
 
+    private SelectTemplateHandler selectTemplateHandler;
+    private MybatisgxConfiguration configuration;
+
+    public StatementTemplateHandler(MybatisgxConfiguration configuration) {
+        this.configuration = configuration;
+        this.selectTemplateHandler = new SelectTemplateHandler(configuration);
+    }
+
     public Map<String, XNode> execute(MapperInfo mapperInfo) {
         List<MethodInfo> methodInfoList = mapperInfo.getMethodInfoList();
         Map<String, XNode> xNodeMap = new HashMap(15);
@@ -46,7 +55,6 @@ public class StatementTemplateHandler {
     private XNode complexTemplateHandle(MapperInfo mapperInfo, MethodInfo methodInfo) {
         String xmlString;
         if (methodInfo.getSqlCommandType() == SqlCommandType.SELECT) {
-            SelectTemplateHandler selectTemplateHandler = new SelectTemplateHandler();
             xmlString = selectTemplateHandler.execute(mapperInfo, methodInfo);
         } else if (methodInfo.getSqlCommandType() == SqlCommandType.INSERT) {
             InsertTemplateHandler insertTemplateHandler = new InsertTemplateHandler();

@@ -19,12 +19,13 @@ import java.util.*;
  */
 public class WhereTemplateHandler {
 
-    public void execute(Element parentElement, EntityInfo entityInfo, MethodInfo methodInfo) {
+    public Element execute(EntityInfo entityInfo, MethodInfo methodInfo) {
         ConditionProcessorFactory factory = new ConditionProcessorFactory();
-        Element whereElement = parentElement.addElement("where");
+        Element whereElement = DocumentHelper.createElement("where");
         this.handleConditionGroup(methodInfo, whereElement, methodInfo.getConditionInfoList(), factory);
         this.addOptimisticLockCondition(entityInfo, methodInfo, whereElement);
         this.addLogicDeleteCondition(entityInfo, whereElement);
+        return whereElement;
     }
 
     private void addOptimisticLockCondition(EntityInfo entityInfo, MethodInfo methodInfo, Element whereElement) {

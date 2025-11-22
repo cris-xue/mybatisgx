@@ -128,7 +128,8 @@ public class UpdateTemplateHandler {
         }
 
         private void setWhere(Element updateElement, EntityInfo entityInfo, MethodInfo methodInfo) {
-            whereTemplateHandler.execute(updateElement, entityInfo, methodInfo);
+            Element whereElement = whereTemplateHandler.execute(entityInfo, methodInfo);
+            updateElement.add(whereElement);
         }
 
         private Element buildTrimOrIfElement(Boolean dynamic, Element parentElement, String testExpression) {

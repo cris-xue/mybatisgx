@@ -34,7 +34,8 @@ public class DeleteTemplateHandler {
         } else {
             deleteElement = logicDelete(mapperElement, entityInfo, methodInfo, logicDeleteColumnInfo);
         }
-        whereTemplateHandler.execute(deleteElement, mapperInfo.getEntityInfo(), methodInfo);
+        Element whereElement = whereTemplateHandler.execute(mapperInfo.getEntityInfo(), methodInfo);
+        deleteElement.add(whereElement);
         return document.asXML();
     }
 

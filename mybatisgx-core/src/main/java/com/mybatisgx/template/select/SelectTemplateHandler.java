@@ -11,6 +11,7 @@ import org.dom4j.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -38,6 +39,7 @@ public class SelectTemplateHandler {
         Element selectElement = mapperElement.addElement("select");
         selectElement.addAttribute("id", methodInfo.getMethodName());
 
+        List<Object> selectXmlItemList = new ArrayList();
         EntityInfo entityInfo = null;
         SelectItemInfo selectItemInfo = methodInfo.getSelectItemInfo();
         if (selectItemInfo.getSelectItemType() == SelectItemType.COLUMN) {
@@ -45,27 +47,36 @@ public class SelectTemplateHandler {
             Class<?> methodReturnType = methodInfo.getMethodReturnInfo().getType();
             entityInfo = EntityInfoContextHolder.get(methodReturnType);
             PlainSelect plainSelect = selectColumnSqlTemplateHandler.buildSelectSql(entityInfo);
-            selectElement.addText(plainSelect.toString());
+            selectXmlItemList.add(plainSelect.toString());
         }
         if (selectItemInfo.getSelectItemType() == SelectItemType.COUNT) {
             selectElement.addAttribute("resultType", methodInfo.getMethodReturnInfo().getTypeName());
             entityInfo = mapperInfo.getEntityInfo();
             PlainSelect plainSelect = selectCountSqlTemplateHandler.buildSelectSql(entityInfo);
-            selectElement.addText(plainSelect.toString());
+            selectXmlItemList.add(plainSelect.toString());
         }
 
-        whereTemplateHandler.execute(selectElement, entityInfo, methodInfo);
+        Element whereElement = whereTemplateHandler.execute(entityInfo, methodInfo);
+        selectXmlItemList.add(whereElement);
 
         List<SelectOrderByInfo> selectOrderByInfoList = methodInfo.getSelectOrderByInfoList();
         if (ObjectUtils.isNotEmpty(selectOrderByInfoList)) {
             String orderBySql = orderByTemplateHandler.execute(selectOrderByInfoList);
-            selectElement.addText(orderBySql);
+            selectXmlItemList.add(orderBySql);
         }
 
         SelectPageInfo selectPageInfo = methodInfo.getSelectPageInfo();
         if (ObjectUtils.isNotEmpty(selectPageInfo)) {
-            String limitSql = limitTemplateHandler.execute(selectPageInfo);
-            selectElement.addText(limitSql);
+            limitTemplateHandler.execute(selectXmlItemList, selectPageInfo);
+        }
+
+        for (Object selectSql : selectXmlItemList) {
+            if (selectSql instanceof Element) {
+                selectElement.add((Element) selectSql);
+            }
+            if (selectSql instanceof String) {
+                selectElement.addText((String) selectSql);
+            }
         }
 
         return document.asXML();

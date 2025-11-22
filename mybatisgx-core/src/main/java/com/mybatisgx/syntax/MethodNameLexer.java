@@ -100,7 +100,11 @@ public class MethodNameLexer extends Lexer {
 	    public Token emit() {
 	        Token token = super.emit();
 	        switch(token.getType()) {
-	            case SELECT_ACTION:
+	            case SELECT_COLUMN_ACTION:
+	                afterSelect = true;
+	                afterBy = false;
+	                break;
+	            case SELECT_COUNT_ACTION:
 	                afterSelect = true;
 	                afterBy = false;
 	                break;

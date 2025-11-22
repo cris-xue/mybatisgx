@@ -41,6 +41,14 @@ public class MethodInfo {
      */
     private SelectItemInfo selectItemInfo;
     /**
+     * 查询排序信息
+     */
+    private List<SelectOrderByInfo> selectOrderByInfoList;
+    /**
+     * 查询数量限制
+     */
+    private SelectPageInfo selectPageInfo;
+    /**
      * 方法名条件信息【修改、删除、查询都可以存在条件】
      */
     private List<ConditionInfo> conditionInfoList = new ArrayList<>();
@@ -122,6 +130,22 @@ public class MethodInfo {
 
     public void setSelectItemInfo(SelectItemInfo selectItemInfo) {
         this.selectItemInfo = selectItemInfo;
+    }
+
+    public List<SelectOrderByInfo> getSelectOrderByInfoList() {
+        return selectOrderByInfoList;
+    }
+
+    public void setSelectOrderByInfoList(List<SelectOrderByInfo> selectOrderByInfoList) {
+        this.selectOrderByInfoList = selectOrderByInfoList;
+    }
+
+    public SelectPageInfo getSelectPageInfo() {
+        return selectPageInfo;
+    }
+
+    public void setSelectPageInfo(SelectPageInfo selectPageInfo) {
+        this.selectPageInfo = selectPageInfo;
     }
 
     public List<ConditionInfo> getConditionInfoList() {

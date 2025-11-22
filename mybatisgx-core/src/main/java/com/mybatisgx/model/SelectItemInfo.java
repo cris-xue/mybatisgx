@@ -7,9 +7,23 @@ package com.mybatisgx.model;
  */
 public class SelectItemInfo {
 
-    private String name;
-
     private SelectItemType selectItemType;
 
     private String expression;
+
+    public SelectItemType getSelectItemType() {
+        return selectItemType;
+    }
+
+    public void setSelectItemType(SelectItemType selectItemType) {
+        this.selectItemType = selectItemType;
+    }
+
+    public String getExpression() {
+        return expression;
+    }
+
+    public void setExpression(String expression) {
+        this.expression = expression;
+    }
 }

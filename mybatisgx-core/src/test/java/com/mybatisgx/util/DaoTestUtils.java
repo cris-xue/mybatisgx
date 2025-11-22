@@ -28,7 +28,7 @@ public class DaoTestUtils {
 
     static {
         try {
-            properties.load(DaoTestUtils.class.getClassLoader().getResourceAsStream("application.properties"));
+            properties.load(DaoTestUtils.class.getClassLoader().getResourceAsStream("application_mysql.properties"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -72,13 +72,14 @@ public class DaoTestUtils {
         mybatisgxConfiguration.setAggressiveLazyLoading(false);
         mybatisgxConfiguration.setLazyLoadTriggerMethods(Sets.newHashSet("get"));
         mybatisgxConfiguration.addInterceptor(new PageInterceptor());
+        mybatisgxConfiguration.setDatabaseId("pgsql");
 
-        MybatisxContextLoader mybatisxContextLoader = new MybatisxContextLoader();
+        MybatisxContextLoader mybatisxContextLoader = new MybatisxContextLoader(mybatisgxConfiguration);
         mybatisxContextLoader.processEntityClass(entityClassList);
         mybatisxContextLoader.processDaoClass(daoClassList);
         mybatisxContextLoader.processTemplate();
 
-        StatementTemplateHandler statementTemplateHandler = new StatementTemplateHandler();
+        StatementTemplateHandler statementTemplateHandler = new StatementTemplateHandler(mybatisgxConfiguration);
         statementTemplateHandler.curdMethod(mybatisgxConfiguration);
         return mybatisgxConfiguration;
     }

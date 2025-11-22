@@ -17,16 +17,13 @@ delete_clause: DELETE_ACTION ignore_reserved_word ;
 update_statement: update_clause where_clause ;
 update_clause: UPDATE_ACTION ignore_reserved_word ;
 
-select_statement: select_clause
-    aggregate_function_expression?
+select_statement: (select_item_clause limit_op? | select_count_clause | select_exist_clause)
     where_clause
-    group_by_clause?
     order_by_clause?
-    limit_op_expression?
     ;
-select_clause: SELECT_ACTION ignore_reserved_word ;
-
-aggregate_function_expression: aggregate_function field_clause ;
+select_item_clause: SELECT_ACTION ignore_reserved_word ;
+select_count_clause: SELECT_COUNT_ACTION ignore_reserved_word ;
+select_exist_clause: SELECT_EXIST_ACTION ignore_reserved_word ;
 
 // 条件语法   ByNameLikeAndAgeEq
 where_clause: (where_start condition_expression)? ignore_reserved_word? ;
@@ -54,7 +51,7 @@ order_by_clause: order_by_op order_by_item_clause* ;
 order_by_item_clause: field_clause order_by_op_direction ;
 
 // 分页
-limit_op_expression: limit_op limit_op_number ;
+limit_op_expression: limit_op ;
 
 // 忽略保留关键字
 ignore_reserved_word: (RESERVED_WORD)*;
@@ -65,10 +62,7 @@ comparison_op: (COMPARISON_NOT_OP? COMPARISON_OP) | COMPARISON_NULL_OP ;
 group_by_op: GROUP_BY_OP ;
 order_by_op: ORDER_BY_OP ;
 order_by_op_direction: ORDER_BY_OP_DIRECTION ;
-// 聚合函数
-aggregate_function: AGGREGATE_FUNCTION ;
 limit_op: LIMIT_OP ;
-limit_op_number: NUMBER ;
 field_clause: (FIELD)+ ;
 left_bracket: LEFT_BRACKET ;
 right_bracket: RIGHT_BRACKET ;

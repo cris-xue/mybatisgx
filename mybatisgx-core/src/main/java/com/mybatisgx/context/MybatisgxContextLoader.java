@@ -35,24 +35,29 @@ import java.util.Map;
  * @author ccxuef
  * @date 2025/7/3 12:17
  */
-public class MybatisxContextLoader {
+public class MybatisgxContextLoader {
 
-    private static final Logger logger = LoggerFactory.getLogger(MybatisxContextLoader.class);
+    private static final Logger logger = LoggerFactory.getLogger(MybatisgxContextLoader.class);
 
     private static final ResourcePatternResolver RESOURCE_PATTERN_RESOLVER = new PathMatchingResourcePatternResolver();
     private static final MetadataReaderFactory METADATA_READER_FACTORY = new CachingMetadataReaderFactory();
 
     private static final EntityInfoHandler entityInfoHandler = new EntityInfoHandler();
     private static final MapperInfoHandler mapperInfoHandler = new MapperInfoHandler();
+    private String[] entityBasePackages;
+    private String[] daoBasePackages;
+    private List<Resource> repositoryResourceList;
     private StatementTemplateHandler statementTemplateHandler;
     private MybatisgxConfiguration configuration;
 
-    public MybatisxContextLoader(MybatisgxConfiguration configuration) {
-        this.configuration = configuration;
-        statementTemplateHandler = new StatementTemplateHandler(configuration);
+    public MybatisgxContextLoader(String[] entityBasePackages, String[] daoBasePackages, List<Resource> repositoryResourceList) {
+        this.entityBasePackages = entityBasePackages;
+        this.daoBasePackages = daoBasePackages;
+        this.repositoryResourceList = repositoryResourceList;
+        this.statementTemplateHandler = new StatementTemplateHandler(configuration);
     }
 
-    public void load(String[] entityBasePackages, String[] daoBasePackages, List<Resource> repositoryResourceList) {
+    public void load() {
         for (String entityBasePackage : entityBasePackages) {
             this.processEntity(entityBasePackage);
         }
@@ -182,5 +187,9 @@ public class MybatisxContextLoader {
             logger.error(e.getMessage(), e);
         }
         return null;
+    }
+
+    public void setConfiguration(MybatisgxConfiguration configuration) {
+        this.configuration = configuration;
     }
 }

@@ -1,9 +1,9 @@
-package com.mybatisgx.ext.builder;
+package com.mybatisgx.ext.builder.xml;
 
 import com.mybatisgx.annotation.FetchMode;
 import com.mybatisgx.ext.mapping.BatchSelectResultMapping;
 import com.mybatisgx.template.TemplateHandler;
-import org.apache.ibatis.builder.PatchXMLMapperBuilder;
+import org.apache.ibatis.builder.xml.PatchXMLMapperBuilder;
 import org.apache.ibatis.mapping.ResultFlag;
 import org.apache.ibatis.mapping.ResultMapping;
 import org.apache.ibatis.parsing.XNode;

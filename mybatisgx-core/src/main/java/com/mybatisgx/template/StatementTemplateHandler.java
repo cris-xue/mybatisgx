@@ -1,7 +1,7 @@
 package com.mybatisgx.template;
 
 import com.mybatisgx.context.MapperInfoContextHolder;
-import com.mybatisgx.ext.builder.MybatisgxXMLMapperBuilder;
+import com.mybatisgx.ext.builder.xml.MybatisgxXMLMapperBuilder;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.model.MapperInfo;
 import com.mybatisgx.model.MethodInfo;
@@ -32,6 +32,9 @@ public class StatementTemplateHandler {
     private static final Logger logger = LoggerFactory.getLogger(StatementTemplateHandler.class);
 
     private SelectTemplateHandler selectTemplateHandler;
+    private InsertTemplateHandler insertTemplateHandler = new InsertTemplateHandler();
+    private DeleteTemplateHandler deleteTemplateHandler = new DeleteTemplateHandler();
+    private UpdateTemplateHandler updateTemplateHandler = new UpdateTemplateHandler();
     private MybatisgxConfiguration configuration;
 
     public StatementTemplateHandler(MybatisgxConfiguration configuration) {
@@ -57,13 +60,10 @@ public class StatementTemplateHandler {
         if (methodInfo.getSqlCommandType() == SqlCommandType.SELECT) {
             xmlString = selectTemplateHandler.execute(mapperInfo, methodInfo);
         } else if (methodInfo.getSqlCommandType() == SqlCommandType.INSERT) {
-            InsertTemplateHandler insertTemplateHandler = new InsertTemplateHandler();
             xmlString = insertTemplateHandler.execute(mapperInfo, methodInfo);
         } else if (methodInfo.getSqlCommandType() == SqlCommandType.DELETE) {
-            DeleteTemplateHandler deleteTemplateHandler = new DeleteTemplateHandler();
             xmlString = deleteTemplateHandler.execute(mapperInfo, methodInfo);
         } else if (methodInfo.getSqlCommandType() == SqlCommandType.UPDATE) {
-            UpdateTemplateHandler updateTemplateHandler = new UpdateTemplateHandler();
             xmlString = updateTemplateHandler.execute(mapperInfo, methodInfo);
         } else {
             throw new RuntimeException("不存在的操作方式");

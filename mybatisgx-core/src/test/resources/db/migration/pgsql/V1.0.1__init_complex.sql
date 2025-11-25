@@ -1,67 +1,67 @@
 create table test_user_complex
 (
-    id1            NUMBER(19)  not null,
-    id2            NUMBER(19)  not null,
+    id1            bigint    not null,
+    id2            bigint    not null,
     code           varchar(64) null,
 
-    input_user_id  NUMBER(19)  not null,
-    input_time     TIMESTAMP   not null,
-    update_user_id NUMBER(19)  null,
-    update_time    TIMESTAMP   null,
+    input_user_id  bigint    not null,
+    input_time     TIMESTAMP not null,
+    update_user_id bigint null,
+    update_time    TIMESTAMP null,
     primary key (id1, id2)
 );
 
 create table user_detail_complex
 (
-    id1            NUMBER(19)  not null,
-    id2            NUMBER(19)  not null,
+    id1            bigint      not null,
+    id2            bigint      not null,
     code           varchar(64) not null,
-    user_id1       NUMBER(19)  not null,
-    user_id2       NUMBER(19)  not null,
+    user_id1       bigint      not null,
+    user_id2       bigint      not null,
 
-    input_user_id  NUMBER(19)  not null,
+    input_user_id  bigint      not null,
     input_time     TIMESTAMP   not null,
-    update_user_id NUMBER(19)  null,
-    update_time    TIMESTAMP   null,
+    update_user_id bigint null,
+    update_time    TIMESTAMP null,
     primary key (id1, id2)
 );
 
 create table user_detail_item1_complex
 (
-    id1             NUMBER(19)  not null,
-    id2             NUMBER(19)  not null,
+    id1             bigint      not null,
+    id2             bigint      not null,
     code            varchar(64) not null,
-    user_detail_id1 NUMBER(19)  not null,
-    user_detail_id2 NUMBER(19)  not null,
+    user_detail_id1 bigint      not null,
+    user_detail_id2 bigint      not null,
 
-    input_user_id   NUMBER(19)  not null,
+    input_user_id   bigint      not null,
     input_time      TIMESTAMP   not null,
-    update_user_id  NUMBER(19)  null,
-    update_time     TIMESTAMP   null,
+    update_user_id  bigint null,
+    update_time     TIMESTAMP null,
     primary key (id1, id2)
 );
 
 create table user_detail_item2_complex
 (
-    id1                   NUMBER(19)  not null,
-    id2                   NUMBER(19)  not null,
+    id1                   bigint      not null,
+    id2                   bigint      not null,
     code                  varchar(64) not null,
-    user_detail_item1_id1 NUMBER(19)  not null,
-    user_detail_item1_id2 NUMBER(19)  not null,
+    user_detail_item1_id1 bigint      not null,
+    user_detail_item1_id2 bigint      not null,
 
-    input_user_id         NUMBER(19)  not null,
+    input_user_id         bigint      not null,
     input_time            TIMESTAMP   not null,
-    update_user_id        NUMBER(19)  null,
-    update_time           TIMESTAMP   null,
+    update_user_id        bigint null,
+    update_time           TIMESTAMP null,
     primary key (id1, id2)
 );
 
 create table user_role_complex
 (
-    id1     NUMBER(19) not null,
-    id2     NUMBER(19) not null,
-    user_id NUMBER(19) not null,
-    role_id NUMBER(19) null,
+    id1     bigint not null,
+    id2     bigint not null,
+    user_id bigint not null,
+    role_id bigint null,
     primary key (id1, id2)
 );
 
@@ -76,15 +76,15 @@ create table test_org_complex
 
 create table role_complex
 (
-    id1            NUMBER(19)  not null,
-    id2            NUMBER(19)  not null,
+    id1            bigint      not null,
+    id2            bigint      not null,
     name           varchar(64) not null,
     code           varchar(64) null,
 
-    input_user_id  NUMBER(19)  not null,
+    input_user_id  bigint      not null,
     input_time     TIMESTAMP   not null,
-    update_user_id NUMBER(19)  null,
-    update_time    TIMESTAMP   null,
+    update_user_id bigint null,
+    update_time    TIMESTAMP null,
     status         int         not null,
     version        int         not null,
     primary key (id1, id2)

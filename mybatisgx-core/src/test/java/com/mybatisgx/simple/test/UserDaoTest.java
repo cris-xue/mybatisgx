@@ -7,6 +7,7 @@ import com.mybatisgx.simple.dao.UserDao;
 import com.mybatisgx.simple.entity.User;
 import com.mybatisgx.simple.entity.UserQuery;
 import com.mybatisgx.util.DaoTestUtils;
+import org.apache.ibatis.session.SqlSession;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -23,7 +24,11 @@ public class UserDaoTest {
 
     @BeforeClass
     public static void beforeClass() {
-        userDao = DaoTestUtils.getDao(User.class, UserDao.class);
+        SqlSession sqlSession = DaoTestUtils.getSqlSession(
+                new String[]{"com.mybatisgx.simple.entity"},
+                new String[]{"com.mybatisgx.simple.dao"}
+        );
+        userDao = sqlSession.getMapper(UserDao.class);
 
         FixtureGenerator fixtureGenerator = new FixtureGenerator();
         fixtureGenerator.configure().ignoreCyclicReferences();

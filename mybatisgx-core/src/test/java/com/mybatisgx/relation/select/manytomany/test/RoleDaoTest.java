@@ -14,7 +14,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class RoleDaoTest {
@@ -26,9 +25,10 @@ public class RoleDaoTest {
 
     @BeforeClass
     public static void beforeClass() {
-        List<Class<?>> entityClassList = Arrays.asList(User.class, UserRole.class, Role.class);
-        List<Class<?>> daoClassList = Arrays.asList(UserDao.class, UserRoleDao.class, RoleDao.class);
-        SqlSession sqlSession = DaoTestUtils.getSqlSession(entityClassList, daoClassList);
+        SqlSession sqlSession = DaoTestUtils.getSqlSession(
+                new String[]{"com.mybatisgx.relation.select.manytomany.entity"},
+                new String[]{"com.mybatisgx.relation.select.manytomany.dao"}
+        );
         userDao = sqlSession.getMapper(UserDao.class);
         userRoleDao = sqlSession.getMapper(UserRoleDao.class);
         roleDao = sqlSession.getMapper(RoleDao.class);
@@ -45,9 +45,11 @@ public class RoleDaoTest {
         }
 
         List<UserRole> userRoleList = new ArrayList(count);
+        long i = 200000;
         for (User user : userList) {
             for (Role role : user.getRoleList()) {
                 UserRole userRole = new UserRole();
+                userRole.setId(++i);
                 userRole.setUserId(user.getId());
                 userRole.setRoleId(role.getId());
                 userRoleList.add(userRole);

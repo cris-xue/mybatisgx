@@ -9,7 +9,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -24,9 +23,10 @@ public class OrgDaoTest {
 
     @BeforeClass
     public static void beforeClass() {
-        List<Class<?>> entityClassList = Arrays.asList(Org.class);
-        List<Class<?>> daoClassList = Arrays.asList(OrgDao.class);
-        SqlSession sqlSession = DaoTestUtils.getSqlSession(entityClassList, daoClassList);
+        SqlSession sqlSession = DaoTestUtils.getSqlSession(
+                new String[]{"com.mybatisgx.relation.select.onetomany.entity"},
+                new String[]{"com.mybatisgx.relation.select.onetomany.dao"}
+        );
         orgDao = sqlSession.getMapper(OrgDao.class);
 
         buildRoot();

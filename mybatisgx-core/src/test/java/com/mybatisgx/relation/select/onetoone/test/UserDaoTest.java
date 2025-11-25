@@ -4,12 +4,8 @@ import com.github.swierkosz.fixture.generator.FixtureGenerator;
 import com.mybatisgx.entity.MultiId;
 import com.mybatisgx.relation.select.onetoone.dao.UserDao;
 import com.mybatisgx.relation.select.onetoone.dao.UserDetailDao;
-import com.mybatisgx.relation.select.onetoone.dao.UserDetailItem1Dao;
-import com.mybatisgx.relation.select.onetoone.dao.UserDetailItem2Dao;
 import com.mybatisgx.relation.select.onetoone.entity.User;
 import com.mybatisgx.relation.select.onetoone.entity.UserDetail;
-import com.mybatisgx.relation.select.onetoone.entity.UserDetailItem1;
-import com.mybatisgx.relation.select.onetoone.entity.UserDetailItem2;
 import com.mybatisgx.util.DaoTestUtils;
 import org.apache.ibatis.session.SqlSession;
 import org.junit.Assert;
@@ -19,7 +15,6 @@ import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -31,14 +26,13 @@ public class UserDaoTest {
 
     private static List<User> userList = new ArrayList();
     private static List<UserDetail> userDetailList = new ArrayList();
-    private static List<UserDetailItem1> userDetailItem1List = new ArrayList();
-    private static List<UserDetailItem2> userDetailItem2List = new ArrayList();
 
     @BeforeClass
     public static void beforeClass() {
-        List<Class<?>> entityClassList = Arrays.asList(User.class, UserDetail.class, UserDetailItem1.class, UserDetailItem2.class);
-        List<Class<?>> daoClassList = Arrays.asList(UserDao.class, UserDetailDao.class, UserDetailItem1Dao.class, UserDetailItem2Dao.class);
-        SqlSession sqlSession = DaoTestUtils.getSqlSession(entityClassList, daoClassList);
+        SqlSession sqlSession = DaoTestUtils.getSqlSession(
+                new String[]{"com.mybatisgx.relation.select.onetoone.entity"},
+                new String[]{"com.mybatisgx.relation.select.onetoone.dao"}
+        );
         userDao = sqlSession.getMapper(UserDao.class);
         userDetailDao = sqlSession.getMapper(UserDetailDao.class);
 

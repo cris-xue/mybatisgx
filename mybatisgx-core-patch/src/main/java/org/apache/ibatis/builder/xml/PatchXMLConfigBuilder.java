@@ -15,12 +15,6 @@
  */
 package org.apache.ibatis.builder.xml;
 
-import java.io.InputStream;
-import java.io.Reader;
-import java.util.Properties;
-
-import javax.sql.DataSource;
-
 import org.apache.ibatis.builder.BaseBuilder;
 import org.apache.ibatis.builder.BuilderException;
 import org.apache.ibatis.datasource.DataSourceFactory;
@@ -39,13 +33,14 @@ import org.apache.ibatis.reflection.MetaClass;
 import org.apache.ibatis.reflection.ReflectorFactory;
 import org.apache.ibatis.reflection.factory.ObjectFactory;
 import org.apache.ibatis.reflection.wrapper.ObjectWrapperFactory;
-import org.apache.ibatis.session.AutoMappingBehavior;
-import org.apache.ibatis.session.AutoMappingUnknownColumnBehavior;
-import org.apache.ibatis.session.Configuration;
-import org.apache.ibatis.session.ExecutorType;
-import org.apache.ibatis.session.LocalCacheScope;
+import org.apache.ibatis.session.*;
 import org.apache.ibatis.transaction.TransactionFactory;
 import org.apache.ibatis.type.JdbcType;
+
+import javax.sql.DataSource;
+import java.io.InputStream;
+import java.io.Reader;
+import java.util.Properties;
 
 /**
  * @author Clinton Begin
@@ -53,10 +48,10 @@ import org.apache.ibatis.type.JdbcType;
  */
 public class PatchXMLConfigBuilder extends BaseBuilder {
 
-    private boolean parsed;
-    private final XPathParser parser;
-    private String environment;
-    private final ReflectorFactory localReflectorFactory = new DefaultReflectorFactory();
+    protected boolean parsed;
+    protected XPathParser parser;
+    protected String environment;
+    protected final ReflectorFactory localReflectorFactory = new DefaultReflectorFactory();
 
     public PatchXMLConfigBuilder(Reader reader) {
         this(reader, null, null);
@@ -89,6 +84,10 @@ public class PatchXMLConfigBuilder extends BaseBuilder {
         this.parsed = false;
         this.environment = environment;
         this.parser = parser;
+    }
+
+    public PatchXMLConfigBuilder(Configuration configuration) {
+        super(configuration);
     }
 
     public Configuration parse() {

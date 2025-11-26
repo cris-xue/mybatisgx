@@ -1,9 +1,10 @@
 package com.mybatisgx.boot;
 
-import com.mybatisgx.context.MybatisxContextLoader;
+import com.mybatisgx.context.MybatisgxContextLoader;
 import com.mybatisgx.dao.Dao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
@@ -38,15 +39,18 @@ public class MybatisgxRegistrar implements ImportBeanDefinitionRegistrar {
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
         AnnotationAttributes annotationAttributes = AnnotationAttributes
                 .fromMap(importingClassMetadata.getAnnotationAttributes(MybatisgxScan.class.getName()));
-        MybatisxContextLoader mybatisxContextLoader = new MybatisxContextLoader();
+
         if (annotationAttributes != null) {
             String[] entityBasePackages = (String[]) annotationAttributes.get("entityBasePackages");
             String[] daoBasePackages = (String[]) annotationAttributes.get("daoBasePackages");
             List<Resource> resourceList = this.getDaoResourceList(daoBasePackages);
-            mybatisxContextLoader.load(entityBasePackages, daoBasePackages, resourceList);
+            MybatisgxContextLoader mybatisgxContextLoader = new MybatisgxContextLoader(entityBasePackages, daoBasePackages, resourceList);
 
+            ConstructorArgumentValues constructorArgumentValues = new ConstructorArgumentValues();
+            constructorArgumentValues.addIndexedArgumentValue(0, mybatisgxContextLoader);
             GenericBeanDefinition sqlSessionFactoryBeanPostProcessorBeanDefinition = new GenericBeanDefinition();
             sqlSessionFactoryBeanPostProcessorBeanDefinition.setBeanClass(SqlSessionFactoryBeanPostProcessor.class);
+            sqlSessionFactoryBeanPostProcessorBeanDefinition.setConstructorArgumentValues(constructorArgumentValues);
             registry.registerBeanDefinition("sqlSessionFactoryBeanPostProcessorBeanDefinition", sqlSessionFactoryBeanPostProcessorBeanDefinition);
         }
     }

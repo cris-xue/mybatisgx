@@ -1,6 +1,7 @@
 package com.mybatisgx.boot;
 
 import com.mybatisgx.annotation.handler.IdGenerateValueHandler;
+import com.mybatisgx.context.MybatisgxContextLoader;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.template.StatementTemplateHandler;
 import org.apache.ibatis.session.Configuration;
@@ -14,10 +15,13 @@ public class SqlSessionFactoryBeanPostProcessor implements BeanPostProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SqlSessionFactoryBeanPostProcessor.class);
 
-    private StatementTemplateHandler statementTemplateHandler = new StatementTemplateHandler();
-
+    private MybatisgxContextLoader mybatisgxContextLoader;
     // @Autowired
     private IdGenerateValueHandler<?> idGenerateValueHandler;
+
+    public SqlSessionFactoryBeanPostProcessor(MybatisgxContextLoader mybatisgxContextLoader) {
+        this.mybatisgxContextLoader = mybatisgxContextLoader;
+    }
 
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
@@ -33,12 +37,15 @@ public class SqlSessionFactoryBeanPostProcessor implements BeanPostProcessor {
             LOGGER.info("SqlSessionFactoryBean 初始化完成");
             SqlSessionFactory sqlSessionFactory = (SqlSessionFactory) bean;
             Configuration configuration = sqlSessionFactory.getConfiguration();
-            statementTemplateHandler.curdMethod(configuration);
-
             if (configuration instanceof MybatisgxConfiguration) {
                 MybatisgxConfiguration mybatisgxConfiguration = (MybatisgxConfiguration) configuration;
                 mybatisgxConfiguration.setIdGenerateValueHandler(idGenerateValueHandler);
             }
+
+            mybatisgxContextLoader.load();
+
+            StatementTemplateHandler statementTemplateHandler = new StatementTemplateHandler((MybatisgxConfiguration) configuration);
+            statementTemplateHandler.curdMethod(configuration);
         }
         if (bean instanceof MybatisgxProperties) {
             MybatisgxProperties mybatisxProperties = (MybatisgxProperties) bean;

@@ -12,6 +12,7 @@ import org.apache.commons.lang3.reflect.FieldUtils;
 
 import java.lang.reflect.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -21,6 +22,24 @@ public class ColumnInfoHandler {
 
     static {
         typeMap.put("", "");
+    }
+
+    public List<ColumnInfo> getColumnInfoList(Type type, Map<Type, Class<?>> typeParameterMap) {
+        if (type instanceof ParameterizedType) {
+            Map<Type, Class<?>> childTypeParameterMap = new HashMap<>();
+
+            ParameterizedType parameterizedType = (ParameterizedType) type;
+            // 获取泛型参数映射关系
+            Map<TypeVariable<?>, Type> childTypeParameterMap1111 = TypeUtils.getTypeArguments(parameterizedType);
+            childTypeParameterMap1111.forEach((typeVariable, typeValue) -> childTypeParameterMap.put(typeVariable, typeParameterMap.get(typeValue)));
+            Field[] fields = FieldUtils.getAllFields((Class<?>) parameterizedType.getRawType());
+            return this.processColumnInfo(fields, childTypeParameterMap);
+        }
+        if (type instanceof ParameterizedType) {
+            Field[] fields = FieldUtils.getAllFields((Class<?>) type);
+            return this.processColumnInfo(fields, typeParameterMap);
+        }
+        return new ArrayList<>();
     }
 
     public List<ColumnInfo> getColumnInfoList(Class<?> clazz, Map<Type, Class<?>> typeParameterMap) {
@@ -185,8 +204,8 @@ public class ColumnInfoHandler {
         EmbeddedId embeddedId = field.getAnnotation(EmbeddedId.class);
         List<ColumnInfo> idColumnInfoComposites = new ArrayList();
         if (embeddedId != null) {
-            Class<?> javaType = idColumnInfo.getJavaType();
-            idColumnInfoComposites = this.getColumnInfoList(javaType, typeParameterMap);
+            Type type = field.getGenericType();
+            idColumnInfoComposites = this.getColumnInfoList(type, typeParameterMap);
         }
         idColumnInfo.setId(id);
         idColumnInfo.setEmbeddedId(embeddedId);

@@ -1,6 +1,7 @@
 package com.mybatisgx.template.select;
 
 import com.mybatisgx.context.EntityInfoContextHolder;
+import com.mybatisgx.context.MybatisgxObjectFactory;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.model.*;
 import com.mybatisgx.template.WhereTemplateHandler;
@@ -28,12 +29,8 @@ public class SelectTemplateHandler {
     private SelectCountSqlTemplateHandler selectCountSqlTemplateHandler = new SelectCountSqlTemplateHandler();
     private WhereTemplateHandler whereTemplateHandler = new WhereTemplateHandler();
     private OrderByTemplateHandler orderByTemplateHandler = new OrderByTemplateHandler();
-    private LimitTemplateHandler limitTemplateHandler;
-    private MybatisgxConfiguration configuration;
 
     public SelectTemplateHandler(MybatisgxConfiguration configuration) {
-        this.configuration = configuration;
-        this.limitTemplateHandler = new LimitTemplateHandler(configuration);
     }
 
     public String execute(MapperInfo mapperInfo, MethodInfo methodInfo) {
@@ -74,6 +71,7 @@ public class SelectTemplateHandler {
 
         SelectPageInfo selectPageInfo = methodInfo.getSelectPageInfo();
         if (ObjectUtils.isNotEmpty(selectPageInfo)) {
+            LimitTemplateHandler limitTemplateHandler = MybatisgxObjectFactory.get(LimitTemplateHandler.class);
             limitTemplateHandler.execute(selectXmlItemList, selectPageInfo);
         }
 

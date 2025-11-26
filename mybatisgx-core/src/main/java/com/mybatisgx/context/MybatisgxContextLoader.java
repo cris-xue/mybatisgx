@@ -47,14 +47,12 @@ public class MybatisgxContextLoader {
     private String[] entityBasePackages;
     private String[] daoBasePackages;
     private List<Resource> repositoryResourceList;
-    private StatementTemplateHandler statementTemplateHandler;
     private MybatisgxConfiguration configuration;
 
     public MybatisgxContextLoader(String[] entityBasePackages, String[] daoBasePackages, List<Resource> repositoryResourceList) {
         this.entityBasePackages = entityBasePackages;
         this.daoBasePackages = daoBasePackages;
         this.repositoryResourceList = repositoryResourceList;
-        this.statementTemplateHandler = new StatementTemplateHandler(configuration);
     }
 
     public void load() {
@@ -149,6 +147,7 @@ public class MybatisgxContextLoader {
     }
 
     public void processTemplate() {
+        StatementTemplateHandler statementTemplateHandler = MybatisgxObjectFactory.get(StatementTemplateHandler.class);
         ResultMapTemplateHandler resultMapTemplateHandler = new ResultMapTemplateHandler();
         RelationSelectTemplateHandler relationSelectTemplateHandler = new RelationSelectTemplateHandler();
         List<MapperInfo> mapperInfoList = MapperInfoContextHolder.getMapperInfoList();
@@ -187,9 +186,5 @@ public class MybatisgxContextLoader {
             logger.error(e.getMessage(), e);
         }
         return null;
-    }
-
-    public void setConfiguration(MybatisgxConfiguration configuration) {
-        this.configuration = configuration;
     }
 }

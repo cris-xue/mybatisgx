@@ -1,6 +1,7 @@
 package com.mybatisgx.template;
 
 import com.mybatisgx.context.MapperInfoContextHolder;
+import com.mybatisgx.context.MybatisgxObjectFactory;
 import com.mybatisgx.ext.builder.xml.MybatisgxXMLMapperBuilder;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.model.MapperInfo;
@@ -31,15 +32,7 @@ public class StatementTemplateHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(StatementTemplateHandler.class);
 
-    private SelectTemplateHandler selectTemplateHandler;
-    private InsertTemplateHandler insertTemplateHandler = new InsertTemplateHandler();
-    private DeleteTemplateHandler deleteTemplateHandler = new DeleteTemplateHandler();
-    private UpdateTemplateHandler updateTemplateHandler = new UpdateTemplateHandler();
-    private MybatisgxConfiguration configuration;
-
     public StatementTemplateHandler(MybatisgxConfiguration configuration) {
-        this.configuration = configuration;
-        this.selectTemplateHandler = new SelectTemplateHandler(configuration);
     }
 
     public Map<String, XNode> execute(MapperInfo mapperInfo) {
@@ -58,12 +51,16 @@ public class StatementTemplateHandler {
     private XNode complexTemplateHandle(MapperInfo mapperInfo, MethodInfo methodInfo) {
         String xmlString;
         if (methodInfo.getSqlCommandType() == SqlCommandType.SELECT) {
+            SelectTemplateHandler selectTemplateHandler = MybatisgxObjectFactory.get(SelectTemplateHandler.class);
             xmlString = selectTemplateHandler.execute(mapperInfo, methodInfo);
         } else if (methodInfo.getSqlCommandType() == SqlCommandType.INSERT) {
+            InsertTemplateHandler insertTemplateHandler = MybatisgxObjectFactory.get(InsertTemplateHandler.class);
             xmlString = insertTemplateHandler.execute(mapperInfo, methodInfo);
         } else if (methodInfo.getSqlCommandType() == SqlCommandType.DELETE) {
+            DeleteTemplateHandler deleteTemplateHandler = MybatisgxObjectFactory.get(DeleteTemplateHandler.class);
             xmlString = deleteTemplateHandler.execute(mapperInfo, methodInfo);
         } else if (methodInfo.getSqlCommandType() == SqlCommandType.UPDATE) {
+            UpdateTemplateHandler updateTemplateHandler = MybatisgxObjectFactory.get(UpdateTemplateHandler.class);
             xmlString = updateTemplateHandler.execute(mapperInfo, methodInfo);
         } else {
             throw new RuntimeException("不存在的操作方式");

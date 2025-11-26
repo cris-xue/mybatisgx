@@ -1,7 +1,6 @@
 package com.mybatisgx.model.handler;
 
 import com.google.common.base.CaseFormat;
-import com.google.common.collect.Maps;
 import com.mybatisgx.annotation.*;
 import com.mybatisgx.annotation.handler.GenerateValueHandler;
 import com.mybatisgx.context.EntityInfoContextHolder;
@@ -18,20 +17,13 @@ import java.util.Map;
 
 public class ColumnInfoHandler {
 
-    private static final Map<String, String> typeMap = Maps.newHashMap();
-
-    static {
-        typeMap.put("", "");
-    }
-
-    public List<ColumnInfo> getColumnInfoList(Type type, Map<Type, Class<?>> typeParameterMap) {
+    private List<ColumnInfo> getColumnInfoList(Type type, Map<Type, Class<?>> typeParameterMap) {
         if (type instanceof ParameterizedType) {
-            Map<Type, Class<?>> childTypeParameterMap = new HashMap<>();
-
+            // 处理复杂类型嵌套丢失真实类型
             ParameterizedType parameterizedType = (ParameterizedType) type;
-            // 获取泛型参数映射关系
-            Map<TypeVariable<?>, Type> childTypeParameterMap1111 = TypeUtils.getTypeArguments(parameterizedType);
-            childTypeParameterMap1111.forEach((typeVariable, typeValue) -> childTypeParameterMap.put(typeVariable, typeParameterMap.get(typeValue)));
+            Map<Type, Class<?>> childTypeParameterMap = new HashMap<>();
+            Map<TypeVariable<?>, Type> typeMap = TypeUtils.getTypeArguments(parameterizedType);
+            typeMap.forEach((typeVariable, typeValue) -> childTypeParameterMap.put(typeVariable, typeParameterMap.get(typeValue)));
             Field[] fields = FieldUtils.getAllFields((Class<?>) parameterizedType.getRawType());
             return this.processColumnInfo(fields, childTypeParameterMap);
         }

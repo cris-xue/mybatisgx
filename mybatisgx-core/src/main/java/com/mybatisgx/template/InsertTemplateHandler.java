@@ -38,9 +38,9 @@ public class InsertTemplateHandler {
         Element mapperElement = document.addElement("mapper");
         Element insertElement = mapperElement.addElement("insert");
         insertElement.addAttribute("id", methodInfo.getMethodName());
-        String keyProperty = insertHandler.getKeyProperty(methodInfo);
+        /*String keyProperty = insertHandler.getKeyProperty(methodInfo);
         insertElement.addAttribute("keyProperty", keyProperty);
-        insertElement.addAttribute("useGeneratedKeys", "true");
+        insertElement.addAttribute("useGeneratedKeys", "true");*/
         insertElement.addText(String.format("insert into %s", mapperInfo.getEntityInfo().getTableName()));
 
         Element dbTrimElement = insertElement.addElement("trim");

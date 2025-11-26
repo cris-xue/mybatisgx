@@ -11,7 +11,7 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty;
 @ConfigurationProperties(prefix = MybatisgxProperties.MYBATIS_PREFIX)
 public class MybatisgxProperties extends MybatisProperties {
 
-    public static final String MYBATIS_PREFIX = "mybatisx";
+    public static final String MYBATIS_PREFIX = "mybatisgx";
 
     @NestedConfigurationProperty
     private MybatisgxConfiguration configuration = new MybatisgxConfiguration();

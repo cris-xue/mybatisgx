@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
 <configuration>
+    <properties>
+        <property name="dbType" value="Oracle"/>
+    </properties>
     <!-- 2. 全局配置设置 -->
     <settings>
         <!-- 延迟加载开关 -->
@@ -17,14 +20,25 @@
     <!-- 6. 插件（拦截器） -->
     <plugins>
         <!-- 分页插件 -->
-        <plugin interceptor="com.github.pagehelper.PageInterceptor"/>
+        <plugin interceptor="com.github.pagehelper.PageInterceptor">
+            <property name="helperDialect" value="${dbType}"/>
+        </plugin>
     </plugins>
-    <environments default="mysql">
-        <environment id="mysql">
+    <environments default="${dbType}">
+        <environment id="MySQL">
             <transactionManager type="JDBC"/>
             <dataSource type="POOLED">
                 <property name="driver" value="org.h2.Driver"/>
                 <property name="url" value="jdbc:h2:mem:test_db;MODE=MySQL;LOCK_TIMEOUT=10000;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE"/>
+                <property name="username" value="sa"/>
+                <property name="password" value=""/>
+            </dataSource>
+        </environment>
+        <environment id="Oracle">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <property name="driver" value="org.h2.Driver"/>
+                <property name="url" value="jdbc:h2:mem:test_db;MODE=Oracle;LOCK_TIMEOUT=10000;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE"/>
                 <property name="username" value="sa"/>
                 <property name="password" value=""/>
             </dataSource>

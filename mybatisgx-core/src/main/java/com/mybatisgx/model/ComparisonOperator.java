@@ -1,5 +1,10 @@
 package com.mybatisgx.model;
 
+/**
+ * 比较运算符
+ * @author 薛承城
+ * @date 2025/11/27 11:59
+ */
 public enum ComparisonOperator {
 
     LT("Lt", "<"),
@@ -7,11 +12,18 @@ public enum ComparisonOperator {
     GT("Gt", ">"),
     GT_EQ("Gteq", ">="),
     IN("In", "in"),
-    IS("Is", "="),
     EQ("Eq", "="),
-    NOT("Not", "<>"),
+    EQUAL("Equal", "="),
     LIKE("Like", "like"),
-    BETWEEN("Between", "between");
+    STARTING_WITH("StartingWith", "like"),
+    ENDING_WITH("EndingWith", "like"),
+    BETWEEN("Between", "between"),
+    NOT("Not", "<>"),
+
+    NULL("Null", "null"),
+    IS_NULL("IsNull", "is null"),
+    IS_NOT_NULL("IsNotNull", "is not null"),
+    NOT_NULL("NotNull", "not null");
 
     private String key;
     private String value;

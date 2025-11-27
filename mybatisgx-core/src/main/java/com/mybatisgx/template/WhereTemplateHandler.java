@@ -312,13 +312,17 @@ public class WhereTemplateHandler {
          * @return and user_id = #{userId} or and user_id = #{user.userId}
          */
         protected String getConditionExpression(LogicOperator logicOperator, ComparisonOperator comparisonOperator, ColumnInfo columnInfo, String paramValueExpression) {
-            return String.format(
-                    " %1$s %2$s %3$s %4$s",
+            List<String> expressionItemList = Lists.newArrayList(
                     logicOperator.getValue(),
                     columnInfo.getDbColumnName(),
                     comparisonOperator.getValue(),
                     paramValueExpression
             );
+            ComparisonOperator comparisonNotOperator = this.conditionInfo.getComparisonNotOperator();
+            if (comparisonNotOperator != null) {
+                expressionItemList.add(2, comparisonNotOperator.getValue());
+            }
+            return StringUtils.SPACE + StringUtils.join(expressionItemList, StringUtils.SPACE);
         }
 
         protected Element buildWhereOrIfElement(Element whereElement, Boolean dynamic, String testExpression) {

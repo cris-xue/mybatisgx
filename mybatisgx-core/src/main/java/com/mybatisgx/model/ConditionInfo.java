@@ -28,6 +28,10 @@ public class ConditionInfo {
      */
     private String columnName;
     /**
+     * 比较操作符not
+     */
+    private ComparisonOperator comparisonNotOperator;
+    /**
      * 比较操作符【=、<=、!=】
      */
     private ComparisonOperator comparisonOperator = ComparisonOperator.EQ;
@@ -102,6 +106,14 @@ public class ConditionInfo {
 
     public void setColumnName(String columnName) {
         this.columnName = columnName;
+    }
+
+    public ComparisonOperator getComparisonNotOperator() {
+        return comparisonNotOperator;
+    }
+
+    public void setComparisonNotOperator(ComparisonOperator comparisonNotOperator) {
+        this.comparisonNotOperator = comparisonNotOperator;
     }
 
     public ComparisonOperator getComparisonOperator() {

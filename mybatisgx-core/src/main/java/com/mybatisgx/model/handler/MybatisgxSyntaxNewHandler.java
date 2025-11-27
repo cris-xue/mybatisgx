@@ -263,6 +263,9 @@ public class MybatisgxSyntaxNewHandler {
             this.context = context;
             this.strategies.put(MethodNameParser.Field_clauseContext.class, new FieldStrategyHandler());
             this.strategies.put(MethodNameParser.Comparison_opContext.class, new ComparisonOperatorStrategyHandler());
+            this.strategies.put(MethodNameParser.Comparison_not_opContext.class, new ComparisonNotOperatorStrategyHandler());
+            this.strategies.put(MethodNameParser.Comparison_null_opContext.class, new ComparisonNullOperatorStrategyHandler());
+
         }
 
         public ConditionInfo parse(int index, MethodNameParser.Field_comparison_op_clauseContext ctx) {
@@ -309,6 +312,24 @@ public class MybatisgxSyntaxNewHandler {
     }
 
     private static class ComparisonOperatorStrategyHandler implements ConditionStrategy {
+
+        @Override
+        public void apply(ParseTree node, ConditionInfo conditionInfo, ParserContext context) {
+            String token = node.getText();
+            conditionInfo.setComparisonOperator(ComparisonOperator.getComparisonOperator(token));
+        }
+    }
+
+    private static class ComparisonNotOperatorStrategyHandler implements ConditionStrategy {
+
+        @Override
+        public void apply(ParseTree node, ConditionInfo conditionInfo, ParserContext context) {
+            String token = node.getText();
+            conditionInfo.setComparisonNotOperator(ComparisonOperator.getComparisonOperator(token));
+        }
+    }
+
+    private static class ComparisonNullOperatorStrategyHandler implements ConditionStrategy {
 
         @Override
         public void apply(ParseTree node, ConditionInfo conditionInfo, ParserContext context) {

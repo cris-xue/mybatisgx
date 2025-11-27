@@ -793,13 +793,6 @@ public class WhereTemplateHandler {
             String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, relationColumnInfo, paramValueExpression);
             return new WhereItemContext(testExpression, Arrays.asList(conditionExpression));
         }
-
-        private WhereItemContext buildWhereItemContext(ColumnInfo columnInfo, List<String> paramValueCommonPathItemList) {
-            String testExpression = this.getTestExpression(paramValueCommonPathItemList);
-            String paramValueExpression = this.getParamValueExpression(paramValueCommonPathItemList);
-            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
-            return new WhereItemContext(testExpression, Arrays.asList(conditionExpression));
-        }
     }
 
     static class WhereItemContext {

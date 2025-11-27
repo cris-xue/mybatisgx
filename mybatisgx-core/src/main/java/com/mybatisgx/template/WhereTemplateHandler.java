@@ -83,17 +83,30 @@ public class WhereTemplateHandler {
 
     static class ConditionProcessorFactory {
 
-        protected final Map<String, ConditionHandler> conditionHandlers = new HashMap<>();
+        protected final Map<ComparisonOperator, ConditionHandler> conditionHandlers = new HashMap<>();
 
         public ConditionProcessorFactory() {
-            conditionHandlers.put("like", new LikeConditionHandler());
-            conditionHandlers.put("in", new InConditionHandler());
-            conditionHandlers.put("between", new BetweenConditionHandler());
-            conditionHandlers.put("default", new CommonConditionHandler());
+            conditionHandlers.put(ComparisonOperator.LT, new CommonConditionHandler());
+            conditionHandlers.put(ComparisonOperator.LT_EQ, new CommonConditionHandler());
+            conditionHandlers.put(ComparisonOperator.GT, new CommonConditionHandler());
+            conditionHandlers.put(ComparisonOperator.GT_EQ, new CommonConditionHandler());
+            conditionHandlers.put(ComparisonOperator.LT, new CommonConditionHandler());
+            conditionHandlers.put(ComparisonOperator.IN, new InConditionHandler());
+            conditionHandlers.put(ComparisonOperator.EQ, new CommonConditionHandler());
+            conditionHandlers.put(ComparisonOperator.EQUAL, new CommonConditionHandler());
+            conditionHandlers.put(ComparisonOperator.LIKE, new LikeConditionHandler());
+            conditionHandlers.put(ComparisonOperator.STARTING_WITH, new LikeConditionHandler());
+            conditionHandlers.put(ComparisonOperator.ENDING_WITH, new LikeConditionHandler());
+            conditionHandlers.put(ComparisonOperator.BETWEEN, new BetweenConditionHandler());
+
+            conditionHandlers.put(ComparisonOperator.NULL, new NullConditionHandler());
+            conditionHandlers.put(ComparisonOperator.IS_NULL, new NullConditionHandler());
+            conditionHandlers.put(ComparisonOperator.IS_NOT_NULL, new NullConditionHandler());
+            conditionHandlers.put(ComparisonOperator.NOT_NULL, new NullConditionHandler());
         }
 
         public void process(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement) {
-            ConditionHandler conditionHandler = conditionHandlers.getOrDefault(conditionInfo.getComparisonOperator().getValue(), conditionHandlers.get("default"));
+            ConditionHandler conditionHandler = conditionHandlers.get(conditionInfo.getComparisonOperator());
             conditionHandler.handle(methodInfo, conditionInfo, whereElement);
         }
     }
@@ -699,6 +712,103 @@ public class WhereTemplateHandler {
     }
 
     static class CommonConditionHandler extends AbstractConditionHandler {
+
+        @Override
+        public WhereItemContext handleSimpleTypeSingleParam(ColumnInfo columnInfo) {
+            List<String> paramValuePathItemList = this.getParamValuePathItemList(columnInfo, null);
+            String testExpression = this.getTestExpression(paramValuePathItemList);
+            String paramValueExpression = this.getParamValueExpression(paramValuePathItemList);
+            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
+            return new WhereItemContext(testExpression, Arrays.asList(conditionExpression));
+        }
+
+        @Override
+        public WhereItemContext handleSimpleTypeNoAnnotationSingleParam(ColumnInfo columnInfo) {
+            return handleSimpleTypeSingleParam(columnInfo);
+        }
+
+        @Override
+        public WhereItemContext handleComplexTypeNoAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
+            List<String> paramValuePathItemList = this.getParamValuePathItemList(columnInfo, columnInfoComposite);
+            String testExpression = this.getTestExpression(paramValuePathItemList);
+            String paramValueExpression = this.getParamValueExpression(paramValuePathItemList);
+            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, paramValueExpression);
+            return new WhereItemContext(testExpression, Arrays.asList(conditionExpression));
+        }
+
+        @Override
+        public WhereItemContext handleSimpleTypeWithAnnotationSingleParam(ColumnInfo columnInfo) {
+            return handleSimpleTypeSingleParam(columnInfo);
+        }
+
+        @Override
+        public WhereItemContext handleComplexTypeWithAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
+            return this.handleComplexTypeNoAnnotationSingleParam(columnInfo, columnInfoComposite);
+        }
+
+        @Override
+        public WhereItemContext handleRelationColumnSingleParam(RelationColumnInfo relationColumnInfo, ForeignKeyColumnInfo foreignKeyInfo) {
+            ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();
+            String testExpression = String.format(
+                    "%1$s != null and %1$s.%2$s != null",
+                    relationColumnInfo.getJavaColumnName(),
+                    referencedColumnInfo.getJavaColumnName()
+            );
+            String paramValueExpression = String.format(
+                    "#{%1$s.%2$s}",
+                    relationColumnInfo.getJavaColumnName(),
+                    referencedColumnInfo.getJavaColumnName()
+            );
+            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, relationColumnInfo, paramValueExpression);
+            return new WhereItemContext(testExpression, Arrays.asList(conditionExpression));
+        }
+
+        @Override
+        public WhereItemContext handleSimpleTypeMultiParam(ColumnInfo columnInfo) {
+            return this.handleSimpleTypeSingleParam(columnInfo);
+        }
+
+        @Override
+        public WhereItemContext handleSimpleTypeNoAnnotationMultiParam(ColumnInfo columnInfo) {
+            return handleSimpleTypeSingleParam(columnInfo);
+        }
+
+        @Override
+        public WhereItemContext handleComplexTypeNoAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
+            return handleComplexTypeNoAnnotationSingleParam(columnInfoComposite, columnInfoComposite);
+        }
+
+        @Override
+        public WhereItemContext handleSimpleTypeWithAnnotationMultiParam(ColumnInfo columnInfo) {
+            return handleSimpleTypeSingleParam(columnInfo);
+        }
+
+        @Override
+        public WhereItemContext handleComplexTypeWithAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
+            return handleComplexTypeNoAnnotationSingleParam(columnInfoComposite, columnInfoComposite);
+        }
+
+        @Override
+        public WhereItemContext handleRelationColumnMultiParam(RelationColumnInfo relationColumnInfo, ForeignKeyColumnInfo foreignKeyInfo) {
+            ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();
+            String testExpression = String.format(
+                    "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
+                    methodParamInfo.getArgName(),
+                    relationColumnInfo.getJavaColumnName(),
+                    referencedColumnInfo.getJavaColumnName()
+            );
+            String paramValueExpression = String.format(
+                    "#{%1$s.%2$s.%3$s}",
+                    methodParamInfo.getArgName(),
+                    relationColumnInfo.getJavaColumnName(),
+                    referencedColumnInfo.getJavaColumnName()
+            );
+            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, relationColumnInfo, paramValueExpression);
+            return new WhereItemContext(testExpression, Arrays.asList(conditionExpression));
+        }
+    }
+
+    static class NullConditionHandler extends AbstractConditionHandler {
 
         @Override
         public WhereItemContext handleSimpleTypeSingleParam(ColumnInfo columnInfo) {

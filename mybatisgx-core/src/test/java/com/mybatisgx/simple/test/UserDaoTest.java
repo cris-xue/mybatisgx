@@ -210,7 +210,7 @@ public class UserDaoTest {
     }
 
     @Test
-    public void testCustomQuery() {
+    public void testCustomQuery01() {
         FixtureGenerator fixtureGenerator = new FixtureGenerator();
         fixtureGenerator.configure().ignoreCyclicReferences();
         User user = fixtureGenerator.createRandomized(User.class);
@@ -226,5 +226,29 @@ public class UserDaoTest {
         userDao.findListNew2222(1111L, userQuery);
         userDao.countByNameByName("name");
         userDao.findTop5ByNameLikeOrderByNameDesc("name");
+    }
+
+    @Test
+    public void testCustomQuery02() {
+        FixtureGenerator fixtureGenerator = new FixtureGenerator();
+        fixtureGenerator.configure().ignoreCyclicReferences();
+        User user = fixtureGenerator.createRandomized(User.class);
+
+        userDao.insertNew(user, user);
+        userDao.findByIdNotInAndNameNotLike(Arrays.asList(111L, 2222L), "name");
+    }
+
+    @Test
+    public void testCustomQuery03() {
+        userDao.findByNameNotNullAndNameLike("name");
+        userDao.findByNameNotNull();
+        userDao.findByNameIsNotNull();
+        userDao.findByNameIsNull();
+        userDao.findByNameIsNullAndNameIsNotNullAndNameNotNull();
+    }
+
+    @Test
+    public void testCustomQuery04() {
+        userDao.findCustomSql(111L, "name", Arrays.asList("name1", "name2"));
     }
 }

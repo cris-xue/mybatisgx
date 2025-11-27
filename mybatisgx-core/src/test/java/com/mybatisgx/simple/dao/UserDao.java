@@ -1,6 +1,7 @@
 package com.mybatisgx.simple.dao;
 
 import com.mybatisgx.annotation.Dynamic;
+import com.mybatisgx.annotation.Sql;
 import com.mybatisgx.dao.SimpleDao;
 import com.mybatisgx.simple.entity.User;
 import com.mybatisgx.simple.entity.UserQuery;
@@ -37,4 +38,20 @@ public interface UserDao extends SimpleDao<User, Long> {
     long countByNameByName(@Param("name") String name);
 
     List<User> findTop5ByNameLikeOrderByNameDesc(String name);
+
+    List<User> findByIdNotInAndNameNotLike(List<Long> idList, String name);
+
+    @Dynamic
+    List<User> findByNameNotNullAndNameLike(@Param("name") String name);
+
+    List<User> findByNameNotNull();
+
+    List<User> findByNameIsNotNull();
+
+    List<User> findByNameIsNull();
+
+    List<User> findByNameIsNullAndNameIsNotNullAndNameNotNull();
+
+    @Sql("findByIdAnd(NameLikeOrNameIn)")
+    List<User> findCustomSql(Long id, String name, List<String> nameList);
 }

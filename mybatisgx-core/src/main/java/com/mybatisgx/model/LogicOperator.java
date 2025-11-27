@@ -4,7 +4,7 @@ public enum LogicOperator {
 
     AND("And", "and"),
     OR("Or", "or"),
-    NULL("Null", "and");
+    NULL("Null", "");
 
     private String key;
     private String value;

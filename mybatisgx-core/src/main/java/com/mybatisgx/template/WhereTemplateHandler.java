@@ -159,7 +159,9 @@ public class WhereTemplateHandler {
 
             List<WhereItemContext> whereItemContextList;
             int paramCount = methodInfo.getMethodParamInfoList().size();
-            if (paramCount == 1) {
+            if (this.conditionInfo.getComparisonOperator().isNullComparisonOperator()) {
+                whereItemContextList = this.noParamHandle();
+            } else if (paramCount == 1) {
                 whereItemContextList = this.singleParamHandle();
             } else {
                 whereItemContextList = this.multiParamHandle();
@@ -189,6 +191,24 @@ public class WhereTemplateHandler {
                     }
                 }
             }
+        }
+
+        public List<WhereItemContext> noParamHandle() {
+            List<WhereItemContext> whereItemContextList = new ArrayList<>();
+            if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class, ColumnInfo.class)) {
+                WhereItemContext whereItemContext = this.handleSimpleTypeSingleParam(columnInfo);
+                whereItemContextList.add(whereItemContext);
+            }
+            if (TypeUtils.typeEquals(columnInfo, RelationColumnInfo.class)) {
+                RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
+                if (relationColumnInfo.getMappedByRelationColumnInfo() == null) {
+                    for (ForeignKeyColumnInfo foreignKeyInfo : relationColumnInfo.getInverseForeignKeyColumnInfoList()) {
+                        WhereItemContext whereItemContext = this.handleRelationColumnMultiParam(relationColumnInfo, foreignKeyInfo);
+                        whereItemContextList.add(whereItemContext);
+                    }
+                }
+            }
+            return whereItemContextList;
         }
 
         public List<WhereItemContext> singleParamHandle() {
@@ -322,11 +342,11 @@ public class WhereTemplateHandler {
             if (comparisonNotOperator != null) {
                 expressionItemList.add(2, comparisonNotOperator.getValue());
             }
-            return StringUtils.SPACE + StringUtils.join(expressionItemList, StringUtils.SPACE);
+            return StringUtils.join(expressionItemList, StringUtils.SPACE);
         }
 
         protected Element buildWhereOrIfElement(Element whereElement, Boolean dynamic, String testExpression) {
-            if (dynamic) {
+            if (dynamic && !this.comparisonOperator.isNullComparisonOperator()) {
                 Element ifElement = whereElement.addElement("if");
                 ifElement.addAttribute("test", testExpression);
                 return ifElement;

@@ -341,6 +341,30 @@ public class MethodNameParserBaseListener implements MethodNameParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterComparison_not_op(MethodNameParser.Comparison_not_opContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitComparison_not_op(MethodNameParser.Comparison_not_opContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterComparison_null_op(MethodNameParser.Comparison_null_opContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitComparison_null_op(MethodNameParser.Comparison_null_opContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterGroup_by(MethodNameParser.Group_byContext ctx) { }
 	/**
 	 * {@inheritDoc}

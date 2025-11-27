@@ -278,6 +278,26 @@ public interface MethodNameParserListener extends ParseTreeListener {
 	 */
 	void exitComparison_op(MethodNameParser.Comparison_opContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link MethodNameParser#comparison_not_op}.
+	 * @param ctx the parse tree
+	 */
+	void enterComparison_not_op(MethodNameParser.Comparison_not_opContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MethodNameParser#comparison_not_op}.
+	 * @param ctx the parse tree
+	 */
+	void exitComparison_not_op(MethodNameParser.Comparison_not_opContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MethodNameParser#comparison_null_op}.
+	 * @param ctx the parse tree
+	 */
+	void enterComparison_null_op(MethodNameParser.Comparison_null_opContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MethodNameParser#comparison_null_op}.
+	 * @param ctx the parse tree
+	 */
+	void exitComparison_null_op(MethodNameParser.Comparison_null_opContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link MethodNameParser#group_by}.
 	 * @param ctx the parse tree
 	 */

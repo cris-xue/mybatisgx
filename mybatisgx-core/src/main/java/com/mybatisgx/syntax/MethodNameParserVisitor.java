@@ -173,6 +173,18 @@ public interface MethodNameParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitComparison_op(MethodNameParser.Comparison_opContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link MethodNameParser#comparison_not_op}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitComparison_not_op(MethodNameParser.Comparison_not_opContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MethodNameParser#comparison_null_op}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitComparison_null_op(MethodNameParser.Comparison_null_opContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link MethodNameParser#group_by}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

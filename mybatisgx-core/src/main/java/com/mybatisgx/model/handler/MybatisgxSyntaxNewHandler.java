@@ -198,7 +198,7 @@ public class MybatisgxSyntaxNewHandler {
                     if (conditionExpressionContext != null) {
                         List<ConditionInfo> childConditionInfoList = this.visitCondition_expression(conditionExpressionContext);
                         ConditionInfo conditionInfo = new ConditionInfo(conditionIndex++, context.conditionOriginType, context.methodParamInfo);
-                        conditionInfo.setLogicOperator(LogicOperator.OR);
+                        this.setLogicOperator(conditionInfo, logicOpOrContext, logicOpAndContext);
                         this.handleBrackets(conditionTermContext, conditionInfo);
                         conditionInfo.setConditionInfoList(childConditionInfoList);
                         conditionInfoList.add(conditionInfo);

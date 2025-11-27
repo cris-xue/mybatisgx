@@ -2,7 +2,7 @@
 <!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
 <configuration>
     <properties>
-        <property name="dbType" value="Oracle"/>
+        <property name="dbType" value="PostgreSQL"/>
     </properties>
     <!-- 2. 全局配置设置 -->
     <settings>
@@ -43,12 +43,20 @@
                 <property name="password" value=""/>
             </dataSource>
         </environment>
+        <environment id="PostgreSQL">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <property name="driver" value="org.h2.Driver"/>
+                <property name="url" value="jdbc:h2:mem:test_db;MODE=PostgreSQL;LOCK_TIMEOUT=10000;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE"/>
+                <property name="username" value="sa"/>
+                <property name="password" value=""/>
+            </dataSource>
+        </environment>
     </environments>
     <databaseIdProvider type="com.mybatisgx.ext.mapping.H2DatabaseIdProvider">
-        <property name="MySQL" value="mysql"/>
-        <property name="Oracle" value="oracle"/>
-        <property name="PostgreSQL" value="postgresql"/>
-        <property name="SQL Server" value="sqlserver"/>
+        <property name="MySQL" value="MySQL"/>
+        <property name="Oracle" value="Oracle"/>
+        <property name="PostgreSQL" value="PostgreSQL"/>
     </databaseIdProvider>
     <mappers>
         <!--<mapper resource="com/mybatisgx/simple/dao/UserMapper.xml"/>-->

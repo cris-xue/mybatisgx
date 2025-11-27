@@ -1,6 +1,5 @@
 package com.mybatisgx.util;
 
-import com.alibaba.druid.pool.DruidDataSource;
 import com.mybatisgx.context.MybatisgxContextLoader;
 import com.mybatisgx.context.MybatisgxObjectFactory;
 import com.mybatisgx.ext.builder.xml.MybatisgxXMLConfigBuilder;
@@ -23,19 +22,17 @@ public class DaoTestUtils {
 
     private static final Properties properties = new Properties();
 
-    private static final String DB_TYPE = "oracle";
-
     static {
         try {
-            properties.load(DaoTestUtils.class.getClassLoader().getResourceAsStream(String.format("application_%s.properties", DB_TYPE)));
+            properties.load(DaoTestUtils.class.getClassLoader().getResourceAsStream(String.format("application_flyway.properties")));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    protected static void flywayInit(DataSource dataSource) {
+    protected static void flywayInit(DataSource dataSource, String dbType) {
         // 初始化Flyway
-        String flywayLocations = properties.getProperty("flywayLocations");
+        String flywayLocations = properties.getProperty(dbType);
         Flyway flyway = Flyway.configure()
                 .dataSource(dataSource)
                 .locations(StringUtils.split(flywayLocations, ","))
@@ -55,7 +52,7 @@ public class DaoTestUtils {
         }
 
         DataSource dataSource = configuration.getEnvironment().getDataSource();
-        flywayInit(dataSource);
+        flywayInit(dataSource, configuration.getEnvironment().getId());
 
         MybatisgxContextLoader mybatisgxContextLoader = new MybatisgxContextLoader(entityBasePackages, daoBasePackages, null);
         mybatisgxContextLoader.load();

@@ -32,6 +32,13 @@ public class MethodInfoHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MethodInfoHandler.class);
 
+    private static final Set<ComparisonOperator> COMPARISON_NULL_OPERATOR_SET = new HashSet<>(Arrays.asList(
+            ComparisonOperator.NULL,
+            ComparisonOperator.IS_NULL,
+            ComparisonOperator.IS_NOT_NULL,
+            ComparisonOperator.NOT_NULL
+    ));
+
     private ColumnInfoHandler columnInfoHandler = new ColumnInfoHandler();
     private ColumnTypeHandler columnTypeHandler = new ColumnTypeHandler();
     private MybatisgxSyntaxProcessor mybatisgxSyntaxProcessor = new MybatisgxSyntaxProcessor();
@@ -273,6 +280,10 @@ public class MethodInfoHandler {
             if (conditionGroupInfo != null) {
                 this.bindConditionParam(methodInfo, conditionGroupInfo.getConditionInfoList());
             } else {
+                ComparisonOperator comparisonOperator = conditionInfo.getComparisonOperator();
+                if (COMPARISON_NULL_OPERATOR_SET.contains(comparisonOperator)) {
+                    continue;
+                }
                 // 处理查询条件和参数之间的关系，查询条件和参数之间是1对1关系，不要设计一对多关系，后续绑定参数很难处理
                 // 条件优先级是    方法简单参数有@Param注解(id条件支持复合类型) > 方法简单参数有@Param注解全小写(id条件支持复合类型) > 实体字段 > 方法简单参数无@Param注解
                 String conditionColumnName = conditionInfo.getColumnName();

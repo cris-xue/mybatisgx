@@ -99,7 +99,6 @@ public class WhereTemplateHandler {
             conditionHandlers.put(ComparisonOperator.ENDING_WITH, new EndingLikeConditionHandler());
             conditionHandlers.put(ComparisonOperator.BETWEEN, new BetweenConditionHandler());
 
-            conditionHandlers.put(ComparisonOperator.NULL, new NullConditionHandler());
             conditionHandlers.put(ComparisonOperator.IS_NULL, new NullConditionHandler());
             conditionHandlers.put(ComparisonOperator.IS_NOT_NULL, new NullConditionHandler());
             conditionHandlers.put(ComparisonOperator.NOT_NULL, new NullConditionHandler());

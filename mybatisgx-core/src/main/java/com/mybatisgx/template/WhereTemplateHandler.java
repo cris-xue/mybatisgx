@@ -480,7 +480,7 @@ public class WhereTemplateHandler {
         }
 
         protected Element buildLikeBindElement(String bindKey, String bindValuePath) {
-            String likeExpression = "%" + bindValuePath + "%";
+            String likeExpression = "'%'+" + bindValuePath + "+'%'";
             return this.buildBindElement(bindKey, likeExpression);
         }
     }
@@ -489,7 +489,7 @@ public class WhereTemplateHandler {
 
         @Override
         protected Element buildLikeBindElement(String bindKey, String bindValuePath) {
-            String likeExpression = "%" + bindValuePath;
+            String likeExpression = "'%'+" + bindValuePath;
             return this.buildBindElement(bindKey, likeExpression);
         }
     }
@@ -498,7 +498,7 @@ public class WhereTemplateHandler {
 
         @Override
         protected Element buildLikeBindElement(String bindKey, String bindValuePath) {
-            String likeExpression = bindValuePath + "%";
+            String likeExpression = bindValuePath + "+'%'";
             return this.buildBindElement(bindKey, likeExpression);
         }
     }

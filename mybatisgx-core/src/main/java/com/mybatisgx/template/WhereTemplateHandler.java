@@ -64,11 +64,11 @@ public class WhereTemplateHandler {
      */
     private void handleConditionGroup(MethodInfo methodInfo, Element whereElement, List<ConditionInfo> conditionInfoList, ConditionProcessorFactory factory) {
         for (ConditionInfo conditionInfo : conditionInfoList) {
-            ConditionGroupInfo conditionGroupInfo = conditionInfo.getConditionGroupInfo();
-            if (conditionGroupInfo != null) {
+            List<ConditionInfo> childConditionInfoList = conditionInfo.getConditionInfoList();
+            if (ObjectUtils.isNotEmpty(childConditionInfoList)) {
                 // 处理分组的括号
                 whereElement.addText(String.format(" %s %s", conditionInfo.getLogicOperator(), conditionInfo.getLeftBracket()));
-                this.handleConditionGroup(methodInfo, whereElement, conditionGroupInfo.getConditionInfoList(), factory);
+                this.handleConditionGroup(methodInfo, whereElement, childConditionInfoList, factory);
                 whereElement.addText(conditionInfo.getRightBracket());
             } else {
                 ColumnInfo columnInfo = conditionInfo.getColumnInfo();
@@ -342,7 +342,7 @@ public class WhereTemplateHandler {
             if (comparisonNotOperator != null) {
                 expressionItemList.add(2, comparisonNotOperator.getValue());
             }
-            return StringUtils.join(expressionItemList, StringUtils.SPACE);
+            return StringUtils.SPACE + StringUtils.join(expressionItemList, StringUtils.SPACE);
         }
 
         protected Element buildWhereOrIfElement(Element whereElement, Boolean dynamic, String testExpression) {

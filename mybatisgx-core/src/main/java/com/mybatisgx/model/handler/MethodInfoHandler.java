@@ -269,12 +269,11 @@ public class MethodInfoHandler {
      */
     private void bindConditionParam(MethodInfo methodInfo, List<ConditionInfo> conditionInfoList) {
         for (ConditionInfo conditionInfo : conditionInfoList) {
-            ConditionGroupInfo conditionGroupInfo = conditionInfo.getConditionGroupInfo();
-            if (conditionGroupInfo != null) {
-                this.bindConditionParam(methodInfo, conditionGroupInfo.getConditionInfoList());
+            List<ConditionInfo> childConditionInfoList = conditionInfo.getConditionInfoList();
+            if (ObjectUtils.isNotEmpty(childConditionInfoList)) {
+                this.bindConditionParam(methodInfo, childConditionInfoList);
             } else {
-                ComparisonOperator comparisonOperator = conditionInfo.getComparisonOperator();
-                if (comparisonOperator.isNullComparisonOperator()) {
+                if (conditionInfo.getComparisonOperator().isNullComparisonOperator()) {
                     continue;
                 }
                 // 处理查询条件和参数之间的关系，查询条件和参数之间是1对1关系，不要设计一对多关系，后续绑定参数很难处理

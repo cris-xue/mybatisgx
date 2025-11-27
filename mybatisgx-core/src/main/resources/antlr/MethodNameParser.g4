@@ -39,7 +39,7 @@ and_expression: condition_term (logic_op_and condition_term)* ;
 condition_term: field_comparison_op_clause | (left_bracket condition_expression right_bracket) ;
 
 // 解析方法名和实体字段
-field_comparison_op_clause: field_clause comparison_op? ;
+field_comparison_op_clause: field_clause ((comparison_not_op? comparison_op) | comparison_null_op)? ;
 
 // 分组
 group_by_clause: group_by field_clause ;
@@ -56,7 +56,10 @@ ignore_reserved_word: (RESERVED_WORD)*;
 where_start: BY ;
 logic_op_and: LOGIC_OP_AND ;
 logic_op_or: LOGIC_OP_OR ;
-comparison_op: (COMPARISON_NOT_OP? COMPARISON_OP) | COMPARISON_NULL_OP ;
+// (COMPARISON_NOT_OP? COMPARISON_OP) | COMPARISON_NULL_OP
+comparison_op: COMPARISON_OP ;
+comparison_not_op: COMPARISON_NOT_OP ;
+comparison_null_op: COMPARISON_NULL_OP ;
 group_by: GROUP_BY ;
 order_by: ORDER_BY ;
 order_by_direction: ORDER_BY_DIRECTION ;

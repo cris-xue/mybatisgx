@@ -24,7 +24,7 @@ public class RelationSelectTemplateHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(RelationSelectTemplateHandler.class);
 
-    private SelectSqlTemplateHandler selectSqlTemplateHandler = new SelectSqlTemplateHandler();
+    private SelectColumnSqlTemplateHandler selectColumnSqlTemplateHandler = new SelectColumnSqlTemplateHandler();
     private SimpleRelationSelect simpleRelationSelect = new SimpleRelationSelect();
     private BatchRelationSelect batchRelationSelect = new BatchRelationSelect();
 
@@ -91,7 +91,7 @@ public class RelationSelectTemplateHandler {
 
     private String buildJoinSelect(ResultMapInfo resultMapInfo) {
         try {
-            return selectSqlTemplateHandler.buildSelectSql(resultMapInfo);
+            return selectColumnSqlTemplateHandler.buildSelectSql(resultMapInfo);
         } catch (JSQLParserException e) {
             throw new RuntimeException(e);
         }

@@ -3,7 +3,9 @@ package com.mybatisgx.template.select;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.model.SelectPageInfo;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 分页模板处理器
@@ -12,28 +14,27 @@ import java.util.List;
  */
 public class LimitTemplateHandler {
 
+    private static final Map<String, AbstractLimitHandler> LIMIT_OBJECT_MAP = new HashMap<>();
     private MybatisgxConfiguration configuration;
 
     public LimitTemplateHandler(MybatisgxConfiguration configuration) {
         this.configuration = configuration;
+        LIMIT_OBJECT_MAP.put("MySQL", new MysqlLimitHandler());
+        LIMIT_OBJECT_MAP.put("Oracle", new OracleLimitHandler());
+        LIMIT_OBJECT_MAP.put("PostgreSQL", new PgsqlLimitHandler());
     }
 
     public void execute(List<Object> selectXmlItemList, SelectPageInfo selectPageInfo) {
-        if ("mysql".equals(configuration.getDatabaseId())) {
-            MysqlLimitHandler mysqlLimitHandler = new MysqlLimitHandler();
-            mysqlLimitHandler.execute(selectXmlItemList, selectPageInfo);
-        }
-        if ("oracle".equals(configuration.getDatabaseId())) {
-            OracleLimitHandler oracleLimitHandler = new OracleLimitHandler();
-            oracleLimitHandler.execute(selectXmlItemList, selectPageInfo);
-        }
-        if ("pgsql".equals(configuration.getDatabaseId())) {
-            PgsqlLimitHandler pgsqlLimitHandler = new PgsqlLimitHandler();
-            pgsqlLimitHandler.execute(selectXmlItemList, selectPageInfo);
-        }
+        AbstractLimitHandler abstractLimitHandler = LIMIT_OBJECT_MAP.get(configuration.getDatabaseId());
+        abstractLimitHandler.execute(selectXmlItemList, selectPageInfo);
     }
 
-    public static class MysqlLimitHandler {
+    public static abstract class AbstractLimitHandler {
+
+        abstract void execute(List<Object> selectXmlItemList, SelectPageInfo selectPageInfo);
+    }
+
+    public static class MysqlLimitHandler extends AbstractLimitHandler {
 
         private static final String LIMIT_SQL_EXPRESSION = " limit %s, %s";
 
@@ -45,7 +46,7 @@ public class LimitTemplateHandler {
         }
     }
 
-    public static class OracleLimitHandler {
+    public static class OracleLimitHandler extends AbstractLimitHandler {
 
         private static final String LIMIT_SQL_EXPRESSION_START = "SELECT * FROM (SELECT t.*, ROWNUM AS rn FROM (";
         private static final String LIMIT_SQL_EXPRESSION_END = ") t WHERE ROWNUM <= %s) WHERE rn > %s";
@@ -59,7 +60,7 @@ public class LimitTemplateHandler {
         }
     }
 
-    public static class PgsqlLimitHandler {
+    public static class PgsqlLimitHandler extends AbstractLimitHandler {
 
         private static final String LIMIT_SQL_EXPRESSION = " limit %s OFFSET %s";
 

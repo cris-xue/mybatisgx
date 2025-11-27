@@ -20,10 +20,9 @@ public enum ComparisonOperator {
     BETWEEN("Between", "between"),
     NOT("Not", "not"),
 
-    NULL("Null", "null"),
     IS_NULL("IsNull", "is null"),
     IS_NOT_NULL("IsNotNull", "is not null"),
-    NOT_NULL("NotNull", "not null");
+    NOT_NULL("NotNull", "is not null");
 
     private String key;
     private String value;
@@ -47,6 +46,6 @@ public enum ComparisonOperator {
     }
 
     public Boolean isNullComparisonOperator() {
-        return this == NULL || this == IS_NULL || this == IS_NOT_NULL || this == NOT_NULL;
+        return this == IS_NULL || this == IS_NOT_NULL || this == NOT_NULL;
     }
 }

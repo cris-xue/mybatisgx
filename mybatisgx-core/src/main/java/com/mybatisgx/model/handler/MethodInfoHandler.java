@@ -32,13 +32,6 @@ public class MethodInfoHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MethodInfoHandler.class);
 
-    private static final Set<ComparisonOperator> COMPARISON_NULL_OPERATOR_SET = new HashSet<>(Arrays.asList(
-            ComparisonOperator.NULL,
-            ComparisonOperator.IS_NULL,
-            ComparisonOperator.IS_NOT_NULL,
-            ComparisonOperator.NOT_NULL
-    ));
-
     private ColumnInfoHandler columnInfoHandler = new ColumnInfoHandler();
     private ColumnTypeHandler columnTypeHandler = new ColumnTypeHandler();
     private MybatisgxSyntaxProcessor mybatisgxSyntaxProcessor = new MybatisgxSyntaxProcessor();
@@ -281,7 +274,7 @@ public class MethodInfoHandler {
                 this.bindConditionParam(methodInfo, conditionGroupInfo.getConditionInfoList());
             } else {
                 ComparisonOperator comparisonOperator = conditionInfo.getComparisonOperator();
-                if (COMPARISON_NULL_OPERATOR_SET.contains(comparisonOperator)) {
+                if (comparisonOperator.isNullComparisonOperator()) {
                     continue;
                 }
                 // 处理查询条件和参数之间的关系，查询条件和参数之间是1对1关系，不要设计一对多关系，后续绑定参数很难处理

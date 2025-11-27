@@ -45,4 +45,8 @@ public enum ComparisonOperator {
     public String getValue() {
         return value;
     }
+
+    public Boolean isNullComparisonOperator() {
+        return this == NULL || this == IS_NULL || this == IS_NOT_NULL || this == NOT_NULL;
+    }
 }

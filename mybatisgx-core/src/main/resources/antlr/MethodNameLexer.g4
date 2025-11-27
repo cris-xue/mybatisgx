@@ -22,7 +22,7 @@ COMPARISON_OP: 'Lt'
     | 'Like' | 'StartingWith' | 'EndingWith'
     | 'Between'
     ;
-COMPARISON_NULL_OP: 'IsNull' | 'IsNotNull' ;
+COMPARISON_NULL_OP: 'IsNull' | 'IsNotNull' | 'NotNull' ;
 GROUP_BY: 'GroupBy' ;
 ORDER_BY: 'OrderBy' ;
 ORDER_BY_DIRECTION: 'Desc' | 'Asc' ;

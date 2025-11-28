@@ -249,7 +249,13 @@ public class MethodInfoHandler {
         List<String> columnConditionList = new ArrayList<>();
         for (ColumnInfo columnInfo : methodParamInfo.getColumnInfoList()) {
             if (TypeUtils.typeEquals(columnInfo, RelationColumnInfo.class)) {
-                continue;
+                RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
+                if (relationColumnInfo.getRelationType() == RelationType.MANY_TO_MANY) {
+                    continue;
+                }
+                if (relationColumnInfo.getMappedByRelationColumnInfo() != null) {
+                    continue;
+                }
             }
             String javaColumnName = CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, columnInfo.getJavaColumnName());
             columnConditionList.add(javaColumnName);

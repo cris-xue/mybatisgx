@@ -324,13 +324,11 @@ public class WhereTemplateHandler {
 
         /**
          *
-         * @param logicOperator
-         * @param comparisonOperator
          * @param columnInfo
          * @param paramValueExpression #{userId} or #{user.userId}
          * @return and user_id = #{userId} or and user_id = #{user.userId}
          */
-        protected String getConditionExpression(LogicOperator logicOperator, ComparisonOperator comparisonOperator, ColumnInfo columnInfo, String paramValueExpression) {
+        protected String getConditionExpression(ColumnInfo columnInfo, String paramValueExpression) {
             List<String> expressionItemList = Lists.newArrayList(
                     logicOperator.getValue(),
                     columnInfo.getDbColumnName(),
@@ -390,7 +388,7 @@ public class WhereTemplateHandler {
             String bindValuePath = this.getBindValuePath(paramValuePathItemList);
             Element likeBindElement = this.buildLikeBindElement(bindKey, bindValuePath);
             String paramValueExpression = this.getParamValueExpression(Arrays.asList(bindKey));
-            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
+            String conditionExpression = this.getConditionExpression(columnInfo, paramValueExpression);
             return new WhereItemContext(testExpression, Arrays.asList(likeBindElement, conditionExpression));
         }
 
@@ -407,7 +405,7 @@ public class WhereTemplateHandler {
             String bindValuePath = this.getBindValuePath(paramValuePathItemList);
             Element likeBindElement = this.buildLikeBindElement(bindKey, bindValuePath);
             String paramValueExpression = this.getParamValueExpression(Arrays.asList(bindKey));
-            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, paramValueExpression);
+            String conditionExpression = this.getConditionExpression(columnInfoComposite, paramValueExpression);
             return new WhereItemContext(testExpression, Arrays.asList(likeBindElement, conditionExpression));
         }
 
@@ -441,7 +439,7 @@ public class WhereTemplateHandler {
             );
             Element likeBindElement = this.buildLikeBindElement(bindKey, bindValuePath);
             String paramValueExpression = bindKey;
-            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, relationColumnInfo, paramValueExpression);
+            String conditionExpression = this.getConditionExpression(relationColumnInfo, paramValueExpression);
             return new WhereItemContext(testExpression, Arrays.asList(likeBindElement, conditionExpression));
         }
 
@@ -493,7 +491,7 @@ public class WhereTemplateHandler {
             );
             Element likeBindElement = this.buildLikeBindElement(bindKey, bindValuePath);
             String paramValueExpression = bindKey;
-            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, relationColumnInfo, paramValueExpression);
+            String conditionExpression = this.getConditionExpression(relationColumnInfo, paramValueExpression);
             return new WhereItemContext(testExpression, Arrays.asList(likeBindElement, conditionExpression));
         }
 
@@ -546,7 +544,7 @@ public class WhereTemplateHandler {
             List<String> paramValuePathItemList = this.getParamValuePathItemList(columnInfo, null);
             String testExpression = this.getTestExpression(paramValuePathItemList);
             String paramValueExpression = this.getParamValueExpression(paramValuePathItemList);
-            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, "");
+            String conditionExpression = this.getConditionExpression(columnInfo, "");
             Element foreachElement = this.buildForeachElement(paramValueExpression);
             return new WhereItemContext(testExpression, Arrays.asList(conditionExpression, foreachElement));
         }
@@ -561,7 +559,7 @@ public class WhereTemplateHandler {
             List<String> paramValuePathItemList = this.getParamValuePathItemList(columnInfo, columnInfoComposite);
             String testExpression = this.getTestExpression(paramValuePathItemList);
             String paramValueExpression = this.getParamValueExpression(paramValuePathItemList);
-            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, "");
+            String conditionExpression = this.getConditionExpression(columnInfoComposite, "");
             Element foreachElement = this.buildForeachElement(paramValueExpression);
             return new WhereItemContext(testExpression, Arrays.asList(conditionExpression, foreachElement));
         }
@@ -589,7 +587,7 @@ public class WhereTemplateHandler {
                     relationColumnInfo.getJavaColumnName(),
                     referencedColumnInfo.getJavaColumnName()
             );
-            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, relationColumnInfo, "");
+            String conditionExpression = this.getConditionExpression(relationColumnInfo, "");
             Element foreachElement = this.buildForeachElement(paramValueExpression);
             return new WhereItemContext(testExpression, Arrays.asList(conditionExpression, foreachElement));
         }
@@ -634,7 +632,7 @@ public class WhereTemplateHandler {
                     relationColumnInfo.getJavaColumnName(),
                     referencedColumnInfo.getJavaColumnName()
             );
-            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, relationColumnInfo, "");
+            String conditionExpression = this.getConditionExpression(relationColumnInfo, "");
             Element foreachElement = this.buildForeachElement(paramValueExpression);
             return new WhereItemContext(testExpression, Arrays.asList(conditionExpression, foreachElement));
         }
@@ -659,7 +657,7 @@ public class WhereTemplateHandler {
             List<String> paramValuePathItemList = this.getParamValuePathItemList(columnInfo, null);
             String testExpression = this.getTestExpression(paramValuePathItemList);
             String paramValueExpression = this.getParamValueExpression(paramValuePathItemList);
-            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
+            String conditionExpression = this.getConditionExpression(columnInfo, paramValueExpression);
             return new WhereItemContext(testExpression, Arrays.asList(conditionExpression));
         }
 
@@ -673,7 +671,7 @@ public class WhereTemplateHandler {
             List<String> paramValuePathItemList = this.getParamValuePathItemList(columnInfo, columnInfoComposite);
             String testExpression = this.getTestExpression(paramValuePathItemList);
             String paramValueExpression = this.getParamValueExpression(paramValuePathItemList);
-            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, paramValueExpression);
+            String conditionExpression = this.getConditionExpression(columnInfoComposite, paramValueExpression);
             return new WhereItemContext(testExpression, Arrays.asList(conditionExpression));
         }
 
@@ -700,7 +698,7 @@ public class WhereTemplateHandler {
                     relationColumnInfo.getJavaColumnName(),
                     referencedColumnInfo.getJavaColumnName()
             );
-            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, relationColumnInfo, paramValueExpression);
+            String conditionExpression = this.getConditionExpression(relationColumnInfo, paramValueExpression);
             return new WhereItemContext(testExpression, Arrays.asList(conditionExpression));
         }
 
@@ -744,7 +742,7 @@ public class WhereTemplateHandler {
                     relationColumnInfo.getJavaColumnName(),
                     referencedColumnInfo.getJavaColumnName()
             );
-            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, relationColumnInfo, paramValueExpression);
+            String conditionExpression = this.getConditionExpression(relationColumnInfo, paramValueExpression);
             return new WhereItemContext(testExpression, Arrays.asList(conditionExpression));
         }
 
@@ -762,7 +760,7 @@ public class WhereTemplateHandler {
             List<String> paramValuePathItemList = this.getParamValuePathItemList(columnInfo, null);
             String testExpression = this.getTestExpression(paramValuePathItemList);
             String paramValueExpression = this.getParamValueExpression(paramValuePathItemList);
-            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, paramValueExpression);
+            String conditionExpression = this.getConditionExpression(columnInfo, paramValueExpression);
             return new WhereItemContext(testExpression, Arrays.asList(conditionExpression));
         }
 
@@ -776,7 +774,7 @@ public class WhereTemplateHandler {
             List<String> paramValuePathItemList = this.getParamValuePathItemList(columnInfo, columnInfoComposite);
             String testExpression = this.getTestExpression(paramValuePathItemList);
             String paramValueExpression = this.getParamValueExpression(paramValuePathItemList);
-            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, paramValueExpression);
+            String conditionExpression = this.getConditionExpression(columnInfoComposite, paramValueExpression);
             return new WhereItemContext(testExpression, Arrays.asList(conditionExpression));
         }
 
@@ -803,7 +801,7 @@ public class WhereTemplateHandler {
                     relationColumnInfo.getJavaColumnName(),
                     referencedColumnInfo.getJavaColumnName()
             );
-            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, relationColumnInfo, paramValueExpression);
+            String conditionExpression = this.getConditionExpression(relationColumnInfo, paramValueExpression);
             return new WhereItemContext(testExpression, Arrays.asList(conditionExpression));
         }
 
@@ -847,7 +845,7 @@ public class WhereTemplateHandler {
                     relationColumnInfo.getJavaColumnName(),
                     referencedColumnInfo.getJavaColumnName()
             );
-            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, relationColumnInfo, paramValueExpression);
+            String conditionExpression = this.getConditionExpression(relationColumnInfo, paramValueExpression);
             return new WhereItemContext(testExpression, Arrays.asList(conditionExpression));
         }
     }
@@ -856,7 +854,7 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleSimpleTypeSingleParam(ColumnInfo columnInfo) {
-            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfo, "");
+            String conditionExpression = this.getConditionExpression(columnInfo, "");
             return new WhereItemContext(null, Arrays.asList(conditionExpression));
         }
 
@@ -867,7 +865,7 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleComplexTypeNoAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, columnInfoComposite, "");
+            String conditionExpression = this.getConditionExpression(columnInfoComposite, "");
             return new WhereItemContext(null, Arrays.asList(conditionExpression));
         }
 
@@ -883,7 +881,7 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleRelationColumnSingleParam(RelationColumnInfo relationColumnInfo, ForeignKeyColumnInfo foreignKeyInfo) {
-            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, relationColumnInfo, "");
+            String conditionExpression = this.getConditionExpression(relationColumnInfo, "");
             return new WhereItemContext(null, Arrays.asList(conditionExpression));
         }
 
@@ -914,7 +912,7 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleRelationColumnMultiParam(RelationColumnInfo relationColumnInfo, ForeignKeyColumnInfo foreignKeyInfo) {
-            String conditionExpression = this.getConditionExpression(logicOperator, comparisonOperator, relationColumnInfo, "");
+            String conditionExpression = this.getConditionExpression(relationColumnInfo, "");
             return new WhereItemContext(null, Arrays.asList(conditionExpression));
         }
     }

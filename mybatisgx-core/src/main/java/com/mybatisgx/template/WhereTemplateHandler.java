@@ -141,14 +141,14 @@ public class WhereTemplateHandler {
             this.logicOperator = conditionInfo.getLogicOperator();
             this.comparisonOperator = conditionInfo.getComparisonOperator();
 
-            List<WhereItemContext> whereItemContextList;
+            List<WhereItemContext> whereItemContextList = new ArrayList();
             int paramCount = methodInfo.getMethodParamInfoList().size();
             if (this.conditionInfo.getComparisonOperator().isNullComparisonOperator()) {
-                whereItemContextList = this.noParamHandle();
+                this.noParamHandle(whereItemContextList);
             } else if (paramCount == 1) {
-                whereItemContextList = this.singleParamHandle();
+                this.singleParamHandle(whereItemContextList);
             } else {
-                whereItemContextList = this.multiParamHandle();
+                this.multiParamHandle(whereItemContextList);
             }
             this.processWhereItem(whereElement, methodInfo.getDynamic(), whereItemContextList);
         }
@@ -177,8 +177,7 @@ public class WhereTemplateHandler {
             }
         }
 
-        public List<WhereItemContext> noParamHandle() {
-            List<WhereItemContext> whereItemContextList = new ArrayList<>();
+        public void noParamHandle(List<WhereItemContext> whereItemContextList) {
             if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class, ColumnInfo.class)) {
                 WhereItemContext whereItemContext = this.handleSimpleTypeParam(columnInfo);
                 whereItemContextList.add(whereItemContext);
@@ -192,11 +191,9 @@ public class WhereTemplateHandler {
                     }
                 }
             }
-            return whereItemContextList;
         }
 
-        public List<WhereItemContext> singleParamHandle() {
-            List<WhereItemContext> whereItemContextList = new ArrayList<>();
+        public void singleParamHandle(List<WhereItemContext> whereItemContextList) {
             if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class, ColumnInfo.class)) {
                 ClassCategory classCategory = this.getParamClassCategory();
                 if (classCategory == ClassCategory.SIMPLE) {
@@ -255,11 +252,9 @@ public class WhereTemplateHandler {
                     }
                 }
             }
-            return whereItemContextList;
         }
 
-        public List<WhereItemContext> multiParamHandle() {
-            List<WhereItemContext> whereItemContextList = new ArrayList();
+        public void multiParamHandle(List<WhereItemContext> whereItemContextList) {
             if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class, ColumnInfo.class)) {
                 ClassCategory classCategory = this.getParamClassCategory();
                 if (classCategory == ClassCategory.SIMPLE) {
@@ -318,7 +313,6 @@ public class WhereTemplateHandler {
                     }
                 }
             }
-            return whereItemContextList;
         }
 
         private ClassCategory getParamClassCategory() {

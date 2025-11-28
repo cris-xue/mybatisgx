@@ -345,7 +345,10 @@ public class WhereTemplateHandler {
         }
 
         protected Element buildWhereOrIfElement(Element whereElement, Boolean dynamic, String testExpression) {
-            if (dynamic && !this.comparisonOperator.isNullComparisonOperator()) {
+            if (this.comparisonOperator.isNullComparisonOperator()) {
+                return whereElement;
+            }
+            if (dynamic) {
                 Element ifElement = whereElement.addElement("if");
                 ifElement.addAttribute("test", testExpression);
                 return ifElement;

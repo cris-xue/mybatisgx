@@ -144,6 +144,7 @@ public class WhereTemplateHandler {
 
         protected ConditionInfo conditionInfo;
         protected ColumnInfo columnInfo;
+        protected Integer columnInfoCompositeIndex;
         protected MethodParamInfo methodParamInfo;
         protected LogicOperator logicOperator;
         protected ComparisonOperator comparisonOperator;
@@ -152,6 +153,7 @@ public class WhereTemplateHandler {
         public void handle(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement) {
             this.conditionInfo = conditionInfo;
             this.columnInfo = conditionInfo.getColumnInfo();
+            this.columnInfoCompositeIndex = 0;
             this.methodParamInfo = conditionInfo.getMethodParamInfo();
             this.logicOperator = conditionInfo.getLogicOperator();
             this.comparisonOperator = conditionInfo.getComparisonOperator();
@@ -227,6 +229,7 @@ public class WhereTemplateHandler {
                             whereItemContextList.add(whereItemContext);
                         } else {
                             for (ColumnInfo columnInfoComposite : columnInfoComposites) {
+                                this.columnInfoCompositeIndex++;
                                 WhereItemContext whereItemContext = this.handleComplexTypeNoAnnotationSingleParam(columnInfo, columnInfoComposite);
                                 whereItemContextList.add(whereItemContext);
                             }
@@ -238,6 +241,7 @@ public class WhereTemplateHandler {
                             whereItemContextList.add(whereItemContext);
                         } else {
                             for (ColumnInfo columnInfoComposite : columnInfoComposites) {
+                                this.columnInfoCompositeIndex++;
                                 WhereItemContext whereItemContext = this.handleComplexTypeWithAnnotationSingleParam(columnInfo, columnInfoComposite);
                                 whereItemContextList.add(whereItemContext);
                             }
@@ -249,6 +253,7 @@ public class WhereTemplateHandler {
                 RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
                 if (relationColumnInfo.getMappedByRelationColumnInfo() == null) {
                     for (ForeignKeyColumnInfo foreignKeyInfo : relationColumnInfo.getInverseForeignKeyColumnInfoList()) {
+                        this.columnInfoCompositeIndex++;
                         WhereItemContext whereItemContext = this.handleRelationColumnSingleParam(relationColumnInfo, foreignKeyInfo);
                         whereItemContextList.add(whereItemContext);
                     }
@@ -274,6 +279,7 @@ public class WhereTemplateHandler {
                             whereItemContextList.add(whereItemContext);
                         } else {
                             for (ColumnInfo columnInfoComposite : columnInfoComposites) {
+                                this.columnInfoCompositeIndex++;
                                 WhereItemContext whereItemContext = this.handleComplexTypeNoAnnotationMultiParam(columnInfo, columnInfoComposite);
                                 whereItemContextList.add(whereItemContext);
                             }
@@ -285,6 +291,7 @@ public class WhereTemplateHandler {
                             whereItemContextList.add(whereItemContext);
                         } else {
                             for (ColumnInfo columnInfoComposite : columnInfoComposites) {
+                                this.columnInfoCompositeIndex++;
                                 WhereItemContext whereItemContext = this.handleComplexTypeWithAnnotationMultiParam(columnInfo, columnInfoComposite);
                                 whereItemContextList.add(whereItemContext);
                             }
@@ -296,6 +303,7 @@ public class WhereTemplateHandler {
                 RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
                 if (relationColumnInfo.getMappedByRelationColumnInfo() == null) {
                     for (ForeignKeyColumnInfo foreignKeyInfo : relationColumnInfo.getInverseForeignKeyColumnInfoList()) {
+                        this.columnInfoCompositeIndex++;
                         WhereItemContext whereItemContext = this.handleRelationColumnMultiParam(relationColumnInfo, foreignKeyInfo);
                         whereItemContextList.add(whereItemContext);
                     }
@@ -329,6 +337,10 @@ public class WhereTemplateHandler {
          * @return and user_id = #{userId} or and user_id = #{user.userId}
          */
         protected String getConditionExpression(ColumnInfo columnInfo, String paramValueExpression) {
+            LogicOperator logicOperator = this.logicOperator;
+            if (this.columnInfoCompositeIndex >= 2) {
+                logicOperator = LogicOperator.AND;
+            }
             List<String> expressionItemList = Lists.newArrayList(
                     logicOperator.getValue(),
                     columnInfo.getDbColumnName(),
@@ -914,6 +926,32 @@ public class WhereTemplateHandler {
         public WhereItemContext handleRelationColumnMultiParam(RelationColumnInfo relationColumnInfo, ForeignKeyColumnInfo foreignKeyInfo) {
             String conditionExpression = this.getConditionExpression(relationColumnInfo, "");
             return new WhereItemContext(null, Arrays.asList(conditionExpression));
+        }
+    }
+
+    static class TemplateParamContext {
+
+        private ConditionInfo conditionInfo;
+        private ColumnInfo columnInfo;
+        private ColumnInfo columnInfoComposite;
+        private MethodParamInfo methodParamInfo;
+        private LogicOperator logicOperator;
+        private ComparisonOperator comparisonOperator;
+
+        public TemplateParamContext(ConditionInfo conditionInfo) {
+            this.conditionInfo = conditionInfo;
+            this.columnInfo = conditionInfo.getColumnInfo();
+            this.methodParamInfo = conditionInfo.getMethodParamInfo();
+            this.logicOperator = conditionInfo.getLogicOperator();
+            this.comparisonOperator = conditionInfo.getComparisonOperator();
+        }
+
+        public ColumnInfo getColumnInfo() {
+            return columnInfo;
+        }
+
+        public MethodParamInfo getMethodParamInfo() {
+            return methodParamInfo;
         }
     }
 

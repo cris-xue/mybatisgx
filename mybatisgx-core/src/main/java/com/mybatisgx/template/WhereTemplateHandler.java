@@ -203,7 +203,20 @@ public class WhereTemplateHandler {
         public List<WhereItemContext> singleParamHandle() {
             List<WhereItemContext> whereItemContextList = new ArrayList<>();
             if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class, ColumnInfo.class)) {
-                if (methodParamInfo.getClassCategory() == ClassCategory.SIMPLE) {
+                ClassCategory classCategory = this.getParamClassCategory();
+                if (classCategory == ClassCategory.SIMPLE) {
+                    WhereItemContext whereItemContext = this.handleSimpleTypeParam(columnInfo);
+                    whereItemContextList.add(whereItemContext);
+                }
+                if (classCategory == ClassCategory.COMPLEX) {
+                    for (ColumnInfo columnInfoComposite : methodParamInfo.getColumnInfoList()) {
+                        this.columnInfoCompositeIndex++;
+                        WhereItemContext whereItemContext = this.handleComplexTypeParam(columnInfo, columnInfoComposite);
+                        whereItemContextList.add(whereItemContext);
+                    }
+                }
+
+                /*if (methodParamInfo.getClassCategory() == ClassCategory.SIMPLE) {
                     // findById(Long id) findById(@Param("id") Long id)
                     WhereItemContext whereItemContext = this.handleSimpleTypeParam(columnInfo);
                     whereItemContextList.add(whereItemContext);
@@ -235,7 +248,7 @@ public class WhereTemplateHandler {
                             }
                         }
                     }
-                }
+                }*/
             }
             if (TypeUtils.typeEquals(columnInfo, RelationColumnInfo.class)) {
                 RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
@@ -253,7 +266,20 @@ public class WhereTemplateHandler {
         public List<WhereItemContext> multiParamHandle() {
             List<WhereItemContext> whereItemContextList = new ArrayList();
             if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class, ColumnInfo.class)) {
-                if (methodParamInfo.getClassCategory() == ClassCategory.SIMPLE) {
+                ClassCategory classCategory = this.getParamClassCategory();
+                if (classCategory == ClassCategory.SIMPLE) {
+                    WhereItemContext whereItemContext = this.handleSimpleTypeParam(columnInfo);
+                    whereItemContextList.add(whereItemContext);
+                }
+                if (classCategory == ClassCategory.COMPLEX) {
+                    for (ColumnInfo columnInfoComposite : methodParamInfo.getColumnInfoList()) {
+                        this.columnInfoCompositeIndex++;
+                        WhereItemContext whereItemContext = this.handleComplexTypeParam(columnInfo, columnInfoComposite);
+                        whereItemContextList.add(whereItemContext);
+                    }
+                }
+
+                /*if (methodParamInfo.getClassCategory() == ClassCategory.SIMPLE) {
                     // findById(Long id) findById(@Param("id") Long id)
                     WhereItemContext whereItemContext = this.handleSimpleTypeParam(columnInfo);
                     whereItemContextList.add(whereItemContext);
@@ -285,7 +311,7 @@ public class WhereTemplateHandler {
                             }
                         }
                     }
-                }
+                }*/
             }
             if (TypeUtils.typeEquals(columnInfo, RelationColumnInfo.class)) {
                 RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
@@ -298,6 +324,22 @@ public class WhereTemplateHandler {
                 }
             }
             return whereItemContextList;
+        }
+
+        private ClassCategory getParamClassCategory() {
+            if (methodParamInfo.getClassCategory() == ClassCategory.SIMPLE) {
+                // findById(Long id) findById(@Param("id") Long id)
+                return ClassCategory.SIMPLE;
+            }
+            if (methodParamInfo.getClassCategory() == ClassCategory.COMPLEX) {
+                // findById(MultiId id) findById(@Param("id") MultiId id)
+                if (ObjectUtils.isEmpty(methodParamInfo.getColumnInfoList())) {
+                    return ClassCategory.SIMPLE;
+                } else {
+                    return ClassCategory.COMPLEX;
+                }
+            }
+            throw new RuntimeException("columnInfoClassCategory is null");
         }
 
         protected String getTestExpression(List<String> pathItemList) {

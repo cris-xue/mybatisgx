@@ -114,11 +114,6 @@ public class WhereTemplateHandler {
 
         void handle(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement);
 
-        /*WhereItemContext handleSimpleTypeParam(ColumnInfo columnInfo);
-
-        WhereItemContext handleComplexTypeParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite);*/
-
-
         WhereItemContext handleSimpleTypeParam(ColumnInfo columnInfo);
 
         WhereItemContext handleComplexTypeParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite);

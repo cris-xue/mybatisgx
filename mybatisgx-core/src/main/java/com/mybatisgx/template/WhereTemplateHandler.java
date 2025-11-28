@@ -114,28 +114,16 @@ public class WhereTemplateHandler {
 
         void handle(MethodInfo methodInfo, ConditionInfo conditionInfo, Element whereElement);
 
-        WhereItemContext handleSimpleTypeSingleParam(ColumnInfo columnInfo);
+        /*WhereItemContext handleSimpleTypeParam(ColumnInfo columnInfo);
 
-        WhereItemContext handleSimpleTypeNoAnnotationSingleParam(ColumnInfo columnInfo);
+        WhereItemContext handleComplexTypeParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite);*/
+
+
+        WhereItemContext handleSimpleTypeSingleParam(ColumnInfo columnInfo);
 
         WhereItemContext handleComplexTypeNoAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite);
 
-        WhereItemContext handleSimpleTypeWithAnnotationSingleParam(ColumnInfo columnInfo);
-
-        WhereItemContext handleComplexTypeWithAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite);
-
         WhereItemContext handleRelationColumnSingleParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo);
-
-
-        WhereItemContext handleSimpleTypeMultiParam(ColumnInfo columnInfo);
-
-        WhereItemContext handleSimpleTypeNoAnnotationMultiParam(ColumnInfo columnInfo);
-
-        WhereItemContext handleComplexTypeNoAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite);
-
-        WhereItemContext handleSimpleTypeWithAnnotationMultiParam(ColumnInfo columnInfo);
-
-        WhereItemContext handleComplexTypeWithAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite);
 
         WhereItemContext handleRelationColumnMultiParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo);
     }
@@ -225,7 +213,7 @@ public class WhereTemplateHandler {
                     if (methodParamInfo.getParam() == null) {
                         List<ColumnInfo> columnInfoComposites = methodParamInfo.getColumnInfoList();
                         if (ObjectUtils.isEmpty(columnInfoComposites)) {
-                            WhereItemContext whereItemContext = this.handleSimpleTypeNoAnnotationSingleParam(columnInfo);
+                            WhereItemContext whereItemContext = this.handleSimpleTypeSingleParam(columnInfo);
                             whereItemContextList.add(whereItemContext);
                         } else {
                             for (ColumnInfo columnInfoComposite : columnInfoComposites) {
@@ -237,12 +225,12 @@ public class WhereTemplateHandler {
                     } else {
                         List<ColumnInfo> columnInfoComposites = methodParamInfo.getColumnInfoList();
                         if (ObjectUtils.isEmpty(columnInfoComposites)) {
-                            WhereItemContext whereItemContext = this.handleSimpleTypeWithAnnotationSingleParam(columnInfo);
+                            WhereItemContext whereItemContext = this.handleSimpleTypeSingleParam(columnInfo);
                             whereItemContextList.add(whereItemContext);
                         } else {
                             for (ColumnInfo columnInfoComposite : columnInfoComposites) {
                                 this.columnInfoCompositeIndex++;
-                                WhereItemContext whereItemContext = this.handleComplexTypeWithAnnotationSingleParam(columnInfo, columnInfoComposite);
+                                WhereItemContext whereItemContext = this.handleComplexTypeNoAnnotationSingleParam(columnInfo, columnInfoComposite);
                                 whereItemContextList.add(whereItemContext);
                             }
                         }
@@ -267,7 +255,7 @@ public class WhereTemplateHandler {
             if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class, ColumnInfo.class)) {
                 if (methodParamInfo.getClassCategory() == ClassCategory.SIMPLE) {
                     // findById(Long id) findById(@Param("id") Long id)
-                    WhereItemContext whereItemContext = this.handleSimpleTypeMultiParam(columnInfo);
+                    WhereItemContext whereItemContext = this.handleSimpleTypeSingleParam(columnInfo);
                     whereItemContextList.add(whereItemContext);
                 }
                 if (methodParamInfo.getClassCategory() == ClassCategory.COMPLEX) {
@@ -275,24 +263,24 @@ public class WhereTemplateHandler {
                     if (methodParamInfo.getParam() == null) {
                         List<ColumnInfo> columnInfoComposites = methodParamInfo.getColumnInfoList();
                         if (ObjectUtils.isEmpty(columnInfoComposites)) {
-                            WhereItemContext whereItemContext = this.handleSimpleTypeNoAnnotationMultiParam(columnInfo);
+                            WhereItemContext whereItemContext = this.handleSimpleTypeSingleParam(columnInfo);
                             whereItemContextList.add(whereItemContext);
                         } else {
                             for (ColumnInfo columnInfoComposite : columnInfoComposites) {
                                 this.columnInfoCompositeIndex++;
-                                WhereItemContext whereItemContext = this.handleComplexTypeNoAnnotationMultiParam(columnInfo, columnInfoComposite);
+                                WhereItemContext whereItemContext = this.handleComplexTypeNoAnnotationSingleParam(columnInfo, columnInfoComposite);
                                 whereItemContextList.add(whereItemContext);
                             }
                         }
                     } else {
                         List<ColumnInfo> columnInfoComposites = methodParamInfo.getColumnInfoList();
                         if (ObjectUtils.isEmpty(columnInfoComposites)) {
-                            WhereItemContext whereItemContext = this.handleSimpleTypeWithAnnotationMultiParam(columnInfo);
+                            WhereItemContext whereItemContext = this.handleSimpleTypeSingleParam(columnInfo);
                             whereItemContextList.add(whereItemContext);
                         } else {
                             for (ColumnInfo columnInfoComposite : columnInfoComposites) {
                                 this.columnInfoCompositeIndex++;
-                                WhereItemContext whereItemContext = this.handleComplexTypeWithAnnotationMultiParam(columnInfo, columnInfoComposite);
+                                WhereItemContext whereItemContext = this.handleComplexTypeNoAnnotationSingleParam(columnInfo, columnInfoComposite);
                                 whereItemContextList.add(whereItemContext);
                             }
                         }
@@ -405,11 +393,6 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleSimpleTypeNoAnnotationSingleParam(ColumnInfo columnInfo) {
-            return this.handleSimpleTypeSingleParam(columnInfo);
-        }
-
-        @Override
         public WhereItemContext handleComplexTypeNoAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
             List<String> paramValuePathItemList = this.getParamValuePathItemList(columnInfo, columnInfoComposite);
             String testExpression = this.getTestExpression(paramValuePathItemList);
@@ -419,16 +402,6 @@ public class WhereTemplateHandler {
             String paramValueExpression = this.getParamValueExpression(Arrays.asList(bindKey));
             String conditionExpression = this.getConditionExpression(columnInfoComposite, paramValueExpression);
             return new WhereItemContext(testExpression, Arrays.asList(likeBindElement, conditionExpression));
-        }
-
-        @Override
-        public WhereItemContext handleSimpleTypeWithAnnotationSingleParam(ColumnInfo columnInfo) {
-            return this.handleSimpleTypeSingleParam(columnInfo);
-        }
-
-        @Override
-        public WhereItemContext handleComplexTypeWithAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            return this.handleComplexTypeNoAnnotationSingleParam(columnInfo, columnInfoComposite);
         }
 
         @Override
@@ -453,31 +426,6 @@ public class WhereTemplateHandler {
             String paramValueExpression = bindKey;
             String conditionExpression = this.getConditionExpression(relationColumnInfo, paramValueExpression);
             return new WhereItemContext(testExpression, Arrays.asList(likeBindElement, conditionExpression));
-        }
-
-        @Override
-        public WhereItemContext handleSimpleTypeMultiParam(ColumnInfo columnInfo) {
-            return this.handleSimpleTypeSingleParam(columnInfo);
-        }
-
-        @Override
-        public WhereItemContext handleSimpleTypeNoAnnotationMultiParam(ColumnInfo columnInfo) {
-            return this.handleSimpleTypeSingleParam(columnInfo);
-        }
-
-        @Override
-        public WhereItemContext handleComplexTypeNoAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            return this.handleComplexTypeNoAnnotationSingleParam(columnInfo, columnInfoComposite);
-        }
-
-        @Override
-        public WhereItemContext handleSimpleTypeWithAnnotationMultiParam(ColumnInfo columnInfo) {
-            return this.handleSimpleTypeSingleParam(columnInfo);
-        }
-
-        @Override
-        public WhereItemContext handleComplexTypeWithAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            return this.handleComplexTypeNoAnnotationSingleParam(columnInfo, columnInfoComposite);
         }
 
         @Override
@@ -562,11 +510,6 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleSimpleTypeNoAnnotationSingleParam(ColumnInfo columnInfo) {
-            return this.handleSimpleTypeSingleParam(columnInfo);
-        }
-
-        @Override
         public WhereItemContext handleComplexTypeNoAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
             List<String> paramValuePathItemList = this.getParamValuePathItemList(columnInfo, columnInfoComposite);
             String testExpression = this.getTestExpression(paramValuePathItemList);
@@ -574,16 +517,6 @@ public class WhereTemplateHandler {
             String conditionExpression = this.getConditionExpression(columnInfoComposite, "");
             Element foreachElement = this.buildForeachElement(paramValueExpression);
             return new WhereItemContext(testExpression, Arrays.asList(conditionExpression, foreachElement));
-        }
-
-        @Override
-        public WhereItemContext handleSimpleTypeWithAnnotationSingleParam(ColumnInfo columnInfo) {
-            return this.handleSimpleTypeSingleParam(columnInfo);
-        }
-
-        @Override
-        public WhereItemContext handleComplexTypeWithAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            return this.handleComplexTypeNoAnnotationSingleParam(columnInfo, columnInfoComposite);
         }
 
         @Override
@@ -602,31 +535,6 @@ public class WhereTemplateHandler {
             String conditionExpression = this.getConditionExpression(relationColumnInfo, "");
             Element foreachElement = this.buildForeachElement(paramValueExpression);
             return new WhereItemContext(testExpression, Arrays.asList(conditionExpression, foreachElement));
-        }
-
-        @Override
-        public WhereItemContext handleSimpleTypeMultiParam(ColumnInfo columnInfo) {
-            return this.handleSimpleTypeSingleParam(columnInfo);
-        }
-
-        @Override
-        public WhereItemContext handleSimpleTypeNoAnnotationMultiParam(ColumnInfo columnInfo) {
-            return this.handleSimpleTypeSingleParam(columnInfo);
-        }
-
-        @Override
-        public WhereItemContext handleComplexTypeNoAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            return this.handleComplexTypeNoAnnotationSingleParam(columnInfo, columnInfoComposite);
-        }
-
-        @Override
-        public WhereItemContext handleSimpleTypeWithAnnotationMultiParam(ColumnInfo columnInfo) {
-            return this.handleSimpleTypeSingleParam(columnInfo);
-        }
-
-        @Override
-        public WhereItemContext handleComplexTypeWithAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            return this.handleComplexTypeNoAnnotationSingleParam(columnInfo, columnInfoComposite);
         }
 
         @Override
@@ -674,27 +582,12 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleSimpleTypeNoAnnotationSingleParam(ColumnInfo columnInfo) {
-            return this.handleSimpleTypeSingleParam(columnInfo);
-        }
-
-        @Override
         public WhereItemContext handleComplexTypeNoAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
             List<String> paramValuePathItemList = this.getParamValuePathItemList(columnInfo, columnInfoComposite);
             String testExpression = this.getTestExpression(paramValuePathItemList);
             String paramValueExpression = this.getParamValueExpression(paramValuePathItemList);
             String conditionExpression = this.getConditionExpression(columnInfoComposite, paramValueExpression);
             return new WhereItemContext(testExpression, Arrays.asList(conditionExpression));
-        }
-
-        @Override
-        public WhereItemContext handleSimpleTypeWithAnnotationSingleParam(ColumnInfo columnInfo) {
-            return this.handleSimpleTypeSingleParam(columnInfo);
-        }
-
-        @Override
-        public WhereItemContext handleComplexTypeWithAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            return this.handleComplexTypeNoAnnotationSingleParam(columnInfo, columnInfoComposite);
         }
 
         @Override
@@ -712,31 +605,6 @@ public class WhereTemplateHandler {
             );
             String conditionExpression = this.getConditionExpression(relationColumnInfo, paramValueExpression);
             return new WhereItemContext(testExpression, Arrays.asList(conditionExpression));
-        }
-
-        @Override
-        public WhereItemContext handleSimpleTypeMultiParam(ColumnInfo columnInfo) {
-            return this.handleSimpleTypeSingleParam(columnInfo);
-        }
-
-        @Override
-        public WhereItemContext handleSimpleTypeNoAnnotationMultiParam(ColumnInfo columnInfo) {
-            return this.handleSimpleTypeSingleParam(columnInfo);
-        }
-
-        @Override
-        public WhereItemContext handleComplexTypeNoAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            return handleComplexTypeNoAnnotationSingleParam(columnInfo, columnInfoComposite);
-        }
-
-        @Override
-        public WhereItemContext handleSimpleTypeWithAnnotationMultiParam(ColumnInfo columnInfo) {
-            return this.handleSimpleTypeSingleParam(columnInfo);
-        }
-
-        @Override
-        public WhereItemContext handleComplexTypeWithAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            return handleComplexTypeNoAnnotationSingleParam(columnInfo, columnInfoComposite);
         }
 
         @Override
@@ -777,27 +645,12 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleSimpleTypeNoAnnotationSingleParam(ColumnInfo columnInfo) {
-            return handleSimpleTypeSingleParam(columnInfo);
-        }
-
-        @Override
         public WhereItemContext handleComplexTypeNoAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
             List<String> paramValuePathItemList = this.getParamValuePathItemList(columnInfo, columnInfoComposite);
             String testExpression = this.getTestExpression(paramValuePathItemList);
             String paramValueExpression = this.getParamValueExpression(paramValuePathItemList);
             String conditionExpression = this.getConditionExpression(columnInfoComposite, paramValueExpression);
             return new WhereItemContext(testExpression, Arrays.asList(conditionExpression));
-        }
-
-        @Override
-        public WhereItemContext handleSimpleTypeWithAnnotationSingleParam(ColumnInfo columnInfo) {
-            return handleSimpleTypeSingleParam(columnInfo);
-        }
-
-        @Override
-        public WhereItemContext handleComplexTypeWithAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            return this.handleComplexTypeNoAnnotationSingleParam(columnInfo, columnInfoComposite);
         }
 
         @Override
@@ -815,31 +668,6 @@ public class WhereTemplateHandler {
             );
             String conditionExpression = this.getConditionExpression(relationColumnInfo, paramValueExpression);
             return new WhereItemContext(testExpression, Arrays.asList(conditionExpression));
-        }
-
-        @Override
-        public WhereItemContext handleSimpleTypeMultiParam(ColumnInfo columnInfo) {
-            return this.handleSimpleTypeSingleParam(columnInfo);
-        }
-
-        @Override
-        public WhereItemContext handleSimpleTypeNoAnnotationMultiParam(ColumnInfo columnInfo) {
-            return handleSimpleTypeSingleParam(columnInfo);
-        }
-
-        @Override
-        public WhereItemContext handleComplexTypeNoAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            return handleComplexTypeNoAnnotationSingleParam(columnInfo, columnInfoComposite);
-        }
-
-        @Override
-        public WhereItemContext handleSimpleTypeWithAnnotationMultiParam(ColumnInfo columnInfo) {
-            return handleSimpleTypeSingleParam(columnInfo);
-        }
-
-        @Override
-        public WhereItemContext handleComplexTypeWithAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            return handleComplexTypeNoAnnotationSingleParam(columnInfo, columnInfoComposite);
         }
 
         @Override
@@ -871,55 +699,15 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleSimpleTypeNoAnnotationSingleParam(ColumnInfo columnInfo) {
-            return handleSimpleTypeSingleParam(columnInfo);
-        }
-
-        @Override
         public WhereItemContext handleComplexTypeNoAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
             String conditionExpression = this.getConditionExpression(columnInfoComposite, "");
             return new WhereItemContext(null, Arrays.asList(conditionExpression));
         }
 
         @Override
-        public WhereItemContext handleSimpleTypeWithAnnotationSingleParam(ColumnInfo columnInfo) {
-            return handleSimpleTypeSingleParam(columnInfo);
-        }
-
-        @Override
-        public WhereItemContext handleComplexTypeWithAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            return this.handleComplexTypeNoAnnotationSingleParam(columnInfo, columnInfoComposite);
-        }
-
-        @Override
         public WhereItemContext handleRelationColumnSingleParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo) {
             String conditionExpression = this.getConditionExpression(relationColumnInfo, "");
             return new WhereItemContext(null, Arrays.asList(conditionExpression));
-        }
-
-        @Override
-        public WhereItemContext handleSimpleTypeMultiParam(ColumnInfo columnInfo) {
-            return this.handleSimpleTypeSingleParam(columnInfo);
-        }
-
-        @Override
-        public WhereItemContext handleSimpleTypeNoAnnotationMultiParam(ColumnInfo columnInfo) {
-            return handleSimpleTypeSingleParam(columnInfo);
-        }
-
-        @Override
-        public WhereItemContext handleComplexTypeNoAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            return handleComplexTypeNoAnnotationSingleParam(columnInfo, columnInfoComposite);
-        }
-
-        @Override
-        public WhereItemContext handleSimpleTypeWithAnnotationMultiParam(ColumnInfo columnInfo) {
-            return handleSimpleTypeSingleParam(columnInfo);
-        }
-
-        @Override
-        public WhereItemContext handleComplexTypeWithAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            return handleComplexTypeNoAnnotationSingleParam(columnInfo, columnInfoComposite);
         }
 
         @Override

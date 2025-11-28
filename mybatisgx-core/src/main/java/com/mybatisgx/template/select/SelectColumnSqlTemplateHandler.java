@@ -145,7 +145,7 @@ public class SelectColumnSqlTemplateHandler {
                 String entityTableNameAlias = leftEntityRelationSelectInfo.getEntityTableNameAlias();
                 Join join = this.buildLeftJoin(entityTableName, entityTableNameAlias);
 
-                List<ForeignKeyColumnInfo> foreignKeyColumnInfoList;
+                List<ForeignKeyInfo> foreignKeyColumnInfoList;
                 Boolean isMappedBy = leftEntityRelationSelectInfo.isMappedBy();
                 if (isMappedBy) {
                     foreignKeyColumnInfoList = leftEntityRelationSelectInfo.getForeignKeyColumnInfoList();
@@ -168,7 +168,7 @@ public class SelectColumnSqlTemplateHandler {
                 String middleTableName = rightEntityRelationSelectInfo.getMiddleTableName();
                 Join join = this.buildLeftJoin(middleTableName, null);
 
-                List<ForeignKeyColumnInfo> foreignKeyColumnInfoList;
+                List<ForeignKeyInfo> foreignKeyColumnInfoList;
                 Boolean isMappedBy = rightEntityRelationSelectInfo.isMappedBy();
                 if (isMappedBy) {
                     foreignKeyColumnInfoList = rightEntityRelationSelectInfo.getInverseForeignKeyColumnInfoList();
@@ -241,7 +241,7 @@ public class SelectColumnSqlTemplateHandler {
             RelationColumnInfo mappedByRelationColumnInfo = relationColumnInfo.getMappedByRelationColumnInfo();
             if (relationType != RelationType.MANY_TO_MANY && mappedByRelationColumnInfo == null) {
                 // 只有一对一、一对多、多对一的时候关联字段才需要作为表字段。多对多存在中间表，关联字段在中间中表，不需要作为实体表字段
-                List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
+                List<ForeignKeyInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
                 for (ForeignKeyInfo inverseForeignKeyInfo : inverseForeignKeyColumnInfoList) {
                     ColumnInfo foreignKeyColumnInfo = inverseForeignKeyInfo.getColumnInfo();
                     SelectItem<?> selectItem = this.getSelectItem(table, foreignKeyColumnInfo.getDbColumnName(), foreignKeyColumnInfo.getDbColumnNameAlias());
@@ -265,7 +265,7 @@ public class SelectColumnSqlTemplateHandler {
         List<Expression> onExpressionList = new ArrayList<>();
         String leftEntityTableNameAlias = leftEntityRelationSelectInfo.getEntityTableNameAlias();
         String rightEntityTableNameAlias = rightEntityRelationSelectInfo.getEntityTableNameAlias();
-        List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = rightEntityRelationSelectInfo.getInverseForeignKeyColumnInfoList();
+        List<ForeignKeyInfo> inverseForeignKeyColumnInfoList = rightEntityRelationSelectInfo.getInverseForeignKeyColumnInfoList();
         if (rightEntityRelationSelectInfo.isMappedBy()) {
             for (ForeignKeyInfo inverseForeignKeyInfo : inverseForeignKeyColumnInfoList) {
                 ColumnInfo foreignKeyColumnInfo = inverseForeignKeyInfo.getColumnInfo();
@@ -302,7 +302,7 @@ public class SelectColumnSqlTemplateHandler {
         join.addOnExpression(expression);
     }
 
-    private void buildEntityTableOnMiddleTable(String entityTableNameAlias, String middleTableName, List<ForeignKeyColumnInfo> foreignKeyColumnInfoList, Join join) {
+    private void buildEntityTableOnMiddleTable(String entityTableNameAlias, String middleTableName, List<ForeignKeyInfo> foreignKeyColumnInfoList, Join join) {
         List<Expression> onExpressionList = new ArrayList<>();
         for (ForeignKeyInfo foreignKeyInfo : foreignKeyColumnInfoList) {
             ColumnInfo foreignKeyColumnInfo = foreignKeyInfo.getColumnInfo();
@@ -323,7 +323,7 @@ public class SelectColumnSqlTemplateHandler {
         join.addOnExpression(expression);
     }
 
-    private void buildMiddleTableOnEntityTable(String middleTableName, String entityTableNameAlias, List<ForeignKeyColumnInfo> foreignKeyColumnInfoList, Join join) {
+    private void buildMiddleTableOnEntityTable(String middleTableName, String entityTableNameAlias, List<ForeignKeyInfo> foreignKeyColumnInfoList, Join join) {
         List<Expression> onExpressionList = new ArrayList<>();
         for (ForeignKeyInfo foreignKeyInfo : foreignKeyColumnInfoList) {
             ColumnInfo foreignKeyColumnInfo = foreignKeyInfo.getColumnInfo();

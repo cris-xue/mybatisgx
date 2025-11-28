@@ -40,11 +40,11 @@ public class RelationColumnInfo extends ColumnInfo {
     /**
      * 当前实体外键字段列表
      */
-    private List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = new ArrayList();
+    private List<ForeignKeyInfo> foreignKeyColumnInfoList = new ArrayList();
     /**
      * 关联实体外键字段列表
      */
-    private List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = new ArrayList();
+    private List<ForeignKeyInfo> inverseForeignKeyColumnInfoList = new ArrayList();
     /**
      * 一对一
      */
@@ -126,19 +126,19 @@ public class RelationColumnInfo extends ColumnInfo {
         this.mappedByRelationColumnInfo = mappedByRelationColumnInfo;
     }
 
-    public List<ForeignKeyColumnInfo> getForeignKeyColumnInfoList() {
+    public List<ForeignKeyInfo> getForeignKeyColumnInfoList() {
         return foreignKeyColumnInfoList;
     }
 
-    public void setForeignKeyColumnInfoList(List<ForeignKeyColumnInfo> foreignKeyColumnInfoList) {
+    public void setForeignKeyColumnInfoList(List<ForeignKeyInfo> foreignKeyColumnInfoList) {
         this.foreignKeyColumnInfoList = foreignKeyColumnInfoList;
     }
 
-    public List<ForeignKeyColumnInfo> getInverseForeignKeyColumnInfoList() {
+    public List<ForeignKeyInfo> getInverseForeignKeyColumnInfoList() {
         return inverseForeignKeyColumnInfoList;
     }
 
-    public void setInverseForeignKeyColumnInfoList(List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList) {
+    public void setInverseForeignKeyColumnInfoList(List<ForeignKeyInfo> inverseForeignKeyColumnInfoList) {
         this.inverseForeignKeyColumnInfoList = inverseForeignKeyColumnInfoList;
     }
 

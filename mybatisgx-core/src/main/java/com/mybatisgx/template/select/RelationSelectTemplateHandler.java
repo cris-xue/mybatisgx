@@ -104,9 +104,9 @@ public class RelationSelectTemplateHandler {
             RelationColumnInfo relationColumnInfo = (RelationColumnInfo) entityRelationSelectInfo.getColumnInfo();
             RelationColumnInfo mappedByRelationColumnInfo = relationColumnInfo.getMappedByRelationColumnInfo();
             if (mappedByRelationColumnInfo != null) {
-                List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedByRelationColumnInfo.getInverseForeignKeyColumnInfoList();
+                List<ForeignKeyInfo> inverseForeignKeyColumnInfoList = mappedByRelationColumnInfo.getInverseForeignKeyColumnInfoList();
                 Expression whereCondition = null;
-                for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
+                for (ForeignKeyInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
                     ColumnInfo foreignKeyColumnInfo = inverseForeignKeyColumnInfo.getColumnInfo();
                     String leftEq = String.format("%s.%s", relationEntityInfo.getTableNameAlias(), foreignKeyColumnInfo.getDbColumnName());
                     String rightEq = String.format("#{%s}", foreignKeyColumnInfo.getJavaColumnName());
@@ -114,9 +114,9 @@ public class RelationSelectTemplateHandler {
                 }
                 return whereCondition;
             } else {
-                List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
+                List<ForeignKeyInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
                 Expression whereCondition = null;
-                for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
+                for (ForeignKeyInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
                     ColumnInfo foreignKeyColumnInfo = inverseForeignKeyColumnInfo.getColumnInfo();
                     ColumnInfo referencedColumnInfo = inverseForeignKeyColumnInfo.getReferencedColumnInfo();
                     String leftEq = String.format("%s.%s", relationEntityInfo.getTableNameAlias(), referencedColumnInfo.getDbColumnName());
@@ -133,11 +133,11 @@ public class RelationSelectTemplateHandler {
             RelationColumnInfo mappedByRelationColumnInfo = relationColumnInfo.getMappedByRelationColumnInfo();
             if (mappedByRelationColumnInfo != null) {
                 // user_role left join role on() user_role.role_id = role.id where user_role.user_id = user.id
-                List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedByRelationColumnInfo.getInverseForeignKeyColumnInfoList();
+                List<ForeignKeyInfo> inverseForeignKeyColumnInfoList = mappedByRelationColumnInfo.getInverseForeignKeyColumnInfoList();
                 return this.buildManyToManyWhereExpression(middleTableName, inverseForeignKeyColumnInfoList);
             } else {
                 // user_role left join user on() user_role.user_id = user.id where user_role.role_id = role.id
-                List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = relationColumnInfo.getForeignKeyColumnInfoList();
+                List<ForeignKeyInfo> foreignKeyColumnInfoList = relationColumnInfo.getForeignKeyColumnInfoList();
                 return this.buildManyToManyWhereExpression(middleTableName, foreignKeyColumnInfoList);
             }
         }
@@ -149,7 +149,7 @@ public class RelationSelectTemplateHandler {
          * @param foreignKeyColumnInfoList 外键字段列表
          * @return
          */
-        public Expression buildManyToManyWhereExpression(String middleTableName, List<ForeignKeyColumnInfo> foreignKeyColumnInfoList) {
+        public Expression buildManyToManyWhereExpression(String middleTableName, List<ForeignKeyInfo> foreignKeyColumnInfoList) {
             Expression whereCondition = null;
             for (ForeignKeyInfo foreignKeyInfo : foreignKeyColumnInfoList) {
                 ColumnInfo foreignKeyColumnInfo = foreignKeyInfo.getColumnInfo();

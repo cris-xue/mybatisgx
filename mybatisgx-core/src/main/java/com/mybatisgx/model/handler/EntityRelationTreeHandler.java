@@ -99,26 +99,26 @@ public class EntityRelationTreeHandler {
             JoinTable joinTable = mappedByRelationColumnInfo.getJoinTable();
             tableName = joinTable.name();
 
-            List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = mappedByRelationColumnInfo.getForeignKeyColumnInfoList();
-            for (ForeignKeyColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
+            List<ForeignKeyInfo> foreignKeyColumnInfoList = mappedByRelationColumnInfo.getForeignKeyColumnInfoList();
+            for (ForeignKeyInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
                 rightColumnInfoList.add(foreignKeyColumnInfo.getColumnInfo());
             }
 
-            List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = mappedByRelationColumnInfo.getInverseForeignKeyColumnInfoList();
-            for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
+            List<ForeignKeyInfo> inverseForeignKeyColumnInfoList = mappedByRelationColumnInfo.getInverseForeignKeyColumnInfoList();
+            for (ForeignKeyInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
                 leftColumnInfoList.add(inverseForeignKeyColumnInfo.getColumnInfo());
             }
         } else {
             JoinTable joinTable = relationColumnInfo.getJoinTable();
             tableName = joinTable.name();
 
-            List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = relationColumnInfo.getForeignKeyColumnInfoList();
-            for (ForeignKeyColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
+            List<ForeignKeyInfo> foreignKeyColumnInfoList = relationColumnInfo.getForeignKeyColumnInfoList();
+            for (ForeignKeyInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
                 leftColumnInfoList.add(foreignKeyColumnInfo.getColumnInfo());
             }
 
-            List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
-            for (ForeignKeyColumnInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
+            List<ForeignKeyInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
+            for (ForeignKeyInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
                 rightColumnInfoList.add(inverseForeignKeyColumnInfo.getColumnInfo());
             }
         }
@@ -182,13 +182,13 @@ public class EntityRelationTreeHandler {
                     RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
                     ManyToMany manyToMany = relationColumnInfo.getManyToMany();
                     if (manyToMany == null) {
-                        List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
+                        List<ForeignKeyInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
                         this.processForeignKeyColumnAlias(inverseForeignKeyColumnInfoList, tableNameAlias, level, index, i);
                     } else {
-                        List<ForeignKeyColumnInfo> foreignKeyColumnInfoList = relationColumnInfo.getForeignKeyColumnInfoList();
+                        List<ForeignKeyInfo> foreignKeyColumnInfoList = relationColumnInfo.getForeignKeyColumnInfoList();
                         this.processForeignKeyColumnAlias(foreignKeyColumnInfoList, tableNameAlias, level, index, i);
 
-                        List<ForeignKeyColumnInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
+                        List<ForeignKeyInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
                         this.processForeignKeyColumnAlias(inverseForeignKeyColumnInfoList, tableNameAlias, level, index, i);
                     }
                 }
@@ -204,8 +204,8 @@ public class EntityRelationTreeHandler {
          * @param tableIndex
          * @param columnIndex
          */
-        private void processForeignKeyColumnAlias(List<ForeignKeyColumnInfo> foreignKeyColumnInfoList, String tableNameAlias, int level, int tableIndex, int columnIndex) {
-            for (ForeignKeyColumnInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
+        private void processForeignKeyColumnAlias(List<ForeignKeyInfo> foreignKeyColumnInfoList, String tableNameAlias, int level, int tableIndex, int columnIndex) {
+            for (ForeignKeyInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
                 ColumnInfo columnInfo = foreignKeyColumnInfo.getColumnInfo();
                 String dbColumnName = columnInfo.getDbColumnName();
                 String dbColumnNameAlias = this.buildTableColumnNameAlias(tableNameAlias, dbColumnName, level, tableIndex, columnIndex);

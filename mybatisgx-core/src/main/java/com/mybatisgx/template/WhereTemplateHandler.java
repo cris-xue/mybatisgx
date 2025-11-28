@@ -124,7 +124,7 @@ public class WhereTemplateHandler {
 
         WhereItemContext handleComplexTypeWithAnnotationSingleParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite);
 
-        WhereItemContext handleRelationColumnSingleParam(RelationColumnInfo relationColumnInfo, ForeignKeyColumnInfo foreignKeyInfo);
+        WhereItemContext handleRelationColumnSingleParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo);
 
 
         WhereItemContext handleSimpleTypeMultiParam(ColumnInfo columnInfo);
@@ -137,7 +137,7 @@ public class WhereTemplateHandler {
 
         WhereItemContext handleComplexTypeWithAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite);
 
-        WhereItemContext handleRelationColumnMultiParam(RelationColumnInfo relationColumnInfo, ForeignKeyColumnInfo foreignKeyInfo);
+        WhereItemContext handleRelationColumnMultiParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo);
     }
 
     static abstract class AbstractConditionHandler implements ConditionHandler {
@@ -203,7 +203,7 @@ public class WhereTemplateHandler {
             if (TypeUtils.typeEquals(columnInfo, RelationColumnInfo.class)) {
                 RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
                 if (relationColumnInfo.getMappedByRelationColumnInfo() == null) {
-                    for (ForeignKeyColumnInfo foreignKeyInfo : relationColumnInfo.getInverseForeignKeyColumnInfoList()) {
+                    for (ForeignKeyInfo foreignKeyInfo : relationColumnInfo.getInverseForeignKeyColumnInfoList()) {
                         WhereItemContext whereItemContext = this.handleRelationColumnMultiParam(relationColumnInfo, foreignKeyInfo);
                         whereItemContextList.add(whereItemContext);
                     }
@@ -252,7 +252,7 @@ public class WhereTemplateHandler {
             if (TypeUtils.typeEquals(columnInfo, RelationColumnInfo.class)) {
                 RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
                 if (relationColumnInfo.getMappedByRelationColumnInfo() == null) {
-                    for (ForeignKeyColumnInfo foreignKeyInfo : relationColumnInfo.getInverseForeignKeyColumnInfoList()) {
+                    for (ForeignKeyInfo foreignKeyInfo : relationColumnInfo.getInverseForeignKeyColumnInfoList()) {
                         this.columnInfoCompositeIndex++;
                         WhereItemContext whereItemContext = this.handleRelationColumnSingleParam(relationColumnInfo, foreignKeyInfo);
                         whereItemContextList.add(whereItemContext);
@@ -302,7 +302,7 @@ public class WhereTemplateHandler {
             if (TypeUtils.typeEquals(columnInfo, RelationColumnInfo.class)) {
                 RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
                 if (relationColumnInfo.getMappedByRelationColumnInfo() == null) {
-                    for (ForeignKeyColumnInfo foreignKeyInfo : relationColumnInfo.getInverseForeignKeyColumnInfoList()) {
+                    for (ForeignKeyInfo foreignKeyInfo : relationColumnInfo.getInverseForeignKeyColumnInfoList()) {
                         this.columnInfoCompositeIndex++;
                         WhereItemContext whereItemContext = this.handleRelationColumnMultiParam(relationColumnInfo, foreignKeyInfo);
                         whereItemContextList.add(whereItemContext);
@@ -432,7 +432,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleRelationColumnSingleParam(RelationColumnInfo relationColumnInfo, ForeignKeyColumnInfo foreignKeyInfo) {
+        public WhereItemContext handleRelationColumnSingleParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo) {
             ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();
             String testExpression = String.format(
                     "%1$s != null and %1$s.%2$s != null",
@@ -481,7 +481,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleRelationColumnMultiParam(RelationColumnInfo relationColumnInfo, ForeignKeyColumnInfo foreignKeyInfo) {
+        public WhereItemContext handleRelationColumnMultiParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo) {
             ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();
             String testExpression = String.format(
                     "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
@@ -587,7 +587,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleRelationColumnSingleParam(RelationColumnInfo relationColumnInfo, ForeignKeyColumnInfo foreignKeyInfo) {
+        public WhereItemContext handleRelationColumnSingleParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo) {
             ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();
             String testExpression = String.format(
                     "%1$s != null and %1$s.%2$s != null",
@@ -630,7 +630,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleRelationColumnMultiParam(RelationColumnInfo relationColumnInfo, ForeignKeyColumnInfo foreignKeyInfo) {
+        public WhereItemContext handleRelationColumnMultiParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo) {
             ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();
             String testExpression = String.format(
                     "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
@@ -698,7 +698,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleRelationColumnSingleParam(RelationColumnInfo relationColumnInfo, ForeignKeyColumnInfo foreignKeyInfo) {
+        public WhereItemContext handleRelationColumnSingleParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo) {
             ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();
             String testExpression = String.format(
                     "%1$s != null and %1$s.%2$s != null",
@@ -740,7 +740,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleRelationColumnMultiParam(RelationColumnInfo relationColumnInfo, ForeignKeyColumnInfo foreignKeyInfo) {
+        public WhereItemContext handleRelationColumnMultiParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo) {
             ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();
             String testExpression = String.format(
                     "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
@@ -801,7 +801,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleRelationColumnSingleParam(RelationColumnInfo relationColumnInfo, ForeignKeyColumnInfo foreignKeyInfo) {
+        public WhereItemContext handleRelationColumnSingleParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo) {
             ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();
             String testExpression = String.format(
                     "%1$s != null and %1$s.%2$s != null",
@@ -843,7 +843,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleRelationColumnMultiParam(RelationColumnInfo relationColumnInfo, ForeignKeyColumnInfo foreignKeyInfo) {
+        public WhereItemContext handleRelationColumnMultiParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo) {
             ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();
             String testExpression = String.format(
                     "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
@@ -892,7 +892,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleRelationColumnSingleParam(RelationColumnInfo relationColumnInfo, ForeignKeyColumnInfo foreignKeyInfo) {
+        public WhereItemContext handleRelationColumnSingleParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo) {
             String conditionExpression = this.getConditionExpression(relationColumnInfo, "");
             return new WhereItemContext(null, Arrays.asList(conditionExpression));
         }
@@ -923,7 +923,7 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleRelationColumnMultiParam(RelationColumnInfo relationColumnInfo, ForeignKeyColumnInfo foreignKeyInfo) {
+        public WhereItemContext handleRelationColumnMultiParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo) {
             String conditionExpression = this.getConditionExpression(relationColumnInfo, "");
             return new WhereItemContext(null, Arrays.asList(conditionExpression));
         }

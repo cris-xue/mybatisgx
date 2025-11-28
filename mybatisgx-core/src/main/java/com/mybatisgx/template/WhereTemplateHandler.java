@@ -203,7 +203,7 @@ public class WhereTemplateHandler {
             if (TypeUtils.typeEquals(columnInfo, RelationColumnInfo.class)) {
                 RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
                 if (relationColumnInfo.getMappedByRelationColumnInfo() == null) {
-                    for (ForeignKeyInfo foreignKeyInfo : relationColumnInfo.getInverseForeignKeyColumnInfoList()) {
+                    for (ForeignKeyInfo foreignKeyInfo : relationColumnInfo.getInverseForeignKeyInfoList()) {
                         WhereItemContext whereItemContext = this.handleRelationColumnMultiParam(relationColumnInfo, foreignKeyInfo);
                         whereItemContextList.add(whereItemContext);
                     }
@@ -252,7 +252,7 @@ public class WhereTemplateHandler {
             if (TypeUtils.typeEquals(columnInfo, RelationColumnInfo.class)) {
                 RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
                 if (relationColumnInfo.getMappedByRelationColumnInfo() == null) {
-                    for (ForeignKeyInfo foreignKeyInfo : relationColumnInfo.getInverseForeignKeyColumnInfoList()) {
+                    for (ForeignKeyInfo foreignKeyInfo : relationColumnInfo.getInverseForeignKeyInfoList()) {
                         this.columnInfoCompositeIndex++;
                         WhereItemContext whereItemContext = this.handleRelationColumnSingleParam(relationColumnInfo, foreignKeyInfo);
                         whereItemContextList.add(whereItemContext);
@@ -302,7 +302,7 @@ public class WhereTemplateHandler {
             if (TypeUtils.typeEquals(columnInfo, RelationColumnInfo.class)) {
                 RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
                 if (relationColumnInfo.getMappedByRelationColumnInfo() == null) {
-                    for (ForeignKeyInfo foreignKeyInfo : relationColumnInfo.getInverseForeignKeyColumnInfoList()) {
+                    for (ForeignKeyInfo foreignKeyInfo : relationColumnInfo.getInverseForeignKeyInfoList()) {
                         this.columnInfoCompositeIndex++;
                         WhereItemContext whereItemContext = this.handleRelationColumnMultiParam(relationColumnInfo, foreignKeyInfo);
                         whereItemContextList.add(whereItemContext);

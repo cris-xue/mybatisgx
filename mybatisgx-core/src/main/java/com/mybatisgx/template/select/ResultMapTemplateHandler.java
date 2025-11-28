@@ -98,7 +98,7 @@ public class ResultMapTemplateHandler {
             RelationType relationType = relationColumnInfo.getRelationType();
             if (relationType != RelationType.MANY_TO_MANY) {
                 if (mappedByRelationColumnInfo == null) {
-                    for (ForeignKeyInfo inverseForeignKeyColumnInfo : relationColumnInfo.getInverseForeignKeyColumnInfoList()) {
+                    for (ForeignKeyInfo inverseForeignKeyColumnInfo : relationColumnInfo.getInverseForeignKeyInfoList()) {
                         ColumnInfo foreignKeyColumnInfo = inverseForeignKeyColumnInfo.getColumnInfo();
                         ColumnInfo referencedColumnInfo = inverseForeignKeyColumnInfo.getReferencedColumnInfo();
                         if (TypeUtils.typeEquals(referencedColumnInfo, IdColumnInfo.class)) {
@@ -182,7 +182,7 @@ public class ResultMapTemplateHandler {
         RelationColumnInfo mappedByColumnRelationInfo = relationColumnInfo.getMappedByRelationColumnInfo();
         if (mappedByColumnRelationInfo == null) {
             // 关系维护方
-            List<ForeignKeyInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
+            List<ForeignKeyInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyInfoList();
             for (ForeignKeyInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
                 ColumnInfo foreignKeyColumnInfo = inverseForeignKeyColumnInfo.getColumnInfo();
                 ColumnInfo referencedColumnInfo = inverseForeignKeyColumnInfo.getReferencedColumnInfo();
@@ -193,7 +193,7 @@ public class ResultMapTemplateHandler {
                 relationProperty.put(left, right);*/
             }
         } else {
-            List<ForeignKeyInfo> inverseForeignKeyColumnInfoList = mappedByColumnRelationInfo.getInverseForeignKeyColumnInfoList();
+            List<ForeignKeyInfo> inverseForeignKeyColumnInfoList = mappedByColumnRelationInfo.getInverseForeignKeyInfoList();
             for (ForeignKeyInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
                 ColumnInfo foreignKeyColumnInfo = inverseForeignKeyColumnInfo.getColumnInfo();
                 ColumnInfo referencedColumnInfo = inverseForeignKeyColumnInfo.getReferencedColumnInfo();
@@ -225,14 +225,14 @@ public class ResultMapTemplateHandler {
         Map<String, String> column = new HashMap();
         if (relationType != RelationType.MANY_TO_MANY) {
             if (mappedByRelationColumnInfo != null) {
-                List<ForeignKeyInfo> inverseForeignKeyColumnInfoList = mappedByRelationColumnInfo.getInverseForeignKeyColumnInfoList();
+                List<ForeignKeyInfo> inverseForeignKeyColumnInfoList = mappedByRelationColumnInfo.getInverseForeignKeyInfoList();
                 for (ForeignKeyInfo inverseForeignKeyInfo : inverseForeignKeyColumnInfoList) {
                     ColumnInfo foreignKeyColumnInfo = inverseForeignKeyInfo.getColumnInfo();
                     ColumnInfo referencedColumnInfo = inverseForeignKeyInfo.getReferencedColumnInfo();
                     column.put(foreignKeyColumnInfo.getJavaColumnName(), referencedColumnInfo.getDbColumnNameAlias());
                 }
             } else {
-                List<ForeignKeyInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
+                List<ForeignKeyInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyInfoList();
                 for (ForeignKeyInfo inverseForeignKeyInfo : inverseForeignKeyColumnInfoList) {
                     ColumnInfo foreignKeyColumnInfo = inverseForeignKeyInfo.getColumnInfo();
                     column.put(foreignKeyColumnInfo.getJavaColumnName(), foreignKeyColumnInfo.getDbColumnNameAlias());
@@ -240,14 +240,14 @@ public class ResultMapTemplateHandler {
             }
         } else {
             if (mappedByRelationColumnInfo != null) {
-                List<ForeignKeyInfo> inverseForeignKeyColumnInfoList = mappedByRelationColumnInfo.getInverseForeignKeyColumnInfoList();
+                List<ForeignKeyInfo> inverseForeignKeyColumnInfoList = mappedByRelationColumnInfo.getInverseForeignKeyInfoList();
                 for (ForeignKeyInfo inverseForeignKeyInfo : inverseForeignKeyColumnInfoList) {
                     ColumnInfo foreignKeyColumnInfo = inverseForeignKeyInfo.getColumnInfo();
                     ColumnInfo referencedColumnInfo = inverseForeignKeyInfo.getReferencedColumnInfo();
                     column.put(foreignKeyColumnInfo.getJavaColumnName(), referencedColumnInfo.getDbColumnNameAlias());
                 }
             } else {
-                List<ForeignKeyInfo> foreignKeyColumnInfoList = relationColumnInfo.getForeignKeyColumnInfoList();
+                List<ForeignKeyInfo> foreignKeyColumnInfoList = relationColumnInfo.getForeignKeyInfoList();
                 for (ForeignKeyInfo foreignKeyInfo : foreignKeyColumnInfoList) {
                     ColumnInfo foreignKeyColumnInfo = foreignKeyInfo.getColumnInfo();
                     ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();

@@ -271,12 +271,12 @@ public class EntityInfo {
                     RelationColumnInfo relationColumnInfo = (RelationColumnInfo) this.cloneBean(columnInfo);
                     RelationColumnInfo mappedByRelationColumnInfo = relationColumnInfo.getMappedByRelationColumnInfo();
                     if (mappedByRelationColumnInfo != null) {
-                        for (ForeignKeyInfo foreignKeyInfo : mappedByRelationColumnInfo.getInverseForeignKeyColumnInfoList()) {
+                        for (ForeignKeyInfo foreignKeyInfo : mappedByRelationColumnInfo.getInverseForeignKeyInfoList()) {
                             ColumnInfo referencedColumnInfo = this.cloneBean(foreignKeyInfo.getReferencedColumnInfo());
                             foreignKeyInfo.setReferencedColumnInfo(referencedColumnInfo);
                         }
                     } else {
-                        for (ForeignKeyInfo foreignKeyInfo : relationColumnInfo.getInverseForeignKeyColumnInfoList()) {
+                        for (ForeignKeyInfo foreignKeyInfo : relationColumnInfo.getInverseForeignKeyInfoList()) {
                             ColumnInfo referencedColumnInfo = this.cloneBean(foreignKeyInfo.getReferencedColumnInfo());
                             foreignKeyInfo.setReferencedColumnInfo(referencedColumnInfo);
                         }

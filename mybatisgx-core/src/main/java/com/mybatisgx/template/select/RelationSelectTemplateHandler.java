@@ -104,7 +104,7 @@ public class RelationSelectTemplateHandler {
             RelationColumnInfo relationColumnInfo = (RelationColumnInfo) entityRelationSelectInfo.getColumnInfo();
             RelationColumnInfo mappedByRelationColumnInfo = relationColumnInfo.getMappedByRelationColumnInfo();
             if (mappedByRelationColumnInfo != null) {
-                List<ForeignKeyInfo> inverseForeignKeyColumnInfoList = mappedByRelationColumnInfo.getInverseForeignKeyColumnInfoList();
+                List<ForeignKeyInfo> inverseForeignKeyColumnInfoList = mappedByRelationColumnInfo.getInverseForeignKeyInfoList();
                 Expression whereCondition = null;
                 for (ForeignKeyInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
                     ColumnInfo foreignKeyColumnInfo = inverseForeignKeyColumnInfo.getColumnInfo();
@@ -114,7 +114,7 @@ public class RelationSelectTemplateHandler {
                 }
                 return whereCondition;
             } else {
-                List<ForeignKeyInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
+                List<ForeignKeyInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyInfoList();
                 Expression whereCondition = null;
                 for (ForeignKeyInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
                     ColumnInfo foreignKeyColumnInfo = inverseForeignKeyColumnInfo.getColumnInfo();
@@ -133,11 +133,11 @@ public class RelationSelectTemplateHandler {
             RelationColumnInfo mappedByRelationColumnInfo = relationColumnInfo.getMappedByRelationColumnInfo();
             if (mappedByRelationColumnInfo != null) {
                 // user_role left join role on() user_role.role_id = role.id where user_role.user_id = user.id
-                List<ForeignKeyInfo> inverseForeignKeyColumnInfoList = mappedByRelationColumnInfo.getInverseForeignKeyColumnInfoList();
+                List<ForeignKeyInfo> inverseForeignKeyColumnInfoList = mappedByRelationColumnInfo.getInverseForeignKeyInfoList();
                 return this.buildManyToManyWhereExpression(middleTableName, inverseForeignKeyColumnInfoList);
             } else {
                 // user_role left join user on() user_role.user_id = user.id where user_role.role_id = role.id
-                List<ForeignKeyInfo> foreignKeyColumnInfoList = relationColumnInfo.getForeignKeyColumnInfoList();
+                List<ForeignKeyInfo> foreignKeyColumnInfoList = relationColumnInfo.getForeignKeyInfoList();
                 return this.buildManyToManyWhereExpression(middleTableName, foreignKeyColumnInfoList);
             }
         }

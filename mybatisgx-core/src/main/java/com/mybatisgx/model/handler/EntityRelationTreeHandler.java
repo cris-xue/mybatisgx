@@ -99,12 +99,12 @@ public class EntityRelationTreeHandler {
             JoinTable joinTable = mappedByRelationColumnInfo.getJoinTable();
             tableName = joinTable.name();
 
-            List<ForeignKeyInfo> foreignKeyColumnInfoList = mappedByRelationColumnInfo.getForeignKeyColumnInfoList();
+            List<ForeignKeyInfo> foreignKeyColumnInfoList = mappedByRelationColumnInfo.getForeignKeyInfoList();
             for (ForeignKeyInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
                 rightColumnInfoList.add(foreignKeyColumnInfo.getColumnInfo());
             }
 
-            List<ForeignKeyInfo> inverseForeignKeyColumnInfoList = mappedByRelationColumnInfo.getInverseForeignKeyColumnInfoList();
+            List<ForeignKeyInfo> inverseForeignKeyColumnInfoList = mappedByRelationColumnInfo.getInverseForeignKeyInfoList();
             for (ForeignKeyInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
                 leftColumnInfoList.add(inverseForeignKeyColumnInfo.getColumnInfo());
             }
@@ -112,12 +112,12 @@ public class EntityRelationTreeHandler {
             JoinTable joinTable = relationColumnInfo.getJoinTable();
             tableName = joinTable.name();
 
-            List<ForeignKeyInfo> foreignKeyColumnInfoList = relationColumnInfo.getForeignKeyColumnInfoList();
+            List<ForeignKeyInfo> foreignKeyColumnInfoList = relationColumnInfo.getForeignKeyInfoList();
             for (ForeignKeyInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
                 leftColumnInfoList.add(foreignKeyColumnInfo.getColumnInfo());
             }
 
-            List<ForeignKeyInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
+            List<ForeignKeyInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyInfoList();
             for (ForeignKeyInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
                 rightColumnInfoList.add(inverseForeignKeyColumnInfo.getColumnInfo());
             }
@@ -182,13 +182,13 @@ public class EntityRelationTreeHandler {
                     RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
                     ManyToMany manyToMany = relationColumnInfo.getManyToMany();
                     if (manyToMany == null) {
-                        List<ForeignKeyInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
+                        List<ForeignKeyInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyInfoList();
                         this.processForeignKeyColumnAlias(inverseForeignKeyColumnInfoList, tableNameAlias, level, index, i);
                     } else {
-                        List<ForeignKeyInfo> foreignKeyColumnInfoList = relationColumnInfo.getForeignKeyColumnInfoList();
+                        List<ForeignKeyInfo> foreignKeyColumnInfoList = relationColumnInfo.getForeignKeyInfoList();
                         this.processForeignKeyColumnAlias(foreignKeyColumnInfoList, tableNameAlias, level, index, i);
 
-                        List<ForeignKeyInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
+                        List<ForeignKeyInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyInfoList();
                         this.processForeignKeyColumnAlias(inverseForeignKeyColumnInfoList, tableNameAlias, level, index, i);
                     }
                 }

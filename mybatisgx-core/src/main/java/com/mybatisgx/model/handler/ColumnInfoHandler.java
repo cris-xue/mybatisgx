@@ -231,8 +231,8 @@ public class ColumnInfoHandler {
         relationColumnInfo.setJoinColumns(joinColumns);
         relationColumnInfo.setJoinTable(joinTable);
         relationColumnInfo.setFetch(fetch);
-        relationColumnInfo.setForeignKeyColumnInfoList(foreignKeyColumnInfoList);
-        relationColumnInfo.setInverseForeignKeyColumnInfoList(inverseForeignKeyColumnInfoList);
+        relationColumnInfo.setForeignKeyInfoList(foreignKeyColumnInfoList);
+        relationColumnInfo.setInverseForeignKeyInfoList(inverseForeignKeyColumnInfoList);
     }
 
     private List<ForeignKeyInfo> getForeignKeyList(JoinColumn[] joinColumnList) {
@@ -263,7 +263,7 @@ public class ColumnInfoHandler {
             } else {
                 RelationType relationType = relationColumnInfo.getRelationType();
                 if (relationType != RelationType.MANY_TO_MANY) {
-                    List<ForeignKeyInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
+                    List<ForeignKeyInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyInfoList();
                     for (ForeignKeyInfo inverseForeignKeyColumn : inverseForeignKeyColumnInfoList) {
                         Class<?> javaType = relationColumnInfo.getJavaType();
                         EntityInfo relationColumnEntityInfo = EntityInfoContextHolder.get(javaType);
@@ -278,7 +278,7 @@ public class ColumnInfoHandler {
                         // foreignKeyColumnInfo.setDbTypeName(referencedColumnInfo.getDbTypeName());
                     }
                 } else {
-                    List<ForeignKeyInfo> foreignKeyColumnInfoList = relationColumnInfo.getForeignKeyColumnInfoList();
+                    List<ForeignKeyInfo> foreignKeyColumnInfoList = relationColumnInfo.getForeignKeyInfoList();
                     for (ForeignKeyInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
                         Class<?> javaType = relationColumnInfo.getJavaType();
                         EntityInfo relationColumnEntityInfo = EntityInfoContextHolder.get(javaType);
@@ -288,7 +288,7 @@ public class ColumnInfoHandler {
                         foreignKeyColumnInfo.setReferencedColumnInfo(referencedColumnInfo);
                     }
 
-                    List<ForeignKeyInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyColumnInfoList();
+                    List<ForeignKeyInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyInfoList();
                     for (ForeignKeyInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
                         Class<?> javaType = relationColumnInfo.getJavaType();
                         EntityInfo relationColumnEntityInfo = EntityInfoContextHolder.get(javaType);

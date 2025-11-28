@@ -108,9 +108,9 @@ public class ColumnEntityRelation<T> {
         RelationColumnInfo relationColumnInfo = (RelationColumnInfo) this.columnInfo;
         RelationColumnInfo mappedByRelationColumnInfo = relationColumnInfo.getMappedByRelationColumnInfo();
         if (mappedByRelationColumnInfo != null) {
-            return mappedByRelationColumnInfo.getForeignKeyColumnInfoList();
+            return mappedByRelationColumnInfo.getForeignKeyInfoList();
         } else {
-            return relationColumnInfo.getForeignKeyColumnInfoList();
+            return relationColumnInfo.getForeignKeyInfoList();
         }
     }
 
@@ -118,9 +118,9 @@ public class ColumnEntityRelation<T> {
         RelationColumnInfo relationColumnInfo = (RelationColumnInfo) this.columnInfo;
         RelationColumnInfo mappedByRelationColumnInfo = relationColumnInfo.getMappedByRelationColumnInfo();
         if (mappedByRelationColumnInfo != null) {
-            return mappedByRelationColumnInfo.getInverseForeignKeyColumnInfoList();
+            return mappedByRelationColumnInfo.getInverseForeignKeyInfoList();
         } else {
-            return relationColumnInfo.getInverseForeignKeyColumnInfoList();
+            return relationColumnInfo.getInverseForeignKeyInfoList();
         }
     }
 }

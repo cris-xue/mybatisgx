@@ -126,19 +126,19 @@ public class RelationColumnInfo extends ColumnInfo {
         this.mappedByRelationColumnInfo = mappedByRelationColumnInfo;
     }
 
-    public List<ForeignKeyInfo> getForeignKeyColumnInfoList() {
+    public List<ForeignKeyInfo> getForeignKeyInfoList() {
         return foreignKeyColumnInfoList;
     }
 
-    public void setForeignKeyColumnInfoList(List<ForeignKeyInfo> foreignKeyColumnInfoList) {
+    public void setForeignKeyInfoList(List<ForeignKeyInfo> foreignKeyColumnInfoList) {
         this.foreignKeyColumnInfoList = foreignKeyColumnInfoList;
     }
 
-    public List<ForeignKeyInfo> getInverseForeignKeyColumnInfoList() {
+    public List<ForeignKeyInfo> getInverseForeignKeyInfoList() {
         return inverseForeignKeyColumnInfoList;
     }
 
-    public void setInverseForeignKeyColumnInfoList(List<ForeignKeyInfo> inverseForeignKeyColumnInfoList) {
+    public void setInverseForeignKeyInfoList(List<ForeignKeyInfo> inverseForeignKeyColumnInfoList) {
         this.inverseForeignKeyColumnInfoList = inverseForeignKeyColumnInfoList;
     }
 

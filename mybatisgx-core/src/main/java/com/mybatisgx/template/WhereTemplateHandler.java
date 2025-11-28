@@ -819,7 +819,7 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleComplexTypeNoAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            return handleComplexTypeNoAnnotationSingleParam(columnInfoComposite, columnInfoComposite);
+            return handleComplexTypeNoAnnotationSingleParam(columnInfo, columnInfoComposite);
         }
 
         @Override
@@ -829,7 +829,7 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleComplexTypeWithAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            return handleComplexTypeNoAnnotationSingleParam(columnInfoComposite, columnInfoComposite);
+            return handleComplexTypeNoAnnotationSingleParam(columnInfo, columnInfoComposite);
         }
 
         @Override
@@ -899,7 +899,7 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleComplexTypeNoAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            return handleComplexTypeNoAnnotationSingleParam(columnInfoComposite, columnInfoComposite);
+            return handleComplexTypeNoAnnotationSingleParam(columnInfo, columnInfoComposite);
         }
 
         @Override
@@ -909,7 +909,7 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleComplexTypeWithAnnotationMultiParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            return handleComplexTypeNoAnnotationSingleParam(columnInfoComposite, columnInfoComposite);
+            return handleComplexTypeNoAnnotationSingleParam(columnInfo, columnInfoComposite);
         }
 
         @Override

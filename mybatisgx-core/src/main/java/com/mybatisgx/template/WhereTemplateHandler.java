@@ -207,40 +207,6 @@ public class WhereTemplateHandler {
                         whereItemContextList.add(whereItemContext);
                     }
                 }
-
-                /*if (methodParamInfo.getClassCategory() == ClassCategory.SIMPLE) {
-                    // findById(Long id) findById(@Param("id") Long id)
-                    WhereItemContext whereItemContext = this.handleSimpleTypeParam(columnInfo);
-                    whereItemContextList.add(whereItemContext);
-                }
-                if (methodParamInfo.getClassCategory() == ClassCategory.COMPLEX) {
-                    // findById(MultiId id) findById(@Param("id") MultiId id)
-                    if (methodParamInfo.getParam() == null) {
-                        List<ColumnInfo> columnInfoComposites = methodParamInfo.getColumnInfoList();
-                        if (ObjectUtils.isEmpty(columnInfoComposites)) {
-                            WhereItemContext whereItemContext = this.handleSimpleTypeParam(columnInfo);
-                            whereItemContextList.add(whereItemContext);
-                        } else {
-                            for (ColumnInfo columnInfoComposite : columnInfoComposites) {
-                                this.columnInfoCompositeIndex++;
-                                WhereItemContext whereItemContext = this.handleComplexTypeParam(columnInfo, columnInfoComposite);
-                                whereItemContextList.add(whereItemContext);
-                            }
-                        }
-                    } else {
-                        List<ColumnInfo> columnInfoComposites = methodParamInfo.getColumnInfoList();
-                        if (ObjectUtils.isEmpty(columnInfoComposites)) {
-                            WhereItemContext whereItemContext = this.handleSimpleTypeParam(columnInfo);
-                            whereItemContextList.add(whereItemContext);
-                        } else {
-                            for (ColumnInfo columnInfoComposite : columnInfoComposites) {
-                                this.columnInfoCompositeIndex++;
-                                WhereItemContext whereItemContext = this.handleComplexTypeParam(columnInfo, columnInfoComposite);
-                                whereItemContextList.add(whereItemContext);
-                            }
-                        }
-                    }
-                }*/
             }
             if (TypeUtils.typeEquals(columnInfo, RelationColumnInfo.class)) {
                 RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
@@ -268,40 +234,6 @@ public class WhereTemplateHandler {
                         whereItemContextList.add(whereItemContext);
                     }
                 }
-
-                /*if (methodParamInfo.getClassCategory() == ClassCategory.SIMPLE) {
-                    // findById(Long id) findById(@Param("id") Long id)
-                    WhereItemContext whereItemContext = this.handleSimpleTypeParam(columnInfo);
-                    whereItemContextList.add(whereItemContext);
-                }
-                if (methodParamInfo.getClassCategory() == ClassCategory.COMPLEX) {
-                    // findById(MultiId id) findById(@Param("id") MultiId id)
-                    if (methodParamInfo.getParam() == null) {
-                        List<ColumnInfo> columnInfoComposites = methodParamInfo.getColumnInfoList();
-                        if (ObjectUtils.isEmpty(columnInfoComposites)) {
-                            WhereItemContext whereItemContext = this.handleSimpleTypeParam(columnInfo);
-                            whereItemContextList.add(whereItemContext);
-                        } else {
-                            for (ColumnInfo columnInfoComposite : columnInfoComposites) {
-                                this.columnInfoCompositeIndex++;
-                                WhereItemContext whereItemContext = this.handleComplexTypeParam(columnInfo, columnInfoComposite);
-                                whereItemContextList.add(whereItemContext);
-                            }
-                        }
-                    } else {
-                        List<ColumnInfo> columnInfoComposites = methodParamInfo.getColumnInfoList();
-                        if (ObjectUtils.isEmpty(columnInfoComposites)) {
-                            WhereItemContext whereItemContext = this.handleSimpleTypeParam(columnInfo);
-                            whereItemContextList.add(whereItemContext);
-                        } else {
-                            for (ColumnInfo columnInfoComposite : columnInfoComposites) {
-                                this.columnInfoCompositeIndex++;
-                                WhereItemContext whereItemContext = this.handleComplexTypeParam(columnInfo, columnInfoComposite);
-                                whereItemContextList.add(whereItemContext);
-                            }
-                        }
-                    }
-                }*/
             }
             if (TypeUtils.typeEquals(columnInfo, RelationColumnInfo.class)) {
                 RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;

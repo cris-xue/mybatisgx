@@ -437,53 +437,12 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleRelationColumnSingleParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo) {
-            ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();
-            String testExpression = String.format(
-                    "%1$s != null and %1$s.%2$s != null",
-                    relationColumnInfo.getJavaColumnName(),
-                    referencedColumnInfo.getJavaColumnName()
-            );
-            String bindKey = String.format(
-                    "%1$s_%2$s",
-                    relationColumnInfo.getJavaColumnName(),
-                    referencedColumnInfo.getJavaColumnName()
-            );
-            String bindValuePath = String.format(
-                    "%1$s.%2$s",
-                    relationColumnInfo.getJavaColumnName(),
-                    referencedColumnInfo.getJavaColumnName()
-            );
-            Element likeBindElement = this.buildLikeBindElement(bindKey, bindValuePath);
-            String paramValueExpression = bindKey;
-            String conditionExpression = this.getConditionExpression(relationColumnInfo, paramValueExpression);
-            return new WhereItemContext(testExpression, Arrays.asList(likeBindElement, conditionExpression));
+            throw new UnsupportedOperationException("多对多关系字段不支持模糊查询");
         }
 
         @Override
         public WhereItemContext handleRelationColumnMultiParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo) {
-            ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();
-            String testExpression = String.format(
-                    "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
-                    methodParamInfo.getArgName(),
-                    relationColumnInfo.getJavaColumnName(),
-                    referencedColumnInfo.getJavaColumnName()
-            );
-            String bindKey = String.format(
-                    "%1$s_%2$s_%3$s",
-                    methodParamInfo.getArgName(),
-                    relationColumnInfo.getJavaColumnName(),
-                    referencedColumnInfo.getJavaColumnName()
-            );
-            String bindValuePath = String.format(
-                    "%1$s.%2$s.%3$s",
-                    methodParamInfo.getArgName(),
-                    relationColumnInfo.getJavaColumnName(),
-                    referencedColumnInfo.getJavaColumnName()
-            );
-            Element likeBindElement = this.buildLikeBindElement(bindKey, bindValuePath);
-            String paramValueExpression = bindKey;
-            String conditionExpression = this.getConditionExpression(relationColumnInfo, paramValueExpression);
-            return new WhereItemContext(testExpression, Arrays.asList(likeBindElement, conditionExpression));
+            throw new UnsupportedOperationException("多对多关系字段不支持模糊查询");
         }
 
         private String getBindKey(List<String> pathItemList) {
@@ -552,38 +511,20 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleRelationColumnSingleParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo) {
-            ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();
-            String testExpression = String.format(
-                    "%1$s != null and %1$s.%2$s != null",
-                    relationColumnInfo.getJavaColumnName(),
-                    referencedColumnInfo.getJavaColumnName()
-            );
-            String paramValueExpression = String.format(
-                    "%1$s.%2$s",
-                    relationColumnInfo.getJavaColumnName(),
-                    referencedColumnInfo.getJavaColumnName()
-            );
-            String conditionExpression = this.getConditionExpression(relationColumnInfo, "");
+            List<String> paramValuePathItemList = this.getParamValuePathItemList(relationColumnInfo, foreignKeyInfo.getReferencedColumnInfo());
+            String testExpression = this.getTestExpression(paramValuePathItemList);
+            String paramValueExpression = this.getParamValueExpression(paramValuePathItemList);
+            String conditionExpression = this.getConditionExpression(foreignKeyInfo.getColumnInfo(), "");
             Element foreachElement = this.buildForeachElement(paramValueExpression);
             return new WhereItemContext(testExpression, Arrays.asList(conditionExpression, foreachElement));
         }
 
         @Override
         public WhereItemContext handleRelationColumnMultiParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo) {
-            ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();
-            String testExpression = String.format(
-                    "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
-                    methodParamInfo.getArgName(),
-                    relationColumnInfo.getJavaColumnName(),
-                    referencedColumnInfo.getJavaColumnName()
-            );
-            String paramValueExpression = String.format(
-                    "%1$s.%2$s.%3$s",
-                    methodParamInfo.getArgName(),
-                    relationColumnInfo.getJavaColumnName(),
-                    referencedColumnInfo.getJavaColumnName()
-            );
-            String conditionExpression = this.getConditionExpression(relationColumnInfo, "");
+            List<String> paramValuePathItemList = this.getParamValuePathItemList(relationColumnInfo, foreignKeyInfo.getReferencedColumnInfo());
+            String testExpression = this.getTestExpression(paramValuePathItemList);
+            String paramValueExpression = this.getParamValueExpression(paramValuePathItemList);
+            String conditionExpression = this.getConditionExpression(foreignKeyInfo.getColumnInfo(), "");
             Element foreachElement = this.buildForeachElement(paramValueExpression);
             return new WhereItemContext(testExpression, Arrays.asList(conditionExpression, foreachElement));
         }
@@ -623,37 +564,19 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleRelationColumnSingleParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo) {
-            ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();
-            String testExpression = String.format(
-                    "%1$s != null and %1$s.%2$s != null",
-                    relationColumnInfo.getJavaColumnName(),
-                    referencedColumnInfo.getJavaColumnName()
-            );
-            String paramValueExpression = String.format(
-                    "#{%1$s.%2$s[0]} and #{%1$s.%2$s[1]}",
-                    relationColumnInfo.getJavaColumnName(),
-                    referencedColumnInfo.getJavaColumnName()
-            );
-            String conditionExpression = this.getConditionExpression(relationColumnInfo, paramValueExpression);
+            List<String> paramValuePathItemList = this.getParamValuePathItemList(relationColumnInfo, foreignKeyInfo.getReferencedColumnInfo());
+            String testExpression = this.getTestExpression(paramValuePathItemList);
+            String paramValueExpression = this.getParamValueExpression(paramValuePathItemList);
+            String conditionExpression = this.getConditionExpression(foreignKeyInfo.getColumnInfo(), paramValueExpression);
             return new WhereItemContext(testExpression, Arrays.asList(conditionExpression));
         }
 
         @Override
         public WhereItemContext handleRelationColumnMultiParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo) {
-            ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();
-            String testExpression = String.format(
-                    "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
-                    methodParamInfo.getArgName(),
-                    relationColumnInfo.getJavaColumnName(),
-                    referencedColumnInfo.getJavaColumnName()
-            );
-            String paramValueExpression = String.format(
-                    "#{%1$s.%2$s.%3$s[0]} and #{%1$s.%2$s.%3$s[1]}",
-                    methodParamInfo.getArgName(),
-                    relationColumnInfo.getJavaColumnName(),
-                    referencedColumnInfo.getJavaColumnName()
-            );
-            String conditionExpression = this.getConditionExpression(relationColumnInfo, paramValueExpression);
+            List<String> paramValuePathItemList = this.getParamValuePathItemList(relationColumnInfo, foreignKeyInfo.getReferencedColumnInfo());
+            String testExpression = this.getTestExpression(paramValuePathItemList);
+            String paramValueExpression = this.getParamValueExpression(paramValuePathItemList);
+            String conditionExpression = this.getConditionExpression(foreignKeyInfo.getColumnInfo(), paramValueExpression);
             return new WhereItemContext(testExpression, Arrays.asList(conditionExpression));
         }
 
@@ -686,37 +609,19 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleRelationColumnSingleParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo) {
-            ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();
-            String testExpression = String.format(
-                    "%1$s != null and %1$s.%2$s != null",
-                    relationColumnInfo.getJavaColumnName(),
-                    referencedColumnInfo.getJavaColumnName()
-            );
-            String paramValueExpression = String.format(
-                    "#{%1$s.%2$s}",
-                    relationColumnInfo.getJavaColumnName(),
-                    referencedColumnInfo.getJavaColumnName()
-            );
-            String conditionExpression = this.getConditionExpression(relationColumnInfo, paramValueExpression);
+            List<String> paramValuePathItemList = this.getParamValuePathItemList(relationColumnInfo, foreignKeyInfo.getReferencedColumnInfo());
+            String testExpression = this.getTestExpression(paramValuePathItemList);
+            String paramValueExpression = this.getParamValueExpression(paramValuePathItemList);
+            String conditionExpression = this.getConditionExpression(foreignKeyInfo.getColumnInfo(), paramValueExpression);
             return new WhereItemContext(testExpression, Arrays.asList(conditionExpression));
         }
 
         @Override
         public WhereItemContext handleRelationColumnMultiParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo) {
-            ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();
-            String testExpression = String.format(
-                    "%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null",
-                    methodParamInfo.getArgName(),
-                    relationColumnInfo.getJavaColumnName(),
-                    referencedColumnInfo.getJavaColumnName()
-            );
-            String paramValueExpression = String.format(
-                    "#{%1$s.%2$s.%3$s}",
-                    methodParamInfo.getArgName(),
-                    relationColumnInfo.getJavaColumnName(),
-                    referencedColumnInfo.getJavaColumnName()
-            );
-            String conditionExpression = this.getConditionExpression(relationColumnInfo, paramValueExpression);
+            List<String> paramValuePathItemList = this.getParamValuePathItemList(relationColumnInfo, foreignKeyInfo.getReferencedColumnInfo());
+            String testExpression = this.getTestExpression(paramValuePathItemList);
+            String paramValueExpression = this.getParamValueExpression(paramValuePathItemList);
+            String conditionExpression = this.getConditionExpression(foreignKeyInfo.getColumnInfo(), paramValueExpression);
             return new WhereItemContext(testExpression, Arrays.asList(conditionExpression));
         }
     }
@@ -737,14 +642,12 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleRelationColumnSingleParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo) {
-            String conditionExpression = this.getConditionExpression(relationColumnInfo, "");
-            return new WhereItemContext(null, Arrays.asList(conditionExpression));
+            throw new UnsupportedOperationException("不支持单参数关系字段");
         }
 
         @Override
         public WhereItemContext handleRelationColumnMultiParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo) {
-            String conditionExpression = this.getConditionExpression(relationColumnInfo, "");
-            return new WhereItemContext(null, Arrays.asList(conditionExpression));
+            throw new UnsupportedOperationException("不支持多参数关系字段");
         }
     }
 

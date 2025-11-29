@@ -22,7 +22,7 @@ public class Role extends BaseEntity<Long> {
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-            name = "user_role_simple",
+            name = "batch_mtm_user_role",
             joinColumns = @JoinColumn(name = "role_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )

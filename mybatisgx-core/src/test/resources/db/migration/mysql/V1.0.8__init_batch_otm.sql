@@ -2,6 +2,7 @@ create table if not exists batch_otm_user
 (
     id             bigint      not null,
     code           varchar(64) null comment '',
+    org_id         bigint      not null,
 
     input_user_id  bigint      not null comment '输入用户id',
     input_time     datetime    not null comment '输入时间',

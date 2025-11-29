@@ -346,25 +346,27 @@ public class WhereTemplateHandler {
         @Override
         public WhereItemContext handleSimpleTypeParam(ColumnInfo columnInfo) {
             List<String> paramValuePathItemList = this.getParamValuePathItemList(columnInfo, null);
-            String testExpression = this.getTestExpression(paramValuePathItemList);
+            return this.buildWhereItemContext(columnInfo, paramValuePathItemList);
+            /*String testExpression = this.getTestExpression(paramValuePathItemList);
             String bindKey = this.getBindKey(paramValuePathItemList);
             String bindValuePath = this.getBindValuePath(paramValuePathItemList);
             Element likeBindElement = this.buildLikeBindElement(bindKey, bindValuePath);
             String paramValueExpression = this.getParamValueExpression(Arrays.asList(bindKey));
             String conditionExpression = this.getConditionExpression(columnInfo, paramValueExpression);
-            return new WhereItemContext(testExpression, Arrays.asList(likeBindElement, conditionExpression));
+            return new WhereItemContext(testExpression, Arrays.asList(likeBindElement, conditionExpression));*/
         }
 
         @Override
         public WhereItemContext handleComplexTypeParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
             List<String> paramValuePathItemList = this.getParamValuePathItemList(columnInfo, columnInfoComposite);
-            String testExpression = this.getTestExpression(paramValuePathItemList);
+            return this.buildWhereItemContext(columnInfoComposite, paramValuePathItemList);
+            /*String testExpression = this.getTestExpression(paramValuePathItemList);
             String bindKey = this.getBindKey(paramValuePathItemList);
             String bindValuePath = this.getBindValuePath(paramValuePathItemList);
             Element likeBindElement = this.buildLikeBindElement(bindKey, bindValuePath);
             String paramValueExpression = this.getParamValueExpression(Arrays.asList(bindKey));
             String conditionExpression = this.getConditionExpression(columnInfoComposite, paramValueExpression);
-            return new WhereItemContext(testExpression, Arrays.asList(likeBindElement, conditionExpression));
+            return new WhereItemContext(testExpression, Arrays.asList(likeBindElement, conditionExpression));*/
         }
 
         @Override
@@ -375,6 +377,22 @@ public class WhereTemplateHandler {
         @Override
         public WhereItemContext handleRelationColumnMultiParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo) {
             throw new UnsupportedOperationException("多对多关系字段不支持模糊查询");
+        }
+
+        /**
+         * 构建WhereItemContext
+         * @param columnInfo 数据库列字段信息
+         * @param paramValuePathItemList 参数值路径
+         * @return
+         */
+        private WhereItemContext buildWhereItemContext(ColumnInfo columnInfo, List<String> paramValuePathItemList) {
+            String testExpression = this.getTestExpression(paramValuePathItemList);
+            String bindKey = this.getBindKey(paramValuePathItemList);
+            String bindValuePath = this.getBindValuePath(paramValuePathItemList);
+            Element likeBindElement = this.buildLikeBindElement(bindKey, bindValuePath);
+            String paramValueExpression = this.getParamValueExpression(Arrays.asList(bindKey));
+            String conditionExpression = this.getConditionExpression(columnInfo, paramValueExpression);
+            return new WhereItemContext(testExpression, Arrays.asList(likeBindElement, conditionExpression));
         }
 
         private String getBindKey(List<String> pathItemList) {
@@ -424,39 +442,57 @@ public class WhereTemplateHandler {
         @Override
         public WhereItemContext handleSimpleTypeParam(ColumnInfo columnInfo) {
             List<String> paramValuePathItemList = this.getParamValuePathItemList(columnInfo, null);
-            String testExpression = this.getTestExpression(paramValuePathItemList);
+            return this.buildWhereItemContext(columnInfo, paramValuePathItemList);
+            /*String testExpression = this.getTestExpression(paramValuePathItemList);
             String paramValueExpression = this.getParamValueExpression(paramValuePathItemList);
             String conditionExpression = this.getConditionExpression(columnInfo, "");
             Element foreachElement = this.buildForeachElement(paramValueExpression);
-            return new WhereItemContext(testExpression, Arrays.asList(conditionExpression, foreachElement));
+            return new WhereItemContext(testExpression, Arrays.asList(conditionExpression, foreachElement));*/
         }
 
         @Override
         public WhereItemContext handleComplexTypeParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
             List<String> paramValuePathItemList = this.getParamValuePathItemList(columnInfo, columnInfoComposite);
-            String testExpression = this.getTestExpression(paramValuePathItemList);
+            return this.buildWhereItemContext(columnInfoComposite, paramValuePathItemList);
+            /*String testExpression = this.getTestExpression(paramValuePathItemList);
             String paramValueExpression = this.getParamValueExpression(paramValuePathItemList);
             String conditionExpression = this.getConditionExpression(columnInfoComposite, "");
             Element foreachElement = this.buildForeachElement(paramValueExpression);
-            return new WhereItemContext(testExpression, Arrays.asList(conditionExpression, foreachElement));
+            return new WhereItemContext(testExpression, Arrays.asList(conditionExpression, foreachElement));*/
         }
 
         @Override
         public WhereItemContext handleRelationColumnSingleParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo) {
             List<String> paramValuePathItemList = this.getParamValuePathItemList(relationColumnInfo, foreignKeyInfo.getReferencedColumnInfo());
-            String testExpression = this.getTestExpression(paramValuePathItemList);
+            return this.buildWhereItemContext(foreignKeyInfo.getColumnInfo(), paramValuePathItemList);
+            /*String testExpression = this.getTestExpression(paramValuePathItemList);
             String paramValueExpression = this.getParamValueExpression(paramValuePathItemList);
             String conditionExpression = this.getConditionExpression(foreignKeyInfo.getColumnInfo(), "");
             Element foreachElement = this.buildForeachElement(paramValueExpression);
-            return new WhereItemContext(testExpression, Arrays.asList(conditionExpression, foreachElement));
+            return new WhereItemContext(testExpression, Arrays.asList(conditionExpression, foreachElement));*/
         }
 
         @Override
         public WhereItemContext handleRelationColumnMultiParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo) {
             List<String> paramValuePathItemList = this.getParamValuePathItemList(relationColumnInfo, foreignKeyInfo.getReferencedColumnInfo());
-            String testExpression = this.getTestExpression(paramValuePathItemList);
+            return this.buildWhereItemContext(foreignKeyInfo.getColumnInfo(), paramValuePathItemList);
+            /*String testExpression = this.getTestExpression(paramValuePathItemList);
             String paramValueExpression = this.getParamValueExpression(paramValuePathItemList);
             String conditionExpression = this.getConditionExpression(foreignKeyInfo.getColumnInfo(), "");
+            Element foreachElement = this.buildForeachElement(paramValueExpression);
+            return new WhereItemContext(testExpression, Arrays.asList(conditionExpression, foreachElement));*/
+        }
+
+        /**
+         * 构建WhereItemContext
+         * @param columnInfo 数据库列字段信息
+         * @param paramValuePathItemList 参数值路径
+         * @return
+         */
+        private WhereItemContext buildWhereItemContext(ColumnInfo columnInfo, List<String> paramValuePathItemList) {
+            String testExpression = this.getTestExpression(paramValuePathItemList);
+            String paramValueExpression = this.getParamValueExpression(paramValuePathItemList);
+            String conditionExpression = this.getConditionExpression(columnInfo, "");
             Element foreachElement = this.buildForeachElement(paramValueExpression);
             return new WhereItemContext(testExpression, Arrays.asList(conditionExpression, foreachElement));
         }
@@ -479,43 +515,60 @@ public class WhereTemplateHandler {
         @Override
         public WhereItemContext handleSimpleTypeParam(ColumnInfo columnInfo) {
             List<String> paramValuePathItemList = this.getParamValuePathItemList(columnInfo, null);
-            String testExpression = this.getTestExpression(paramValuePathItemList);
+            return this.buildWhereItemContext(columnInfo, paramValuePathItemList);
+            /*String testExpression = this.getTestExpression(paramValuePathItemList);
             String paramValueExpression = this.getParamValueExpression(paramValuePathItemList);
             String conditionExpression = this.getConditionExpression(columnInfo, paramValueExpression);
-            return new WhereItemContext(testExpression, Arrays.asList(conditionExpression));
+            return new WhereItemContext(testExpression, Arrays.asList(conditionExpression));*/
         }
 
         @Override
         public WhereItemContext handleComplexTypeParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
             List<String> paramValuePathItemList = this.getParamValuePathItemList(columnInfo, columnInfoComposite);
-            String testExpression = this.getTestExpression(paramValuePathItemList);
+            return this.buildWhereItemContext(columnInfoComposite, paramValuePathItemList);
+            /*String testExpression = this.getTestExpression(paramValuePathItemList);
             String paramValueExpression = this.getParamValueExpression(paramValuePathItemList);
             String conditionExpression = this.getConditionExpression(columnInfoComposite, paramValueExpression);
-            return new WhereItemContext(testExpression, Arrays.asList(conditionExpression));
+            return new WhereItemContext(testExpression, Arrays.asList(conditionExpression));*/
         }
 
         @Override
         public WhereItemContext handleRelationColumnSingleParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo) {
             List<String> paramValuePathItemList = this.getParamValuePathItemList(relationColumnInfo, foreignKeyInfo.getReferencedColumnInfo());
-            String testExpression = this.getTestExpression(paramValuePathItemList);
+            return this.buildWhereItemContext(foreignKeyInfo.getColumnInfo(), paramValuePathItemList);
+            /*String testExpression = this.getTestExpression(paramValuePathItemList);
             String paramValueExpression = this.getParamValueExpression(paramValuePathItemList);
             String conditionExpression = this.getConditionExpression(foreignKeyInfo.getColumnInfo(), paramValueExpression);
-            return new WhereItemContext(testExpression, Arrays.asList(conditionExpression));
+            return new WhereItemContext(testExpression, Arrays.asList(conditionExpression));*/
         }
 
         @Override
         public WhereItemContext handleRelationColumnMultiParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo) {
             List<String> paramValuePathItemList = this.getParamValuePathItemList(relationColumnInfo, foreignKeyInfo.getReferencedColumnInfo());
-            String testExpression = this.getTestExpression(paramValuePathItemList);
+            return this.buildWhereItemContext(foreignKeyInfo.getColumnInfo(), paramValuePathItemList);
+            /*String testExpression = this.getTestExpression(paramValuePathItemList);
             String paramValueExpression = this.getParamValueExpression(paramValuePathItemList);
             String conditionExpression = this.getConditionExpression(foreignKeyInfo.getColumnInfo(), paramValueExpression);
-            return new WhereItemContext(testExpression, Arrays.asList(conditionExpression));
+            return new WhereItemContext(testExpression, Arrays.asList(conditionExpression));*/
         }
 
         @Override
         protected String getParamValueExpression(List<String> pathItemList) {
             String path = StringUtils.join(pathItemList, ".");
             return String.format("#{%1$s[0]} and #{%1$s[1]}", path);
+        }
+
+        /**
+         * 构建WhereItemContext
+         * @param columnInfo 数据库列字段信息
+         * @param paramValuePathItemList 参数值路径
+         * @return
+         */
+        private WhereItemContext buildWhereItemContext(ColumnInfo columnInfo, List<String> paramValuePathItemList) {
+            String testExpression = this.getTestExpression(paramValuePathItemList);
+            String paramValueExpression = this.getParamValueExpression(paramValuePathItemList);
+            String conditionExpression = this.getConditionExpression(columnInfo, paramValueExpression);
+            return new WhereItemContext(testExpression, Arrays.asList(conditionExpression));
         }
     }
 
@@ -524,36 +577,53 @@ public class WhereTemplateHandler {
         @Override
         public WhereItemContext handleSimpleTypeParam(ColumnInfo columnInfo) {
             List<String> paramValuePathItemList = this.getParamValuePathItemList(columnInfo, null);
-            String testExpression = this.getTestExpression(paramValuePathItemList);
+            return this.buildWhereItemContext(columnInfo, paramValuePathItemList);
+            /*String testExpression = this.getTestExpression(paramValuePathItemList);
             String paramValueExpression = this.getParamValueExpression(paramValuePathItemList);
             String conditionExpression = this.getConditionExpression(columnInfo, paramValueExpression);
-            return new WhereItemContext(testExpression, Arrays.asList(conditionExpression));
+            return new WhereItemContext(testExpression, Arrays.asList(conditionExpression));*/
         }
 
         @Override
         public WhereItemContext handleComplexTypeParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
             List<String> paramValuePathItemList = this.getParamValuePathItemList(columnInfo, columnInfoComposite);
-            String testExpression = this.getTestExpression(paramValuePathItemList);
+            return this.buildWhereItemContext(columnInfoComposite, paramValuePathItemList);
+            /*String testExpression = this.getTestExpression(paramValuePathItemList);
             String paramValueExpression = this.getParamValueExpression(paramValuePathItemList);
             String conditionExpression = this.getConditionExpression(columnInfoComposite, paramValueExpression);
-            return new WhereItemContext(testExpression, Arrays.asList(conditionExpression));
+            return new WhereItemContext(testExpression, Arrays.asList(conditionExpression));*/
         }
 
         @Override
         public WhereItemContext handleRelationColumnSingleParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo) {
             List<String> paramValuePathItemList = this.getParamValuePathItemList(relationColumnInfo, foreignKeyInfo.getReferencedColumnInfo());
-            String testExpression = this.getTestExpression(paramValuePathItemList);
+            return this.buildWhereItemContext(foreignKeyInfo.getColumnInfo(), paramValuePathItemList);
+            /*String testExpression = this.getTestExpression(paramValuePathItemList);
             String paramValueExpression = this.getParamValueExpression(paramValuePathItemList);
             String conditionExpression = this.getConditionExpression(foreignKeyInfo.getColumnInfo(), paramValueExpression);
-            return new WhereItemContext(testExpression, Arrays.asList(conditionExpression));
+            return new WhereItemContext(testExpression, Arrays.asList(conditionExpression));*/
         }
 
         @Override
         public WhereItemContext handleRelationColumnMultiParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo) {
             List<String> paramValuePathItemList = this.getParamValuePathItemList(relationColumnInfo, foreignKeyInfo.getReferencedColumnInfo());
-            String testExpression = this.getTestExpression(paramValuePathItemList);
+            return this.buildWhereItemContext(foreignKeyInfo.getColumnInfo(), paramValuePathItemList);
+            /*String testExpression = this.getTestExpression(paramValuePathItemList);
             String paramValueExpression = this.getParamValueExpression(paramValuePathItemList);
             String conditionExpression = this.getConditionExpression(foreignKeyInfo.getColumnInfo(), paramValueExpression);
+            return new WhereItemContext(testExpression, Arrays.asList(conditionExpression));*/
+        }
+
+        /**
+         * 构建WhereItemContext
+         * @param columnInfo 数据库列字段信息
+         * @param paramValuePathItemList 参数值路径
+         * @return
+         */
+        private WhereItemContext buildWhereItemContext(ColumnInfo columnInfo, List<String> paramValuePathItemList) {
+            String testExpression = this.getTestExpression(paramValuePathItemList);
+            String paramValueExpression = this.getParamValueExpression(paramValuePathItemList);
+            String conditionExpression = this.getConditionExpression(columnInfo, paramValueExpression);
             return new WhereItemContext(testExpression, Arrays.asList(conditionExpression));
         }
     }

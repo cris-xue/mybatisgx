@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -146,8 +145,7 @@ public class ResultMapTemplateHandler {
         RelationColumnInfo relationColumnInfo = (RelationColumnInfo) resultMapInfo.getColumnInfo();
         RelationType relationType = relationColumnInfo.getRelationType();
         if (relationType == RelationType.ONE_TO_ONE || relationType == RelationType.MANY_TO_ONE) {
-            String relationProperty = this.getRelationProperty(resultMapInfo);
-            ResultMapHelper.associationColumnElement(resultMapElement, resultMapInfo, column, relationProperty);
+            ResultMapHelper.associationColumnElement(resultMapElement, resultMapInfo, column);
         } else if (relationType == RelationType.ONE_TO_MANY || relationType == RelationType.MANY_TO_MANY) {
             ResultMapHelper.collectionColumnElement(resultMapElement, resultMapInfo, column);
         } else {
@@ -174,37 +172,6 @@ public class ResultMapTemplateHandler {
         } else {
             throw new RuntimeException(relationColumnInfo.getJavaType() + "没有关联注解");
         }
-    }
-
-    private String getRelationProperty(ResultMapInfo resultMapRelationInfo) {
-        Map<String, String> relationProperty = new LinkedHashMap<>();
-        RelationColumnInfo relationColumnInfo = (RelationColumnInfo) resultMapRelationInfo.getColumnInfo();
-        RelationColumnInfo mappedByColumnRelationInfo = relationColumnInfo.getMappedByRelationColumnInfo();
-        if (mappedByColumnRelationInfo == null) {
-            // 关系维护方
-            List<ForeignKeyInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyInfoList();
-            for (ForeignKeyInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
-                ColumnInfo foreignKeyColumnInfo = inverseForeignKeyColumnInfo.getColumnInfo();
-                ColumnInfo referencedColumnInfo = inverseForeignKeyColumnInfo.getReferencedColumnInfo();
-                /*String foreignKeyJavaColumnPath = foreignKeyColumnInfo.getJavaColumnPath();
-                String referencedJavaColumnPath = referencedColumnInfo.getJavaColumnPath();*/
-                /*String left = foreignKeyJavaColumnPath + "." + referencedJavaColumnPath;
-                String right = referencedJavaColumnPath;
-                relationProperty.put(left, right);*/
-            }
-        } else {
-            List<ForeignKeyInfo> inverseForeignKeyColumnInfoList = mappedByColumnRelationInfo.getInverseForeignKeyInfoList();
-            for (ForeignKeyInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
-                ColumnInfo foreignKeyColumnInfo = inverseForeignKeyColumnInfo.getColumnInfo();
-                ColumnInfo referencedColumnInfo = inverseForeignKeyColumnInfo.getReferencedColumnInfo();
-                /*String foreignKeyJavaColumnPath = foreignKeyColumnInfo.getJavaColumnPath();
-                String referencedJavaColumnPath = referencedColumnInfo.getJavaColumnPath();
-                String left = referencedJavaColumnPath;
-                String right = foreignKeyJavaColumnPath + "." + referencedJavaColumnPath;
-                relationProperty.put(left, right);*/
-            }
-        }
-        return relationProperty.toString();
     }
 
     /**

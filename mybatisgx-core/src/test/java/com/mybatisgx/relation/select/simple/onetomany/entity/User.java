@@ -12,7 +12,7 @@ public class User extends BaseEntity<Long> {
     private String code;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @Fetch(FetchMode.BATCH)
+    @Fetch(FetchMode.SIMPLE)
     @JoinColumn(name = "org_id")
     private Org org;
 

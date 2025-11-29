@@ -26,7 +26,7 @@ public class Role extends BaseEntity<Long> {
             joinColumns = @JoinColumn(name = "role_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    @Fetch(FetchMode.BATCH)
+    @Fetch(FetchMode.SIMPLE)
     private List<User> userList;
 
     public String getCode() {

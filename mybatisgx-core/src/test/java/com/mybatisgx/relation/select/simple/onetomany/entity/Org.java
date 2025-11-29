@@ -12,16 +12,16 @@ public class Org extends IdBaseEntity<Integer> {
 
     private String code;
 
-    @Fetch
+    @Fetch(FetchMode.SIMPLE)
     @OneToMany(mappedBy = "org", fetch = FetchType.EAGER)
     private List<User> userList;
 
-    @Fetch
+    @Fetch(FetchMode.SIMPLE)
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "parent_id")
     private Org parent;
 
-    @Fetch
+    @Fetch(FetchMode.SIMPLE)
     @OneToMany(mappedBy = "parent", fetch = FetchType.EAGER)
     private List<Org> children;
 

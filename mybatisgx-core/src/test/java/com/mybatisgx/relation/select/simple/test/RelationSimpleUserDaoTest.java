@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class UserDaoTest {
+public class RelationSimpleUserDaoTest {
 
     private static int count = 10;
     private static UserDao userDao;

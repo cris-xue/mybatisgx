@@ -88,7 +88,9 @@ public class ColumnInfo {
 
     public void setJavaType(Class<?> javaType) {
         this.javaType = javaType;
-        this.javaTypeName = javaType.getTypeName();
+        if (javaType != null) {
+            this.javaTypeName = javaType.getTypeName();
+        }
     }
 
     public String getJavaTypeName() {

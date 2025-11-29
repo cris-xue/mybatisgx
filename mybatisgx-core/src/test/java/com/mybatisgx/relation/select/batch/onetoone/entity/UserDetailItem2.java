@@ -6,7 +6,7 @@ import com.mybatisgx.entity.EmbeddedIdBaseEntity;
 import javax.persistence.FetchType;
 
 @Entity
-@Table(name = "user_detail_item2_complex")
+@Table(name = "batch_oto_user_detail_item2_complex")
 public class UserDetailItem2 extends EmbeddedIdBaseEntity<Long> {
 
     private String code;

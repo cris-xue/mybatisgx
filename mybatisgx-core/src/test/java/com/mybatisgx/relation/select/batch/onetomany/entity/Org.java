@@ -7,10 +7,14 @@ import javax.persistence.FetchType;
 import java.util.List;
 
 @Entity
-@Table(name = "test_org_complex")
+@Table(name = "batch_otm_org")
 public class Org extends IdBaseEntity<Integer> {
 
     private String code;
+
+    @Fetch
+    @OneToMany(mappedBy = "org", fetch = FetchType.EAGER)
+    private List<User> userList;
 
     @Fetch
     @ManyToOne(fetch = FetchType.EAGER)
@@ -35,6 +39,14 @@ public class Org extends IdBaseEntity<Integer> {
 
     public void setCode(String code) {
         this.code = code;
+    }
+
+    public List<User> getUserList() {
+        return userList;
+    }
+
+    public void setUserList(List<User> userList) {
+        this.userList = userList;
     }
 
     public Org getParent() {

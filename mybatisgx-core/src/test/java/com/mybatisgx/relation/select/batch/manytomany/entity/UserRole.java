@@ -5,7 +5,7 @@ import com.mybatisgx.annotation.Table;
 import com.mybatisgx.entity.IdBaseEntity;
 
 @Entity
-@Table(name = "user_role_simple")
+@Table(name = "batch_mtm_user_role")
 public class UserRole extends IdBaseEntity<Long> {
 
     private Long userId;

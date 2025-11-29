@@ -7,7 +7,7 @@ import javax.persistence.FetchType;
 import java.util.List;
 
 @Entity
-@Table(name = "test_user_simple")
+@Table(name = "batch_mtm_user")
 public class User extends BaseEntity<Long> {
 
     @Column(name = "role_ids")

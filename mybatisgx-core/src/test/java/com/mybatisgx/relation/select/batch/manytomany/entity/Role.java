@@ -7,7 +7,7 @@ import javax.persistence.FetchType;
 import java.util.List;
 
 @Entity
-@Table(name = "role_simple")
+@Table(name = "batch_mtm_role")
 public class Role extends BaseEntity<Long> {
 
     private String code;

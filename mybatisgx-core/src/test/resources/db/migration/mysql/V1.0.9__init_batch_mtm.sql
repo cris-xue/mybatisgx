@@ -1,4 +1,4 @@
-create table if not exists test_user_simple
+create table if not exists batch_mtm_user
 (
     id             bigint       not null auto_increment,
     role_ids       varchar(256) not null comment '',
@@ -19,21 +19,7 @@ create table if not exists test_user_simple
 ) engine = InnoDB
   default charset = utf8mb4;
 
-create table if not exists user_detail_simple
-(
-    id             bigint      not null auto_increment,
-    code           varchar(64) not null comment '',
-    user_id        bigint      not null comment '',
-
-    input_user_id  bigint      not null comment '输入用户id',
-    input_time     datetime    not null comment '输入时间',
-    update_user_id bigint      null comment '更新用户id',
-    update_time    datetime    null comment '更新时间',
-    primary key (id)
-) engine = InnoDB
-  default charset = utf8mb4;
-
-create table if not exists user_role_simple
+create table if not exists batch_mtm_user_role
 (
     id      bigint not null auto_increment,
     user_id bigint not null comment '',
@@ -42,7 +28,7 @@ create table if not exists user_role_simple
 ) engine = InnoDB
   default charset = utf8mb4;
 
-create table if not exists role_simple
+create table if not exists batch_mtm_role
 (
     id             bigint      not null auto_increment,
     name           varchar(64) not null comment '',

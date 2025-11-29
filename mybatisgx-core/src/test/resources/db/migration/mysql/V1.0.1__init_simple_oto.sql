@@ -1,4 +1,4 @@
-create table if not exists test_user_complex_rl_sp
+create table if not exists simple_oto_user_complex
 (
     id1            bigint      not null,
     id2            bigint      not null,
@@ -12,7 +12,7 @@ create table if not exists test_user_complex_rl_sp
 ) engine = InnoDB
   default charset = utf8mb4;
 
-create table if not exists user_detail_complex_rl_sp
+create table if not exists simple_oto_user_detail_complex
 (
     id1            bigint      not null,
     id2            bigint      not null,

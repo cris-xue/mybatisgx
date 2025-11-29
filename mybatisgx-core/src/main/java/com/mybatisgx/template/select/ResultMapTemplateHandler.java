@@ -196,6 +196,9 @@ public class ResultMapTemplateHandler {
                 for (ForeignKeyInfo inverseForeignKeyInfo : inverseForeignKeyColumnInfoList) {
                     ColumnInfo foreignKeyColumnInfo = inverseForeignKeyInfo.getColumnInfo();
                     ColumnInfo referencedColumnInfo = inverseForeignKeyInfo.getReferencedColumnInfo();
+                    if (ObjectUtils.isNotEmpty(referencedColumnInfo.getComposites())) {
+                        referencedColumnInfo = referencedColumnInfo.getComposites().get(0);
+                    }
                     column.put(foreignKeyColumnInfo.getJavaColumnName(), referencedColumnInfo.getDbColumnNameAlias());
                 }
             } else {

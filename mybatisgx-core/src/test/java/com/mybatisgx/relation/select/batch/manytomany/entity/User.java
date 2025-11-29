@@ -1,14 +1,13 @@
-package com.mybatisgx.model.handler.test;
+package com.mybatisgx.relation.select.batch.manytomany.entity;
 
 import com.mybatisgx.annotation.*;
 import com.mybatisgx.entity.BaseEntity;
-import com.mybatisgx.relation.select.batch.manytomany.entity.Role;
 
 import javax.persistence.FetchType;
 import java.util.List;
 
 @Entity
-@Table(name = "test_user")
+@Table(name = "test_user_simple")
 public class User extends BaseEntity<Long> {
 
     @Column(name = "role_ids")
@@ -34,7 +33,7 @@ public class User extends BaseEntity<Long> {
     private Integer version;
 
     @ManyToMany(mappedBy = "userList", fetch = FetchType.LAZY)
-    @Fetch
+    @Fetch(FetchMode.BATCH)
     private List<Role> roleList;
 
     public String getRoleIds() {

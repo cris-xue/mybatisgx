@@ -1,14 +1,10 @@
-package com.mybatisgx.model.handler.test;
+package com.mybatisgx.custom.condition.entity;
 
 import com.mybatisgx.annotation.*;
 import com.mybatisgx.entity.BaseEntity;
-import com.mybatisgx.relation.select.batch.manytomany.entity.Role;
-
-import javax.persistence.FetchType;
-import java.util.List;
 
 @Entity
-@Table(name = "test_user")
+@Table(name = "test_user_simple")
 public class User extends BaseEntity<Long> {
 
     @Column(name = "role_ids")
@@ -32,10 +28,6 @@ public class User extends BaseEntity<Long> {
 
     @Lock
     private Integer version;
-
-    @ManyToMany(mappedBy = "userList", fetch = FetchType.LAZY)
-    @Fetch
-    private List<Role> roleList;
 
     public String getRoleIds() {
         return roleIds;
@@ -107,13 +99,5 @@ public class User extends BaseEntity<Long> {
 
     public void setVersion(Integer version) {
         this.version = version;
-    }
-
-    public List<Role> getRoleList() {
-        return roleList;
-    }
-
-    public void setRoleList(List<Role> roleList) {
-        this.roleList = roleList;
     }
 }

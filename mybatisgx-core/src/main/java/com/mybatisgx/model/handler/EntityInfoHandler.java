@@ -33,11 +33,6 @@ public class EntityInfoHandler {
                 .setTypeParameterMap(typeParameterMap)
                 .process()
                 .build();
-        /*entityInfo.setTableName(entityClass.getAnnotation(Table.class).name());
-        entityInfo.setClazz(entityClass);
-        entityInfo.setClazzName(entityClass.getName());
-        entityInfo.setColumnInfoList(columnInfoList);
-        entityInfo.setTypeParameterMap(typeParameterMap);*/
         return entityInfo;
     }
 

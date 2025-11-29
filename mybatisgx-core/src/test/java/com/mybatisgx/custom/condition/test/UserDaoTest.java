@@ -1,11 +1,11 @@
 package com.mybatisgx.custom.condition.test;
 
 import com.github.swierkosz.fixture.generator.FixtureGenerator;
-import com.mybatisgx.handler.page.Page;
-import com.mybatisgx.handler.page.Pageable;
 import com.mybatisgx.custom.condition.dao.UserDao;
 import com.mybatisgx.custom.condition.entity.User;
 import com.mybatisgx.custom.condition.entity.UserQuery;
+import com.mybatisgx.handler.page.Page;
+import com.mybatisgx.handler.page.Pageable;
 import com.mybatisgx.util.DaoTestUtils;
 import org.apache.ibatis.session.SqlSession;
 import org.junit.Assert;
@@ -25,8 +25,8 @@ public class UserDaoTest {
     @BeforeClass
     public static void beforeClass() {
         SqlSession sqlSession = DaoTestUtils.getSqlSession(
-                new String[]{"com.mybatisgx.simple.entity"},
-                new String[]{"com.mybatisgx.simple.dao"}
+                new String[]{"com.mybatisgx.custom.condition.entity"},
+                new String[]{"com.mybatisgx.custom.condition.dao"}
         );
         userDao = sqlSession.getMapper(UserDao.class);
 

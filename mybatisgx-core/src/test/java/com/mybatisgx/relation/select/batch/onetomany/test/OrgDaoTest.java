@@ -24,8 +24,8 @@ public class OrgDaoTest {
     @BeforeClass
     public static void beforeClass() {
         SqlSession sqlSession = DaoTestUtils.getSqlSession(
-                new String[]{"com.mybatisgx.relation.select.onetomany.entity"},
-                new String[]{"com.mybatisgx.relation.select.onetomany.dao"}
+                new String[]{"com.mybatisgx.relation.select.batch.onetomany.entity"},
+                new String[]{"com.mybatisgx.relation.select.batch.onetomany.dao"}
         );
         orgDao = sqlSession.getMapper(OrgDao.class);
 

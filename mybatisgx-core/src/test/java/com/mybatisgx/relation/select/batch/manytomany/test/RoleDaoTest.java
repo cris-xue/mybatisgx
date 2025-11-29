@@ -26,8 +26,8 @@ public class RoleDaoTest {
     @BeforeClass
     public static void beforeClass() {
         SqlSession sqlSession = DaoTestUtils.getSqlSession(
-                new String[]{"com.mybatisgx.relation.select.manytomany.entity"},
-                new String[]{"com.mybatisgx.relation.select.manytomany.dao"}
+                new String[]{"com.mybatisgx.relation.select.batch.manytomany.entity"},
+                new String[]{"com.mybatisgx.relation.select.batch.manytomany.dao"}
         );
         userDao = sqlSession.getMapper(UserDao.class);
         userRoleDao = sqlSession.getMapper(UserRoleDao.class);

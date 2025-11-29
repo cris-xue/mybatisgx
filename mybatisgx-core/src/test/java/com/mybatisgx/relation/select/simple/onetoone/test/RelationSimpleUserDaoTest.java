@@ -30,8 +30,8 @@ public class RelationSimpleUserDaoTest {
     @BeforeClass
     public static void beforeClass() {
         SqlSession sqlSession = DaoTestUtils.getSqlSession(
-                new String[]{"com.mybatisgx.relation.select.simple.entity"},
-                new String[]{"com.mybatisgx.relation.select.simple.dao"}
+                new String[]{"com.mybatisgx.relation.select.simple.onetoone.entity"},
+                new String[]{"com.mybatisgx.relation.select.simple.onetoone.dao"}
         );
         userDao = sqlSession.getMapper(UserDao.class);
         userDetailDao = sqlSession.getMapper(UserDetailDao.class);

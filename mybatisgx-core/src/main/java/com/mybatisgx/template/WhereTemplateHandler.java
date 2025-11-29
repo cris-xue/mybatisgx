@@ -140,14 +140,15 @@ public class WhereTemplateHandler {
             this.comparisonOperator = conditionInfo.getComparisonOperator();
 
             List<WhereItemContext> whereItemContextList = new ArrayList();
-            int paramCount = methodInfo.getMethodParamInfoList().size();
+            this.singleParamHandle(whereItemContextList);
+            /*int paramCount = methodInfo.getMethodParamInfoList().size();
             if (this.conditionInfo.getComparisonOperator().isNullComparisonOperator()) {
                 this.noParamHandle(whereItemContextList);
             } else if (paramCount == 1) {
                 this.singleParamHandle(whereItemContextList);
             } else {
-                this.multiParamHandle(whereItemContextList);
-            }
+                this.singleParamHandle(whereItemContextList);
+            }*/
             this.processWhereItem(whereElement, methodInfo.getDynamic(), whereItemContextList);
         }
 
@@ -192,6 +193,12 @@ public class WhereTemplateHandler {
         }
 
         public void singleParamHandle(List<WhereItemContext> whereItemContextList) {
+            // 条件不需要参数
+            if (this.conditionInfo.getComparisonOperator().isNullComparisonOperator()) {
+                WhereItemContext whereItemContext = this.handleSimpleTypeParam(columnInfo);
+                whereItemContextList.add(whereItemContext);
+                return;
+            }
             if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class, ColumnInfo.class)) {
                 ClassCategory classCategory = this.getParamClassCategory();
                 if (classCategory == ClassCategory.SIMPLE) {

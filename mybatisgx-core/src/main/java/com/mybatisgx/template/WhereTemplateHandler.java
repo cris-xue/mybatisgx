@@ -140,15 +140,7 @@ public class WhereTemplateHandler {
             this.comparisonOperator = conditionInfo.getComparisonOperator();
 
             List<WhereItemContext> whereItemContextList = new ArrayList();
-            this.singleParamHandle(whereItemContextList);
-            /*int paramCount = methodInfo.getMethodParamInfoList().size();
-            if (this.conditionInfo.getComparisonOperator().isNullComparisonOperator()) {
-                this.noParamHandle(whereItemContextList);
-            } else if (paramCount == 1) {
-                this.singleParamHandle(whereItemContextList);
-            } else {
-                this.singleParamHandle(whereItemContextList);
-            }*/
+            this.conditionParamHandle(whereItemContextList);
             this.processWhereItem(whereElement, methodInfo.getDynamic(), whereItemContextList);
         }
 
@@ -176,56 +168,17 @@ public class WhereTemplateHandler {
             }
         }
 
-        public void noParamHandle(List<WhereItemContext> whereItemContextList) {
-            if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class, ColumnInfo.class)) {
-                WhereItemContext whereItemContext = this.handleSimpleTypeParam(columnInfo);
-                whereItemContextList.add(whereItemContext);
-            }
-            if (TypeUtils.typeEquals(columnInfo, RelationColumnInfo.class)) {
-                RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
-                if (relationColumnInfo.getMappedByRelationColumnInfo() == null) {
-                    for (ForeignKeyInfo foreignKeyInfo : relationColumnInfo.getInverseForeignKeyInfoList()) {
-                        WhereItemContext whereItemContext = this.handleRelationTypeParam(relationColumnInfo, foreignKeyInfo);
-                        whereItemContextList.add(whereItemContext);
-                    }
-                }
-            }
-        }
-
-        public void singleParamHandle(List<WhereItemContext> whereItemContextList) {
+        /**
+         * 条件参数处理
+         * @param whereItemContextList
+         */
+        public void conditionParamHandle(List<WhereItemContext> whereItemContextList) {
             // 条件不需要参数
             if (this.conditionInfo.getComparisonOperator().isNullComparisonOperator()) {
                 WhereItemContext whereItemContext = this.handleSimpleTypeParam(columnInfo);
                 whereItemContextList.add(whereItemContext);
                 return;
             }
-            if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class, ColumnInfo.class)) {
-                ClassCategory classCategory = this.getParamClassCategory();
-                if (classCategory == ClassCategory.SIMPLE) {
-                    WhereItemContext whereItemContext = this.handleSimpleTypeParam(columnInfo);
-                    whereItemContextList.add(whereItemContext);
-                }
-                if (classCategory == ClassCategory.COMPLEX) {
-                    for (ColumnInfo columnInfoComposite : methodParamInfo.getColumnInfoList()) {
-                        this.columnInfoCompositeIndex++;
-                        WhereItemContext whereItemContext = this.handleComplexTypeParam(columnInfo, columnInfoComposite);
-                        whereItemContextList.add(whereItemContext);
-                    }
-                }
-            }
-            if (TypeUtils.typeEquals(columnInfo, RelationColumnInfo.class)) {
-                RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
-                if (relationColumnInfo.getMappedByRelationColumnInfo() == null) {
-                    for (ForeignKeyInfo foreignKeyInfo : relationColumnInfo.getInverseForeignKeyInfoList()) {
-                        this.columnInfoCompositeIndex++;
-                        WhereItemContext whereItemContext = this.handleRelationTypeParam(relationColumnInfo, foreignKeyInfo);
-                        whereItemContextList.add(whereItemContext);
-                    }
-                }
-            }
-        }
-
-        public void multiParamHandle(List<WhereItemContext> whereItemContextList) {
             if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class, ColumnInfo.class)) {
                 ClassCategory classCategory = this.getParamClassCategory();
                 if (classCategory == ClassCategory.SIMPLE) {
@@ -293,6 +246,7 @@ public class WhereTemplateHandler {
          * @return and user_id = #{userId} or and user_id = #{user.userId}
          */
         protected String getConditionExpression(ColumnInfo columnInfo, String paramValueExpression) {
+            // 复合对象从第二个字段开始全部用and连接
             LogicOperator logicOperator = this.logicOperator;
             if (this.columnInfoCompositeIndex >= 2) {
                 logicOperator = LogicOperator.AND;

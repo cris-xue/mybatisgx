@@ -20,7 +20,7 @@ public class Role extends BaseEntity<Long> {
     @Lock
     private Integer version;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "join_mtm_user_role",
             joinColumns = @JoinColumn(name = "role_id"),
@@ -28,6 +28,10 @@ public class Role extends BaseEntity<Long> {
     )
     @Fetch(FetchMode.JOIN)
     private List<User> userList;
+
+    @ManyToMany(mappedBy = "roleList", fetch = FetchType.EAGER)
+    @Fetch(FetchMode.JOIN)
+    private List<Menu> menuList;
 
     public String getCode() {
         return code;

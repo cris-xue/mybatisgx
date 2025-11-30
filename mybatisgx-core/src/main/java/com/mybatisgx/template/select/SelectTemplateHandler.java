@@ -50,7 +50,8 @@ public class SelectTemplateHandler {
             selectElement.addAttribute("resultMap", methodInfo.getResultMapId());
             Class<?> methodReturnType = methodInfo.getMethodReturnInfo().getType();
             entityInfo = EntityInfoContextHolder.get(methodReturnType);
-            PlainSelect plainSelect = selectColumnSqlTemplateHandler.buildSelectSql(entityInfo);
+            ColumnEntityRelation columnEntityRelation = mapperInfo.getEntityRelationTree(methodReturnType);
+            PlainSelect plainSelect = selectColumnSqlTemplateHandler.buildSimpleSelectSql(columnEntityRelation);
             selectXmlItemList.add(plainSelect.toString());
         }
         if (selectItemInfo.getSelectItemType() == SelectItemType.COUNT) {

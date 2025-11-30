@@ -31,6 +31,18 @@ public class SelectColumnSqlTemplateHandler {
     private static final Logger logger = LoggerFactory.getLogger(SelectColumnSqlTemplateHandler.class);
 
     /**
+     * 构建单表查询，如：select * from user
+     *
+     * @param columnEntityRelation
+     * @return
+     */
+    public PlainSelect buildSimpleSelectSql(ColumnEntityRelation columnEntityRelation) {
+        PlainSelect plainSelect = this.buildMainSelect(new EntityContext(columnEntityRelation, columnEntityRelation.getEntityInfo(), false));
+        this.buildFromItem(plainSelect, columnEntityRelation.getTableName(), columnEntityRelation.getTableNameAlias());
+        return plainSelect;
+    }
+
+    /**
      * 构建关联查询
      * <code>
      * select * from user_role left join role on user_role.user_id = role.id
@@ -40,11 +52,11 @@ public class SelectColumnSqlTemplateHandler {
      * @return
      * @throws JSQLParserException
      */
-    public String buildSelectSql(ResultMapInfo entityRelationSelectInfo) throws JSQLParserException {
+    public String buildComplexSelectSql(ResultMapInfo entityRelationSelectInfo) throws JSQLParserException {
         List<EntityContext> entityContextList = this.getEntityInfoList(entityRelationSelectInfo);
         PlainSelect plainSelect = this.buildMainSelect(entityContextList);
         if (TypeUtils.typeEquals(entityRelationSelectInfo, ResultMapInfo.class)) {
-            this.buildFromItem(plainSelect, entityRelationSelectInfo.getEntityTableName(), entityRelationSelectInfo.getEntityTableNameAlias());
+            this.buildFromItem(plainSelect, entityRelationSelectInfo.getTableName(), entityRelationSelectInfo.getTableNameAlias());
             this.buildLeftJoinOn(plainSelect, entityRelationSelectInfo, entityRelationSelectInfo.getComposites());
         }
         if (TypeUtils.typeEquals(entityRelationSelectInfo, SimpleNestedResultMapInfo.class)) {
@@ -55,30 +67,19 @@ public class SelectColumnSqlTemplateHandler {
             if (relationType == RelationType.MANY_TO_MANY) {
                 mainTableName = entityRelationSelectInfo.getMiddleTableName();
             } else {
-                mainTableName = entityRelationSelectInfo.getEntityTableName();
-                mainTableNameAlias = entityRelationSelectInfo.getEntityTableNameAlias();
+                mainTableName = entityRelationSelectInfo.getTableName();
+                mainTableNameAlias = entityRelationSelectInfo.getTableNameAlias();
             }
             this.buildFromItem(plainSelect, mainTableName, mainTableNameAlias);
             this.buildLeftJoinOn(plainSelect, entityRelationSelectInfo, entityRelationSelectInfo.getComposites());
         }
         if (TypeUtils.typeEquals(entityRelationSelectInfo, BatchNestedResultMapInfo.class)) {
-            this.buildFromItem(plainSelect, entityRelationSelectInfo.getEntityTableName(), entityRelationSelectInfo.getEntityTableNameAlias());
+            this.buildFromItem(plainSelect, entityRelationSelectInfo.getTableName(), entityRelationSelectInfo.getTableNameAlias());
             this.buildLeftJoinOn(plainSelect, entityRelationSelectInfo, entityRelationSelectInfo.getComposites());
         }
         return plainSelect.toString();
     }
 
-    /**
-     * 构建单表查询，如：select * from user
-     *
-     * @param entityInfo
-     * @return
-     */
-    public PlainSelect buildSelectSql(EntityInfo entityInfo) {
-        PlainSelect plainSelect = this.buildMainSelect(new EntityContext(entityInfo, false));
-        this.buildFromItem(plainSelect, entityInfo.getTableName(), entityInfo.getTableNameAlias());
-        return plainSelect;
-    }
 
     /**
      * 构建主表查询，如：select * from user_role
@@ -116,7 +117,7 @@ public class SelectColumnSqlTemplateHandler {
         EntityInfo entityInfo = resultMapInfo.getEntityInfo();
         if (entityInfo != null) {
             Boolean isBatch = TypeUtils.typeEquals(resultMapInfo, BatchNestedResultMapInfo.class);
-            entityContextList.add(new EntityContext(entityInfo, isBatch));
+            entityContextList.add(new EntityContext(resultMapInfo, entityInfo, isBatch));
         }
         for (ResultMapInfo composite : resultMapInfo.getComposites()) {
             List<EntityContext> childrenEntityContextList = this.getEntityInfoList(composite);
@@ -141,8 +142,8 @@ public class SelectColumnSqlTemplateHandler {
             if (leftManyToMany) {
                 // 左表是多对多的处理【user_role left join role on user_role.user_id = role.id】
                 String middleTableName = leftEntityRelationSelectInfo.getMiddleTableName();
-                String entityTableName = leftEntityRelationSelectInfo.getEntityTableName();
-                String entityTableNameAlias = leftEntityRelationSelectInfo.getEntityTableNameAlias();
+                String entityTableName = leftEntityRelationSelectInfo.getTableName();
+                String entityTableNameAlias = leftEntityRelationSelectInfo.getTableNameAlias();
                 Join join = this.buildLeftJoin(entityTableName, entityTableNameAlias);
 
                 List<ForeignKeyInfo> foreignKeyColumnInfoList;
@@ -164,7 +165,7 @@ public class SelectColumnSqlTemplateHandler {
             Boolean rightManyToMany = rightEntityRelationSelectInfo.isManyToMany();
             if (rightManyToMany) {
                 // 右表是多对多的处理【role left join role_menu on role.id = role_menu.role_id】
-                String entityTableNameAlias = leftEntityRelationSelectInfo.getEntityTableNameAlias();
+                String entityTableNameAlias = leftEntityRelationSelectInfo.getTableNameAlias();
                 String middleTableName = rightEntityRelationSelectInfo.getMiddleTableName();
                 Join join = this.buildLeftJoin(middleTableName, null);
 
@@ -179,9 +180,9 @@ public class SelectColumnSqlTemplateHandler {
                 plainSelect.addJoins(join);
             } else {
                 // 一对一、一对多、多对一的处理【user left join user_detail on user.id = user_detail.user_id】
-                String leftEntityTableName = leftEntityRelationSelectInfo.getEntityTableName();
-                String rightEntityTableName = rightEntityRelationSelectInfo.getEntityTableName();
-                String rightEntityTableNameAlias = rightEntityRelationSelectInfo.getEntityTableNameAlias();
+                String leftEntityTableName = leftEntityRelationSelectInfo.getTableName();
+                String rightEntityTableName = rightEntityRelationSelectInfo.getTableName();
+                String rightEntityTableNameAlias = rightEntityRelationSelectInfo.getTableNameAlias();
                 Join join = this.buildLeftJoin(rightEntityTableName, rightEntityTableNameAlias);
 
                 this.buildEntityTableOnEntityTable(leftEntityRelationSelectInfo, rightEntityRelationSelectInfo, join);
@@ -209,29 +210,30 @@ public class SelectColumnSqlTemplateHandler {
      * @return
      */
     private List<SelectItem<?>> buildSelectItemList(EntityContext entityContext) {
+        ColumnEntityRelation columnEntityRelation = entityContext.getColumnEntityRelation();
         EntityInfo entityInfo = entityContext.getEntityInfo();
         Boolean isBatch = entityContext.getBatch();
 
         List<SelectItem<?>> selectItemList = new ArrayList();
-        Table table = new Table(entityInfo.getTableNameAlias());
+        Table table = new Table(columnEntityRelation.getTableNameAlias());
         // 添加非外键表字段
         for (ColumnInfo columnInfo : entityInfo.getTableColumnInfoList()) {
             if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class)) {
                 IdColumnInfo idColumnInfo = (IdColumnInfo) columnInfo;
                 List<ColumnInfo> compositeList = idColumnInfo.getComposites();
                 if (ObjectUtils.isEmpty(compositeList)) {
-                    SelectItem<?> selectItem = this.getSelectItem(table, idColumnInfo.getDbColumnName(), idColumnInfo.getDbColumnNameAlias());
+                    SelectItem<?> selectItem = this.getSelectItem(table, idColumnInfo.getDbColumnName(), idColumnInfo.getTableColumnNameAlias(columnEntityRelation));
                     selectItemList.add(selectItem);
                 } else {
                     for (ColumnInfo composite : compositeList) {
-                        SelectItem<?> selectItem = this.getSelectItem(table, composite.getDbColumnName(), composite.getDbColumnNameAlias());
+                        SelectItem<?> selectItem = this.getSelectItem(table, composite.getDbColumnName(), composite.getTableColumnNameAlias(columnEntityRelation));
                         selectItemList.add(selectItem);
                     }
                 }
             }
             // 批量结果集节点是不需要查询字段的，只需要查询出主键最终能够合并数据即可
             if (!isBatch && TypeUtils.typeEquals(columnInfo, ColumnInfo.class)) {
-                SelectItem<?> selectItem = this.getSelectItem(table, columnInfo.getDbColumnName(), columnInfo.getDbColumnNameAlias());
+                SelectItem<?> selectItem = this.getSelectItem(table, columnInfo.getDbColumnName(), columnInfo.getTableColumnNameAlias(columnEntityRelation));
                 selectItemList.add(selectItem);
             }
         }
@@ -244,7 +246,7 @@ public class SelectColumnSqlTemplateHandler {
                 List<ForeignKeyInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyInfoList();
                 for (ForeignKeyInfo inverseForeignKeyInfo : inverseForeignKeyColumnInfoList) {
                     ColumnInfo foreignKeyColumnInfo = inverseForeignKeyInfo.getColumnInfo();
-                    SelectItem<?> selectItem = this.getSelectItem(table, foreignKeyColumnInfo.getDbColumnName(), foreignKeyColumnInfo.getDbColumnNameAlias());
+                    SelectItem<?> selectItem = this.getSelectItem(table, foreignKeyColumnInfo.getDbColumnName(), foreignKeyColumnInfo.getTableColumnNameAlias(columnEntityRelation));
                     selectItemList.add(selectItem);
                 }
             }
@@ -263,8 +265,8 @@ public class SelectColumnSqlTemplateHandler {
 
     private void buildEntityTableOnEntityTable(ResultMapInfo leftEntityRelationSelectInfo, ResultMapInfo rightEntityRelationSelectInfo, Join join) {
         List<Expression> onExpressionList = new ArrayList<>();
-        String leftEntityTableNameAlias = leftEntityRelationSelectInfo.getEntityTableNameAlias();
-        String rightEntityTableNameAlias = rightEntityRelationSelectInfo.getEntityTableNameAlias();
+        String leftEntityTableNameAlias = leftEntityRelationSelectInfo.getTableNameAlias();
+        String rightEntityTableNameAlias = rightEntityRelationSelectInfo.getTableNameAlias();
         List<ForeignKeyInfo> inverseForeignKeyColumnInfoList = rightEntityRelationSelectInfo.getInverseForeignKeyColumnInfoList();
         if (rightEntityRelationSelectInfo.isMappedBy()) {
             for (ForeignKeyInfo inverseForeignKeyInfo : inverseForeignKeyColumnInfoList) {
@@ -346,13 +348,20 @@ public class SelectColumnSqlTemplateHandler {
 
     private static class EntityContext {
 
+        private ColumnEntityRelation columnEntityRelation;
+
         private EntityInfo entityInfo;
 
         private Boolean isBatch;
 
-        public EntityContext(EntityInfo entityInfo, Boolean isBatch) {
+        public EntityContext(ColumnEntityRelation columnEntityRelation, EntityInfo entityInfo, Boolean isBatch) {
+            this.columnEntityRelation = columnEntityRelation;
             this.entityInfo = entityInfo;
             this.isBatch = isBatch;
+        }
+
+        public ColumnEntityRelation getColumnEntityRelation() {
+            return columnEntityRelation;
         }
 
         public EntityInfo getEntityInfo() {

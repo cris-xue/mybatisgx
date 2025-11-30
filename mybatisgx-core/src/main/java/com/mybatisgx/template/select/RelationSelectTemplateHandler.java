@@ -91,7 +91,7 @@ public class RelationSelectTemplateHandler {
 
     private String buildJoinSelect(ResultMapInfo resultMapInfo) {
         try {
-            return selectColumnSqlTemplateHandler.buildSelectSql(resultMapInfo);
+            return selectColumnSqlTemplateHandler.buildComplexSelectSql(resultMapInfo);
         } catch (JSQLParserException e) {
             throw new RuntimeException(e);
         }
@@ -100,14 +100,13 @@ public class RelationSelectTemplateHandler {
     private static class SimpleRelationSelect {
 
         public Expression buildOneToOneWhere(ResultMapInfo entityRelationSelectInfo) {
-            EntityInfo relationEntityInfo = entityRelationSelectInfo.getEntityInfo();
             RelationColumnInfo relationColumnInfo = (RelationColumnInfo) entityRelationSelectInfo.getColumnInfo();
             RelationColumnInfo mappedByRelationColumnInfo = relationColumnInfo.getMappedByRelationColumnInfo();
             if (mappedByRelationColumnInfo != null) {
                 Expression whereCondition = null;
                 for (ForeignKeyInfo inverseForeignKeyColumnInfo : mappedByRelationColumnInfo.getInverseForeignKeyInfoList()) {
                     ColumnInfo foreignKeyColumnInfo = inverseForeignKeyColumnInfo.getColumnInfo();
-                    String leftEq = String.format("%s.%s", relationEntityInfo.getTableNameAlias(), foreignKeyColumnInfo.getDbColumnName());
+                    String leftEq = String.format("%s.%s", entityRelationSelectInfo.getTableNameAlias(), foreignKeyColumnInfo.getDbColumnName());
                     String rightEq = String.format("#{%s}", foreignKeyColumnInfo.getJavaColumnName());
                     whereCondition = RelationSelectHelper.buildWhereConditionExpression(whereCondition, leftEq, rightEq);
                 }
@@ -120,7 +119,7 @@ public class RelationSelectTemplateHandler {
                     if (ObjectUtils.isNotEmpty(referencedColumnInfo.getComposites())) {
                         referencedColumnInfo = referencedColumnInfo.getComposites().get(0);
                     }
-                    String leftEq = String.format("%s.%s", relationEntityInfo.getTableNameAlias(), referencedColumnInfo.getDbColumnName());
+                    String leftEq = String.format("%s.%s", entityRelationSelectInfo.getTableNameAlias(), referencedColumnInfo.getDbColumnName());
                     String rightEq = String.format("#{%s}", foreignKeyColumnInfo.getJavaColumnName());
                     whereCondition = RelationSelectHelper.buildWhereConditionExpression(whereCondition, leftEq, rightEq);
                 }
@@ -169,16 +168,15 @@ public class RelationSelectTemplateHandler {
             IdColumnInfo idColumnInfo = relationEntityInfo.getIdColumnInfo();
             List<ColumnInfo> idColumnInfoComposites = idColumnInfo.getComposites();
             RelationColumnInfo relationColumnInfo = (RelationColumnInfo) resultMapInfo.getColumnInfo();
-            RelationColumnInfo mappedByRelationColumnInfo = relationColumnInfo.getMappedByRelationColumnInfo();
-            if (mappedByRelationColumnInfo != null) {
+            if (relationColumnInfo.getMappedByRelationColumnInfo() != null) {
                 Expression whereConditionExpression = null;
                 if (ObjectUtils.isEmpty(idColumnInfoComposites)) {
-                    String leftEq = String.format("%s.%s", relationEntityInfo.getTableNameAlias(), idColumnInfo.getDbColumnName());
+                    String leftEq = String.format("%s.%s", resultMapInfo.getTableNameAlias(), idColumnInfo.getDbColumnName());
                     String rightEq = String.format("#{%s.%s}", "item", idColumnInfo.getJavaColumnName());
                     whereConditionExpression = RelationSelectHelper.buildWhereConditionExpression(whereConditionExpression, leftEq, rightEq);
                 } else {
                     for (ColumnInfo idColumnInfoComposite : idColumnInfoComposites) {
-                        String leftEq = String.format("%s.%s", relationEntityInfo.getTableNameAlias(), idColumnInfoComposite.getDbColumnName());
+                        String leftEq = String.format("%s.%s", resultMapInfo.getTableNameAlias(), idColumnInfoComposite.getDbColumnName());
                         String rightEq = String.format("#{%s.%s.%s}", "item", idColumnInfo.getJavaColumnName(), idColumnInfoComposite.getJavaColumnName());
                         whereConditionExpression = RelationSelectHelper.buildWhereConditionExpression(whereConditionExpression, leftEq, rightEq);
                     }
@@ -187,12 +185,12 @@ public class RelationSelectTemplateHandler {
             } else {
                 Expression whereConditionExpression = null;
                 if (ObjectUtils.isEmpty(idColumnInfoComposites)) {
-                    String leftEq = String.format("%s.%s", relationEntityInfo.getTableNameAlias(), idColumnInfo.getDbColumnName());
+                    String leftEq = String.format("%s.%s", resultMapInfo.getTableNameAlias(), idColumnInfo.getDbColumnName());
                     String rightEq = String.format("#{%s.%s}", "item", idColumnInfo.getJavaColumnName());
                     whereConditionExpression = RelationSelectHelper.buildWhereConditionExpression(whereConditionExpression, leftEq, rightEq);
                 } else {
                     for (ColumnInfo idColumnInfoComposite : idColumnInfoComposites) {
-                        String leftEq = String.format("%s.%s", relationEntityInfo.getTableNameAlias(), idColumnInfoComposite.getDbColumnName());
+                        String leftEq = String.format("%s.%s", resultMapInfo.getTableNameAlias(), idColumnInfoComposite.getDbColumnName());
                         String rightEq = String.format("#{%s.%s.%s}", "item", idColumnInfo.getJavaColumnName(), idColumnInfoComposite.getJavaColumnName());
                         whereConditionExpression = RelationSelectHelper.buildWhereConditionExpression(whereConditionExpression, leftEq, rightEq);
                     }
@@ -205,11 +203,10 @@ public class RelationSelectTemplateHandler {
             EntityInfo relationEntityInfo = entityRelationSelectInfo.getEntityInfo();
             IdColumnInfo idColumnInfo = relationEntityInfo.getIdColumnInfo();
             RelationColumnInfo relationColumnInfo = (RelationColumnInfo) entityRelationSelectInfo.getColumnInfo();
-            RelationColumnInfo mappedByRelationColumnInfo = relationColumnInfo.getMappedByRelationColumnInfo();
-            if (mappedByRelationColumnInfo != null) {
-                return this.buildManyToManyWhereExpression(relationEntityInfo.getTableNameAlias(), idColumnInfo);
+            if (relationColumnInfo.getMappedByRelationColumnInfo() != null) {
+                return this.buildManyToManyWhereExpression(entityRelationSelectInfo.getTableNameAlias(), idColumnInfo);
             } else {
-                return this.buildManyToManyWhereExpression(relationEntityInfo.getTableNameAlias(), idColumnInfo);
+                return this.buildManyToManyWhereExpression(entityRelationSelectInfo.getTableNameAlias(), idColumnInfo);
             }
         }
 

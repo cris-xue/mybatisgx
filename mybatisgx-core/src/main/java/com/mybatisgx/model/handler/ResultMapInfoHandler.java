@@ -47,32 +47,36 @@ public class ResultMapInfoHandler {
 
     public static abstract class AbstractEntityRelation {
 
-        protected List<EntityInfo> getEntityInfoList(ColumnEntityRelation columnEntityRelation) {
-            List<EntityInfo> entityInfoList = new ArrayList();
-            EntityInfo entityInfo = columnEntityRelation.getEntityInfo();
-            if (entityInfo != null) {
-                entityInfoList.add(columnEntityRelation.getEntityInfo());
+        protected List<ResultMapInfo> resultMapTreeToList(ResultMapInfo resultMapInfo) {
+            List<ResultMapInfo> resultMapInfoList = new ArrayList();
+            if (resultMapInfo.getEntityInfo() != null) {
+                resultMapInfoList.add(resultMapInfo);
             }
-            List<ResultMapInfo> composites = columnEntityRelation.getComposites();
-            for (ResultMapInfo composite : composites) {
-                List<EntityInfo> childEntityInfoList = this.getEntityInfoList(composite);
-                if (ObjectUtils.isNotEmpty(childEntityInfoList)) {
-                    entityInfoList.addAll(childEntityInfoList);
+            for (ResultMapInfo composite : resultMapInfo.getComposites()) {
+                List<ResultMapInfo> childResultMapInfoList = this.resultMapTreeToList(composite);
+                if (ObjectUtils.isNotEmpty(childResultMapInfoList)) {
+                    resultMapInfoList.addAll(childResultMapInfoList);
                 }
             }
-            return entityInfoList;
+            return resultMapInfoList;
         }
 
-        protected String getResultMapId(List<EntityInfo> entityInfoList) {
-            List<String> classNameList = entityInfoList.stream()
-                    .map(entityInfo -> entityInfo.getClazzName().replaceAll("\\.", "_"))
+        protected String getResultMapId(List<ResultMapInfo> resultMapInfoList) {
+            List<String> classNameList = resultMapInfoList.stream()
+                    .map(resultMapInfo -> {
+                        String clazzName = resultMapInfo.getEntityInfo().getClazzName().replaceAll("\\.", "_");
+                        return StringUtils.join(Arrays.asList(clazzName, resultMapInfo.getLevel(), resultMapInfo.getIndex()), "_");
+                    })
                     .collect(Collectors.toList());
             return StringUtils.join(classNameList, "_join_") + "_ResultMap";
         }
 
-        protected String getNestedSelectId(List<EntityInfo> entityInfoList) {
-            List<String> classNameList = entityInfoList.stream()
-                    .map(entityInfo -> entityInfo.getClazzName().replaceAll("\\.", "_"))
+        protected String getNestedSelectId(List<ResultMapInfo> resultMapInfoList) {
+            List<String> classNameList = resultMapInfoList.stream()
+                    .map(resultMapInfo -> {
+                        String clazzName = resultMapInfo.getEntityInfo().getClazzName().replaceAll("\\.", "_");
+                        return StringUtils.join(Arrays.asList(clazzName, resultMapInfo.getLevel(), resultMapInfo.getIndex()), "_");
+                    })
                     .collect(Collectors.toList());
             return "nestedSelect_" + StringUtils.join(classNameList, "_join_");
         }
@@ -107,7 +111,7 @@ public class ResultMapInfoHandler {
                 RelationColumnInfo relationColumnInfo = (RelationColumnInfo) childEntityRelationTree.getColumnInfo();
 
                 // 构建一个内嵌查询结果集
-                ResultMapInfo nestedResultMapInfo = this.buildNestedSelectResultMapInfo(childEntityRelationTree, relationColumnInfo);
+                ResultMapInfo nestedResultMapInfo = this.buildNestedSelectResultMapInfo(entityRelationTree, childEntityRelationTree, relationColumnInfo);
                 resultMapInfoList.add(nestedResultMapInfo);
 
                 FetchMode fetchMode = relationColumnInfo.getFetchMode();
@@ -135,18 +139,20 @@ public class ResultMapInfoHandler {
             return resultMapInfoList;
         }
 
-        private ResultMapInfo buildNestedSelectResultMapInfo(EntityRelationTree entityRelationTree, RelationColumnInfo relationColumnInfo) {
-            int level = entityRelationTree.getLevel();
+        private ResultMapInfo buildNestedSelectResultMapInfo(EntityRelationTree parentEntityRelationTree, EntityRelationTree childEntityRelationTree, RelationColumnInfo relationColumnInfo) {
+            int level = childEntityRelationTree.getLevel();
             FetchMode fetchMode = relationColumnInfo.getFetchMode();
             if (fetchMode == FetchMode.JOIN && level > 2) {
                 ResultMapInfo resultMapInfo = new ResultMapInfo();
-                resultMapInfo.setColumnInfo(entityRelationTree.getColumnInfo());
-                resultMapInfo.setMiddleEntityInfo(entityRelationTree.getMiddleEntityInfo());
-                resultMapInfo.setEntityInfo(entityRelationTree.getEntityInfo());
+                resultMapInfo.setTableNameAlias(childEntityRelationTree.getTableNameAlias());
+                resultMapInfo.setColumnInfo(childEntityRelationTree.getColumnInfo());
+                resultMapInfo.setMiddleEntityInfo(childEntityRelationTree.getMiddleEntityInfo());
+                resultMapInfo.setEntityInfo(childEntityRelationTree.getEntityInfo());
                 return resultMapInfo;
             } else {
                 ResultMapInfo resultMapInfo = new ResultMapInfo();
-                resultMapInfo.setColumnInfo(entityRelationTree.getColumnInfo());
+                resultMapInfo.setTableNameAlias(parentEntityRelationTree.getTableNameAlias());
+                resultMapInfo.setColumnInfo(childEntityRelationTree.getColumnInfo());
                 resultMapInfo.setNestedSelect(new ResultMapInfo.NestedSelect());
                 return resultMapInfo;
             }
@@ -154,6 +160,7 @@ public class ResultMapInfoHandler {
 
         private ResultMapInfo buildSimpleNestedResultMapInfo(ResultMapContext resultMapContext, EntityRelationTree childEntityRelationTree) {
             ResultMapInfo resultMapInfo = new SimpleNestedResultMapInfo();
+            resultMapInfo.setTableNameAlias(childEntityRelationTree.getTableNameAlias());
             resultMapInfo.setColumnInfo(childEntityRelationTree.getColumnInfo());
             resultMapInfo.setMiddleEntityInfo(childEntityRelationTree.getMiddleEntityInfo());
             resultMapInfo.setEntityInfo(childEntityRelationTree.getEntityInfo());
@@ -168,6 +175,7 @@ public class ResultMapInfoHandler {
             ResultMapInfo resultMapInfo = this.buildAloneResultMapInfo(childEntityRelationTree);
 
             ResultMapInfo parentResultMapInfo = new BatchNestedResultMapInfo();
+            parentResultMapInfo.setTableNameAlias(parentRelationTree.getTableNameAlias());
             parentResultMapInfo.setEntityInfo(parentRelationTree.getEntityInfo());
             parentResultMapInfo.setComposites(Arrays.asList(resultMapInfo));
             resultMapContext.addRelationResultMap(parentResultMapInfo);
@@ -184,22 +192,24 @@ public class ResultMapInfoHandler {
 
         private ResultMapInfo buildAloneResultMapInfo(EntityRelationTree childEntityRelationTree) {
             ResultMapInfo resultMapInfo = new ResultMapInfo();
+            resultMapInfo.setTableNameAlias(childEntityRelationTree.getTableNameAlias());
             resultMapInfo.setColumnInfo(childEntityRelationTree.getColumnInfo());
             resultMapInfo.setMiddleEntityInfo(childEntityRelationTree.getMiddleEntityInfo());
             resultMapInfo.setEntityInfo(childEntityRelationTree.getEntityInfo());
             return resultMapInfo;
         }
 
+        /**
+         * 为结果集生成内嵌查询id和结果集id
+         * @param resultMapInfoList
+         */
         protected void processResultMapInfo(List<ResultMapInfo> resultMapInfoList) {
             for (ResultMapInfo resultMapInfo : resultMapInfoList) {
-                List<EntityInfo> entityInfoList = this.getEntityInfoList(resultMapInfo);
-                String resultMapId = this.getResultMapId(entityInfoList);
-                resultMapInfo.setId(resultMapId);
-
+                List<ResultMapInfo> list = this.resultMapTreeToList(resultMapInfo);
+                resultMapInfo.setId(this.getResultMapId(list));
                 ResultMapInfo.NestedSelect nestedSelect = resultMapInfo.getNestedSelect();
                 if (nestedSelect != null) {
-                    String nestedSelectId = this.getNestedSelectId(entityInfoList);
-                    nestedSelect.setId(nestedSelectId);
+                    nestedSelect.setId(this.getNestedSelectId(list));
                 }
             }
         }

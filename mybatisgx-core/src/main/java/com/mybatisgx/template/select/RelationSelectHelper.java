@@ -25,7 +25,7 @@ public class RelationSelectHelper {
 
     private static String getFetchSize(ResultMapInfo resultMapInfo) {
         RelationColumnInfo relationColumnInfo = null;
-        if (TypeUtils.typeEquals(resultMapInfo, ResultMapInfo.class) || TypeUtils.typeEquals(resultMapInfo, SimpleNestedResultMapInfo.class)) {
+        if (TypeUtils.typeEquals(resultMapInfo, ResultMapInfo.class, SimpleNestedResultMapInfo.class)) {
             relationColumnInfo = (RelationColumnInfo) resultMapInfo.getColumnInfo();
         }
         if (TypeUtils.typeEquals(resultMapInfo, BatchNestedResultMapInfo.class)) {

@@ -278,21 +278,14 @@ public class ColumnInfoHandler {
                         // foreignKeyColumnInfo.setDbTypeName(referencedColumnInfo.getDbTypeName());
                     }
                 } else {
-                    List<ForeignKeyInfo> foreignKeyColumnInfoList = relationColumnInfo.getForeignKeyInfoList();
-                    for (ForeignKeyInfo foreignKeyColumnInfo : foreignKeyColumnInfoList) {
-                        Class<?> javaType = relationColumnInfo.getJavaType();
-                        EntityInfo relationColumnEntityInfo = EntityInfoContextHolder.get(javaType);
-
+                    for (ForeignKeyInfo foreignKeyColumnInfo : relationColumnInfo.getForeignKeyInfoList()) {
                         String referencedColumnName = foreignKeyColumnInfo.getReferencedColumnName();
-                        ColumnInfo referencedColumnInfo = relationColumnEntityInfo.getDbColumnInfo(referencedColumnName);
+                        ColumnInfo referencedColumnInfo = entityInfo.getColumnInfo(referencedColumnName);
                         foreignKeyColumnInfo.setReferencedColumnInfo(referencedColumnInfo);
                     }
 
-                    List<ForeignKeyInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyInfoList();
-                    for (ForeignKeyInfo inverseForeignKeyColumnInfo : inverseForeignKeyColumnInfoList) {
-                        Class<?> javaType = relationColumnInfo.getJavaType();
-                        EntityInfo relationColumnEntityInfo = EntityInfoContextHolder.get(javaType);
-
+                    for (ForeignKeyInfo inverseForeignKeyColumnInfo : relationColumnInfo.getInverseForeignKeyInfoList()) {
+                        EntityInfo relationColumnEntityInfo = EntityInfoContextHolder.get(relationColumnInfo.getJavaType());
                         String referencedColumnName = inverseForeignKeyColumnInfo.getReferencedColumnName();
                         ColumnInfo referencedColumnInfo = relationColumnEntityInfo.getDbColumnInfo(referencedColumnName);
                         inverseForeignKeyColumnInfo.setReferencedColumnInfo(referencedColumnInfo);

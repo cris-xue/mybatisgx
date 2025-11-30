@@ -12,6 +12,14 @@ import java.util.List;
 public class ColumnEntityRelation<T> {
 
     /**
+     * 关系层级，第一层为1层，第二层为2层，以此类推，如用户和角色，用户为1、角色为2层
+     */
+    private int level;
+    /**
+     * 当前实体所在层级的索引
+     */
+    private int index;
+    /**
      * 当前实体的表别名
      */
     private String tableNameAlias;
@@ -31,6 +39,22 @@ public class ColumnEntityRelation<T> {
      * 结果集和关系查询中的子对象
      */
     private List<T> composites = new ArrayList();
+
+    public int getLevel() {
+        return level;
+    }
+
+    public void setLevel(int level) {
+        this.level = level;
+    }
+
+    public int getIndex() {
+        return index;
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
+    }
 
     public String getTableName() {
         return this.entityInfo.getTableName();

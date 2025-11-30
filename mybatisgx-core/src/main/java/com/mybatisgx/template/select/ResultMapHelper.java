@@ -1,5 +1,6 @@
 package com.mybatisgx.template.select;
 
+import com.mybatisgx.model.ColumnEntityRelation;
 import com.mybatisgx.model.ColumnInfo;
 import com.mybatisgx.model.RelationColumnInfo;
 import com.mybatisgx.model.ResultMapInfo;
@@ -17,21 +18,22 @@ public class ResultMapHelper {
         return resultMapElement;
     }
 
-    public static void idColumnElement(Element resultMapElement, ColumnInfo columnInfo) {
+    public static void idColumnElement(Element resultMapElement, ColumnEntityRelation columnEntityRelation, ColumnInfo columnInfo) {
         Element idColumnElement = resultMapElement.addElement("id");
-        columnElement(idColumnElement, columnInfo);
+        columnElement(idColumnElement, columnEntityRelation, columnInfo);
     }
 
-    public static void resultColumnElement(Element resultMapElement, ColumnInfo columnInfo) {
+    public static void resultColumnElement(Element resultMapElement, ColumnEntityRelation columnEntityRelation, ColumnInfo columnInfo) {
         Element resultColumnElement = resultMapElement.addElement("result");
-        columnElement(resultColumnElement, columnInfo);
+        columnElement(resultColumnElement, columnEntityRelation, columnInfo);
     }
 
-    public static void columnElement(Element columnElement, ColumnInfo columnInfo) {
+    public static void columnElement(Element columnElement, ColumnEntityRelation columnEntityRelation, ColumnInfo columnInfo) {
+        String tableColumnNameAlias = String.format("%s_%s", columnEntityRelation.getTableNameAlias(), columnInfo.getDbColumnNameAlias());
+        String dbTypeName = columnInfo.getDbTypeName();
         columnElement.addAttribute("property", columnInfo.getJavaColumnName());
         columnElement.addAttribute("javaType", columnInfo.getJavaTypeName());
-        columnElement.addAttribute("column", columnInfo.getDbColumnNameAlias());
-        String dbTypeName = columnInfo.getDbTypeName();
+        columnElement.addAttribute("column", tableColumnNameAlias);
         columnElement.addAttribute("jdbcType", StringUtils.isNotBlank(dbTypeName) ? dbTypeName.toUpperCase() : null);
         columnElement.addAttribute("typeHandler", columnInfo.getTypeHandler());
     }

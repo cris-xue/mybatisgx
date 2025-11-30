@@ -144,14 +144,14 @@ public class ResultMapInfoHandler {
             FetchMode fetchMode = relationColumnInfo.getFetchMode();
             if (fetchMode == FetchMode.JOIN && level > 2) {
                 ResultMapInfo resultMapInfo = new ResultMapInfo();
-                resultMapInfo.setTableNameAlias(childEntityRelationTree.getTableNameAlias());
+                this.copyProperties(childEntityRelationTree, resultMapInfo);
                 resultMapInfo.setColumnInfo(childEntityRelationTree.getColumnInfo());
                 resultMapInfo.setMiddleEntityInfo(childEntityRelationTree.getMiddleEntityInfo());
                 resultMapInfo.setEntityInfo(childEntityRelationTree.getEntityInfo());
                 return resultMapInfo;
             } else {
                 ResultMapInfo resultMapInfo = new ResultMapInfo();
-                resultMapInfo.setTableNameAlias(parentEntityRelationTree.getTableNameAlias());
+                this.copyProperties(parentEntityRelationTree, resultMapInfo);
                 resultMapInfo.setColumnInfo(childEntityRelationTree.getColumnInfo());
                 resultMapInfo.setNestedSelect(new ResultMapInfo.NestedSelect());
                 return resultMapInfo;
@@ -160,7 +160,7 @@ public class ResultMapInfoHandler {
 
         private ResultMapInfo buildSimpleNestedResultMapInfo(ResultMapContext resultMapContext, EntityRelationTree childEntityRelationTree) {
             ResultMapInfo resultMapInfo = new SimpleNestedResultMapInfo();
-            resultMapInfo.setTableNameAlias(childEntityRelationTree.getTableNameAlias());
+            this.copyProperties(childEntityRelationTree, resultMapInfo);
             resultMapInfo.setColumnInfo(childEntityRelationTree.getColumnInfo());
             resultMapInfo.setMiddleEntityInfo(childEntityRelationTree.getMiddleEntityInfo());
             resultMapInfo.setEntityInfo(childEntityRelationTree.getEntityInfo());
@@ -175,7 +175,7 @@ public class ResultMapInfoHandler {
             ResultMapInfo resultMapInfo = this.buildAloneResultMapInfo(childEntityRelationTree);
 
             ResultMapInfo parentResultMapInfo = new BatchNestedResultMapInfo();
-            parentResultMapInfo.setTableNameAlias(parentRelationTree.getTableNameAlias());
+            this.copyProperties(parentRelationTree, parentResultMapInfo);
             parentResultMapInfo.setEntityInfo(parentRelationTree.getEntityInfo());
             parentResultMapInfo.setComposites(Arrays.asList(resultMapInfo));
             resultMapContext.addRelationResultMap(parentResultMapInfo);
@@ -192,7 +192,7 @@ public class ResultMapInfoHandler {
 
         private ResultMapInfo buildAloneResultMapInfo(EntityRelationTree childEntityRelationTree) {
             ResultMapInfo resultMapInfo = new ResultMapInfo();
-            resultMapInfo.setTableNameAlias(childEntityRelationTree.getTableNameAlias());
+            this.copyProperties(childEntityRelationTree, resultMapInfo);
             resultMapInfo.setColumnInfo(childEntityRelationTree.getColumnInfo());
             resultMapInfo.setMiddleEntityInfo(childEntityRelationTree.getMiddleEntityInfo());
             resultMapInfo.setEntityInfo(childEntityRelationTree.getEntityInfo());
@@ -212,6 +212,12 @@ public class ResultMapInfoHandler {
                     nestedSelect.setId(this.getNestedSelectId(list));
                 }
             }
+        }
+
+        private void copyProperties(EntityRelationTree source, ResultMapInfo target) {
+            target.setLevel(source.getLevel());
+            target.setIndex(source.getIndex());
+            target.setTableNameAlias(source.getTableNameAlias());
         }
     }
 

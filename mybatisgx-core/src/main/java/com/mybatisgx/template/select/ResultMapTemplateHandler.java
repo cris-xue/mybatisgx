@@ -27,13 +27,13 @@ public class ResultMapTemplateHandler {
             Document document = DocumentHelper.createDocument();
             Element resultMapElement = ResultMapHelper.addResultMapElement(document, resultMapInfo);
             if (TypeUtils.typeEquals(resultMapInfo, ResultMapInfo.class, SimpleNestedResultMapInfo.class)) {
-                this.addIdColumnElement(resultMapElement, resultMapInfo.getEntityInfo());
-                this.addColumnElement(resultMapElement, resultMapInfo.getTableColumnInfoList());
+                this.addIdColumnElement(resultMapElement, resultMapInfo);
+                this.addColumnElement(resultMapElement, resultMapInfo);
                 this.addRelationColumnElement(resultMapElement, resultMapInfo);
                 this.addRelationResultMapElement(resultMapElement, resultMapInfo);
             }
             if (TypeUtils.typeEquals(resultMapInfo, BatchNestedResultMapInfo.class)) {
-                this.addIdColumnElement(resultMapElement, resultMapInfo.getEntityInfo());
+                this.addIdColumnElement(resultMapElement, resultMapInfo);
                 // this.addRelationColumnElement(resultMapElement, resultMapInfo);
                 this.addRelationResultMapElement(resultMapElement, resultMapInfo);
             }
@@ -47,24 +47,24 @@ public class ResultMapTemplateHandler {
         return xNodeMap;
     }
 
-    private void addIdColumnElement(Element resultMapElement, EntityInfo entityInfo) {
-        IdColumnInfo idColumnInfo = entityInfo.getIdColumnInfo();
-        List<ColumnInfo> composites = idColumnInfo.getComposites();
-        if (ObjectUtils.isEmpty(composites)) {
-            ResultMapHelper.idColumnElement(resultMapElement, idColumnInfo);
+    private void addIdColumnElement(Element resultMapElement, ResultMapInfo resultMapInfo) {
+        IdColumnInfo idColumnInfo = resultMapInfo.getEntityInfo().getIdColumnInfo();
+        List<ColumnInfo> columnInfoComposites = idColumnInfo.getComposites();
+        if (ObjectUtils.isEmpty(columnInfoComposites)) {
+            ResultMapHelper.idColumnElement(resultMapElement, resultMapInfo, idColumnInfo);
         } else {
-            for (ColumnInfo columnInfo : composites) {
-                String javaColumnName = String.format("%s.%s", idColumnInfo.getJavaColumnName(), columnInfo.getJavaColumnName());
-                ColumnInfo composite = new ColumnInfo.Builder().columnInfo(columnInfo).javaColumnName(javaColumnName).build();
-                ResultMapHelper.idColumnElement(resultMapElement, composite);
+            for (ColumnInfo columnInfoComposite : columnInfoComposites) {
+                String javaColumnName = String.format("%s.%s", idColumnInfo.getJavaColumnName(), columnInfoComposite.getJavaColumnName());
+                ColumnInfo composite = new ColumnInfo.Builder().columnInfo(columnInfoComposite).javaColumnName(javaColumnName).build();
+                ResultMapHelper.idColumnElement(resultMapElement, resultMapInfo, composite);
             }
         }
     }
 
-    private void addColumnElement(Element resultMapElement, List<ColumnInfo> tableColumnInfoList) {
-        for (ColumnInfo tableColumnInfo : tableColumnInfoList) {
+    private void addColumnElement(Element resultMapElement, ResultMapInfo resultMapInfo) {
+        for (ColumnInfo tableColumnInfo : resultMapInfo.getTableColumnInfoList()) {
             if (TypeUtils.typeEquals(tableColumnInfo, ColumnInfo.class)) {
-                ResultMapHelper.resultColumnElement(resultMapElement, tableColumnInfo);
+                ResultMapHelper.resultColumnElement(resultMapElement, resultMapInfo, tableColumnInfo);
             }
         }
     }
@@ -106,12 +106,12 @@ public class ResultMapTemplateHandler {
                             if (ObjectUtils.isEmpty(idColumnInfoComposites)) {
                                 String javaColumnName = String.format("%s.%s", relationColumnInfo.getJavaColumnName(), idColumnInfo.getJavaColumnName());
                                 ColumnInfo composite = new ColumnInfo.Builder().columnInfo(foreignKeyColumnInfo).javaColumnName(javaColumnName).build();
-                                ResultMapHelper.resultColumnElement(resultMapElement, composite);
+                                ResultMapHelper.resultColumnElement(resultMapElement, resultMapInfo, composite);
                             } else {
                                 for (ColumnInfo idColumnComposite : idColumnInfoComposites) {
                                     String javaColumnName = String.format("%s.%s.%s", relationColumnInfo.getJavaColumnName(), idColumnInfo.getJavaColumnName(), idColumnComposite.getJavaColumnName());
                                     ColumnInfo composite = new ColumnInfo.Builder().columnInfo(foreignKeyColumnInfo).javaColumnName(javaColumnName).build();
-                                    ResultMapHelper.resultColumnElement(resultMapElement, composite);
+                                    ResultMapHelper.resultColumnElement(resultMapElement, resultMapInfo, composite);
                                 }
                             }
                         }
@@ -158,13 +158,13 @@ public class ResultMapTemplateHandler {
         RelationType relationType = relationColumnInfo.getRelationType();
         if (relationType == RelationType.ONE_TO_ONE || relationType == RelationType.MANY_TO_ONE) {
             Element resultMapRelationElement = ResultMapHelper.joinAssociationColumnElement(resultMapElement, resultMapInfo);
-            this.addIdColumnElement(resultMapRelationElement, resultMapInfo.getEntityInfo());
-            this.addColumnElement(resultMapRelationElement, resultMapInfo.getTableColumnInfoList());
+            this.addIdColumnElement(resultMapRelationElement, resultMapInfo);
+            this.addColumnElement(resultMapRelationElement, resultMapInfo);
             return resultMapRelationElement;
         } else if (relationType == RelationType.ONE_TO_MANY || relationType == RelationType.MANY_TO_MANY) {
             Element resultMapCollectionElement = ResultMapHelper.joinCollectionColumnElement(resultMapElement, resultMapInfo);
-            this.addIdColumnElement(resultMapCollectionElement, resultMapInfo.getEntityInfo());
-            this.addColumnElement(resultMapCollectionElement, resultMapInfo.getTableColumnInfoList());
+            this.addIdColumnElement(resultMapCollectionElement, resultMapInfo);
+            this.addColumnElement(resultMapCollectionElement, resultMapInfo);
             if (resultMapInfo.isMappedBy()) {
                 this.addRelationColumnElement(resultMapCollectionElement, resultMapInfo);
             }
@@ -196,12 +196,12 @@ public class ResultMapTemplateHandler {
                     if (ObjectUtils.isNotEmpty(referencedColumnInfo.getComposites())) {
                         referencedColumnInfo = referencedColumnInfo.getComposites().get(0);
                     }
-                    column.put(foreignKeyColumnInfo.getJavaColumnName(), referencedColumnInfo.getDbColumnNameAlias());
+                    column.put(foreignKeyColumnInfo.getJavaColumnName(), referencedColumnInfo.getTableColumnNameAlias(resultMapRelationInfo));
                 }
             } else {
                 for (ForeignKeyInfo inverseForeignKeyInfo : relationColumnInfo.getInverseForeignKeyInfoList()) {
                     ColumnInfo foreignKeyColumnInfo = inverseForeignKeyInfo.getColumnInfo();
-                    column.put(foreignKeyColumnInfo.getJavaColumnName(), foreignKeyColumnInfo.getDbColumnNameAlias());
+                    column.put(foreignKeyColumnInfo.getJavaColumnName(), foreignKeyColumnInfo.getTableColumnNameAlias(resultMapRelationInfo));
                 }
             }
         } else {
@@ -209,13 +209,13 @@ public class ResultMapTemplateHandler {
                 for (ForeignKeyInfo inverseForeignKeyInfo : mappedByRelationColumnInfo.getInverseForeignKeyInfoList()) {
                     ColumnInfo foreignKeyColumnInfo = inverseForeignKeyInfo.getColumnInfo();
                     ColumnInfo referencedColumnInfo = inverseForeignKeyInfo.getReferencedColumnInfo();
-                    column.put(foreignKeyColumnInfo.getJavaColumnName(), referencedColumnInfo.getDbColumnNameAlias());
+                    column.put(foreignKeyColumnInfo.getJavaColumnName(), referencedColumnInfo.getTableColumnNameAlias(resultMapRelationInfo));
                 }
             } else {
                 for (ForeignKeyInfo foreignKeyInfo : relationColumnInfo.getForeignKeyInfoList()) {
                     ColumnInfo foreignKeyColumnInfo = foreignKeyInfo.getColumnInfo();
                     ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();
-                    column.put(foreignKeyColumnInfo.getJavaColumnName(), referencedColumnInfo.getDbColumnNameAlias());
+                    column.put(foreignKeyColumnInfo.getJavaColumnName(), referencedColumnInfo.getTableColumnNameAlias(resultMapRelationInfo));
                 }
             }
         }

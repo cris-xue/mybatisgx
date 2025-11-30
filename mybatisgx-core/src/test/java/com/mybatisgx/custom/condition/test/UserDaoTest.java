@@ -226,6 +226,8 @@ public class UserDaoTest {
         userDao.findListNew2222(1111L, userQuery);
         userDao.countByNameByName("name");
         userDao.findTop5ByNameLikeOrderByNameDesc("name");
+        userDao.findTop5ByNameStartingWithOrderByNameDesc("name");
+        userDao.findTop5ByNameEndingWithOrderByNameDesc("name");
     }
 
     @Test

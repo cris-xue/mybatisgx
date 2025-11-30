@@ -2,9 +2,9 @@ package com.mybatisgx.custom.condition.dao;
 
 import com.mybatisgx.annotation.Dynamic;
 import com.mybatisgx.annotation.Sql;
-import com.mybatisgx.dao.SimpleDao;
 import com.mybatisgx.custom.condition.entity.User;
 import com.mybatisgx.custom.condition.entity.UserQuery;
+import com.mybatisgx.dao.SimpleDao;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -38,6 +38,10 @@ public interface UserDao extends SimpleDao<User, Long> {
     long countByNameByName(@Param("name") String name);
 
     List<User> findTop5ByNameLikeOrderByNameDesc(String name);
+
+    List<User> findTop5ByNameStartingWithOrderByNameDesc(String name);
+
+    List<User> findTop5ByNameEndingWithOrderByNameDesc(String name);
 
     List<User> findByIdNotInAndNameNotLike(List<Long> idList, String name);
 

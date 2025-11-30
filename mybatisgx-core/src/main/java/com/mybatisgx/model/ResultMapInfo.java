@@ -52,22 +52,6 @@ public class ResultMapInfo extends ColumnEntityRelation<ResultMapInfo> {
         this.nestedSelect = nestedSelect;
     }
 
-    public String getEntityTableName() {
-        return this.entityInfo.getTableName();
-    }
-
-    public String getEntityTableNameAlias() {
-        return this.entityInfo.getTableNameAlias();
-    }
-
-    public String getMiddleTableName() {
-        return this.getMiddleEntityInfo().getTableName();
-    }
-
-    public ColumnInfo getColumnInfo(String javaColumnName) {
-        return this.entityInfo.getColumnInfo(javaColumnName);
-    }
-
     public static class NestedSelect {
 
         private String id;

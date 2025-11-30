@@ -148,6 +148,10 @@ public class ColumnInfo {
         return dbColumnNameAlias;
     }
 
+    public String getTableColumnNameAlias(ColumnEntityRelation columnEntityRelation) {
+        return String.format("%s_%s", columnEntityRelation.getTableNameAlias(), dbColumnNameAlias);
+    }
+
     public void setDbColumnNameAlias(String dbColumnNameAlias) {
         this.dbColumnNameAlias = dbColumnNameAlias;
     }

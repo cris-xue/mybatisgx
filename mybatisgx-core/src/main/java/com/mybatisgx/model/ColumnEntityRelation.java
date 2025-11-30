@@ -12,6 +12,10 @@ import java.util.List;
 public class ColumnEntityRelation<T> {
 
     /**
+     * 当前实体的表别名
+     */
+    private String tableNameAlias;
+    /**
      * 关系字段，如当前类为role，关系字段为user中的List<Role>字段
      */
     protected ColumnInfo columnInfo;
@@ -28,12 +32,28 @@ public class ColumnEntityRelation<T> {
      */
     private List<T> composites = new ArrayList();
 
+    public String getTableName() {
+        return this.entityInfo.getTableName();
+    }
+
+    public String getTableNameAlias() {
+        return tableNameAlias;
+    }
+
+    public void setTableNameAlias(String tableNameAlias) {
+        this.tableNameAlias = tableNameAlias;
+    }
+
     public ColumnInfo getColumnInfo() {
         return columnInfo;
     }
 
     public void setColumnInfo(ColumnInfo columnInfo) {
         this.columnInfo = columnInfo;
+    }
+
+    public String getMiddleTableName() {
+        return this.middleEntityInfo.getTableName();
     }
 
     public MiddleEntityInfo getMiddleEntityInfo() {

@@ -81,7 +81,7 @@ public class MybatisgxSyntaxNewHandler {
 
         @Override
         public void handle(ParseTree node, ParserContext context) {
-            LOGGER.info("处理查询: {}", node.getText());
+            LOGGER.debug("处理查询: {}", node.getText());
             MethodInfo methodInfo = context.getMethodInfo();
             methodInfo.setSqlCommandType(SqlCommandType.SELECT);
             MethodNameParser.Select_itemContext selectItemContext = (MethodNameParser.Select_itemContext) node;
@@ -126,7 +126,7 @@ public class MybatisgxSyntaxNewHandler {
 
         @Override
         public void handle(ParseTree node, ParserContext context) {
-            LOGGER.info("处理where条件: {}", node.getText());
+            LOGGER.debug("处理where条件: {}", node.getText());
             WhereClauseVisitor whereClauseVisitor = new WhereClauseVisitor(context);
             List<ConditionInfo> conditionInfoList = whereClauseVisitor.visit(node);
             context.getMethodInfo().setConditionInfoList(conditionInfoList);
@@ -147,7 +147,7 @@ public class MybatisgxSyntaxNewHandler {
 
         @Override
         public void handle(ParseTree node, ParserContext context) {
-            LOGGER.info("排序函数: {}", node.getText());
+            LOGGER.debug("排序函数: {}", node.getText());
             List<SelectOrderByInfo> selectOrderByInfoList = new ArrayList<>();
             MethodNameParser.Order_by_clauseContext orderByClauseContext = (MethodNameParser.Order_by_clauseContext) node;
             for (MethodNameParser.Order_by_item_clauseContext orderByItem : orderByClauseContext.order_by_item_clause()) {
@@ -170,7 +170,7 @@ public class MybatisgxSyntaxNewHandler {
 
         @Override
         public List<ConditionInfo> visitCondition_expression(MethodNameParser.Condition_expressionContext ctx) {
-            LOGGER.info("处理条件表达式: {}", ctx.getText());
+            LOGGER.debug("处理条件表达式: {}", ctx.getText());
             List<ConditionInfo> conditionInfoList = new ArrayList();
             MethodNameParser.Or_expressionContext orExpressionContext = ctx.or_expression();
             MethodNameParser.Logic_op_orContext logicOpOrContext = null;
@@ -244,7 +244,7 @@ public class MybatisgxSyntaxNewHandler {
 
         @Override
         public List<ConditionInfo> visitCondition_term(MethodNameParser.Condition_termContext ctx) {
-            LOGGER.info("处理条件单元: {}", ctx.getText());
+            LOGGER.debug("处理条件单元: {}", ctx.getText());
             return super.visitCondition_term(ctx);
         }
 
@@ -269,7 +269,7 @@ public class MybatisgxSyntaxNewHandler {
         }
 
         public ConditionInfo parse(int index, MethodNameParser.Field_comparison_op_clauseContext ctx) {
-            LOGGER.info("处理条件: {}", ctx.getText());
+            LOGGER.debug("处理条件: {}", ctx.getText());
             ConditionInfo conditionInfo = new ConditionInfo(index, context.conditionOriginType, context.methodParamInfo);
             if (context.conditionOriginType == ConditionOriginType.ENTITY_FIELD) {
                 String conditionColumnName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, ctx.getText());

@@ -1,13 +1,11 @@
 package com.mybatisgx.util;
 
 import com.mybatisgx.context.MybatisgxContextLoader;
-import com.mybatisgx.context.MybatisgxObjectFactory;
 import com.mybatisgx.ext.builder.xml.MybatisgxXMLConfigBuilder;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.ext.session.defaults.MybatisgxDefaultSqlSessionFactory;
 import com.mybatisgx.template.StatementTemplateHandler;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.defaults.DefaultSqlSessionFactory;
@@ -41,12 +39,11 @@ public class DaoTestUtils {
     }
 
     protected static MybatisgxConfiguration context(String[] entityBasePackages, String[] daoBasePackages) {
-        Configuration configuration;
+        MybatisgxConfiguration configuration;
         try {
             ClassPathResource classPathResource = new ClassPathResource("mybatis-config.xml");
             MybatisgxXMLConfigBuilder xmlConfigBuilder = new MybatisgxXMLConfigBuilder(classPathResource.getInputStream());
-            configuration = xmlConfigBuilder.parse();
-            MybatisgxObjectFactory.register((MybatisgxConfiguration) configuration);
+            configuration = (MybatisgxConfiguration) xmlConfigBuilder.parse();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -54,12 +51,12 @@ public class DaoTestUtils {
         DataSource dataSource = configuration.getEnvironment().getDataSource();
         flywayInit(dataSource, configuration.getEnvironment().getId());
 
-        MybatisgxContextLoader mybatisgxContextLoader = new MybatisgxContextLoader(entityBasePackages, daoBasePackages, null);
+        MybatisgxContextLoader mybatisgxContextLoader = new MybatisgxContextLoader(entityBasePackages, daoBasePackages, null, configuration);
         mybatisgxContextLoader.load();
 
-        StatementTemplateHandler statementTemplateHandler = new StatementTemplateHandler((MybatisgxConfiguration) configuration);
+        StatementTemplateHandler statementTemplateHandler = new StatementTemplateHandler(configuration);
         statementTemplateHandler.curdMethod(configuration);
-        return (MybatisgxConfiguration) configuration;
+        return configuration;
     }
 
     public static SqlSession getSqlSession(String[] entityBasePackages, String[] daoBasePackages) {

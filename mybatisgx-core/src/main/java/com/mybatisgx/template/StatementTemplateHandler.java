@@ -65,7 +65,7 @@ public class StatementTemplateHandler {
         } else {
             throw new RuntimeException("不存在的操作方式");
         }
-        logger.info("{}:\n{}", methodInfo.getMethodName(), xmlString);
+        logger.debug("{}:\n{}", methodInfo.getMethodName(), xmlString);
         XPathParser xPathParser = XmlUtils.processXml(xmlString);
         return xPathParser.evalNode("/mapper/select|/mapper/insert|/mapper/delete|/mapper/update");
     }

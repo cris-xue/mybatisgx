@@ -48,7 +48,7 @@ public class RelationSelectTemplateHandler {
         String selectXmlString = this.buildSelectString(resultMapInfo);
         Map<String, XNode> entityRelationSelectXNodeMap = new HashMap();
         if (StringUtils.isNotBlank(selectXmlString)) {
-            logger.info("auto relation select sql: \n{}", selectXmlString);
+            logger.debug("auto relation select sql: \n{}", selectXmlString);
             XPathParser xPathParser = XmlUtils.processXml(selectXmlString);
             XNode xNode = xPathParser.evalNode("/mapper/select");
             entityRelationSelectXNodeMap.put(resultMapInfo.getId(), xNode);

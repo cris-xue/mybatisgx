@@ -38,7 +38,7 @@ public class ResultMapTemplateHandler {
                 this.addRelationResultMapElement(resultMapElement, resultMapInfo);
             }
             String resultMapXmlString = document.asXML();
-            logger.info("select resultMap: \n{}", resultMapXmlString);
+            logger.debug("select resultMap: \n{}", resultMapXmlString);
 
             XPathParser xPathParser = XmlUtils.processXml(resultMapXmlString);
             XNode xNode = xPathParser.evalNode("/mapper/resultMap");

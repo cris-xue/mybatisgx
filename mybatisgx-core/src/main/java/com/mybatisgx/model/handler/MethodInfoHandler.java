@@ -7,6 +7,7 @@ import com.mybatisgx.context.EntityInfoContextHolder;
 import com.mybatisgx.context.MethodInfoContextHolder;
 import com.mybatisgx.dao.Dao;
 import com.mybatisgx.dao.SimpleDao;
+import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.model.*;
 import com.mybatisgx.utils.TypeUtils;
 import org.apache.commons.lang3.ClassUtils;
@@ -37,13 +38,18 @@ public class MethodInfoHandler {
     private MybatisgxSyntaxProcessor mybatisgxSyntaxProcessor = new MybatisgxSyntaxProcessor();
     private EntityRelationTreeHandler entityRelationTreeHandler = new EntityRelationTreeHandler();
     private ResultMapInfoHandler resultMapInfoHandler = new ResultMapInfoHandler();
+    private MybatisgxConfiguration configuration;
+
+    public MethodInfoHandler(MybatisgxConfiguration configuration) {
+        this.configuration = configuration;
+    }
 
     public List<MethodInfo> execute(MapperInfo mapperInfo, Class<?> interfaceClass) {
         Map<String, MethodInfo> methodInfoMap = new LinkedHashMap<>();
         this.daoClass(interfaceClass, mapperInfo, methodInfoMap);
         List<MethodInfo> methodInfoList = new ArrayList(20);
         methodInfoMap.forEach((methodName, methodInfo) -> {
-            String namespaceMethodName = String.format("%s.%s", mapperInfo.getNamespace(), methodName);
+            String namespaceMethodName = this.getNamespaceMethodName(mapperInfo, methodName);
             MethodInfoContextHolder.set(namespaceMethodName, methodInfo);
             methodInfoList.add(methodInfo);
         });
@@ -52,7 +58,7 @@ public class MethodInfoHandler {
 
     private void daoClass(Class<?> daoClass, MapperInfo mapperInfo, Map<String, MethodInfo> methodInfoMap) {
         Method[] declaredMethods = daoClass.getDeclaredMethods();
-        processMethod(declaredMethods, mapperInfo, methodInfoMap);
+        this.processMethod(declaredMethods, mapperInfo, methodInfoMap);
 
         Type[] superInterfaces = daoClass.getGenericInterfaces();
         for (Type type : superInterfaces) {
@@ -71,7 +77,11 @@ public class MethodInfoHandler {
             Class<?> methodDeclaringClass = method.getDeclaringClass();
             String methodName = method.getName();
             if (methodInfoMap.containsKey(methodName)) {
-                LOGGER.error("方法名{}已存在，请修改方法名！", methodName);
+                throw new RuntimeException("dao接口方法无法重载，请修改方法名" + methodName);
+            }
+            String namespaceMethodName = this.getNamespaceMethodName(mapperInfo, methodName);
+            if (this.configuration.hasStatement(namespaceMethodName)) {
+                LOGGER.debug("方法{}已在mapper存在，无需处理该方法！", namespaceMethodName);
                 continue;
             }
 
@@ -274,6 +284,9 @@ public class MethodInfoHandler {
      * @param conditionInfoList
      */
     private void bindConditionParam(MethodInfo methodInfo, List<ConditionInfo> conditionInfoList) {
+        if (methodInfo.getSqlCommandType() != SqlCommandType.INSERT && ObjectUtils.isEmpty(conditionInfoList)) {
+            throw new RuntimeException(methodInfo.getMethodName() + "方法无条件");
+        }
         for (ConditionInfo conditionInfo : conditionInfoList) {
             List<ConditionInfo> childConditionInfoList = conditionInfo.getConditionInfoList();
             if (ObjectUtils.isNotEmpty(childConditionInfoList)) {
@@ -449,6 +462,10 @@ public class MethodInfoHandler {
             return Collection.class;
         }
         return null;
+    }
+
+    private String getNamespaceMethodName(MapperInfo mapperInfo, String methodName) {
+        return String.format("%s.%s", mapperInfo.getNamespace(), methodName);
     }
 
     public ClassCategory getClassCategory(Type type) {

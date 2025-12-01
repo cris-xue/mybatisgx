@@ -18,7 +18,6 @@ import org.apache.ibatis.transaction.Transaction;
 
 import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -82,8 +81,7 @@ public class MybatisgxMixExecutor implements Executor {
     private Pageable getPageable(Object parameterObject) {
         if (parameterObject instanceof Map) {
             Map<String, Object> parameterObjectMap = (Map<String, Object>) parameterObject;
-            Collection<Object> parameterObjectCollection = parameterObjectMap.values();
-            for (Object object : parameterObjectCollection) {
+            for (Object object : parameterObjectMap.values()) {
                 if (object instanceof Pageable) {
                     return (Pageable) object;
                 }

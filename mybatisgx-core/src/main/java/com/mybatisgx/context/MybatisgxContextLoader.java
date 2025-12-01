@@ -37,7 +37,7 @@ import java.util.Map;
  */
 public class MybatisgxContextLoader {
 
-    private static final Logger logger = LoggerFactory.getLogger(MybatisgxContextLoader.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MybatisgxContextLoader.class);
 
     private static final ResourcePatternResolver RESOURCE_PATTERN_RESOLVER = new PathMatchingResourcePatternResolver();
     private static final MetadataReaderFactory METADATA_READER_FACTORY = new CachingMetadataReaderFactory();
@@ -56,6 +56,8 @@ public class MybatisgxContextLoader {
     }
 
     public void load() {
+        long startTime = System.currentTimeMillis();
+
         for (String entityBasePackage : entityBasePackages) {
             this.processEntity(entityBasePackage);
         }
@@ -72,6 +74,9 @@ public class MybatisgxContextLoader {
 
         this.processDao(totalResourceList);
         this.processTemplate();
+
+        long endTime = System.currentTimeMillis();
+        LOGGER.info("Mybatisgx process total time {} ms", endTime - startTime);
     }
 
     private void processEntity(String basePackage) {
@@ -171,7 +176,7 @@ public class MybatisgxContextLoader {
             ClassUtils.convertClassNameToResourcePath(basePackage).concat("/**.class");
             return RESOURCE_PATTERN_RESOLVER.getResources(basePackage);
         } catch (IOException e) {
-            logger.error(e.getMessage(), e);
+            LOGGER.error(e.getMessage(), e);
         }
         return null;
     }
@@ -181,9 +186,9 @@ public class MybatisgxContextLoader {
             ClassMetadata classMetadata = METADATA_READER_FACTORY.getMetadataReader(resource).getClassMetadata();
             return Class.forName(classMetadata.getClassName());
         } catch (IOException e) {
-            logger.error(e.getMessage(), e);
+            LOGGER.error(e.getMessage(), e);
         } catch (ClassNotFoundException e) {
-            logger.error(e.getMessage(), e);
+            LOGGER.error(e.getMessage(), e);
         }
         return null;
     }

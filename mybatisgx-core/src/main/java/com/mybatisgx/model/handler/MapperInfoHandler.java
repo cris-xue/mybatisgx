@@ -2,6 +2,7 @@ package com.mybatisgx.model.handler;
 
 import com.mybatisgx.context.EntityInfoContextHolder;
 import com.mybatisgx.context.MapperInfoContextHolder;
+import com.mybatisgx.context.MybatisgxObjectFactory;
 import com.mybatisgx.dao.Dao;
 import com.mybatisgx.dao.SimpleDao;
 import com.mybatisgx.model.EntityInfo;
@@ -25,8 +26,6 @@ public class MapperInfoHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(MapperInfoHandler.class);
 
-    private static MethodInfoHandler methodInfoHandler = new MethodInfoHandler();
-
     public MapperInfo execute(MapperBuilderAssistant builderAssistant) {
         String namespace = builderAssistant.getCurrentNamespace();
         Class<?> daoInterface = this.getDaoInterface(namespace);
@@ -38,6 +37,7 @@ public class MapperInfoHandler {
         EntityInfo entityInfo = EntityInfoContextHolder.get(mapperInfo.getEntityClass());
         mapperInfo.setEntityInfo(entityInfo);
 
+        MethodInfoHandler methodInfoHandler = MybatisgxObjectFactory.get(MethodInfoHandler.class);
         List<MethodInfo> methodInfoList = methodInfoHandler.execute(mapperInfo, daoInterface);
         mapperInfo.setMethodInfoList(methodInfoList);
         return mapperInfo;

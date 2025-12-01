@@ -47,12 +47,12 @@ public class MybatisgxContextLoader {
     private String[] entityBasePackages;
     private String[] daoBasePackages;
     private List<Resource> repositoryResourceList;
-    private MybatisgxConfiguration configuration;
 
-    public MybatisgxContextLoader(String[] entityBasePackages, String[] daoBasePackages, List<Resource> repositoryResourceList) {
+    public MybatisgxContextLoader(String[] entityBasePackages, String[] daoBasePackages, List<Resource> repositoryResourceList, MybatisgxConfiguration configuration) {
         this.entityBasePackages = entityBasePackages;
         this.daoBasePackages = daoBasePackages;
         this.repositoryResourceList = repositoryResourceList;
+        MybatisgxObjectFactory.register(configuration);
     }
 
     public void load() {

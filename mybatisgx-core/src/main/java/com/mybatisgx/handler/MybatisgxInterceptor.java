@@ -1,7 +1,6 @@
 package com.mybatisgx.handler;
 
-import com.mybatisgx.api.IdGeneratedValueHandler;
-import com.mybatisgx.scripting.MybatisxParameterHandler;
+import com.mybatisgx.executor.MybatisgxParameterHandler;
 import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.mapping.BoundSql;
@@ -37,13 +36,7 @@ import java.util.Properties;
 })
 public class MybatisgxInterceptor implements Interceptor {
 
-    private IdGeneratedValueHandler idGenerateValueHandler;
-    private String tenantId = "";
     private List<SqlHandler> sqlHandlerList = new ArrayList();
-
-    public MybatisgxInterceptor(IdGeneratedValueHandler idGenerateValueHandler) {
-        this.idGenerateValueHandler = idGenerateValueHandler;
-    }
 
     @Override
     public Object intercept(Invocation invocation) throws Throwable {
@@ -53,8 +46,8 @@ public class MybatisgxInterceptor implements Interceptor {
         MappedStatement mappedStatement = mybatisgxExecutorInfo.getMappedStatement();
         Object parameterObject = mybatisgxExecutorInfo.getParameterObject();
 
-        MybatisxParameterHandler mybatisxParameterHandler = new MybatisxParameterHandler(this.idGenerateValueHandler);
-        parameterObject = mybatisxParameterHandler.fillParameterObject(mappedStatement, parameterObject);
+        MybatisgxParameterHandler mybatisgxParameterHandler = new MybatisgxParameterHandler();
+        parameterObject = mybatisgxParameterHandler.fillParameterObject(mappedStatement, parameterObject);
 
         for (SqlHandler sqlHandler : sqlHandlerList) {
             sqlHandler.process(mybatisgxExecutorInfo);

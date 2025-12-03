@@ -21,27 +21,28 @@ import java.util.List;
  */
 public class MybatisgxParameterHandler {
 
-    private GeneratedValueHandler<?> idGenerateValueHandler;
-
-    public MybatisgxParameterHandler(GeneratedValueHandler<?> idGenerateValueHandler) {
-        this.idGenerateValueHandler = idGenerateValueHandler;
-    }
-
     public Object fillParameterObject(MappedStatement mappedStatement, Object parameterObject) {
         if (parameterObject == null) {
             return null;
         }
-
-        MapperMethod.ParamMap<Object> mapperMethodParameterObject = (MapperMethod.ParamMap<Object>) parameterObject;
-        MethodInfo methodInfo = MethodInfoContextHolder.get(mappedStatement.getId());
-        MethodParamInfo entityParamInfo = methodInfo.getEntityParamInfo();
-        String paramWrapperKey = methodInfo.getBatch() ? entityParamInfo.getBatchItemName() : entityParamInfo.getArgName();
-        Object parameterObjectNew = mapperMethodParameterObject.get(paramWrapperKey);
-
         SqlCommandType sqlCommandType = mappedStatement.getSqlCommandType();
+        if (SqlCommandType.DELETE == sqlCommandType || SqlCommandType.SELECT == sqlCommandType) {
+            return parameterObject;
+        }
+
+        Object parameterObjectNew;
+        if (parameterObject instanceof MapperMethod.ParamMap) {
+            MapperMethod.ParamMap<Object> mapperMethodParameterObject = (MapperMethod.ParamMap<Object>) parameterObject;
+            MethodInfo methodInfo = MethodInfoContextHolder.get(mappedStatement.getId());
+            MethodParamInfo entityParamInfo = methodInfo.getEntityParamInfo();
+            String paramWrapperKey = methodInfo.getBatch() ? entityParamInfo.getBatchItemName() : entityParamInfo.getArgName();
+            parameterObjectNew = mapperMethodParameterObject.get(paramWrapperKey);
+        } else {
+            parameterObjectNew = parameterObject;
+        }
+
         EntityInfo entityInfo = EntityInfoContextHolder.get(parameterObjectNew.getClass());
-        boolean isFill = (SqlCommandType.INSERT == sqlCommandType || SqlCommandType.UPDATE == sqlCommandType) && entityInfo != null;
-        if (!isFill) {
+        if (entityInfo == null) {
             return parameterObject;
         }
 
@@ -60,10 +61,9 @@ public class MybatisgxParameterHandler {
 
     private Object next(SqlCommandType sqlCommandType, ColumnInfo columnInfo, Class<?> javaColumnType, Object originalValue) {
         if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class)) {
-            GeneratedValue generatedValue = columnInfo.getGenerateValue();
-            if (generatedValue != null) {
-                GeneratedValueHandler generatedValueHandler = columnInfo.getGenerateValueHandler();
-                if (generatedValue.insert() && sqlCommandType == SqlCommandType.INSERT) {
+            GeneratedValueHandler generatedValueHandler = columnInfo.getGenerateValueHandler();
+            if (generatedValueHandler != null) {
+                if (sqlCommandType == SqlCommandType.INSERT) {
                     return generatedValueHandler.insert(columnInfo, originalValue);
                 }
             }

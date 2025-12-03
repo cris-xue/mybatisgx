@@ -1,6 +1,6 @@
 package com.mybatisgx.ext.session;
 
-import com.mybatisgx.annotation.handler.IdGenerateValueHandler;
+import com.mybatisgx.executor.MybatisgxParameterHandler;
 import com.mybatisgx.ext.executor.MybatisgxBatchExecutor;
 import com.mybatisgx.ext.executor.MybatisgxMixExecutor;
 import com.mybatisgx.ext.executor.resultset.MybatisgxResultSetHandler;
@@ -19,15 +19,14 @@ import org.apache.ibatis.transaction.Transaction;
 
 public class MybatisgxConfiguration extends Configuration {
 
+    private MybatisgxParameterHandler mybatisgxParameterHandler = new MybatisgxParameterHandler();
+
     public MybatisgxConfiguration() {
         super();
     }
 
     public MybatisgxConfiguration(Environment environment) {
         super(environment);
-    }
-
-    public void setIdGenerateValueHandler(IdGenerateValueHandler<?> idGenerateValueHandler) {
     }
 
     @Override
@@ -39,6 +38,7 @@ public class MybatisgxConfiguration extends Configuration {
 
     @Override
     public StatementHandler newStatementHandler(Executor executor, MappedStatement mappedStatement, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
+        mybatisgxParameterHandler.fillParameterObject(mappedStatement, parameterObject);
         return super.newStatementHandler(executor, mappedStatement, parameterObject, rowBounds, resultHandler, boundSql);
     }
 

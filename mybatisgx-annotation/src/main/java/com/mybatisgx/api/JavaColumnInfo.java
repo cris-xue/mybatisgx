@@ -1,6 +1,6 @@
-package com.mybatisgx.annotation.handler;
+package com.mybatisgx.api;
 
-import com.mybatisgx.annotation.GenerateValue;
+import com.mybatisgx.annotation.GeneratedValue;
 import com.mybatisgx.annotation.Id;
 import com.mybatisgx.annotation.Lock;
 import com.mybatisgx.annotation.LogicDelete;
@@ -30,7 +30,7 @@ public class JavaColumnInfo {
     /**
      * 生成值注解
      */
-    private GenerateValue generateValue;
+    private GeneratedValue generatedValue;
 
     public Class<?> getType() {
         return type;
@@ -72,11 +72,11 @@ public class JavaColumnInfo {
         this.logicDelete = logicDelete;
     }
 
-    public GenerateValue getGenerateValue() {
-        return generateValue;
+    public GeneratedValue getGenerateValue() {
+        return generatedValue;
     }
 
-    public void setGenerateValue(GenerateValue generateValue) {
-        this.generateValue = generateValue;
+    public void setGenerateValue(GeneratedValue generatedValue) {
+        this.generatedValue = generatedValue;
     }
 }

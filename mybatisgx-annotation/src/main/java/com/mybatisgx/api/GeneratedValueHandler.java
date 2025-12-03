@@ -1,6 +1,6 @@
-package com.mybatisgx.annotation.handler;
+package com.mybatisgx.api;
 
-public interface GenerateValueHandler<T> {
+public interface GeneratedValueHandler<T> {
 
     T insert(JavaColumnInfo javaColumnInfo, Object originalValue);
 

@@ -1,12 +1,12 @@
-package com.mybatisgx.annotation.handler;
+package com.mybatisgx.api;
 
 import com.mybatisgx.annotation.Lock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LockGenerateValueHandler implements GenerateValueHandler<Object> {
+public class LockGeneratedValueHandler implements GeneratedValueHandler<Object> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(LockGenerateValueHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LockGeneratedValueHandler.class);
 
     @Override
     public Object insert(JavaColumnInfo javaColumnInfo, Object originalValue) {

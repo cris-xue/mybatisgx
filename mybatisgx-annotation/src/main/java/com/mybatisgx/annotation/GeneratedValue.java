@@ -1,6 +1,6 @@
 package com.mybatisgx.annotation;
 
-import com.mybatisgx.annotation.handler.GenerateValueHandler;
+import com.mybatisgx.api.GeneratedValueHandler;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -10,9 +10,9 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Target({FIELD})
 @Retention(RUNTIME)
-public @interface GenerateValue {
+public @interface GeneratedValue {
 
-    Class<? extends GenerateValueHandler<?>> handler();
+    Class<? extends GeneratedValueHandler<?>> value();
 
     boolean insert() default false;
 

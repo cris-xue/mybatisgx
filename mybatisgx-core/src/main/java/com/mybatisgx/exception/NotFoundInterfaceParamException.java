@@ -7,4 +7,7 @@ package com.mybatisgx.exception;
  */
 public class NotFoundInterfaceParamException extends MybatisgxException {
 
+    public NotFoundInterfaceParamException(Throwable cause) {
+        super(cause);
+    }
 }

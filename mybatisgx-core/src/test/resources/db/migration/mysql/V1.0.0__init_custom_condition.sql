@@ -1,6 +1,6 @@
 create table if not exists custom_condition_user
 (
-    id             bigint       not null auto_increment,
+    id             bigint       not null,
     role_ids       varchar(256) not null comment '',
     name           varchar(256) null comment '',
     age            int          null comment '',

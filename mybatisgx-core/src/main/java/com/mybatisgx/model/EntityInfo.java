@@ -4,7 +4,7 @@ import com.mybatisgx.annotation.Lock;
 import com.mybatisgx.annotation.LogicDelete;
 import com.mybatisgx.annotation.ManyToMany;
 import com.mybatisgx.annotation.Transient;
-import com.mybatisgx.annotation.handler.GenerateValueHandler;
+import com.mybatisgx.api.GeneratedValueHandler;
 import com.mybatisgx.utils.TypeUtils;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -177,8 +177,8 @@ public class EntityInfo {
                 if (logicDelete != null) {
                     entityInfo.logicDeleteColumnInfo = columnInfo;
                 }
-                GenerateValueHandler generateValueHandler = columnInfo.getGenerateValueHandler();
-                if (columnInfo instanceof IdColumnInfo || generateValueHandler != null) {
+                GeneratedValueHandler generatedValueHandler = columnInfo.getGenerateValueHandler();
+                if (columnInfo instanceof IdColumnInfo || generatedValueHandler != null) {
                     entityInfo.generateValueColumnInfoList.add(columnInfo);
                 }
 

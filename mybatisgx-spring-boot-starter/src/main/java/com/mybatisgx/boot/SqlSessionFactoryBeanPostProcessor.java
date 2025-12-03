@@ -1,6 +1,6 @@
 package com.mybatisgx.boot;
 
-import com.mybatisgx.annotation.handler.IdGenerateValueHandler;
+import com.mybatisgx.api.IdGeneratedValueHandler;
 import com.mybatisgx.context.MybatisgxContextLoader;
 import com.mybatisgx.dao.Dao;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
@@ -34,7 +34,7 @@ public class SqlSessionFactoryBeanPostProcessor implements BeanPostProcessor {
     private final String[] entityBasePackages;
     private final String[] daoBasePackages;
     // @Autowired
-    private IdGenerateValueHandler<?> idGenerateValueHandler;
+    private IdGeneratedValueHandler<?> idGenerateValueHandler;
 
     public SqlSessionFactoryBeanPostProcessor(String[] entityBasePackages, String[] daoBasePackages) {
         this.entityBasePackages = entityBasePackages;

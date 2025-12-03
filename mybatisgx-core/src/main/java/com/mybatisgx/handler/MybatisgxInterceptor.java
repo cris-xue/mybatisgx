@@ -1,6 +1,6 @@
 package com.mybatisgx.handler;
 
-import com.mybatisgx.annotation.handler.IdGenerateValueHandler;
+import com.mybatisgx.api.IdGeneratedValueHandler;
 import com.mybatisgx.scripting.MybatisxParameterHandler;
 import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.executor.Executor;
@@ -37,11 +37,11 @@ import java.util.Properties;
 })
 public class MybatisgxInterceptor implements Interceptor {
 
-    private IdGenerateValueHandler idGenerateValueHandler;
+    private IdGeneratedValueHandler idGenerateValueHandler;
     private String tenantId = "";
     private List<SqlHandler> sqlHandlerList = new ArrayList();
 
-    public MybatisgxInterceptor(IdGenerateValueHandler idGenerateValueHandler) {
+    public MybatisgxInterceptor(IdGeneratedValueHandler idGenerateValueHandler) {
         this.idGenerateValueHandler = idGenerateValueHandler;
     }
 

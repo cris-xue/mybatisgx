@@ -1,7 +1,7 @@
 package com.mybatisgx.model;
 
 import com.mybatisgx.annotation.*;
-import com.mybatisgx.annotation.handler.GenerateValueHandler;
+import com.mybatisgx.api.GeneratedValueHandler;
 
 import java.util.List;
 
@@ -56,7 +56,7 @@ public class ColumnInfo {
     /**
      * 字段值生成处理器
      */
-    private GenerateValueHandler generateValueHandler;
+    private GeneratedValueHandler generatedValueHandler;
     /**
      * 字段注解
      */
@@ -80,7 +80,7 @@ public class ColumnInfo {
     /**
      * 生成值注解
      */
-    private GenerateValue generateValue;
+    private GeneratedValue generatedValue;
 
     public Class<?> getJavaType() {
         return javaType;
@@ -172,12 +172,12 @@ public class ColumnInfo {
         this.composites = composites;
     }
 
-    public GenerateValueHandler getGenerateValueHandler() {
-        return generateValueHandler;
+    public GeneratedValueHandler getGenerateValueHandler() {
+        return generatedValueHandler;
     }
 
-    public void setGenerateValueHandler(GenerateValueHandler generateValueHandler) {
-        this.generateValueHandler = generateValueHandler;
+    public void setGenerateValueHandler(GeneratedValueHandler generatedValueHandler) {
+        this.generatedValueHandler = generatedValueHandler;
     }
 
     public Column getColumn() {
@@ -220,12 +220,12 @@ public class ColumnInfo {
         this.tenantId = tenantId;
     }
 
-    public GenerateValue getGenerateValue() {
-        return generateValue;
+    public GeneratedValue getGenerateValue() {
+        return generatedValue;
     }
 
-    public void setGenerateValue(GenerateValue generateValue) {
-        this.generateValue = generateValue;
+    public void setGenerateValue(GeneratedValue generatedValue) {
+        this.generatedValue = generatedValue;
     }
 
     public static class Builder {

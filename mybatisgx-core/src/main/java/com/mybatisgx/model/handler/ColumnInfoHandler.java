@@ -2,7 +2,7 @@ package com.mybatisgx.model.handler;
 
 import com.google.common.base.CaseFormat;
 import com.mybatisgx.annotation.*;
-import com.mybatisgx.annotation.handler.GenerateValueHandler;
+import com.mybatisgx.api.GeneratedValueHandler;
 import com.mybatisgx.context.EntityInfoContextHolder;
 import com.mybatisgx.model.*;
 import com.mybatisgx.utils.TypeUtils;
@@ -150,11 +150,11 @@ public class ColumnInfoHandler {
 
     private void setGenerateValueHandler(Field field, ColumnInfo columnInfo) {
         try {
-            GenerateValue generateValue = field.getAnnotation(GenerateValue.class);
-            if (generateValue != null) {
-                GenerateValueHandler generateValueHandler = generateValue.handler().newInstance();
-                columnInfo.setGenerateValue(generateValue);
-                columnInfo.setGenerateValueHandler(generateValueHandler);
+            GeneratedValue generatedValue = field.getAnnotation(GeneratedValue.class);
+            if (generatedValue != null) {
+                GeneratedValueHandler generatedValueHandler = generatedValue.handler().newInstance();
+                columnInfo.setGenerateValue(generatedValue);
+                columnInfo.setGenerateValueHandler(generatedValueHandler);
             }
         } catch (InstantiationException e) {
             throw new RuntimeException(e);

@@ -15,24 +15,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 字段处理器
+ * @author 薛承城
+ * @date 2025/12/3 12:13
+ */
 public class ColumnInfoHandler {
-
-    private List<ColumnInfo> getColumnInfoList(Type type, Map<Type, Class<?>> typeParameterMap) {
-        if (type instanceof ParameterizedType) {
-            // 处理复杂类型嵌套丢失真实类型
-            ParameterizedType parameterizedType = (ParameterizedType) type;
-            Map<Type, Class<?>> childTypeParameterMap = new HashMap<>();
-            Map<TypeVariable<?>, Type> typeMap = TypeUtils.getTypeArguments(parameterizedType);
-            typeMap.forEach((typeVariable, typeValue) -> childTypeParameterMap.put(typeVariable, typeParameterMap.get(typeValue)));
-            Field[] fields = FieldUtils.getAllFields((Class<?>) parameterizedType.getRawType());
-            return this.processColumnInfo(fields, childTypeParameterMap);
-        }
-        if (type instanceof ParameterizedType) {
-            Field[] fields = FieldUtils.getAllFields((Class<?>) type);
-            return this.processColumnInfo(fields, typeParameterMap);
-        }
-        return new ArrayList<>();
-    }
 
     public List<ColumnInfo> getColumnInfoList(Class<?> clazz, Map<Type, Class<?>> typeParameterMap) {
         Field[] fields = FieldUtils.getAllFields(clazz);
@@ -202,6 +190,23 @@ public class ColumnInfoHandler {
         idColumnInfo.setId(id);
         idColumnInfo.setEmbeddedId(embeddedId);
         idColumnInfo.setComposites(idColumnInfoComposites);
+    }
+
+    private List<ColumnInfo> getColumnInfoList(Type type, Map<Type, Class<?>> typeParameterMap) {
+        if (type instanceof ParameterizedType) {
+            // 处理复杂类型嵌套丢失真实类型
+            ParameterizedType parameterizedType = (ParameterizedType) type;
+            Map<Type, Class<?>> childTypeParameterMap = new HashMap<>();
+            Map<TypeVariable<?>, Type> typeMap = TypeUtils.getTypeArguments(parameterizedType);
+            typeMap.forEach((typeVariable, typeValue) -> childTypeParameterMap.put(typeVariable, typeParameterMap.get(typeValue)));
+            Field[] fields = FieldUtils.getAllFields((Class<?>) parameterizedType.getRawType());
+            return this.processColumnInfo(fields, childTypeParameterMap);
+        }
+        if (type instanceof ParameterizedType) {
+            Field[] fields = FieldUtils.getAllFields((Class<?>) type);
+            return this.processColumnInfo(fields, typeParameterMap);
+        }
+        return new ArrayList<>();
     }
 
     private void setRelationColumnInfo(Field field, RelationColumnInfo relationColumnInfo) {

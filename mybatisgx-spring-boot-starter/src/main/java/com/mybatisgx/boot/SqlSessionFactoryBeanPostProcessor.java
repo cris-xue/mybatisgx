@@ -1,6 +1,5 @@
 package com.mybatisgx.boot;
 
-import com.mybatisgx.api.IdGeneratedValueHandler;
 import com.mybatisgx.context.MybatisgxContextLoader;
 import com.mybatisgx.dao.Dao;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
@@ -33,8 +32,6 @@ public class SqlSessionFactoryBeanPostProcessor implements BeanPostProcessor {
 
     private final String[] entityBasePackages;
     private final String[] daoBasePackages;
-    // @Autowired
-    private IdGeneratedValueHandler<?> idGenerateValueHandler;
 
     public SqlSessionFactoryBeanPostProcessor(String[] entityBasePackages, String[] daoBasePackages) {
         this.entityBasePackages = entityBasePackages;
@@ -56,22 +53,13 @@ public class SqlSessionFactoryBeanPostProcessor implements BeanPostProcessor {
             SqlSessionFactory sqlSessionFactory = (SqlSessionFactory) bean;
             Configuration configuration = sqlSessionFactory.getConfiguration();
             if (configuration instanceof MybatisgxConfiguration) {
-                MybatisgxConfiguration mybatisgxConfiguration = (MybatisgxConfiguration) configuration;
-                mybatisgxConfiguration.setIdGenerateValueHandler(idGenerateValueHandler);
-
                 List<Resource> resourceList = this.getDaoResourceList(daoBasePackages);
-                MybatisgxContextLoader mybatisgxContextLoader = new MybatisgxContextLoader(entityBasePackages, daoBasePackages, resourceList, mybatisgxConfiguration);
+                MybatisgxContextLoader mybatisgxContextLoader = new MybatisgxContextLoader(entityBasePackages, daoBasePackages, resourceList, (MybatisgxConfiguration) configuration);
                 mybatisgxContextLoader.load();
 
                 StatementTemplateHandler statementTemplateHandler = new StatementTemplateHandler((MybatisgxConfiguration) configuration);
                 statementTemplateHandler.curdMethod(configuration);
             }
-        }
-        if (bean instanceof MybatisgxProperties) {
-            MybatisgxProperties mybatisxProperties = (MybatisgxProperties) bean;
-        }
-        if (bean instanceof MybatisgxConfiguration) {
-            MybatisgxConfiguration mybatisgxConfiguration = (MybatisgxConfiguration) bean;
         }
         return bean;
     }

@@ -152,7 +152,7 @@ public class ColumnInfoHandler {
         try {
             GeneratedValue generatedValue = field.getAnnotation(GeneratedValue.class);
             if (generatedValue != null) {
-                GeneratedValueHandler generatedValueHandler = generatedValue.handler().newInstance();
+                GeneratedValueHandler generatedValueHandler = generatedValue.value().newInstance();
                 columnInfo.setGenerateValue(generatedValue);
                 columnInfo.setGenerateValueHandler(generatedValueHandler);
             }

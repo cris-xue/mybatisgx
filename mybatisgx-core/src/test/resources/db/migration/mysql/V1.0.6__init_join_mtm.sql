@@ -1,6 +1,6 @@
 create table if not exists join_mtm_user
 (
-    id             bigint       not null auto_increment,
+    id             bigint       not null,
     role_ids       varchar(256) not null comment '',
     name           varchar(256) null comment '',
     age            int          null comment '',
@@ -21,7 +21,7 @@ create table if not exists join_mtm_user
 
 create table if not exists join_mtm_user_role
 (
-    id      bigint not null auto_increment,
+    id      bigint not null,
     user_id bigint not null comment '',
     role_id bigint null comment '',
     primary key (id)
@@ -30,7 +30,7 @@ create table if not exists join_mtm_user_role
 
 create table if not exists join_mtm_role
 (
-    id             bigint      not null auto_increment,
+    id             bigint      not null,
     name           varchar(64) not null comment '',
     code           varchar(64) null comment '',
 
@@ -46,7 +46,7 @@ create table if not exists join_mtm_role
 
 create table if not exists join_mtm_role_menu
 (
-    id      bigint not null auto_increment,
+    id      bigint not null,
     role_id bigint null comment '',
     menu_id bigint null comment '',
     primary key (id)
@@ -55,7 +55,7 @@ create table if not exists join_mtm_role_menu
 
 create table if not exists join_mtm_menu
 (
-    id             bigint      not null auto_increment,
+    id             bigint      not null,
     name           varchar(64) not null comment '',
     code           varchar(64) null comment '',
 

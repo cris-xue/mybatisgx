@@ -1,7 +1,7 @@
 package com.mybatisgx.util;
 
-import com.mybatisgx.api.GeneratedValueHandler;
 import com.mybatisgx.context.MybatisgxContextLoader;
+import com.mybatisgx.executor.genval.IdGeneratedValueHandler;
 import com.mybatisgx.ext.builder.xml.MybatisgxXMLConfigBuilder;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.ext.session.defaults.MybatisgxDefaultSqlSessionFactory;
@@ -52,7 +52,13 @@ public class DaoTestUtils {
         DataSource dataSource = configuration.getEnvironment().getDataSource();
         flywayInit(dataSource, configuration.getEnvironment().getId());
 
-        MybatisgxContextLoader mybatisgxContextLoader = new MybatisgxContextLoader(entityBasePackages, daoBasePackages, null, configuration);
+        MybatisgxContextLoader mybatisgxContextLoader = new MybatisgxContextLoader(
+                entityBasePackages,
+                daoBasePackages,
+                null,
+                new IdGeneratedValueHandler(),
+                configuration
+        );
         mybatisgxContextLoader.load();
 
         StatementTemplateHandler statementTemplateHandler = new StatementTemplateHandler(configuration);

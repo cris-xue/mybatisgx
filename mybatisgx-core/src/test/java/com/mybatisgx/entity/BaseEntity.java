@@ -1,9 +1,7 @@
 package com.mybatisgx.entity;
 
 import com.mybatisgx.annotation.Column;
-import com.mybatisgx.annotation.GeneratedValue;
 import com.mybatisgx.annotation.Id;
-import com.mybatisgx.executor.genval.IdSnowGeneratedValueHandler;
 
 import java.time.LocalDateTime;
 
@@ -15,7 +13,6 @@ import java.time.LocalDateTime;
 public abstract class BaseEntity<ID> {
 
     @Id
-    @GeneratedValue(value = IdSnowGeneratedValueHandler.class)
     private ID id;
 
     @Column(name = "input_user_id", insertable = true)

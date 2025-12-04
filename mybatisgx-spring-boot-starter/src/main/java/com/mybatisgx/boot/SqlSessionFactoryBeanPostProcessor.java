@@ -1,5 +1,6 @@
 package com.mybatisgx.boot;
 
+import com.mybatisgx.api.GeneratedValueHandler;
 import com.mybatisgx.context.MybatisgxContextLoader;
 import com.mybatisgx.dao.Dao;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
@@ -9,6 +10,7 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -32,6 +34,8 @@ public class SqlSessionFactoryBeanPostProcessor implements BeanPostProcessor {
 
     private final String[] entityBasePackages;
     private final String[] daoBasePackages;
+    @Autowired
+    private GeneratedValueHandler idGeneratedValueHandler;
 
     public SqlSessionFactoryBeanPostProcessor(String[] entityBasePackages, String[] daoBasePackages) {
         this.entityBasePackages = entityBasePackages;
@@ -54,7 +58,13 @@ public class SqlSessionFactoryBeanPostProcessor implements BeanPostProcessor {
             Configuration configuration = sqlSessionFactory.getConfiguration();
             if (configuration instanceof MybatisgxConfiguration) {
                 List<Resource> resourceList = this.getDaoResourceList(daoBasePackages);
-                MybatisgxContextLoader mybatisgxContextLoader = new MybatisgxContextLoader(entityBasePackages, daoBasePackages, resourceList, (MybatisgxConfiguration) configuration);
+                MybatisgxContextLoader mybatisgxContextLoader = new MybatisgxContextLoader(
+                        entityBasePackages,
+                        daoBasePackages,
+                        resourceList,
+                        this.idGeneratedValueHandler,
+                        (MybatisgxConfiguration) configuration
+                );
                 mybatisgxContextLoader.load();
 
                 StatementTemplateHandler statementTemplateHandler = new StatementTemplateHandler((MybatisgxConfiguration) configuration);

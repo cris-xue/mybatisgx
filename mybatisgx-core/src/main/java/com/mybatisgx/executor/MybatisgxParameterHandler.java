@@ -21,6 +21,12 @@ import java.util.List;
  */
 public class MybatisgxParameterHandler {
 
+    private GeneratedValueHandler idGeneratedValueHandler;
+
+    public MybatisgxParameterHandler(GeneratedValueHandler idGeneratedValueHandler) {
+        this.idGeneratedValueHandler = idGeneratedValueHandler;
+    }
+
     public Object fillParameterObject(MappedStatement mappedStatement, Object parameterObject) {
         if (parameterObject == null) {
             return null;
@@ -53,18 +59,22 @@ public class MybatisgxParameterHandler {
             Class<?> javaColumnType = metaObject.getSetterType(javaColumnName);
             Object originalValue = metaObject.getValue(javaColumnName);
 
-            Object value = this.next(sqlCommandType, generateValueColumnInfo, javaColumnType, originalValue);
+            Object value = this.next(sqlCommandType, generateValueColumnInfo, originalValue);
             metaObject.setValue(javaColumnName, value);
         }
         return metaObject.getOriginalObject();
     }
 
-    private Object next(SqlCommandType sqlCommandType, ColumnInfo columnInfo, Class<?> javaColumnType, Object originalValue) {
+    private Object next(SqlCommandType sqlCommandType, ColumnInfo columnInfo, Object originalValue) {
         if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class)) {
-            GeneratedValueHandler generatedValueHandler = columnInfo.getGenerateValueHandler();
-            if (generatedValueHandler != null) {
+            // 默认使用全局id生成器
+            GeneratedValueHandler idGeneratedValueHandler = columnInfo.getGenerateValueHandler();
+            if (idGeneratedValueHandler == null) {
+                idGeneratedValueHandler = this.idGeneratedValueHandler;
+            }
+            if (idGeneratedValueHandler != null) {
                 if (sqlCommandType == SqlCommandType.INSERT) {
-                    return generatedValueHandler.insert(columnInfo, originalValue);
+                    return idGeneratedValueHandler.insert(columnInfo, originalValue);
                 }
             }
         }

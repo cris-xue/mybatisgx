@@ -19,7 +19,7 @@ public abstract class AbstractGeneratedValueHandler<T> implements GeneratedValue
         return this.update((ColumnInfo) columnInfo, originalValue);
     }
 
-    abstract T insert(ColumnInfo columnInfo, Object originalValue);
+    public abstract T insert(ColumnInfo columnInfo, Object originalValue);
 
-    abstract T update(ColumnInfo columnInfo, Object originalValue);
+    public abstract T update(ColumnInfo columnInfo, Object originalValue);
 }

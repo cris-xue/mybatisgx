@@ -1,5 +1,7 @@
 package com.mybatisgx.context;
 
+import com.mybatisgx.api.GeneratedValueHandler;
+import com.mybatisgx.executor.MybatisgxParameterHandler;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.model.handler.MethodInfoHandler;
 import com.mybatisgx.template.DeleteTemplateHandler;
@@ -21,7 +23,8 @@ public class MybatisgxObjectFactory {
 
     private static final Map<Class, Object> OBJECTO_MAP = new HashMap<>();
 
-    public static void register(MybatisgxConfiguration configuration) {
+    public static void register(GeneratedValueHandler idGeneratedValueHandler, MybatisgxConfiguration configuration) {
+        OBJECTO_MAP.put(MybatisgxParameterHandler.class, new MybatisgxParameterHandler(idGeneratedValueHandler));
         OBJECTO_MAP.put(MethodInfoHandler.class, new MethodInfoHandler(configuration));
 
         OBJECTO_MAP.put(StatementTemplateHandler.class, new StatementTemplateHandler(configuration));

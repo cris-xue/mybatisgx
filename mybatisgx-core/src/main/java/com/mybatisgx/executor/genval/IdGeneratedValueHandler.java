@@ -18,7 +18,7 @@ public class IdGeneratedValueHandler extends AbstractGeneratedValueHandler<Objec
 
     @Override
     public Object insert(ColumnInfo columnInfo, Object originalValue) {
-        return snowGeneratedValueHandler.get();
+        return originalValue != null ? originalValue : snowGeneratedValueHandler.get();
     }
 
     @Override

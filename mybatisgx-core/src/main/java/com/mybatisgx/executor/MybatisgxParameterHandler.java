@@ -6,6 +6,7 @@ import com.mybatisgx.context.EntityInfoContextHolder;
 import com.mybatisgx.context.MethodInfoContextHolder;
 import com.mybatisgx.model.*;
 import com.mybatisgx.utils.TypeUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.ibatis.binding.MapperMethod;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.SqlCommandType;
@@ -67,15 +68,28 @@ public class MybatisgxParameterHandler {
 
     private Object next(SqlCommandType sqlCommandType, ColumnInfo columnInfo, Object originalValue) {
         if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class)) {
-            // 默认使用全局id生成器
-            GeneratedValueHandler idGeneratedValueHandler = columnInfo.getGenerateValueHandler();
-            if (idGeneratedValueHandler == null) {
-                idGeneratedValueHandler = this.idGeneratedValueHandler;
-            }
-            if (idGeneratedValueHandler != null) {
-                if (sqlCommandType == SqlCommandType.INSERT) {
-                    return idGeneratedValueHandler.insert(columnInfo, originalValue);
+            List<ColumnInfo> columnInfoComposites = columnInfo.getComposites();
+            if (ObjectUtils.isEmpty(columnInfoComposites)) {
+                GeneratedValueHandler idGeneratedValueHandler = this.getIdGeneratedValueHandler(columnInfo);
+                if (idGeneratedValueHandler != null) {
+                    if (sqlCommandType == SqlCommandType.INSERT) {
+                        return idGeneratedValueHandler.insert(columnInfo, originalValue);
+                    }
                 }
+            } else {
+                MetaObject metaObject = SystemMetaObject.forObject(originalValue);
+                for (ColumnInfo columnInfoComposite : columnInfoComposites) {
+                    GeneratedValueHandler idGeneratedValueHandler = this.getIdGeneratedValueHandler(columnInfoComposite);
+                    if (idGeneratedValueHandler != null) {
+                        if (sqlCommandType == SqlCommandType.INSERT) {
+                            String javaColumnName = columnInfoComposite.getJavaColumnName();
+                            Object columnInfoCompositeOriginalValue = metaObject.getValue(javaColumnName);
+                            Object value = idGeneratedValueHandler.insert(columnInfoComposite, columnInfoCompositeOriginalValue);
+                            metaObject.setValue(javaColumnName, value);
+                        }
+                    }
+                }
+                return metaObject.getOriginalObject();
             }
         }
         if (TypeUtils.typeEquals(columnInfo, ColumnInfo.class)) {
@@ -91,5 +105,14 @@ public class MybatisgxParameterHandler {
             }
         }
         return originalValue;
+    }
+
+    private GeneratedValueHandler getIdGeneratedValueHandler(ColumnInfo columnInfo) {
+        // 默认使用全局id生成器
+        GeneratedValueHandler idGeneratedValueHandler = columnInfo.getGenerateValueHandler();
+        if (idGeneratedValueHandler == null) {
+            idGeneratedValueHandler = this.idGeneratedValueHandler;
+        }
+        return idGeneratedValueHandler;
     }
 }

@@ -18,22 +18,22 @@ import java.util.stream.Collectors;
 
 public class MybatisgxSyntaxProcessor {
 
-    private final List<MybatisgxSyntaxNewHandler.SyntaxNodeHandler> handlers = Arrays.asList(
-            new MybatisgxSyntaxNewHandler.SqlCommandTypeHandler(),
-            new MybatisgxSyntaxNewHandler.SelectItemHandler(),
-            new MybatisgxSyntaxNewHandler.WhereClauseHandler(),
-            new MybatisgxSyntaxNewHandler.OrderByHandler()
+    private final List<MybatisgxSyntaxHandler.SyntaxNodeHandler> handlers = Arrays.asList(
+            new MybatisgxSyntaxHandler.SqlCommandTypeHandler(),
+            new MybatisgxSyntaxHandler.SelectItemHandler(),
+            new MybatisgxSyntaxHandler.WhereClauseHandler(),
+            new MybatisgxSyntaxHandler.OrderByHandler()
     );
 
     public MybatisgxSyntaxProcessor() {
         this.handlers.stream()
-                .sorted(Comparator.comparingInt(MybatisgxSyntaxNewHandler.SyntaxNodeHandler::getOrder))
+                .sorted(Comparator.comparingInt(MybatisgxSyntaxHandler.SyntaxNodeHandler::getOrder))
                 .collect(Collectors.toList());
     }
 
     public void execute(EntityInfo entityInfo, MethodInfo methodInfo, MethodParamInfo methodParamInfo, ConditionOriginType conditionOriginType, String methodName) {
         ParseTree parseTree = this.parseMethodName(methodName);
-        MybatisgxSyntaxNewHandler.ParserContext parserContext = new MybatisgxSyntaxNewHandler.ParserContext(
+        MybatisgxSyntaxHandler.ParserContext parserContext = new MybatisgxSyntaxHandler.ParserContext(
                 entityInfo,
                 methodInfo,
                 methodParamInfo,
@@ -51,8 +51,8 @@ public class MybatisgxSyntaxProcessor {
         return methodNameParser.sql_statement();
     }
 
-    private void traverseSyntaxTree(ParseTree node, MybatisgxSyntaxNewHandler.ParserContext context) {
-        for (MybatisgxSyntaxNewHandler.SyntaxNodeHandler handler : handlers) {
+    private void traverseSyntaxTree(ParseTree node, MybatisgxSyntaxHandler.ParserContext context) {
+        for (MybatisgxSyntaxHandler.SyntaxNodeHandler handler : handlers) {
             if (handler.support(node)) {
                 handler.handle(node, context);
                 break;

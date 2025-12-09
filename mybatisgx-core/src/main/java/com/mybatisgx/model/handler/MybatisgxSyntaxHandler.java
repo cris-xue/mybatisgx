@@ -22,9 +22,9 @@ import java.util.Map;
  * @author 薛承城
  * @date 2025/11/17 10:19
  */
-public class MybatisgxSyntaxNewHandler {
+public class MybatisgxSyntaxHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MybatisgxSyntaxNewHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MybatisgxSyntaxHandler.class);
 
     /**
      * 语法节点处理器接口

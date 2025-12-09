@@ -1,6 +1,7 @@
 package com.mybatisgx.annotation;
 
-import javax.persistence.FetchType;
+import org.apache.ibatis.mapping.FetchType;
+
 import java.lang.annotation.*;
 
 /**

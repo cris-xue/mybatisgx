@@ -33,12 +33,6 @@
 		</dependency>
 		
 		<dependency>
-			<groupId>javax.persistence</groupId>
-			<artifactId>javax.persistence-api</artifactId>
-			<version>2.2</version>
-		</dependency>
-
-		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 			<version>29.0-jre</version>
@@ -87,11 +81,11 @@
 			<artifactId>jsqlparser</artifactId>
 			<version>4.9</version>
 		</dependency>
-		<dependency>
+		<!--<dependency>
 			<groupId>org.hibernate.hql</groupId>
 			<artifactId>hibernate-hql-parser</artifactId>
 			<version>1.5.0.Final</version>
-		</dependency>
+		</dependency>-->
 		<dependency>
 			<groupId>com.github.pagehelper</groupId>
 			<artifactId>pagehelper</artifactId>

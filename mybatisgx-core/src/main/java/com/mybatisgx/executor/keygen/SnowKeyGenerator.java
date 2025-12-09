@@ -11,9 +11,9 @@ import java.util.concurrent.TimeUnit;
  * @author 薛承城
  * @date 2025/12/3 9:30
  */
-public class SnowGeneratedValueHandler {
+public class SnowKeyGenerator {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SnowGeneratedValueHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SnowKeyGenerator.class);
 
     /**
      * Bits allocate
@@ -39,7 +39,7 @@ public class SnowGeneratedValueHandler {
     private final int timestampShift;
     private final int workerIdShift;
 
-    public SnowGeneratedValueHandler() {
+    public SnowKeyGenerator() {
         this.maxSequence = ~(-1L << sequenceBits);
         this.maxDeltaSeconds = ~(-1L << timestampBits);
         this.timestampShift = workerIdBits + sequenceBits;

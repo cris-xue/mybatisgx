@@ -3,7 +3,7 @@ package com.mybatisgx.relation.select.join.manytomany.entity;
 import com.mybatisgx.annotation.*;
 import com.mybatisgx.entity.BaseEntity;
 
-import javax.persistence.FetchType;
+import org.apache.ibatis.mapping.FetchType;
 import java.util.List;
 
 @Entity

@@ -26,6 +26,9 @@ public class User extends BaseEntity<Long> {
     @LogicDelete
     private Integer status;
 
+    @LogicDeleteId
+    private Long logicDeleteId;
+
     @Lock
     private Integer version;
 

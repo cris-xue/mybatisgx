@@ -2,8 +2,8 @@ package com.mybatisgx.relation.select.simple.onetomany.entity;
 
 import com.mybatisgx.annotation.*;
 import com.mybatisgx.entity.IdBaseEntity;
+import org.apache.ibatis.mapping.FetchType;
 
-import javax.persistence.FetchType;
 import java.util.List;
 
 @Entity

@@ -3,8 +3,8 @@ package com.mybatisgx.model.handler.test;
 import com.mybatisgx.annotation.*;
 import com.mybatisgx.entity.BaseEntity;
 import com.mybatisgx.relation.select.batch.manytomany.entity.Role;
+import org.apache.ibatis.mapping.FetchType;
 
-import javax.persistence.FetchType;
 import java.util.List;
 
 @Entity

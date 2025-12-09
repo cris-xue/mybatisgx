@@ -3,7 +3,7 @@ package com.mybatisgx.relation.select.simple.onetoone.entity;
 import com.mybatisgx.annotation.*;
 import com.mybatisgx.entity.EmbeddedIdBaseEntity;
 
-import javax.persistence.FetchType;
+import org.apache.ibatis.mapping.FetchType;
 
 @Entity
 @Table(name = "simple_oto_user_complex")

@@ -3,7 +3,7 @@ package com.mybatisgx.relation.select.simple.onetomany.entity;
 import com.mybatisgx.annotation.*;
 import com.mybatisgx.entity.BaseEntity;
 
-import javax.persistence.FetchType;
+import org.apache.ibatis.mapping.FetchType;
 
 @Entity
 @Table(name = "simple_otm_user")

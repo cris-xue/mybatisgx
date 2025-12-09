@@ -2,8 +2,7 @@ package com.mybatisgx.relation.select.batch.onetoone.entity;
 
 import com.mybatisgx.annotation.*;
 import com.mybatisgx.entity.EmbeddedIdBaseEntity;
-
-import javax.persistence.FetchType;
+import org.apache.ibatis.mapping.FetchType;
 
 @Entity
 @Table(name = "batch_oto_user_detail_item1_complex")

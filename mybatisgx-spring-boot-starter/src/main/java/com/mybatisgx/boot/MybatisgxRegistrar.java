@@ -1,5 +1,6 @@
 package com.mybatisgx.boot;
 
+import com.mybatisgx.spring.SqlSessionFactoryBeanPostProcessor;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;

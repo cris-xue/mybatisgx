@@ -1,6 +1,6 @@
 package com.mybatisgx.executor.genval;
 
-import com.mybatisgx.executor.keygen.SnowGeneratedValueHandler;
+import com.mybatisgx.executor.keygen.SnowKeyGenerator;
 import com.mybatisgx.model.ColumnInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +14,7 @@ public class IdGeneratedValueHandler extends AbstractGeneratedValueHandler<Objec
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IdGeneratedValueHandler.class);
 
-    private static SnowGeneratedValueHandler snowGeneratedValueHandler = new SnowGeneratedValueHandler();
+    private static SnowKeyGenerator snowGeneratedValueHandler = new SnowKeyGenerator();
 
     @Override
     public Object insert(ColumnInfo columnInfo, Object originalValue) {

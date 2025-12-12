@@ -1,9 +1,6 @@
 package com.mybatisgx.model;
 
-import com.mybatisgx.annotation.Lock;
-import com.mybatisgx.annotation.LogicDelete;
-import com.mybatisgx.annotation.ManyToMany;
-import com.mybatisgx.annotation.Transient;
+import com.mybatisgx.annotation.*;
 import com.mybatisgx.api.GeneratedValueHandler;
 import com.mybatisgx.utils.TypeUtils;
 import org.apache.commons.beanutils.BeanUtils;
@@ -64,6 +61,10 @@ public class EntityInfo {
      * 逻辑删除
      */
     private ColumnInfo logicDeleteColumnInfo;
+    /**
+     * 逻辑删除id字段
+     */
+    private ColumnInfo logicDeleteIdColumnInfo;
     /**
      * 乐观锁
      */
@@ -126,6 +127,10 @@ public class EntityInfo {
         return logicDeleteColumnInfo;
     }
 
+    public ColumnInfo getLogicDeleteIdColumnInfo() {
+        return logicDeleteIdColumnInfo;
+    }
+
     public ColumnInfo getLockColumnInfo() {
         return lockColumnInfo;
     }
@@ -176,6 +181,10 @@ public class EntityInfo {
                 LogicDelete logicDelete = columnInfo.getLogicDelete();
                 if (logicDelete != null) {
                     entityInfo.logicDeleteColumnInfo = columnInfo;
+                }
+                LogicDeleteId logicDeleteId = columnInfo.getLogicDeleteId();
+                if (logicDeleteId != null) {
+                    entityInfo.logicDeleteIdColumnInfo = columnInfo;
                 }
                 GeneratedValueHandler generatedValueHandler = columnInfo.getGenerateValueHandler();
                 if (columnInfo instanceof IdColumnInfo || generatedValueHandler != null) {

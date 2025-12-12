@@ -32,15 +32,26 @@ public class MybatisgxParameterHandler {
         if (parameterObject == null) {
             return null;
         }
-        SqlCommandType sqlCommandType = mappedStatement.getSqlCommandType();
-        if (SqlCommandType.DELETE == sqlCommandType || SqlCommandType.SELECT == sqlCommandType) {
-            return parameterObject;
-        }
 
+        MethodInfo methodInfo = MethodInfoContextHolder.get(mappedStatement.getId());
+        if (mappedStatement.getSqlCommandType() == SqlCommandType.UPDATE && methodInfo.getSqlCommandType() == SqlCommandType.DELETE) {
+            // mapper为更新操作，但是方法为删除删除，表示当前方法为逻辑删除
+        }
+        if (mappedStatement.getSqlCommandType() == SqlCommandType.UPDATE && methodInfo.getSqlCommandType() == SqlCommandType.UPDATE) {
+            // 更新操作
+            return this.processFillParameterObject(methodInfo, parameterObject);
+        }
+        if (mappedStatement.getSqlCommandType() == SqlCommandType.INSERT && methodInfo.getSqlCommandType() == SqlCommandType.INSERT) {
+            // 新增操作
+            return this.processFillParameterObject(methodInfo, parameterObject);
+        }
+        return parameterObject;
+    }
+
+    private Object processFillParameterObject(MethodInfo methodInfo, Object parameterObject) {
         Object parameterObjectNew;
         if (parameterObject instanceof MapperMethod.ParamMap) {
             MapperMethod.ParamMap<Object> mapperMethodParameterObject = (MapperMethod.ParamMap<Object>) parameterObject;
-            MethodInfo methodInfo = MethodInfoContextHolder.get(mappedStatement.getId());
             MethodParamInfo entityParamInfo = methodInfo.getEntityParamInfo();
             String paramWrapperKey = methodInfo.getBatch() ? entityParamInfo.getBatchItemName() : entityParamInfo.getArgName();
             parameterObjectNew = mapperMethodParameterObject.get(paramWrapperKey);
@@ -60,13 +71,13 @@ public class MybatisgxParameterHandler {
             Class<?> javaColumnType = metaObject.getSetterType(javaColumnName);
             Object originalValue = metaObject.getValue(javaColumnName);
 
-            Object value = this.next(sqlCommandType, generateValueColumnInfo, originalValue);
+            Object value = this.processGeneratedValue(methodInfo.getSqlCommandType(), generateValueColumnInfo, originalValue);
             metaObject.setValue(javaColumnName, value);
         }
         return metaObject.getOriginalObject();
     }
 
-    private Object next(SqlCommandType sqlCommandType, ColumnInfo columnInfo, Object originalValue) {
+    private Object processGeneratedValue(SqlCommandType sqlCommandType, ColumnInfo columnInfo, Object originalValue) {
         if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class)) {
             List<ColumnInfo> columnInfoComposites = columnInfo.getComposites();
             if (ObjectUtils.isEmpty(columnInfoComposites)) {

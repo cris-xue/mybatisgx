@@ -37,9 +37,6 @@ public class ColumnInfoHandler {
             }
 
             Column column = field.getAnnotation(Column.class);
-            Lock lock = field.getAnnotation(Lock.class);
-            LogicDelete logicDelete = field.getAnnotation(LogicDelete.class);
-
             String fieldName = field.getName();
             String dbColumnName = this.getDbColumnName(field);
 
@@ -48,8 +45,9 @@ public class ColumnInfoHandler {
             columnInfo.setDbTypeName(column != null ? column.columnDefinition() : null);
             columnInfo.setDbColumnName(dbColumnName);
 
-            columnInfo.setLock(lock);
-            columnInfo.setLogicDelete(logicDelete);
+            columnInfo.setLock(field.getAnnotation(Lock.class));
+            columnInfo.setLogicDelete(field.getAnnotation(LogicDelete.class));
+            columnInfo.setLogicDeleteId(field.getAnnotation(LogicDeleteId.class));
 
             this.setGenerateValueHandler(field, columnInfo);
             this.processColumnType(field, columnInfo, typeParameterMap);

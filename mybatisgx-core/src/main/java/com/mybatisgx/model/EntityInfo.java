@@ -22,10 +22,6 @@ public class EntityInfo {
      */
     private String tableName;
     /**
-     * 表名称别名
-     */
-    private String tableNameAlias;
-    /**
      * 实体类型
      */
     private Class<?> clazz;
@@ -80,14 +76,6 @@ public class EntityInfo {
 
     public String getTableName() {
         return tableName;
-    }
-
-    public String getTableNameAlias() {
-        return tableNameAlias;
-    }
-
-    public void setTableNameAlias(String tableNameAlias) {
-        this.tableNameAlias = tableNameAlias;
     }
 
     public Class<?> getClazz() {

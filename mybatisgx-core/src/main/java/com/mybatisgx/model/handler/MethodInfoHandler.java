@@ -7,6 +7,7 @@ import com.mybatisgx.context.EntityInfoContextHolder;
 import com.mybatisgx.context.MethodInfoContextHolder;
 import com.mybatisgx.dao.Dao;
 import com.mybatisgx.dao.SimpleDao;
+import com.mybatisgx.exception.MethodNotConditionException;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.model.*;
 import com.mybatisgx.utils.TypeUtils;
@@ -114,7 +115,7 @@ public class MethodInfoHandler {
                 methodInfo.setResultMapId(resultMapId);
             }
 
-            this.bindConditionParam(methodInfo, methodInfo.getConditionInfoList());
+            this.bindConditionParam(mapperInfo, methodInfo, methodInfo.getConditionInfoList());
             // check(resultMapInfo, methodInfo);
 
             methodInfoMap.put(methodName, methodInfo);
@@ -283,14 +284,14 @@ public class MethodInfoHandler {
      * @param methodInfo
      * @param conditionInfoList
      */
-    private void bindConditionParam(MethodInfo methodInfo, List<ConditionInfo> conditionInfoList) {
+    private void bindConditionParam(MapperInfo mapperInfo, MethodInfo methodInfo, List<ConditionInfo> conditionInfoList) {
         if (methodInfo.getSqlCommandType() != SqlCommandType.INSERT && ObjectUtils.isEmpty(conditionInfoList)) {
-            throw new RuntimeException(methodInfo.getMethodName() + "方法无条件");
+            throw new MethodNotConditionException("%s.%s方法无条件", mapperInfo.getNamespace(), methodInfo.getMethodName());
         }
         for (ConditionInfo conditionInfo : conditionInfoList) {
             List<ConditionInfo> childConditionInfoList = conditionInfo.getConditionInfoList();
             if (ObjectUtils.isNotEmpty(childConditionInfoList)) {
-                this.bindConditionParam(methodInfo, childConditionInfoList);
+                this.bindConditionParam(mapperInfo, methodInfo, childConditionInfoList);
             } else {
                 if (conditionInfo.getComparisonOperator().isNullComparisonOperator()) {
                     continue;

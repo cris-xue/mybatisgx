@@ -18,11 +18,11 @@ public class MybatisgxException extends RuntimeException {
     public MybatisgxException() {
     }
 
-    public MybatisgxException(String message) {
-        super(message);
+    public MybatisgxException(String message, String... args) {
+        super(String.format(message, args));
     }
 
-    public MybatisgxException(String message, Throwable cause) {
-        super(message, cause);
+    public MybatisgxException(String message, Throwable cause, String... args) {
+        super(String.format(message, args), cause);
     }
 }

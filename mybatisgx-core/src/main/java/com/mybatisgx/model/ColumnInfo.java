@@ -74,14 +74,6 @@ public class ColumnInfo {
      */
     private LogicDelete logicDelete;
     /**
-     * 逻辑删除id
-     */
-    private LogicDeleteId logicDeleteId;
-    /**
-     * 是否是租户字段
-     */
-    private TenantId tenantId;
-    /**
      * 生成值注解
      */
     private GeneratedValue generatedValue;
@@ -214,22 +206,6 @@ public class ColumnInfo {
 
     public void setLogicDelete(LogicDelete logicDelete) {
         this.logicDelete = logicDelete;
-    }
-
-    public LogicDeleteId getLogicDeleteId() {
-        return logicDeleteId;
-    }
-
-    public void setLogicDeleteId(LogicDeleteId logicDeleteId) {
-        this.logicDeleteId = logicDeleteId;
-    }
-
-    public TenantId getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(TenantId tenantId) {
-        this.tenantId = tenantId;
     }
 
     public GeneratedValue getGenerateValue() {

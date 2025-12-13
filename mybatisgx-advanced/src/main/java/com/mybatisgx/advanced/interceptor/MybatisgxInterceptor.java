@@ -1,4 +1,4 @@
-package com.mybatisgx.handler;
+package com.mybatisgx.advanced.interceptor;
 
 import com.mybatisgx.context.MybatisgxObjectFactory;
 import com.mybatisgx.executor.MybatisgxParameterHandler;

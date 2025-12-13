@@ -1,8 +1,8 @@
 package com.mybatisgx.advanced.tenant;
 
-import com.mybatisgx.handler.MappedStatementHelper;
-import com.mybatisgx.handler.MybatisgxExecutorInfo;
-import com.mybatisgx.handler.SqlHandler;
+import com.mybatisgx.advanced.interceptor.MappedStatementHelper;
+import com.mybatisgx.advanced.interceptor.MybatisgxExecutorInfo;
+import com.mybatisgx.advanced.interceptor.SqlHandler;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.Statement;

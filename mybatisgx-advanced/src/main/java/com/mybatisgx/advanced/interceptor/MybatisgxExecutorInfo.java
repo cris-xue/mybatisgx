@@ -1,4 +1,4 @@
-package com.mybatisgx.handler;
+package com.mybatisgx.advanced.interceptor;
 
 import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.mapping.BoundSql;

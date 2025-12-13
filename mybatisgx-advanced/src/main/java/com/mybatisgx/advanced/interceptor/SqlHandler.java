@@ -1,4 +1,4 @@
-package com.mybatisgx.handler;
+package com.mybatisgx.advanced.interceptor;
 
 /**
  * sql处理器

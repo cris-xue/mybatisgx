@@ -48,7 +48,7 @@ public class MybatisgxInterceptor implements Interceptor {
         Object parameterObject = mybatisgxExecutorInfo.getParameterObject();
 
         MybatisgxParameterHandler mybatisgxParameterHandler = MybatisgxObjectFactory.get(MybatisgxParameterHandler.class);
-        parameterObject = mybatisgxParameterHandler.fillParameterObject(mappedStatement, parameterObject);
+        parameterObject = mybatisgxParameterHandler.fillParameterObject(mappedStatement, parameterObject, null);
 
         for (SqlHandler sqlHandler : sqlHandlerList) {
             sqlHandler.process(mybatisgxExecutorInfo);

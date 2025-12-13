@@ -23,7 +23,7 @@ public class MybatisgxObjectFactory {
 
     private static final Map<Class, Object> OBJECTO_MAP = new HashMap<>();
 
-    public static void register(GeneratedValueHandler idGeneratedValueHandler, MybatisgxConfiguration configuration) {
+    public static void register(MybatisgxConfiguration configuration, GeneratedValueHandler idGeneratedValueHandler) {
         OBJECTO_MAP.put(MybatisgxParameterHandler.class, new MybatisgxParameterHandler(idGeneratedValueHandler));
         OBJECTO_MAP.put(MethodInfoHandler.class, new MethodInfoHandler(configuration));
 

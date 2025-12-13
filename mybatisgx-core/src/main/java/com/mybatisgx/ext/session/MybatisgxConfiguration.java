@@ -38,7 +38,7 @@ public class MybatisgxConfiguration extends Configuration {
     @Override
     public StatementHandler newStatementHandler(Executor executor, MappedStatement mappedStatement, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
         MybatisgxParameterHandler mybatisgxParameterHandler = MybatisgxObjectFactory.get(MybatisgxParameterHandler.class);
-        mybatisgxParameterHandler.fillParameterObject(mappedStatement, parameterObject);
+        mybatisgxParameterHandler.fillParameterObject(mappedStatement, parameterObject, boundSql);
         return super.newStatementHandler(executor, mappedStatement, parameterObject, rowBounds, resultHandler, boundSql);
     }
 

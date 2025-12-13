@@ -53,7 +53,7 @@ public class MybatisgxContextLoader {
         this.entityBasePackages = entityBasePackages;
         this.daoBasePackages = daoBasePackages;
         this.repositoryResourceList = repositoryResourceList;
-        MybatisgxObjectFactory.register(idGeneratedValueHandler, configuration);
+        MybatisgxObjectFactory.register(configuration, idGeneratedValueHandler);
     }
 
     public void load() {

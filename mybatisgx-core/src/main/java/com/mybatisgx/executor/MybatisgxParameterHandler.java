@@ -8,6 +8,7 @@ import com.mybatisgx.model.*;
 import com.mybatisgx.utils.TypeUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.ibatis.binding.MapperMethod;
+import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.reflection.MetaObject;
@@ -28,7 +29,7 @@ public class MybatisgxParameterHandler {
         this.idGeneratedValueHandler = idGeneratedValueHandler;
     }
 
-    public Object fillParameterObject(MappedStatement mappedStatement, Object parameterObject) {
+    public Object fillParameterObject(MappedStatement mappedStatement, Object parameterObject, BoundSql boundSql) {
         if (parameterObject == null) {
             return null;
         }
@@ -36,6 +37,11 @@ public class MybatisgxParameterHandler {
         MethodInfo methodInfo = MethodInfoContextHolder.get(mappedStatement.getId());
         if (mappedStatement.getSqlCommandType() == SqlCommandType.UPDATE && methodInfo.getSqlCommandType() == SqlCommandType.DELETE) {
             // mapper为更新操作，但是方法为删除删除，表示当前方法为逻辑删除
+            EntityInfo entityInfo = methodInfo.getEntityInfo();
+            ColumnInfo logicDeleteIdColumnInfo = entityInfo.getLogicDeleteIdColumnInfo();
+            if (logicDeleteIdColumnInfo != null) {
+                boundSql.setAdditionalParameter(logicDeleteIdColumnInfo.getDbColumnName(), System.currentTimeMillis());
+            }
         }
         if (mappedStatement.getSqlCommandType() == SqlCommandType.UPDATE && methodInfo.getSqlCommandType() == SqlCommandType.UPDATE) {
             // 更新操作

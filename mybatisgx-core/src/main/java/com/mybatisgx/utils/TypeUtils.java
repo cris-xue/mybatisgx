@@ -1,6 +1,6 @@
 package com.mybatisgx.utils;
 
-import com.mybatisgx.handler.page.Page;
+import com.mybatisgx.executor.page.Page;
 import org.apache.commons.lang3.ObjectUtils;
 
 import java.lang.reflect.ParameterizedType;

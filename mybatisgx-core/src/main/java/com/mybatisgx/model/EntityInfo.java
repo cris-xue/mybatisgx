@@ -1,7 +1,6 @@
 package com.mybatisgx.model;
 
-import com.mybatisgx.annotation.*;
-import com.mybatisgx.api.GeneratedValueHandler;
+import com.mybatisgx.annotation.Transient;
 import com.mybatisgx.utils.TypeUtils;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -162,20 +161,17 @@ public class EntityInfo {
 
         public Builder process() {
             for (ColumnInfo columnInfo : this.entityInfo.columnInfoList) {
-                Lock lock = columnInfo.getLock();
-                if (lock != null) {
+                if (columnInfo.getLock() != null) {
                     entityInfo.lockColumnInfo = columnInfo;
                 }
-                LogicDelete logicDelete = columnInfo.getLogicDelete();
-                if (logicDelete != null) {
+                if (columnInfo.getLogicDelete() != null) {
                     entityInfo.logicDeleteColumnInfo = columnInfo;
                 }
-                LogicDeleteId logicDeleteId = columnInfo.getLogicDeleteId();
-                if (logicDeleteId != null) {
+                if (TypeUtils.typeEquals(columnInfo, LogicDeleteIdColumnInfo.class)) {
                     entityInfo.logicDeleteIdColumnInfo = columnInfo;
                 }
-                GeneratedValueHandler generatedValueHandler = columnInfo.getGenerateValueHandler();
-                if (columnInfo instanceof IdColumnInfo || generatedValueHandler != null) {
+
+                if (columnInfo instanceof IdColumnInfo || columnInfo.getGenerateValueHandler() != null) {
                     entityInfo.generateValueColumnInfoList.add(columnInfo);
                 }
 
@@ -188,11 +184,10 @@ public class EntityInfo {
                 // 1、字段不存在关联实体为表字段
                 // 2、存在关联实体并且是关系维护方才是表字段【多对多关联字段在中间表，所以实体中是不存在表字段的】
                 ColumnInfo tableColumnInfo = null;
-                if (columnInfo instanceof RelationColumnInfo) {
+                if (TypeUtils.typeEquals(columnInfo, RelationColumnInfo.class)) {
                     RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
-                    ManyToMany manyToMany = relationColumnInfo.getManyToMany();
                     String mappedBy = relationColumnInfo.getMappedBy();
-                    if (manyToMany == null && StringUtils.isBlank(mappedBy)) {
+                    if (relationColumnInfo.getManyToMany() == null && StringUtils.isBlank(mappedBy)) {
                         tableColumnInfo = columnInfo;
                     }
                 } else {

@@ -90,6 +90,7 @@ public class MethodInfoHandler {
             MethodReturnInfo methodReturnInfo = this.getMethodReturn(mapperInfo, method);
 
             MethodInfo methodInfo = new MethodInfo();
+            methodInfo.setEntityInfo(mapperInfo.getEntityInfo());
             methodInfo.setMethod(method);
             methodInfo.setMethodName(methodName);
             methodInfo.setDynamic(method.getAnnotation(Dynamic.class) != null);

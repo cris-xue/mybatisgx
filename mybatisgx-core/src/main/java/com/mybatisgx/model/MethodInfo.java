@@ -15,6 +15,13 @@ import java.util.Map;
  */
 public class MethodInfo {
 
+    /**
+     * 方法所属实体
+     */
+    private EntityInfo entityInfo;
+    /**
+     * java方法信息
+     */
     private Method method;
     /**
      * sql动作，insert、delete、update、select
@@ -75,6 +82,14 @@ public class MethodInfo {
      * 结果集信息id
      */
     private String resultMapId;
+
+    public EntityInfo getEntityInfo() {
+        return entityInfo;
+    }
+
+    public void setEntityInfo(EntityInfo entityInfo) {
+        this.entityInfo = entityInfo;
+    }
 
     public Method getMethod() {
         return method;

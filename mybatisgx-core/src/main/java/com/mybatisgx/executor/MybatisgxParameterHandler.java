@@ -1,6 +1,7 @@
 package com.mybatisgx.executor;
 
 import com.mybatisgx.annotation.GeneratedValue;
+import com.mybatisgx.annotation.LogicDeleteId;
 import com.mybatisgx.api.GeneratedValueHandler;
 import com.mybatisgx.context.EntityInfoContextHolder;
 import com.mybatisgx.context.MethodInfoContextHolder;
@@ -38,23 +39,27 @@ public class MybatisgxParameterHandler {
         if (mappedStatement.getSqlCommandType() == SqlCommandType.UPDATE && methodInfo.getSqlCommandType() == SqlCommandType.DELETE) {
             // mapper为更新操作，但是方法为删除删除，表示当前方法为逻辑删除
             EntityInfo entityInfo = methodInfo.getEntityInfo();
-            ColumnInfo logicDeleteIdColumnInfo = entityInfo.getLogicDeleteIdColumnInfo();
+            LogicDeleteIdColumnInfo logicDeleteIdColumnInfo = (LogicDeleteIdColumnInfo) entityInfo.getLogicDeleteIdColumnInfo();
             if (logicDeleteIdColumnInfo != null) {
-                boundSql.setAdditionalParameter(logicDeleteIdColumnInfo.getDbColumnName(), System.currentTimeMillis());
+                LogicDeleteId logicDeleteId = logicDeleteIdColumnInfo.getLogicDeleteId();
+                Object value = this.processLogicDelete(logicDeleteIdColumnInfo);
+                boundSql.setAdditionalParameter(logicDeleteId.value(), value);
             }
         }
         if (mappedStatement.getSqlCommandType() == SqlCommandType.UPDATE && methodInfo.getSqlCommandType() == SqlCommandType.UPDATE) {
             // 更新操作
-            return this.processFillParameterObject(methodInfo, parameterObject);
+            Object parameterObjectNew = this.getParameterObject(methodInfo, parameterObject);
+            return this.processInsert(parameterObjectNew);
         }
         if (mappedStatement.getSqlCommandType() == SqlCommandType.INSERT && methodInfo.getSqlCommandType() == SqlCommandType.INSERT) {
             // 新增操作
-            return this.processFillParameterObject(methodInfo, parameterObject);
+            Object parameterObjectNew = this.getParameterObject(methodInfo, parameterObject);
+            return this.processUpdate(parameterObjectNew);
         }
         return parameterObject;
     }
 
-    private Object processFillParameterObject(MethodInfo methodInfo, Object parameterObject) {
+    private Object getParameterObject(MethodInfo methodInfo, Object parameterObject) {
         Object parameterObjectNew;
         if (parameterObject instanceof MapperMethod.ParamMap) {
             MapperMethod.ParamMap<Object> mapperMethodParameterObject = (MapperMethod.ParamMap<Object>) parameterObject;
@@ -64,64 +69,93 @@ public class MybatisgxParameterHandler {
         } else {
             parameterObjectNew = parameterObject;
         }
+        return parameterObjectNew;
+    }
 
-        EntityInfo entityInfo = EntityInfoContextHolder.get(parameterObjectNew.getClass());
+    private Object processInsert(Object parameterObject) {
+        EntityInfo entityInfo = EntityInfoContextHolder.get(parameterObject.getClass());
         if (entityInfo == null) {
             return parameterObject;
         }
 
-        MetaObject metaObject = SystemMetaObject.forObject(parameterObjectNew);
-        List<ColumnInfo> generateValueColumnInfoList = entityInfo.getGenerateValueColumnInfoList();
-        for (ColumnInfo generateValueColumnInfo : generateValueColumnInfoList) {
+        MetaObject metaObject = SystemMetaObject.forObject(parameterObject);
+        for (ColumnInfo generateValueColumnInfo : entityInfo.getGenerateValueColumnInfoList()) {
             String javaColumnName = generateValueColumnInfo.getJavaColumnName();
-            Class<?> javaColumnType = metaObject.getSetterType(javaColumnName);
             Object originalValue = metaObject.getValue(javaColumnName);
-
-            Object value = this.processGeneratedValue(methodInfo.getSqlCommandType(), generateValueColumnInfo, originalValue);
+            Object value = this.processInsert(generateValueColumnInfo, originalValue);
             metaObject.setValue(javaColumnName, value);
         }
         return metaObject.getOriginalObject();
     }
 
-    private Object processGeneratedValue(SqlCommandType sqlCommandType, ColumnInfo columnInfo, Object originalValue) {
+    private Object processUpdate(Object parameterObject) {
+        EntityInfo entityInfo = EntityInfoContextHolder.get(parameterObject.getClass());
+        if (entityInfo == null) {
+            return parameterObject;
+        }
+
+        MetaObject metaObject = SystemMetaObject.forObject(parameterObject);
+        for (ColumnInfo generateValueColumnInfo : entityInfo.getGenerateValueColumnInfoList()) {
+            String javaColumnName = generateValueColumnInfo.getJavaColumnName();
+            Object originalValue = metaObject.getValue(javaColumnName);
+            Object value = this.processUpdate(generateValueColumnInfo, originalValue);
+            metaObject.setValue(javaColumnName, value);
+        }
+        return metaObject.getOriginalObject();
+    }
+
+    private Object processInsert(ColumnInfo columnInfo, Object originalValue) {
         if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class)) {
             List<ColumnInfo> columnInfoComposites = columnInfo.getComposites();
             if (ObjectUtils.isEmpty(columnInfoComposites)) {
                 GeneratedValueHandler idGeneratedValueHandler = this.getIdGeneratedValueHandler(columnInfo);
                 if (idGeneratedValueHandler != null) {
-                    if (sqlCommandType == SqlCommandType.INSERT) {
-                        return idGeneratedValueHandler.insert(columnInfo, originalValue);
-                    }
+                    return idGeneratedValueHandler.insert(columnInfo, originalValue);
                 }
             } else {
                 MetaObject metaObject = SystemMetaObject.forObject(originalValue);
                 for (ColumnInfo columnInfoComposite : columnInfoComposites) {
                     GeneratedValueHandler idGeneratedValueHandler = this.getIdGeneratedValueHandler(columnInfoComposite);
                     if (idGeneratedValueHandler != null) {
-                        if (sqlCommandType == SqlCommandType.INSERT) {
-                            String javaColumnName = columnInfoComposite.getJavaColumnName();
-                            Object columnInfoCompositeOriginalValue = metaObject.getValue(javaColumnName);
-                            Object value = idGeneratedValueHandler.insert(columnInfoComposite, columnInfoCompositeOriginalValue);
-                            metaObject.setValue(javaColumnName, value);
-                        }
+                        String javaColumnName = columnInfoComposite.getJavaColumnName();
+                        Object columnInfoCompositeOriginalValue = metaObject.getValue(javaColumnName);
+                        Object value = idGeneratedValueHandler.insert(columnInfoComposite, columnInfoCompositeOriginalValue);
+                        metaObject.setValue(javaColumnName, value);
                     }
                 }
                 return metaObject.getOriginalObject();
             }
         }
-        if (TypeUtils.typeEquals(columnInfo, ColumnInfo.class)) {
+        if (TypeUtils.typeEquals(columnInfo, ColumnInfo.class, LogicDeleteIdColumnInfo.class)) {
             GeneratedValue generatedValue = columnInfo.getGenerateValue();
-            if (generatedValue != null) {
+            if (generatedValue != null && generatedValue.insert()) {
                 GeneratedValueHandler generatedValueHandler = columnInfo.getGenerateValueHandler();
-                if (generatedValue.insert() && sqlCommandType == SqlCommandType.INSERT) {
-                    return generatedValueHandler.insert(columnInfo, originalValue);
-                }
-                if (generatedValue.update() && sqlCommandType == SqlCommandType.UPDATE) {
-                    return generatedValueHandler.update(columnInfo, originalValue);
-                }
+                return generatedValueHandler.insert(columnInfo, originalValue);
             }
         }
         return originalValue;
+    }
+
+    private Object processUpdate(ColumnInfo columnInfo, Object originalValue) {
+        if (TypeUtils.typeEquals(columnInfo, ColumnInfo.class)) {
+            GeneratedValue generatedValue = columnInfo.getGenerateValue();
+            if (generatedValue != null && generatedValue.update()) {
+                GeneratedValueHandler generatedValueHandler = columnInfo.getGenerateValueHandler();
+                return generatedValueHandler.update(columnInfo, originalValue);
+            }
+        }
+        return originalValue;
+    }
+
+    private Object processLogicDelete(ColumnInfo columnInfo) {
+        if (TypeUtils.typeEquals(columnInfo, LogicDeleteIdColumnInfo.class)) {
+            GeneratedValue generatedValue = columnInfo.getGenerateValue();
+            if (generatedValue != null && generatedValue.logicDelete()) {
+                GeneratedValueHandler generatedValueHandler = columnInfo.getGenerateValueHandler();
+                return generatedValueHandler.logicDelete(columnInfo);
+            }
+        }
+        return null;
     }
 
     private GeneratedValueHandler getIdGeneratedValueHandler(ColumnInfo columnInfo) {

@@ -10,4 +10,6 @@ public interface GeneratedValueHandler<T> {
     T insert(Object columnInfo, Object originalValue);
 
     T update(Object columnInfo, Object originalValue);
+
+    T logicDelete(Object columnInfo);
 }

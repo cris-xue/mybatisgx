@@ -2,10 +2,7 @@ package com.mybatisgx.template;
 
 import com.mybatisgx.annotation.LogicDelete;
 import com.mybatisgx.annotation.LogicDeleteId;
-import com.mybatisgx.model.ColumnInfo;
-import com.mybatisgx.model.EntityInfo;
-import com.mybatisgx.model.MapperInfo;
-import com.mybatisgx.model.MethodInfo;
+import com.mybatisgx.model.*;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
@@ -72,15 +69,15 @@ public class DeleteTemplateHandler {
 
     private List<String> getExpressionList(EntityInfo entityInfo) {
         ColumnInfo logicDeleteColumnInfo = entityInfo.getLogicDeleteColumnInfo();
-        ColumnInfo logicDeleteIdColumnInfo = entityInfo.getLogicDeleteIdColumnInfo();
+        LogicDeleteIdColumnInfo logicDeleteIdColumnInfo = (LogicDeleteIdColumnInfo) entityInfo.getLogicDeleteIdColumnInfo();
         LogicDelete logicDelete = logicDeleteColumnInfo.getLogicDelete();
-        LogicDeleteId logicDeleteId = logicDeleteIdColumnInfo.getLogicDeleteId();
 
         List<String> expressionList = new ArrayList<>();
         String logicDeleteColumnValueExpression = String.format("%s = '%s'", logicDeleteColumnInfo.getDbColumnName(), logicDelete.hide());
         expressionList.add(logicDeleteColumnValueExpression);
-        if (logicDeleteId != null) {
-            String logicDeleteIdColumnColumnValueExpression = String.format("%s = #{%s}", logicDeleteIdColumnInfo.getDbColumnName(), logicDeleteIdColumnInfo.getJavaColumnName());
+        if (logicDeleteColumnInfo != null) {
+            LogicDeleteId logicDeleteId = logicDeleteIdColumnInfo.getLogicDeleteId();
+            String logicDeleteIdColumnColumnValueExpression = String.format("%s = #{%s}", logicDeleteIdColumnInfo.getDbColumnName(), logicDeleteId.value());
             expressionList.add(logicDeleteIdColumnColumnValueExpression);
         }
         return expressionList;

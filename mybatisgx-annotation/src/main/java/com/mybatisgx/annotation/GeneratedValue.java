@@ -34,4 +34,10 @@ public @interface GeneratedValue {
      * @return
      */
     boolean update() default false;
+
+    /**
+     * 是否逻辑删除时生成
+     * @return
+     */
+    boolean logicDelete() default false;
 }

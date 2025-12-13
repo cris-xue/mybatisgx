@@ -14,4 +14,11 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Target({FIELD})
 @Retention(RUNTIME)
 public @interface LogicDeleteId {
+
+    /**
+     * 逻辑删除id参数路径
+     *
+     * @return
+     */
+    String value() default "logic_delete_id_parameter_key";
 }

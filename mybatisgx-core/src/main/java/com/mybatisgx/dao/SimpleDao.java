@@ -4,8 +4,8 @@ import com.mybatisgx.annotation.BatchData;
 import com.mybatisgx.annotation.BatchOperation;
 import com.mybatisgx.annotation.BatchSize;
 import com.mybatisgx.annotation.Dynamic;
-import com.mybatisgx.handler.page.Page;
-import com.mybatisgx.handler.page.Pageable;
+import com.mybatisgx.executor.page.Page;
+import com.mybatisgx.executor.page.Pageable;
 import org.apache.ibatis.annotations.Param;
 
 import java.io.Serializable;

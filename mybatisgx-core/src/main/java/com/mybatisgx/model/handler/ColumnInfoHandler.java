@@ -152,6 +152,7 @@ public class ColumnInfoHandler {
     private ColumnInfo getColumnInfo(Field field) {
         Id id = field.getAnnotation(Id.class);
         EmbeddedId embeddedId = field.getAnnotation(EmbeddedId.class);
+        LogicDeleteId logicDeleteId = field.getAnnotation(LogicDeleteId.class);
         Column column = field.getAnnotation(Column.class);
         OneToOne oneToOne = field.getAnnotation(OneToOne.class);
         OneToMany oneToMany = field.getAnnotation(OneToMany.class);
@@ -170,6 +171,10 @@ public class ColumnInfoHandler {
             idColumnInfo.setId(id);
             idColumnInfo.setEmbeddedId(embeddedId);
             return idColumnInfo;
+        } else if (logicDeleteId != null) {
+            LogicDeleteIdColumnInfo logicDeleteIdColumnInfo = new LogicDeleteIdColumnInfo();
+            logicDeleteIdColumnInfo.setLogicDeleteId(logicDeleteId);
+            return logicDeleteIdColumnInfo;
         } else {
             ColumnInfo columnInfo = new ColumnInfo();
             columnInfo.setColumn(column);

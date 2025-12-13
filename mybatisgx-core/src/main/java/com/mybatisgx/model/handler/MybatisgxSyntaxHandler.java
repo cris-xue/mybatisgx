@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * mybatisgx语法处理器
@@ -159,7 +160,7 @@ public class MybatisgxSyntaxHandler {
 
     public static class WhereClauseVisitor extends MethodNameParserBaseVisitor<List<ConditionInfo>> {
 
-        private Integer conditionIndex = 0;
+        private AtomicInteger conditionIndex = new AtomicInteger(0);
         private ParserContext context;
         private ConditionTermParser conditionTermParser;
 
@@ -187,6 +188,10 @@ public class MybatisgxSyntaxHandler {
             return conditionInfoList;
         }
 
+        public Integer getConditionIndex() {
+            return conditionIndex.getAndIncrement();
+        }
+
         private List<ConditionInfo> parseAndExpression(MethodNameParser.And_expressionContext andExpressionContext, MethodNameParser.Logic_op_orContext logicOpOrContext) {
             List<ConditionInfo> conditionInfoList = new ArrayList();
             MethodNameParser.Logic_op_andContext logicOpAndContext = null;
@@ -197,7 +202,7 @@ public class MybatisgxSyntaxHandler {
                     MethodNameParser.Condition_expressionContext conditionExpressionContext = conditionTermContext.condition_expression();
                     if (conditionExpressionContext != null) {
                         List<ConditionInfo> childConditionInfoList = this.visitCondition_expression(conditionExpressionContext);
-                        ConditionInfo conditionInfo = new ConditionInfo(conditionIndex++, context.conditionOriginType, context.methodParamInfo);
+                        ConditionInfo conditionInfo = new ConditionInfo(this.getConditionIndex(), context.conditionOriginType, context.methodParamInfo);
                         this.setLogicOperator(conditionInfo, logicOpOrContext, logicOpAndContext);
                         this.handleBrackets(conditionTermContext, conditionInfo);
                         conditionInfo.setConditionInfoList(childConditionInfoList);
@@ -205,7 +210,7 @@ public class MybatisgxSyntaxHandler {
                     }
                     MethodNameParser.Field_comparison_op_clauseContext fieldComparisonOpClauseContext = conditionTermContext.field_comparison_op_clause();
                     if (fieldComparisonOpClauseContext != null) {
-                        ConditionInfo conditionInfo = this.conditionTermParser.parse(conditionIndex++, fieldComparisonOpClauseContext);
+                        ConditionInfo conditionInfo = this.conditionTermParser.parse(this.getConditionIndex(), fieldComparisonOpClauseContext);
                         conditionInfo.setOriginSegment(conditionTermContext.getText());
                         this.setLogicOperator(conditionInfo, logicOpOrContext, logicOpAndContext);
                         conditionInfoList.add(conditionInfo);

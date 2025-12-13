@@ -37,22 +37,15 @@ public class MybatisgxConfiguration extends Configuration {
 
     @Override
     public StatementHandler newStatementHandler(Executor executor, MappedStatement mappedStatement, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
+        StatementHandler statementHandler = super.newStatementHandler(executor, mappedStatement, parameterObject, rowBounds, resultHandler, boundSql);
         MybatisgxParameterHandler mybatisgxParameterHandler = MybatisgxObjectFactory.get(MybatisgxParameterHandler.class);
-        mybatisgxParameterHandler.fillParameterObject(mappedStatement, parameterObject, boundSql);
-        return super.newStatementHandler(executor, mappedStatement, parameterObject, rowBounds, resultHandler, boundSql);
+        mybatisgxParameterHandler.fillParameterObject(mappedStatement, parameterObject, statementHandler.getBoundSql());
+        return statementHandler;
     }
 
     @Override
     public ResultSetHandler newResultSetHandler(Executor executor, MappedStatement mappedStatement, RowBounds rowBounds, ParameterHandler parameterHandler, ResultHandler resultHandler, BoundSql boundSql) {
-        ResultSetHandler resultSetHandler;
-        /*if (boundSql instanceof BatchSelectBoundSql) {
-            resultSetHandler = new MybatisgxResultSetHandler(executor, mappedStatement, parameterHandler, resultHandler, boundSql, rowBounds);
-            resultSetHandler = (ResultSetHandler) interceptorChain.pluginAll(resultSetHandler);
-        } else {
-            executor = (Executor) interceptorChain.pluginAll(executor);
-            resultSetHandler = super.newResultSetHandler(executor, mappedStatement, rowBounds, parameterHandler, resultHandler, boundSql);
-        }*/
-        resultSetHandler = new MybatisgxResultSetHandler(executor, mappedStatement, parameterHandler, resultHandler, boundSql, rowBounds);
+        ResultSetHandler resultSetHandler = new MybatisgxResultSetHandler(executor, mappedStatement, parameterHandler, resultHandler, boundSql, rowBounds);
         resultSetHandler = (ResultSetHandler) interceptorChain.pluginAll(resultSetHandler);
         return resultSetHandler;
     }

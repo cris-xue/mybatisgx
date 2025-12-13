@@ -1,4 +1,4 @@
-package com.mybatisgx.handler.page;
+package com.mybatisgx.executor.page;
 
 import java.util.List;
 

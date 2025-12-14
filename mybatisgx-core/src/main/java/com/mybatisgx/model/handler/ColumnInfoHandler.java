@@ -47,7 +47,6 @@ public class ColumnInfoHandler {
 
             columnInfo.setLock(field.getAnnotation(Lock.class));
             columnInfo.setLogicDelete(field.getAnnotation(LogicDelete.class));
-            columnInfo.setLogicDeleteId(field.getAnnotation(LogicDeleteId.class));
 
             this.setGenerateValueHandler(field, columnInfo);
             this.processColumnType(field, columnInfo, typeParameterMap);

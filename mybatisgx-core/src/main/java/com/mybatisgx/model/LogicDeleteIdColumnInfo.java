@@ -11,16 +11,14 @@ import com.mybatisgx.annotation.LogicDeleteId;
 public class LogicDeleteIdColumnInfo extends ColumnInfo {
 
     /**
-     * 主键
+     * 逻辑删除id注解
      */
     private LogicDeleteId logicDeleteId;
 
-    @Override
     public LogicDeleteId getLogicDeleteId() {
         return logicDeleteId;
     }
 
-    @Override
     public void setLogicDeleteId(LogicDeleteId logicDeleteId) {
         this.logicDeleteId = logicDeleteId;
     }

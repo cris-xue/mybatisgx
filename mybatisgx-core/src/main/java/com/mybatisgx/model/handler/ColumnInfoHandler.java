@@ -47,8 +47,8 @@ public class ColumnInfoHandler {
 
             columnInfo.setLock(field.getAnnotation(Lock.class));
             columnInfo.setLogicDelete(field.getAnnotation(LogicDelete.class));
+            columnInfo.setGenerateValue(field.getAnnotation(GeneratedValue.class));
 
-            this.setGenerateValueHandler(field, columnInfo);
             this.processColumnType(field, columnInfo, typeParameterMap);
             if (columnInfo instanceof IdColumnInfo) {
                 this.setIdColumnInfo(field, (IdColumnInfo) columnInfo, typeParameterMap);
@@ -136,9 +136,7 @@ public class ColumnInfoHandler {
     private void setGenerateValueHandler(Field field, ColumnInfo columnInfo) {
         GeneratedValue generatedValue = field.getAnnotation(GeneratedValue.class);
         if (generatedValue != null) {
-            // GeneratedValueHandler generatedValueHandler = generatedValue.value().newInstance();
             columnInfo.setGenerateValue(generatedValue);
-            // columnInfo.setGenerateValueHandler(generatedValueHandler);
         }
     }
 

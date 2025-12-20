@@ -15,7 +15,9 @@ import java.util.List;
 public interface UserDao extends SimpleDao<User, Long> {
 
     @Dynamic
-    int insertNew(User user, User user1);
+    int insertNew(User user);
+
+    int deleteByIdAndName(Long id, String name);
 
     List<User> findByNameLike(String name);
 

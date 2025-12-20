@@ -4,8 +4,8 @@ import com.github.swierkosz.fixture.generator.FixtureGenerator;
 import com.mybatisgx.custom.condition.dao.UserDao;
 import com.mybatisgx.custom.condition.entity.User;
 import com.mybatisgx.custom.condition.entity.UserQuery;
-import com.mybatisgx.handler.page.Page;
-import com.mybatisgx.handler.page.Pageable;
+import com.mybatisgx.executor.page.Page;
+import com.mybatisgx.executor.page.Pageable;
 import com.mybatisgx.util.DaoTestUtils;
 import org.apache.ibatis.session.SqlSession;
 import org.junit.Assert;
@@ -105,6 +105,22 @@ public class UserDaoTest {
 
         User dbUser = userDao.findById(user.getId());
         Assert.assertNull(dbUser);
+    }
+
+    @Test
+    public void testDeleteCustomById() {
+        FixtureGenerator fixtureGenerator = new FixtureGenerator();
+        fixtureGenerator.configure().ignoreCyclicReferences();
+        User user = fixtureGenerator.createRandomized(User.class);
+        user.setId(null);
+        int insertCount = userDao.insert(user);
+        Assert.assertEquals(1, insertCount);
+
+        int deleteCount = userDao.deleteByIdAndName(user.getId(), "");
+        Assert.assertEquals(0, deleteCount);
+
+        User dbUser = userDao.findById(user.getId());
+        Assert.assertNotNull(dbUser);
     }
 
     @Test
@@ -215,13 +231,20 @@ public class UserDaoTest {
     }
 
     @Test
+    public void testMultiEntityParam() {
+        FixtureGenerator fixtureGenerator = new FixtureGenerator();
+        fixtureGenerator.configure().ignoreCyclicReferences();
+        User user = fixtureGenerator.createRandomized(User.class);
+        userDao.insertNew(user);
+    }
+
+    @Test
     public void testCustomQuery01() {
         FixtureGenerator fixtureGenerator = new FixtureGenerator();
         fixtureGenerator.configure().ignoreCyclicReferences();
         User user = fixtureGenerator.createRandomized(User.class);
         UserQuery userQuery = fixtureGenerator.createRandomized(UserQuery.class);
 
-        userDao.insertNew(user, user);
         userDao.findByNameLike("name");
         userDao.findByNameLikeAndId(user.getName(), user.getId());
         userDao.findByInputTimeBetween(Arrays.asList(LocalDateTime.now(), LocalDateTime.now()));
@@ -241,7 +264,7 @@ public class UserDaoTest {
         fixtureGenerator.configure().ignoreCyclicReferences();
         User user = fixtureGenerator.createRandomized(User.class);
 
-        userDao.insertNew(user, user);
+        userDao.insertSelective(user);
         userDao.findByIdNotInAndNameNotLike(Arrays.asList(111L, 2222L), "name");
     }
 

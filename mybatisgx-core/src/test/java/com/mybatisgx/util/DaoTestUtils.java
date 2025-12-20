@@ -1,7 +1,7 @@
 package com.mybatisgx.util;
 
 import com.mybatisgx.context.MybatisgxContextLoader;
-import com.mybatisgx.executor.genval.IdGeneratedValueHandler;
+import com.mybatisgx.executor.keygen.SnowKeyGenerator;
 import com.mybatisgx.ext.builder.xml.MybatisgxXMLConfigBuilder;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.ext.session.defaults.MybatisgxDefaultSqlSessionFactory;
@@ -56,7 +56,7 @@ public class DaoTestUtils {
                 entityBasePackages,
                 daoBasePackages,
                 null,
-                new IdGeneratedValueHandler(),
+                new SnowKeyGenerator(),
                 configuration
         );
         mybatisgxContextLoader.load();

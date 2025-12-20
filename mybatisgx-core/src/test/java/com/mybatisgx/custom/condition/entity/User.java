@@ -1,6 +1,7 @@
 package com.mybatisgx.custom.condition.entity;
 
 import com.mybatisgx.annotation.*;
+import com.mybatisgx.custom.condition.test.LogicDeleteIdValueProcessor;
 import com.mybatisgx.entity.BaseEntity;
 
 @Entity
@@ -27,6 +28,7 @@ public class User extends BaseEntity<Long> {
     private Integer status;
 
     @LogicDeleteId
+    @GeneratedValue(value = LogicDeleteIdValueProcessor.class)
     private Long logicDeleteId;
 
     @Lock
@@ -94,6 +96,14 @@ public class User extends BaseEntity<Long> {
 
     public void setStatus(Integer status) {
         this.status = status;
+    }
+
+    public Long getLogicDeleteId() {
+        return logicDeleteId;
+    }
+
+    public void setLogicDeleteId(Long logicDeleteId) {
+        this.logicDeleteId = logicDeleteId;
     }
 
     public Integer getVersion() {

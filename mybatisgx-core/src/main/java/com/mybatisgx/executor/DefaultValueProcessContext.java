@@ -52,6 +52,9 @@ public class DefaultValueProcessContext implements ValueProcessContext {
 
     @Override
     public Object getFieldValue(String fieldName) {
-        return entityMetaObject.getValue(fieldName);
+        if (entityMetaObject.hasGetter(fieldName)) {
+            return entityMetaObject.getValue(fieldName);
+        }
+        return null;
     }
 }

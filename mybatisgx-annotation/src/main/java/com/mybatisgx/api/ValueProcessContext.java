@@ -49,8 +49,8 @@ public interface ValueProcessContext {
 
     /**
      * 获取实体对象中的字段值，支持多层级获取，如【user.name】
-     * @param columnName
+     * @param filedName
      * @return
      */
-    Object getFieldValue(String columnName);
+    Object getFieldValue(String filedName);
 }

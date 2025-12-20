@@ -1,5 +1,6 @@
 package com.mybatisgx.context;
 
+import com.mybatisgx.executor.MybatisgxValueProcessor;
 import com.mybatisgx.executor.keygen.KeyGenerator;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.model.handler.MethodInfoHandler;
@@ -33,6 +34,7 @@ public class MybatisgxObjectFactory {
         OBJECTO_MAP.put(DeleteTemplateHandler.class, new DeleteTemplateHandler());
         OBJECTO_MAP.put(UpdateTemplateHandler.class, new UpdateTemplateHandler());
 
+        OBJECTO_MAP.put(MybatisgxValueProcessor.class, new MybatisgxValueProcessor());
         OBJECTO_MAP.put(KeyGenerator.class, keyGenerator);
     }
 

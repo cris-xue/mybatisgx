@@ -8,7 +8,6 @@ import com.mybatisgx.context.DaoMethodManager;
 import com.mybatisgx.context.EntityInfoContextHolder;
 import com.mybatisgx.context.MethodInfoContextHolder;
 import com.mybatisgx.model.*;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.ibatis.binding.MapperMethod;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
@@ -34,7 +33,6 @@ public class MybatisgxValueProcessor {
         VALUE_HANDLER_MAP.put(IdColumnInfo.class, new CommonFieldValueHandler());
         VALUE_HANDLER_MAP.put(LogicDeleteIdColumnInfo.class, new LogicDeleteIdFieldValueHandler());
     }
-
 
     public Object process(MappedStatement mappedStatement, Object parameterObject, BoundSql boundSql) {
         if (parameterObject == null) {
@@ -139,18 +137,10 @@ public class MybatisgxValueProcessor {
             if (entityMetaObject == null) {
                 entityMetaObject = metaObject;
             }
-
-            String javaColumnName = columnInfo.getJavaColumnName();
-            Object fieldValue = metaObject.getValue(javaColumnName);
-            List<ColumnInfo> columnInfoComposites = columnInfo.getComposites();
-            if (ObjectUtils.isEmpty(columnInfoComposites)) {
-                Object value = this.valueHandle(phase, columnInfo, fieldValue, entityMetaObject);
-                metaObject.setValue(javaColumnName, value);
-            } else {
-                for (ColumnInfo columnInfoComposite : columnInfoComposites) {
-                    this.setMetaObjectValue(phase, columnInfoComposite, fieldValue, metaObject);
-                }
-            }
+            String javaColumnNamePath = columnInfo.getJavaColumnNamePath();
+            Object fieldValue = metaObject.getValue(javaColumnNamePath);
+            Object value = this.valueHandle(phase, columnInfo, fieldValue, entityMetaObject);
+            metaObject.setValue(javaColumnNamePath, value);
         }
     }
 }

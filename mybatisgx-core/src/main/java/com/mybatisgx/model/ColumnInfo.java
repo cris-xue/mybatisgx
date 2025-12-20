@@ -2,6 +2,7 @@ package com.mybatisgx.model;
 
 import com.mybatisgx.annotation.*;
 import com.mybatisgx.api.FieldMeta;
+import org.apache.commons.lang3.StringUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -15,6 +16,10 @@ import java.util.List;
  */
 public class ColumnInfo implements FieldMeta {
 
+    /**
+     * 父字段信息
+     */
+    private ColumnInfo parent;
     /**
      * java字段信息
      */
@@ -31,6 +36,10 @@ public class ColumnInfo implements FieldMeta {
      *
      */
     private String javaColumnName;
+    /**
+     * java字段名路径列表
+     */
+    private List<String> javaColumnNamePathList;
     /**
      * 容器类型，List、Set
      */
@@ -80,6 +89,14 @@ public class ColumnInfo implements FieldMeta {
      */
     private GeneratedValue generatedValue;
 
+    public ColumnInfo getParent() {
+        return parent;
+    }
+
+    public void setParent(ColumnInfo parent) {
+        this.parent = parent;
+    }
+
     public Field getField() {
         return field;
     }
@@ -113,6 +130,18 @@ public class ColumnInfo implements FieldMeta {
 
     public void setJavaColumnName(String javaColumnName) {
         this.javaColumnName = javaColumnName;
+    }
+
+    public String getJavaColumnNamePath() {
+        return StringUtils.join(javaColumnNamePathList, ".");
+    }
+
+    public List<String> getJavaColumnNamePathList() {
+        return javaColumnNamePathList;
+    }
+
+    public void setJavaColumnNamePathList(List<String> javaColumnNamePathList) {
+        this.javaColumnNamePathList = javaColumnNamePathList;
     }
 
     public Class<?> getCollectionType() {

@@ -173,10 +173,7 @@ public class EntityInfo {
                     entityInfo.logicDeleteIdColumnInfo = columnInfo;
                 }
 
-                if (columnInfo.getGenerateValue() != null) {
-                    entityInfo.generateValueColumnInfoList.add(columnInfo);
-                    DaoMethodManager.register((Class<ValueProcessor>[]) columnInfo.getGenerateValue().value());
-                }
+                this.processGenerateValue(columnInfo);
 
                 if (columnInfo instanceof RelationColumnInfo) {
                     entityInfo.relationColumnInfoList.add((RelationColumnInfo) columnInfo);
@@ -234,6 +231,28 @@ public class EntityInfo {
 
                     String wrapJavaColumnName = String.format("%s.%s", idColumnInfo.getJavaColumnName(), composite.getJavaColumnName());
                     entityInfo.columnInfoMap.put(wrapJavaColumnName, wrapIdColumnInfo);
+                }
+            }
+        }
+
+        private void processGenerateValue(ColumnInfo columnInfo) {
+            List<ColumnInfo> generateValueColumnInfoList = new ArrayList<>();
+            if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class)) {
+                List<ColumnInfo> columnInfoComposites = columnInfo.getComposites();
+                if (ObjectUtils.isEmpty(columnInfoComposites)) {
+                    generateValueColumnInfoList.add(columnInfo);
+                } else {
+                    for (ColumnInfo compositeColumnInfo : columnInfoComposites) {
+                        generateValueColumnInfoList.add(compositeColumnInfo);
+                    }
+                }
+            } else {
+                generateValueColumnInfoList.add(columnInfo);
+            }
+            for (ColumnInfo generateValueColumnInfo : generateValueColumnInfoList) {
+                if (generateValueColumnInfo.getGenerateValue() != null) {
+                    entityInfo.generateValueColumnInfoList.add(generateValueColumnInfo);
+                    DaoMethodManager.register((Class<ValueProcessor>[]) generateValueColumnInfo.getGenerateValue().value());
                 }
             }
         }

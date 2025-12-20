@@ -3,6 +3,7 @@ package com.mybatisgx.model.handler;
 import com.google.common.base.CaseFormat;
 import com.mybatisgx.annotation.*;
 import com.mybatisgx.context.EntityInfoContextHolder;
+import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.model.*;
 import com.mybatisgx.utils.TypeUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -23,10 +24,10 @@ public class ColumnInfoHandler {
 
     public List<ColumnInfo> getColumnInfoList(Class<?> clazz, Map<Type, Class<?>> typeParameterMap) {
         Field[] fields = FieldUtils.getAllFields(clazz);
-        return this.processColumnInfo(fields, typeParameterMap);
+        return this.processColumnInfo(null, fields, typeParameterMap);
     }
 
-    private List<ColumnInfo> processColumnInfo(Field[] fields, Map<Type, Class<?>> typeParameterMap) {
+    private List<ColumnInfo> processColumnInfo(ColumnInfo parentColumnInfo, Field[] fields, Map<Type, Class<?>> typeParameterMap) {
         List<ColumnInfo> columnInfoList = new ArrayList<>();
         for (Field field : fields) {
             int modifiers = field.getModifiers();
@@ -40,8 +41,10 @@ public class ColumnInfoHandler {
             String dbColumnName = this.getDbColumnName(field);
 
             ColumnInfo columnInfo = this.getColumnInfo(field);
+            columnInfo.setParent(parentColumnInfo);
             columnInfo.setField(field);
             columnInfo.setJavaColumnName(fieldName);
+            columnInfo.setJavaColumnNamePathList(this.getJavaColumnNamePathList(parentColumnInfo, columnInfo));
             columnInfo.setDbTypeName(column != null ? column.columnDefinition() : null);
             columnInfo.setDbColumnName(dbColumnName);
 
@@ -133,13 +136,6 @@ public class ColumnInfoHandler {
         }
     }
 
-    private void setGenerateValueHandler(Field field, ColumnInfo columnInfo) {
-        GeneratedValue generatedValue = field.getAnnotation(GeneratedValue.class);
-        if (generatedValue != null) {
-            columnInfo.setGenerateValue(generatedValue);
-        }
-    }
-
     private ColumnInfo getColumnInfo(Field field) {
         Id id = field.getAnnotation(Id.class);
         EmbeddedId embeddedId = field.getAnnotation(EmbeddedId.class);
@@ -179,14 +175,14 @@ public class ColumnInfoHandler {
         List<ColumnInfo> idColumnInfoComposites = new ArrayList();
         if (embeddedId != null) {
             Type type = field.getGenericType();
-            idColumnInfoComposites = this.getColumnInfoList(type, typeParameterMap);
+            idColumnInfoComposites = this.getColumnInfoList(idColumnInfo, type, typeParameterMap);
         }
         idColumnInfo.setId(id);
         idColumnInfo.setEmbeddedId(embeddedId);
         idColumnInfo.setComposites(idColumnInfoComposites);
     }
 
-    private List<ColumnInfo> getColumnInfoList(Type type, Map<Type, Class<?>> typeParameterMap) {
+    private List<ColumnInfo> getColumnInfoList(ColumnInfo columnInfo, Type type, Map<Type, Class<?>> typeParameterMap) {
         if (type instanceof ParameterizedType) {
             // 处理复杂类型嵌套丢失真实类型
             ParameterizedType parameterizedType = (ParameterizedType) type;
@@ -194,11 +190,11 @@ public class ColumnInfoHandler {
             Map<TypeVariable<?>, Type> typeMap = TypeUtils.getTypeArguments(parameterizedType);
             typeMap.forEach((typeVariable, typeValue) -> childTypeParameterMap.put(typeVariable, typeParameterMap.get(typeValue)));
             Field[] fields = FieldUtils.getAllFields((Class<?>) parameterizedType.getRawType());
-            return this.processColumnInfo(fields, childTypeParameterMap);
+            return this.processColumnInfo(columnInfo, fields, childTypeParameterMap);
         }
         if (type instanceof ParameterizedType) {
             Field[] fields = FieldUtils.getAllFields((Class<?>) type);
-            return this.processColumnInfo(fields, typeParameterMap);
+            return this.processColumnInfo(columnInfo, fields, typeParameterMap);
         }
         return new ArrayList<>();
     }
@@ -294,15 +290,24 @@ public class ColumnInfoHandler {
         }
     }
 
+    private List<String> getJavaColumnNamePathList(ColumnInfo parentColumnInfo, ColumnInfo columnInfo) {
+        List<String> javaColumnNamePathList = new ArrayList<>();
+        if (parentColumnInfo != null) {
+            javaColumnNamePathList.addAll(parentColumnInfo.getJavaColumnNamePathList());
+        }
+        javaColumnNamePathList.add(columnInfo.getJavaColumnName());
+        return javaColumnNamePathList;
+    }
+
     private ColumnInfo validateEntityRelation(RelationColumnInfo relationColumnInfo, String mappedBy) {
         Class<?> javaType = relationColumnInfo.getJavaType();
         EntityInfo relationColumnEntityInfo = EntityInfoContextHolder.get(javaType);
         if (relationColumnEntityInfo == null) {
-            throw new RuntimeException("实体类" + javaType + "不存在");
+            throw new MybatisgxException("实体类 %s 不存在", javaType.getTypeName());
         }
         ColumnInfo mappedByRelationColumnInfo = relationColumnEntityInfo.getColumnInfo(mappedBy);
         if (mappedByRelationColumnInfo == null) {
-            throw new RuntimeException("实体类" + javaType + "不存在" + mappedBy + "字段");
+            throw new MybatisgxException("实体类 %s 不存在 %s 字段", javaType.getTypeName(), mappedBy);
         }
         return mappedByRelationColumnInfo;
     }

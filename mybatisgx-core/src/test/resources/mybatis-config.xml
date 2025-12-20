@@ -15,7 +15,7 @@
         <setting name="mapUnderscoreToCamelCase" value="true"/>
 
         <!-- 日志实现 -->
-        <setting name="logImpl" value="SLF4J"/>
+        <setting name="logImpl" value="STDOUT_LOGGING"/>
     </settings>
     <!-- 6. 插件（拦截器） -->
     <plugins>

@@ -1,7 +1,5 @@
 package com.mybatisgx.advanced.interceptor;
 
-import com.mybatisgx.context.MybatisgxObjectFactory;
-import com.mybatisgx.executor.MybatisgxParameterHandler;
 import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.mapping.BoundSql;
@@ -46,9 +44,6 @@ public class MybatisgxInterceptor implements Interceptor {
         MybatisgxExecutorInfo mybatisgxExecutorInfo = new MybatisgxExecutorInfo(args);
         MappedStatement mappedStatement = mybatisgxExecutorInfo.getMappedStatement();
         Object parameterObject = mybatisgxExecutorInfo.getParameterObject();
-
-        MybatisgxParameterHandler mybatisgxParameterHandler = MybatisgxObjectFactory.get(MybatisgxParameterHandler.class);
-        parameterObject = mybatisgxParameterHandler.fillParameterObject(mappedStatement, parameterObject, null);
 
         for (SqlHandler sqlHandler : sqlHandlerList) {
             sqlHandler.process(mybatisgxExecutorInfo);

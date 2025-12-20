@@ -1,7 +1,6 @@
 package com.mybatisgx.context;
 
-import com.mybatisgx.api.GeneratedValueHandler;
-import com.mybatisgx.executor.MybatisgxParameterHandler;
+import com.mybatisgx.executor.keygen.KeyGenerator;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.model.handler.MethodInfoHandler;
 import com.mybatisgx.template.DeleteTemplateHandler;
@@ -11,8 +10,8 @@ import com.mybatisgx.template.UpdateTemplateHandler;
 import com.mybatisgx.template.select.LimitTemplateHandler;
 import com.mybatisgx.template.select.SelectTemplateHandler;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 一句话描述
@@ -21,10 +20,9 @@ import java.util.Map;
  */
 public class MybatisgxObjectFactory {
 
-    private static final Map<Class, Object> OBJECTO_MAP = new HashMap<>();
+    private static final Map<Class, Object> OBJECTO_MAP = new ConcurrentHashMap();
 
-    public static void register(MybatisgxConfiguration configuration, GeneratedValueHandler idGeneratedValueHandler) {
-        OBJECTO_MAP.put(MybatisgxParameterHandler.class, new MybatisgxParameterHandler(idGeneratedValueHandler));
+    public static void register(MybatisgxConfiguration configuration, KeyGenerator<?> keyGenerator) {
         OBJECTO_MAP.put(MethodInfoHandler.class, new MethodInfoHandler(configuration));
 
         OBJECTO_MAP.put(StatementTemplateHandler.class, new StatementTemplateHandler(configuration));
@@ -34,6 +32,8 @@ public class MybatisgxObjectFactory {
         OBJECTO_MAP.put(InsertTemplateHandler.class, new InsertTemplateHandler());
         OBJECTO_MAP.put(DeleteTemplateHandler.class, new DeleteTemplateHandler());
         OBJECTO_MAP.put(UpdateTemplateHandler.class, new UpdateTemplateHandler());
+
+        OBJECTO_MAP.put(KeyGenerator.class, keyGenerator);
     }
 
     public static synchronized <T> T get(Class<T> clazz) {

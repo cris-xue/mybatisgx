@@ -1,6 +1,8 @@
 package com.mybatisgx.model;
 
 import com.mybatisgx.annotation.Transient;
+import com.mybatisgx.api.ValueProcessor;
+import com.mybatisgx.context.DaoMethodManager;
 import com.mybatisgx.utils.TypeUtils;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -171,8 +173,9 @@ public class EntityInfo {
                     entityInfo.logicDeleteIdColumnInfo = columnInfo;
                 }
 
-                if (columnInfo instanceof IdColumnInfo || columnInfo.getGenerateValueHandler() != null) {
+                if (columnInfo.getGenerateValue() != null) {
                     entityInfo.generateValueColumnInfoList.add(columnInfo);
+                    DaoMethodManager.register((Class<ValueProcessor>[]) columnInfo.getGenerateValue().value());
                 }
 
                 if (columnInfo instanceof RelationColumnInfo) {

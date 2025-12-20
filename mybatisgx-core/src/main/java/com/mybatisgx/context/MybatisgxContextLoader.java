@@ -1,8 +1,8 @@
 package com.mybatisgx.context;
 
 import com.mybatisgx.annotation.Entity;
-import com.mybatisgx.api.GeneratedValueHandler;
 import com.mybatisgx.dao.Dao;
+import com.mybatisgx.executor.keygen.KeyGenerator;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.model.EntityInfo;
 import com.mybatisgx.model.MapperInfo;
@@ -49,11 +49,16 @@ public class MybatisgxContextLoader {
     private String[] daoBasePackages;
     private List<Resource> repositoryResourceList;
 
-    public MybatisgxContextLoader(String[] entityBasePackages, String[] daoBasePackages, List<Resource> repositoryResourceList, GeneratedValueHandler idGeneratedValueHandler, MybatisgxConfiguration configuration) {
+    public MybatisgxContextLoader(
+            String[] entityBasePackages,
+            String[] daoBasePackages,
+            List<Resource> repositoryResourceList,
+            KeyGenerator<?> keyGenerator,
+            MybatisgxConfiguration configuration) {
         this.entityBasePackages = entityBasePackages;
         this.daoBasePackages = daoBasePackages;
         this.repositoryResourceList = repositoryResourceList;
-        MybatisgxObjectFactory.register(configuration, idGeneratedValueHandler);
+        MybatisgxObjectFactory.register(configuration, keyGenerator);
     }
 
     public void load() {

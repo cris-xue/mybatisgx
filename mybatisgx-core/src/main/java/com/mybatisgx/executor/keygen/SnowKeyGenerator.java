@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
  * @author 薛承城
  * @date 2025/12/3 9:30
  */
-public class SnowKeyGenerator {
+public class SnowKeyGenerator implements KeyGenerator<Long> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SnowKeyGenerator.class);
 
@@ -46,7 +46,7 @@ public class SnowKeyGenerator {
         this.workerIdShift = sequenceBits;
     }
 
-    public long get() throws SnowGenerateException {
+    public Long get() throws SnowGenerateException {
         try {
             return nextId();
         } catch (Exception e) {

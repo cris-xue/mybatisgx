@@ -2,7 +2,6 @@ package com.mybatisgx.model.handler;
 
 import com.google.common.base.CaseFormat;
 import com.mybatisgx.annotation.*;
-import com.mybatisgx.api.GeneratedValueHandler;
 import com.mybatisgx.context.EntityInfoContextHolder;
 import com.mybatisgx.model.*;
 import com.mybatisgx.utils.TypeUtils;
@@ -41,6 +40,7 @@ public class ColumnInfoHandler {
             String dbColumnName = this.getDbColumnName(field);
 
             ColumnInfo columnInfo = this.getColumnInfo(field);
+            columnInfo.setField(field);
             columnInfo.setJavaColumnName(fieldName);
             columnInfo.setDbTypeName(column != null ? column.columnDefinition() : null);
             columnInfo.setDbColumnName(dbColumnName);
@@ -134,17 +134,11 @@ public class ColumnInfoHandler {
     }
 
     private void setGenerateValueHandler(Field field, ColumnInfo columnInfo) {
-        try {
-            GeneratedValue generatedValue = field.getAnnotation(GeneratedValue.class);
-            if (generatedValue != null) {
-                GeneratedValueHandler generatedValueHandler = generatedValue.value().newInstance();
-                columnInfo.setGenerateValue(generatedValue);
-                columnInfo.setGenerateValueHandler(generatedValueHandler);
-            }
-        } catch (InstantiationException e) {
-            throw new RuntimeException(e);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
+        GeneratedValue generatedValue = field.getAnnotation(GeneratedValue.class);
+        if (generatedValue != null) {
+            // GeneratedValueHandler generatedValueHandler = generatedValue.value().newInstance();
+            columnInfo.setGenerateValue(generatedValue);
+            // columnInfo.setGenerateValueHandler(generatedValueHandler);
         }
     }
 

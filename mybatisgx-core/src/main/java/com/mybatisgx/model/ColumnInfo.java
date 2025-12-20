@@ -1,8 +1,10 @@
 package com.mybatisgx.model;
 
 import com.mybatisgx.annotation.*;
-import com.mybatisgx.api.GeneratedValueHandler;
+import com.mybatisgx.api.FieldMeta;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.util.List;
 
 /**
@@ -11,8 +13,12 @@ import java.util.List;
  * @author ccxuef
  * @date 2025/8/9 15:54
  */
-public class ColumnInfo {
+public class ColumnInfo implements FieldMeta {
 
+    /**
+     * java字段信息
+     */
+    private Field field;
     /**
      * Map、基础类型、业务类型
      */
@@ -54,10 +60,6 @@ public class ColumnInfo {
      */
     private List<ColumnInfo> composites;
     /**
-     * 字段值生成处理器
-     */
-    private GeneratedValueHandler generatedValueHandler;
-    /**
      * 字段注解
      */
     private Column column;
@@ -77,6 +79,14 @@ public class ColumnInfo {
      * 生成值注解
      */
     private GeneratedValue generatedValue;
+
+    public Field getField() {
+        return field;
+    }
+
+    public void setField(Field field) {
+        this.field = field;
+    }
 
     public Class<?> getJavaType() {
         return javaType;
@@ -168,14 +178,6 @@ public class ColumnInfo {
         this.composites = composites;
     }
 
-    public GeneratedValueHandler getGenerateValueHandler() {
-        return generatedValueHandler;
-    }
-
-    public void setGenerateValueHandler(GeneratedValueHandler generatedValueHandler) {
-        this.generatedValueHandler = generatedValueHandler;
-    }
-
     public Column getColumn() {
         return column;
     }
@@ -214,6 +216,16 @@ public class ColumnInfo {
 
     public void setGenerateValue(GeneratedValue generatedValue) {
         this.generatedValue = generatedValue;
+    }
+
+    @Override
+    public <A extends Annotation> A getAnnotation(Class<A> annotationType) {
+        return this.field.getAnnotation(annotationType);
+    }
+
+    @Override
+    public boolean hasAnnotation(Class<? extends Annotation> annotationType) {
+        return this.getAnnotation(annotationType) != null;
     }
 
     public static class Builder {

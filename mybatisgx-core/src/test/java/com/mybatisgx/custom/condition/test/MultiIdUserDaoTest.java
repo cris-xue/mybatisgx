@@ -48,7 +48,7 @@ public class MultiIdUserDaoTest {
 
         MultiIdUser dbUser = multiIdUserDao.findById(user.getId());
         Assert.assertNotNull(dbUser);
-        Assert.assertEquals(user.getId(), dbUser.getId());
+        Assert.assertEquals(user.getId().getId1(), dbUser.getId().getId1());
     }
 
     @Test
@@ -62,7 +62,7 @@ public class MultiIdUserDaoTest {
 
         MultiIdUser dbUser = multiIdUserDao.findById(user.getId());
         Assert.assertNotNull(dbUser);
-        Assert.assertEquals(user.getId(), dbUser.getId());
+        Assert.assertEquals(user.getId().getId1(), dbUser.getId().getId1());
     }
 
     @Test

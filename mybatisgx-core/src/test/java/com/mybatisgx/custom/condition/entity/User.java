@@ -1,8 +1,8 @@
 package com.mybatisgx.custom.condition.entity;
 
 import com.mybatisgx.annotation.*;
+import com.mybatisgx.custom.condition.base.BaseEntity;
 import com.mybatisgx.custom.condition.test.LogicDeleteIdValueProcessor;
-import com.mybatisgx.entity.BaseEntity;
 
 @Entity
 @Table(name = "custom_condition_user")

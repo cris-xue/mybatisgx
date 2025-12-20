@@ -3,7 +3,7 @@ package com.mybatisgx.custom.condition.entity;
 import com.mybatisgx.annotation.EmbeddedId;
 import com.mybatisgx.annotation.Entity;
 import com.mybatisgx.annotation.Table;
-import com.mybatisgx.entity.MultiId;
+import com.mybatisgx.custom.condition.base.MultiId;
 
 @Entity
 @Table(name = "custom_condition_multi_id_user")

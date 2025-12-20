@@ -62,12 +62,12 @@ public class DeleteTemplateHandler {
         updateElement.addText(String.format("update %s", entityInfo.getTableName()));
         Element setElement = updateElement.addElement("set");
 
-        List<String> expressionList = this.getExpressionList(entityInfo);
+        List<String> expressionList = this.getLogicDeleteExpressionList(entityInfo);
         setElement.addText(StringUtils.join(expressionList, ", "));
         return updateElement;
     }
 
-    private List<String> getExpressionList(EntityInfo entityInfo) {
+    private List<String> getLogicDeleteExpressionList(EntityInfo entityInfo) {
         ColumnInfo logicDeleteColumnInfo = entityInfo.getLogicDeleteColumnInfo();
         LogicDeleteIdColumnInfo logicDeleteIdColumnInfo = (LogicDeleteIdColumnInfo) entityInfo.getLogicDeleteIdColumnInfo();
         LogicDelete logicDelete = logicDeleteColumnInfo.getLogicDelete();
@@ -75,7 +75,7 @@ public class DeleteTemplateHandler {
         List<String> expressionList = new ArrayList<>();
         String logicDeleteColumnValueExpression = String.format("%s = '%s'", logicDeleteColumnInfo.getDbColumnName(), logicDelete.hide());
         expressionList.add(logicDeleteColumnValueExpression);
-        if (logicDeleteColumnInfo != null) {
+        if (logicDeleteIdColumnInfo != null) {
             LogicDeleteId logicDeleteId = logicDeleteIdColumnInfo.getLogicDeleteId();
             String logicDeleteIdColumnColumnValueExpression = String.format("%s = #{%s}", logicDeleteIdColumnInfo.getDbColumnName(), logicDeleteId.value());
             expressionList.add(logicDeleteIdColumnColumnValueExpression);

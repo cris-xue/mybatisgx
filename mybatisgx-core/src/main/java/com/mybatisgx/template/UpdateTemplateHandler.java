@@ -104,26 +104,24 @@ public class UpdateTemplateHandler {
         }
 
         private void setValue(MethodInfo methodInfo, ColumnInfo columnInfo, List<String> paramValuePathItemList, Element trimElement) {
-            String dbColumnName = columnInfo.getDbColumnName();
             Lock lock = columnInfo.getLock();
-            LogicDelete logicDelete = columnInfo.getLogicDelete();
-
             if (lock != null) {
                 String valuePath = StringUtils.join(paramValuePathItemList, ".");
-                String columnValueExpression = String.format("%s = #{%s} + %s, ", dbColumnName, valuePath, lock.increment());
+                String columnValueExpression = String.format("%s = #{%s} + %s, ", columnInfo.getDbColumnName(), valuePath, lock.increment());
                 trimElement.addText(columnValueExpression);
                 return;
             }
 
+            LogicDelete logicDelete = columnInfo.getLogicDelete();
             if (logicDelete != null) {
-                String columnValueExpression = String.format("%s = '%s', ", dbColumnName, logicDelete.show());
+                String columnValueExpression = String.format("%s = '%s', ", columnInfo.getDbColumnName(), logicDelete.show());
                 trimElement.addText(columnValueExpression);
                 return;
             }
 
             String testExpression = this.getTestExpression(paramValuePathItemList);
             String valueExpression = this.getValueExpression(paramValuePathItemList, columnInfo);
-            Element trimOrIfElement = this.buildTrimOrIfElement(methodInfo.getDynamic(), trimElement, testExpression);
+            Element trimOrIfElement = this.buildTrimOrIfElement(methodInfo, columnInfo, trimElement, testExpression);
             trimOrIfElement.addText(String.format("%s = %s", columnInfo.getDbColumnName(), valueExpression));
         }
 
@@ -132,8 +130,8 @@ public class UpdateTemplateHandler {
             updateElement.add(whereElement);
         }
 
-        private Element buildTrimOrIfElement(Boolean dynamic, Element parentElement, String testExpression) {
-            if (dynamic) {
+        private Element buildTrimOrIfElement(MethodInfo methodInfo, ColumnInfo columnInfo, Element parentElement, String testExpression) {
+            if (methodInfo.getDynamic() && columnInfo.getGenerateValue() == null) {
                 Element ifElement = parentElement.addElement("if");
                 ifElement.addAttribute("test", testExpression);
                 return ifElement;

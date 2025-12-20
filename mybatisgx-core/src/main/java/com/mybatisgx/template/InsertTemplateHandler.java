@@ -76,7 +76,7 @@ public class InsertTemplateHandler {
             MethodParamInfo entityParamInfo = methodInfo.getEntityParamInfo();
             List<ColumnInfo> tableColumnInfoList = this.getTableColumnInfoList(entityParamInfo.getType());
             for (ColumnInfo columnInfo : tableColumnInfoList) {
-                if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class, ColumnInfo.class)) {
+                if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class, ColumnInfo.class, LogicDeleteIdColumnInfo.class)) {
                     List<ColumnInfo> columnInfoComposites = columnInfo.getComposites();
                     if (ObjectUtils.isEmpty(columnInfoComposites)) {
                         List<String> paramValuePathItemList = this.getParamValuePathItemList(entityParamInfo, columnInfo, null);
@@ -116,15 +116,14 @@ public class InsertTemplateHandler {
 
         private void setColumn(MethodInfo methodInfo, ColumnInfo columnInfo, List<String> paramValuePathItemList, Element dbTrimElement) {
             String dbColumnName = columnInfo.getDbColumnName();
-            LogicDelete logicDelete = columnInfo.getLogicDelete();
-            if (logicDelete != null) {
+            if (columnInfo.getLogicDelete() != null) {
                 String columnExpression = String.format("%s,", dbColumnName);
                 dbTrimElement.addText(columnExpression);
                 return;
             }
             String testExpression = this.getTestExpression(paramValuePathItemList);
             String columnExpression = String.format("%s,", dbColumnName);
-            Element trimOrIfElement = this.buildTrimOrIfElement(methodInfo.getDynamic(), dbTrimElement, testExpression);
+            Element trimOrIfElement = this.buildTrimOrIfElement(methodInfo, columnInfo, dbTrimElement, testExpression);
             trimOrIfElement.addText(columnExpression);
         }
 
@@ -135,7 +134,7 @@ public class InsertTemplateHandler {
                 throw new RuntimeException("实体表字段不存在");
             }
             for (ColumnInfo columnInfo : tableColumnInfoList) {
-                if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class, ColumnInfo.class)) {
+                if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class, ColumnInfo.class, LogicDeleteIdColumnInfo.class)) {
                     List<ColumnInfo> columnInfoComposites = columnInfo.getComposites();
                     if (ObjectUtils.isEmpty(columnInfoComposites)) {
                         List<String> paramValuePathItemList = this.getParamValuePathItemList(entityParamInfo, columnInfo, null);
@@ -175,23 +174,23 @@ public class InsertTemplateHandler {
         private void setValue(MethodInfo methodInfo, ColumnInfo columnInfo, List<String> paramValuePathItemList, Element trimElement) {
             LogicDelete logicDelete = columnInfo.getLogicDelete();
             if (logicDelete != null) {
-                String javaColumn = String.format("'%s'%s,", logicDelete.show(), buildTypeHandler(columnInfo));
-                trimElement.addText(javaColumn);
+                String valueExpression = String.format("'%s'%s,", logicDelete.show(), buildTypeHandler(columnInfo));
+                trimElement.addText(valueExpression);
                 return;
             }
             String testExpression = this.getTestExpression(paramValuePathItemList);
             String valueExpression = this.getValueExpression(paramValuePathItemList, columnInfo);
-            Element trimOrIfElement = this.buildTrimOrIfElement(methodInfo.getDynamic(), trimElement, testExpression);
+            Element trimOrIfElement = this.buildTrimOrIfElement(methodInfo, columnInfo, trimElement, testExpression);
             trimOrIfElement.addText(valueExpression);
         }
 
-        private Element buildTrimOrIfElement(Boolean dynamic, Element parentElement, String testExpression) {
-            if (dynamic) {
-                Element ifElement = parentElement.addElement("if");
+        private Element buildTrimOrIfElement(MethodInfo methodInfo, ColumnInfo columnInfo, Element trimElement, String testExpression) {
+            if (methodInfo.getDynamic() && columnInfo.getGenerateValue() == null) {
+                Element ifElement = trimElement.addElement("if");
                 ifElement.addAttribute("test", testExpression);
                 return ifElement;
             }
-            return parentElement;
+            return trimElement;
         }
 
         protected String getTestExpression(List<String> pathItemList) {

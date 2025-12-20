@@ -8,6 +8,7 @@ import com.mybatisgx.context.MethodInfoContextHolder;
 import com.mybatisgx.dao.Dao;
 import com.mybatisgx.dao.SimpleDao;
 import com.mybatisgx.exception.MethodNotConditionException;
+import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.model.*;
 import com.mybatisgx.utils.TypeUtils;
@@ -168,17 +169,25 @@ public class MethodInfoHandler {
                 // 获取实体管理器中是否方法参数类型，如果不存在，使用字段处理器对方法参数类型进行字段处理
                 Entity entity = methodParamType.getAnnotation(Entity.class);
                 if (entity != null) {
-                    EntityInfo entityInfo = EntityInfoContextHolder.get(methodParamType);
-                    List<ColumnInfo> columnInfoList = entityInfo.getColumnInfoList();
-                    methodParamInfo.setColumnInfoList(columnInfoList);
-                    entityParamInfo = methodParamInfo;
+                    if (entityParamInfo == null) {
+                        EntityInfo entityInfo = EntityInfoContextHolder.get(methodParamType);
+                        List<ColumnInfo> columnInfoList = entityInfo.getColumnInfoList();
+                        methodParamInfo.setColumnInfoList(columnInfoList);
+                        entityParamInfo = methodParamInfo;
+                    } else {
+                        throw new MybatisgxException("%s 方法实体参数类型或查询实体参数类型存在多个", method.getName());
+                    }
                 }
                 QueryEntity queryEntity = methodParamType.getAnnotation(QueryEntity.class);
                 if (queryEntity != null) {
-                    Map<Type, Class<?>> typeParameterMap = mapperInfo.getEntityInfo().getTypeParameterMap();
-                    List<ColumnInfo> columnInfoList = columnInfoHandler.getColumnInfoList(methodParamType, typeParameterMap);
-                    methodParamInfo.setColumnInfoList(columnInfoList);
-                    entityParamInfo = methodParamInfo;
+                    if (entityParamInfo == null) {
+                        Map<Type, Class<?>> typeParameterMap = mapperInfo.getEntityInfo().getTypeParameterMap();
+                        List<ColumnInfo> columnInfoList = columnInfoHandler.getColumnInfoList(methodParamType, typeParameterMap);
+                        methodParamInfo.setColumnInfoList(columnInfoList);
+                        entityParamInfo = methodParamInfo;
+                    } else {
+                        throw new MybatisgxException("%s 方法实体参数类型或查询实体参数类型存在多个", method.getName());
+                    }
                 }
             }
             Class<?> collectionType = this.getCollectionType(parameter.getType());

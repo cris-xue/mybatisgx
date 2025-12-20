@@ -12,22 +12,11 @@ public class DefaultValueProcessContext implements ValueProcessContext {
     private Object fieldValue;
     private MetaObject entityMetaObject;
 
-    @Override
-    public void init(ValueProcessPhase phase, FieldMeta fieldMeta, Object fieldValue, MetaObject entityMetaObject) {
+    public DefaultValueProcessContext(ValueProcessPhase phase, FieldMeta fieldMeta, Object fieldValue, MetaObject entityMetaObject) {
         this.phase = phase;
         this.fieldMeta = fieldMeta;
         this.fieldValue = fieldValue;
         this.entityMetaObject = entityMetaObject;
-    }
-
-    @Override
-    public Object getFieldValueAndClear() {
-        Object tempFieldValue = this.fieldValue;
-        this.phase = null;
-        this.fieldMeta = null;
-        this.fieldValue = null;
-        this.entityMetaObject = null;
-        return tempFieldValue;
     }
 
     @Override

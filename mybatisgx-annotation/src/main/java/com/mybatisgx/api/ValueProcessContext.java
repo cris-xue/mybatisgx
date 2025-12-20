@@ -1,27 +1,11 @@
 package com.mybatisgx.api;
 
-import org.apache.ibatis.reflection.MetaObject;
-
 /**
  * 字段值处理上下文
  * @author 薛承城
  * @date 2025/12/20 17:38
  */
 public interface ValueProcessContext {
-
-    /**
-     * 初始化上下文数据
-     * @param phase
-     * @param fieldMeta
-     * @param originalValue
-     * @param entityMetaObject
-     */
-    void init(ValueProcessPhase phase, FieldMeta fieldMeta, Object originalValue, MetaObject entityMetaObject);
-
-    /**
-     * 清理上下文数据
-     */
-    Object getFieldValueAndClear();
 
     /**
      * 获取数据处理阶段

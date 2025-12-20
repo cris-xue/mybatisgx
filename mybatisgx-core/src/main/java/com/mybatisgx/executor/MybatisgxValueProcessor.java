@@ -47,12 +47,12 @@ public class MybatisgxValueProcessor {
             return parameterObject;
         }
 
-        ValueProcessContext context = new DefaultValueProcessContext();
+
         Object parameterObjectNew = this.getParameterObject(methodInfo, parameterObject);
         ValueProcessPhase phase = this.getValueProcessPhase(mappedStatement, methodInfo);
         for (ColumnInfo columnInfo : methodInfo.getEntityInfo().getGenerateValueColumnInfoList()) {
             AbstractFieldValueHandler fieldValueHandler = this.VALUE_HANDLER_MAP.get(columnInfo.getClass());
-            fieldValueHandler.handle(methodInfo, phase, columnInfo, parameterObjectNew, boundSql, context);
+            fieldValueHandler.handle(methodInfo, phase, columnInfo, parameterObjectNew, boundSql);
         }
         return parameterObjectNew;
     }
@@ -84,10 +84,10 @@ public class MybatisgxValueProcessor {
 
     private static abstract class AbstractFieldValueHandler {
 
-        public abstract void handle(MethodInfo methodInfo, ValueProcessPhase phase, ColumnInfo columnInfo, Object parameterObject, BoundSql boundSql, ValueProcessContext context);
+        public abstract void handle(MethodInfo methodInfo, ValueProcessPhase phase, ColumnInfo columnInfo, Object parameterObject, BoundSql boundSql);
 
-        protected Object valueHandle(ValueProcessPhase phase, ColumnInfo columnInfo, Object originalValue, MetaObject entityMetaObject, ValueProcessContext context) {
-            context.init(phase, columnInfo, originalValue, entityMetaObject);
+        protected Object valueHandle(ValueProcessPhase phase, ColumnInfo columnInfo, Object originalValue, MetaObject entityMetaObject) {
+            ValueProcessContext context = new DefaultValueProcessContext(phase, columnInfo, originalValue, entityMetaObject);
             List<ValueProcessor> valueProcessors = DaoMethodManager.get(columnInfo.getGenerateValue().value());
             for (ValueProcessor valueProcessor : valueProcessors) {
                 if (valueProcessor.supports(columnInfo)) {
@@ -97,18 +97,18 @@ public class MybatisgxValueProcessor {
                     }
                 }
             }
-            return context.getFieldValueAndClear();
+            return context.getFieldValue();
         }
     }
 
     private static class LogicDeleteIdFieldValueHandler extends AbstractFieldValueHandler {
 
         @Override
-        public void handle(MethodInfo methodInfo, ValueProcessPhase phase, ColumnInfo columnInfo, Object parameterObject, BoundSql boundSql, ValueProcessContext context) {
+        public void handle(MethodInfo methodInfo, ValueProcessPhase phase, ColumnInfo columnInfo, Object parameterObject, BoundSql boundSql) {
             EntityInfo entityInfo = methodInfo.getEntityInfo();
             LogicDeleteIdColumnInfo logicDeleteIdColumnInfo = (LogicDeleteIdColumnInfo) entityInfo.getLogicDeleteIdColumnInfo();
             if (logicDeleteIdColumnInfo != null) {
-                Object value = this.valueHandle(phase, columnInfo, null, null, context);
+                Object value = this.valueHandle(phase, columnInfo, null, null);
                 LogicDeleteId logicDeleteId = logicDeleteIdColumnInfo.getLogicDeleteId();
                 boundSql.setAdditionalParameter(logicDeleteId.value(), value);
             }
@@ -118,7 +118,7 @@ public class MybatisgxValueProcessor {
     private static class CommonFieldValueHandler extends AbstractFieldValueHandler {
 
         @Override
-        public void handle(MethodInfo methodInfo, ValueProcessPhase phase, ColumnInfo columnInfo, Object parameterObject, BoundSql boundSql, ValueProcessContext context) {
+        public void handle(MethodInfo methodInfo, ValueProcessPhase phase, ColumnInfo columnInfo, Object parameterObject, BoundSql boundSql) {
             EntityInfo parameterEntityInfo = EntityInfoContextHolder.get(parameterObject.getClass());
             if (parameterEntityInfo == null) {
                 return;
@@ -126,7 +126,7 @@ public class MybatisgxValueProcessor {
             MetaObject metaObject = SystemMetaObject.forObject(parameterObject);
             String javaColumnNamePath = columnInfo.getJavaColumnNamePath();
             Object fieldValue = metaObject.getValue(javaColumnNamePath);
-            Object value = this.valueHandle(phase, columnInfo, fieldValue, metaObject, context);
+            Object value = this.valueHandle(phase, columnInfo, fieldValue, metaObject);
             metaObject.setValue(javaColumnNamePath, value);
         }
     }

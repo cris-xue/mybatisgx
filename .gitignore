@@ -20,3 +20,6 @@ doc/*
 # maven
 *.releaseBackup
 release.properties
+
+# other
+.lingma

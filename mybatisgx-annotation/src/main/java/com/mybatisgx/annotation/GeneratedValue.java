@@ -1,6 +1,6 @@
 package com.mybatisgx.annotation;
 
-import com.mybatisgx.api.GeneratedValueHandler;
+import com.mybatisgx.api.ValueProcessor;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -18,26 +18,8 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 public @interface GeneratedValue {
 
     /**
-     * 字段值生成处理器
+     * 字段值生成处理器，同一可以设置多个处理器，会按顺序执行，并且一个阶段也支持多个处理
      * @return
      */
-    Class<? extends GeneratedValueHandler<?>> value();
-
-    /**
-     * 是否插入时生成
-     * @return
-     */
-    boolean insert() default false;
-
-    /**
-     * 是否更新时生成
-     * @return
-     */
-    boolean update() default false;
-
-    /**
-     * 是否逻辑删除时生成
-     * @return
-     */
-    boolean logicDelete() default false;
+    Class<? extends ValueProcessor> value()[];
 }

@@ -15,12 +15,12 @@ public class DaoMethodManager {
         ValueProcessor valueProcessor;
         try {
             valueProcessor = clazz.newInstance();
+            VALUE_PROCESSOR_MAP.put(clazz, valueProcessor);
         } catch (InstantiationException e) {
             throw new RuntimeException(e);
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
-        VALUE_PROCESSOR_MAP.put(clazz, valueProcessor);
     }
 
     public static void register(Class<ValueProcessor>[] classes) {

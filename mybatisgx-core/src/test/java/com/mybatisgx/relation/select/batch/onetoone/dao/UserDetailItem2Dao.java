@@ -6,5 +6,5 @@ import com.mybatisgx.relation.select.batch.onetoone.entity.UserDetailItem2;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
-public interface UserDetailItem2Dao extends SimpleDao<UserDetailItem2, MultiId> {
+public interface UserDetailItem2Dao extends SimpleDao<UserDetailItem2, UserDetailItem2, MultiId> {
 }

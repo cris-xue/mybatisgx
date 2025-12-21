@@ -6,5 +6,5 @@ import com.mybatisgx.relation.select.batch.onetomany.entity.Org;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
-public interface OrgDao extends SimpleDao<Org, MultiId> {
+public interface OrgDao extends SimpleDao<Org, Org, MultiId> {
 }

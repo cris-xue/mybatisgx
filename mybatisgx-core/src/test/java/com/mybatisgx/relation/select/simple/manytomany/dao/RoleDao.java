@@ -5,5 +5,5 @@ import com.mybatisgx.relation.select.simple.manytomany.entity.Role;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
-public interface RoleDao extends SimpleDao<Role, Long> {
+public interface RoleDao extends SimpleDao<Role, Role, Long> {
 }

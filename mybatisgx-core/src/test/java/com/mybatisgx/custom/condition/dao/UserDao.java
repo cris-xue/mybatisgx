@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Mapper
-public interface UserDao extends SimpleDao<User, Long> {
+public interface UserDao extends SimpleDao<User, UserQuery, Long> {
 
     @Dynamic
     int insertNew(User user);

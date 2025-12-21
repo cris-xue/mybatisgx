@@ -6,5 +6,5 @@ import com.mybatisgx.relation.select.join.onetoone.entity.User;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
-public interface UserDao extends SimpleDao<User, MultiId> {
+public interface UserDao extends SimpleDao<User, User, MultiId> {
 }

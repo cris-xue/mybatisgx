@@ -199,7 +199,7 @@ public class UserDaoTest {
         int insertCount = userDao.insert(user);
         Assert.assertEquals(1, insertCount);
 
-        User queryUser = new User();
+        UserQuery queryUser = new UserQuery();
         queryUser.setId(user.getId());
         User dbUser = userDao.findOne(queryUser);
         Assert.assertNotNull(dbUser);
@@ -209,7 +209,7 @@ public class UserDaoTest {
     @Test
     public void testFindPage() {
         Pageable pageable = new Pageable(1, 10);
-        Page<User> page2 = userDao.findPage(new User(), pageable);
+        Page<User> page2 = userDao.findPage(new UserQuery(), pageable);
         Assert.assertNotNull(page2);
     }
 
@@ -217,7 +217,7 @@ public class UserDaoTest {
     public void testFindPageParamNotNull() {
         FixtureGenerator fixtureGenerator = new FixtureGenerator();
         fixtureGenerator.configure().ignoreCyclicReferences();
-        User user = fixtureGenerator.createRandomized(User.class);
+        UserQuery user = fixtureGenerator.createRandomized(UserQuery.class);
         Pageable pageable = new Pageable(1, 10);
         userDao.findPage(user, pageable);
     }
@@ -226,7 +226,7 @@ public class UserDaoTest {
     public void testFindList() {
         FixtureGenerator fixtureGenerator = new FixtureGenerator();
         fixtureGenerator.configure().ignoreCyclicReferences();
-        User user = fixtureGenerator.createRandomized(User.class);
+        UserQuery user = fixtureGenerator.createRandomized(UserQuery.class);
         userDao.findList(user);
     }
 

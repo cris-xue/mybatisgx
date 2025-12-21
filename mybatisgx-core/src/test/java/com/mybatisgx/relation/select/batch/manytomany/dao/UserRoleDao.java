@@ -5,5 +5,5 @@ import com.mybatisgx.relation.select.batch.manytomany.entity.UserRole;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
-public interface UserRoleDao extends SimpleDao<UserRole, Long> {
+public interface UserRoleDao extends SimpleDao<UserRole, UserRole, Long> {
 }

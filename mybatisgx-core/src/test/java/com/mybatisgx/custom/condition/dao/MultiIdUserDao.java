@@ -6,5 +6,5 @@ import com.mybatisgx.dao.SimpleDao;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
-public interface MultiIdUserDao extends SimpleDao<MultiIdUser, MultiId> {
+public interface MultiIdUserDao extends SimpleDao<MultiIdUser, MultiIdUser, MultiId> {
 }

@@ -6,7 +6,7 @@ import com.mybatisgx.annotation.*;
 import com.mybatisgx.context.EntityInfoContextHolder;
 import com.mybatisgx.context.MethodInfoContextHolder;
 import com.mybatisgx.dao.Dao;
-import com.mybatisgx.dao.SimpleDao;
+import com.mybatisgx.dao.SelectDao;
 import com.mybatisgx.exception.MethodNotConditionException;
 import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
@@ -223,7 +223,7 @@ public class MethodInfoHandler {
 
     /**
      * 条件实体只有非SimpleDao方法才会处理，SimpleDao只有findOne、findList会特殊处理。
-     * 一个方法只允许定义一个条件实体，如果定义多个，只取最后一个条件实体。条件实体会把所有的方法名条件覆盖掉。
+     * 一个方法只允许定义一个实体参数（领域实体+查询实体），如果定义多个，会报错。
      * 实体作为条件只支持查询方法，修改和删除不支持。
      * @param entityInfo
      * @param methodInfo
@@ -231,13 +231,12 @@ public class MethodInfoHandler {
      */
     public void methodNameParse(EntityInfo entityInfo, MethodInfo methodInfo, Class<?> methodInterfaceClass) {
         mybatisgxSyntaxProcessor.execute(entityInfo, methodInfo, null, ConditionOriginType.METHOD_NAME, methodInfo.getMethodName());
-        // mybatisgxSyntaxHandler.execute(entityInfo, methodInfo, null, ConditionOriginType.METHOD_NAME, methodInfo.getMethodName());
         if (methodInfo.getSqlCommandType() != SqlCommandType.SELECT) {
             return;
         }
-        if (methodInterfaceClass == SimpleDao.class) {
+        if (methodInterfaceClass == SelectDao.class) {
             String methodName = methodInfo.getMethodName();
-            if ("findOne".equals(methodName) || "findList".equals(methodName) || "findPage".equals(methodName)) {
+            if (Arrays.asList("findOne", "findList", "findPage").contains(methodName)) {
                 MethodParamInfo entityParamInfo = methodInfo.getEntityParamInfo();
                 if (entityParamInfo != null) {
                     String entityCondition = this.entityCondition(methodInfo, entityParamInfo);

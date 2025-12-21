@@ -76,10 +76,9 @@ public class MethodInfoHandler {
 
     private void processMethod(Method[] methods, MapperInfo mapperInfo, Map<String, MethodInfo> methodInfoMap) {
         for (Method method : methods) {
-            Class<?> methodDeclaringClass = method.getDeclaringClass();
             String methodName = method.getName();
             if (methodInfoMap.containsKey(methodName)) {
-                throw new RuntimeException("dao接口方法无法重载，请修改方法名" + methodName);
+                throw new MybatisgxException("dao接口方法无法重载，请修改方法名: %s", methodName);
             }
             String namespaceMethodName = this.getNamespaceMethodName(mapperInfo, methodName);
             if (this.configuration.hasStatement(namespaceMethodName)) {
@@ -101,7 +100,8 @@ public class MethodInfoHandler {
             methodInfo.setMethodReturnInfo(methodReturnInfo);
 
             // 方法名解析
-            this.methodNameParse(mapperInfo.getEntityInfo(), methodInfo, methodDeclaringClass);
+            Class<?> methodInterfaceClass = method.getDeclaringClass();
+            this.methodNameParse(mapperInfo.getEntityInfo(), methodInfo, methodInterfaceClass);
             // 方法条件解析
             Sql sql = method.getAnnotation(Sql.class);
             if (sql != null) {
@@ -229,15 +229,15 @@ public class MethodInfoHandler {
      * 实体作为条件只支持查询方法，修改和删除不支持。
      * @param entityInfo
      * @param methodInfo
-     * @param methodDeclaringClass
+     * @param methodInterfaceClass
      */
-    public void methodNameParse(EntityInfo entityInfo, MethodInfo methodInfo, Class<?> methodDeclaringClass) {
+    public void methodNameParse(EntityInfo entityInfo, MethodInfo methodInfo, Class<?> methodInterfaceClass) {
         mybatisgxSyntaxProcessor.execute(entityInfo, methodInfo, null, ConditionOriginType.METHOD_NAME, methodInfo.getMethodName());
         // mybatisgxSyntaxHandler.execute(entityInfo, methodInfo, null, ConditionOriginType.METHOD_NAME, methodInfo.getMethodName());
         if (methodInfo.getSqlCommandType() != SqlCommandType.SELECT) {
             return;
         }
-        if (methodDeclaringClass == SimpleDao.class) {
+        if (methodInterfaceClass == SimpleDao.class) {
             String methodName = methodInfo.getMethodName();
             if ("findOne".equals(methodName) || "findList".equals(methodName) || "findPage".equals(methodName)) {
                 MethodParamInfo entityParamInfo = methodInfo.getEntityParamInfo();

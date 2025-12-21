@@ -7,6 +7,6 @@ package com.mybatisgx.annotation;
  */
 public enum SqlSyntaxType {
 
-    HQL,           // HQL查询: FROM User u WHERE u.name LIKE ?
+    OBJECT_LANGUAGE,           // QL查询: FROM User u WHERE u.name LIKE ?
     METHOD_NAME    // 方法名衍生（默认）
 }

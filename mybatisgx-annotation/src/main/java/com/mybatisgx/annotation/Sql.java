@@ -22,5 +22,5 @@ public @interface Sql {
      * sql语法类型
      * @return
      */
-    SqlSyntaxType sqlSyntaxType() default SqlSyntaxType.METHOD_NAME;
+    SqlSyntaxType type() default SqlSyntaxType.METHOD_NAME;
 }

@@ -20,7 +20,7 @@ import java.util.List;
 
 /**
  * create by: 薛承城
- * description: CustomMybatisAutoConfiguration是完全使用的spring boot mybatis的源码，仅仅只在98行替换了自定义CustomSqlSessionFactoryBean
+ * description: mybatisgx自动配置类
  * create time: 2019/5/9 17:54
  */
 @Import({MybatisgxConfiguration.class})

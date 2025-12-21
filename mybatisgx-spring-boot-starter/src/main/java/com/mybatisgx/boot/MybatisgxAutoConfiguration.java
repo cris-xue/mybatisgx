@@ -1,6 +1,5 @@
 package com.mybatisgx.boot;
 
-import com.mybatisgx.boot.converter.MetaObjectHandlerConverter;
 import com.mybatisgx.ext.session.defaults.MybatisgxDefaultSqlSessionFactory;
 import org.apache.ibatis.mapping.DatabaseIdProvider;
 import org.apache.ibatis.plugin.Interceptor;
@@ -24,7 +23,7 @@ import java.util.List;
  * description: CustomMybatisAutoConfiguration是完全使用的spring boot mybatis的源码，仅仅只在98行替换了自定义CustomSqlSessionFactoryBean
  * create time: 2019/5/9 17:54
  */
-@Import({MetaObjectHandlerConverter.class, MybatisgxConfiguration.class})
+@Import({MybatisgxConfiguration.class})
 @EnableConfigurationProperties(MybatisgxProperties.class)
 public class MybatisgxAutoConfiguration extends MybatisAutoConfiguration {
 

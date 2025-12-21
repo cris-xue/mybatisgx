@@ -4,8 +4,6 @@ import com.mybatisgx.annotation.BatchData;
 import com.mybatisgx.annotation.BatchOperation;
 import com.mybatisgx.annotation.BatchSize;
 import com.mybatisgx.annotation.Dynamic;
-import com.mybatisgx.executor.page.Page;
-import com.mybatisgx.executor.page.Pageable;
 import org.apache.ibatis.annotations.Param;
 
 import java.io.Serializable;
@@ -40,13 +38,4 @@ public interface SimpleDao<ENTITY, ID extends Serializable> extends Dao {
     int updateByIdSelective(ENTITY entity);
 
     ENTITY findById(@Param("id") ID id);
-
-    @Dynamic
-    ENTITY findOne(ENTITY entity);
-
-    @Dynamic
-    List<ENTITY> findList(ENTITY entity);
-
-    @Dynamic
-    Page<ENTITY> findPage(ENTITY entity, Pageable pageable);
 }

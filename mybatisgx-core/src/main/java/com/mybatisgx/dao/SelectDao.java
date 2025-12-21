@@ -11,14 +11,14 @@ import java.util.List;
  * @author 薛承城
  * @date 2025/12/21 14:19
  */
-public interface SelectDao<ENTITY> extends Dao {
+public interface SelectDao<QUERY_ENTITY> extends Dao {
 
     @Dynamic
-    ENTITY findOne(ENTITY entity);
+    QUERY_ENTITY findOne(QUERY_ENTITY entity);
 
     @Dynamic
-    List<ENTITY> findList(ENTITY entity);
+    List<QUERY_ENTITY> findList(QUERY_ENTITY entity);
 
     @Dynamic
-    Page<ENTITY> findPage(ENTITY entity, Pageable pageable);
+    Page<QUERY_ENTITY> findPage(QUERY_ENTITY entity, Pageable pageable);
 }

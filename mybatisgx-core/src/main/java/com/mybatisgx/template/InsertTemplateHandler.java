@@ -38,9 +38,8 @@ public class InsertTemplateHandler {
         Element mapperElement = document.addElement("mapper");
         Element insertElement = mapperElement.addElement("insert");
         insertElement.addAttribute("id", methodInfo.getMethodName());
-        /*String keyProperty = insertHandler.getKeyProperty(methodInfo);
-        insertElement.addAttribute("keyProperty", keyProperty);
-        insertElement.addAttribute("useGeneratedKeys", "true");*/
+        insertElement.addAttribute("keyProperty", insertHandler.getKeyProperty(methodInfo));
+        insertElement.addAttribute("useGeneratedKeys", "true");
         insertElement.addText(String.format("insert into %s", mapperInfo.getEntityInfo().getTableName()));
 
         Element dbTrimElement = insertElement.addElement("trim");
@@ -236,20 +235,20 @@ public class InsertTemplateHandler {
 
         @Override
         String getKeyProperty(MethodInfo methodInfo) {
-            MethodParamInfo entityParamInfo = methodInfo.getEntityParamInfo();
-            List<String> argValeueCommonPathItemList = Lists.newArrayList(entityParamInfo.getArgValueCommonPathItemList());
             List<String> keyPropertyList = new ArrayList();
+            MethodParamInfo entityParamInfo = methodInfo.getEntityParamInfo();
             EntityInfo entityInfo = EntityInfoContextHolder.get(entityParamInfo.getType());
             IdColumnInfo idColumnInfo = entityInfo.getIdColumnInfo();
             List<ColumnInfo> idColumnComposites = idColumnInfo.getComposites();
             if (ObjectUtils.isEmpty(idColumnComposites)) {
+                List<String> argValeueCommonPathItemList = Lists.newArrayList(entityParamInfo.getArgValueCommonPathItemList());
                 argValeueCommonPathItemList.add(idColumnInfo.getJavaColumnName());
                 String keyProperty = StringUtils.join(argValeueCommonPathItemList, ".");
                 keyPropertyList.add(keyProperty);
             } else {
                 for (ColumnInfo idColumnComposite : idColumnComposites) {
-                    argValeueCommonPathItemList.add(idColumnInfo.getJavaColumnName());
-                    argValeueCommonPathItemList.add(idColumnComposite.getJavaColumnName());
+                    List<String> argValeueCommonPathItemList = Lists.newArrayList(entityParamInfo.getArgValueCommonPathItemList());
+                    argValeueCommonPathItemList.addAll(idColumnComposite.getJavaColumnNamePathList());
                     String keyProperty = StringUtils.join(argValeueCommonPathItemList, ".");
                     keyPropertyList.add(keyProperty);
                 }
@@ -277,18 +276,22 @@ public class InsertTemplateHandler {
 
         @Override
         String getKeyProperty(MethodInfo methodInfo) {
-            MethodParamInfo entityParamInfo = methodInfo.getEntityParamInfo();
             List<String> keyPropertyList = new ArrayList();
+            MethodParamInfo entityParamInfo = methodInfo.getEntityParamInfo();
             if (entityParamInfo.getBatchData()) {
                 EntityInfo entityInfo = EntityInfoContextHolder.get(entityParamInfo.getType());
                 IdColumnInfo idColumnInfo = entityInfo.getIdColumnInfo();
                 List<ColumnInfo> idColumnComposites = idColumnInfo.getComposites();
                 if (ObjectUtils.isEmpty(idColumnComposites)) {
-                    String keyProperty = String.format("%s.%s", entityParamInfo.getBatchItemName(), idColumnInfo.getJavaColumnName());
+                    List<String> argValeueCommonPathItemList = Lists.newArrayList(entityParamInfo.getBatchItemName());
+                    argValeueCommonPathItemList.add(idColumnInfo.getJavaColumnName());
+                    String keyProperty = StringUtils.join(argValeueCommonPathItemList, ".");
                     keyPropertyList.add(keyProperty);
                 } else {
                     for (ColumnInfo idColumnComposite : idColumnComposites) {
-                        String keyProperty = String.format("%s.%s.%s", entityParamInfo.getBatchItemName(), idColumnInfo.getJavaColumnName(), idColumnComposite.getJavaColumnName());
+                        List<String> argValeueCommonPathItemList = Lists.newArrayList(entityParamInfo.getBatchItemName());
+                        argValeueCommonPathItemList.addAll(idColumnComposite.getJavaColumnNamePathList());
+                        String keyProperty = StringUtils.join(argValeueCommonPathItemList, ".");
                         keyPropertyList.add(keyProperty);
                     }
                 }

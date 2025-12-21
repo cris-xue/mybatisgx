@@ -1,10 +1,12 @@
 package com.mybatisgx.custom.condition.entity;
 
 import com.mybatisgx.annotation.QueryEntity;
+import com.mybatisgx.annotation.Table;
 
 import java.util.List;
 
 @QueryEntity
+@Table(name = "custom_condition_user")
 public class UserQuery extends User {
 
     private String nameLike;

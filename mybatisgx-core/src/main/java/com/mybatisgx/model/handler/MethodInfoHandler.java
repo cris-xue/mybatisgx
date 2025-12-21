@@ -171,8 +171,7 @@ public class MethodInfoHandler {
                 if (entity != null) {
                     if (entityParamInfo == null) {
                         EntityInfo entityInfo = EntityInfoContextHolder.get(methodParamType);
-                        List<ColumnInfo> columnInfoList = entityInfo.getColumnInfoList();
-                        methodParamInfo.setColumnInfoList(columnInfoList);
+                        methodParamInfo.setColumnInfoList(entityInfo.getColumnInfoList());
                         entityParamInfo = methodParamInfo;
                     } else {
                         throw new MybatisgxException("%s 方法实体参数类型或查询实体参数类型存在多个", method.getName());
@@ -181,9 +180,8 @@ public class MethodInfoHandler {
                 QueryEntity queryEntity = methodParamType.getAnnotation(QueryEntity.class);
                 if (queryEntity != null) {
                     if (entityParamInfo == null) {
-                        Map<Type, Class<?>> typeParameterMap = mapperInfo.getEntityInfo().getTypeParameterMap();
-                        List<ColumnInfo> columnInfoList = columnInfoHandler.getColumnInfoList(methodParamType, typeParameterMap);
-                        methodParamInfo.setColumnInfoList(columnInfoList);
+                        EntityInfo entityInfo = EntityInfoContextHolder.get(methodParamType);
+                        methodParamInfo.setColumnInfoList(entityInfo.getColumnInfoList());
                         entityParamInfo = methodParamInfo;
                     } else {
                         throw new MybatisgxException("%s 方法实体参数类型或查询实体参数类型存在多个", method.getName());
@@ -463,6 +461,8 @@ public class MethodInfoHandler {
             return mapperInfo.getIdClass();
         } else if ("ENTITY".equals(actualTypeName)) {
             return mapperInfo.getEntityClass();
+        } else if ("QUERY_ENTITY".equals(actualTypeName)) {
+            return mapperInfo.getQueryEntityClass();
         } else {
             return (Class<?>) actualType;
         }

@@ -1,6 +1,7 @@
 package com.mybatisgx.context;
 
 import com.mybatisgx.annotation.Entity;
+import com.mybatisgx.annotation.QueryEntity;
 import com.mybatisgx.dao.Dao;
 import com.mybatisgx.executor.keygen.KeyGenerator;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
@@ -103,11 +104,11 @@ public class MybatisgxContextLoader {
 
     private void processEntity(Class<?> clazz) {
         Entity entity = clazz.getAnnotation(Entity.class);
-        if (entity == null) {
-            return;
+        QueryEntity queryEntity = clazz.getAnnotation(QueryEntity.class);
+        if (entity != null || queryEntity != null) {
+            EntityInfo entityInfo = entityInfoHandler.execute(clazz);
+            EntityInfoContextHolder.set(clazz, entityInfo);
         }
-        EntityInfo entityInfo = entityInfoHandler.execute(clazz);
-        EntityInfoContextHolder.set(clazz, entityInfo);
     }
 
     private void processEntityRelation() {

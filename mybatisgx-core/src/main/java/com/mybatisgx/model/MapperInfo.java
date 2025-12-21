@@ -21,6 +21,10 @@ public class MapperInfo {
      */
     private Class<?> entityClass;
     /**
+     * 查询实体类型【SimpleDao的queryEntity类型，不能和实体中的queryEntity合并，在启动阶段需要使用两者进行对比，如果不一致表示写错了，需要提示】
+     */
+    private Class<?> queryEntityClass;
+    /**
      * dao类型
      */
     private Class<?> daoClass;
@@ -32,6 +36,10 @@ public class MapperInfo {
      * 实体信息
      */
     private EntityInfo entityInfo;
+    /**
+     * 查询实体信息
+     */
+    private EntityInfo queryEntityInfo;
     /**
      * 方法信息列表
      */
@@ -61,6 +69,14 @@ public class MapperInfo {
         this.entityClass = entityClass;
     }
 
+    public Class<?> getQueryEntityClass() {
+        return queryEntityClass;
+    }
+
+    public void setQueryEntityClass(Class<?> queryEntityClass) {
+        this.queryEntityClass = queryEntityClass;
+    }
+
     public Class<?> getDaoClass() {
         return daoClass;
     }
@@ -87,6 +103,14 @@ public class MapperInfo {
 
     public void setEntityInfo(EntityInfo entityInfo) {
         this.entityInfo = entityInfo;
+    }
+
+    public EntityInfo getQueryEntityInfo() {
+        return queryEntityInfo;
+    }
+
+    public void setQueryEntityInfo(EntityInfo queryEntityInfo) {
+        this.queryEntityInfo = queryEntityInfo;
     }
 
     public List<MethodInfo> getMethodInfoList() {

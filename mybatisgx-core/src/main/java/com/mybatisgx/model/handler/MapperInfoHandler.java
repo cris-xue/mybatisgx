@@ -5,7 +5,6 @@ import com.mybatisgx.context.MapperInfoContextHolder;
 import com.mybatisgx.context.MybatisgxObjectFactory;
 import com.mybatisgx.dao.Dao;
 import com.mybatisgx.dao.SimpleDao;
-import com.mybatisgx.model.EntityInfo;
 import com.mybatisgx.model.MapperInfo;
 import com.mybatisgx.model.MethodInfo;
 import org.apache.commons.lang3.reflect.TypeUtils;
@@ -34,8 +33,8 @@ public class MapperInfoHandler {
 
     public MapperInfo execute(Class<?> daoInterface) {
         MapperInfo mapperInfo = this.getMapperInfo(daoInterface);
-        EntityInfo entityInfo = EntityInfoContextHolder.get(mapperInfo.getEntityClass());
-        mapperInfo.setEntityInfo(entityInfo);
+        mapperInfo.setEntityInfo(EntityInfoContextHolder.get(mapperInfo.getEntityClass()));
+        mapperInfo.setQueryEntityInfo(EntityInfoContextHolder.get(mapperInfo.getQueryEntityClass()));
 
         MethodInfoHandler methodInfoHandler = MybatisgxObjectFactory.get(MethodInfoHandler.class);
         List<MethodInfo> methodInfoList = methodInfoHandler.execute(mapperInfo, daoInterface);
@@ -45,12 +44,23 @@ public class MapperInfoHandler {
 
     public MapperInfo getMapperInfo(Class<?> daoInterface) {
         Type[] daoInterfaceParams = this.getDaoInterfaceParams(daoInterface);
-        Class<?> idClass = (Class<?>) daoInterfaceParams[1];
-        Class<?> entityClass = (Class<?>) daoInterfaceParams[0];
+        Class<?> idClass = null;
+        Class<?> entityClass = null;
+        Class<?> queryEntityClass = null;
+        if (daoInterfaceParams.length == 2) {
+            idClass = (Class<?>) daoInterfaceParams[1];
+            entityClass = (Class<?>) daoInterfaceParams[0];
+        }
+        if (daoInterfaceParams.length == 3) {
+            idClass = (Class<?>) daoInterfaceParams[2];
+            queryEntityClass = (Class<?>) daoInterfaceParams[1];
+            entityClass = (Class<?>) daoInterfaceParams[0];
+        }
 
         MapperInfo mapperInfo = new MapperInfo();
         mapperInfo.setIdClass(idClass);
         mapperInfo.setEntityClass(entityClass);
+        mapperInfo.setQueryEntityClass(queryEntityClass);
         mapperInfo.setDaoClass(daoInterface);
         mapperInfo.setNamespace(daoInterface.getName());
         return mapperInfo;

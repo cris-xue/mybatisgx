@@ -1,8 +1,8 @@
 package com.mybatisgx.spring;
 
-import com.mybatisgx.api.GeneratedValueHandler;
 import com.mybatisgx.context.MybatisgxContextLoader;
 import com.mybatisgx.dao.Dao;
+import com.mybatisgx.executor.keygen.KeyGenerator;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.template.StatementTemplateHandler;
 import org.apache.ibatis.session.Configuration;
@@ -35,7 +35,7 @@ public class SqlSessionFactoryBeanPostProcessor implements BeanPostProcessor {
     private final String[] entityBasePackages;
     private final String[] daoBasePackages;
     @Autowired
-    private GeneratedValueHandler idGeneratedValueHandler;
+    private KeyGenerator keyGenerator;
 
     public SqlSessionFactoryBeanPostProcessor(String[] entityBasePackages, String[] daoBasePackages) {
         this.entityBasePackages = entityBasePackages;
@@ -62,7 +62,7 @@ public class SqlSessionFactoryBeanPostProcessor implements BeanPostProcessor {
                         entityBasePackages,
                         daoBasePackages,
                         resourceList,
-                        this.idGeneratedValueHandler,
+                        this.keyGenerator,
                         (MybatisgxConfiguration) configuration
                 );
                 mybatisgxContextLoader.load();

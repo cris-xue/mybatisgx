@@ -13,19 +13,19 @@ import java.lang.annotation.*;
 public @interface JoinTable {
 
     /**
-     * 关联表名
+     * 中间表表名
      * @return
      */
     String name();
 
     /**
-     * 当前实体外键
+     * 中间表中，指向当前实体表的外键
      * @return
      */
     JoinColumn[] joinColumns() default {};
 
     /**
-     * 关联实体外键
+     * 中间表中，指向对端实体表的外键
      * @return
      */
     JoinColumn[] inverseJoinColumns() default {};

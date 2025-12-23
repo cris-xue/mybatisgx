@@ -3,7 +3,7 @@ package com.mybatisgx.annotation;
 import java.lang.annotation.*;
 
 /**
- * sql定义，支持方法名衍生和HQL
+ * sql定义，支持方法名衍生
  * @author 薛承城
  * @date 2025/11/11 11:22
  */

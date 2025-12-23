@@ -1,8 +1,8 @@
 package com.mybatisgx.template;
 
 import com.google.common.collect.Lists;
-import com.mybatisgx.annotation.Lock;
 import com.mybatisgx.annotation.LogicDelete;
+import com.mybatisgx.annotation.Version;
 import com.mybatisgx.context.EntityInfoContextHolder;
 import com.mybatisgx.model.*;
 import com.mybatisgx.utils.TypeUtils;
@@ -104,10 +104,10 @@ public class UpdateTemplateHandler {
         }
 
         private void setValue(MethodInfo methodInfo, ColumnInfo columnInfo, List<String> paramValuePathItemList, Element trimElement) {
-            Lock lock = columnInfo.getLock();
-            if (lock != null) {
+            Version version = columnInfo.getVersion();
+            if (version != null) {
                 String valuePath = StringUtils.join(paramValuePathItemList, ".");
-                String columnValueExpression = String.format("%s = #{%s} + %s, ", columnInfo.getDbColumnName(), valuePath, lock.increment());
+                String columnValueExpression = String.format("%s = #{%s} + %s, ", columnInfo.getDbColumnName(), valuePath, version.increment());
                 trimElement.addText(columnValueExpression);
                 return;
             }

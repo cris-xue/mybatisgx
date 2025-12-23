@@ -48,7 +48,7 @@ public class ColumnInfoHandler {
             columnInfo.setDbTypeName(column != null ? column.columnDefinition() : null);
             columnInfo.setDbColumnName(dbColumnName);
 
-            columnInfo.setLock(field.getAnnotation(Lock.class));
+            columnInfo.setVersion(field.getAnnotation(Version.class));
             columnInfo.setLogicDelete(field.getAnnotation(LogicDelete.class));
             columnInfo.setGenerateValue(field.getAnnotation(GeneratedValue.class));
 

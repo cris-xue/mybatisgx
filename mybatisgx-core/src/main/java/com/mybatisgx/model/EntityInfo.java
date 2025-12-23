@@ -64,7 +64,7 @@ public class EntityInfo {
     /**
      * 乐观锁
      */
-    private ColumnInfo lockColumnInfo;
+    private ColumnInfo versionColumnInfo;
     /**
      * 关系字段信息
      */
@@ -119,8 +119,8 @@ public class EntityInfo {
         return logicDeleteIdColumnInfo;
     }
 
-    public ColumnInfo getLockColumnInfo() {
-        return lockColumnInfo;
+    public ColumnInfo getVersionColumnInfo() {
+        return versionColumnInfo;
     }
 
     public List<RelationColumnInfo> getRelationColumnInfoList() {
@@ -162,8 +162,8 @@ public class EntityInfo {
 
         public Builder process() {
             for (ColumnInfo columnInfo : this.entityInfo.columnInfoList) {
-                if (columnInfo.getLock() != null) {
-                    entityInfo.lockColumnInfo = columnInfo;
+                if (columnInfo.getVersion() != null) {
+                    entityInfo.versionColumnInfo = columnInfo;
                 }
                 if (columnInfo.getLogicDelete() != null) {
                     entityInfo.logicDeleteColumnInfo = columnInfo;

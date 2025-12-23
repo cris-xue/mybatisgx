@@ -79,7 +79,7 @@ public class ColumnInfo implements FieldMeta {
     /**
      * 是否是乐观锁字段
      */
-    private Lock lock;
+    private Version version;
     /**
      * 是否是逻辑删除字段
      */
@@ -223,12 +223,12 @@ public class ColumnInfo implements FieldMeta {
         this.nonPersistent = nonPersistent;
     }
 
-    public Lock getLock() {
-        return lock;
+    public Version getVersion() {
+        return version;
     }
 
-    public void setLock(Lock lock) {
-        this.lock = lock;
+    public void setVersion(Version version) {
+        this.version = version;
     }
 
     public LogicDelete getLogicDelete() {

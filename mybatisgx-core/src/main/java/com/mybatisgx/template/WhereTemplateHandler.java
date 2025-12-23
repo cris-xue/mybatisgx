@@ -31,17 +31,17 @@ public class WhereTemplateHandler {
     private void addOptimisticLockCondition(EntityInfo entityInfo, MethodInfo methodInfo, Element whereElement) {
         // 查询不需要乐观锁版本条件
         MethodParamInfo entityParamInfo = methodInfo.getEntityParamInfo();
-        ColumnInfo lockColumnInfo = entityInfo.getLockColumnInfo();
-        if (lockColumnInfo != null) {
+        ColumnInfo versionColumnInfo = entityInfo.getVersionColumnInfo();
+        if (versionColumnInfo != null) {
             // 只有更新的场景才需要乐观锁，逻辑删除不需要乐观锁，因为逻辑删除直接改变逻辑删除字段，因为不管什么操作都一定需要逻辑删除字段
             if (methodInfo.getSqlCommandType() == SqlCommandType.UPDATE) {
                 List<String> argValueCommonPathItemList = new ArrayList<>();
                 if (methodInfo.getBatch()) {
                     argValueCommonPathItemList.add(entityParamInfo.getBatchItemName());
                 }
-                argValueCommonPathItemList.add(lockColumnInfo.getJavaColumnName());
+                argValueCommonPathItemList.add(versionColumnInfo.getJavaColumnName());
                 String valueExpression = StringUtils.join(argValueCommonPathItemList, ".");
-                whereElement.addText(String.format(" and %s = #{%s}", lockColumnInfo.getDbColumnName(), valueExpression));
+                whereElement.addText(String.format(" and %s = #{%s}", versionColumnInfo.getDbColumnName(), valueExpression));
             }
         }
     }

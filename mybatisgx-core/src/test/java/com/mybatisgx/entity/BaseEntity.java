@@ -18,16 +18,16 @@ public abstract class BaseEntity<ID> {
     @GeneratedValue(IdValueProcessor.class)
     private ID id;
 
-    @Column(name = "input_user_id", insertable = true)
+    @Column(name = "input_user_id")
     private Long inputUserId;
 
-    @Column(name = "input_time", insertable = true)
+    @Column(name = "input_time")
     private LocalDateTime inputTime;
 
-    @Column(name = "update_user_id", updatable = true)
+    @Column(name = "update_user_id")
     private Long updateUserId;
 
-    @Column(name = "update_time", updatable = true)
+    @Column(name = "update_time")
     private LocalDateTime updateTime;
 
     public ID getId() {

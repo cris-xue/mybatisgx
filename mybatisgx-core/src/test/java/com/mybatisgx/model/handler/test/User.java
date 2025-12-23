@@ -30,7 +30,7 @@ public class User extends BaseEntity<Long> {
     @LogicDelete
     private Integer status;
 
-    @Lock
+    @Version
     private Integer version;
 
     @ManyToMany(mappedBy = "userList", fetch = FetchType.LAZY)

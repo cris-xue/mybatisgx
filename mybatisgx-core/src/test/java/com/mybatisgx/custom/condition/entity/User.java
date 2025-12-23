@@ -31,7 +31,7 @@ public class User extends BaseEntity<Long> {
     @GeneratedValue(value = LogicDeleteIdValueProcessor.class)
     private Long logicDeleteId;
 
-    @Lock
+    @Version
     private Integer version;
 
     public String getRoleIds() {

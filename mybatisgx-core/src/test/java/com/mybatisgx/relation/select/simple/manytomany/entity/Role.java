@@ -17,7 +17,7 @@ public class Role extends BaseEntity<Long> {
     @LogicDelete
     private Integer status;
 
-    @Lock
+    @Version
     private Integer version;
 
     @ManyToMany(fetch = FetchType.LAZY)

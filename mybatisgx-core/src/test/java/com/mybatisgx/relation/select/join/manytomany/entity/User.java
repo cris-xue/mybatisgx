@@ -2,8 +2,8 @@ package com.mybatisgx.relation.select.join.manytomany.entity;
 
 import com.mybatisgx.annotation.*;
 import com.mybatisgx.entity.BaseEntity;
-
 import org.apache.ibatis.mapping.FetchType;
+
 import java.util.List;
 
 @Entity
@@ -29,7 +29,7 @@ public class User extends BaseEntity<Long> {
     @LogicDelete
     private Integer status;
 
-    @Lock
+    @Version
     private Integer version;
 
     @ManyToMany(mappedBy = "userList", fetch = FetchType.LAZY)

@@ -3,8 +3,8 @@ package com.mybatisgx.annotation;
 import java.lang.annotation.*;
 
 /**
- * 描述关联字段，用于多对多的关系
- * @author ccxuef
+ * 描述实体之间通过中间表建立的关联关系。用于多对多（Many-to-Many）关系映射
+ * @author 薛承城
  * @date 2025/8/3 17:00
  */
 @Documented

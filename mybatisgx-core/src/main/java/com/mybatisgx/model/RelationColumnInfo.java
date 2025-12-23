@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * 关系字段信息
  *
- * @author ccxuef
+ * @author 薛承城
  * @date 2025/7/27 13:20
  */
 public class RelationColumnInfo extends ColumnInfo {
@@ -38,11 +38,22 @@ public class RelationColumnInfo extends ColumnInfo {
      */
     private RelationColumnInfo mappedByRelationColumnInfo;
     /**
-     * 当前实体外键字段列表
+     * 指向当前实体的外键列表。
+     *
+     * 语义说明：
+     * - 一对一 / 一对多 / 多对一：无（外键不在当前实体视角维护）
+     * - 多对多：中间表中指向当前实体主键的一侧外键
+     *
+     * 说明：
+     * 该外键位于中间表中，而非当前实体对应的数据库表。
      */
     private List<ForeignKeyInfo> foreignKeyInfoList = new ArrayList();
     /**
-     * 关联实体外键字段列表
+     * 当前实体用于指向关联实体的外键列表。
+     *
+     * 语义说明：
+     * - 一对一 / 一对多 / 多对一：来自 @JoinColumn / @JoinColumns
+     * - 多对多：中间表中指向对端实体主键的一侧外键
      */
     private List<ForeignKeyInfo> inverseForeignKeyInfoList = new ArrayList();
     /**

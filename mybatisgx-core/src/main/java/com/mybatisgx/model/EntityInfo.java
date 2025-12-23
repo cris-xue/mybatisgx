@@ -4,7 +4,6 @@ import com.mybatisgx.annotation.Transient;
 import com.mybatisgx.api.ValueProcessor;
 import com.mybatisgx.context.DaoMethodManager;
 import com.mybatisgx.utils.TypeUtils;
-import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -259,54 +258,6 @@ public class EntityInfo {
 
         public EntityInfo build() {
             return entityInfo;
-        }
-
-        /**
-         * 自引用实体属性复制
-         * @param entityInfo
-         * @return
-         */
-        public Builder selfRefEntityPropertyCopy(EntityInfo entityInfo) {
-            this.setTableName(entityInfo.tableName);
-            this.setClazz(entityInfo.clazz);
-            this.setColumnInfoList(this.cloneColumnInfoList(entityInfo));
-            this.setTypeParameterMap(entityInfo.typeParameterMap);
-            this.process();
-            return this;
-        }
-
-        private List<ColumnInfo> cloneColumnInfoList(EntityInfo entityInfo) {
-            List<ColumnInfo> columnInfoList = new ArrayList();
-            for (ColumnInfo columnInfo : entityInfo.columnInfoList) {
-                if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class, ColumnInfo.class)) {
-                    columnInfoList.add(this.cloneBean(columnInfo));
-                }
-                if (TypeUtils.typeEquals(columnInfo, RelationColumnInfo.class)) {
-                    RelationColumnInfo relationColumnInfo = (RelationColumnInfo) this.cloneBean(columnInfo);
-                    RelationColumnInfo mappedByRelationColumnInfo = relationColumnInfo.getMappedByRelationColumnInfo();
-                    if (mappedByRelationColumnInfo != null) {
-                        for (ForeignKeyInfo foreignKeyInfo : mappedByRelationColumnInfo.getInverseForeignKeyInfoList()) {
-                            ColumnInfo referencedColumnInfo = this.cloneBean(foreignKeyInfo.getReferencedColumnInfo());
-                            foreignKeyInfo.setReferencedColumnInfo(referencedColumnInfo);
-                        }
-                    } else {
-                        for (ForeignKeyInfo foreignKeyInfo : relationColumnInfo.getInverseForeignKeyInfoList()) {
-                            ColumnInfo referencedColumnInfo = this.cloneBean(foreignKeyInfo.getReferencedColumnInfo());
-                            foreignKeyInfo.setReferencedColumnInfo(referencedColumnInfo);
-                        }
-                    }
-                    columnInfoList.add(relationColumnInfo);
-                }
-            }
-            return columnInfoList;
-        }
-
-        private ColumnInfo cloneBean(ColumnInfo columnInfo) {
-            try {
-                return (ColumnInfo) BeanUtils.cloneBean(columnInfo);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
         }
     }
 }

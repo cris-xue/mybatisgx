@@ -204,6 +204,36 @@ public class ColumnInfoHandler {
         JoinColumns joinColumns = field.getAnnotation(JoinColumns.class);
         JoinTable joinTable = field.getAnnotation(JoinTable.class);
         Fetch fetch = field.getAnnotation(Fetch.class);
+        if (relationColumnInfo.getRelationType() == RelationType.MANY_TO_MANY) {
+            if (joinTable == null) {
+                throw new MybatisgxException("%s字段必须使用JoinTable注解", relationColumnInfo.getJavaColumnName());
+            }
+            if (joinColumns != null || joinColumn != null) {
+                throw new MybatisgxException("%s字段不能使用JoinColumns注解", relationColumnInfo.getJavaColumnName());
+            }
+            if (joinTable.joinColumns().length == 0) {
+                throw new MybatisgxException("%s字段必须有JoinColumns注解", relationColumnInfo.getJavaColumnName());
+            }
+            if (joinTable.inverseJoinColumns().length == 0) {
+                throw new MybatisgxException("%s字段必须有InverseJoinColumns注解", relationColumnInfo.getJavaColumnName());
+            }
+        } else {
+            if (joinTable != null) {
+                throw new MybatisgxException("%s字段不能使用JoinTable注解", relationColumnInfo.getJavaColumnName());
+            }
+            if (joinColumns == null && joinColumn == null) {
+                throw new MybatisgxException("%s字段必须有JoinColumns或JoinColumn注解", relationColumnInfo.getJavaColumnName());
+            }
+            if (joinColumns != null && joinColumn != null) {
+                throw new MybatisgxException("%s字段有JoinColumns和JoinColumn注解，不能同时使用", relationColumnInfo.getJavaColumnName());
+            }
+            if (joinColumns.value().length == 0) {
+                throw new MybatisgxException("%s字段joinColumns注解至少有一个JoinColumn注解", relationColumnInfo.getJavaColumnName());
+            }
+        }
+        if (fetch == null) {
+            throw new MybatisgxException("%s字段必须使用Fetch注解", relationColumnInfo.getJavaColumnName());
+        }
 
         List<ForeignKeyInfo> foreignKeyColumnInfoList = new ArrayList();
         List<ForeignKeyInfo> inverseForeignKeyColumnInfoList = new ArrayList();

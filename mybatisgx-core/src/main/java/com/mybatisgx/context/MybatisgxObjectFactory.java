@@ -24,6 +24,10 @@ public class MybatisgxObjectFactory {
     private static final Map<Class, Object> OBJECTO_MAP = new ConcurrentHashMap();
 
     public static void register(MybatisgxConfiguration configuration, KeyGenerator<?> keyGenerator) {
+        if (configuration == null) {
+            throw new IllegalArgumentException("configuration is null");
+        }
+
         OBJECTO_MAP.put(MethodInfoHandler.class, new MethodInfoHandler(configuration));
 
         OBJECTO_MAP.put(StatementTemplateHandler.class, new StatementTemplateHandler(configuration));
@@ -35,7 +39,9 @@ public class MybatisgxObjectFactory {
         OBJECTO_MAP.put(UpdateTemplateHandler.class, new UpdateTemplateHandler());
 
         OBJECTO_MAP.put(MybatisgxValueProcessor.class, new MybatisgxValueProcessor());
-        OBJECTO_MAP.put(KeyGenerator.class, keyGenerator);
+        if (keyGenerator != null) {
+            OBJECTO_MAP.put(KeyGenerator.class, keyGenerator);
+        }
     }
 
     public static synchronized <T> T get(Class<T> clazz) {

@@ -34,8 +34,10 @@ public class MapperInfoHandler {
     public MapperInfo execute(Class<?> daoInterface) {
         MapperInfo mapperInfo = this.getMapperInfo(daoInterface);
         mapperInfo.setEntityInfo(EntityInfoContextHolder.get(mapperInfo.getEntityClass()));
-        mapperInfo.setQueryEntityInfo(EntityInfoContextHolder.get(mapperInfo.getQueryEntityClass()));
-
+        // 如果只是继承了CrudDao，那么queryEntityClass就是空
+        if (mapperInfo.getQueryEntityClass() != null) {
+            mapperInfo.setQueryEntityInfo(EntityInfoContextHolder.get(mapperInfo.getQueryEntityClass()));
+        }
         MethodInfoHandler methodInfoHandler = MybatisgxObjectFactory.get(MethodInfoHandler.class);
         List<MethodInfo> methodInfoList = methodInfoHandler.execute(mapperInfo, daoInterface);
         mapperInfo.setMethodInfoList(methodInfoList);

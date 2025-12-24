@@ -6,6 +6,7 @@ import com.mybatisgx.api.ValueProcessContext;
 import com.mybatisgx.api.ValueProcessPhase;
 import com.mybatisgx.api.ValueProcessor;
 import com.mybatisgx.context.MybatisgxObjectFactory;
+import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.executor.keygen.KeyGenerator;
 
 import java.util.EnumSet;
@@ -30,6 +31,9 @@ public class IdValueProcessor implements ValueProcessor {
     @Override
     public Object process(ValueProcessContext context) {
         KeyGenerator keyGenerator = MybatisgxObjectFactory.get(KeyGenerator.class);
+        if (keyGenerator == null) {
+            throw new MybatisgxException("keyGenerator is null");
+        }
         return keyGenerator.get();
     }
 }

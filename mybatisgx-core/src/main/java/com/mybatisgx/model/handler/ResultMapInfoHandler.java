@@ -1,6 +1,7 @@
 package com.mybatisgx.model.handler;
 
 import com.mybatisgx.annotation.FetchMode;
+import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.model.*;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -133,7 +134,7 @@ public class ResultMapInfoHandler {
                         this.buildJoinResultMapInfo(resultMapContext, nestedResultMapInfo, childEntityRelationTree);
                     }
                 } else {
-                    throw new RuntimeException("未知的抓取模式");
+                    throw new MybatisgxException("%s字段缺少Fetch注解或者FetchMode为空", relationColumnInfo.getJavaColumnName());
                 }
             }
             return resultMapInfoList;

@@ -322,7 +322,7 @@ public class MethodInfoHandler {
                 }
                 // 校验条件是否可以关联到参数，如果无法关联，后续执行数据库操作会报错
                 if (methodParamInfo == null) {
-                    throw new RuntimeException("查询条件没有对应的参数");
+                    throw new MybatisgxException("%s方法条件没有对应的参数", methodInfo.getMethodName());
                 }
                 conditionInfo.setMethodParamInfo(methodParamInfo);
             }
@@ -385,35 +385,6 @@ public class MethodInfoHandler {
             methodParamInfo.setArgValueCommonPathItemList(argValueCommonPathItemList);
         }
         return methodParamInfo;
-    }
-
-    /**
-     * 检查方法名信息和方法信息参数是否匹配
-     */
-    public void check(ResultMapInfo resultMapInfo, MethodInfo methodInfo) {
-        List<ConditionInfo> conditionInfoList = methodInfo.getConditionInfoList();
-        if (ObjectUtils.isEmpty(conditionInfoList)) {
-            return;
-        }
-        Map<String, MethodParamInfo> methodParamInfoMap = methodInfo.getMethodParamInfoMap();
-
-        if (conditionInfoList.size() != methodParamInfoMap.size()) {
-            throw new RuntimeException("方法名中的查询条件和方法参数中中查询条件个数不匹配");
-        }
-
-        for (int i = 0; i < conditionInfoList.size(); i++) {
-            ConditionInfo conditionInfo = conditionInfoList.get(i);
-            MethodParamInfo methodParamInfo = methodParamInfoMap.get(i);
-
-            /*String javaColumnName = conditionInfo.getJavaColumnName();
-            javaColumnName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, javaColumnName);
-            ColumnInfo columnInfo = resultMapInfo.getColumnInfo(javaColumnName);
-            if (columnInfo == null) {
-                throw new RuntimeException("方法名中的字段在实体类中不存在: " + javaColumnName);
-            }
-            conditionInfo.setDbColumnName(columnInfo.getDbColumnName());
-            conditionInfo.setJavaColumnName(methodParamInfo.getParamName());*/
-        }
     }
 
     private Class<?> getMethodParamType(MapperInfo mapperInfo, Parameter parameter) {

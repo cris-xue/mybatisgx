@@ -28,7 +28,7 @@ public @interface JoinColumn {
      * </ul>
      * @return
      */
-    String name() default "";
+    String name();
 
     /**
      * 外键所引用的目标表列名，通常为主键列。

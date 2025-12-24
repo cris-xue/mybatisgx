@@ -204,35 +204,44 @@ public class ColumnInfoHandler {
         JoinColumns joinColumns = field.getAnnotation(JoinColumns.class);
         JoinTable joinTable = field.getAnnotation(JoinTable.class);
         Fetch fetch = field.getAnnotation(Fetch.class);
-        if (relationColumnInfo.getRelationType() == RelationType.MANY_TO_MANY) {
-            if (joinTable == null) {
-                throw new MybatisgxException("%s字段必须使用JoinTable注解", relationColumnInfo.getJavaColumnName());
-            }
-            if (joinColumns != null || joinColumn != null) {
-                throw new MybatisgxException("%s字段不能使用JoinColumns注解", relationColumnInfo.getJavaColumnName());
-            }
-            if (joinTable.joinColumns().length == 0) {
-                throw new MybatisgxException("%s字段必须有JoinColumns注解", relationColumnInfo.getJavaColumnName());
-            }
-            if (joinTable.inverseJoinColumns().length == 0) {
-                throw new MybatisgxException("%s字段必须有InverseJoinColumns注解", relationColumnInfo.getJavaColumnName());
+        if (StringUtils.isNotBlank(relationColumnInfo.getMappedBy())) {
+            if (joinTable != null || joinColumns != null || joinColumn != null) {
+                throw new MybatisgxException(
+                        "%s字段已声明为关系反向方（mappedBy 不为空），不允许定义 JoinTable / JoinColumns / JoinColumn",
+                        relationColumnInfo.getJavaColumnName()
+                );
             }
         } else {
-            if (joinTable != null) {
-                throw new MybatisgxException("%s字段不能使用JoinTable注解", relationColumnInfo.getJavaColumnName());
-            }
-            if (joinColumns == null && joinColumn == null) {
-                throw new MybatisgxException("%s字段必须有JoinColumns或JoinColumn注解", relationColumnInfo.getJavaColumnName());
-            }
-            if (joinColumns != null && joinColumn != null) {
-                throw new MybatisgxException("%s字段有JoinColumns和JoinColumn注解，不能同时使用", relationColumnInfo.getJavaColumnName());
-            }
-            if (joinColumns.value().length == 0) {
-                throw new MybatisgxException("%s字段joinColumns注解至少有一个JoinColumn注解", relationColumnInfo.getJavaColumnName());
+            if (relationColumnInfo.getRelationType() == RelationType.MANY_TO_MANY) {
+                if (joinTable == null) {
+                    throw new MybatisgxException("%s字段为多对多关系的维护方，必须使用 JoinTable 注解定义中间表", relationColumnInfo.getJavaColumnName());
+                }
+                if (joinColumns != null || joinColumn != null) {
+                    throw new MybatisgxException("%s字段为多对多关系，不能直接使用 JoinColumn 或 JoinColumns，请通过 JoinTable 定义关联", relationColumnInfo.getJavaColumnName());
+                }
+                if (joinTable.joinColumns().length == 0) {
+                    throw new MybatisgxException("%s字段的 JoinTable 必须定义 joinColumns（中间表指向当前实体的外键）", relationColumnInfo.getJavaColumnName());
+                }
+                if (joinTable.inverseJoinColumns().length == 0) {
+                    throw new MybatisgxException("%s字段的 JoinTable 必须定义 inverseJoinColumns（中间表指向关联实体的外键）", relationColumnInfo.getJavaColumnName());
+                }
+            } else {
+                if (joinTable != null) {
+                    throw new MybatisgxException("%s字段不是多对多关系，不能使用 JoinTable 注解", relationColumnInfo.getJavaColumnName());
+                }
+                if (joinColumns == null && joinColumn == null) {
+                    throw new MybatisgxException("%s字段为关系维护方，必须使用 JoinColumn 或 JoinColumns 定义外键", relationColumnInfo.getJavaColumnName());
+                }
+                if (joinColumns != null && joinColumn != null) {
+                    throw new MybatisgxException("%s字段不能同时使用 JoinColumn 和 JoinColumns，请选择其中一种", relationColumnInfo.getJavaColumnName());
+                }
+                if (joinColumns != null && joinColumns.value().length == 0) {
+                    throw new MybatisgxException("%s字段的 JoinColumns 至少需要定义一个 JoinColumn", relationColumnInfo.getJavaColumnName());
+                }
             }
         }
         if (fetch == null) {
-            throw new MybatisgxException("%s字段必须使用Fetch注解", relationColumnInfo.getJavaColumnName());
+            throw new MybatisgxException("%s字段必须显式声明 Fetch 注解，用于指定关联加载时的抓取方式（如批量、单条等）", relationColumnInfo.getJavaColumnName());
         }
 
         List<ForeignKeyInfo> foreignKeyColumnInfoList = new ArrayList();

@@ -168,12 +168,12 @@ public class MybatisgxContextLoader {
             Map<String, XNode> resultMapXNodeMap = resultMapTemplateHandler.execute(mapperInfo);
             Map<String, XNode> relationSelectXNodeMap = relationSelectTemplateHandler.execute(mapperInfo);
 
-            MapperTemplateInfo mappingTemplateInfo = new MapperTemplateInfo();
-            mappingTemplateInfo.setNamespace(mapperInfo.getNamespace());
-            mappingTemplateInfo.setCurdTemplateMap(curdXNodeMap);
-            mappingTemplateInfo.setResultMapTemplateMap(resultMapXNodeMap);
-            mappingTemplateInfo.setAssociationSelectTemplateMap(relationSelectXNodeMap);
-            MapperTemplateContextHolder.set(mappingTemplateInfo);
+            MapperTemplateInfo mapperTemplateInfo = new MapperTemplateInfo();
+            mapperTemplateInfo.setNamespace(mapperInfo.getNamespace());
+            mapperTemplateInfo.setCurdTemplateMap(curdXNodeMap);
+            mapperTemplateInfo.setResultMapTemplateMap(resultMapXNodeMap);
+            mapperTemplateInfo.setAssociationSelectTemplateMap(relationSelectXNodeMap);
+            MapperTemplateContextHolder.set(mapperTemplateInfo);
         }
     }
 

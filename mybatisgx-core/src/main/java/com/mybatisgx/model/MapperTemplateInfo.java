@@ -12,7 +12,7 @@ public class MapperTemplateInfo {
 
     private Map<String, XNode> resultMapTemplateMap;
 
-    private Map<String, XNode> associationSelectTemplateMap;
+    private Map<String, XNode> relationSelectTemplateMap;
 
     public String getNamespace() {
         return namespace;
@@ -39,11 +39,11 @@ public class MapperTemplateInfo {
     }
 
     public Map<String, XNode> getAssociationSelectTemplateMap() {
-        return associationSelectTemplateMap;
+        return relationSelectTemplateMap;
     }
 
-    public void setAssociationSelectTemplateMap(Map<String, XNode> associationSelectTemplateMap) {
-        this.associationSelectTemplateMap = associationSelectTemplateMap;
+    public void setRelationSelectTemplateMap(Map<String, XNode> relationSelectTemplateMap) {
+        this.relationSelectTemplateMap = relationSelectTemplateMap;
     }
 
     @Override
@@ -52,7 +52,7 @@ public class MapperTemplateInfo {
                 "namespace='" + namespace + '\'' +
                 ", curdTemplateMap=" + curdTemplateMap +
                 ", resultMapTemplateMap=" + resultMapTemplateMap +
-                ", associationSelectTemplateMap=" + associationSelectTemplateMap +
+                ", relationSelectTemplateMap=" + relationSelectTemplateMap +
                 '}';
     }
 }

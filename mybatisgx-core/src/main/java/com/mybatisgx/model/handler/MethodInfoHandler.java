@@ -47,8 +47,8 @@ public class MethodInfoHandler {
     }
 
     public List<MethodInfo> execute(MapperInfo mapperInfo, Class<?> interfaceClass) {
-        Map<String, MethodInfo> methodInfoMap = new LinkedHashMap<>();
-        this.daoClass(interfaceClass, mapperInfo, methodInfoMap);
+        List<Method> methodList = this.getDaoMethodList(interfaceClass);
+        Map<String, MethodInfo> methodInfoMap = this.processMethod(methodList, mapperInfo);
         List<MethodInfo> methodInfoList = new ArrayList(20);
         methodInfoMap.forEach((methodName, methodInfo) -> {
             String namespaceMethodName = this.getNamespaceMethodName(mapperInfo, methodName);
@@ -58,24 +58,26 @@ public class MethodInfoHandler {
         return methodInfoList;
     }
 
-    private void daoClass(Class<?> daoClass, MapperInfo mapperInfo, Map<String, MethodInfo> methodInfoMap) {
-        Method[] declaredMethods = daoClass.getDeclaredMethods();
-        this.processMethod(declaredMethods, mapperInfo, methodInfoMap);
-
-        Type[] superInterfaces = daoClass.getGenericInterfaces();
-        for (Type type : superInterfaces) {
+    private List<Method> getDaoMethodList(Class<?> daoClass) {
+        List<Method> totalMethodList = Lists.newArrayList(daoClass.getDeclaredMethods());
+        for (Type type : daoClass.getGenericInterfaces()) {
             if (type instanceof ParameterizedType) {
                 ParameterizedType parameterizedType = (ParameterizedType) type;
                 Class<?> superInterface = (Class<?>) parameterizedType.getRawType();
                 if (ClassUtils.isAssignable(superInterface, Dao.class)) {
-                    this.daoClass(superInterface, mapperInfo, methodInfoMap);
+                    List<Method> methodList = this.getDaoMethodList(superInterface);
+                    if (ObjectUtils.isNotEmpty(methodList)) {
+                        totalMethodList.addAll(methodList);
+                    }
                 }
             }
         }
+        return totalMethodList;
     }
 
-    private void processMethod(Method[] methods, MapperInfo mapperInfo, Map<String, MethodInfo> methodInfoMap) {
-        for (Method method : methods) {
+    private Map<String, MethodInfo> processMethod(List<Method> methodList, MapperInfo mapperInfo) {
+        Map<String, MethodInfo> methodInfoMap = new LinkedHashMap<>();
+        for (Method method : methodList) {
             String methodName = method.getName();
             if (methodInfoMap.containsKey(methodName)) {
                 throw new MybatisgxException("dao接口方法无法重载，请修改方法名: %s", methodName);
@@ -122,6 +124,7 @@ public class MethodInfoHandler {
 
             methodInfoMap.put(methodName, methodInfo);
         }
+        return methodInfoMap;
     }
 
     /**

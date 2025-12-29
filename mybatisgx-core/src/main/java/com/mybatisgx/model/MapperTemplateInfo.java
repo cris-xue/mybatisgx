@@ -38,7 +38,7 @@ public class MapperTemplateInfo {
         this.resultMapTemplateMap = resultMapTemplateMap;
     }
 
-    public Map<String, XNode> getAssociationSelectTemplateMap() {
+    public Map<String, XNode> getRelationSelectTemplateMap() {
         return relationSelectTemplateMap;
     }
 

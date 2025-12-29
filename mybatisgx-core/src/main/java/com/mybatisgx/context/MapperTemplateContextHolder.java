@@ -24,7 +24,7 @@ public class MapperTemplateContextHolder {
 
     public static List<String> getStatementIdList(String namespace) {
         Set<String> singleTableStatementIdSet = MAPPER_TEMPLATE_MAP.get(namespace).getCurdTemplateMap().keySet();
-        Set<String> relationTableSelectStatementIdSet = MAPPER_TEMPLATE_MAP.get(namespace).getAssociationSelectTemplateMap().keySet();
+        Set<String> relationTableSelectStatementIdSet = MAPPER_TEMPLATE_MAP.get(namespace).getRelationSelectTemplateMap().keySet();
         List<String> totalActionIdList = new ArrayList(20);
         totalActionIdList.addAll(singleTableStatementIdSet);
         totalActionIdList.addAll(relationTableSelectStatementIdSet);
@@ -40,7 +40,7 @@ public class MapperTemplateContextHolder {
     public static XNode getStatementTemplate(String namespace, String id) {
         MapperTemplateInfo mapperTemplateInfo = MAPPER_TEMPLATE_MAP.get(namespace);
         Map<String, XNode> idSimpleXNodeMap = mapperTemplateInfo.getCurdTemplateMap();
-        Map<String, XNode> idSubSelectXNodeMap = mapperTemplateInfo.getAssociationSelectTemplateMap();
+        Map<String, XNode> idSubSelectXNodeMap = mapperTemplateInfo.getRelationSelectTemplateMap();
         idSimpleXNodeMap.putAll(idSubSelectXNodeMap);
         return idSimpleXNodeMap.get(id);
     }

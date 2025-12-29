@@ -172,7 +172,7 @@ public class MybatisgxContextLoader {
             mapperTemplateInfo.setNamespace(mapperInfo.getNamespace());
             mapperTemplateInfo.setCurdTemplateMap(curdXNodeMap);
             mapperTemplateInfo.setResultMapTemplateMap(resultMapXNodeMap);
-            mapperTemplateInfo.setAssociationSelectTemplateMap(relationSelectXNodeMap);
+            mapperTemplateInfo.setRelationSelectTemplateMap(relationSelectXNodeMap);
             MapperTemplateContextHolder.set(mapperTemplateInfo);
         }
     }

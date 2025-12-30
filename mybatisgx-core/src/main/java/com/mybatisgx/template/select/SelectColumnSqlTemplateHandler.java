@@ -1,7 +1,7 @@
 package com.mybatisgx.template.select;
 
 import com.mybatisgx.model.*;
-import com.mybatisgx.template.ConditionBuilder;
+import com.mybatisgx.template.MybatisgxSqlBuilder;
 import com.mybatisgx.utils.TypeUtils;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Alias;
@@ -277,7 +277,7 @@ public class SelectColumnSqlTemplateHandler {
                 }
                 String leftExpression = String.format("%s.%s", leftEntityTableNameAlias, referencedColumnInfo.getDbColumnName());
                 String rightExpression = String.format("%s.%s", rightEntityTableNameAlias, foreignKeyColumnInfo.getDbColumnName());
-                EqualsTo onCondition = ConditionBuilder.eq(leftExpression, rightExpression);
+                EqualsTo onCondition = MybatisgxSqlBuilder.eq(leftExpression, rightExpression);
                 onExpressionList.add(onCondition);
             }
         } else {
@@ -289,7 +289,7 @@ public class SelectColumnSqlTemplateHandler {
                 }
                 String leftExpression = String.format("%s.%s", leftEntityTableNameAlias, foreignKeyColumnInfo.getDbColumnName());
                 String rightExpression = String.format("%s.%s", rightEntityTableNameAlias, referencedColumnInfo.getDbColumnName());
-                EqualsTo onCondition = ConditionBuilder.eq(leftExpression, rightExpression);
+                EqualsTo onCondition = MybatisgxSqlBuilder.eq(leftExpression, rightExpression);
                 onExpressionList.add(onCondition);
             }
         }
@@ -298,7 +298,7 @@ public class SelectColumnSqlTemplateHandler {
             if (expression == null) {
                 expression = onExpression;
             } else {
-                expression = ConditionBuilder.and(expression, onExpression);
+                expression = MybatisgxSqlBuilder.and(expression, onExpression);
             }
         }
         join.addOnExpression(expression);
@@ -311,7 +311,7 @@ public class SelectColumnSqlTemplateHandler {
             ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();
             String leftExpression = String.format("%s.%s", entityTableNameAlias, referencedColumnInfo.getDbColumnName());
             String rightExpression = String.format("%s.%s", middleTableName, foreignKeyColumnInfo.getDbColumnName());
-            EqualsTo onCondition = ConditionBuilder.eq(leftExpression, rightExpression);
+            EqualsTo onCondition = MybatisgxSqlBuilder.eq(leftExpression, rightExpression);
             onExpressionList.add(onCondition);
         }
         Expression expression = null;
@@ -319,7 +319,7 @@ public class SelectColumnSqlTemplateHandler {
             if (expression == null) {
                 expression = onExpression;
             } else {
-                expression = ConditionBuilder.and(expression, onExpression);
+                expression = MybatisgxSqlBuilder.and(expression, onExpression);
             }
         }
         join.addOnExpression(expression);
@@ -332,7 +332,7 @@ public class SelectColumnSqlTemplateHandler {
             ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();
             String leftExpression = String.format("%s.%s", middleTableName, foreignKeyColumnInfo.getDbColumnName());
             String rightExpression = String.format("%s.%s", entityTableNameAlias, referencedColumnInfo.getDbColumnName());
-            EqualsTo onCondition = ConditionBuilder.eq(leftExpression, rightExpression);
+            EqualsTo onCondition = MybatisgxSqlBuilder.eq(leftExpression, rightExpression);
             onExpressionList.add(onCondition);
         }
         Expression expression = null;
@@ -340,7 +340,7 @@ public class SelectColumnSqlTemplateHandler {
             if (expression == null) {
                 expression = onExpression;
             } else {
-                expression = ConditionBuilder.and(expression, onExpression);
+                expression = MybatisgxSqlBuilder.and(expression, onExpression);
             }
         }
         join.addOnExpression(expression);

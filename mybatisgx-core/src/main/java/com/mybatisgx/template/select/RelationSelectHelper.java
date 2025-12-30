@@ -5,10 +5,9 @@ import com.mybatisgx.model.BatchNestedResultMapInfo;
 import com.mybatisgx.model.RelationColumnInfo;
 import com.mybatisgx.model.ResultMapInfo;
 import com.mybatisgx.model.SimpleNestedResultMapInfo;
-import com.mybatisgx.template.ConditionBuilder;
+import com.mybatisgx.template.MybatisgxSqlBuilder;
 import com.mybatisgx.utils.TypeUtils;
 import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import org.dom4j.Element;
 
@@ -65,7 +64,7 @@ public class RelationSelectHelper {
      * @return
      */
     public static Expression buildWhereConditionExpression(Expression whereConditionExpression, String leftEq, String rightEq) {
-        EqualsTo eqCondition = ConditionBuilder.eq(leftEq, rightEq);
-        return whereConditionExpression == null ? eqCondition : new AndExpression(whereConditionExpression, eqCondition);
+        EqualsTo eqCondition = MybatisgxSqlBuilder.eq(leftEq, rightEq);
+        return whereConditionExpression == null ? eqCondition : MybatisgxSqlBuilder.and(whereConditionExpression, eqCondition);
     }
 }

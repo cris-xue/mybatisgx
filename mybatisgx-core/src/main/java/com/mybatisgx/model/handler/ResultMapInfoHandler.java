@@ -124,7 +124,7 @@ public class ResultMapInfoHandler {
                     resultMapInfo.setNestedSelect(nestedResultMapInfo.getNestedSelect());
                 } else if (fetchMode == FetchMode.JOIN) {
                     if (level == 1) {
-                        throw new RuntimeException("解析错误");
+                        throw new MybatisgxException("解析错误");
                     }
                     if (level == 2) {
                         ResultMapInfo resultMapInfo = this.buildBatchNestedResultMapInfo(resultMapContext, entityRelationTree, childEntityRelationTree);

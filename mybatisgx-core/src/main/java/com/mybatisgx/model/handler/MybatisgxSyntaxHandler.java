@@ -2,6 +2,7 @@ package com.mybatisgx.model.handler;
 
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.Maps;
+import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.model.*;
 import com.mybatisgx.syntax.MethodNameParser;
 import com.mybatisgx.syntax.MethodNameParserBaseVisitor;
@@ -307,7 +308,7 @@ public class MybatisgxSyntaxHandler {
             String conditionColumnName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, token);
             ColumnInfo columnInfo = context.getEntityInfo().getColumnInfo(conditionColumnName);
             if (columnInfo == null) {
-                throw new RuntimeException("方法条件或者实体中条件与数据库库实体无法对应：" + conditionColumnName);
+                throw new MybatisgxException("方法条件或者实体中条件与数据库库实体无法对应：%s", conditionColumnName);
             }
             if (context.getConditionOriginType() == ConditionOriginType.METHOD_NAME) {
                 conditionInfo.setColumnName(conditionColumnName);

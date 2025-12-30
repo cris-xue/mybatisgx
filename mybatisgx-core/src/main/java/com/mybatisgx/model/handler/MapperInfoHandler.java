@@ -5,6 +5,7 @@ import com.mybatisgx.context.MapperInfoContextHolder;
 import com.mybatisgx.context.MybatisgxObjectFactory;
 import com.mybatisgx.dao.Dao;
 import com.mybatisgx.dao.SimpleDao;
+import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.model.MapperInfo;
 import com.mybatisgx.model.MethodInfo;
 import org.apache.commons.lang3.reflect.TypeUtils;
@@ -86,7 +87,7 @@ public class MapperInfoHandler {
         try {
             return Class.forName(namespace);
         } catch (ClassNotFoundException e) {
-            throw new RuntimeException("namespace not found");
+            throw new MybatisgxException("namespace not found");
         }
     }
 }

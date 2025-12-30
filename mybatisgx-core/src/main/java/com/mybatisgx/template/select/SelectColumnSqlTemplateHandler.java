@@ -147,8 +147,7 @@ public class SelectColumnSqlTemplateHandler {
                 Join join = this.buildLeftJoin(entityTableName, entityTableNameAlias);
 
                 List<ForeignKeyInfo> foreignKeyColumnInfoList;
-                Boolean isMappedBy = leftEntityRelationSelectInfo.isMappedBy();
-                if (isMappedBy) {
+                if (leftEntityRelationSelectInfo.isMappedBy()) {
                     foreignKeyColumnInfoList = leftEntityRelationSelectInfo.getForeignKeyColumnInfoList();
                 } else {
                     foreignKeyColumnInfoList = leftEntityRelationSelectInfo.getInverseForeignKeyColumnInfoList();
@@ -170,8 +169,7 @@ public class SelectColumnSqlTemplateHandler {
                 Join join = this.buildLeftJoin(middleTableName, null);
 
                 List<ForeignKeyInfo> foreignKeyColumnInfoList;
-                Boolean isMappedBy = rightEntityRelationSelectInfo.isMappedBy();
-                if (isMappedBy) {
+                if (rightEntityRelationSelectInfo.isMappedBy()) {
                     foreignKeyColumnInfoList = rightEntityRelationSelectInfo.getInverseForeignKeyColumnInfoList();
                 } else {
                     foreignKeyColumnInfoList = rightEntityRelationSelectInfo.getForeignKeyColumnInfoList();

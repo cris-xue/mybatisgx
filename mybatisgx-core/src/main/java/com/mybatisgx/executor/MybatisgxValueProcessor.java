@@ -47,14 +47,13 @@ public class MybatisgxValueProcessor {
             return parameterObject;
         }
 
-
-        Object parameterObjectNew = this.getParameterObject(methodInfo, parameterObject);
+        Object useParameterObject = this.getParameterObject(methodInfo, parameterObject);
         ValueProcessPhase phase = this.getValueProcessPhase(mappedStatement, methodInfo);
         for (ColumnInfo columnInfo : methodInfo.getEntityInfo().getGenerateValueColumnInfoList()) {
             AbstractFieldValueHandler fieldValueHandler = this.VALUE_HANDLER_MAP.get(columnInfo.getClass());
-            fieldValueHandler.handle(methodInfo, phase, columnInfo, parameterObjectNew, boundSql);
+            fieldValueHandler.handle(methodInfo, phase, columnInfo, useParameterObject, boundSql);
         }
-        return parameterObjectNew;
+        return useParameterObject;
     }
 
     private ValueProcessPhase getValueProcessPhase(MappedStatement mappedStatement, MethodInfo methodInfo) {

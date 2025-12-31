@@ -117,10 +117,10 @@
 				</executions>
 			</plugin>-->
 			<!-- GPG -->
-			<!--<plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-gpg-plugin</artifactId>
-				<version>3.1.0</version>
+				<version>1.6</version>
 				<executions>
 					<execution>
 						<id>sign-artifacts</id>
@@ -130,8 +130,8 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin>-->
-			<!--<plugin>
+			</plugin>
+			<plugin>
 				<groupId>org.sonatype.central</groupId>
 				<artifactId>central-publishing-maven-plugin</artifactId>
 				<version>0.5.0</version>
@@ -139,7 +139,7 @@
 				<configuration>
 					<publishingServerId>central</publishingServerId>
 				</configuration>
-			</plugin>-->
+			</plugin>
 		</plugins>
 	</build>
 
@@ -162,4 +162,11 @@
 		<developerConnection>scm:git:ssh://github.com/cris-xue/mybatisgx.git</developerConnection>
 		<url>https://github.com/cris-xue/mybatisgx</url>
 	</scm>
+
+	<distributionManagement>
+		<repository>
+			<id>central</id>
+			<url>https://central.sonatype.com/api/v1/publish</url>
+		</repository>
+	</distributionManagement>
 </project>

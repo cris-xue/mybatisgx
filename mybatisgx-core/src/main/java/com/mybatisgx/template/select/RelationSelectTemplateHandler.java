@@ -1,6 +1,7 @@
 package com.mybatisgx.template.select;
 
 import com.mybatisgx.annotation.ManyToMany;
+import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.model.*;
 import com.mybatisgx.utils.TypeUtils;
 import com.mybatisgx.utils.XmlUtils;
@@ -93,7 +94,7 @@ public class RelationSelectTemplateHandler {
         try {
             return selectColumnSqlTemplateHandler.buildComplexSelectSql(resultMapInfo);
         } catch (JSQLParserException e) {
-            throw new RuntimeException(e);
+            throw new MybatisgxException(e.getMessage(), e);
         }
     }
 

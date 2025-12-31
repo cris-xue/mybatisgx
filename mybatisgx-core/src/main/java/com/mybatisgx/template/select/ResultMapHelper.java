@@ -68,7 +68,6 @@ public class ResultMapHelper {
         resultMapCollectionElement.addAttribute("fetchType", relationColumnInfo.getFetchType());
         resultMapCollectionElement.addAttribute("select", resultMapRelationInfo.getNestedSelectId());
         resultMapCollectionElement.addAttribute("fetchMode", relationColumnInfo.getFetchMode().name());
-        // resultMapCollectionElement.addAttribute("relationProperty", "{id=userId}");
         return resultMapCollectionElement;
     }
 

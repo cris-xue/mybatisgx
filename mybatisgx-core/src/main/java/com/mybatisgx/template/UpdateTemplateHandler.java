@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.mybatisgx.annotation.LogicDelete;
 import com.mybatisgx.annotation.Version;
 import com.mybatisgx.context.EntityInfoContextHolder;
+import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.model.*;
 import com.mybatisgx.utils.TypeUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -62,7 +63,7 @@ public class UpdateTemplateHandler {
             MethodParamInfo entityParamInfo = methodInfo.getEntityParamInfo();
             List<ColumnInfo> tableColumnInfoList = this.getTableColumnInfoList(entityParamInfo);
             if (ObjectUtils.isEmpty(tableColumnInfoList)) {
-                throw new RuntimeException("实体表字段不存在" + entityParamInfo.getType());
+                throw new MybatisgxException("%s实体表字段不存在", entityParamInfo.getTypeName());
             }
             for (ColumnInfo columnInfo : tableColumnInfoList) {
                 if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class, ColumnInfo.class)) {

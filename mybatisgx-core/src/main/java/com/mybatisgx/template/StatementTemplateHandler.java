@@ -2,6 +2,7 @@ package com.mybatisgx.template;
 
 import com.mybatisgx.context.MapperInfoContextHolder;
 import com.mybatisgx.context.MybatisgxObjectFactory;
+import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.ext.builder.xml.MybatisgxXMLMapperBuilder;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.model.MapperInfo;
@@ -63,7 +64,7 @@ public class StatementTemplateHandler {
             UpdateTemplateHandler updateTemplateHandler = MybatisgxObjectFactory.get(UpdateTemplateHandler.class);
             xmlString = updateTemplateHandler.execute(mapperInfo, methodInfo);
         } else {
-            throw new RuntimeException("不存在的操作方式");
+            throw new MybatisgxException("不存在的操作方式");
         }
         logger.debug("{}:\n{}", methodInfo.getMethodName(), xmlString);
         XPathParser xPathParser = XmlUtils.processXml(xmlString);

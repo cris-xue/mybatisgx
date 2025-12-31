@@ -295,21 +295,12 @@ public class ColumnInfoHandler {
                 ColumnInfo mappedByRelationColumnInfo = this.validateEntityRelation(relationColumnInfo, mappedBy);
                 relationColumnInfo.setMappedByRelationColumnInfo((RelationColumnInfo) mappedByRelationColumnInfo);
             } else {
-                RelationType relationType = relationColumnInfo.getRelationType();
-                if (relationType != RelationType.MANY_TO_MANY) {
-                    List<ForeignKeyInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyInfoList();
-                    for (ForeignKeyInfo inverseForeignKeyColumn : inverseForeignKeyColumnInfoList) {
-                        Class<?> javaType = relationColumnInfo.getJavaType();
-                        EntityInfo relationColumnEntityInfo = EntityInfoContextHolder.get(javaType);
-
+                if (relationColumnInfo.getRelationType() != RelationType.MANY_TO_MANY) {
+                    for (ForeignKeyInfo inverseForeignKeyColumn : relationColumnInfo.getInverseForeignKeyInfoList()) {
+                        EntityInfo relationColumnEntityInfo = EntityInfoContextHolder.get(relationColumnInfo.getJavaType());
                         String referencedColumnName = inverseForeignKeyColumn.getReferencedColumnName();
                         ColumnInfo referencedColumnInfo = relationColumnEntityInfo.getColumnInfo(referencedColumnName);
                         inverseForeignKeyColumn.setReferencedColumnInfo(referencedColumnInfo);
-
-                        // 补充外键字段信息
-                        ColumnInfo foreignKeyColumnInfo = inverseForeignKeyColumn.getColumnInfo();
-                        // foreignKeyColumnInfo.setJavaType(referencedColumnInfo.getJavaType());
-                        // foreignKeyColumnInfo.setDbTypeName(referencedColumnInfo.getDbTypeName());
                     }
                 } else {
                     for (ForeignKeyInfo foreignKeyColumnInfo : relationColumnInfo.getForeignKeyInfoList()) {

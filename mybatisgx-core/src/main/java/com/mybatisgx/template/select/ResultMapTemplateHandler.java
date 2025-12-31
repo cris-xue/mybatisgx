@@ -1,5 +1,6 @@
 package com.mybatisgx.template.select;
 
+import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.model.*;
 import com.mybatisgx.utils.TypeUtils;
 import com.mybatisgx.utils.XmlUtils;
@@ -16,6 +17,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 结果集模板处理
+ * @author 薛承城
+ * @date 2025/12/31 12:43
+ */
 public class ResultMapTemplateHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(ResultMapTemplateHandler.class);
@@ -94,25 +100,22 @@ public class ResultMapTemplateHandler {
         for (ColumnInfo columnInfo : resultMapEntityInfo.getRelationColumnInfoList()) {
             RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
             RelationColumnInfo mappedByRelationColumnInfo = relationColumnInfo.getMappedByRelationColumnInfo();
-            RelationType relationType = relationColumnInfo.getRelationType();
-            if (relationType != RelationType.MANY_TO_MANY) {
-                if (mappedByRelationColumnInfo == null) {
-                    for (ForeignKeyInfo inverseForeignKeyColumnInfo : relationColumnInfo.getInverseForeignKeyInfoList()) {
-                        ColumnInfo foreignKeyColumnInfo = inverseForeignKeyColumnInfo.getColumnInfo();
-                        ColumnInfo referencedColumnInfo = inverseForeignKeyColumnInfo.getReferencedColumnInfo();
-                        if (TypeUtils.typeEquals(referencedColumnInfo, IdColumnInfo.class)) {
-                            IdColumnInfo idColumnInfo = (IdColumnInfo) referencedColumnInfo;
-                            List<ColumnInfo> idColumnInfoComposites = idColumnInfo.getComposites();
-                            if (ObjectUtils.isEmpty(idColumnInfoComposites)) {
-                                String javaColumnName = String.format("%s.%s", relationColumnInfo.getJavaColumnName(), idColumnInfo.getJavaColumnName());
+            // 如果不是多对多并且是关系维护方【mappedBy为空表示是关系维护方】
+            if (relationColumnInfo.getRelationType() != RelationType.MANY_TO_MANY && mappedByRelationColumnInfo == null) {
+                for (ForeignKeyInfo inverseForeignKeyColumnInfo : relationColumnInfo.getInverseForeignKeyInfoList()) {
+                    ColumnInfo foreignKeyColumnInfo = inverseForeignKeyColumnInfo.getColumnInfo();
+                    ColumnInfo referencedColumnInfo = inverseForeignKeyColumnInfo.getReferencedColumnInfo();
+                    if (TypeUtils.typeEquals(referencedColumnInfo, IdColumnInfo.class)) {
+                        List<ColumnInfo> idColumnInfoComposites = referencedColumnInfo.getComposites();
+                        if (ObjectUtils.isEmpty(idColumnInfoComposites)) {
+                            String javaColumnName = String.format("%s.%s", relationColumnInfo.getJavaColumnName(), referencedColumnInfo.getJavaColumnName());
+                            ColumnInfo composite = new ColumnInfo.Builder().columnInfo(foreignKeyColumnInfo).javaColumnName(javaColumnName).build();
+                            ResultMapHelper.resultColumnElement(resultMapElement, resultMapInfo, composite);
+                        } else {
+                            for (ColumnInfo idColumnComposite : idColumnInfoComposites) {
+                                String javaColumnName = String.format("%s.%s.%s", relationColumnInfo.getJavaColumnName(), referencedColumnInfo.getJavaColumnName(), idColumnComposite.getJavaColumnName());
                                 ColumnInfo composite = new ColumnInfo.Builder().columnInfo(foreignKeyColumnInfo).javaColumnName(javaColumnName).build();
                                 ResultMapHelper.resultColumnElement(resultMapElement, resultMapInfo, composite);
-                            } else {
-                                for (ColumnInfo idColumnComposite : idColumnInfoComposites) {
-                                    String javaColumnName = String.format("%s.%s.%s", relationColumnInfo.getJavaColumnName(), idColumnInfo.getJavaColumnName(), idColumnComposite.getJavaColumnName());
-                                    ColumnInfo composite = new ColumnInfo.Builder().columnInfo(foreignKeyColumnInfo).javaColumnName(javaColumnName).build();
-                                    ResultMapHelper.resultColumnElement(resultMapElement, resultMapInfo, composite);
-                                }
                             }
                         }
                     }
@@ -129,9 +132,8 @@ public class ResultMapTemplateHandler {
      */
     private void addRelationResultMapElement(Element resultMapElement, ResultMapInfo resultMapInfo) {
         for (ResultMapInfo composite : resultMapInfo.getComposites()) {
-            ResultMapInfo.NestedSelect nestedSelect = composite.getNestedSelect();
             // 是否存在独立的 resultMap，如果存在，为子查询，如果不存在，则为join关联查询
-            if (nestedSelect != null) {
+            if (composite.getNestedSelect() != null) {
                 this.subSelect(resultMapElement, composite);
             } else {
                 Element resultMapRelationElement = this.joinSelect(resultMapElement, composite);
@@ -146,10 +148,9 @@ public class ResultMapTemplateHandler {
         RelationType relationType = relationColumnInfo.getRelationType();
         if (relationType == RelationType.ONE_TO_ONE || relationType == RelationType.MANY_TO_ONE) {
             ResultMapHelper.associationColumnElement(resultMapElement, resultMapInfo, column);
-        } else if (relationType == RelationType.ONE_TO_MANY || relationType == RelationType.MANY_TO_MANY) {
+        }
+        if (relationType == RelationType.ONE_TO_MANY || relationType == RelationType.MANY_TO_MANY) {
             ResultMapHelper.collectionColumnElement(resultMapElement, resultMapInfo, column);
-        } else {
-            throw new RuntimeException(relationColumnInfo.getJavaType() + "没有关联注解");
         }
     }
 
@@ -161,7 +162,8 @@ public class ResultMapTemplateHandler {
             this.addIdColumnElement(resultMapRelationElement, resultMapInfo);
             this.addColumnElement(resultMapRelationElement, resultMapInfo);
             return resultMapRelationElement;
-        } else if (relationType == RelationType.ONE_TO_MANY || relationType == RelationType.MANY_TO_MANY) {
+        }
+        if (relationType == RelationType.ONE_TO_MANY || relationType == RelationType.MANY_TO_MANY) {
             Element resultMapCollectionElement = ResultMapHelper.joinCollectionColumnElement(resultMapElement, resultMapInfo);
             this.addIdColumnElement(resultMapCollectionElement, resultMapInfo);
             this.addColumnElement(resultMapCollectionElement, resultMapInfo);
@@ -169,9 +171,8 @@ public class ResultMapTemplateHandler {
                 this.addRelationColumnElement(resultMapCollectionElement, resultMapInfo);
             }
             return resultMapCollectionElement;
-        } else {
-            throw new RuntimeException(relationColumnInfo.getJavaType() + "没有关联注解");
         }
+        throw new MybatisgxException("%s没有关联注解", relationColumnInfo.getJavaTypeName());
     }
 
     /**

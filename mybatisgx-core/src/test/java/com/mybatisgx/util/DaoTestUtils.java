@@ -5,7 +5,6 @@ import com.mybatisgx.executor.keygen.SnowKeyGenerator;
 import com.mybatisgx.ext.builder.xml.MybatisgxXMLConfigBuilder;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.ext.session.defaults.MybatisgxDefaultSqlSessionFactory;
-import com.mybatisgx.template.StatementTemplateHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -60,9 +59,6 @@ public class DaoTestUtils {
                 configuration
         );
         mybatisgxContextLoader.load();
-
-        StatementTemplateHandler statementTemplateHandler = new StatementTemplateHandler(configuration);
-        statementTemplateHandler.curdMethod(configuration);
         return configuration;
     }
 

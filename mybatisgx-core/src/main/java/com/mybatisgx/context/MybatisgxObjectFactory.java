@@ -30,7 +30,7 @@ public class MybatisgxObjectFactory {
 
         OBJECTO_MAP.put(MethodInfoHandler.class, new MethodInfoHandler(configuration));
 
-        OBJECTO_MAP.put(StatementTemplateHandler.class, new StatementTemplateHandler(configuration));
+        OBJECTO_MAP.put(StatementTemplateHandler.class, new StatementTemplateHandler());
         OBJECTO_MAP.put(SelectTemplateHandler.class, new SelectTemplateHandler(configuration));
         OBJECTO_MAP.put(LimitTemplateHandler.class, new LimitTemplateHandler(configuration));
 

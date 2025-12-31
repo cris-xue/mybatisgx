@@ -4,6 +4,7 @@ import com.mybatisgx.annotation.Entity;
 import com.mybatisgx.annotation.QueryEntity;
 import com.mybatisgx.dao.Dao;
 import com.mybatisgx.executor.keygen.KeyGenerator;
+import com.mybatisgx.ext.builder.xml.MybatisgxXMLMapperBuilder;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.model.EntityInfo;
 import com.mybatisgx.model.MapperInfo;
@@ -16,8 +17,13 @@ import com.mybatisgx.template.select.ResultMapTemplateHandler;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.parsing.XNode;
+import org.apache.ibatis.session.Configuration;
+import org.dom4j.Document;
+import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -26,7 +32,9 @@ import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.util.ClassUtils;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +57,7 @@ public class MybatisgxContextLoader {
     private String[] entityBasePackages;
     private String[] daoBasePackages;
     private List<Resource> repositoryResourceList;
+    private MybatisgxConfiguration configuration;
 
     public MybatisgxContextLoader(
             String[] entityBasePackages,
@@ -59,6 +68,7 @@ public class MybatisgxContextLoader {
         this.entityBasePackages = entityBasePackages;
         this.daoBasePackages = daoBasePackages;
         this.repositoryResourceList = repositoryResourceList;
+        this.configuration = configuration;
         MybatisgxObjectFactory.register(configuration, keyGenerator);
     }
 
@@ -81,6 +91,8 @@ public class MybatisgxContextLoader {
 
         this.processDao(totalResourceList);
         this.processTemplate();
+
+        this.curdMethod(configuration);
 
         long endTime = System.currentTimeMillis();
         LOGGER.info("Mybatisgx process total time {} ms", endTime - startTime);
@@ -198,5 +210,57 @@ public class MybatisgxContextLoader {
             LOGGER.error(e.getMessage(), e);
         }
         return null;
+    }
+
+    public void curdMethod(Configuration configuration) {
+        try {
+            List<Resource> mapperResourceList = this.getMapper();
+            for (Resource mapperResource : mapperResourceList) {
+                InputStream inputStream = null;
+                try {
+                    inputStream = mapperResource.getInputStream();
+                    MybatisgxXMLMapperBuilder xmlMapperBuilder = new MybatisgxXMLMapperBuilder(
+                            inputStream, configuration, mapperResource.toString(), configuration.getSqlFragments()
+                    );
+                    xmlMapperBuilder.parse();
+                } finally {
+                    if (inputStream != null) {
+                        inputStream.close();
+                    }
+                }
+            }
+        } catch (IOException e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+    }
+
+    private List<Resource> getMapper() throws IOException {
+        List<Resource> mapperResourceList = new ArrayList<>();
+        List<MapperInfo> mapperInfoList = MapperInfoContextHolder.getMapperInfoList();
+        for (MapperInfo mapperInfo : mapperInfoList) {
+            ByteArrayInputStream bais = null;
+            try {
+                String namespace = mapperInfo.getNamespace();
+                String mapperXml = createMapperXml(namespace);
+                bais = new ByteArrayInputStream(mapperXml.getBytes());
+                Resource resource = new InputStreamResource(bais, namespace);
+                mapperResourceList.add(resource);
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
+            } finally {
+                if (bais != null) {
+                    bais.close();
+                }
+            }
+        }
+        return mapperResourceList;
+    }
+
+    private String createMapperXml(String namespace) {
+        Document document = DocumentHelper.createDocument();
+        document.addDocType("mapper", "-//mybatis.org//DTD Mapper 3.0//EN", "http://mybatis.org/dtd/mybatis-3-mapper.dtd");
+        Element element = document.addElement("mapper");
+        element.addAttribute("namespace", namespace);
+        return document.asXML();
     }
 }

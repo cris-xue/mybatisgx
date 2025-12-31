@@ -4,7 +4,6 @@ import com.mybatisgx.context.MybatisgxContextLoader;
 import com.mybatisgx.dao.Dao;
 import com.mybatisgx.executor.keygen.KeyGenerator;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
-import com.mybatisgx.template.StatementTemplateHandler;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.slf4j.Logger;
@@ -66,9 +65,6 @@ public class SqlSessionFactoryBeanPostProcessor implements BeanPostProcessor {
                         (MybatisgxConfiguration) configuration
                 );
                 mybatisgxContextLoader.load();
-
-                StatementTemplateHandler statementTemplateHandler = new StatementTemplateHandler((MybatisgxConfiguration) configuration);
-                statementTemplateHandler.curdMethod(configuration);
             }
         }
         return bean;

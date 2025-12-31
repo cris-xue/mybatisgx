@@ -4,7 +4,6 @@ import com.mybatisgx.context.MapperInfoContextHolder;
 import com.mybatisgx.context.MybatisgxObjectFactory;
 import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.ext.builder.xml.MybatisgxXMLMapperBuilder;
-import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.model.MapperInfo;
 import com.mybatisgx.model.MethodInfo;
 import com.mybatisgx.template.select.SelectTemplateHandler;
@@ -32,9 +31,6 @@ import java.util.Map;
 public class StatementTemplateHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(StatementTemplateHandler.class);
-
-    public StatementTemplateHandler(MybatisgxConfiguration configuration) {
-    }
 
     public Map<String, XNode> execute(MapperInfo mapperInfo) {
         List<MethodInfo> methodInfoList = mapperInfo.getMethodInfoList();

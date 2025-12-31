@@ -2,6 +2,7 @@ package com.mybatisgx.template;
 
 import com.google.common.collect.Lists;
 import com.mybatisgx.annotation.LogicDelete;
+import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.model.*;
 import com.mybatisgx.utils.TypeUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -218,7 +219,7 @@ public class WhereTemplateHandler {
                     return ClassCategory.COMPLEX;
                 }
             }
-            throw new RuntimeException("columnInfoClassCategory is null");
+            throw new MybatisgxException("columnInfoClassCategory is null");
         }
 
         protected String getTestExpression(List<String> pathItemList) {

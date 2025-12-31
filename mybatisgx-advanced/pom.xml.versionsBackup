@@ -6,12 +6,12 @@
 	<parent>
 		<groupId>com.mybatisgx</groupId>
 		<artifactId>mybatisgx</artifactId>
-		<version>0.0.1</version>
+		<version>0.0.1-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<artifactId>mybatisgx-core-patch</artifactId>
-	<name>mybatisgx-core-patch</name>
+	<artifactId>mybatisgx-advanced</artifactId>
+	<name>mybatisgx-advanced</name>
 	<url>http://www.mybatisgx.com</url>
 	
 	<properties>
@@ -20,8 +20,8 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.mybatis</groupId>
-			<artifactId>mybatis</artifactId>
+			<groupId>com.mybatisgx</groupId>
+			<artifactId>mybatisgx-core</artifactId>
 		</dependency>
 	</dependencies>
 	

@@ -6,25 +6,39 @@
 	<parent>
 		<groupId>com.mybatisgx</groupId>
 		<artifactId>mybatisgx</artifactId>
-		<version>0.0.1</version>
+		<version>0.0.1-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
-
-	<artifactId>mybatisgx-core-patch</artifactId>
-	<name>mybatisgx-core-patch</name>
+	
+	<artifactId>mybatisgx-spring</artifactId>
+	<name>mybatisgx-spring</name>
 	<url>http://www.mybatisgx.com</url>
 	
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
-
+	
 	<dependencies>
 		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+			<version>5.3.37</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-beans</artifactId>
+			<version>5.3.37</version>
+		</dependency>
+		<dependency>
 			<groupId>org.mybatis</groupId>
-			<artifactId>mybatis</artifactId>
+			<artifactId>mybatis-spring</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.mybatisgx</groupId>
+			<artifactId>mybatisgx-core</artifactId>
 		</dependency>
 	</dependencies>
-	
+
 	<build>
 		<finalName>${project.artifactId}</finalName>
 	</build>

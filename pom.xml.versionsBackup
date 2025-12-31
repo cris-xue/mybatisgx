@@ -6,7 +6,7 @@
 	<groupId>com.mybatisgx</groupId>
 	<artifactId>mybatisgx</artifactId>
 	<packaging>pom</packaging>
-	<version>0.0.1</version>
+	<version>0.0.1-SNAPSHOT</version>
 	<name>mybatisgx</name>
 	<url>http://www.mybatisgx.com</url>
 	

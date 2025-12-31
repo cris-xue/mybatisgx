@@ -92,7 +92,7 @@ public class MybatisgxContextLoader {
         this.processDao(totalResourceList);
         this.processTemplate();
 
-        this.curdMethod(configuration);
+        this.registerMapperTemplate(configuration);
 
         long endTime = System.currentTimeMillis();
         LOGGER.info("Mybatisgx process total time {} ms", endTime - startTime);
@@ -212,10 +212,9 @@ public class MybatisgxContextLoader {
         return null;
     }
 
-    public void curdMethod(Configuration configuration) {
+    public void registerMapperTemplate(Configuration configuration) {
         try {
-            List<Resource> mapperResourceList = this.getMapper();
-            for (Resource mapperResource : mapperResourceList) {
+            for (Resource mapperResource : this.getMapperList()) {
                 InputStream inputStream = null;
                 try {
                     inputStream = mapperResource.getInputStream();
@@ -234,7 +233,7 @@ public class MybatisgxContextLoader {
         }
     }
 
-    private List<Resource> getMapper() throws IOException {
+    private List<Resource> getMapperList() throws IOException {
         List<Resource> mapperResourceList = new ArrayList<>();
         List<MapperInfo> mapperInfoList = MapperInfoContextHolder.getMapperInfoList();
         for (MapperInfo mapperInfo : mapperInfoList) {

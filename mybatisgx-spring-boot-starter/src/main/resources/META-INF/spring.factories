@@ -1,0 +1,5 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+    com.mybatisgx.boot.MybatisgxAutoConfiguration
+
+org.springframework.boot.autoconfigure.AutoConfigurationImportFilter=\
+    com.mybatisgx.boot.MybatisgxExcludeAutoConfigFilter

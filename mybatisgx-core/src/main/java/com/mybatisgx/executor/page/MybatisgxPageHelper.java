@@ -1,0 +1,30 @@
+package com.mybatisgx.executor.page;
+
+import com.github.pagehelper.PageHelper;
+
+import java.util.List;
+import java.util.function.Supplier;
+
+/**
+ * 一句话描述
+ * @author 薛承城
+ * @date 2025/11/13 19:45
+ */
+public class MybatisgxPageHelper {
+
+    public static <T> T startPage(Pageable pageable, T target) {
+        PageHelper.startPage(pageable.getPageNo(), pageable.getPageSize());
+        return target;
+    }
+
+    public static <T> Page<T> startPage(Pageable pageable, Supplier<List<T>> target) {
+        com.github.pagehelper.Page page = PageHelper.startPage(pageable.getPageNo(), pageable.getPageSize());
+        List<T> list = target.get();
+        return new Page<>(page.size(), list);
+    }
+
+    public static <T> Page<T> startPage(Pageable pageable) {
+        PageHelper.startPage(pageable.getPageNo(), pageable.getPageSize());
+        return new Page();
+    }
+}

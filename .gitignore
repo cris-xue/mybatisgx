@@ -15,7 +15,11 @@ target
 .factorypath
 .idea
 *.iml
+doc/*
 
 # maven
 *.releaseBackup
 release.properties
+
+# other
+.lingma

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <properties>
+        <property name="dbType" value="MySQL"/>
+    </properties>
+    <!-- 2. 全局配置设置 -->
+    <settings>
+        <!-- 延迟加载开关 -->
+        <setting name="lazyLoadingEnabled" value="true"/>
+        <setting name="aggressiveLazyLoading" value="false"/>
+        <setting name="lazyLoadTriggerMethods" value="get"/>
+
+        <!-- 开启自动驼峰命名映射 -->
+        <setting name="mapUnderscoreToCamelCase" value="true"/>
+
+        <!-- 日志实现 -->
+        <setting name="logImpl" value="STDOUT_LOGGING"/>
+    </settings>
+    <!-- 6. 插件（拦截器） -->
+    <plugins>
+        <!-- 分页插件 -->
+        <plugin interceptor="com.github.pagehelper.PageInterceptor">
+            <property name="helperDialect" value="${dbType}"/>
+        </plugin>
+    </plugins>
+    <environments default="${dbType}">
+        <environment id="MySQL">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <property name="driver" value="org.h2.Driver"/>
+                <property name="url" value="jdbc:h2:mem:test_db;MODE=MySQL;LOCK_TIMEOUT=10000;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE"/>
+                <property name="username" value="sa"/>
+                <property name="password" value=""/>
+            </dataSource>
+        </environment>
+        <environment id="Oracle">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <property name="driver" value="org.h2.Driver"/>
+                <property name="url" value="jdbc:h2:mem:test_db;MODE=Oracle;LOCK_TIMEOUT=10000;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE"/>
+                <property name="username" value="sa"/>
+                <property name="password" value=""/>
+            </dataSource>
+        </environment>
+        <environment id="PostgreSQL">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <property name="driver" value="org.h2.Driver"/>
+                <property name="url" value="jdbc:h2:mem:test_db;MODE=PostgreSQL;LOCK_TIMEOUT=10000;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE"/>
+                <property name="username" value="sa"/>
+                <property name="password" value=""/>
+            </dataSource>
+        </environment>
+    </environments>
+    <databaseIdProvider type="com.mybatisgx.ext.mapping.H2DatabaseIdProvider">
+        <property name="MySQL" value="MySQL"/>
+        <property name="Oracle" value="Oracle"/>
+        <property name="PostgreSQL" value="PostgreSQL"/>
+    </databaseIdProvider>
+    <mappers>
+        <!--<mapper resource="com/mybatisgx/simple/dao/UserMapper.xml"/>-->
+    </mappers>
+</configuration>

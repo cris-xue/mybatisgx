@@ -1,0 +1,225 @@
+package com.mybatisgx.template.select;
+
+import com.mybatisgx.exception.MybatisgxException;
+import com.mybatisgx.model.*;
+import com.mybatisgx.utils.TypeUtils;
+import com.mybatisgx.utils.XmlUtils;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.ibatis.parsing.XNode;
+import org.apache.ibatis.parsing.XPathParser;
+import org.dom4j.Document;
+import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * 结果集模板处理
+ * @author 薛承城
+ * @date 2025/12/31 12:43
+ */
+public class ResultMapTemplateHandler {
+
+    private static final Logger logger = LoggerFactory.getLogger(ResultMapTemplateHandler.class);
+
+    public Map<String, XNode> execute(MapperInfo mapperInfo) {
+        Map<String, XNode> xNodeMap = new HashMap();
+        List<ResultMapInfo> resultMapInfoList = mapperInfo.getResultMapInfoList();
+        for (ResultMapInfo resultMapInfo : resultMapInfoList) {
+            Document document = DocumentHelper.createDocument();
+            Element resultMapElement = ResultMapHelper.addResultMapElement(document, resultMapInfo);
+            if (TypeUtils.typeEquals(resultMapInfo, ResultMapInfo.class, SimpleNestedResultMapInfo.class)) {
+                this.addIdColumnElement(resultMapElement, resultMapInfo);
+                this.addColumnElement(resultMapElement, resultMapInfo);
+                this.addRelationColumnElement(resultMapElement, resultMapInfo);
+                this.addRelationResultMapElement(resultMapElement, resultMapInfo);
+            }
+            if (TypeUtils.typeEquals(resultMapInfo, BatchNestedResultMapInfo.class)) {
+                this.addIdColumnElement(resultMapElement, resultMapInfo);
+                // this.addRelationColumnElement(resultMapElement, resultMapInfo);
+                this.addRelationResultMapElement(resultMapElement, resultMapInfo);
+            }
+            String resultMapXmlString = document.asXML();
+            logger.debug("select resultMap: \n{}", resultMapXmlString);
+
+            XPathParser xPathParser = XmlUtils.processXml(resultMapXmlString);
+            XNode xNode = xPathParser.evalNode("/mapper/resultMap");
+            xNodeMap.put(resultMapInfo.getId(), xNode);
+        }
+        return xNodeMap;
+    }
+
+    private void addIdColumnElement(Element resultMapElement, ResultMapInfo resultMapInfo) {
+        IdColumnInfo idColumnInfo = resultMapInfo.getEntityInfo().getIdColumnInfo();
+        List<ColumnInfo> columnInfoComposites = idColumnInfo.getComposites();
+        if (ObjectUtils.isEmpty(columnInfoComposites)) {
+            ResultMapHelper.idColumnElement(resultMapElement, resultMapInfo, idColumnInfo);
+        } else {
+            for (ColumnInfo columnInfoComposite : columnInfoComposites) {
+                String javaColumnName = String.format("%s.%s", idColumnInfo.getJavaColumnName(), columnInfoComposite.getJavaColumnName());
+                ColumnInfo composite = new ColumnInfo.Builder().columnInfo(columnInfoComposite).javaColumnName(javaColumnName).build();
+                ResultMapHelper.idColumnElement(resultMapElement, resultMapInfo, composite);
+            }
+        }
+    }
+
+    private void addColumnElement(Element resultMapElement, ResultMapInfo resultMapInfo) {
+        for (ColumnInfo tableColumnInfo : resultMapInfo.getTableColumnInfoList()) {
+            if (TypeUtils.typeEquals(tableColumnInfo, ColumnInfo.class)) {
+                ResultMapHelper.resultColumnElement(resultMapElement, resultMapInfo, tableColumnInfo);
+            }
+        }
+    }
+
+    /**
+     * 添加字段关系节点，主要实现纯对象关系映射
+     * <code>
+     * <resultMap id="resultMapId" type="User">
+     * <id property="id" column="id"/>
+     * <id property="code" column="code"/>
+     * <column property="userDetail.user.id" column="id"/>
+     * <column property="userDetail.user.code" column="code"/>
+     * <association property="userDetail" column="{user_id=id,user_code=code}"/>
+     * </resultMap>
+     * <resultMap id="resultMapId" type="UserDetail">
+     * <column property="user.id" column="user_id"/>
+     * <column property="user.code" column="user_code"/>
+     * <association property="user" column="{user_id=user_id,user_code=user_code}"/>
+     * </resultMap>
+     * </code>
+     *
+     * @param resultMapElement
+     * @param resultMapInfo
+     */
+    private void addRelationColumnElement(Element resultMapElement, ResultMapInfo resultMapInfo) {
+        EntityInfo resultMapEntityInfo = resultMapInfo.getEntityInfo();
+        for (ColumnInfo columnInfo : resultMapEntityInfo.getRelationColumnInfoList()) {
+            RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
+            RelationColumnInfo mappedByRelationColumnInfo = relationColumnInfo.getMappedByRelationColumnInfo();
+            // 如果不是多对多并且是关系维护方【mappedBy为空表示是关系维护方】
+            if (relationColumnInfo.getRelationType() != RelationType.MANY_TO_MANY && mappedByRelationColumnInfo == null) {
+                for (ForeignKeyInfo inverseForeignKeyColumnInfo : relationColumnInfo.getInverseForeignKeyInfoList()) {
+                    ColumnInfo foreignKeyColumnInfo = inverseForeignKeyColumnInfo.getColumnInfo();
+                    ColumnInfo referencedColumnInfo = inverseForeignKeyColumnInfo.getReferencedColumnInfo();
+                    if (TypeUtils.typeEquals(referencedColumnInfo, IdColumnInfo.class)) {
+                        List<ColumnInfo> idColumnInfoComposites = referencedColumnInfo.getComposites();
+                        if (ObjectUtils.isEmpty(idColumnInfoComposites)) {
+                            String javaColumnName = String.format("%s.%s", relationColumnInfo.getJavaColumnName(), referencedColumnInfo.getJavaColumnName());
+                            ColumnInfo composite = new ColumnInfo.Builder().columnInfo(foreignKeyColumnInfo).javaColumnName(javaColumnName).build();
+                            ResultMapHelper.resultColumnElement(resultMapElement, resultMapInfo, composite);
+                        } else {
+                            for (ColumnInfo idColumnComposite : idColumnInfoComposites) {
+                                String javaColumnName = String.format("%s.%s.%s", relationColumnInfo.getJavaColumnName(), referencedColumnInfo.getJavaColumnName(), idColumnComposite.getJavaColumnName());
+                                ColumnInfo composite = new ColumnInfo.Builder().columnInfo(foreignKeyColumnInfo).javaColumnName(javaColumnName).build();
+                                ResultMapHelper.resultColumnElement(resultMapElement, resultMapInfo, composite);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * 添加结果集关联节点
+     *
+     * @param resultMapElement
+     * @param resultMapInfo
+     */
+    private void addRelationResultMapElement(Element resultMapElement, ResultMapInfo resultMapInfo) {
+        for (ResultMapInfo composite : resultMapInfo.getComposites()) {
+            // 是否存在独立的 resultMap，如果存在，为子查询，如果不存在，则为join关联查询
+            if (composite.getNestedSelect() != null) {
+                this.subSelect(resultMapElement, composite);
+            } else {
+                Element resultMapRelationElement = this.joinSelect(resultMapElement, composite);
+                this.addRelationResultMapElement(resultMapRelationElement, composite);
+            }
+        }
+    }
+
+    private void subSelect(Element resultMapElement, ResultMapInfo resultMapInfo) {
+        String column = this.getColumn(resultMapInfo);
+        RelationColumnInfo relationColumnInfo = (RelationColumnInfo) resultMapInfo.getColumnInfo();
+        RelationType relationType = relationColumnInfo.getRelationType();
+        if (relationType == RelationType.ONE_TO_ONE || relationType == RelationType.MANY_TO_ONE) {
+            ResultMapHelper.associationColumnElement(resultMapElement, resultMapInfo, column);
+        }
+        if (relationType == RelationType.ONE_TO_MANY || relationType == RelationType.MANY_TO_MANY) {
+            ResultMapHelper.collectionColumnElement(resultMapElement, resultMapInfo, column);
+        }
+    }
+
+    private Element joinSelect(Element resultMapElement, ResultMapInfo resultMapInfo) {
+        RelationColumnInfo relationColumnInfo = (RelationColumnInfo) resultMapInfo.getColumnInfo();
+        RelationType relationType = relationColumnInfo.getRelationType();
+        if (relationType == RelationType.ONE_TO_ONE || relationType == RelationType.MANY_TO_ONE) {
+            Element resultMapRelationElement = ResultMapHelper.joinAssociationColumnElement(resultMapElement, resultMapInfo);
+            this.addIdColumnElement(resultMapRelationElement, resultMapInfo);
+            this.addColumnElement(resultMapRelationElement, resultMapInfo);
+            return resultMapRelationElement;
+        }
+        if (relationType == RelationType.ONE_TO_MANY || relationType == RelationType.MANY_TO_MANY) {
+            Element resultMapCollectionElement = ResultMapHelper.joinCollectionColumnElement(resultMapElement, resultMapInfo);
+            this.addIdColumnElement(resultMapCollectionElement, resultMapInfo);
+            this.addColumnElement(resultMapCollectionElement, resultMapInfo);
+            if (resultMapInfo.isMappedBy()) {
+                this.addRelationColumnElement(resultMapCollectionElement, resultMapInfo);
+            }
+            return resultMapCollectionElement;
+        }
+        throw new MybatisgxException("%s没有关联注解", relationColumnInfo.getJavaTypeName());
+    }
+
+    /**
+     * 生成关系查询参数，参数名称带有业务属性，如查询用户，参数名为user_id，查询角色，参数名为role_id
+     * <code>
+     * <association property="user" column="{user_id=user_id}" javaType="com.lc.mybatisx.test.model.entity.User" fetchType="lazy" select="findUser"/>
+     * <collection property="roleList" column="{user_id=id}" javaType="java.util.List" ofType="com.lc.mybatisx.test.model.entity.Role" fetchType="lazy" select="findRoleList"/>
+     * </code>
+     *
+     * @param resultMapRelationInfo
+     * @return
+     */
+    private String getColumn(ResultMapInfo resultMapRelationInfo) {
+        RelationColumnInfo relationColumnInfo = (RelationColumnInfo) resultMapRelationInfo.getColumnInfo();
+        RelationColumnInfo mappedByRelationColumnInfo = relationColumnInfo.getMappedByRelationColumnInfo();
+        Map<String, String> column = new HashMap();
+        if (relationColumnInfo.getRelationType() != RelationType.MANY_TO_MANY) {
+            if (mappedByRelationColumnInfo != null) {
+                for (ForeignKeyInfo inverseForeignKeyInfo : mappedByRelationColumnInfo.getInverseForeignKeyInfoList()) {
+                    ColumnInfo foreignKeyColumnInfo = inverseForeignKeyInfo.getColumnInfo();
+                    ColumnInfo referencedColumnInfo = inverseForeignKeyInfo.getReferencedColumnInfo();
+                    if (ObjectUtils.isNotEmpty(referencedColumnInfo.getComposites())) {
+                        referencedColumnInfo = referencedColumnInfo.getComposites().get(0);
+                    }
+                    column.put(foreignKeyColumnInfo.getJavaColumnName(), referencedColumnInfo.getTableColumnNameAlias(resultMapRelationInfo));
+                }
+            } else {
+                for (ForeignKeyInfo inverseForeignKeyInfo : relationColumnInfo.getInverseForeignKeyInfoList()) {
+                    ColumnInfo foreignKeyColumnInfo = inverseForeignKeyInfo.getColumnInfo();
+                    column.put(foreignKeyColumnInfo.getJavaColumnName(), foreignKeyColumnInfo.getTableColumnNameAlias(resultMapRelationInfo));
+                }
+            }
+        } else {
+            if (mappedByRelationColumnInfo != null) {
+                for (ForeignKeyInfo inverseForeignKeyInfo : mappedByRelationColumnInfo.getInverseForeignKeyInfoList()) {
+                    ColumnInfo foreignKeyColumnInfo = inverseForeignKeyInfo.getColumnInfo();
+                    ColumnInfo referencedColumnInfo = inverseForeignKeyInfo.getReferencedColumnInfo();
+                    column.put(foreignKeyColumnInfo.getJavaColumnName(), referencedColumnInfo.getTableColumnNameAlias(resultMapRelationInfo));
+                }
+            } else {
+                for (ForeignKeyInfo foreignKeyInfo : relationColumnInfo.getForeignKeyInfoList()) {
+                    ColumnInfo foreignKeyColumnInfo = foreignKeyInfo.getColumnInfo();
+                    ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();
+                    column.put(foreignKeyColumnInfo.getJavaColumnName(), referencedColumnInfo.getTableColumnNameAlias(resultMapRelationInfo));
+                }
+            }
+        }
+        return column.toString();
+    }
+}

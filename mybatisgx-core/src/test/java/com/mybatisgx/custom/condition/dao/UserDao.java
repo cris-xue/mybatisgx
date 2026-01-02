@@ -1,7 +1,7 @@
 package com.mybatisgx.custom.condition.dao;
 
 import com.mybatisgx.annotation.Dynamic;
-import com.mybatisgx.annotation.Sql;
+import com.mybatisgx.annotation.Statement;
 import com.mybatisgx.custom.condition.entity.User;
 import com.mybatisgx.custom.condition.entity.UserQuery;
 import com.mybatisgx.dao.SimpleDao;
@@ -58,6 +58,6 @@ public interface UserDao extends SimpleDao<User, UserQuery, Long> {
 
     List<User> findByNameIsNullAndNameIsNotNullAndNameNotNull();
 
-    @Sql("findByIdAnd(NameLikeOrNameIn)")
+    @Statement("findByIdAnd(NameLikeOrNameIn)")
     List<User> findCustomSql(Long id, String name, List<String> nameList);
 }

@@ -32,9 +32,9 @@ public class MethodInfo {
      */
     private String methodName;
     /**
-     * 语法表达式
+     * 语义表达式
      */
-    private String sqlSyntaxExpression;
+    private String statementExpression;
     /**
      * 是否动态参数
      */
@@ -115,12 +115,12 @@ public class MethodInfo {
         this.methodName = methodName;
     }
 
-    public String getSqlSyntaxExpression() {
-        return sqlSyntaxExpression;
+    public String getStatementExpression() {
+        return statementExpression;
     }
 
-    public void setSqlSyntaxExpression(String sqlSyntaxExpression) {
-        this.sqlSyntaxExpression = sqlSyntaxExpression;
+    public void setStatementExpression(String statementExpression) {
+        this.statementExpression = statementExpression;
     }
 
     public Boolean getDynamic() {

@@ -105,10 +105,10 @@ public class MethodInfoHandler {
             Class<?> methodInterfaceClass = method.getDeclaringClass();
             this.methodNameParse(mapperInfo.getEntityInfo(), methodInfo, methodInterfaceClass);
             // 方法条件解析
-            Sql sql = method.getAnnotation(Sql.class);
-            if (sql != null) {
-                methodInfo.setSqlSyntaxExpression(sql.value());
-                this.sqlSyntaxExpressionParse(mapperInfo.getEntityInfo(), methodInfo);
+            Statement statement = method.getAnnotation(Statement.class);
+            if (statement != null) {
+                methodInfo.setStatementExpression(statement.value());
+                this.statementExpressionParse(mapperInfo.getEntityInfo(), methodInfo);
             }
 
             SelectItemInfo selectItemInfo = methodInfo.getSelectItemInfo();
@@ -247,8 +247,8 @@ public class MethodInfoHandler {
         }
     }
 
-    public void sqlSyntaxExpressionParse(EntityInfo entityInfo, MethodInfo methodInfo) {
-        mybatisgxSyntaxProcessor.execute(entityInfo, methodInfo, null, ConditionOriginType.METHOD_NAME, methodInfo.getSqlSyntaxExpression());
+    public void statementExpressionParse(EntityInfo entityInfo, MethodInfo methodInfo) {
+        mybatisgxSyntaxProcessor.execute(entityInfo, methodInfo, null, ConditionOriginType.METHOD_NAME, methodInfo.getStatementExpression());
     }
 
     /**

@@ -14,5 +14,5 @@ public @interface Table {
      * 表名
      * @return
      */
-    String name() default "";
+    String name();
 }

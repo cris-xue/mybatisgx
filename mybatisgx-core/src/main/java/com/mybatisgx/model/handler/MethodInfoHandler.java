@@ -78,6 +78,10 @@ public class MethodInfoHandler {
     private Map<String, MethodInfo> processMethod(List<Method> methodList, MapperInfo mapperInfo) {
         Map<String, MethodInfo> methodInfoMap = new LinkedHashMap<>();
         for (Method method : methodList) {
+            // 忽略default方法，default本质上已经有实现，不需要自动处理，这里也主要是为了支持批量操作的重载，默认可以不传参数。
+            if (method.isDefault()) {
+                continue;
+            }
             String methodName = method.getName();
             if (methodInfoMap.containsKey(methodName)) {
                 throw new MybatisgxException("dao接口方法无法重载，请修改方法名: %s", methodName);

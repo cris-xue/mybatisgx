@@ -19,6 +19,7 @@ doc/*
 
 # maven
 *.releaseBackup
+*.versionsBackup
 release.properties
 
 # other

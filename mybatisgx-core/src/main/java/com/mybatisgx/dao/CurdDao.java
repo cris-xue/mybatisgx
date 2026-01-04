@@ -18,6 +18,10 @@ public interface CurdDao<ENTITY, ID extends Serializable> extends Dao {
 
     int insert(ENTITY entity);
 
+    default int insertBatch(List<ENTITY> entityList) {
+        return this.insertBatch(entityList, 1000);
+    }
+
     @BatchOperation
     int insertBatch(@BatchData List<ENTITY> entityList, @BatchSize int batchSize);
 
@@ -26,10 +30,18 @@ public interface CurdDao<ENTITY, ID extends Serializable> extends Dao {
 
     int deleteById(@Param("id") ID id);
 
+    default int deleteBatchById(List<ID> ids) {
+        return this.deleteBatchById(ids, 1000);
+    }
+
     @BatchOperation
     int deleteBatchById(@BatchData List<ID> ids, @BatchSize int batchSize);
 
     int updateById(ENTITY entity);
+
+    default int updateBatchById(List<ENTITY> entityList) {
+        return this.updateBatchById(entityList, 1000);
+    }
 
     @BatchOperation
     int updateBatchById(@BatchData List<ENTITY> entityList, @BatchSize int batchSize);

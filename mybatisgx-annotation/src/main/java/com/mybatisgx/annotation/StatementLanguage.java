@@ -1,18 +1,18 @@
 package com.mybatisgx.annotation;
 
 /**
- * sql语法类型
+ * Statement语言
  * @author 薛承城
  * @date 2025/11/11 11:36
  */
-public enum SqlSyntaxType {
+public enum StatementLanguage {
 
     /**
-     * 方法名衍生（默认）
+     * 方法名衍生（默认）: findByAaaAnd(bbbOrCcc)、updateByIdAndName(bbbOrCcc)
      */
-    METHOD_NAME,
+    METHOD,
     /**
      * 对象语言：FROM User u WHERE u.name LIKE ?
      */
-    // OBJECT_LANGUAGE
+    // OBJECT
 }

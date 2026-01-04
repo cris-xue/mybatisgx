@@ -12,5 +12,9 @@ import java.lang.annotation.*;
 @Target({ElementType.FIELD})
 public @interface QueryColumn {
 
-    String value();
+    /**
+     * 查询字段比较运算符
+     * @return
+     */
+    QueryColumnComparisonOperator[] value();
 }

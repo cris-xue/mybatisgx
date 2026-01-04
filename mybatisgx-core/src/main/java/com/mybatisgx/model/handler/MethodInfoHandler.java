@@ -78,6 +78,10 @@ public class MethodInfoHandler {
     private Map<String, MethodInfo> processMethod(List<Method> methodList, MapperInfo mapperInfo) {
         Map<String, MethodInfo> methodInfoMap = new LinkedHashMap<>();
         for (Method method : methodList) {
+            // 忽略default方法，default本质上已经有实现，不需要自动处理，这里也主要是为了支持批量操作的重载，默认可以不传参数。
+            if (method.isDefault()) {
+                continue;
+            }
             String methodName = method.getName();
             if (methodInfoMap.containsKey(methodName)) {
                 throw new MybatisgxException("dao接口方法无法重载，请修改方法名: %s", methodName);
@@ -105,10 +109,10 @@ public class MethodInfoHandler {
             Class<?> methodInterfaceClass = method.getDeclaringClass();
             this.methodNameParse(mapperInfo.getEntityInfo(), methodInfo, methodInterfaceClass);
             // 方法条件解析
-            Sql sql = method.getAnnotation(Sql.class);
-            if (sql != null) {
-                methodInfo.setSqlSyntaxExpression(sql.value());
-                this.sqlSyntaxExpressionParse(mapperInfo.getEntityInfo(), methodInfo);
+            Statement statement = method.getAnnotation(Statement.class);
+            if (statement != null) {
+                methodInfo.setStatementExpression(statement.value());
+                this.statementExpressionParse(mapperInfo.getEntityInfo(), methodInfo);
             }
 
             SelectItemInfo selectItemInfo = methodInfo.getSelectItemInfo();
@@ -247,8 +251,8 @@ public class MethodInfoHandler {
         }
     }
 
-    public void sqlSyntaxExpressionParse(EntityInfo entityInfo, MethodInfo methodInfo) {
-        mybatisgxSyntaxProcessor.execute(entityInfo, methodInfo, null, ConditionOriginType.METHOD_NAME, methodInfo.getSqlSyntaxExpression());
+    public void statementExpressionParse(EntityInfo entityInfo, MethodInfo methodInfo) {
+        mybatisgxSyntaxProcessor.execute(entityInfo, methodInfo, null, ConditionOriginType.METHOD_NAME, methodInfo.getStatementExpression());
     }
 
     /**

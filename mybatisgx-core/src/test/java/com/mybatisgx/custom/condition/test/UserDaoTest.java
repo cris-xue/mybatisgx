@@ -84,7 +84,7 @@ public class UserDaoTest {
         }
 
         long startTime = System.currentTimeMillis();
-        int insertBatchCount = userDao.insertBatch(userList, 3000);
+        int insertBatchCount = userDao.insertBatch(userList);
         long endTime = System.currentTimeMillis();
 
         Assert.assertEquals(count, insertBatchCount);

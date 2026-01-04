@@ -155,6 +155,7 @@
 				<artifactId>maven-release-plugin</artifactId>
 				<version>3.0.1</version>
 				<configuration>
+					<pushChanges>false</pushChanges>
 					<tagNameFormat>mybatisgx-@{project.version}</tagNameFormat>
 				</configuration>
 			</plugin>

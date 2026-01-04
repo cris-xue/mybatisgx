@@ -20,10 +20,7 @@ import org.apache.ibatis.mapping.SqlCommandType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.util.*;
 
 /**
@@ -79,7 +76,7 @@ public class MethodInfoHandler {
         Map<String, MethodInfo> methodInfoMap = new LinkedHashMap<>();
         for (Method method : methodList) {
             // 忽略default方法，default本质上已经有实现，不需要自动处理，这里也主要是为了支持批量操作的重载，默认可以不传参数。
-            if (method.isDefault()) {
+            if (this.isIgnoredMethod(method)) {
                 continue;
             }
             String methodName = method.getName();
@@ -446,6 +443,31 @@ public class MethodInfoHandler {
 
     private String getNamespaceMethodName(MapperInfo mapperInfo, String methodName) {
         return String.format("%s.%s", mapperInfo.getNamespace(), methodName);
+    }
+
+    /**
+     * 忽略方法
+     * @param method
+     * @return
+     */
+    private boolean isIgnoredMethod(Method method) {
+        int modifiers = method.getModifiers();
+        if (Modifier.isStatic(modifiers)) {
+            return true;
+        }
+        if (Modifier.isPrivate(modifiers)) {
+            return true;
+        }
+        if (method.isDefault()) {
+            return true;
+        }
+        if (method.isSynthetic()) {
+            return true;
+        }
+        if (method.isBridge()) {
+            return true;
+        }
+        return false;
     }
 
     public ClassCategory getClassCategory(Type type) {

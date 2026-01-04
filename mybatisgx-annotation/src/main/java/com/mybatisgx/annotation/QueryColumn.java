@@ -16,5 +16,5 @@ public @interface QueryColumn {
      * 查询字段比较运算符
      * @return
      */
-    QueryColumnComparisonOperator value();
+    QueryColumnComparisonOperator[] value();
 }

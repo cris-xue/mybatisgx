@@ -118,16 +118,6 @@ public interface MethodNameParserListener extends ParseTreeListener {
 	 */
 	void exitSelect_count(MethodNameParser.Select_countContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#select_exist}.
-	 * @param ctx the parse tree
-	 */
-	void enterSelect_exist(MethodNameParser.Select_existContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#select_exist}.
-	 * @param ctx the parse tree
-	 */
-	void exitSelect_exist(MethodNameParser.Select_existContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link MethodNameParser#where_clause}.
 	 * @param ctx the parse tree
 	 */
@@ -187,16 +177,6 @@ public interface MethodNameParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitField_comparison_op_clause(MethodNameParser.Field_comparison_op_clauseContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#group_by_clause}.
-	 * @param ctx the parse tree
-	 */
-	void enterGroup_by_clause(MethodNameParser.Group_by_clauseContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#group_by_clause}.
-	 * @param ctx the parse tree
-	 */
-	void exitGroup_by_clause(MethodNameParser.Group_by_clauseContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MethodNameParser#order_by_clause}.
 	 * @param ctx the parse tree
@@ -298,16 +278,6 @@ public interface MethodNameParserListener extends ParseTreeListener {
 	 */
 	void exitComparison_null_op(MethodNameParser.Comparison_null_opContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#group_by}.
-	 * @param ctx the parse tree
-	 */
-	void enterGroup_by(MethodNameParser.Group_byContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#group_by}.
-	 * @param ctx the parse tree
-	 */
-	void exitGroup_by(MethodNameParser.Group_byContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link MethodNameParser#order_by}.
 	 * @param ctx the parse tree
 	 */
@@ -337,26 +307,6 @@ public interface MethodNameParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitLimit_top(MethodNameParser.Limit_topContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#limit_first}.
-	 * @param ctx the parse tree
-	 */
-	void enterLimit_first(MethodNameParser.Limit_firstContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#limit_first}.
-	 * @param ctx the parse tree
-	 */
-	void exitLimit_first(MethodNameParser.Limit_firstContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#limit_last}.
-	 * @param ctx the parse tree
-	 */
-	void enterLimit_last(MethodNameParser.Limit_lastContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#limit_last}.
-	 * @param ctx the parse tree
-	 */
-	void exitLimit_last(MethodNameParser.Limit_lastContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MethodNameParser#field_clause}.
 	 * @param ctx the parse tree

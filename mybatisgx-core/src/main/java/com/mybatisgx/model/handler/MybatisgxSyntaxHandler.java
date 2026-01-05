@@ -95,9 +95,6 @@ public class MybatisgxSyntaxHandler {
             if (selectItemContext.select_count() != null) {
                 selectItemInfo.setSelectItemType(SelectItemType.COUNT);
             }
-            if (selectItemContext.select_exist() != null) {
-                throw new UnsupportedOperationException("暂不支持exist");
-            }
             methodInfo.setSelectItemInfo(selectItemInfo);
 
             if (selectItemContext.limit() != null) {

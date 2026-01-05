@@ -28,24 +28,6 @@ public @interface Column {
     String name() default "";
 
     /**
-     * 是否允许为空
-     * @return
-     */
-    // boolean nullable() default true;
-
-    /**
-     * 是否允许插入
-     * @return
-     */
-    // boolean insertable() default false;
-
-    /**
-     * 是否允许更新
-     * @return
-     */
-    // boolean updatable() default false;
-
-    /**
      * 数据库字段的类型定义描述，仅作为元信息使用。
      *
      * 不用于自动建表，仅用于 SQL 生成或特殊场景下的字段处理。

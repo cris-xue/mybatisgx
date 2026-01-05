@@ -1,5 +1,6 @@
 package com.mybatisgx.model.handler.test;
 
+import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.model.ConditionInfo;
 import com.mybatisgx.model.ConditionOriginType;
 import com.mybatisgx.model.EntityInfo;
@@ -72,18 +73,41 @@ public class MethodNameAstHandlerTest {
         Assert.assertEquals("NameLike", conditionInfo4.getOriginSegment());
     }
 
-    @Test(expected = RuntimeException.class)
-    public void test10() {
+    @Test
+    public void test03() {
         // 测试方法名中的条件在实体中不存在
         EntityInfo entityInfo = entityInfoHandler.execute(User.class);
         MethodInfo methodInfo = new MethodInfo();
         MybatisgxSyntaxProcessor processor = this.buildProcessor();
-        processor.execute(
-                entityInfo,
-                methodInfo,
-                null,
-                ConditionOriginType.METHOD_NAME,
-                "findByName1"
-        );
+        try {
+            processor.execute(
+                    entityInfo,
+                    methodInfo,
+                    null,
+                    ConditionOriginType.METHOD_NAME,
+                    "findByName1"
+            );
+        } catch (MybatisgxException e) {
+            Assert.assertEquals("方法条件或者实体中条件与数据库库实体无法对应：name1", e.getMessage());
+        }
+    }
+
+    @Test
+    public void test04() {
+        // 测试方法名中存在错误语法
+        EntityInfo entityInfo = entityInfoHandler.execute(User.class);
+        MethodInfo methodInfo = new MethodInfo();
+        MybatisgxSyntaxProcessor processor = this.buildProcessor();
+        try {
+            processor.execute(
+                    entityInfo,
+                    methodInfo,
+                    null,
+                    ConditionOriginType.METHOD_NAME,
+                    "findCustomByName"
+            );
+        } catch (MybatisgxException e) {
+            Assert.assertEquals("语法错误，在(1:4)，非法输入：Custom，当前位置可使用：By、OrderBy、top", e.getMessage());
+        }
     }
 }

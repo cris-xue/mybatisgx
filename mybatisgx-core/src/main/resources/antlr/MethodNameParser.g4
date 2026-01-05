@@ -21,7 +21,6 @@ select_statement: select_item where_clause order_by_clause? ;
 select_item: (select_column limit? | select_count) ignore_reserved_word ;
 select_column: SELECT_COLUMN_ACTION ;
 select_count: SELECT_COUNT_ACTION ;
-// select_exist: SELECT_EXIST_ACTION ;
 
 // 条件语法   ByNameLikeAndAgeEq
 where_clause: (where_start condition_expression)? ignore_reserved_word? ;
@@ -41,9 +40,6 @@ condition_term: field_comparison_op_clause | (left_bracket condition_expression 
 // 解析方法名和实体字段
 field_comparison_op_clause: field_clause ((comparison_not_op? comparison_op) | comparison_null_op)? ;
 
-// 分组 GroupByName
-// group_by_clause: group_by field_clause ;
-
 // 排序 OrderByNameDesc、OrderByName
 order_by_clause: order_by order_by_item_clause* ;
 order_by_item_clause: field_clause order_by_direction ;
@@ -59,12 +55,9 @@ logic_op_or: LOGIC_OP_OR ;
 comparison_op: COMPARISON_OP ;
 comparison_not_op: COMPARISON_NOT_OP ;
 comparison_null_op: COMPARISON_NULL_OP ;
-// group_by: GROUP_BY ;
 order_by: ORDER_BY ;
 order_by_direction: ORDER_BY_DIRECTION ;
 limit_top: LIMIT_TOP ;
-// limit_first: LIMIT_FIRST ;
-// limit_last: LIMIT_LAST ;
 field_clause: (FIELD)+ ;
 left_bracket: LEFT_BRACKET ;
 right_bracket: RIGHT_BRACKET ;

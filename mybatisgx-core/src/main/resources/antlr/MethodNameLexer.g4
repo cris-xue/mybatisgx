@@ -7,7 +7,6 @@ DELETE_ACTION: 'delete' | 'remove' ;
 UPDATE_ACTION: 'update' | 'update' | 'modify' ;
 SELECT_COLUMN_ACTION: 'find' | 'get' | 'select' | 'query' ;
 SELECT_COUNT_ACTION: 'count' ;
-// SELECT_EXIST_ACTION: 'exist' ;
 BY: 'By' ;
 LOGIC_OP_AND: 'And' ;
 LOGIC_OP_OR: 'Or' ;
@@ -23,12 +22,9 @@ COMPARISON_OP: 'Lt'
     | 'Between'
     ;
 COMPARISON_NULL_OP: 'IsNull' | 'IsNotNull' | 'NotNull' ;
-// GROUP_BY: 'GroupBy' ;
 ORDER_BY: 'OrderBy' ;
 ORDER_BY_DIRECTION: 'Desc' | 'Asc' ;
 LIMIT_TOP: 'Top'[0-9]+ ;
-// LIMIT_FIRST: 'First'[0-9]+ ;
-// LIMIT_LAST: 'Last'[0-9]+ ;
 // 左括号
 LEFT_BRACKET: '(' ;
 // 右括号

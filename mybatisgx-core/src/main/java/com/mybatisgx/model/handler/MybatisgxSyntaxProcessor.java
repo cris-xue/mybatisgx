@@ -48,7 +48,21 @@ public class MybatisgxSyntaxProcessor {
         MethodNameLexer methodNameLexer = new MethodNameLexer(charStream);
         CommonTokenStream commonStream = new CommonTokenStream(methodNameLexer);
         MethodNameParser methodNameParser = new MethodNameParser(commonStream);
+        this.addErrorListeners(methodNameLexer, methodNameParser);
         return methodNameParser.sql_statement();
+    }
+
+    /**
+     * 添加错误监听
+     * @param methodNameLexer
+     * @param methodNameParser
+     */
+    private void addErrorListeners(MethodNameLexer methodNameLexer, MethodNameParser methodNameParser) {
+        methodNameLexer.removeErrorListeners();
+        methodNameParser.removeErrorListeners();
+        MethodSyntaxErrorListener methodSyntaxErrorListener = new MethodSyntaxErrorListener();
+        methodNameLexer.addErrorListener(methodSyntaxErrorListener);
+        methodNameParser.addErrorListener(methodSyntaxErrorListener);
     }
 
     private void traverseSyntaxTree(ParseTree node, MybatisgxSyntaxHandler.ParserContext context) {

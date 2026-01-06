@@ -9,7 +9,7 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -33,18 +33,18 @@ public class SqlSessionFactoryBeanPostProcessor implements BeanPostProcessor {
 
     private final String[] entityBasePackages;
     private final String[] daoBasePackages;
-    @Autowired
-    private KeyGenerator keyGenerator;
+    private final ObjectProvider<KeyGenerator> keyGeneratorObjectProvider;
 
-    public SqlSessionFactoryBeanPostProcessor(String[] entityBasePackages, String[] daoBasePackages) {
+    public SqlSessionFactoryBeanPostProcessor(String[] entityBasePackages, String[] daoBasePackages, ObjectProvider<KeyGenerator> keyGeneratorObjectProvider) {
         this.entityBasePackages = entityBasePackages;
         this.daoBasePackages = daoBasePackages;
+        this.keyGeneratorObjectProvider = keyGeneratorObjectProvider;
     }
 
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
         if (bean instanceof SqlSessionFactory) {
-            LOGGER.info("SqlSessionFactoryBean 初始化前的逻辑");
+            LOGGER.info("SqlSessionFactoryBean init before");
         }
         return bean;
     }
@@ -52,7 +52,7 @@ public class SqlSessionFactoryBeanPostProcessor implements BeanPostProcessor {
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         if (bean instanceof SqlSessionFactory) {
-            LOGGER.info("SqlSessionFactoryBean 初始化完成");
+            LOGGER.info("SqlSessionFactoryBean init success");
             SqlSessionFactory sqlSessionFactory = (SqlSessionFactory) bean;
             Configuration configuration = sqlSessionFactory.getConfiguration();
             if (configuration instanceof MybatisgxConfiguration) {
@@ -61,7 +61,7 @@ public class SqlSessionFactoryBeanPostProcessor implements BeanPostProcessor {
                         entityBasePackages,
                         daoBasePackages,
                         resourceList,
-                        this.keyGenerator,
+                        this.keyGeneratorObjectProvider.getIfAvailable(),
                         (MybatisgxConfiguration) configuration
                 );
                 mybatisgxContextLoader.load();

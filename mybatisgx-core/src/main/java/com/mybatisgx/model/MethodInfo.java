@@ -16,9 +16,18 @@ import java.util.Map;
 public class MethodInfo {
 
     /**
-     * 方法所属实体
+     * 方法所属Dao类信息
+     */
+    private MapperInfo mapperInfo;
+    /**
+     * 方法操作实体信息，不参与生成条件
      */
     private EntityInfo entityInfo;
+    /**
+     * 方法查询实体信息，只参与生成条件<br/>
+     * 新增：为空<br/>
+     */
+    private EntityInfo queryEntityInfo;
     /**
      * java方法信息
      */
@@ -61,11 +70,13 @@ public class MethodInfo {
     private List<ConditionInfo> conditionInfoList = new ArrayList<>();
     /**
      * 实体参数
-     * 1、如果存在实体参数，那么条件只能使用实体参数，如果不存在实体参数，那么条件只能使用方法参数列表
-     * 2、方法参数中只要有一个是实体，就存在实体参数，如果存在多个实体参数，只取最后一个实体参数
-     * 3、新增、修改、删除、查询都只允许一个实体参数
      */
     private MethodParamInfo entityParamInfo;
+    /**
+     * 查询实体参数
+     * 新增：为空<br/>
+     */
+    private MethodParamInfo queryEntityParamInfo;
     /**
      * 方法参数信息
      */
@@ -83,12 +94,28 @@ public class MethodInfo {
      */
     private String resultMapId;
 
+    public MapperInfo getMapperInfo() {
+        return mapperInfo;
+    }
+
+    public void setMapperInfo(MapperInfo mapperInfo) {
+        this.mapperInfo = mapperInfo;
+    }
+
     public EntityInfo getEntityInfo() {
         return entityInfo;
     }
 
     public void setEntityInfo(EntityInfo entityInfo) {
         this.entityInfo = entityInfo;
+    }
+
+    public EntityInfo getQueryEntityInfo() {
+        return queryEntityInfo;
+    }
+
+    public void setQueryEntityInfo(EntityInfo queryEntityInfo) {
+        this.queryEntityInfo = queryEntityInfo;
     }
 
     public Method getMethod() {
@@ -177,6 +204,14 @@ public class MethodInfo {
 
     public void setEntityParamInfo(MethodParamInfo entityParamInfo) {
         this.entityParamInfo = entityParamInfo;
+    }
+
+    public MethodParamInfo getQueryEntityParamInfo() {
+        return queryEntityParamInfo;
+    }
+
+    public void setQueryEntityParamInfo(MethodParamInfo queryEntityParamInfo) {
+        this.queryEntityParamInfo = queryEntityParamInfo;
     }
 
     public List<MethodParamInfo> getMethodParamInfoList() {

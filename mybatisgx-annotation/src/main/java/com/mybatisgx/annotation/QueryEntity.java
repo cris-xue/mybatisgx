@@ -11,4 +11,10 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface QueryEntity {
+
+    /**
+     * 查询对象是用在哪个实体上
+     * @return
+     */
+    Class<?> value();
 }

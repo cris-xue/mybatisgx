@@ -303,7 +303,7 @@ public class MybatisgxSyntaxHandler {
             String conditionColumnName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, token);
             ColumnInfo columnInfo = context.getEntityInfo().getColumnInfo(conditionColumnName);
             if (columnInfo == null) {
-                throw new MybatisgxException("方法条件或者实体中条件与数据库库实体无法对应：%s", conditionColumnName);
+                throw new MybatisgxException("%s 方法条件字段或者实体条件字段在 %s 实体类中不存在", conditionColumnName, context.getEntityInfo().getClazzName());
             }
             if (context.getConditionOriginType() == ConditionOriginType.METHOD_NAME) {
                 conditionInfo.setColumnName(conditionColumnName);

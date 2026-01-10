@@ -20,15 +20,6 @@ public class MethodInfo {
      */
     private MapperInfo mapperInfo;
     /**
-     * 方法操作实体信息，不参与生成条件
-     */
-    private EntityInfo entityInfo;
-    /**
-     * 方法查询实体信息，只参与生成条件<br/>
-     * 新增：为空<br/>
-     */
-    private EntityInfo queryEntityInfo;
-    /**
      * java方法信息
      */
     private Method method;
@@ -69,11 +60,11 @@ public class MethodInfo {
      */
     private List<ConditionInfo> conditionInfoList = new ArrayList<>();
     /**
-     * 实体参数
+     * 方法操作实体，不参与生成条件
      */
     private MethodParamInfo entityParamInfo;
     /**
-     * 查询实体参数
+     * 方法查询实体，只参与生成条件
      * 新增：为空<br/>
      */
     private MethodParamInfo queryEntityParamInfo;
@@ -100,22 +91,6 @@ public class MethodInfo {
 
     public void setMapperInfo(MapperInfo mapperInfo) {
         this.mapperInfo = mapperInfo;
-    }
-
-    public EntityInfo getEntityInfo() {
-        return entityInfo;
-    }
-
-    public void setEntityInfo(EntityInfo entityInfo) {
-        this.entityInfo = entityInfo;
-    }
-
-    public EntityInfo getQueryEntityInfo() {
-        return queryEntityInfo;
-    }
-
-    public void setQueryEntityInfo(EntityInfo queryEntityInfo) {
-        this.queryEntityInfo = queryEntityInfo;
     }
 
     public Method getMethod() {

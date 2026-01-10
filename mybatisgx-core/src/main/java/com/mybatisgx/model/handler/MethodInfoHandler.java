@@ -47,11 +47,11 @@ public class MethodInfoHandler {
         List<Method> methodList = this.getDaoMethodList(interfaceClass);
         Map<String, MethodInfo> methodInfoMap = this.processMethod(methodList, mapperInfo);
         List<MethodInfo> methodInfoList = new ArrayList(20);
-        methodInfoMap.forEach((methodName, methodInfo) -> {
-            String namespaceMethodName = this.getNamespaceMethodName(mapperInfo, methodName);
+        for (MethodInfo methodInfo : methodInfoMap.values()) {
+            String namespaceMethodName = this.getNamespaceMethodName(mapperInfo, methodInfo.getMethodName());
             MethodInfoContextHolder.set(namespaceMethodName, methodInfo);
             methodInfoList.add(methodInfo);
-        });
+        }
         return methodInfoList;
     }
 
@@ -93,12 +93,12 @@ public class MethodInfoHandler {
             MethodReturnInfo methodReturnInfo = this.getMethodReturn(mapperInfo, method);
 
             MethodInfo methodInfo = new MethodInfo();
-            methodInfo.setEntityInfo(mapperInfo.getEntityInfo());
             methodInfo.setMethod(method);
             methodInfo.setMethodName(methodName);
             methodInfo.setDynamic(method.getAnnotation(Dynamic.class) != null);
             methodInfo.setBatch(method.getAnnotation(BatchOperation.class) != null);
             methodInfo.setEntityParamInfo(methodParamContext.getEntityParamInfo());
+            methodInfo.setQueryEntityParamInfo(methodParamContext.getQueryEntityParamInfo());
             methodInfo.setMethodParamInfoList(methodParamContext.getMethodParamInfoList());
             methodInfo.setMethodReturnInfo(methodReturnInfo);
 
@@ -138,6 +138,7 @@ public class MethodInfoHandler {
         Parameter[] parameters = method.getParameters();
         int parameterCount = parameters.length;
         MethodParamInfo entityParamInfo = null;
+        MethodParamInfo queryEntityParamInfo = null;
         List<MethodParamInfo> methodParamInfoList = new ArrayList<>();
         for (int i = 0; i < parameterCount; i++) {
             Parameter parameter = parameters[i];
@@ -162,31 +163,28 @@ public class MethodInfoHandler {
 
             methodParamInfo.setClassCategory(classCategory);
             if (classCategory == ClassCategory.COMPLEX && methodParamType != Map.class) {
-                IdClass idClass = methodParamType.getAnnotation(IdClass.class);
-                if (idClass != null) {
+                if (methodParamType.getAnnotation(IdClass.class) != null) {
                     Map<Type, Class<?>> typeParameterMap = mapperInfo.getEntityInfo().getTypeParameterMap();
                     List<ColumnInfo> columnInfoList = columnInfoHandler.getColumnInfoList(methodParamType, typeParameterMap);
                     methodParamInfo.setColumnInfoList(columnInfoList);
                 }
                 // 获取实体管理器中是否方法参数类型，如果不存在，使用字段处理器对方法参数类型进行字段处理
-                Entity entity = methodParamType.getAnnotation(Entity.class);
-                if (entity != null) {
+                if (methodParamType.getAnnotation(Entity.class) != null) {
                     if (entityParamInfo == null) {
                         EntityInfo entityInfo = EntityInfoContextHolder.get(methodParamType);
                         methodParamInfo.setColumnInfoList(entityInfo.getColumnInfoList());
                         entityParamInfo = methodParamInfo;
                     } else {
-                        throw new MybatisgxException("%s 方法实体参数类型或查询实体参数类型存在多个", method.getName());
+                        throw new MybatisgxException("%s 方法实体参数存在多个", method.getName());
                     }
                 }
-                QueryEntity queryEntity = methodParamType.getAnnotation(QueryEntity.class);
-                if (queryEntity != null) {
+                if (methodParamType.getAnnotation(QueryEntity.class) != null) {
                     if (entityParamInfo == null) {
                         EntityInfo entityInfo = EntityInfoContextHolder.get(methodParamType);
                         methodParamInfo.setColumnInfoList(entityInfo.getColumnInfoList());
-                        entityParamInfo = methodParamInfo;
+                        queryEntityParamInfo = methodParamInfo;
                     } else {
-                        throw new MybatisgxException("%s 方法实体参数类型或查询实体参数类型存在多个", method.getName());
+                        throw new MybatisgxException("%s 方法查询实体参数存在多个", method.getName());
                     }
                 }
             }
@@ -198,7 +196,7 @@ public class MethodInfoHandler {
 
             methodParamInfoList.add(methodParamInfo);
         }
-        return new MethodParamContext(entityParamInfo, methodParamInfoList);
+        return new MethodParamContext(entityParamInfo, queryEntityParamInfo, methodParamInfoList);
     }
 
     private MethodReturnInfo getMethodReturn(MapperInfo mapperInfo, Method method) {
@@ -478,10 +476,13 @@ public class MethodInfoHandler {
 
         private MethodParamInfo entityParamInfo;
 
+        private MethodParamInfo queryEntityParamInfo;
+
         private List<MethodParamInfo> methodParamInfoList;
 
-        public MethodParamContext(MethodParamInfo entityParamInfo, List<MethodParamInfo> methodParamInfoList) {
+        public MethodParamContext(MethodParamInfo entityParamInfo, MethodParamInfo queryEntityParamInfo, List<MethodParamInfo> methodParamInfoList) {
             this.entityParamInfo = entityParamInfo;
+            this.queryEntityParamInfo = queryEntityParamInfo;
             this.methodParamInfoList = methodParamInfoList;
         }
 
@@ -491,6 +492,14 @@ public class MethodInfoHandler {
 
         public void setEntityParamInfo(MethodParamInfo entityParamInfo) {
             this.entityParamInfo = entityParamInfo;
+        }
+
+        public MethodParamInfo getQueryEntityParamInfo() {
+            return queryEntityParamInfo;
+        }
+
+        public void setQueryEntityParamInfo(MethodParamInfo queryEntityParamInfo) {
+            this.queryEntityParamInfo = queryEntityParamInfo;
         }
 
         public List<MethodParamInfo> getMethodParamInfoList() {

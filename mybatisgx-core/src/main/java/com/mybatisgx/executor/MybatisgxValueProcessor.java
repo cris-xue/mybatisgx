@@ -43,13 +43,14 @@ public class MybatisgxValueProcessor {
             return parameterObject;
         }
         MethodInfo methodInfo = MethodInfoContextHolder.get(mappedStatement.getId());
-        if (methodInfo == null) {
+        MethodParamInfo entityParamInfo = methodInfo.getEntityParamInfo();
+        if (methodInfo == null || entityParamInfo == null) {
             return parameterObject;
         }
 
         Object useParameterObject = this.getParameterObject(methodInfo, parameterObject);
         ValueProcessPhase phase = this.getValueProcessPhase(mappedStatement, methodInfo);
-        for (ColumnInfo columnInfo : methodInfo.getEntityInfo().getGenerateValueColumnInfoList()) {
+        for (ColumnInfo columnInfo : entityParamInfo.getEntityInfo().getGenerateValueColumnInfoList()) {
             AbstractFieldValueHandler fieldValueHandler = this.VALUE_HANDLER_MAP.get(columnInfo.getClass());
             fieldValueHandler.handle(methodInfo, phase, columnInfo, useParameterObject, boundSql);
         }
@@ -104,7 +105,7 @@ public class MybatisgxValueProcessor {
 
         @Override
         public void handle(MethodInfo methodInfo, ValueProcessPhase phase, ColumnInfo columnInfo, Object parameterObject, BoundSql boundSql) {
-            EntityInfo entityInfo = methodInfo.getEntityInfo();
+            EntityInfo entityInfo = methodInfo.getEntityParamInfo().getEntityInfo();
             LogicDeleteIdColumnInfo logicDeleteIdColumnInfo = (LogicDeleteIdColumnInfo) entityInfo.getLogicDeleteIdColumnInfo();
             if (logicDeleteIdColumnInfo != null) {
                 Object value = this.valueHandle(phase, columnInfo, null, null);

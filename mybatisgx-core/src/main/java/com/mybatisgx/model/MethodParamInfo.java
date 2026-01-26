@@ -56,10 +56,6 @@ public class MethodParamInfo {
      */
     private String collectionTypeName;
     /**
-     * 实体信息
-     */
-    private EntityInfo entityInfo;
-    /**
      * 字段信息
      */
     private List<ColumnInfo> columnInfoList;
@@ -162,14 +158,6 @@ public class MethodParamInfo {
 
     public void setCollectionTypeName(String collectionTypeName) {
         this.collectionTypeName = collectionTypeName;
-    }
-
-    public EntityInfo getEntityInfo() {
-        return entityInfo;
-    }
-
-    public void setEntityInfo(EntityInfo entityInfo) {
-        this.entityInfo = entityInfo;
     }
 
     public List<ColumnInfo> getColumnInfoList() {

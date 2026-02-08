@@ -1,5 +1,6 @@
 package com.mybatisgx.model.handler;
 
+import com.mybatisgx.annotation.QueryEntity;
 import com.mybatisgx.context.EntityInfoContextHolder;
 import com.mybatisgx.context.MapperInfoContextHolder;
 import com.mybatisgx.context.MybatisgxObjectFactory;
@@ -18,9 +19,9 @@ import java.lang.reflect.Type;
 import java.util.List;
 
 /**
- * @author ：薛承城
- * @description：用于解析mybatis接口
- * @date ：2023/12/1
+ * mapper解析处理器
+ *
+ * @author：薛承城
  */
 public class MapperInfoHandler {
 
@@ -58,6 +59,9 @@ public class MapperInfoHandler {
             idClass = (Class<?>) daoInterfaceParams[2];
             queryEntityClass = (Class<?>) daoInterfaceParams[1];
             entityClass = (Class<?>) daoInterfaceParams[0];
+            if (entityClass != queryEntityClass.getAnnotation(QueryEntity.class).value()) {
+                throw new MybatisgxException("mapper查询实体对应的实体和实体不一致");
+            }
         }
 
         MapperInfo mapperInfo = new MapperInfo();
@@ -87,7 +91,7 @@ public class MapperInfoHandler {
         try {
             return Class.forName(namespace);
         } catch (ClassNotFoundException e) {
-            throw new MybatisgxException("namespace not found");
+            throw new MybatisgxException("%s namespace not found", namespace);
         }
     }
 }

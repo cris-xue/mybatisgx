@@ -74,9 +74,7 @@ public class MapperInfoHandler {
     }
 
     private Type[] getDaoInterfaceParams(Class<?> daoInterface) {
-        Type[] daoSuperInterfaces = daoInterface.getGenericInterfaces();
-        for (int i = 0; i < daoSuperInterfaces.length; i++) {
-            Type daoSuperInterfaceType = daoSuperInterfaces[i];
+        for (Type daoSuperInterfaceType : daoInterface.getGenericInterfaces()) {
             ParameterizedType daoSuperInterfaceClass = (ParameterizedType) daoSuperInterfaceType;
             Type[] daoInterfaceParams = daoSuperInterfaceClass.getActualTypeArguments();
             if (TypeUtils.isAssignable(daoInterface, Dao.class)) {

@@ -206,14 +206,6 @@ public class MethodInfo {
         return methodParamInfoMap.get(paramName);
     }
 
-    public Map<String, MethodParamInfo> getMethodParamInfoMap() {
-        return methodParamInfoMap;
-    }
-
-    public void setMethodParamInfoMap(Map<String, MethodParamInfo> methodParamInfoMap) {
-        this.methodParamInfoMap = methodParamInfoMap;
-    }
-
     public MethodReturnInfo getMethodReturnInfo() {
         return methodReturnInfo;
     }

@@ -37,7 +37,7 @@ public interface UserDao extends SimpleDao<User, UserQuery, Long> {
     @Dynamic
     List<User> findListNew2222(Long id, UserQuery userQuery);
 
-    long countByNameByName(@Param("name") String name);
+    long countByName(@Param("name") String name);
 
     List<User> findTop5ByNameLikeOrderByNameDesc(String name);
 

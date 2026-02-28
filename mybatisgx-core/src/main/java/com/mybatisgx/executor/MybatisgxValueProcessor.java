@@ -20,9 +20,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 值处理
- * @author 薛承城
- * @date 2025/12/14 19:56
+ * 值生成处理器
+ *
+ * @author：薛承城
  */
 public class MybatisgxValueProcessor {
 
@@ -44,13 +44,16 @@ public class MybatisgxValueProcessor {
         }
         MethodInfo methodInfo = MethodInfoContextHolder.get(mappedStatement.getId());
         MethodParamInfo entityParamInfo = methodInfo.getEntityParamInfo();
-        if (methodInfo == null || entityParamInfo == null) {
-            return parameterObject;
+        ValueProcessPhase phase = this.getValueProcessPhase(mappedStatement, methodInfo);
+        // 逻辑删除可能没有实体参数，但是新增和修改必须有实体参数
+        if (phase != ValueProcessPhase.LOGIC_DELETE) {
+            if (methodInfo == null || entityParamInfo == null) {
+                return parameterObject;
+            }
         }
 
         Object useParameterObject = this.getParameterObject(methodInfo, parameterObject);
-        ValueProcessPhase phase = this.getValueProcessPhase(mappedStatement, methodInfo);
-        for (ColumnInfo columnInfo : entityParamInfo.getEntityInfo().getGenerateValueColumnInfoList()) {
+        for (ColumnInfo columnInfo : methodInfo.getMapperInfo().getEntityInfo().getGenerateValueColumnInfoList()) {
             AbstractFieldValueHandler fieldValueHandler = this.VALUE_HANDLER_MAP.get(columnInfo.getClass());
             fieldValueHandler.handle(methodInfo, phase, columnInfo, useParameterObject, boundSql);
         }
@@ -105,7 +108,7 @@ public class MybatisgxValueProcessor {
 
         @Override
         public void handle(MethodInfo methodInfo, ValueProcessPhase phase, ColumnInfo columnInfo, Object parameterObject, BoundSql boundSql) {
-            EntityInfo entityInfo = methodInfo.getEntityParamInfo().getEntityInfo();
+            EntityInfo entityInfo = methodInfo.getMapperInfo().getEntityInfo();
             LogicDeleteIdColumnInfo logicDeleteIdColumnInfo = (LogicDeleteIdColumnInfo) entityInfo.getLogicDeleteIdColumnInfo();
             if (logicDeleteIdColumnInfo != null) {
                 Object value = this.valueHandle(phase, columnInfo, null, null);

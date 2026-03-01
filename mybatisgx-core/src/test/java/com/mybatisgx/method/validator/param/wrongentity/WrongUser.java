@@ -1,0 +1,24 @@
+package com.mybatisgx.method.validator.param.wrongentity;
+
+import com.mybatisgx.annotation.Entity;
+import com.mybatisgx.annotation.GeneratedValue;
+import com.mybatisgx.annotation.Id;
+import com.mybatisgx.annotation.Table;
+import com.mybatisgx.executor.genval.IdValueProcessor;
+
+@Entity
+@Table(name = "wrong_user")
+public class WrongUser {
+
+    @Id
+    @GeneratedValue(IdValueProcessor.class)
+    private Long id;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+}

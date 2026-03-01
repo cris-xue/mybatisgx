@@ -59,7 +59,7 @@ public class MapperInfoHandler {
             idClass = (Class<?>) daoInterfaceParams[2];
             queryEntityClass = (Class<?>) daoInterfaceParams[1];
             entityClass = (Class<?>) daoInterfaceParams[0];
-            if (entityClass != queryEntityClass.getAnnotation(QueryEntity.class).value()) {
+            if (entityClass != queryEntityClass && entityClass != queryEntityClass.getAnnotation(QueryEntity.class).value()) {
                 throw new MybatisgxException("mapper查询实体对应的实体和实体不一致");
             }
         }

@@ -11,6 +11,7 @@ import java.util.Map;
 
 /**
  * 方法名语法解析错误监听器
+ *
  * @author 薛承城
  * @date 2026/1/5 18:07
  */
@@ -25,9 +26,15 @@ public class MethodSyntaxErrorListener extends BaseErrorListener {
     @Override
     public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException recognitionException) {
         Token token = (Token) offendingSymbol;
-        IntervalSet expected = recognitionException.getExpectedTokens();
-        String friendlyExpected = this.friendlyExpected(expected, recognizer.getVocabulary());
-        String errorDescription = String.format("语法错误，在(%s:%s)，非法输入：%s，当前位置可使用：%s", line, charPositionInLine, token.getText(), friendlyExpected);
+        String tokenSource = token.getTokenSource().getInputStream().toString();
+        String errorDescription;
+        if (recognitionException != null) {
+            IntervalSet expected = recognitionException.getExpectedTokens();
+            String friendlyExpected = this.friendlyExpected(expected, recognizer.getVocabulary());
+            errorDescription = String.format("%s 语法错误，在(%s:%s)，非法输入：%s，当前位置可使用：%s", tokenSource, line, charPositionInLine, token.getText(), friendlyExpected);
+        } else {
+            errorDescription = String.format("%s 语法错误", tokenSource);
+        }
         throw new MybatisgxException(errorDescription);
     }
 

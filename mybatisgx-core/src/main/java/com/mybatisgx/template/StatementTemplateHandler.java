@@ -23,27 +23,27 @@ public class StatementTemplateHandler {
         Map<String, XNode> xNodeMap = new HashMap(15);
         for (MethodInfo methodInfo : mapperInfo.getMethodInfoList()) {
             if (methodInfo.getSqlCommandType() != null) {
-                XNode xNode = complexTemplateHandle(mapperInfo, methodInfo);
+                XNode xNode = complexTemplateHandle(methodInfo);
                 xNodeMap.put(methodInfo.getMethodName(), xNode);
             }
         }
         return xNodeMap;
     }
 
-    private XNode complexTemplateHandle(MapperInfo mapperInfo, MethodInfo methodInfo) {
+    private XNode complexTemplateHandle(MethodInfo methodInfo) {
         String xmlString;
         if (methodInfo.getSqlCommandType() == SqlCommandType.SELECT) {
             SelectTemplateHandler selectTemplateHandler = MybatisgxObjectFactory.get(SelectTemplateHandler.class);
-            xmlString = selectTemplateHandler.execute(mapperInfo, methodInfo);
+            xmlString = selectTemplateHandler.execute(methodInfo);
         } else if (methodInfo.getSqlCommandType() == SqlCommandType.INSERT) {
             InsertTemplateHandler insertTemplateHandler = MybatisgxObjectFactory.get(InsertTemplateHandler.class);
-            xmlString = insertTemplateHandler.execute(mapperInfo, methodInfo);
+            xmlString = insertTemplateHandler.execute(methodInfo);
         } else if (methodInfo.getSqlCommandType() == SqlCommandType.DELETE) {
             DeleteTemplateHandler deleteTemplateHandler = MybatisgxObjectFactory.get(DeleteTemplateHandler.class);
-            xmlString = deleteTemplateHandler.execute(mapperInfo, methodInfo);
+            xmlString = deleteTemplateHandler.execute(methodInfo);
         } else if (methodInfo.getSqlCommandType() == SqlCommandType.UPDATE) {
             UpdateTemplateHandler updateTemplateHandler = MybatisgxObjectFactory.get(UpdateTemplateHandler.class);
-            xmlString = updateTemplateHandler.execute(mapperInfo, methodInfo);
+            xmlString = updateTemplateHandler.execute(methodInfo);
         } else {
             throw new MybatisgxException("不存在的操作方式");
         }

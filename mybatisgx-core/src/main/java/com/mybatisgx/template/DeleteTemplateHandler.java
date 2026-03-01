@@ -2,7 +2,10 @@ package com.mybatisgx.template;
 
 import com.mybatisgx.annotation.LogicDelete;
 import com.mybatisgx.annotation.LogicDeleteId;
-import com.mybatisgx.model.*;
+import com.mybatisgx.model.ColumnInfo;
+import com.mybatisgx.model.EntityInfo;
+import com.mybatisgx.model.LogicDeleteIdColumnInfo;
+import com.mybatisgx.model.MethodInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
@@ -15,6 +18,7 @@ import java.util.List;
 
 /**
  * 删除模板逻辑
+ *
  * @author 薛承城
  * @date 2025/12/13 17:25
  */
@@ -24,19 +28,23 @@ public class DeleteTemplateHandler {
 
     private WhereTemplateHandler whereTemplateHandler = new WhereTemplateHandler();
 
-    public String execute(MapperInfo mapperInfo, MethodInfo methodInfo) {
-        return buildDeleteXNode(mapperInfo, methodInfo);
+    public String execute(MethodInfo methodInfo) {
+        return buildDeleteXNode(methodInfo);
     }
 
-    private String buildDeleteXNode(MapperInfo mapperInfo, MethodInfo methodInfo) {
+    private String buildDeleteXNode(MethodInfo methodInfo) {
         Document document = DocumentHelper.createDocument();
         Element mapperElement = document.addElement("mapper");
 
-        EntityInfo entityInfo = mapperInfo.getEntityInfo();
+        EntityInfo entityInfo = methodInfo.getMapperInfo().getEntityInfo();
+        if (entityInfo == null) {
+            entityInfo = methodInfo.getMapperInfo().getQueryEntityInfo();
+        }
+
         Element deleteElement = this.getDeleteElement(entityInfo, methodInfo);
         mapperElement.add(deleteElement);
 
-        Element whereElement = whereTemplateHandler.execute(mapperInfo.getEntityInfo(), methodInfo);
+        Element whereElement = whereTemplateHandler.execute(entityInfo, methodInfo);
         deleteElement.add(whereElement);
         return document.asXML();
     }

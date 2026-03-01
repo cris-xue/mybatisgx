@@ -216,34 +216,35 @@ public class MethodInfoHandler {
     private void validatorMethodParamEntity(MapperInfo mapperInfo, Method method, SqlCommandType sqlCommandType, MethodParamInfo entityParamInfo, MethodParamInfo queryEntityParamInfo) {
         if (sqlCommandType == SqlCommandType.INSERT) {
             if (entityParamInfo == null) {
-                throw new MybatisgxException("%s 新增方法实体参数不存在", method.getName());
+                throw new MybatisgxException("%s 方法实体参数不存在", method.getName());
             }
             if (queryEntityParamInfo != null) {
-                throw new MybatisgxException("%s 新增方法查询实体参数不允许存在", method.getName());
+                throw new MybatisgxException("%s 方法查询实体参数不允许存在", method.getName());
             }
             if (entityParamInfo.getType() != mapperInfo.getEntityClass()) {
-                throw new MybatisgxException("%s 新增方法实体参数和定义的实体参数类型不一致", method.getName());
-            }
-        }
-        if (sqlCommandType == SqlCommandType.DELETE) {
-            if (entityParamInfo != null && queryEntityParamInfo != null) {
-                throw new MybatisgxException("%s 删除方法实体参数和查询实体参数不允许同时存在", method.getName());
+                throw new MybatisgxException("%s 方法实体参数和定义的实体参数类型不一致", method.getName());
             }
         }
         if (sqlCommandType == SqlCommandType.UPDATE) {
             if (entityParamInfo == null) {
                 if (queryEntityParamInfo == null) {
-                    throw new MybatisgxException("%s 修改方法实体参数不存在", method.getName());
+                    throw new MybatisgxException("%s 方法实体参数不存在", method.getName());
                 }
                 if (queryEntityParamInfo != null) {
-                    throw new MybatisgxException("%s 修改方法查询实体参数不允许单独存在", method.getName());
+                    throw new MybatisgxException("%s 方法查询实体参数不允许单独存在", method.getName());
                 }
             }
         }
-        if (sqlCommandType == SqlCommandType.SELECT) {
+        if (sqlCommandType == SqlCommandType.DELETE || sqlCommandType == SqlCommandType.SELECT) {
             if (entityParamInfo != null && queryEntityParamInfo != null) {
-                throw new MybatisgxException("%s 查询方法实体参数和查询实体参数不允许同时存在", method.getName());
+                throw new MybatisgxException("%s 方法实体参数和查询实体参数不允许同时存在", method.getName());
             }
+        }
+        if (entityParamInfo != null && entityParamInfo.getType() != mapperInfo.getEntityClass()) {
+            throw new MybatisgxException("%s 方法实体参数和定义的实体参数类型不一致", method.getName());
+        }
+        if (queryEntityParamInfo != null && queryEntityParamInfo.getType().getAnnotation(QueryEntity.class).value() != mapperInfo.getEntityClass()) {
+            throw new MybatisgxException("%s 方法实体参数和定义的实体参数类型不一致", method.getName());
         }
     }
 

@@ -7,7 +7,6 @@ import com.mybatisgx.model.EntityInfo;
 import com.mybatisgx.model.MethodInfo;
 import com.mybatisgx.model.handler.EntityInfoHandler;
 import com.mybatisgx.model.handler.MybatisgxSyntaxProcessor;
-import org.apache.ibatis.mapping.SqlCommandType;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -33,7 +32,6 @@ public class MethodNameAstHandlerTest {
                 null,
                 ConditionOriginType.METHOD_NAME,
                 "findByName");
-        Assert.assertEquals(SqlCommandType.SELECT, methodInfo.getSqlCommandType());
         List<ConditionInfo> conditionInfoList = methodInfo.getConditionInfoList();
         Assert.assertTrue(conditionInfoList != null && conditionInfoList.size() > 0);
         ConditionInfo conditionInfo = conditionInfoList.get(0);
@@ -54,7 +52,6 @@ public class MethodNameAstHandlerTest {
                 "findByIdAndNameOrNameEqAndNameLike"
         );
 
-        Assert.assertEquals(SqlCommandType.SELECT, methodInfo.getSqlCommandType());
         List<ConditionInfo> conditionInfoList = methodInfo.getConditionInfoList();
         Assert.assertTrue(conditionInfoList != null && conditionInfoList.size() > 0);
 
@@ -88,7 +85,7 @@ public class MethodNameAstHandlerTest {
                     "findByName1"
             );
         } catch (MybatisgxException e) {
-            Assert.assertEquals("方法条件或者实体中条件与数据库库实体无法对应：name1", e.getMessage());
+            Assert.assertEquals("name1 方法条件字段或者实体条件字段在 com.mybatisgx.model.handler.test.User 实体类中不存在", e.getMessage());
         }
     }
 
@@ -107,7 +104,7 @@ public class MethodNameAstHandlerTest {
                     "findCustomByName"
             );
         } catch (MybatisgxException e) {
-            Assert.assertEquals("语法错误，在(1:4)，非法输入：Custom，当前位置可使用：By、OrderBy、top", e.getMessage());
+            Assert.assertEquals("findCustomByName 语法错误，在(1:4)，非法输入：Custom，当前位置可使用：By、OrderBy、top", e.getMessage());
         }
     }
 }

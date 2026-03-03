@@ -4,7 +4,7 @@ import com.mybatisgx.annotation.Entity;
 import com.mybatisgx.annotation.Table;
 
 @Entity
-@Table(name = "custom_condition_user")
+@Table(name = "projection_query")
 public class User extends BaseEntity<Long> {
 
     private String name;

@@ -26,22 +26,23 @@ public class EntityRelationTreeHandler {
 
     private TableColumnNameAlias tableColumnNameAlias = new TableColumnNameAlias();
 
-    public EntityRelationTree execute(MapperInfo mapperInfo, MethodInfo methodInfo) {
+    public void execute(MapperInfo mapperInfo, MethodInfo methodInfo) {
         SqlCommandType sqlCommandType = methodInfo.getSqlCommandType();
         if (Arrays.asList(SqlCommandType.INSERT, SqlCommandType.DELETE, SqlCommandType.UPDATE).contains(sqlCommandType)) {
-            return null;
+            return;
         }
 
         MethodReturnInfo methodReturnInfo = methodInfo.getMethodReturnInfo();
         Class<?> resultClass = methodReturnInfo.getType();
         EntityInfo entityInfo = EntityInfoContextHolder.get(resultClass);
+        if (entityInfo == null) {
+            return;
+        }
 
         // 解决循环引用问题
         EntityRelationDependencyTree entityRelationDependencyTree = EntityRelationDependencyTree.build(null, resultClass);
         EntityRelationTree entityRelationTree = this.buildEntityRelationTree(null, entityInfo, entityRelationDependencyTree, 1, 1);
-
         mapperInfo.addEntityRelationTree(entityRelationTree);
-        return entityRelationTree;
     }
 
     private EntityRelationTree buildEntityRelationTree(ColumnInfo columnInfo, EntityInfo entityInfo, EntityRelationDependencyTree entityRelationDependencyTree, int level, int index) {
@@ -290,6 +291,7 @@ public class EntityRelationTreeHandler {
 
         /**
          * 自循环引用是可以允许的
+         *
          * @param subClazz
          * @return
          */
@@ -302,6 +304,7 @@ public class EntityRelationTreeHandler {
 
         /**
          * 自引用检查
+         *
          * @param subClazz
          * @return
          */

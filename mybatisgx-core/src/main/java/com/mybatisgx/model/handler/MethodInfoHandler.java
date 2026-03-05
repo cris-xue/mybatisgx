@@ -257,8 +257,14 @@ public class MethodInfoHandler {
         methodReturnInfo.setType(methodReturnType);
         methodReturnInfo.setTypeName(methodReturnType.getName());
         if (classCategory == ClassCategory.COMPLEX && methodReturnType != Map.class) {
-            Map<Type, Class<?>> typeParameterMap = mapperInfo.getEntityInfo().getTypeParameterMap();
-            List<ColumnInfo> columnInfoList = columnInfoHandler.getColumnInfoList(methodReturnType, typeParameterMap);
+            List<ColumnInfo> columnInfoList = Collections.emptyList();
+            if (methodReturnType == mapperInfo.getEntityClass()) {
+                columnInfoList = mapperInfo.getEntityInfo().getColumnInfoList();
+            }
+            if (methodReturnType != mapperInfo.getEntityClass()) {
+                Map<Type, Class<?>> typeParameterMap = mapperInfo.getEntityInfo().getTypeParameterMap();
+                columnInfoList = columnInfoHandler.getColumnInfoList(methodReturnType, typeParameterMap);
+            }
             methodReturnInfo.setColumnInfoList(columnInfoList);
         }
         Class<?> collectionType = this.getCollectionType(methodReturnType);

@@ -1,4 +1,4 @@
-package com.mybatisgx.method.validator.param.entity;
+package com.mybatisgx.method.validator.param.entity.delete;
 
 import com.mybatisgx.annotation.QueryEntity;
 

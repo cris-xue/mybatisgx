@@ -7,7 +7,7 @@ import org.junit.Test;
 
 public class ValidatorInsertTest {
 
-    private static final String[] ENTITY_PACKAGES = {"com.mybatisgx.method.validator.param.entity"};
+    private static final String[] ENTITY_PACKAGES = {"com.mybatisgx.method.validator.param.entity.insert"};
 
     private void initDao(String daoPackage) {
         DaoTestUtils.getSqlSession(ENTITY_PACKAGES, new String[]{daoPackage});

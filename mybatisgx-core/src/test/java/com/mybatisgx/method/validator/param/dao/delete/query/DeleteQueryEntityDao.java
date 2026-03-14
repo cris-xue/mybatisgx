@@ -1,8 +1,8 @@
 package com.mybatisgx.method.validator.param.dao.delete.query;
 
 import com.mybatisgx.dao.CurdDao;
-import com.mybatisgx.method.validator.param.entity.ValidatorUser;
-import com.mybatisgx.method.validator.param.entity.ValidatorUserQuery;
+import com.mybatisgx.method.validator.param.entity.delete.ValidatorUser;
+import com.mybatisgx.method.validator.param.entity.delete.ValidatorUserQuery;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper

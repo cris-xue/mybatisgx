@@ -1,8 +1,8 @@
 package com.mybatisgx.method.validator.param.dao.select.mapper;
 
 import com.mybatisgx.dao.CurdDao;
-import com.mybatisgx.method.validator.param.entity.MapperUser;
-import com.mybatisgx.method.validator.param.entity.ValidatorUser;
+import com.mybatisgx.method.validator.param.entity.select.MapperUser;
+import com.mybatisgx.method.validator.param.entity.select.ValidatorUser;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;

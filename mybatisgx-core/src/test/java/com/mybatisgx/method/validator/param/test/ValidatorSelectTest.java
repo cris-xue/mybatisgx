@@ -4,8 +4,8 @@ import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.method.validator.param.dao.select.entity.SelectEntityDao;
 import com.mybatisgx.method.validator.param.dao.select.miss.SelectMissEntityDao;
 import com.mybatisgx.method.validator.param.dao.select.query.SelectQueryEntityDao;
-import com.mybatisgx.method.validator.param.entity.ValidatorUser;
-import com.mybatisgx.method.validator.param.entity.ValidatorUserQuery;
+import com.mybatisgx.method.validator.param.entity.select.ValidatorUser;
+import com.mybatisgx.method.validator.param.entity.select.ValidatorUserQuery;
 import com.mybatisgx.util.DaoTestUtils;
 import org.apache.ibatis.session.SqlSession;
 import org.junit.Assert;
@@ -15,7 +15,7 @@ import java.util.List;
 
 public class ValidatorSelectTest {
 
-    private static final String[] ENTITY_PACKAGES = {"com.mybatisgx.method.validator.param.entity"};
+    private static final String[] ENTITY_PACKAGES = {"com.mybatisgx.method.validator.param.entity.select"};
 
     private SqlSession initDao(String daoPackage) {
         return DaoTestUtils.getSqlSession(ENTITY_PACKAGES, new String[]{daoPackage});

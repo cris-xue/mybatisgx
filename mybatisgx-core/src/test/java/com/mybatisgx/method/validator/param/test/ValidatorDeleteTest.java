@@ -4,8 +4,8 @@ import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.method.validator.param.dao.delete.entity.DeleteEntityDao;
 import com.mybatisgx.method.validator.param.dao.delete.miss.DeleteMissEntityDao;
 import com.mybatisgx.method.validator.param.dao.delete.query.DeleteQueryEntityDao;
-import com.mybatisgx.method.validator.param.entity.ValidatorUser;
-import com.mybatisgx.method.validator.param.entity.ValidatorUserQuery;
+import com.mybatisgx.method.validator.param.entity.delete.ValidatorUser;
+import com.mybatisgx.method.validator.param.entity.delete.ValidatorUserQuery;
 import com.mybatisgx.util.DaoTestUtils;
 import org.apache.ibatis.session.SqlSession;
 import org.junit.Assert;
@@ -13,7 +13,7 @@ import org.junit.Test;
 
 public class ValidatorDeleteTest {
 
-    private static final String[] ENTITY_PACKAGES = {"com.mybatisgx.method.validator.param.entity"};
+    private static final String[] ENTITY_PACKAGES = {"com.mybatisgx.method.validator.param.entity.delete"};
 
     private SqlSession initDao(String daoPackage) {
         return DaoTestUtils.getSqlSession(ENTITY_PACKAGES, new String[]{daoPackage});

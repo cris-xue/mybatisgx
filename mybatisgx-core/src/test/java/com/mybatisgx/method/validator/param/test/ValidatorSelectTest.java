@@ -34,6 +34,8 @@ public class ValidatorSelectTest {
         List<ValidatorUser> validatorUserList = selectEntityDao.findByName(validatorUser);
         Assert.assertEquals(1, validatorUserList.size());
         Assert.assertEquals("name", validatorUserList.get(0).getName());
+
+        sqlSession.rollback();
     }
 
     @Test
@@ -51,6 +53,8 @@ public class ValidatorSelectTest {
         List<ValidatorUser> validatorUserList = selectQueryEntityDao.findByName(validatorUserQuery);
         Assert.assertEquals(1, validatorUserList.size());
         Assert.assertEquals("name", validatorUserList.get(0).getName());
+
+        sqlSession.rollback();
     }
 
     @Test
@@ -76,6 +80,8 @@ public class ValidatorSelectTest {
         List<ValidatorUser> validatorUserList = selectMissEntityDao.findByName("name");
         Assert.assertEquals(1, validatorUserList.size());
         Assert.assertEquals("name", validatorUserList.get(0).getName());
+
+        sqlSession.rollback();
     }
 
     @Test

@@ -33,6 +33,8 @@ public class ValidatorDeleteTest {
 
         ValidatorUser queryData = deleteEntityDao.findById(validatorUser.getId());
         Assert.assertNull(queryData);
+
+        sqlSession.rollback();
     }
 
     @Test
@@ -49,6 +51,8 @@ public class ValidatorDeleteTest {
 
         ValidatorUser queryData = deleteQueryEntityDao.findById(validatorUserQuery.getId());
         Assert.assertNull(queryData);
+
+        sqlSession.rollback();
     }
 
     @Test
@@ -74,6 +78,8 @@ public class ValidatorDeleteTest {
 
         ValidatorUser queryData = deleteMissEntityDao.findById(validatorUserQuery.getId());
         Assert.assertNull(queryData);
+
+        sqlSession.rollback();
     }
 
     @Test

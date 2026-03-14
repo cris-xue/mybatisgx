@@ -30,6 +30,8 @@ public class ValidatorUpdateTest {
         validatorUser.setName("name_modify");
         int count = updateEntityDao.updateByName(validatorUser, "name");
         Assert.assertEquals(1, count);
+
+        sqlSession.rollback();
     }
 
     @Test
@@ -55,6 +57,8 @@ public class ValidatorUpdateTest {
         validatorUserQuery.setName("name");
         int count = updateBothDao.updateByName(validatorUser, validatorUserQuery);
         Assert.assertEquals(1, count);
+
+        sqlSession.rollback();
     }
 
     @Test

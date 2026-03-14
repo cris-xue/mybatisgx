@@ -221,9 +221,6 @@ public class MethodInfoHandler {
             if (queryEntityParamInfo != null) {
                 throw new MybatisgxException("%s 方法查询实体参数不允许存在", method.getName());
             }
-            if (entityParamInfo.getType() != mapperInfo.getEntityClass()) {
-                throw new MybatisgxException("%s 方法实体参数和定义的实体参数类型不一致", method.getName());
-            }
         }
         if (sqlCommandType == SqlCommandType.UPDATE) {
             if (entityParamInfo == null) {

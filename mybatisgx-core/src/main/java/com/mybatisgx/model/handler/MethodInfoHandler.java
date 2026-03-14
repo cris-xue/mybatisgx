@@ -301,10 +301,10 @@ public class MethodInfoHandler {
         // 解析查询实体生成的表达式，一个实体只允许定义一个查询实体
         if (methodInfo.getSqlCommandType() == SqlCommandType.SELECT) {
             if (methodInfo.getEntityParamInfo() != null && methodInfo.getQueryEntityParamInfo() == null) {
-                entityInfo = methodInfo.getMapperInfo().getEntityInfo();
+                entityInfo = methodInfo.getEntityParamInfo().getEntityInfo();
             }
             if (methodInfo.getEntityParamInfo() == null && methodInfo.getQueryEntityParamInfo() != null) {
-                entityInfo = methodInfo.getMapperInfo().getQueryEntityInfo();
+                entityInfo = methodInfo.getQueryEntityParamInfo().getEntityInfo();
             }
             if (methodInfo.getEntityParamInfo() != null || methodInfo.getQueryEntityParamInfo() != null) {
                 String entityCondition = this.getEntityCondition(methodInfo, entityInfo);

@@ -241,10 +241,10 @@ public class MethodInfoHandler {
             }
         }
         if (entityParamInfo != null && entityParamInfo.getType() != mapperInfo.getEntityClass()) {
-            throw new MybatisgxException("%s 方法实体参数和定义的实体参数类型不一致", method.getName());
+            throw new MybatisgxException("%s 方法实体参数和mapper定义的实体参数类型不一致", method.getName());
         }
         if (queryEntityParamInfo != null && queryEntityParamInfo.getType().getAnnotation(QueryEntity.class).value() != mapperInfo.getEntityClass()) {
-            throw new MybatisgxException("%s 方法实体参数和定义的实体参数类型不一致", method.getName());
+            throw new MybatisgxException("%s 方法查询实体参数和mapper定义的实体参数类型不一致", method.getName());
         }
     }
 

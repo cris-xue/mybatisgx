@@ -3,6 +3,7 @@ package com.mybatisgx.model.handler;
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.Lists;
 import com.mybatisgx.annotation.*;
+import com.mybatisgx.context.EntityInfoContextHolder;
 import com.mybatisgx.context.MethodInfoContextHolder;
 import com.mybatisgx.dao.Dao;
 import com.mybatisgx.exception.MethodNotConditionException;
@@ -164,7 +165,8 @@ public class MethodInfoHandler {
                     }
                 }
                 if (methodParamType.getAnnotation(QueryEntity.class) != null) {
-                    methodParamInfo.setEntityInfo(mapperInfo.getQueryEntityInfo());
+                    // 如果继承CurdDao的时候MapperInfo中会缺失查询实体信息，这里不需要校验查询实体是否和实体对应，最终会在validatorMethodParamEntity方法中校验
+                    methodParamInfo.setEntityInfo(EntityInfoContextHolder.get(methodParamType));
                     if (queryEntityParamInfo == null) {
                         queryEntityParamInfo = methodParamInfo;
                     } else {

@@ -36,13 +36,34 @@ public class EntityRelationTreeHandler {
         Class<?> resultClass = methodReturnInfo.getType();
         EntityInfo entityInfo = EntityInfoContextHolder.get(resultClass);
         if (entityInfo == null) {
-            return;
-        }
+            // 创建投影实体关系树
+            List<ColumnInfo> entityColumnInfoList = new ArrayList<>();
+            for (ColumnInfo columnInfo : methodReturnInfo.getColumnInfoList()) {
+                ColumnInfo entityColumnInfo = mapperInfo.getEntityInfo().getDbColumnInfo(columnInfo.getDbColumnName());
+                entityColumnInfoList.add(entityColumnInfo);
+            }
 
-        // 解决循环引用问题
-        EntityRelationDependencyTree entityRelationDependencyTree = EntityRelationDependencyTree.build(null, resultClass);
-        EntityRelationTree entityRelationTree = this.buildEntityRelationTree(null, entityInfo, entityRelationDependencyTree, 1, 1);
-        mapperInfo.addEntityRelationTree(entityRelationTree);
+            EntityInfo newEntityInfo = new EntityInfo.Builder()
+                    .setClazz(resultClass)
+                    .setTableName(mapperInfo.getTableName())
+                    .setColumnInfoList(entityColumnInfoList)
+                    .process()
+                    .build();
+
+            String tableNameAlias = this.tableColumnNameAlias.process(1, 1, newEntityInfo);
+
+            EntityRelationTree entityRelationTree = new EntityRelationTree();
+            entityRelationTree.setTableNameAlias(tableNameAlias);
+            entityRelationTree.setLevel(1);
+            entityRelationTree.setIndex(1);
+            entityRelationTree.setEntityInfo(newEntityInfo);
+            mapperInfo.addEntityRelationTree(entityRelationTree);
+        } else {
+            // 1、创建实体关系树   2、解决循环引用问题
+            EntityRelationDependencyTree entityRelationDependencyTree = EntityRelationDependencyTree.build(null, resultClass);
+            EntityRelationTree entityRelationTree = this.buildEntityRelationTree(null, entityInfo, entityRelationDependencyTree, 1, 1);
+            mapperInfo.addEntityRelationTree(entityRelationTree);
+        }
     }
 
     private EntityRelationTree buildEntityRelationTree(ColumnInfo columnInfo, EntityInfo entityInfo, EntityRelationDependencyTree entityRelationDependencyTree, int level, int index) {

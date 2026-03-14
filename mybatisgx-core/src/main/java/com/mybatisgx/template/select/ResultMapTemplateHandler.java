@@ -55,6 +55,9 @@ public class ResultMapTemplateHandler {
 
     private void addIdColumnElement(Element resultMapElement, ResultMapInfo resultMapInfo) {
         IdColumnInfo idColumnInfo = resultMapInfo.getEntityInfo().getIdColumnInfo();
+        if (idColumnInfo == null) {
+            return;
+        }
         List<ColumnInfo> columnInfoComposites = idColumnInfo.getComposites();
         if (ObjectUtils.isEmpty(columnInfoComposites)) {
             ResultMapHelper.idColumnElement(resultMapElement, resultMapInfo, idColumnInfo);

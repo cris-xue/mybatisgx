@@ -15,11 +15,7 @@ public class ValidatorInsertTest {
 
     @Test
     public void testInsertEntity() {
-        try {
-            initDao("com.mybatisgx.method.validator.param.dao.insert.entity");
-        } catch (MybatisgxException e) {
-            Assert.assertEquals("insertMissingEntity 方法实体参数不存在", e.getMessage());
-        }
+        initDao("com.mybatisgx.method.validator.param.dao.insert.entity");
     }
 
     @Test

@@ -1,4 +1,4 @@
-package com.mybatisgx.method.validator.param.dao.insert.missing;
+package com.mybatisgx.method.validator.param.dao.insert.miss;
 
 import com.mybatisgx.dao.CurdDao;
 import com.mybatisgx.method.validator.param.entity.ValidatorUser;
@@ -6,7 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 @Mapper
-public interface InsertMissingEntityDao extends CurdDao<ValidatorUser, Long> {
+public interface InsertMissEntityDao extends CurdDao<ValidatorUser, Long> {
 
-    int insertMissingEntity(@Param("id") Long id);
+    int insertValid(@Param("id") Long id);
 }

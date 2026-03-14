@@ -1,4 +1,4 @@
-package com.mybatisgx.method.validator.param.wrongentity;
+package com.mybatisgx.method.validator.param.entity;
 
 import com.mybatisgx.annotation.Entity;
 import com.mybatisgx.annotation.GeneratedValue;
@@ -8,7 +8,7 @@ import com.mybatisgx.executor.genval.IdValueProcessor;
 
 @Entity
 @Table(name = "wrong_user")
-public class WrongUser {
+public class MapperUser {
 
     @Id
     @GeneratedValue(IdValueProcessor.class)

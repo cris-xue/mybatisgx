@@ -9,5 +9,5 @@ import java.util.List;
 @Mapper
 public interface SelectMissEntityDao extends CurdDao<ValidatorUser, Long> {
 
-    List<ValidatorUser> findByName(Long name);
+    List<ValidatorUser> findByName(String name);
 }

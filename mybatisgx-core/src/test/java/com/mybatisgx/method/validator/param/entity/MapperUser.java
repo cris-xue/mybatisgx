@@ -7,7 +7,7 @@ import com.mybatisgx.annotation.Table;
 import com.mybatisgx.executor.genval.IdValueProcessor;
 
 @Entity
-@Table(name = "wrong_user")
+@Table(name = "mapper_user")
 public class MapperUser {
 
     @Id

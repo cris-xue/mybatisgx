@@ -7,5 +7,5 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface DeleteMissEntityDao extends CurdDao<ValidatorUser, Long> {
 
-    int deleteByName(Long name);
+    int deleteByName(String name);
 }

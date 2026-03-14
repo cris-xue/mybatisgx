@@ -1,7 +1,13 @@
 package com.mybatisgx.method.validator.param.test;
 
 import com.mybatisgx.exception.MybatisgxException;
+import com.mybatisgx.method.validator.param.dao.delete.entity.DeleteEntityDao;
+import com.mybatisgx.method.validator.param.dao.delete.miss.DeleteMissEntityDao;
+import com.mybatisgx.method.validator.param.dao.delete.query.DeleteQueryEntityDao;
+import com.mybatisgx.method.validator.param.entity.ValidatorUser;
+import com.mybatisgx.method.validator.param.entity.ValidatorUserQuery;
 import com.mybatisgx.util.DaoTestUtils;
+import org.apache.ibatis.session.SqlSession;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -9,18 +15,40 @@ public class ValidatorDeleteTest {
 
     private static final String[] ENTITY_PACKAGES = {"com.mybatisgx.method.validator.param.entity"};
 
-    private void initDao(String daoPackage) {
-        DaoTestUtils.getSqlSession(ENTITY_PACKAGES, new String[]{daoPackage});
+    private SqlSession initDao(String daoPackage) {
+        return DaoTestUtils.getSqlSession(ENTITY_PACKAGES, new String[]{daoPackage});
     }
 
     @Test
     public void testDeleteEntity() {
-        initDao("com.mybatisgx.method.validator.param.dao.delete.entity");
+        SqlSession sqlSession = initDao("com.mybatisgx.method.validator.param.dao.delete.entity");
+        DeleteEntityDao deleteEntityDao = sqlSession.getMapper(DeleteEntityDao.class);
+
+        ValidatorUser validatorUser = new ValidatorUser();
+        validatorUser.setName("name");
+        deleteEntityDao.insert(validatorUser);
+
+        int count = deleteEntityDao.deleteByName(validatorUser);
+        Assert.assertEquals(1, count);
+
+        ValidatorUser queryData = deleteEntityDao.findById(validatorUser.getId());
+        Assert.assertNull(queryData);
     }
 
     @Test
     public void testDeleteQueryEntity() {
-        initDao("com.mybatisgx.method.validator.param.dao.delete.query");
+        SqlSession sqlSession = initDao("com.mybatisgx.method.validator.param.dao.delete.query");
+        DeleteQueryEntityDao deleteQueryEntityDao = sqlSession.getMapper(DeleteQueryEntityDao.class);
+
+        ValidatorUserQuery validatorUserQuery = new ValidatorUserQuery();
+        validatorUserQuery.setName("name");
+        deleteQueryEntityDao.insert(validatorUserQuery);
+
+        int count = deleteQueryEntityDao.deleteByName(validatorUserQuery);
+        Assert.assertEquals(1, count);
+
+        ValidatorUser queryData = deleteQueryEntityDao.findById(validatorUserQuery.getId());
+        Assert.assertNull(queryData);
     }
 
     @Test
@@ -34,7 +62,18 @@ public class ValidatorDeleteTest {
 
     @Test
     public void testDeleteMiss() {
-        initDao("com.mybatisgx.method.validator.param.dao.delete.miss");
+        SqlSession sqlSession = initDao("com.mybatisgx.method.validator.param.dao.delete.miss");
+        DeleteMissEntityDao deleteMissEntityDao = sqlSession.getMapper(DeleteMissEntityDao.class);
+
+        ValidatorUserQuery validatorUserQuery = new ValidatorUserQuery();
+        validatorUserQuery.setName("name");
+        deleteMissEntityDao.insert(validatorUserQuery);
+
+        int count = deleteMissEntityDao.deleteByName("name");
+        Assert.assertEquals(1, count);
+
+        ValidatorUser queryData = deleteMissEntityDao.findById(validatorUserQuery.getId());
+        Assert.assertNull(queryData);
     }
 
     @Test

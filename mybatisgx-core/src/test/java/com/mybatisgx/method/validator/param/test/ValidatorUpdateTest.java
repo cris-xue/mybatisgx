@@ -58,6 +58,9 @@ public class ValidatorUpdateTest {
         int count = updateBothDao.updateByName(validatorUser, validatorUserQuery);
         Assert.assertEquals(1, count);
 
+        ValidatorUser dataValidatorUser = updateBothDao.findById(validatorUser.getId());
+        Assert.assertEquals("name_modify", dataValidatorUser.getName());
+
         sqlSession.rollback();
     }
 

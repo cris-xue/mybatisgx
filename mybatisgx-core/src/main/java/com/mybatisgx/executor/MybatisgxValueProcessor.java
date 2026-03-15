@@ -43,11 +43,13 @@ public class MybatisgxValueProcessor {
             return parameterObject;
         }
         MethodInfo methodInfo = MethodInfoContextHolder.get(mappedStatement.getId());
-        MethodParamInfo entityParamInfo = methodInfo.getEntityParamInfo();
+        if (methodInfo == null) {
+            return parameterObject;
+        }
         ValueProcessPhase phase = this.getValueProcessPhase(mappedStatement, methodInfo);
         // 逻辑删除可能没有实体参数，但是新增和修改必须有实体参数
         if (phase != ValueProcessPhase.LOGIC_DELETE) {
-            if (methodInfo == null || entityParamInfo == null) {
+            if (methodInfo.getEntityParamInfo() == null) {
                 return parameterObject;
             }
         }

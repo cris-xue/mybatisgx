@@ -1,6 +1,5 @@
 package com.mybatisgx.template.select;
 
-import com.mybatisgx.context.EntityInfoContextHolder;
 import com.mybatisgx.context.MybatisgxObjectFactory;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.model.*;
@@ -18,6 +17,7 @@ import java.util.List;
 
 /**
  * 单表查询模板处理
+ *
  * @author ccxuef
  * @date 2025/9/6 14:05
  */
@@ -33,35 +33,33 @@ public class SelectTemplateHandler {
     public SelectTemplateHandler(MybatisgxConfiguration configuration) {
     }
 
-    public String execute(MapperInfo mapperInfo, MethodInfo methodInfo) {
-        return buildSelectXNode(mapperInfo, methodInfo);
+    public String execute(MethodInfo methodInfo) {
+        return buildSelectXNode(methodInfo);
     }
 
-    private String buildSelectXNode(MapperInfo mapperInfo, MethodInfo methodInfo) {
+    private String buildSelectXNode(MethodInfo methodInfo) {
         Document document = DocumentHelper.createDocument();
         Element mapperElement = document.addElement("mapper");
         Element selectElement = mapperElement.addElement("select");
         selectElement.addAttribute("id", methodInfo.getMethodName());
 
         List<Object> selectXmlItemList = new ArrayList();
-        EntityInfo entityInfo = null;
+        MapperInfo mapperInfo = methodInfo.getMapperInfo();
         SelectItemInfo selectItemInfo = methodInfo.getSelectItemInfo();
         if (selectItemInfo.getSelectItemType() == SelectItemType.COLUMN) {
             selectElement.addAttribute("resultMap", methodInfo.getResultMapId());
             Class<?> methodReturnType = methodInfo.getMethodReturnInfo().getType();
-            entityInfo = EntityInfoContextHolder.get(methodReturnType);
             ColumnEntityRelation columnEntityRelation = mapperInfo.getEntityRelationTree(methodReturnType);
             PlainSelect plainSelect = selectColumnSqlTemplateHandler.buildSimpleSelectSql(columnEntityRelation);
             selectXmlItemList.add(plainSelect.toString());
         }
         if (selectItemInfo.getSelectItemType() == SelectItemType.COUNT) {
             selectElement.addAttribute("resultType", methodInfo.getMethodReturnInfo().getTypeName());
-            entityInfo = mapperInfo.getEntityInfo();
-            PlainSelect plainSelect = selectCountSqlTemplateHandler.buildSelectSql(entityInfo);
+            PlainSelect plainSelect = selectCountSqlTemplateHandler.buildSelectSql(mapperInfo.getEntityInfo());
             selectXmlItemList.add(plainSelect.toString());
         }
 
-        Element whereElement = whereTemplateHandler.execute(entityInfo, methodInfo);
+        Element whereElement = whereTemplateHandler.execute(mapperInfo.getEntityInfo(), methodInfo);
         selectXmlItemList.add(whereElement);
 
         List<SelectOrderByInfo> selectOrderByInfoList = methodInfo.getSelectOrderByInfoList();

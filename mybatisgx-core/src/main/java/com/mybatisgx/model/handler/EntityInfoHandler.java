@@ -1,7 +1,10 @@
 package com.mybatisgx.model.handler;
 
+import com.mybatisgx.annotation.Entity;
+import com.mybatisgx.annotation.QueryEntity;
 import com.mybatisgx.annotation.Table;
 import com.mybatisgx.context.EntityInfoContextHolder;
+import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.model.ColumnInfo;
 import com.mybatisgx.model.EntityInfo;
 import com.mybatisgx.utils.TypeUtils;
@@ -24,10 +27,31 @@ public class EntityInfoHandler {
     private ColumnInfoHandler columnInfoHandler = new ColumnInfoHandler();
 
     public EntityInfo execute(Class<?> entityClass) {
+        Entity entity = entityClass.getAnnotation(Entity.class);
+        Table table = null;
+        if (entity != null) {
+            table = entityClass.getAnnotation(Table.class);
+            if (table == null) {
+                throw new MybatisgxException("实体必须有 Table 注解: %s", entityClass.getName());
+            }
+        }
+
+        QueryEntity queryEntity = entityClass.getAnnotation(QueryEntity.class);
+        if (queryEntity != null && table == null) {
+            Class<?> target = queryEntity.value();
+            if (target.getAnnotation(Entity.class) == null) {
+                throw new MybatisgxException("@QueryEntity 指向的类必须是实体: %s", target.getName());
+            }
+            table = target.getAnnotation(Table.class);
+            if (table == null) {
+                throw new MybatisgxException("实体必须有 Table 注解: %s", target.getName());
+            }
+        }
+
         Map<Type, Class<?>> typeParameterMap = TypeUtils.getTypeParameterMap(entityClass);
         List<ColumnInfo> columnInfoList = columnInfoHandler.getColumnInfoList(entityClass, typeParameterMap);
         EntityInfo entityInfo = new EntityInfo.Builder()
-                .setTableName(entityClass.getAnnotation(Table.class).name())
+                .setTableName(table.name())
                 .setClazz(entityClass)
                 .setColumnInfoList(columnInfoList)
                 .setTypeParameterMap(typeParameterMap)

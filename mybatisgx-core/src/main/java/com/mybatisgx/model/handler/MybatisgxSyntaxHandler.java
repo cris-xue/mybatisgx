@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * mybatisgx语法处理器
+ *
  * @author 薛承城
  * @date 2025/11/17 10:19
  */
@@ -28,8 +29,22 @@ public class MybatisgxSyntaxHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MybatisgxSyntaxHandler.class);
 
+    private static final Map<Class<?>, SqlCommandType> COMMAND_MAPPINGS = Maps.newHashMap();
+
+    static {
+        COMMAND_MAPPINGS.put(MethodNameParser.Insert_statementContext.class, SqlCommandType.INSERT);
+        COMMAND_MAPPINGS.put(MethodNameParser.Delete_statementContext.class, SqlCommandType.DELETE);
+        COMMAND_MAPPINGS.put(MethodNameParser.Update_statementContext.class, SqlCommandType.UPDATE);
+        COMMAND_MAPPINGS.put(MethodNameParser.Select_statementContext.class, SqlCommandType.SELECT);
+    }
+
+    public SqlCommandType getSqlCommandType(ParseTree node) {
+        return COMMAND_MAPPINGS.get(node.getClass());
+    }
+
     /**
      * 语法节点处理器接口
+     *
      * @author 薛承城
      * @date 2025/11/17 10:47
      */
@@ -40,33 +55,6 @@ public class MybatisgxSyntaxHandler {
         boolean support(ParseTree node);
 
         void handle(ParseTree node, ParserContext context);
-    }
-
-    public static class SqlCommandTypeHandler implements SyntaxNodeHandler {
-
-        private static final Map<Class<?>, SqlCommandType> COMMAND_MAPPINGS = Maps.newHashMap();
-
-        static {
-            COMMAND_MAPPINGS.put(MethodNameParser.Insert_clauseContext.class, SqlCommandType.INSERT);
-            COMMAND_MAPPINGS.put(MethodNameParser.Delete_clauseContext.class, SqlCommandType.DELETE);
-            COMMAND_MAPPINGS.put(MethodNameParser.Update_clauseContext.class, SqlCommandType.UPDATE);
-        }
-
-        @Override
-        public int getOrder() {
-            return 0;
-        }
-
-        @Override
-        public boolean support(ParseTree node) {
-            return COMMAND_MAPPINGS.containsKey(node.getClass());
-        }
-
-        @Override
-        public void handle(ParseTree node, ParserContext context) {
-            SqlCommandType commandType = COMMAND_MAPPINGS.get(node.getClass());
-            context.getMethodInfo().setSqlCommandType(commandType);
-        }
     }
 
     public static class SelectItemHandler implements SyntaxNodeHandler {
@@ -85,7 +73,6 @@ public class MybatisgxSyntaxHandler {
         public void handle(ParseTree node, ParserContext context) {
             LOGGER.debug("处理查询: {}", node.getText());
             MethodInfo methodInfo = context.getMethodInfo();
-            methodInfo.setSqlCommandType(SqlCommandType.SELECT);
             MethodNameParser.Select_itemContext selectItemContext = (MethodNameParser.Select_itemContext) node;
 
             SelectItemInfo selectItemInfo = new SelectItemInfo();
@@ -94,9 +81,6 @@ public class MybatisgxSyntaxHandler {
             }
             if (selectItemContext.select_count() != null) {
                 selectItemInfo.setSelectItemType(SelectItemType.COUNT);
-            }
-            if (selectItemContext.select_exist() != null) {
-                throw new UnsupportedOperationException("暂不支持exist");
             }
             methodInfo.setSelectItemInfo(selectItemInfo);
 
@@ -107,8 +91,6 @@ public class MybatisgxSyntaxHandler {
                     String limitCount = StringUtils.remove(limitTopContext.getText(), "Top");
                     SelectPageInfo selectPageInfo = new SelectPageInfo(0, Integer.parseInt(limitCount));
                     methodInfo.setSelectPageInfo(selectPageInfo);
-                } else {
-                    throw new UnsupportedOperationException("暂不支持" + limitContext.getText());
                 }
             }
         }
@@ -308,9 +290,10 @@ public class MybatisgxSyntaxHandler {
             String conditionColumnName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, token);
             ColumnInfo columnInfo = context.getEntityInfo().getColumnInfo(conditionColumnName);
             if (columnInfo == null) {
-                throw new MybatisgxException("方法条件或者实体中条件与数据库库实体无法对应：%s", conditionColumnName);
+                throw new MybatisgxException("%s 方法条件字段或者实体条件字段在 %s 实体类中不存在", conditionColumnName, context.getEntityInfo().getClazzName());
             }
-            if (context.getConditionOriginType() == ConditionOriginType.METHOD_NAME) {
+            if (context.getConditionOriginType() == ConditionOriginType.METHOD_NAME
+                    || context.getConditionOriginType() == ConditionOriginType.STATEMENT_METHOD_NAME) {
                 conditionInfo.setColumnName(conditionColumnName);
             }
             conditionInfo.setColumnInfo(columnInfo);
@@ -366,40 +349,20 @@ public class MybatisgxSyntaxHandler {
             return entityInfo;
         }
 
-        public void setEntityInfo(EntityInfo entityInfo) {
-            this.entityInfo = entityInfo;
-        }
-
         public MethodInfo getMethodInfo() {
             return methodInfo;
-        }
-
-        public void setMethodInfo(MethodInfo methodInfo) {
-            this.methodInfo = methodInfo;
         }
 
         public MethodParamInfo getMethodParamInfo() {
             return methodParamInfo;
         }
 
-        public void setMethodParamInfo(MethodParamInfo methodParamInfo) {
-            this.methodParamInfo = methodParamInfo;
-        }
-
         public ConditionOriginType getConditionOriginType() {
             return conditionOriginType;
         }
 
-        public void setConditionOriginType(ConditionOriginType conditionOriginType) {
-            this.conditionOriginType = conditionOriginType;
-        }
-
         public String getMethodName() {
             return methodName;
-        }
-
-        public void setMethodName(String methodName) {
-            this.methodName = methodName;
         }
     }
 }

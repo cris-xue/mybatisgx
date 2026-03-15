@@ -9,21 +9,21 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class EntityInfoContextHolder {
 
-    private static Map<Class<?>, EntityInfo> entityInfoMap = new ConcurrentHashMap<>();
+    private static Map<Class<?>, EntityInfo> ENTITY_INFO_MAP = new ConcurrentHashMap<>();
 
     public static void set(Class<?> clazz, EntityInfo entityInfo) {
-        entityInfoMap.put(clazz, entityInfo);
+        ENTITY_INFO_MAP.put(clazz, entityInfo);
     }
 
     public static EntityInfo get(Class<?> clazz) {
-        return entityInfoMap.get(clazz);
+        return ENTITY_INFO_MAP.get(clazz);
     }
 
     public static List<Class<?>> getEntityClassList() {
-        return new ArrayList(entityInfoMap.keySet());
+        return new ArrayList(ENTITY_INFO_MAP.keySet());
     }
 
     public static void remove() {
-        entityInfoMap.clear();
+        ENTITY_INFO_MAP.clear();
     }
 }

@@ -26,22 +26,44 @@ public class EntityRelationTreeHandler {
 
     private TableColumnNameAlias tableColumnNameAlias = new TableColumnNameAlias();
 
-    public EntityRelationTree execute(MapperInfo mapperInfo, MethodInfo methodInfo) {
+    public void execute(MapperInfo mapperInfo, MethodInfo methodInfo) {
         SqlCommandType sqlCommandType = methodInfo.getSqlCommandType();
         if (Arrays.asList(SqlCommandType.INSERT, SqlCommandType.DELETE, SqlCommandType.UPDATE).contains(sqlCommandType)) {
-            return null;
+            return;
         }
 
         MethodReturnInfo methodReturnInfo = methodInfo.getMethodReturnInfo();
         Class<?> resultClass = methodReturnInfo.getType();
         EntityInfo entityInfo = EntityInfoContextHolder.get(resultClass);
+        if (entityInfo == null) {
+            // 创建投影实体关系树
+            List<ColumnInfo> entityColumnInfoList = new ArrayList<>();
+            for (ColumnInfo columnInfo : methodReturnInfo.getColumnInfoList()) {
+                ColumnInfo entityColumnInfo = mapperInfo.getEntityInfo().getDbColumnInfo(columnInfo.getDbColumnName());
+                entityColumnInfoList.add(entityColumnInfo);
+            }
 
-        // 解决循环引用问题
-        EntityRelationDependencyTree entityRelationDependencyTree = EntityRelationDependencyTree.build(null, resultClass);
-        EntityRelationTree entityRelationTree = this.buildEntityRelationTree(null, entityInfo, entityRelationDependencyTree, 1, 1);
+            EntityInfo newEntityInfo = new EntityInfo.Builder()
+                    .setClazz(resultClass)
+                    .setTableName(mapperInfo.getTableName())
+                    .setColumnInfoList(entityColumnInfoList)
+                    .process()
+                    .build();
 
-        mapperInfo.addEntityRelationTree(entityRelationTree);
-        return entityRelationTree;
+            String tableNameAlias = this.tableColumnNameAlias.process(1, 1, newEntityInfo);
+
+            EntityRelationTree entityRelationTree = new EntityRelationTree();
+            entityRelationTree.setTableNameAlias(tableNameAlias);
+            entityRelationTree.setLevel(1);
+            entityRelationTree.setIndex(1);
+            entityRelationTree.setEntityInfo(newEntityInfo);
+            mapperInfo.addEntityRelationTree(entityRelationTree);
+        } else {
+            // 1、创建实体关系树   2、解决循环引用问题
+            EntityRelationDependencyTree entityRelationDependencyTree = EntityRelationDependencyTree.build(null, resultClass);
+            EntityRelationTree entityRelationTree = this.buildEntityRelationTree(null, entityInfo, entityRelationDependencyTree, 1, 1);
+            mapperInfo.addEntityRelationTree(entityRelationTree);
+        }
     }
 
     private EntityRelationTree buildEntityRelationTree(ColumnInfo columnInfo, EntityInfo entityInfo, EntityRelationDependencyTree entityRelationDependencyTree, int level, int index) {
@@ -290,6 +312,7 @@ public class EntityRelationTreeHandler {
 
         /**
          * 自循环引用是可以允许的
+         *
          * @param subClazz
          * @return
          */
@@ -302,6 +325,7 @@ public class EntityRelationTreeHandler {
 
         /**
          * 自引用检查
+         *
          * @param subClazz
          * @return
          */

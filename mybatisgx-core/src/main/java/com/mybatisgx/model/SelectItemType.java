@@ -8,9 +8,5 @@ package com.mybatisgx.model;
 public enum SelectItemType {
 
     COLUMN,
-    COUNT,
-    SUM,
-    AVG,
-    MAX,
-    MIN
+    COUNT
 }

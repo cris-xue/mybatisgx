@@ -6,7 +6,6 @@ import com.mybatisgx.annotation.*;
 import com.mybatisgx.context.EntityInfoContextHolder;
 import com.mybatisgx.context.MethodInfoContextHolder;
 import com.mybatisgx.dao.Dao;
-import com.mybatisgx.dao.SelectDao;
 import com.mybatisgx.exception.MethodNotConditionException;
 import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
@@ -25,7 +24,7 @@ import java.util.*;
 
 /**
  * @author ：薛承城
- * @description：用于解析mybatis接口方法
+ * @description：方法处理器
  * @date ：2023/12/1
  */
 public class MethodInfoHandler {
@@ -47,11 +46,11 @@ public class MethodInfoHandler {
         List<Method> methodList = this.getDaoMethodList(interfaceClass);
         Map<String, MethodInfo> methodInfoMap = this.processMethod(methodList, mapperInfo);
         List<MethodInfo> methodInfoList = new ArrayList(20);
-        methodInfoMap.forEach((methodName, methodInfo) -> {
-            String namespaceMethodName = this.getNamespaceMethodName(mapperInfo, methodName);
+        for (MethodInfo methodInfo : methodInfoMap.values()) {
+            String namespaceMethodName = this.getNamespaceMethodName(mapperInfo, methodInfo.getMethodName());
             MethodInfoContextHolder.set(namespaceMethodName, methodInfo);
             methodInfoList.add(methodInfo);
-        });
+        }
         return methodInfoList;
     }
 
@@ -89,28 +88,24 @@ public class MethodInfoHandler {
                 continue;
             }
 
-            MethodParamContext methodParamContext = this.getMethodParam(mapperInfo, method);
+            SqlCommandType sqlCommandType = this.mybatisgxSyntaxProcessor.getSqlCommandType(methodName);
+            MethodParamContext methodParamContext = this.getMethodParam(mapperInfo, method, sqlCommandType);
             MethodReturnInfo methodReturnInfo = this.getMethodReturn(mapperInfo, method);
 
             MethodInfo methodInfo = new MethodInfo();
-            methodInfo.setEntityInfo(mapperInfo.getEntityInfo());
+            methodInfo.setMapperInfo(mapperInfo);
             methodInfo.setMethod(method);
             methodInfo.setMethodName(methodName);
+            methodInfo.setSqlCommandType(sqlCommandType);
             methodInfo.setDynamic(method.getAnnotation(Dynamic.class) != null);
             methodInfo.setBatch(method.getAnnotation(BatchOperation.class) != null);
             methodInfo.setEntityParamInfo(methodParamContext.getEntityParamInfo());
+            methodInfo.setQueryEntityParamInfo(methodParamContext.getQueryEntityParamInfo());
             methodInfo.setMethodParamInfoList(methodParamContext.getMethodParamInfoList());
             methodInfo.setMethodReturnInfo(methodReturnInfo);
 
-            // 方法名解析
-            Class<?> methodInterfaceClass = method.getDeclaringClass();
-            this.methodNameParse(mapperInfo.getEntityInfo(), methodInfo, methodInterfaceClass);
-            // 方法条件解析
-            Statement statement = method.getAnnotation(Statement.class);
-            if (statement != null) {
-                methodInfo.setStatementExpression(statement.value());
-                this.statementExpressionParse(mapperInfo.getEntityInfo(), methodInfo);
-            }
+            // 条件解析
+            this.methodConditionParse(methodInfo);
 
             SelectItemInfo selectItemInfo = methodInfo.getSelectItemInfo();
             if (methodInfo.getSqlCommandType() == SqlCommandType.SELECT
@@ -131,13 +126,14 @@ public class MethodInfoHandler {
      *
      * @param mapperInfo
      * @param method
+     * @param sqlCommandType
      * @return
      */
-    private MethodParamContext getMethodParam(MapperInfo mapperInfo, Method method) {
-        BatchOperation batchOperation = method.getAnnotation(BatchOperation.class);
+    private MethodParamContext getMethodParam(MapperInfo mapperInfo, Method method, SqlCommandType sqlCommandType) {
         Parameter[] parameters = method.getParameters();
         int parameterCount = parameters.length;
         MethodParamInfo entityParamInfo = null;
+        MethodParamInfo queryEntityParamInfo = null;
         List<MethodParamInfo> methodParamInfoList = new ArrayList<>();
         for (int i = 0; i < parameterCount; i++) {
             Parameter parameter = parameters[i];
@@ -148,57 +144,107 @@ public class MethodInfoHandler {
             methodParamInfo.setIndex(i);
             methodParamInfo.setType(methodParamType);
             methodParamInfo.setTypeName(methodParamType.getName());
-            this.processMethodParamName(methodParamInfo, parameter, parameterCount, classCategory);
-
-            BatchData batchData = parameter.getAnnotation(BatchData.class);
-            if (batchOperation != null && batchData != null) {
-                methodParamInfo.setBatchData(true);
-                methodParamInfo.setBatchItemName(batchData.value());
-            }
-            BatchSize batchSize = parameter.getAnnotation(BatchSize.class);
-            if (batchOperation != null && batchSize != null) {
-                methodParamInfo.setBatchSize(true);
-            }
+            this.handleMethodParamName(methodParamInfo, parameter, parameterCount, classCategory);
+            this.handleMethodCollectionTypeParam(parameter, methodParamInfo);
+            this.handleBatchOperation(method, parameter, methodParamInfo);
 
             methodParamInfo.setClassCategory(classCategory);
             if (classCategory == ClassCategory.COMPLEX && methodParamType != Map.class) {
-                IdClass idClass = methodParamType.getAnnotation(IdClass.class);
-                if (idClass != null) {
+                if (methodParamType.getAnnotation(IdClass.class) != null) {
                     Map<Type, Class<?>> typeParameterMap = mapperInfo.getEntityInfo().getTypeParameterMap();
                     List<ColumnInfo> columnInfoList = columnInfoHandler.getColumnInfoList(methodParamType, typeParameterMap);
                     methodParamInfo.setColumnInfoList(columnInfoList);
                 }
                 // 获取实体管理器中是否方法参数类型，如果不存在，使用字段处理器对方法参数类型进行字段处理
-                Entity entity = methodParamType.getAnnotation(Entity.class);
-                if (entity != null) {
+                if (methodParamType.getAnnotation(Entity.class) != null) {
+                    methodParamInfo.setEntityInfo(mapperInfo.getEntityInfo());
                     if (entityParamInfo == null) {
-                        EntityInfo entityInfo = EntityInfoContextHolder.get(methodParamType);
-                        methodParamInfo.setColumnInfoList(entityInfo.getColumnInfoList());
                         entityParamInfo = methodParamInfo;
                     } else {
-                        throw new MybatisgxException("%s 方法实体参数类型或查询实体参数类型存在多个", method.getName());
+                        throw new MybatisgxException("%s 方法实体参数存在多个", method.getName());
                     }
                 }
-                QueryEntity queryEntity = methodParamType.getAnnotation(QueryEntity.class);
-                if (queryEntity != null) {
-                    if (entityParamInfo == null) {
-                        EntityInfo entityInfo = EntityInfoContextHolder.get(methodParamType);
-                        methodParamInfo.setColumnInfoList(entityInfo.getColumnInfoList());
-                        entityParamInfo = methodParamInfo;
+                if (methodParamType.getAnnotation(QueryEntity.class) != null) {
+                    // 如果继承CurdDao的时候MapperInfo中会缺失查询实体信息，这里不需要校验查询实体是否和实体对应，最终会在validatorMethodParamEntity方法中校验
+                    methodParamInfo.setEntityInfo(EntityInfoContextHolder.get(methodParamType));
+                    if (queryEntityParamInfo == null) {
+                        queryEntityParamInfo = methodParamInfo;
                     } else {
-                        throw new MybatisgxException("%s 方法实体参数类型或查询实体参数类型存在多个", method.getName());
+                        throw new MybatisgxException("%s 方法查询实体参数存在多个", method.getName());
                     }
                 }
-            }
-            Class<?> collectionType = this.getCollectionType(parameter.getType());
-            if (collectionType != null) {
-                methodParamInfo.setCollectionType(collectionType);
-                methodParamInfo.setCollectionTypeName(collectionType.getTypeName());
             }
 
             methodParamInfoList.add(methodParamInfo);
         }
-        return new MethodParamContext(entityParamInfo, methodParamInfoList);
+        this.validatorMethodParamEntity(mapperInfo, method, sqlCommandType, entityParamInfo, queryEntityParamInfo);
+        return new MethodParamContext(entityParamInfo, queryEntityParamInfo, methodParamInfoList);
+    }
+
+    private void handleBatchOperation(Method method, Parameter parameter, MethodParamInfo methodParamInfo) {
+        BatchOperation batchOperation = method.getAnnotation(BatchOperation.class);
+        BatchData batchData = parameter.getAnnotation(BatchData.class);
+        if (batchOperation != null && batchData != null) {
+            methodParamInfo.setBatchData(true);
+            methodParamInfo.setBatchItemName(batchData.value());
+        }
+        BatchSize batchSize = parameter.getAnnotation(BatchSize.class);
+        if (batchOperation != null && batchSize != null) {
+            methodParamInfo.setBatchSize(true);
+        }
+    }
+
+    private void handleMethodCollectionTypeParam(Parameter parameter, MethodParamInfo methodParamInfo) {
+        Class<?> collectionType = this.getCollectionType(parameter.getType());
+        if (collectionType != null) {
+            methodParamInfo.setCollectionType(collectionType);
+            methodParamInfo.setCollectionTypeName(collectionType.getTypeName());
+        }
+    }
+
+    /**
+     * 实体参数定义如下：
+     * 新增方法：只允许存在操作实体参数
+     * 删除方法：允许存在操作实体参数和查询实体参数，但只能存在一个，两个同时存在报错
+     * 修改方法：允许存在操作实体参数和查询实体参数，两个实体参数可以同时存在，操作实体参数可以单独存在，但查询实体参数不能单独存在
+     * 查询方法：允许存在操作实体参数和查询实体参数，但只能存在一个，两个同时存在报错
+     *
+     * @param mapperInfo
+     * @param method
+     * @param sqlCommandType
+     * @param entityParamInfo
+     * @param queryEntityParamInfo
+     */
+    private void validatorMethodParamEntity(MapperInfo mapperInfo, Method method, SqlCommandType sqlCommandType, MethodParamInfo entityParamInfo, MethodParamInfo queryEntityParamInfo) {
+        if (sqlCommandType == SqlCommandType.INSERT) {
+            if (entityParamInfo == null) {
+                throw new MybatisgxException("%s 方法实体参数不存在", method.getName());
+            }
+            if (queryEntityParamInfo != null) {
+                throw new MybatisgxException("%s 方法查询实体参数不允许存在", method.getName());
+            }
+        }
+        if (sqlCommandType == SqlCommandType.UPDATE) {
+            if (entityParamInfo == null) {
+                if (queryEntityParamInfo == null) {
+                    throw new MybatisgxException("%s 方法实体参数不存在", method.getName());
+                }
+                if (queryEntityParamInfo != null) {
+                    throw new MybatisgxException("%s 方法查询实体参数不允许单独存在", method.getName());
+                }
+            }
+        }
+        if (sqlCommandType == SqlCommandType.DELETE || sqlCommandType == SqlCommandType.SELECT) {
+            if (entityParamInfo != null && queryEntityParamInfo != null) {
+                throw new MybatisgxException("%s 方法实体参数和查询实体参数不允许同时存在", method.getName());
+            }
+        }
+        if (entityParamInfo != null && entityParamInfo.getType() != mapperInfo.getEntityClass()) {
+            throw new MybatisgxException("%s 方法实体参数和mapper定义的实体参数类型不一致", method.getName());
+        }
+        if (queryEntityParamInfo != null && queryEntityParamInfo.getType().getAnnotation(QueryEntity.class).value() != mapperInfo.getEntityClass()) {
+            throw new MybatisgxException("%s 方法查询实体参数和mapper定义的实体参数类型不一致", method.getName());
+        }
     }
 
     private MethodReturnInfo getMethodReturn(MapperInfo mapperInfo, Method method) {
@@ -210,8 +256,14 @@ public class MethodInfoHandler {
         methodReturnInfo.setType(methodReturnType);
         methodReturnInfo.setTypeName(methodReturnType.getName());
         if (classCategory == ClassCategory.COMPLEX && methodReturnType != Map.class) {
-            Map<Type, Class<?>> typeParameterMap = mapperInfo.getEntityInfo().getTypeParameterMap();
-            List<ColumnInfo> columnInfoList = columnInfoHandler.getColumnInfoList(methodReturnType, typeParameterMap);
+            List<ColumnInfo> columnInfoList = Collections.emptyList();
+            if (methodReturnType == mapperInfo.getEntityClass()) {
+                columnInfoList = mapperInfo.getEntityInfo().getColumnInfoList();
+            }
+            if (methodReturnType != mapperInfo.getEntityClass()) {
+                Map<Type, Class<?>> typeParameterMap = mapperInfo.getEntityInfo().getTypeParameterMap();
+                columnInfoList = columnInfoHandler.getColumnInfoList(methodReturnType, typeParameterMap);
+            }
             methodReturnInfo.setColumnInfoList(columnInfoList);
         }
         Class<?> collectionType = this.getCollectionType(methodReturnType);
@@ -224,44 +276,57 @@ public class MethodInfoHandler {
     }
 
     /**
-     * 条件实体只有非SimpleDao方法才会处理，SimpleDao只有findOne、findList会特殊处理。
-     * 一个方法只允许定义一个实体参数（领域实体+查询实体），如果定义多个，会报错。
-     * 实体作为条件只支持查询方法，修改和删除不支持。
-     * @param entityInfo
+     * 条件实体只有非SimpleDao、SelectDao、CurdDao方法才会处理，SelectDao只有findOne、findList、findPage会特殊处理。
+     * 查询实体作为条件支持查询、修改、删除。
+     * 解析优先级：Statement > 实体条件 > 方法名
+     *
      * @param methodInfo
-     * @param methodInterfaceClass
      */
-    public void methodNameParse(EntityInfo entityInfo, MethodInfo methodInfo, Class<?> methodInterfaceClass) {
-        mybatisgxSyntaxProcessor.execute(entityInfo, methodInfo, null, ConditionOriginType.METHOD_NAME, methodInfo.getMethodName());
-        if (methodInfo.getSqlCommandType() != SqlCommandType.SELECT) {
+    public void methodConditionParse(MethodInfo methodInfo) {
+        if (methodInfo.getSqlCommandType() == SqlCommandType.INSERT) {
             return;
         }
-        if (methodInterfaceClass == SelectDao.class) {
-            if (!Arrays.asList("findOne", "findList", "findPage").contains(methodInfo.getMethodName())) {
+        EntityInfo entityInfo = methodInfo.getMapperInfo().getEntityInfo();
+
+        // 解析Statement表达式
+        if (methodInfo.getSqlCommandType() == SqlCommandType.SELECT) {
+            Statement statement = methodInfo.getMethod().getAnnotation(Statement.class);
+            if (statement != null) {
+                methodInfo.setStatementExpression(statement.value());
+                this.mybatisgxSyntaxProcessor.execute(entityInfo, methodInfo, null, ConditionOriginType.STATEMENT_METHOD_NAME, methodInfo.getStatementExpression());
                 return;
             }
         }
-        MethodParamInfo entityParamInfo = methodInfo.getEntityParamInfo();
-        if (entityParamInfo != null) {
-            String entityCondition = this.getEntityCondition(methodInfo, entityParamInfo);
-            mybatisgxSyntaxProcessor.execute(entityInfo, methodInfo, entityParamInfo, ConditionOriginType.ENTITY_FIELD, entityCondition);
-        }
-    }
 
-    public void statementExpressionParse(EntityInfo entityInfo, MethodInfo methodInfo) {
-        mybatisgxSyntaxProcessor.execute(entityInfo, methodInfo, null, ConditionOriginType.METHOD_NAME, methodInfo.getStatementExpression());
+        // 解析查询实体生成的表达式，一个实体只允许定义一个查询实体
+        if (methodInfo.getSqlCommandType() == SqlCommandType.SELECT) {
+            if (methodInfo.getEntityParamInfo() != null && methodInfo.getQueryEntityParamInfo() == null) {
+                entityInfo = methodInfo.getEntityParamInfo().getEntityInfo();
+            }
+            if (methodInfo.getEntityParamInfo() == null && methodInfo.getQueryEntityParamInfo() != null) {
+                entityInfo = methodInfo.getQueryEntityParamInfo().getEntityInfo();
+            }
+            if (methodInfo.getEntityParamInfo() != null || methodInfo.getQueryEntityParamInfo() != null) {
+                String entityCondition = this.getEntityCondition(methodInfo, entityInfo);
+                this.mybatisgxSyntaxProcessor.execute(entityInfo, methodInfo, null, ConditionOriginType.ENTITY_FIELD, entityCondition);
+                return;
+            }
+        }
+
+        // 解析方法名
+        this.mybatisgxSyntaxProcessor.execute(entityInfo, methodInfo, null, ConditionOriginType.METHOD_NAME, methodInfo.getMethodName());
     }
 
     /**
      * 把实体字段转换成方法名
      *
      * @param methodInfo
-     * @param methodParamInfo
+     * @param entityInfo
      * @return
      */
-    private String getEntityCondition(MethodInfo methodInfo, MethodParamInfo methodParamInfo) {
+    private String getEntityCondition(MethodInfo methodInfo, EntityInfo entityInfo) {
         List<String> columnConditionList = new ArrayList<>();
-        for (ColumnInfo columnInfo : methodParamInfo.getColumnInfoList()) {
+        for (ColumnInfo columnInfo : entityInfo.getColumnInfoList()) {
             if (TypeUtils.typeEquals(columnInfo, RelationColumnInfo.class)) {
                 RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
                 if (relationColumnInfo.getRelationType() == RelationType.MANY_TO_MANY) {
@@ -311,6 +376,10 @@ public class MethodInfoHandler {
                     if (entityParamInfo != null) {
                         methodParamInfo = this.getEntityTypeConditionParam(methodInfo, conditionInfo, entityParamInfo);
                     }
+                    MethodParamInfo queryEntityParamInfo = methodInfo.getQueryEntityParamInfo();
+                    if (queryEntityParamInfo != null) {
+                        methodParamInfo = this.getEntityTypeConditionParam(methodInfo, conditionInfo, queryEntityParamInfo);
+                    }
                 }
                 if (methodParamInfo == null) {
                     String argName = String.format("arg%1$s", conditionInfo.getIndex());
@@ -328,7 +397,7 @@ public class MethodInfoHandler {
     private MethodParamInfo getEntityTypeConditionParam(MethodInfo methodInfo, ConditionInfo conditionInfo, MethodParamInfo entityParamInfo) {
         // 如果存在条件实体，则把条件实体字段转换成参数名称
         String conditionColumnName = conditionInfo.getColumnName();
-        ColumnInfo columnInfo = entityParamInfo.getColumnInfo(conditionColumnName);
+        ColumnInfo columnInfo = entityParamInfo.getEntityInfo().getColumnInfo(conditionColumnName);
         if (columnInfo == null) {
             return null;
         }
@@ -393,12 +462,13 @@ public class MethodInfoHandler {
 
     /**
      * mybatis在[单参数、复合类型、无注解]情况下为了获取参数方便，不会对参数进行包装，所以不会生成argx这种参数
+     *
      * @param methodParamInfo
      * @param parameter
      * @param parameterCount
      * @param classCategory
      */
-    private void processMethodParamName(MethodParamInfo methodParamInfo, Parameter parameter, int parameterCount, ClassCategory classCategory) {
+    private void handleMethodParamName(MethodParamInfo methodParamInfo, Parameter parameter, int parameterCount, ClassCategory classCategory) {
         String argName = parameter.getName();
         Param param = parameter.getAnnotation(Param.class);
         if (param != null) {
@@ -447,6 +517,7 @@ public class MethodInfoHandler {
 
     /**
      * 忽略方法
+     *
      * @param method
      * @return
      */
@@ -478,10 +549,13 @@ public class MethodInfoHandler {
 
         private MethodParamInfo entityParamInfo;
 
+        private MethodParamInfo queryEntityParamInfo;
+
         private List<MethodParamInfo> methodParamInfoList;
 
-        public MethodParamContext(MethodParamInfo entityParamInfo, List<MethodParamInfo> methodParamInfoList) {
+        public MethodParamContext(MethodParamInfo entityParamInfo, MethodParamInfo queryEntityParamInfo, List<MethodParamInfo> methodParamInfoList) {
             this.entityParamInfo = entityParamInfo;
+            this.queryEntityParamInfo = queryEntityParamInfo;
             this.methodParamInfoList = methodParamInfoList;
         }
 
@@ -489,46 +563,12 @@ public class MethodInfoHandler {
             return entityParamInfo;
         }
 
-        public void setEntityParamInfo(MethodParamInfo entityParamInfo) {
-            this.entityParamInfo = entityParamInfo;
+        public MethodParamInfo getQueryEntityParamInfo() {
+            return queryEntityParamInfo;
         }
 
         public List<MethodParamInfo> getMethodParamInfoList() {
             return methodParamInfoList;
-        }
-
-        public void setMethodParamInfoList(List<MethodParamInfo> methodParamInfoList) {
-            this.methodParamInfoList = methodParamInfoList;
-        }
-    }
-
-    private static class ConditionParamContext {
-
-        private MethodParamInfo methodParamInfo;
-        /**
-         * 条件值来源于方法参数或者方法参数实体，需要提前计算出公共取值路径，模板渲染的时候就不再需要多重逻辑判断
-         */
-        private List<String> paramValueCommonPathItemList;
-
-        public ConditionParamContext(MethodParamInfo methodParamInfo, List<String> paramValueCommonPathItemList) {
-            this.methodParamInfo = methodParamInfo;
-            this.paramValueCommonPathItemList = paramValueCommonPathItemList;
-        }
-
-        public MethodParamInfo getMethodParamInfo() {
-            return methodParamInfo;
-        }
-
-        public void setMethodParamInfo(MethodParamInfo methodParamInfo) {
-            this.methodParamInfo = methodParamInfo;
-        }
-
-        public List<String> getParamValueCommonPathItemList() {
-            return paramValueCommonPathItemList;
-        }
-
-        public void setParamValueCommonPathItemList(List<String> paramValueCommonPathItemList) {
-            this.paramValueCommonPathItemList = paramValueCommonPathItemList;
         }
     }
 }

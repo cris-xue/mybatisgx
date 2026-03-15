@@ -24,16 +24,17 @@ public class InsertTemplateHandler {
     SimpleInsertHandler simpleInsertHandler = new SimpleInsertHandler();
     BatchInsertHandler batchInsertHandler = new BatchInsertHandler();
 
-    public String execute(MapperInfo mapperInfo, MethodInfo methodInfo) {
-        return simpleTemplateHandle(mapperInfo, methodInfo);
+    public String execute(MethodInfo methodInfo) {
+        return simpleTemplateHandle(methodInfo);
     }
 
-    private String simpleTemplateHandle(MapperInfo mapperInfo, MethodInfo methodInfo) {
-        return buildInsertSelectiveXNode(mapperInfo, methodInfo);
+    private String simpleTemplateHandle(MethodInfo methodInfo) {
+        return buildInsertSelectiveXNode(methodInfo);
     }
 
-    private String buildInsertSelectiveXNode(MapperInfo mapperInfo, MethodInfo methodInfo) {
+    private String buildInsertSelectiveXNode(MethodInfo methodInfo) {
         AbstractInsertHandler insertHandler = this.getInsertHandler(methodInfo);
+        EntityInfo entityInfo = methodInfo.getMapperInfo().getEntityInfo();
 
         Document document = DocumentHelper.createDocument();
         Element mapperElement = document.addElement("mapper");
@@ -41,7 +42,7 @@ public class InsertTemplateHandler {
         insertElement.addAttribute("id", methodInfo.getMethodName());
         insertElement.addAttribute("keyProperty", insertHandler.getKeyProperty(methodInfo));
         insertElement.addAttribute("useGeneratedKeys", "true");
-        insertElement.addText(String.format("insert into %s", mapperInfo.getEntityInfo().getTableName()));
+        insertElement.addText(String.format("insert into %s", entityInfo.getTableName()));
 
         Element dbTrimElement = insertElement.addElement("trim");
         dbTrimElement.addAttribute("prefix", "(");

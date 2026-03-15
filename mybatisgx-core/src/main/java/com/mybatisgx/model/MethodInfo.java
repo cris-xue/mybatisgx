@@ -16,9 +16,9 @@ import java.util.Map;
 public class MethodInfo {
 
     /**
-     * 方法所属实体
+     * 方法所属Dao类信息
      */
-    private EntityInfo entityInfo;
+    private MapperInfo mapperInfo;
     /**
      * java方法信息
      */
@@ -60,12 +60,14 @@ public class MethodInfo {
      */
     private List<ConditionInfo> conditionInfoList = new ArrayList<>();
     /**
-     * 实体参数
-     * 1、如果存在实体参数，那么条件只能使用实体参数，如果不存在实体参数，那么条件只能使用方法参数列表
-     * 2、方法参数中只要有一个是实体，就存在实体参数，如果存在多个实体参数，只取最后一个实体参数
-     * 3、新增、修改、删除、查询都只允许一个实体参数
+     * 方法操作实体，不参与生成条件
      */
     private MethodParamInfo entityParamInfo;
+    /**
+     * 方法查询实体，只参与生成条件
+     * 新增：为空<br/>
+     */
+    private MethodParamInfo queryEntityParamInfo;
     /**
      * 方法参数信息
      */
@@ -83,12 +85,12 @@ public class MethodInfo {
      */
     private String resultMapId;
 
-    public EntityInfo getEntityInfo() {
-        return entityInfo;
+    public MapperInfo getMapperInfo() {
+        return mapperInfo;
     }
 
-    public void setEntityInfo(EntityInfo entityInfo) {
-        this.entityInfo = entityInfo;
+    public void setMapperInfo(MapperInfo mapperInfo) {
+        this.mapperInfo = mapperInfo;
     }
 
     public Method getMethod() {
@@ -179,6 +181,14 @@ public class MethodInfo {
         this.entityParamInfo = entityParamInfo;
     }
 
+    public MethodParamInfo getQueryEntityParamInfo() {
+        return queryEntityParamInfo;
+    }
+
+    public void setQueryEntityParamInfo(MethodParamInfo queryEntityParamInfo) {
+        this.queryEntityParamInfo = queryEntityParamInfo;
+    }
+
     public List<MethodParamInfo> getMethodParamInfoList() {
         return methodParamInfoList;
     }
@@ -194,14 +204,6 @@ public class MethodInfo {
 
     public MethodParamInfo getMethodParamInfo(String paramName) {
         return methodParamInfoMap.get(paramName);
-    }
-
-    public Map<String, MethodParamInfo> getMethodParamInfoMap() {
-        return methodParamInfoMap;
-    }
-
-    public void setMethodParamInfoMap(Map<String, MethodParamInfo> methodParamInfoMap) {
-        this.methodParamInfoMap = methodParamInfoMap;
     }
 
     public MethodReturnInfo getMethodReturnInfo() {

@@ -1,12 +1,9 @@
 package com.mybatisgx.model;
 
-import com.mybatisgx.utils.TypeUtils;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author ：薛承城
@@ -56,13 +53,14 @@ public class MethodParamInfo {
      */
     private String collectionTypeName;
     /**
-     * 字段信息
+     * 实体参数对应的实体信息
+     */
+    private EntityInfo entityInfo;
+    /**
+     * 字段信息列表。如果是普通对象参数，不为空，比如：ID复合字段。如果是实体参数，为空。
+     * 主要解决复合字段子字段无法存储的问题，场景1：findById(MultiId)。场景2：findList(MultiIdUser)
      */
     private List<ColumnInfo> columnInfoList;
-    /**
-     * 字段信息Map
-     */
-    private Map<String, ColumnInfo> columnInfoMap = new HashMap();
     /**
      * 是否批量参数
      */
@@ -160,22 +158,20 @@ public class MethodParamInfo {
         this.collectionTypeName = collectionTypeName;
     }
 
+    public EntityInfo getEntityInfo() {
+        return entityInfo;
+    }
+
+    public void setEntityInfo(EntityInfo entityInfo) {
+        this.entityInfo = entityInfo;
+    }
+
     public List<ColumnInfo> getColumnInfoList() {
         return columnInfoList;
     }
 
     public void setColumnInfoList(List<ColumnInfo> columnInfoList) {
         this.columnInfoList = columnInfoList;
-        for (ColumnInfo columnInfo : columnInfoList) {
-            if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class)) {
-                this.columnInfoMap.put("id", columnInfo);
-            }
-            this.columnInfoMap.put(columnInfo.getJavaColumnName(), columnInfo);
-        }
-    }
-
-    public ColumnInfo getColumnInfo(String javaColumnName) {
-        return this.columnInfoMap.get(javaColumnName);
     }
 
     public Boolean getBatchSize() {

@@ -149,18 +149,6 @@ public class MethodNameParserBaseListener implements MethodNameParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterSelect_exist(MethodNameParser.Select_existContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitSelect_exist(MethodNameParser.Select_existContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterWhere_clause(MethodNameParser.Where_clauseContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -228,18 +216,6 @@ public class MethodNameParserBaseListener implements MethodNameParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitField_comparison_op_clause(MethodNameParser.Field_comparison_op_clauseContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterGroup_by_clause(MethodNameParser.Group_by_clauseContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitGroup_by_clause(MethodNameParser.Group_by_clauseContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -365,18 +341,6 @@ public class MethodNameParserBaseListener implements MethodNameParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterGroup_by(MethodNameParser.Group_byContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitGroup_by(MethodNameParser.Group_byContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterOrder_by(MethodNameParser.Order_byContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -408,30 +372,6 @@ public class MethodNameParserBaseListener implements MethodNameParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitLimit_top(MethodNameParser.Limit_topContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterLimit_first(MethodNameParser.Limit_firstContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitLimit_first(MethodNameParser.Limit_firstContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterLimit_last(MethodNameParser.Limit_lastContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitLimit_last(MethodNameParser.Limit_lastContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

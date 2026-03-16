@@ -30,7 +30,6 @@ public class UpdateTemplateHandler {
 
     private String buildUpdateXNode(MethodInfo methodInfo) {
         EntityInfo entityInfo = methodInfo.getMapperInfo().getEntityInfo();
-        EntityInfo queryEntityInfo = methodInfo.getMapperInfo().getQueryEntityInfo();
 
         Document document = DocumentHelper.createDocument();
         Element mapperElement = document.addElement("mapper");

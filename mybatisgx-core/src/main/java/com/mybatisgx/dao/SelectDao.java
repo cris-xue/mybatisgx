@@ -11,7 +11,7 @@ import java.util.List;
  * @author 薛承城
  * @date 2025/12/21 14:19
  */
-public interface SelectDao<ENTITY, QUERY_ENTITY, ID> extends Dao {
+public interface SelectDao<ENTITY, QUERY_ENTITY> extends Dao {
 
     @Dynamic
     ENTITY findOne(QUERY_ENTITY entity);

@@ -8,5 +8,5 @@ import java.io.Serializable;
  * @date ：2020/7/20 14:44
  */
 public interface SimpleDao<ENTITY, QUERY_ENTITY, ID extends Serializable>
-        extends CurdDao<ENTITY, ID>, SelectDao<ENTITY, QUERY_ENTITY, ID> {
+        extends CurdDao<ENTITY, ID>, SelectDao<ENTITY, QUERY_ENTITY> {
 }

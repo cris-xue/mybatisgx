@@ -4,7 +4,7 @@ lexer grammar MethodNameLexer;
 
 INSERT_ACTION: 'insert' | 'add' ;
 DELETE_ACTION: 'delete' | 'remove' ;
-UPDATE_ACTION: 'update' | 'update' | 'modify' ;
+UPDATE_ACTION: 'update' | 'modify' ;
 SELECT_COLUMN_ACTION: 'find' | 'get' | 'select' | 'query' ;
 SELECT_COUNT_ACTION: 'count' ;
 BY: 'By' ;

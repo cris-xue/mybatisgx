@@ -4,12 +4,12 @@ import com.mybatisgx.annotation.QueryEntity;
 import com.mybatisgx.context.EntityInfoContextHolder;
 import com.mybatisgx.context.MapperInfoContextHolder;
 import com.mybatisgx.context.MybatisgxObjectFactory;
-import com.mybatisgx.dao.Dao;
+import com.mybatisgx.dao.CurdDao;
+import com.mybatisgx.dao.SelectDao;
 import com.mybatisgx.dao.SimpleDao;
 import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.model.MapperInfo;
 import com.mybatisgx.model.MethodInfo;
-import org.apache.commons.lang3.reflect.TypeUtils;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,42 +47,14 @@ public class MapperInfoHandler {
     }
 
     public MapperInfo getMapperInfo(Class<?> daoInterface) {
-        Type[] daoInterfaceParams = this.getDaoInterfaceParams(daoInterface);
-        Class<?> idClass = null;
-        Class<?> entityClass = null;
-        Class<?> queryEntityClass = null;
-        if (daoInterfaceParams.length == 2) {
-            idClass = (Class<?>) daoInterfaceParams[1];
-            entityClass = (Class<?>) daoInterfaceParams[0];
-        }
-        if (daoInterfaceParams.length == 3) {
-            idClass = (Class<?>) daoInterfaceParams[2];
-            queryEntityClass = (Class<?>) daoInterfaceParams[1];
-            entityClass = (Class<?>) daoInterfaceParams[0];
-            if (entityClass != queryEntityClass && entityClass != queryEntityClass.getAnnotation(QueryEntity.class).value()) {
-                throw new MybatisgxException("mapper查询实体对应的实体和实体不一致");
-            }
-        }
-
+        DaoInterfaceParamContext context = this.getDaoInterfaceParams(daoInterface);
         MapperInfo mapperInfo = new MapperInfo();
-        mapperInfo.setIdClass(idClass);
-        mapperInfo.setEntityClass(entityClass);
-        mapperInfo.setQueryEntityClass(queryEntityClass);
+        mapperInfo.setIdClass(context.getIdClass());
+        mapperInfo.setEntityClass(context.getEntityClass());
+        mapperInfo.setQueryEntityClass(context.getQueryEntityClass());
         mapperInfo.setDaoClass(daoInterface);
         mapperInfo.setNamespace(daoInterface.getName());
         return mapperInfo;
-    }
-
-    private Type[] getDaoInterfaceParams(Class<?> daoInterface) {
-        for (Type daoSuperInterfaceType : daoInterface.getGenericInterfaces()) {
-            ParameterizedType daoSuperInterfaceClass = (ParameterizedType) daoSuperInterfaceType;
-            Type[] daoInterfaceParams = daoSuperInterfaceClass.getActualTypeArguments();
-            if (TypeUtils.isAssignable(daoInterface, Dao.class)) {
-                return daoInterfaceParams;
-            }
-        }
-        logger.info("{} un extend {}", SimpleDao.class.getName());
-        return null;
     }
 
     private Class<?> getDaoInterface(String namespace) {
@@ -90,6 +62,88 @@ public class MapperInfoHandler {
             return Class.forName(namespace);
         } catch (ClassNotFoundException e) {
             throw new MybatisgxException("%s namespace not found", namespace);
+        }
+    }
+
+    private DaoInterfaceParamContext getDaoInterfaceParams(Type daoInterface) {
+        DaoInterfaceParamContext context = new DaoInterfaceParamContext();
+        Class<?> daoInterfaceClass = null;
+        if (daoInterface instanceof Class) {
+            daoInterfaceClass = (Class<?>) daoInterface;
+        }
+        if (daoInterface instanceof ParameterizedType) {
+            daoInterfaceClass = (Class<?>) ((ParameterizedType) daoInterface).getRawType();
+        }
+        if (daoInterface == null) {
+            return context;
+        }
+        for (Type basicDao : daoInterfaceClass.getGenericInterfaces()) {
+            if (basicDao instanceof ParameterizedType) {
+                ParameterizedType daoParameterizedType = (ParameterizedType) basicDao;
+                Type daoRawType = daoParameterizedType.getRawType();
+                Type[] daoInterfaceParams = daoParameterizedType.getActualTypeArguments();
+                if (daoRawType == CurdDao.class) {
+                    context.setIdClass((Class<?>) daoInterfaceParams[1]);
+                    context.setEntityClass((Class<?>) daoInterfaceParams[0]);
+                    return context;
+                } else if (daoRawType == SelectDao.class) {
+                    Class<?> entityClass = (Class<?>) daoInterfaceParams[0];
+                    Class<?> queryEntityClass = (Class<?>) daoInterfaceParams[1];
+                    if (entityClass != queryEntityClass && entityClass != queryEntityClass.getAnnotation(QueryEntity.class).value()) {
+                        throw new MybatisgxException("mapper查询实体对应的实体和实体不一致");
+                    }
+                    context.setEntityClass(entityClass);
+                    context.setQueryEntityClass(queryEntityClass);
+                    return context;
+                } else if (daoRawType == SimpleDao.class) {
+                    Class<?> entityClass = (Class<?>) daoInterfaceParams[0];
+                    Class<?> queryEntityClass = (Class<?>) daoInterfaceParams[1];
+                    Class<?> idClass = (Class<?>) daoInterfaceParams[2];
+                    if (entityClass != queryEntityClass && entityClass != queryEntityClass.getAnnotation(QueryEntity.class).value()) {
+                        throw new MybatisgxException("mapper查询实体对应的实体和实体不一致");
+                    }
+                    context.setIdClass(idClass);
+                    context.setEntityClass(entityClass);
+                    context.setQueryEntityClass(queryEntityClass);
+                    return context;
+                } else {
+                    return this.getDaoInterfaceParams(basicDao);
+                }
+            }
+        }
+        return context;
+    }
+
+    private static class DaoInterfaceParamContext {
+
+        private Class<?> idClass;
+
+        private Class<?> entityClass;
+
+        private Class<?> queryEntityClass;
+
+        public Class<?> getIdClass() {
+            return idClass;
+        }
+
+        public void setIdClass(Class<?> idClass) {
+            this.idClass = idClass;
+        }
+
+        public Class<?> getEntityClass() {
+            return entityClass;
+        }
+
+        public void setEntityClass(Class<?> entityClass) {
+            this.entityClass = entityClass;
+        }
+
+        public Class<?> getQueryEntityClass() {
+            return queryEntityClass;
+        }
+
+        public void setQueryEntityClass(Class<?> queryEntityClass) {
+            this.queryEntityClass = queryEntityClass;
         }
     }
 }

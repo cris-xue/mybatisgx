@@ -26,7 +26,6 @@
 		<module>mybatisgx-annotation</module>
 		<module>mybatisgx-core</module>
 		<module>mybatisgx-core-patch</module>
-		<!--<module>mybatisgx-advanced</module>-->
 		<module>mybatisgx-spring</module>
 		<module>mybatisgx-spring-boot-starter</module>
 	</modules>
@@ -46,11 +45,6 @@
 			<dependency>
 				<groupId>com.mybatisgx</groupId>
 				<artifactId>mybatisgx-core-patch</artifactId>
-				<version>${mybatisgx.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.mybatisgx</groupId>
-				<artifactId>mybatisgx-advanced</artifactId>
 				<version>${mybatisgx.version}</version>
 			</dependency>
 			<dependency>

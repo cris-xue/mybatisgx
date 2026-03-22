@@ -28,6 +28,7 @@
 		<module>mybatisgx-core-patch</module>
 		<module>mybatisgx-spring</module>
 		<module>mybatisgx-spring-boot-starter</module>
+		<module>mybatisgx-spring-boot3-starter</module>
 	</modules>
 	
 	<dependencyManagement>

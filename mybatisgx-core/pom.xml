@@ -36,11 +36,13 @@
 			<artifactId>guava</artifactId>
 			<version>29.0-jre</version>
 		</dependency>
-		
+
+		<!-- TODO 未来需要移除 -->
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-core</artifactId>
 			<version>5.3.15</version>
+			<optional>true</optional>
 		</dependency>
 
 		<dependency>

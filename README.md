@@ -528,10 +528,9 @@ MyBatisGX 是唯一一个同时满足：
 
 ## 文档与支持
 
-- 📖 [完整文档](http://www.mybatisgx.com)
-- 🚀 [快速开始示例](../mybatisgx-example)
-- 💬 [问题反馈](https://gitee.com/freakchicken/mybatisgx/issues)
-- 📚 [在线文档](../docs/官网文档/mybatisgx_说明.md)
+- 📚 [在线文档](http://www.mybatisgx.com)
+- 🚀 [快速开始示例](https://github.com/cris-xue/mybatisgx-example)
+- 💬 [问题反馈](https://github.com/cris-xue/mybatisgx/issues)
 
 ## 项目理念
 

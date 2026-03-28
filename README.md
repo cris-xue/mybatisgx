@@ -166,10 +166,17 @@ List<User> users = userDao.findList(query);  // 自动生成动态 SQL
 
 ### 2. 配置扫描路径
 
-```yaml
-mybatisgx:
-  entity-package: com.example.entity    # 实体类包路径
-  dao-package: com.example.dao          # DAO 接口包路径
+```java
+@MybatisgxScan(
+        entityBasePackages = "com.example.entity",
+        daoBasePackages = "com.example.dao"
+)
+@SpringBootApplication
+public class Application {
+    public static void main(String[] args) {
+        SpringApplication.run(Application.class, args);
+    }
+}
 ```
 
 ### 3. 创建实体类

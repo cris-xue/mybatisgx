@@ -3,6 +3,9 @@
 > 为长期演进而设计的 MyBatis 增强框架
 
 [![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
+[![GitHub stars](https://img.shields.io/github/stars/cris-xue/mybatisgx?style=social)](https://github.com/cris-xue/mybatisgx)
+[![Spring Boot 2](https://img.shields.io/badge/Spring%20Boot-2.x-green.svg)](https://spring.io/projects/spring-boot)
+[![Spring Boot 3](https://img.shields.io/badge/Spring%20Boot-3.x-green.svg)](https://spring.io/projects/spring-boot)
 
 ## 概述
 
@@ -424,7 +427,7 @@ public class User {
 }
 
 // 调用 delete 方法时自动转换为 UPDATE
-userDao.delete(userId);  // UPDATE user SET deleted = 1 WHERE id = ? and deleted = 0
+userDao.deleteById(userId);  // UPDATE user SET deleted = 1 WHERE id = ? and deleted = 0
 ```
 
 ### 乐观锁
@@ -441,7 +444,7 @@ public class User {
 }
 
 // 更新时自动检查版本号
-userDao.update(user);  // UPDATE user SET ..., version = version + 1 WHERE id = ? AND version = ?
+userDao.updateById(user);  // UPDATE user SET ..., version = version + 1 WHERE id = ? AND version = ?
 ```
 
 ### 字段自动填充
@@ -496,7 +499,7 @@ long total = page.getTotal();       // 总记录数
 List<User> list = page.getList();   // 当前页数据
 ```
 
-## 核心定位总结
+## 核心定位
 
 MyBatisGX 解决的不是"怎么快速开发"，而是：
 

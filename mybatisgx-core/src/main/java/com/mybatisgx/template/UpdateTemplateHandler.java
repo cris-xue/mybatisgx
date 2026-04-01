@@ -120,9 +120,9 @@ public class UpdateTemplateHandler {
                 return;
             }
 
-            String testExpression = this.getTestExpression(paramValuePathItemList);
-            String valueExpression = this.getValueExpression(paramValuePathItemList, columnInfo);
-            Element trimOrIfElement = this.buildTrimOrIfElement(methodInfo, columnInfo, trimElement, testExpression);
+            String testExpression = MybatisXmlHelper.getTestExpression(paramValuePathItemList);
+            String valueExpression = MybatisXmlHelper.getValueExpression(paramValuePathItemList, columnInfo);
+            Element trimOrIfElement = MybatisXmlHelper.buildTrimOrIfElement(methodInfo, columnInfo, trimElement, testExpression);
             trimOrIfElement.addText(String.format("%s = %s", columnInfo.getDbColumnName(), valueExpression));
         }
 

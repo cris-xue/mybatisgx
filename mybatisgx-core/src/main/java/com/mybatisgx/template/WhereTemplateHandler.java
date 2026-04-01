@@ -327,7 +327,7 @@ public class WhereTemplateHandler {
          * @return
          */
         private WhereItemContext buildWhereItemContext(ColumnInfo columnInfo, List<String> paramValuePathItemList) {
-            String testExpression = this.getTestExpression(paramValuePathItemList);
+            String testExpression = MybatisXmlHelper.getTestExpression(paramValuePathItemList);
             String bindKey = this.getBindKey(paramValuePathItemList);
             String bindValuePath = this.getBindValuePath(paramValuePathItemList);
             Element likeBindElement = this.buildLikeBindElement(bindKey, bindValuePath);
@@ -405,7 +405,7 @@ public class WhereTemplateHandler {
          * @return
          */
         private WhereItemContext buildWhereItemContext(ColumnInfo columnInfo, List<String> paramValuePathItemList) {
-            String testExpression = this.getTestExpression(paramValuePathItemList);
+            String testExpression = MybatisXmlHelper.getTestExpression(paramValuePathItemList);
             String paramValueExpression = this.getParamValueExpression(paramValuePathItemList);
             String conditionExpression = this.getConditionExpression(columnInfo, "");
             Element foreachElement = this.buildForeachElement(paramValueExpression);
@@ -458,7 +458,7 @@ public class WhereTemplateHandler {
          * @return
          */
         private WhereItemContext buildWhereItemContext(ColumnInfo columnInfo, List<String> paramValuePathItemList) {
-            String testExpression = this.getTestExpression(paramValuePathItemList);
+            String testExpression = MybatisXmlHelper.getTestExpression(paramValuePathItemList);
             String paramValueExpression = this.getParamValueExpression(paramValuePathItemList);
             String conditionExpression = this.getConditionExpression(columnInfo, paramValueExpression);
             return new WhereItemContext(testExpression, Arrays.asList(conditionExpression));
@@ -492,7 +492,7 @@ public class WhereTemplateHandler {
          * @return
          */
         private WhereItemContext buildWhereItemContext(ColumnInfo columnInfo, List<String> paramValuePathItemList) {
-            String testExpression = this.getTestExpression(paramValuePathItemList);
+            String testExpression = MybatisXmlHelper.getTestExpression(paramValuePathItemList);
             String paramValueExpression = this.getParamValueExpression(paramValuePathItemList);
             String conditionExpression = this.getConditionExpression(columnInfo, paramValueExpression);
             return new WhereItemContext(testExpression, Arrays.asList(conditionExpression));

@@ -117,14 +117,13 @@ public class InsertTemplateHandler {
 
         private void setColumn(MethodInfo methodInfo, ColumnInfo columnInfo, List<String> paramValuePathItemList, Element dbTrimElement) {
             String dbColumnName = columnInfo.getDbColumnName();
+            String columnExpression = String.format("%s,", dbColumnName);
             if (columnInfo.getLogicDelete() != null) {
-                String columnExpression = String.format("%s,", dbColumnName);
                 dbTrimElement.addText(columnExpression);
                 return;
             }
-            String testExpression = this.getTestExpression(paramValuePathItemList);
-            String columnExpression = String.format("%s,", dbColumnName);
-            Element trimOrIfElement = this.buildTrimOrIfElement(methodInfo, columnInfo, dbTrimElement, testExpression);
+            String testExpression = MybatisXmlHelper.getTestExpression(paramValuePathItemList);
+            Element trimOrIfElement = MybatisXmlHelper.buildTrimOrIfElement(methodInfo, columnInfo, dbTrimElement, testExpression);
             trimOrIfElement.addText(columnExpression);
         }
 
@@ -179,17 +178,18 @@ public class InsertTemplateHandler {
                 trimElement.addText(valueExpression);
                 return;
             }
-            String testExpression = this.getTestExpression(paramValuePathItemList);
-            String valueExpression = this.getValueExpression(paramValuePathItemList, columnInfo);
-            Element trimOrIfElement = this.buildTrimOrIfElement(methodInfo, columnInfo, trimElement, testExpression);
+            String testExpression = MybatisXmlHelper.getTestExpression(paramValuePathItemList);
+            String valueExpression = MybatisXmlHelper.getValueExpression(paramValuePathItemList, columnInfo);
+            Element trimOrIfElement = MybatisXmlHelper.buildTrimOrIfElement(methodInfo, columnInfo, trimElement, testExpression);
             trimOrIfElement.addText(valueExpression);
         }
 
         private Element buildTrimOrIfElement(MethodInfo methodInfo, ColumnInfo columnInfo, Element trimElement, String testExpression) {
             if (methodInfo.getDynamic() && columnInfo.getGenerateValue() == null) {
-                Element ifElement = trimElement.addElement("if");
-                ifElement.addAttribute("test", testExpression);
-                return ifElement;
+                return MybatisXmlHelper.buildIfElement(trimElement, testExpression);
+                // Element ifElement = trimElement.addElement("if");
+                // ifElement.addAttribute("test", testExpression);
+                // return ifElement;
             }
             return trimElement;
         }

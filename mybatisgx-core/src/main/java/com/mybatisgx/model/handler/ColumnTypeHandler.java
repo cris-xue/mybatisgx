@@ -5,12 +5,13 @@ import com.mybatisgx.model.ClassCategory;
 import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 public class ColumnTypeHandler {
 
     private static final List<Class<?>> SIMPLE_TYPE_LIST = new ArrayList();
-    private static final Map<String, String> TYPE_MAP = new HashMap();
 
     static {
         SIMPLE_TYPE_LIST.add(int.class);
@@ -24,16 +25,12 @@ public class ColumnTypeHandler {
         SIMPLE_TYPE_LIST.add(LocalDateTime.class);
     }
 
-    static {
-        TYPE_MAP.put("", "");
-    }
-
     public ClassCategory getClassCategory(Type type) {
         for (Class<?> simpleType : SIMPLE_TYPE_LIST) {
             if (type == simpleType) {
                 return ClassCategory.SIMPLE;
             }
         }
-        return ClassCategory.COMPLEX;
+        return ClassCategory.OBJECT;
     }
 }

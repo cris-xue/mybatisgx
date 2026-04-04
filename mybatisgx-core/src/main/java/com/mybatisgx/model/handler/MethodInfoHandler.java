@@ -32,7 +32,7 @@ public class MethodInfoHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(MethodInfoHandler.class);
 
     private ColumnInfoHandler columnInfoHandler = new ColumnInfoHandler();
-    private ColumnTypeHandler columnTypeHandler = new ColumnTypeHandler();
+    private TypeResolver typeResolver = new TypeResolver();
     private MybatisgxSyntaxProcessor mybatisgxSyntaxProcessor = new MybatisgxSyntaxProcessor();
     private EntityRelationTreeHandler entityRelationTreeHandler = new EntityRelationTreeHandler();
     private ResultMapInfoHandler resultMapInfoHandler = new ResultMapInfoHandler();
@@ -542,7 +542,7 @@ public class MethodInfoHandler {
     }
 
     public TypeCategory getClassCategory(Type type) {
-        return columnTypeHandler.getClassCategory(type);
+        return typeResolver.getClassCategory(type);
     }
 
     private static class MethodParamContext {

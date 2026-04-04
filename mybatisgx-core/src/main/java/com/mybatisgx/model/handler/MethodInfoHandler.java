@@ -149,7 +149,7 @@ public class MethodInfoHandler {
             this.handleBatchOperation(method, parameter, methodParamInfo);
 
             methodParamInfo.setClassCategory(typeCategory);
-            if (typeCategory == TypeCategory.COMPLEX && methodParamType != Map.class) {
+            if (typeCategory == TypeCategory.OBJECT && methodParamType != Map.class) {
                 if (methodParamType.getAnnotation(IdClass.class) != null) {
                     Map<Type, Class<?>> typeParameterMap = mapperInfo.getEntityInfo().getTypeParameterMap();
                     List<ColumnInfo> columnInfoList = columnInfoHandler.getColumnInfoList(methodParamType, typeParameterMap);
@@ -255,7 +255,7 @@ public class MethodInfoHandler {
         methodReturnInfo.setClassCategory(typeCategory);
         methodReturnInfo.setType(methodReturnType);
         methodReturnInfo.setTypeName(methodReturnType.getName());
-        if (typeCategory == TypeCategory.COMPLEX && methodReturnType != Map.class) {
+        if (typeCategory == TypeCategory.OBJECT && methodReturnType != Map.class) {
             List<ColumnInfo> columnInfoList = Collections.emptyList();
             if (methodReturnType == mapperInfo.getEntityClass()) {
                 columnInfoList = mapperInfo.getEntityInfo().getColumnInfoList();
@@ -403,7 +403,7 @@ public class MethodInfoHandler {
         }
 
         List<ColumnInfo> composites = columnInfo.getComposites();
-        TypeCategory typeCategory = ObjectUtils.isEmpty(composites) ? TypeCategory.SIMPLE : TypeCategory.COMPLEX;
+        TypeCategory typeCategory = ObjectUtils.isEmpty(composites) ? TypeCategory.SIMPLE : TypeCategory.OBJECT;
 
         MethodParamInfo methodParamInfo = new MethodParamInfo();
         methodParamInfo.setClassCategory(typeCategory);
@@ -441,7 +441,7 @@ public class MethodInfoHandler {
         if (methodParamInfo == null) {
             return null;
         }
-        if (methodParamInfo.getClassCategory() == TypeCategory.COMPLEX && TypeUtils.typeEquals(conditionInfo.getColumnInfo(), ColumnInfo.class)) {
+        if (methodParamInfo.getClassCategory() == TypeCategory.OBJECT && TypeUtils.typeEquals(conditionInfo.getColumnInfo(), ColumnInfo.class)) {
             throw new MybatisgxException("%s查询条件不能关联到复杂类型参数%s", methodInfo.getMethodName(), methodParamInfo.getArgName());
         }
         if (methodInfo.getBatch()) {
@@ -476,7 +476,7 @@ public class MethodInfoHandler {
         }
         methodParamInfo.setArgName(argName);
         methodParamInfo.setParam(param);
-        if (!(parameterCount == 1 && typeCategory == TypeCategory.COMPLEX && param == null)) {
+        if (!(parameterCount == 1 && typeCategory == TypeCategory.OBJECT && param == null)) {
             methodParamInfo.setArgValueCommonPathItemList(Lists.newArrayList(argName));
             methodParamInfo.setWrapper(true);
         }

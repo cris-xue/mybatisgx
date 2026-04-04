@@ -186,7 +186,7 @@ public class WhereTemplateHandler {
                     WhereItemContext whereItemContext = this.handleSimpleTypeParam(columnInfo);
                     whereItemContextList.add(whereItemContext);
                 }
-                if (typeCategory == TypeCategory.COMPLEX) {
+                if (typeCategory == TypeCategory.OBJECT) {
                     for (ColumnInfo columnInfoComposite : methodParamInfo.getColumnInfoList()) {
                         this.columnInfoCompositeIndex++;
                         WhereItemContext whereItemContext = this.handleComplexTypeParam(columnInfo, columnInfoComposite);
@@ -211,12 +211,12 @@ public class WhereTemplateHandler {
                 // findById(Long id) findById(@Param("id") Long id)
                 return TypeCategory.SIMPLE;
             }
-            if (methodParamInfo.getClassCategory() == TypeCategory.COMPLEX) {
+            if (methodParamInfo.getClassCategory() == TypeCategory.OBJECT) {
                 // findById(MultiId id) findById(@Param("id") MultiId id)
                 if (ObjectUtils.isEmpty(methodParamInfo.getColumnInfoList())) {
                     return TypeCategory.SIMPLE;
                 } else {
-                    return TypeCategory.COMPLEX;
+                    return TypeCategory.OBJECT;
                 }
             }
             throw new MybatisgxException("columnInfoClassCategory is null");

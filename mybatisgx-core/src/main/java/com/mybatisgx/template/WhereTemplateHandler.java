@@ -181,12 +181,12 @@ public class WhereTemplateHandler {
                 return;
             }
             if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class, ColumnInfo.class)) {
-                ClassCategory classCategory = this.getParamClassCategory();
-                if (classCategory == ClassCategory.SIMPLE) {
+                TypeCategory typeCategory = this.getParamClassCategory();
+                if (typeCategory == TypeCategory.SIMPLE) {
                     WhereItemContext whereItemContext = this.handleSimpleTypeParam(columnInfo);
                     whereItemContextList.add(whereItemContext);
                 }
-                if (classCategory == ClassCategory.COMPLEX) {
+                if (typeCategory == TypeCategory.COMPLEX) {
                     for (ColumnInfo columnInfoComposite : methodParamInfo.getColumnInfoList()) {
                         this.columnInfoCompositeIndex++;
                         WhereItemContext whereItemContext = this.handleComplexTypeParam(columnInfo, columnInfoComposite);
@@ -206,17 +206,17 @@ public class WhereTemplateHandler {
             }
         }
 
-        private ClassCategory getParamClassCategory() {
-            if (methodParamInfo.getClassCategory() == ClassCategory.SIMPLE) {
+        private TypeCategory getParamClassCategory() {
+            if (methodParamInfo.getClassCategory() == TypeCategory.SIMPLE) {
                 // findById(Long id) findById(@Param("id") Long id)
-                return ClassCategory.SIMPLE;
+                return TypeCategory.SIMPLE;
             }
-            if (methodParamInfo.getClassCategory() == ClassCategory.COMPLEX) {
+            if (methodParamInfo.getClassCategory() == TypeCategory.COMPLEX) {
                 // findById(MultiId id) findById(@Param("id") MultiId id)
                 if (ObjectUtils.isEmpty(methodParamInfo.getColumnInfoList())) {
-                    return ClassCategory.SIMPLE;
+                    return TypeCategory.SIMPLE;
                 } else {
-                    return ClassCategory.COMPLEX;
+                    return TypeCategory.COMPLEX;
                 }
             }
             throw new MybatisgxException("columnInfoClassCategory is null");

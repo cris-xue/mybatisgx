@@ -12,7 +12,7 @@ public class MethodReturnInfo {
     /**
      * 类型分类
      */
-    private ClassCategory classCategory;
+    private TypeCategory typeCategory;
     /**
      * 类型，Integer、User
      */
@@ -34,12 +34,12 @@ public class MethodReturnInfo {
      */
     List<ColumnInfo> columnInfoList;
 
-    public ClassCategory getClassCategory() {
-        return classCategory;
+    public TypeCategory getClassCategory() {
+        return typeCategory;
     }
 
-    public void setClassCategory(ClassCategory classCategory) {
-        this.classCategory = classCategory;
+    public void setClassCategory(TypeCategory typeCategory) {
+        this.typeCategory = typeCategory;
     }
 
     public Class<?> getType() {

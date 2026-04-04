@@ -19,7 +19,7 @@ public class MethodParamInfo {
     /**
      * 类型分类
      */
-    private ClassCategory classCategory;
+    private TypeCategory typeCategory;
     /**
      * 类型，Integer、User、Map
      */
@@ -86,12 +86,12 @@ public class MethodParamInfo {
         this.index = index;
     }
 
-    public ClassCategory getClassCategory() {
-        return classCategory;
+    public TypeCategory getClassCategory() {
+        return typeCategory;
     }
 
-    public void setClassCategory(ClassCategory classCategory) {
-        this.classCategory = classCategory;
+    public void setClassCategory(TypeCategory typeCategory) {
+        this.typeCategory = typeCategory;
     }
 
     public Class<?> getType() {

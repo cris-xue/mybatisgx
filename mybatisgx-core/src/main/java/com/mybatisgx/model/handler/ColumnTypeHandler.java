@@ -1,6 +1,6 @@
 package com.mybatisgx.model.handler;
 
-import com.mybatisgx.model.ClassCategory;
+import com.mybatisgx.model.TypeCategory;
 
 import java.lang.reflect.Type;
 import java.time.LocalDate;
@@ -25,12 +25,12 @@ public class ColumnTypeHandler {
         SIMPLE_TYPE_LIST.add(LocalDateTime.class);
     }
 
-    public ClassCategory getClassCategory(Type type) {
+    public TypeCategory getClassCategory(Type type) {
         for (Class<?> simpleType : SIMPLE_TYPE_LIST) {
             if (type == simpleType) {
-                return ClassCategory.SIMPLE;
+                return TypeCategory.SIMPLE;
             }
         }
-        return ClassCategory.OBJECT;
+        return TypeCategory.OBJECT;
     }
 }

@@ -138,18 +138,18 @@ public class MethodInfoHandler {
         for (int i = 0; i < parameterCount; i++) {
             Parameter parameter = parameters[i];
             Class<?> methodParamType = this.getMethodParamType(mapperInfo, parameter);
-            ClassCategory classCategory = this.getClassCategory(methodParamType);
+            TypeCategory typeCategory = this.getClassCategory(methodParamType);
 
             MethodParamInfo methodParamInfo = new MethodParamInfo();
             methodParamInfo.setIndex(i);
             methodParamInfo.setType(methodParamType);
             methodParamInfo.setTypeName(methodParamType.getName());
-            this.handleMethodParamName(methodParamInfo, parameter, parameterCount, classCategory);
+            this.handleMethodParamName(methodParamInfo, parameter, parameterCount, typeCategory);
             this.handleMethodCollectionTypeParam(parameter, methodParamInfo);
             this.handleBatchOperation(method, parameter, methodParamInfo);
 
-            methodParamInfo.setClassCategory(classCategory);
-            if (classCategory == ClassCategory.COMPLEX && methodParamType != Map.class) {
+            methodParamInfo.setClassCategory(typeCategory);
+            if (typeCategory == TypeCategory.COMPLEX && methodParamType != Map.class) {
                 if (methodParamType.getAnnotation(IdClass.class) != null) {
                     Map<Type, Class<?>> typeParameterMap = mapperInfo.getEntityInfo().getTypeParameterMap();
                     List<ColumnInfo> columnInfoList = columnInfoHandler.getColumnInfoList(methodParamType, typeParameterMap);
@@ -249,13 +249,13 @@ public class MethodInfoHandler {
 
     private MethodReturnInfo getMethodReturn(MapperInfo mapperInfo, Method method) {
         Class<?> methodReturnType = this.getMethodReturnType(mapperInfo, method);
-        ClassCategory classCategory = this.getClassCategory(methodReturnType);
+        TypeCategory typeCategory = this.getClassCategory(methodReturnType);
 
         MethodReturnInfo methodReturnInfo = new MethodReturnInfo();
-        methodReturnInfo.setClassCategory(classCategory);
+        methodReturnInfo.setClassCategory(typeCategory);
         methodReturnInfo.setType(methodReturnType);
         methodReturnInfo.setTypeName(methodReturnType.getName());
-        if (classCategory == ClassCategory.COMPLEX && methodReturnType != Map.class) {
+        if (typeCategory == TypeCategory.COMPLEX && methodReturnType != Map.class) {
             List<ColumnInfo> columnInfoList = Collections.emptyList();
             if (methodReturnType == mapperInfo.getEntityClass()) {
                 columnInfoList = mapperInfo.getEntityInfo().getColumnInfoList();
@@ -403,10 +403,10 @@ public class MethodInfoHandler {
         }
 
         List<ColumnInfo> composites = columnInfo.getComposites();
-        ClassCategory classCategory = ObjectUtils.isEmpty(composites) ? ClassCategory.SIMPLE : ClassCategory.COMPLEX;
+        TypeCategory typeCategory = ObjectUtils.isEmpty(composites) ? TypeCategory.SIMPLE : TypeCategory.COMPLEX;
 
         MethodParamInfo methodParamInfo = new MethodParamInfo();
-        methodParamInfo.setClassCategory(classCategory);
+        methodParamInfo.setClassCategory(typeCategory);
         methodParamInfo.setType(columnInfo.getJavaType());
         methodParamInfo.setCollectionType(columnInfo.getCollectionType());
         if (ObjectUtils.isNotEmpty(composites)) {
@@ -441,8 +441,8 @@ public class MethodInfoHandler {
         if (methodParamInfo == null) {
             return null;
         }
-        if (methodParamInfo.getClassCategory() == ClassCategory.COMPLEX && TypeUtils.typeEquals(conditionInfo.getColumnInfo(), ColumnInfo.class)) {
-            throw new MybatisgxException("查询条件不能关联到复杂类型参数%s", methodParamInfo.getArgName());
+        if (methodParamInfo.getClassCategory() == TypeCategory.COMPLEX && TypeUtils.typeEquals(conditionInfo.getColumnInfo(), ColumnInfo.class)) {
+            throw new MybatisgxException("%s查询条件不能关联到复杂类型参数%s", methodInfo.getMethodName(), methodParamInfo.getArgName());
         }
         if (methodInfo.getBatch()) {
             // 简单类型批量操作需要重写参数节点   【int deleteBatchById(@BatchData List<ID> ids, @BatchSize int batchSize);】
@@ -466,9 +466,9 @@ public class MethodInfoHandler {
      * @param methodParamInfo
      * @param parameter
      * @param parameterCount
-     * @param classCategory
+     * @param typeCategory
      */
-    private void handleMethodParamName(MethodParamInfo methodParamInfo, Parameter parameter, int parameterCount, ClassCategory classCategory) {
+    private void handleMethodParamName(MethodParamInfo methodParamInfo, Parameter parameter, int parameterCount, TypeCategory typeCategory) {
         String argName = parameter.getName();
         Param param = parameter.getAnnotation(Param.class);
         if (param != null) {
@@ -476,7 +476,7 @@ public class MethodInfoHandler {
         }
         methodParamInfo.setArgName(argName);
         methodParamInfo.setParam(param);
-        if (!(parameterCount == 1 && classCategory == ClassCategory.COMPLEX && param == null)) {
+        if (!(parameterCount == 1 && typeCategory == TypeCategory.COMPLEX && param == null)) {
             methodParamInfo.setArgValueCommonPathItemList(Lists.newArrayList(argName));
             methodParamInfo.setWrapper(true);
         }
@@ -541,7 +541,7 @@ public class MethodInfoHandler {
         return false;
     }
 
-    public ClassCategory getClassCategory(Type type) {
+    public TypeCategory getClassCategory(Type type) {
         return columnTypeHandler.getClassCategory(type);
     }
 

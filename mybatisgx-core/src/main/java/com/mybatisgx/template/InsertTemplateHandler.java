@@ -2,6 +2,7 @@ package com.mybatisgx.template;
 
 import com.google.common.collect.Lists;
 import com.mybatisgx.annotation.LogicDelete;
+import com.mybatisgx.annotation.Version;
 import com.mybatisgx.context.EntityInfoContextHolder;
 import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.model.*;
@@ -172,6 +173,12 @@ public class InsertTemplateHandler {
         }
 
         private void setValue(MethodInfo methodInfo, ColumnInfo columnInfo, List<String> paramValuePathItemList, Element trimElement) {
+            Version version = columnInfo.getVersion();
+            if (version != null) {
+                String valueExpression = String.format("'%s'%s,", version.initValue(), buildTypeHandler(columnInfo));
+                trimElement.addText(valueExpression);
+                return;
+            }
             LogicDelete logicDelete = columnInfo.getLogicDelete();
             if (logicDelete != null) {
                 String valueExpression = String.format("'%s'%s,", logicDelete.show(), buildTypeHandler(columnInfo));

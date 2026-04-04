@@ -1,5 +1,6 @@
 package com.mybatisgx.model;
 
+import com.google.common.base.CaseFormat;
 import com.mybatisgx.annotation.Transient;
 import com.mybatisgx.api.ValueProcessor;
 import com.mybatisgx.context.DaoMethodManager;
@@ -198,6 +199,13 @@ public class EntityInfo {
                 if (tableColumnInfo != null) {
                     entityInfo.tableColumnInfoList.add(columnInfo);
                     entityInfo.tableColumnInfoMap.put(columnInfo.getDbColumnName(), columnInfo.getJavaColumnName());
+                }
+                if (tableColumnInfo != null && TypeUtils.typeEquals(tableColumnInfo, RelationColumnInfo.class)) {
+                    // 解决关联字段单独作为条件查询
+                    String tableColumnName = columnInfo.getDbColumnName();
+                    // order_column -> orderColumn
+                    String entityColumnName = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, tableColumnName);
+                    entityInfo.columnInfoMap.put(entityColumnName, columnInfo);
                 }
                 entityInfo.columnInfoMap.put(columnInfo.getJavaColumnName(), columnInfo);
             }

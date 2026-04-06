@@ -147,6 +147,7 @@ public class UserDaoTest {
         Assert.assertEquals(1, insertCount);
 
         user.setName("test");
+        user.setVersion(0);
         int updateCount = userDao.updateById(user);
         Assert.assertEquals(1, updateCount);
 
@@ -164,6 +165,7 @@ public class UserDaoTest {
         Assert.assertEquals(1, insertCount);
 
         user.setName("test");
+        user.setVersion(0);
         int updateCount = userDao.updateByIdSelective(user);
         Assert.assertEquals(1, updateCount);
 

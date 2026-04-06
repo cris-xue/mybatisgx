@@ -111,9 +111,11 @@ public class ResultMapInfoHandler {
                 int level = childEntityRelationTree.getLevel();
                 RelationColumnInfo relationColumnInfo = (RelationColumnInfo) childEntityRelationTree.getColumnInfo();
 
-                // 构建一个内嵌查询结果集
+                // 构建一个内嵌查询结果集，内嵌查询结果集为空，不进行关联查询
                 ResultMapInfo nestedResultMapInfo = this.buildNestedSelectResultMapInfo(entityRelationTree, childEntityRelationTree, relationColumnInfo);
-                resultMapInfoList.add(nestedResultMapInfo);
+                if (nestedResultMapInfo != null) {
+                    resultMapInfoList.add(nestedResultMapInfo);
+                }
 
                 FetchMode fetchMode = relationColumnInfo.getFetchMode();
                 if (fetchMode == FetchMode.SIMPLE) {
@@ -133,6 +135,8 @@ public class ResultMapInfoHandler {
                     if (level > 2) {
                         this.buildJoinResultMapInfo(resultMapContext, nestedResultMapInfo, childEntityRelationTree);
                     }
+                } else if (fetchMode == FetchMode.NONE) {
+                    LOGGER.debug("{} 实体关联字段 {} 不抓取数据", entityRelationTree.getEntityInfo().getClazzName(), relationColumnInfo.getJavaColumnName());
                 } else {
                     throw new MybatisgxException("%s字段缺少Fetch注解或者FetchMode为空", relationColumnInfo.getJavaColumnName());
                 }
@@ -150,6 +154,8 @@ public class ResultMapInfoHandler {
                 resultMapInfo.setMiddleEntityInfo(childEntityRelationTree.getMiddleEntityInfo());
                 resultMapInfo.setEntityInfo(childEntityRelationTree.getEntityInfo());
                 return resultMapInfo;
+            } else if (fetchMode == FetchMode.NONE) {
+                return null;
             } else {
                 ResultMapInfo resultMapInfo = new ResultMapInfo();
                 this.copyProperties(parentEntityRelationTree, resultMapInfo);
@@ -202,6 +208,7 @@ public class ResultMapInfoHandler {
 
         /**
          * 为结果集生成内嵌查询id和结果集id
+         *
          * @param resultMapInfoList
          */
         protected void processResultMapInfo(List<ResultMapInfo> resultMapInfoList) {

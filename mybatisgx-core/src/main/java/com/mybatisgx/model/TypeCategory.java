@@ -1,7 +1,7 @@
 package com.mybatisgx.model;
 
 /**
- * 字段类型
+ * 类型类别
  *
  * @author ccxuef
  * @date 2025/11/6 15:24

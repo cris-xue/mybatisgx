@@ -25,6 +25,10 @@ public class ColumnInfo implements FieldMeta {
      */
     private Field field;
     /**
+     * 类型类别
+     */
+    private TypeCategory typeCategory;
+    /**
      * Map、基础类型、业务类型
      */
     private Class<?> javaType;
@@ -103,6 +107,14 @@ public class ColumnInfo implements FieldMeta {
 
     public void setField(Field field) {
         this.field = field;
+    }
+
+    public TypeCategory getTypeCategory() {
+        return typeCategory;
+    }
+
+    public void setTypeCategory(TypeCategory typeCategory) {
+        this.typeCategory = typeCategory;
     }
 
     public Class<?> getJavaType() {

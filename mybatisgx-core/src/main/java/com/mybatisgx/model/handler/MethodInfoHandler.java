@@ -138,7 +138,7 @@ public class MethodInfoHandler {
         for (int i = 0; i < parameterCount; i++) {
             Parameter parameter = parameters[i];
             Class<?> methodParamType = this.getMethodParamType(mapperInfo, parameter);
-            TypeCategory typeCategory = this.getClassCategory(methodParamType);
+            TypeCategory typeCategory = this.typeResolver.getCategory(methodParamType);
 
             MethodParamInfo methodParamInfo = new MethodParamInfo();
             methodParamInfo.setIndex(i);
@@ -249,7 +249,7 @@ public class MethodInfoHandler {
 
     private MethodReturnInfo getMethodReturn(MapperInfo mapperInfo, Method method) {
         Class<?> methodReturnType = this.getMethodReturnType(mapperInfo, method);
-        TypeCategory typeCategory = this.getClassCategory(methodReturnType);
+        TypeCategory typeCategory = this.typeResolver.getCategory(methodReturnType);
 
         MethodReturnInfo methodReturnInfo = new MethodReturnInfo();
         methodReturnInfo.setClassCategory(typeCategory);
@@ -539,10 +539,6 @@ public class MethodInfoHandler {
             return true;
         }
         return false;
-    }
-
-    public TypeCategory getClassCategory(Type type) {
-        return typeResolver.getClassCategory(type);
     }
 
     private static class MethodParamContext {

@@ -22,6 +22,8 @@ import java.util.Map;
  */
 public class ColumnInfoHandler {
 
+    private TypeResolver typeResolver = new TypeResolver();
+
     public List<ColumnInfo> getColumnInfoList(Class<?> clazz, Map<Type, Class<?>> typeParameterMap) {
         Field[] fields = FieldUtils.getAllFields(clazz);
         return this.processColumnInfo(null, fields, typeParameterMap);
@@ -134,6 +136,8 @@ public class ColumnInfoHandler {
         if (javaType != null) {
             columnInfo.setJavaType(javaType);
         }
+        TypeCategory typeCategory = this.typeResolver.getCategory(type);
+        columnInfo.setTypeCategory(typeCategory);
     }
 
     private ColumnInfo getColumnInfo(Field field) {

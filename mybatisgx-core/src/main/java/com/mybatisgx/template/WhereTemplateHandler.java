@@ -181,7 +181,7 @@ public class WhereTemplateHandler {
                 return;
             }
             if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class, ColumnInfo.class)) {
-                TypeCategory typeCategory = this.getParamClassCategory();
+                TypeCategory typeCategory = this.getParamTypeCategory();
                 if (typeCategory == TypeCategory.SIMPLE) {
                     WhereItemContext whereItemContext = this.handleSimpleTypeParam(columnInfo);
                     whereItemContextList.add(whereItemContext);
@@ -206,7 +206,7 @@ public class WhereTemplateHandler {
             }
         }
 
-        private TypeCategory getParamClassCategory() {
+        private TypeCategory getParamTypeCategory() {
             if (methodParamInfo.getClassCategory() == TypeCategory.SIMPLE) {
                 // findById(Long id) findById(@Param("id") Long id)
                 return TypeCategory.SIMPLE;
@@ -270,9 +270,10 @@ public class WhereTemplateHandler {
                 return whereElement;
             }
             if (dynamic) {
-                Element ifElement = whereElement.addElement("if");
+                return MybatisXmlHelper.buildIfElement(whereElement, testExpression);
+                /*Element ifElement = whereElement.addElement("if");
                 ifElement.addAttribute("test", testExpression);
-                return ifElement;
+                return ifElement;*/
             }
             return whereElement;
         }
@@ -346,7 +347,7 @@ public class WhereTemplateHandler {
 
         protected Element buildLikeBindElement(String bindKey, String bindValuePath) {
             String likeExpression = "'%'+" + bindValuePath + "+'%'";
-            return this.buildBindElement(bindKey, likeExpression);
+            return MybatisXmlHelper.buildBindElement(bindKey, likeExpression);
         }
     }
 
@@ -355,7 +356,7 @@ public class WhereTemplateHandler {
         @Override
         protected Element buildLikeBindElement(String bindKey, String bindValuePath) {
             String likeExpression = "'%'+" + bindValuePath;
-            return this.buildBindElement(bindKey, likeExpression);
+            return MybatisXmlHelper.buildBindElement(bindKey, likeExpression);
         }
     }
 
@@ -364,7 +365,7 @@ public class WhereTemplateHandler {
         @Override
         protected Element buildLikeBindElement(String bindKey, String bindValuePath) {
             String likeExpression = bindValuePath + "+'%'";
-            return this.buildBindElement(bindKey, likeExpression);
+            return MybatisXmlHelper.buildBindElement(bindKey, likeExpression);
         }
     }
 
@@ -408,7 +409,7 @@ public class WhereTemplateHandler {
             String testExpression = MybatisXmlHelper.getTestExpression(paramValuePathItemList);
             String paramValueExpression = this.getParamValueExpression(paramValuePathItemList);
             String conditionExpression = this.getConditionExpression(columnInfo, "");
-            Element foreachElement = this.buildForeachElement(paramValueExpression);
+            Element foreachElement = MybatisXmlHelper.buildForeachElement(paramValueExpression);
             return new WhereItemContext(testExpression, Arrays.asList(conditionExpression, foreachElement));
         }
 

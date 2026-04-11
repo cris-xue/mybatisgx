@@ -404,13 +404,11 @@ public class MethodInfoHandler {
             return null;
         }
 
-        List<ColumnInfo> composites = columnInfo.getComposites();
-        TypeCategory typeCategory = ObjectUtils.isEmpty(composites) ? TypeCategory.SIMPLE : TypeCategory.OBJECT;
-
         MethodParamInfo methodParamInfo = new MethodParamInfo();
-        methodParamInfo.setTypeCategory(typeCategory);
+        methodParamInfo.setTypeCategory(columnInfo.getTypeCategory());
         methodParamInfo.setType(columnInfo.getJavaType());
         methodParamInfo.setCollectionType(columnInfo.getCollectionType());
+        List<ColumnInfo> composites = columnInfo.getComposites();
         if (ObjectUtils.isNotEmpty(composites)) {
             methodParamInfo.setColumnInfoList(composites);
         }

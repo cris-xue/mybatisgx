@@ -148,7 +148,7 @@ public class MethodInfoHandler {
             this.handleMethodCollectionTypeParam(parameter, methodParamInfo);
             this.handleBatchOperation(method, parameter, methodParamInfo);
 
-            methodParamInfo.setClassCategory(typeCategory);
+            methodParamInfo.setTypeCategory(typeCategory);
             if (typeCategory == TypeCategory.OBJECT && methodParamType != Map.class) {
                 if (methodParamType.getAnnotation(IdClass.class) != null) {
                     IdColumnInfo idColumnInfo = mapperInfo.getEntityInfo().getIdColumnInfo();
@@ -408,7 +408,7 @@ public class MethodInfoHandler {
         TypeCategory typeCategory = ObjectUtils.isEmpty(composites) ? TypeCategory.SIMPLE : TypeCategory.OBJECT;
 
         MethodParamInfo methodParamInfo = new MethodParamInfo();
-        methodParamInfo.setClassCategory(typeCategory);
+        methodParamInfo.setTypeCategory(typeCategory);
         methodParamInfo.setType(columnInfo.getJavaType());
         methodParamInfo.setCollectionType(columnInfo.getCollectionType());
         if (ObjectUtils.isNotEmpty(composites)) {
@@ -443,7 +443,7 @@ public class MethodInfoHandler {
         if (methodParamInfo == null) {
             return null;
         }
-        if (methodParamInfo.getClassCategory() == TypeCategory.OBJECT && TypeUtils.typeEquals(conditionInfo.getColumnInfo(), ColumnInfo.class)) {
+        if (methodParamInfo.getTypeCategory() == TypeCategory.OBJECT && TypeUtils.typeEquals(conditionInfo.getColumnInfo(), ColumnInfo.class)) {
             throw new MybatisgxException("%s查询条件不能关联到复杂类型参数%s", methodInfo.getMethodName(), methodParamInfo.getArgName());
         }
         if (methodInfo.getBatch()) {

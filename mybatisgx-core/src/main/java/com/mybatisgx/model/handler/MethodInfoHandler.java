@@ -151,9 +151,11 @@ public class MethodInfoHandler {
             methodParamInfo.setClassCategory(typeCategory);
             if (typeCategory == TypeCategory.OBJECT && methodParamType != Map.class) {
                 if (methodParamType.getAnnotation(IdClass.class) != null) {
-                    Map<Type, Class<?>> typeParameterMap = mapperInfo.getEntityInfo().getTypeParameterMap();
-                    List<ColumnInfo> columnInfoList = columnInfoHandler.getColumnInfoList(methodParamType, typeParameterMap);
-                    methodParamInfo.setColumnInfoList(columnInfoList);
+                    IdColumnInfo idColumnInfo = mapperInfo.getEntityInfo().getIdColumnInfo();
+                    if (methodParamType != idColumnInfo.getJavaType()) {
+                        throw new MybatisgxException("方法参数复合主键和实体中的复合主键类型不一致");
+                    }
+                    methodParamInfo.setColumnInfoList(idColumnInfo.getComposites());
                 }
                 // 获取实体管理器中是否方法参数类型，如果不存在，使用字段处理器对方法参数类型进行字段处理
                 if (methodParamType.getAnnotation(Entity.class) != null) {

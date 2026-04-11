@@ -201,17 +201,8 @@ public class EntityInfo {
                     entityInfo.tableColumnInfoMap.put(columnInfo.getDbColumnName(), columnInfo.getJavaColumnName());
                 }
                 if (tableColumnInfo != null && TypeUtils.typeEquals(tableColumnInfo, RelationColumnInfo.class)) {
-                    // 解决关联字段单独作为条件查询
-                    String tableColumnName = columnInfo.getDbColumnName();
-                    // order_column -> orderColumn
-                    String entityColumnName = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, tableColumnName);
-
-                    ColumnInfo independenceColumnInfo = new ColumnInfo();
-                    independenceColumnInfo.setColumn(tableColumnInfo.getColumn());
-                    independenceColumnInfo.setJavaColumnName(entityColumnName);
-                    independenceColumnInfo.setDbColumnName(tableColumnInfo.getDbColumnName());
-                    independenceColumnInfo.setTypeCategory(TypeCategory.SIMPLE);
-                    entityInfo.columnInfoMap.put(entityColumnName, independenceColumnInfo);
+                    ColumnInfo independenceColumnInfo = this.converterRelationColumnInfoToColumnInfo(tableColumnInfo);
+                    entityInfo.columnInfoMap.put(independenceColumnInfo.getJavaColumnName(), independenceColumnInfo);
                 }
                 entityInfo.columnInfoMap.put(columnInfo.getJavaColumnName(), columnInfo);
             }
@@ -268,6 +259,20 @@ public class EntityInfo {
                     DaoMethodManager.register((Class<ValueProcessor>[]) generateValueColumnInfo.getGenerateValue().value());
                 }
             }
+        }
+
+        private ColumnInfo converterRelationColumnInfoToColumnInfo(ColumnInfo relationColumnInfo) {
+            // 解决关联字段单独作为条件查询
+            String tableColumnName = relationColumnInfo.getDbColumnName();
+            // order_column -> orderColumn
+            String entityColumnName = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, tableColumnName);
+
+            ColumnInfo columnInfo = new ColumnInfo();
+            columnInfo.setColumn(relationColumnInfo.getColumn());
+            columnInfo.setJavaColumnName(entityColumnName);
+            columnInfo.setDbColumnName(relationColumnInfo.getDbColumnName());
+            columnInfo.setTypeCategory(TypeCategory.SIMPLE);
+            return columnInfo;
         }
 
         public EntityInfo build() {

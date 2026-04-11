@@ -205,7 +205,13 @@ public class EntityInfo {
                     String tableColumnName = columnInfo.getDbColumnName();
                     // order_column -> orderColumn
                     String entityColumnName = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, tableColumnName);
-                    entityInfo.columnInfoMap.put(entityColumnName, columnInfo);
+
+                    ColumnInfo independenceColumnInfo = new ColumnInfo();
+                    independenceColumnInfo.setColumn(tableColumnInfo.getColumn());
+                    independenceColumnInfo.setJavaColumnName(entityColumnName);
+                    independenceColumnInfo.setDbColumnName(tableColumnInfo.getDbColumnName());
+                    independenceColumnInfo.setTypeCategory(TypeCategory.SIMPLE);
+                    entityInfo.columnInfoMap.put(entityColumnName, independenceColumnInfo);
                 }
                 entityInfo.columnInfoMap.put(columnInfo.getJavaColumnName(), columnInfo);
             }

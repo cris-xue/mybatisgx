@@ -89,6 +89,7 @@ public class TypeUtils extends org.apache.commons.lang3.reflect.TypeUtils {
 
     /**
      * 获取泛型参数和真实类型的映射关系
+     *
      * @param type
      * @return
      */
@@ -158,7 +159,20 @@ public class TypeUtils extends org.apache.commons.lang3.reflect.TypeUtils {
         return false;
     }
 
+    public static Boolean typeEquals(Class<?> type, Class<?>... clazzList) {
+        for (Class<?> clazz : clazzList) {
+            if (type == clazz) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static Boolean typeNotEquals(Object object, Class<?> clazz) {
         return !typeEquals(object, clazz);
+    }
+
+    public static Boolean typeNotEquals(Class<?> type, Class<?>... clazzList) {
+        return !typeEquals(type, clazzList);
     }
 }

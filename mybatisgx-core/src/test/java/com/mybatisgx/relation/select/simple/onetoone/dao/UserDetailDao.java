@@ -7,4 +7,6 @@ import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
 public interface UserDetailDao extends SimpleDao<UserDetail, UserDetail, MultiId> {
+
+    UserDetail findByMultiId(MultiId<Long> multiId);
 }

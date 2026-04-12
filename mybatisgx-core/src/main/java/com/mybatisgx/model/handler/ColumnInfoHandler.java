@@ -17,6 +17,7 @@ import java.util.Map;
 
 /**
  * 字段处理器
+ *
  * @author 薛承城
  * @date 2025/12/3 12:13
  */
@@ -40,7 +41,7 @@ public class ColumnInfoHandler {
 
             Column column = field.getAnnotation(Column.class);
             String fieldName = field.getName();
-            String dbColumnName = this.getDbColumnName(field);
+            String tableColumnName = this.getTableColumnName(field);
 
             ColumnInfo columnInfo = this.getColumnInfo(field);
             columnInfo.setParent(parentColumnInfo);
@@ -48,7 +49,7 @@ public class ColumnInfoHandler {
             columnInfo.setJavaColumnName(fieldName);
             columnInfo.setJavaColumnNamePathList(this.getJavaColumnNamePathList(parentColumnInfo, columnInfo));
             columnInfo.setDbTypeName(column != null ? column.columnDefinition() : null);
-            columnInfo.setDbColumnName(dbColumnName);
+            columnInfo.setDbColumnName(tableColumnName);
 
             columnInfo.setVersion(field.getAnnotation(Version.class));
             columnInfo.setLogicDelete(field.getAnnotation(LogicDelete.class));
@@ -67,17 +68,17 @@ public class ColumnInfoHandler {
         return columnInfoList;
     }
 
-    private String getDbColumnName(Field field) {
+    private String getTableColumnName(Field field) {
         OneToOne oneToOne = field.getAnnotation(OneToOne.class);
         OneToMany oneToMany = field.getAnnotation(OneToMany.class);
         ManyToOne manyToOne = field.getAnnotation(ManyToOne.class);
         ManyToMany manyToMany = field.getAnnotation(ManyToMany.class);
 
-        String dbColumnName = "";
+        String tableColumnName = "";
         if (oneToOne != null || oneToMany != null || manyToOne != null) {
             JoinColumn joinColumn = field.getAnnotation(JoinColumn.class);
             if (joinColumn != null) {
-                dbColumnName = joinColumn.name();
+                tableColumnName = joinColumn.name();
             }
         } else if (manyToMany != null) {
 
@@ -85,14 +86,14 @@ public class ColumnInfoHandler {
             Column column = field.getAnnotation(Column.class);
             if (column != null) {
                 if (StringUtils.isNotBlank(column.name())) {
-                    dbColumnName = column.name();
+                    tableColumnName = column.name();
                 }
             } else {
                 String fieldName = field.getName();
-                dbColumnName = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, fieldName);
+                tableColumnName = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, fieldName);
             }
         }
-        return dbColumnName;
+        return tableColumnName;
     }
 
     private void processColumnType(Field field, ColumnInfo columnInfo, Map<Type, Class<?>> typeParameterMap) {

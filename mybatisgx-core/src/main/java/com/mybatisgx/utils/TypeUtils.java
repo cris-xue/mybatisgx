@@ -1,5 +1,6 @@
 package com.mybatisgx.utils;
 
+import com.mybatisgx.annotation.IdClass;
 import com.mybatisgx.executor.page.Page;
 import org.apache.commons.lang3.ObjectUtils;
 
@@ -20,6 +21,7 @@ public class TypeUtils extends org.apache.commons.lang3.reflect.TypeUtils {
             ParameterizedType parameterizedType = (ParameterizedType) type;
             Type[] actualTypes = parameterizedType.getActualTypeArguments();
             Class<?> rawType = (Class<?>) parameterizedType.getRawType();
+            IdClass idClass = rawType.getAnnotation(IdClass.class);
             if (rawType == List.class) {
                 Type actualType = actualTypes[0];
                 return getGenericType(actualType);
@@ -27,6 +29,8 @@ public class TypeUtils extends org.apache.commons.lang3.reflect.TypeUtils {
                 Type actualType = actualTypes[0];
                 return getGenericType(actualType);
             } else if (rawType == Map.class) {
+                return rawType;
+            } else if (idClass != null) {
                 return rawType;
             }
         } else if (type instanceof Class<?>) {

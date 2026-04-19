@@ -18,9 +18,10 @@ import java.util.stream.Collectors;
 
 public class MybatisgxSyntaxProcessor {
 
-    private final MybatisgxSyntaxHandler mybatisgxSyntaxHandler = new MybatisgxSyntaxHandler();
     private final List<MybatisgxSyntaxHandler.SyntaxNodeHandler> handlers = Arrays.asList(
             new MybatisgxSyntaxHandler.SelectItemHandler(),
+            new MybatisgxSyntaxHandler.BusinessSemanticHandler(),
+            new MybatisgxSyntaxHandler.LimitHandler(),
             new MybatisgxSyntaxHandler.WhereClauseHandler(),
             new MybatisgxSyntaxHandler.OrderByHandler()
     );

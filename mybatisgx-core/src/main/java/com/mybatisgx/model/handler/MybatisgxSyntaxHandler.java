@@ -66,14 +66,14 @@ public class MybatisgxSyntaxHandler {
 
         @Override
         public boolean support(ParseTree node) {
-            return node instanceof MethodNameParser.Select_itemContext;
+            return node instanceof MethodNameParser.Select_item_clauseContext;
         }
 
         @Override
         public void handle(ParseTree node, ParserContext context) {
             LOGGER.debug("处理查询: {}", node.getText());
             MethodInfo methodInfo = context.getMethodInfo();
-            MethodNameParser.Select_itemContext selectItemContext = (MethodNameParser.Select_itemContext) node;
+            MethodNameParser.Select_item_clauseContext selectItemContext = (MethodNameParser.Select_item_clauseContext) node;
 
             SelectItemInfo selectItemInfo = new SelectItemInfo();
             if (selectItemContext.select_column() != null) {
@@ -83,15 +83,50 @@ public class MybatisgxSyntaxHandler {
                 selectItemInfo.setSelectItemType(SelectItemType.COUNT);
             }
             methodInfo.setSelectItemInfo(selectItemInfo);
+        }
+    }
 
-            if (selectItemContext.limit() != null) {
-                MethodNameParser.LimitContext limitContext = selectItemContext.limit();
-                MethodNameParser.Limit_topContext limitTopContext = limitContext.limit_top();
-                if (limitTopContext != null) {
-                    String limitCount = StringUtils.remove(limitTopContext.getText(), "Top");
-                    SelectPageInfo selectPageInfo = new SelectPageInfo(0, Integer.parseInt(limitCount));
-                    methodInfo.setSelectPageInfo(selectPageInfo);
-                }
+    public static class BusinessSemanticHandler implements SyntaxNodeHandler {
+
+        @Override
+        public int getOrder() {
+            return 0;
+        }
+
+        @Override
+        public boolean support(ParseTree node) {
+            return node instanceof MethodNameParser.Business_semanticContext;
+        }
+
+        @Override
+        public void handle(ParseTree node, ParserContext context) {
+            LOGGER.debug("忽略业务语义: {}", node.getText());
+        }
+    }
+
+    public static class LimitHandler implements SyntaxNodeHandler {
+
+        @Override
+        public int getOrder() {
+            return 0;
+        }
+
+        @Override
+        public boolean support(ParseTree node) {
+            return node instanceof MethodNameParser.LimitContext;
+        }
+
+        @Override
+        public void handle(ParseTree node, ParserContext context) {
+            LOGGER.debug("分页处理: {}", node.getText());
+            MethodInfo methodInfo = context.getMethodInfo();
+            MethodNameParser.LimitContext limitContext = (MethodNameParser.LimitContext) node;
+
+            MethodNameParser.Limit_topContext limitTopContext = limitContext.limit_top();
+            if (limitTopContext != null) {
+                String limitCount = StringUtils.remove(limitTopContext.getText(), "Top");
+                SelectPageInfo selectPageInfo = new SelectPageInfo(0, Integer.parseInt(limitCount));
+                methodInfo.setSelectPageInfo(selectPageInfo);
             }
         }
     }

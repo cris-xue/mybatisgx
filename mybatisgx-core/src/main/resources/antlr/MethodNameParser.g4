@@ -38,7 +38,7 @@ and_expression: condition_term (logic_op_and condition_term)* ;
 condition_term: field_comparison_op_clause | (left_bracket condition_expression right_bracket) ;
 
 // 解析方法名和实体字段
-field_comparison_op_clause: field_clause ((comparison_not_op? comparison_op) | comparison_null_op)? ;
+field_comparison_op_clause: field_clause ((comparison_not_op? comparison_op) | comparison_null_op)* ;
 
 // 排序 OrderByNameDesc、OrderByName
 order_by_clause: order_by order_by_item_clause* ;

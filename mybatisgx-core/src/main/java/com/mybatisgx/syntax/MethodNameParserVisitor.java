@@ -1,4 +1,4 @@
-// Generated from F:/owner_project/mybatisgx-ai_conding/mybatisgx/mybatisgx-core/src/main/resources/antlr/MethodNameParser.g4 by ANTLR 4.13.2
+// Generated from E:/project/wuyue/mybatisgx-ai_coding/mybatisgx/mybatisgx-core/src/main/resources/antlr/MethodNameParser.g4 by ANTLR 4.13.2
 package com.mybatisgx.syntax;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
@@ -59,11 +59,11 @@ public interface MethodNameParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitSelect_statement(MethodNameParser.Select_statementContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MethodNameParser#select_item}.
+	 * Visit a parse tree produced by {@link MethodNameParser#select_item_clause}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitSelect_item(MethodNameParser.Select_itemContext ctx);
+	T visitSelect_item_clause(MethodNameParser.Select_item_clauseContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MethodNameParser#select_column}.
 	 * @param ctx the parse tree
@@ -131,11 +131,11 @@ public interface MethodNameParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitLimit(MethodNameParser.LimitContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MethodNameParser#ignore_reserved_word}.
+	 * Visit a parse tree produced by {@link MethodNameParser#business_semantic}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitIgnore_reserved_word(MethodNameParser.Ignore_reserved_wordContext ctx);
+	T visitBusiness_semantic(MethodNameParser.Business_semanticContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MethodNameParser#where_start}.
 	 * @param ctx the parse tree

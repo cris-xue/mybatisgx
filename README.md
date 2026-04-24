@@ -6,6 +6,7 @@
 [![GitHub stars](https://img.shields.io/github/stars/cris-xue/mybatisgx?style=social)](https://github.com/cris-xue/mybatisgx)
 [![Spring Boot 2](https://img.shields.io/badge/Spring%20Boot-2.x-green.svg)](https://spring.io/projects/spring-boot)
 [![Spring Boot 3](https://img.shields.io/badge/Spring%20Boot-3.x-green.svg)](https://spring.io/projects/spring-boot)
+[![Spring Boot 4](https://img.shields.io/badge/Spring%20Boot-4.x-green.svg)](https://spring.io/projects/spring-boot)
 
 ## 概述
 

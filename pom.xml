@@ -19,6 +19,7 @@
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<java.version>1.8</java.version>
+		<mybatis.version>3.5.19</mybatis.version>
 		<mybatisgx.version>0.0.7-SNAPSHOT</mybatisgx.version>
 	</properties>
 	
@@ -55,7 +56,7 @@
 			<dependency>
 				<groupId>org.mybatis</groupId>
 				<artifactId>mybatis</artifactId>
-				<version>3.5.6</version>
+				<version>${mybatis.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

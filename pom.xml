@@ -19,13 +19,15 @@
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<java.version>1.8</java.version>
+		<mybatis.version>3.5.6</mybatis.version>
 		<mybatisgx.version>0.0.7-SNAPSHOT</mybatisgx.version>
 	</properties>
 	
 	<modules>
 		<module>mybatisgx-annotation</module>
-		<module>mybatisgx-core</module>
+		<module>mybatisgx-spi</module>
 		<module>mybatisgx-core-patch</module>
+		<module>mybatisgx-core</module>
 		<module>mybatisgx-spring</module>
 	</modules>
 	
@@ -34,6 +36,11 @@
 			<dependency>
 				<groupId>com.mybatisgx</groupId>
 				<artifactId>mybatisgx-annotation</artifactId>
+				<version>${mybatisgx.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.mybatisgx</groupId>
+				<artifactId>mybatisgx-spi</artifactId>
 				<version>${mybatisgx.version}</version>
 			</dependency>
 			<dependency>
@@ -55,7 +62,7 @@
 			<dependency>
 				<groupId>org.mybatis</groupId>
 				<artifactId>mybatis</artifactId>
-				<version>3.5.6</version>
+				<version>${mybatis.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

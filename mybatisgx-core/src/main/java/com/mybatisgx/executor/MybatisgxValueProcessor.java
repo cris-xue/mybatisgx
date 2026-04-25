@@ -1,9 +1,9 @@
 package com.mybatisgx.executor;
 
 import com.mybatisgx.annotation.LogicDeleteId;
-import com.mybatisgx.api.ValueProcessContext;
-import com.mybatisgx.api.ValueProcessPhase;
-import com.mybatisgx.api.ValueProcessor;
+import com.mybatisgx.spi.ValueProcessContext;
+import com.mybatisgx.spi.ValueProcessPhase;
+import com.mybatisgx.spi.ValueProcessor;
 import com.mybatisgx.context.DaoMethodManager;
 import com.mybatisgx.context.EntityInfoContextHolder;
 import com.mybatisgx.context.MethodInfoContextHolder;

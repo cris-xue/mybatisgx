@@ -1,9 +1,5 @@
 package com.mybatisgx.spi;
 
-import com.mybatisgx.api.FieldMeta;
-import com.mybatisgx.api.ValueProcessContext;
-import com.mybatisgx.api.ValueProcessPhase;
-
 import java.util.EnumSet;
 
 public interface ValueProcessor {

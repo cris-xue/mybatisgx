@@ -1,6 +1,6 @@
 package com.mybatisgx.context;
 
-import com.mybatisgx.api.ValueProcessor;
+import com.mybatisgx.spi.ValueProcessor;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,10 +1,10 @@
 package com.mybatisgx.custom.condition.test;
 
 import com.mybatisgx.annotation.LogicDeleteId;
-import com.mybatisgx.api.FieldMeta;
-import com.mybatisgx.api.ValueProcessContext;
-import com.mybatisgx.api.ValueProcessPhase;
-import com.mybatisgx.api.ValueProcessor;
+import com.mybatisgx.spi.FieldMeta;
+import com.mybatisgx.spi.ValueProcessContext;
+import com.mybatisgx.spi.ValueProcessPhase;
+import com.mybatisgx.spi.ValueProcessor;
 import com.mybatisgx.executor.keygen.SnowKeyGenerator;
 
 import java.util.EnumSet;

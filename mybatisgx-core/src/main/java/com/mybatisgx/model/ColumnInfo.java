@@ -1,10 +1,8 @@
 package com.mybatisgx.model;
 
 import com.mybatisgx.annotation.*;
-import com.mybatisgx.api.FieldMeta;
 import org.apache.commons.lang3.StringUtils;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.List;
 
@@ -14,7 +12,7 @@ import java.util.List;
  * @author ccxuef
  * @date 2025/8/9 15:54
  */
-public class ColumnInfo implements FieldMeta {
+public class ColumnInfo {
 
     /**
      * 父字段信息
@@ -257,16 +255,6 @@ public class ColumnInfo implements FieldMeta {
 
     public void setGenerateValue(GeneratedValue generatedValue) {
         this.generatedValue = generatedValue;
-    }
-
-    @Override
-    public <A extends Annotation> A getAnnotation(Class<A> annotationType) {
-        return this.field.getAnnotation(annotationType);
-    }
-
-    @Override
-    public boolean hasAnnotation(Class<? extends Annotation> annotationType) {
-        return this.getAnnotation(annotationType) != null;
     }
 
     public static class Builder {

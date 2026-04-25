@@ -2,9 +2,9 @@ package com.mybatisgx.model;
 
 import com.google.common.base.CaseFormat;
 import com.mybatisgx.annotation.Transient;
-import com.mybatisgx.api.ValueProcessor;
 import com.mybatisgx.context.DaoMethodManager;
 import com.mybatisgx.exception.MybatisgxException;
+import com.mybatisgx.spi.ValueProcessor;
 import com.mybatisgx.utils.TypeUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;

@@ -5,6 +5,7 @@ import com.mybatisgx.annotation.*;
 import com.mybatisgx.context.EntityInfoContextHolder;
 import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.model.*;
+import com.mybatisgx.spi.ValueProcessor;
 import com.mybatisgx.utils.TypeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -53,7 +54,7 @@ public class ColumnInfoHandler {
 
             columnInfo.setVersion(field.getAnnotation(Version.class));
             columnInfo.setLogicDelete(field.getAnnotation(LogicDelete.class));
-            columnInfo.setGenerateValue(field.getAnnotation(GeneratedValue.class));
+            this.setGenerateValue(field, columnInfo);
 
             this.processColumnType(field, columnInfo, typeParameterMap);
             if (columnInfo instanceof IdColumnInfo) {
@@ -185,6 +186,25 @@ public class ColumnInfoHandler {
         idColumnInfo.setId(id);
         idColumnInfo.setEmbeddedId(embeddedId);
         idColumnInfo.setComposites(idColumnInfoComposites);
+    }
+
+    private void setGenerateValue(Field field, ColumnInfo columnInfo) {
+        GeneratedValue generatedValue = field.getAnnotation(GeneratedValue.class);
+        if (generatedValue != null) {
+            // 校验生成值类型是否为 ValueProcessor 类型
+            Class<?>[] generatedValueClassList = generatedValue.value();
+            for (Class<?> generatedValueClass : generatedValueClassList) {
+                if (!ValueProcessor.class.isAssignableFrom(generatedValueClass)) {
+                    throw new MybatisgxException(
+                            "字段 %s 值处理类型为 %s，预期为 %s",
+                            columnInfo.getJavaColumnName(),
+                            generatedValueClass.getName(),
+                            ValueProcessor.class.getName()
+                    );
+                }
+            }
+        }
+        columnInfo.setGenerateValue(generatedValue);
     }
 
     private List<ColumnInfo> getColumnInfoList(ColumnInfo columnInfo, Type type, Map<Type, Class<?>> typeParameterMap) {

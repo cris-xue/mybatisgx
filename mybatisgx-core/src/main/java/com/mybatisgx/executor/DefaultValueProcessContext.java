@@ -1,8 +1,8 @@
 package com.mybatisgx.executor;
 
-import com.mybatisgx.api.FieldMeta;
-import com.mybatisgx.api.ValueProcessContext;
-import com.mybatisgx.api.ValueProcessPhase;
+import com.mybatisgx.spi.FieldMeta;
+import com.mybatisgx.spi.ValueProcessContext;
+import com.mybatisgx.spi.ValueProcessPhase;
 import org.apache.ibatis.reflection.MetaObject;
 
 public class DefaultValueProcessContext implements ValueProcessContext {

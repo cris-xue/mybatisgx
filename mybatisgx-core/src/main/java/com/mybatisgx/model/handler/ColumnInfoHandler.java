@@ -5,6 +5,7 @@ import com.mybatisgx.annotation.*;
 import com.mybatisgx.context.EntityInfoContextHolder;
 import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.model.*;
+import com.mybatisgx.spi.ValueProcessor;
 import com.mybatisgx.utils.TypeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -17,10 +18,13 @@ import java.util.Map;
 
 /**
  * 字段处理器
+ *
  * @author 薛承城
  * @date 2025/12/3 12:13
  */
 public class ColumnInfoHandler {
+
+    private TypeResolver typeResolver = new TypeResolver();
 
     public List<ColumnInfo> getColumnInfoList(Class<?> clazz, Map<Type, Class<?>> typeParameterMap) {
         Field[] fields = FieldUtils.getAllFields(clazz);
@@ -38,7 +42,7 @@ public class ColumnInfoHandler {
 
             Column column = field.getAnnotation(Column.class);
             String fieldName = field.getName();
-            String dbColumnName = this.getDbColumnName(field);
+            String tableColumnName = this.getTableColumnName(field);
 
             ColumnInfo columnInfo = this.getColumnInfo(field);
             columnInfo.setParent(parentColumnInfo);
@@ -46,11 +50,11 @@ public class ColumnInfoHandler {
             columnInfo.setJavaColumnName(fieldName);
             columnInfo.setJavaColumnNamePathList(this.getJavaColumnNamePathList(parentColumnInfo, columnInfo));
             columnInfo.setDbTypeName(column != null ? column.columnDefinition() : null);
-            columnInfo.setDbColumnName(dbColumnName);
+            columnInfo.setDbColumnName(tableColumnName);
 
             columnInfo.setVersion(field.getAnnotation(Version.class));
             columnInfo.setLogicDelete(field.getAnnotation(LogicDelete.class));
-            columnInfo.setGenerateValue(field.getAnnotation(GeneratedValue.class));
+            this.setGenerateValue(field, columnInfo);
 
             this.processColumnType(field, columnInfo, typeParameterMap);
             if (columnInfo instanceof IdColumnInfo) {
@@ -65,17 +69,17 @@ public class ColumnInfoHandler {
         return columnInfoList;
     }
 
-    private String getDbColumnName(Field field) {
+    private String getTableColumnName(Field field) {
         OneToOne oneToOne = field.getAnnotation(OneToOne.class);
         OneToMany oneToMany = field.getAnnotation(OneToMany.class);
         ManyToOne manyToOne = field.getAnnotation(ManyToOne.class);
         ManyToMany manyToMany = field.getAnnotation(ManyToMany.class);
 
-        String dbColumnName = "";
+        String tableColumnName = "";
         if (oneToOne != null || oneToMany != null || manyToOne != null) {
             JoinColumn joinColumn = field.getAnnotation(JoinColumn.class);
             if (joinColumn != null) {
-                dbColumnName = joinColumn.name();
+                tableColumnName = joinColumn.name();
             }
         } else if (manyToMany != null) {
 
@@ -83,14 +87,14 @@ public class ColumnInfoHandler {
             Column column = field.getAnnotation(Column.class);
             if (column != null) {
                 if (StringUtils.isNotBlank(column.name())) {
-                    dbColumnName = column.name();
+                    tableColumnName = column.name();
                 }
             } else {
                 String fieldName = field.getName();
-                dbColumnName = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, fieldName);
+                tableColumnName = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, fieldName);
             }
         }
-        return dbColumnName;
+        return tableColumnName;
     }
 
     private void processColumnType(Field field, ColumnInfo columnInfo, Map<Type, Class<?>> typeParameterMap) {
@@ -134,6 +138,8 @@ public class ColumnInfoHandler {
         if (javaType != null) {
             columnInfo.setJavaType(javaType);
         }
+        TypeCategory typeCategory = this.typeResolver.getCategory(type);
+        columnInfo.setTypeCategory(typeCategory);
     }
 
     private ColumnInfo getColumnInfo(Field field) {
@@ -180,6 +186,25 @@ public class ColumnInfoHandler {
         idColumnInfo.setId(id);
         idColumnInfo.setEmbeddedId(embeddedId);
         idColumnInfo.setComposites(idColumnInfoComposites);
+    }
+
+    private void setGenerateValue(Field field, ColumnInfo columnInfo) {
+        GeneratedValue generatedValue = field.getAnnotation(GeneratedValue.class);
+        if (generatedValue != null) {
+            // 校验生成值类型是否为 ValueProcessor 类型
+            Class<?>[] generatedValueClassList = generatedValue.value();
+            for (Class<?> generatedValueClass : generatedValueClassList) {
+                if (!ValueProcessor.class.isAssignableFrom(generatedValueClass)) {
+                    throw new MybatisgxException(
+                            "字段 %s 值处理类型为 %s，预期为 %s",
+                            columnInfo.getJavaColumnName(),
+                            generatedValueClass.getName(),
+                            ValueProcessor.class.getName()
+                    );
+                }
+            }
+        }
+        columnInfo.setGenerateValue(generatedValue);
     }
 
     private List<ColumnInfo> getColumnInfoList(ColumnInfo columnInfo, Type type, Map<Type, Class<?>> typeParameterMap) {

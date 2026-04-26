@@ -86,11 +86,11 @@ public class MethodParamInfo {
         this.index = index;
     }
 
-    public TypeCategory getClassCategory() {
+    public TypeCategory getTypeCategory() {
         return typeCategory;
     }
 
-    public void setClassCategory(TypeCategory typeCategory) {
+    public void setTypeCategory(TypeCategory typeCategory) {
         this.typeCategory = typeCategory;
     }
 

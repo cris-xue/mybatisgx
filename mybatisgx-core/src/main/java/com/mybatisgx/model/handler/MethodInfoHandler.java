@@ -138,7 +138,7 @@ public class MethodInfoHandler {
         for (int i = 0; i < parameterCount; i++) {
             Parameter parameter = parameters[i];
             Class<?> methodParamType = this.getMethodParamType(mapperInfo, parameter);
-            TypeCategory typeCategory = this.getClassCategory(methodParamType);
+            TypeCategory typeCategory = this.typeResolver.getCategory(methodParamType);
 
             MethodParamInfo methodParamInfo = new MethodParamInfo();
             methodParamInfo.setIndex(i);
@@ -148,12 +148,14 @@ public class MethodInfoHandler {
             this.handleMethodCollectionTypeParam(parameter, methodParamInfo);
             this.handleBatchOperation(method, parameter, methodParamInfo);
 
-            methodParamInfo.setClassCategory(typeCategory);
+            methodParamInfo.setTypeCategory(typeCategory);
             if (typeCategory == TypeCategory.OBJECT && methodParamType != Map.class) {
                 if (methodParamType.getAnnotation(IdClass.class) != null) {
-                    Map<Type, Class<?>> typeParameterMap = mapperInfo.getEntityInfo().getTypeParameterMap();
-                    List<ColumnInfo> columnInfoList = columnInfoHandler.getColumnInfoList(methodParamType, typeParameterMap);
-                    methodParamInfo.setColumnInfoList(columnInfoList);
+                    IdColumnInfo idColumnInfo = mapperInfo.getEntityInfo().getIdColumnInfo();
+                    if (methodParamType != idColumnInfo.getJavaType()) {
+                        throw new MybatisgxException("方法参数复合主键和实体中的复合主键类型不一致");
+                    }
+                    methodParamInfo.setColumnInfoList(idColumnInfo.getComposites());
                 }
                 // 获取实体管理器中是否方法参数类型，如果不存在，使用字段处理器对方法参数类型进行字段处理
                 if (methodParamType.getAnnotation(Entity.class) != null) {
@@ -249,7 +251,7 @@ public class MethodInfoHandler {
 
     private MethodReturnInfo getMethodReturn(MapperInfo mapperInfo, Method method) {
         Class<?> methodReturnType = this.getMethodReturnType(mapperInfo, method);
-        TypeCategory typeCategory = this.getClassCategory(methodReturnType);
+        TypeCategory typeCategory = this.typeResolver.getCategory(methodReturnType);
 
         MethodReturnInfo methodReturnInfo = new MethodReturnInfo();
         methodReturnInfo.setClassCategory(typeCategory);
@@ -402,13 +404,11 @@ public class MethodInfoHandler {
             return null;
         }
 
-        List<ColumnInfo> composites = columnInfo.getComposites();
-        TypeCategory typeCategory = ObjectUtils.isEmpty(composites) ? TypeCategory.SIMPLE : TypeCategory.OBJECT;
-
         MethodParamInfo methodParamInfo = new MethodParamInfo();
-        methodParamInfo.setClassCategory(typeCategory);
+        methodParamInfo.setTypeCategory(columnInfo.getTypeCategory());
         methodParamInfo.setType(columnInfo.getJavaType());
         methodParamInfo.setCollectionType(columnInfo.getCollectionType());
+        List<ColumnInfo> composites = columnInfo.getComposites();
         if (ObjectUtils.isNotEmpty(composites)) {
             methodParamInfo.setColumnInfoList(composites);
         }
@@ -441,7 +441,7 @@ public class MethodInfoHandler {
         if (methodParamInfo == null) {
             return null;
         }
-        if (methodParamInfo.getClassCategory() == TypeCategory.OBJECT && TypeUtils.typeEquals(conditionInfo.getColumnInfo(), ColumnInfo.class)) {
+        if (methodParamInfo.getTypeCategory() == TypeCategory.OBJECT && TypeUtils.typeEquals(conditionInfo.getColumnInfo(), ColumnInfo.class)) {
             throw new MybatisgxException("%s查询条件不能关联到复杂类型参数%s", methodInfo.getMethodName(), methodParamInfo.getArgName());
         }
         if (methodInfo.getBatch()) {
@@ -539,10 +539,6 @@ public class MethodInfoHandler {
             return true;
         }
         return false;
-    }
-
-    public TypeCategory getClassCategory(Type type) {
-        return typeResolver.getClassCategory(type);
     }
 
     private static class MethodParamContext {

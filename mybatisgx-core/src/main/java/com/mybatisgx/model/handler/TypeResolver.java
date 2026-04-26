@@ -23,7 +23,7 @@ public class TypeResolver {
         SIMPLE_TYPE_LIST.add(LocalDateTime.class);
     }
 
-    public TypeCategory getClassCategory(Type type) {
+    public TypeCategory getCategory(Type type) {
         if (!(type instanceof Class<?>)) {
             return TypeCategory.OBJECT;
         }

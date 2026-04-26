@@ -3,6 +3,7 @@ package com.mybatisgx.template;
 import com.mybatisgx.model.ColumnInfo;
 import com.mybatisgx.model.MethodInfo;
 import org.apache.commons.lang3.StringUtils;
+import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 
 import java.util.Arrays;
@@ -30,6 +31,25 @@ public class MybatisXmlHelper {
         Element ifElement = parentElement.addElement("if");
         ifElement.addAttribute("test", testExpression);
         return ifElement;
+    }
+
+    public static Element buildBindElement(String name, String value) {
+        Element bindElement = DocumentHelper.createElement("bind");
+        bindElement.addAttribute("name", name);
+        bindElement.addAttribute("value", value);
+        return bindElement;
+    }
+
+    public static Element buildForeachElement(String collection) {
+        Element foreachElement = DocumentHelper.createElement("foreach");
+        foreachElement.addAttribute("index", "index");
+        foreachElement.addAttribute("item", "item");
+        foreachElement.addAttribute("collection", collection);
+        foreachElement.addAttribute("open", "(");
+        foreachElement.addAttribute("close", ")");
+        foreachElement.addAttribute("separator", ",");
+        foreachElement.addText("#{item}");
+        return foreachElement;
     }
 
     public static String getTestExpression(List<String> pathItemList) {

@@ -1,4 +1,4 @@
-// Generated from F:/owner_project/mybatisgx-ai_conding/mybatisgx/mybatisgx-core/src/main/resources/antlr/MethodNameLexer.g4 by ANTLR 4.13.2
+// Generated from E:/project/wuyue/mybatisgx-ai_coding/mybatisgx/mybatisgx-core/src/main/resources/antlr/MethodNameLexer.g4 by ANTLR 4.13.2
 package com.mybatisgx.syntax;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;

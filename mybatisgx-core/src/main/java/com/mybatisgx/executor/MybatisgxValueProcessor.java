@@ -1,13 +1,13 @@
 package com.mybatisgx.executor;
 
 import com.mybatisgx.annotation.LogicDeleteId;
-import com.mybatisgx.api.ValueProcessContext;
-import com.mybatisgx.api.ValueProcessPhase;
-import com.mybatisgx.api.ValueProcessor;
 import com.mybatisgx.context.DaoMethodManager;
 import com.mybatisgx.context.EntityInfoContextHolder;
 import com.mybatisgx.context.MethodInfoContextHolder;
 import com.mybatisgx.model.*;
+import com.mybatisgx.spi.ValueProcessContext;
+import com.mybatisgx.spi.ValueProcessPhase;
+import com.mybatisgx.spi.ValueProcessor;
 import org.apache.ibatis.binding.MapperMethod;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
@@ -92,10 +92,11 @@ public class MybatisgxValueProcessor {
         public abstract void handle(MethodInfo methodInfo, ValueProcessPhase phase, ColumnInfo columnInfo, Object parameterObject, BoundSql boundSql);
 
         protected Object valueHandle(ValueProcessPhase phase, ColumnInfo columnInfo, Object originalValue, MetaObject entityMetaObject) {
-            ValueProcessContext context = new DefaultValueProcessContext(phase, columnInfo, originalValue, entityMetaObject);
+            FieldInfo fieldInfo = new FieldInfo(columnInfo);
+            ValueProcessContext context = new DefaultValueProcessContext(phase, fieldInfo, originalValue, entityMetaObject);
             List<ValueProcessor> valueProcessors = DaoMethodManager.get(columnInfo.getGenerateValue().value());
             for (ValueProcessor valueProcessor : valueProcessors) {
-                if (valueProcessor.supports(columnInfo)) {
+                if (valueProcessor.supports(fieldInfo)) {
                     if (valueProcessor.phases().contains(phase)) {
                         Object fieldValue = valueProcessor.process(context);
                         context.setFieldValue(fieldValue);

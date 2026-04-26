@@ -1,4 +1,4 @@
-package com.mybatisgx.api;
+package com.mybatisgx.spi;
 
 import java.lang.annotation.Annotation;
 

@@ -15,6 +15,7 @@ import java.util.*;
 
 /**
  * 条件模板处理器。修改和删除的条件只能采用方法名定义，不能使用查询实体作为修改和删除方法的条件。
+ *
  * @author ccxuef
  * @date 2025/11/5 19:26
  */
@@ -147,6 +148,7 @@ public class WhereTemplateHandler {
 
         /**
          * 处理条件，有特殊情况的可以在子类中重写
+         *
          * @param whereElement
          * @param dynamic
          * @param whereItemContextList
@@ -171,6 +173,7 @@ public class WhereTemplateHandler {
 
         /**
          * 条件参数处理
+         *
          * @param whereItemContextList
          */
         public void conditionParamHandle(List<WhereItemContext> whereItemContextList) {
@@ -181,7 +184,7 @@ public class WhereTemplateHandler {
                 return;
             }
             if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class, ColumnInfo.class)) {
-                TypeCategory typeCategory = this.getParamClassCategory();
+                TypeCategory typeCategory = this.getParamTypeCategory();
                 if (typeCategory == TypeCategory.SIMPLE) {
                     WhereItemContext whereItemContext = this.handleSimpleTypeParam(columnInfo);
                     whereItemContextList.add(whereItemContext);
@@ -206,12 +209,12 @@ public class WhereTemplateHandler {
             }
         }
 
-        private TypeCategory getParamClassCategory() {
-            if (methodParamInfo.getClassCategory() == TypeCategory.SIMPLE) {
+        private TypeCategory getParamTypeCategory() {
+            if (methodParamInfo.getTypeCategory() == TypeCategory.SIMPLE) {
                 // findById(Long id) findById(@Param("id") Long id)
                 return TypeCategory.SIMPLE;
             }
-            if (methodParamInfo.getClassCategory() == TypeCategory.OBJECT) {
+            if (methodParamInfo.getTypeCategory() == TypeCategory.OBJECT) {
                 // findById(MultiId id) findById(@Param("id") MultiId id)
                 if (ObjectUtils.isEmpty(methodParamInfo.getColumnInfoList())) {
                     return TypeCategory.SIMPLE;
@@ -270,9 +273,10 @@ public class WhereTemplateHandler {
                 return whereElement;
             }
             if (dynamic) {
-                Element ifElement = whereElement.addElement("if");
+                return MybatisXmlHelper.buildIfElement(whereElement, testExpression);
+                /*Element ifElement = whereElement.addElement("if");
                 ifElement.addAttribute("test", testExpression);
-                return ifElement;
+                return ifElement;*/
             }
             return whereElement;
         }
@@ -294,10 +298,11 @@ public class WhereTemplateHandler {
     }
 
     /**
-     *                           <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(likeClientCode)">
-     *                               <bind name="likeClientCode" value="'%' + likeClientCode + '%'"/>
-     *                               and act.client_code like #{likeClientCode}
-     *                           </if>
+     * <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(likeClientCode)">
+     * <bind name="likeClientCode" value="'%' + likeClientCode + '%'"/>
+     * and act.client_code like #{likeClientCode}
+     * </if>
+     *
      * @author ccxuef
      * @date 2025/10/28 18:39
      */
@@ -322,7 +327,8 @@ public class WhereTemplateHandler {
 
         /**
          * 构建WhereItemContext
-         * @param columnInfo 数据库列字段信息
+         *
+         * @param columnInfo             数据库列字段信息
          * @param paramValuePathItemList 参数值路径
          * @return
          */
@@ -346,7 +352,7 @@ public class WhereTemplateHandler {
 
         protected Element buildLikeBindElement(String bindKey, String bindValuePath) {
             String likeExpression = "'%'+" + bindValuePath + "+'%'";
-            return this.buildBindElement(bindKey, likeExpression);
+            return MybatisXmlHelper.buildBindElement(bindKey, likeExpression);
         }
     }
 
@@ -355,7 +361,7 @@ public class WhereTemplateHandler {
         @Override
         protected Element buildLikeBindElement(String bindKey, String bindValuePath) {
             String likeExpression = "'%'+" + bindValuePath;
-            return this.buildBindElement(bindKey, likeExpression);
+            return MybatisXmlHelper.buildBindElement(bindKey, likeExpression);
         }
     }
 
@@ -364,17 +370,18 @@ public class WhereTemplateHandler {
         @Override
         protected Element buildLikeBindElement(String bindKey, String bindValuePath) {
             String likeExpression = bindValuePath + "+'%'";
-            return this.buildBindElement(bindKey, likeExpression);
+            return MybatisXmlHelper.buildBindElement(bindKey, likeExpression);
         }
     }
 
     /**
-     *                           <if test="terminal == @com.iss.dtg.idms.constant.Terminal@EBANK">
-     *                               and act.client_code in
-     *                               <foreach item="item" index="index" collection="unDraftClientCodeList" open="(" separator="," close=")">
-     *                                   #{item}
-     *               				</foreach>
-     *                           </if>
+     * <if test="terminal == @com.iss.dtg.idms.constant.Terminal@EBANK">
+     * and act.client_code in
+     * <foreach item="item" index="index" collection="unDraftClientCodeList" open="(" separator="," close=")">
+     * #{item}
+     * </foreach>
+     * </if>
+     *
      * @author ccxuef
      * @date 2025/10/28 18:41
      */
@@ -400,7 +407,8 @@ public class WhereTemplateHandler {
 
         /**
          * 构建WhereItemContext
-         * @param columnInfo 数据库列字段信息
+         *
+         * @param columnInfo             数据库列字段信息
          * @param paramValuePathItemList 参数值路径
          * @return
          */
@@ -408,7 +416,7 @@ public class WhereTemplateHandler {
             String testExpression = MybatisXmlHelper.getTestExpression(paramValuePathItemList);
             String paramValueExpression = this.getParamValueExpression(paramValuePathItemList);
             String conditionExpression = this.getConditionExpression(columnInfo, "");
-            Element foreachElement = this.buildForeachElement(paramValueExpression);
+            Element foreachElement = MybatisXmlHelper.buildForeachElement(paramValueExpression);
             return new WhereItemContext(testExpression, Arrays.asList(conditionExpression, foreachElement));
         }
 
@@ -453,7 +461,8 @@ public class WhereTemplateHandler {
 
         /**
          * 构建WhereItemContext
-         * @param columnInfo 数据库列字段信息
+         *
+         * @param columnInfo             数据库列字段信息
          * @param paramValuePathItemList 参数值路径
          * @return
          */
@@ -487,7 +496,8 @@ public class WhereTemplateHandler {
 
         /**
          * 构建WhereItemContext
-         * @param columnInfo 数据库列字段信息
+         *
+         * @param columnInfo             数据库列字段信息
          * @param paramValuePathItemList 参数值路径
          * @return
          */

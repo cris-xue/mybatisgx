@@ -6,6 +6,7 @@
 [![GitHub stars](https://img.shields.io/github/stars/cris-xue/mybatisgx?style=social)](https://github.com/cris-xue/mybatisgx)
 [![Spring Boot 2](https://img.shields.io/badge/Spring%20Boot-2.x-green.svg)](https://spring.io/projects/spring-boot)
 [![Spring Boot 3](https://img.shields.io/badge/Spring%20Boot-3.x-green.svg)](https://spring.io/projects/spring-boot)
+[![Spring Boot 4](https://img.shields.io/badge/Spring%20Boot-4.x-green.svg)](https://spring.io/projects/spring-boot)
 
 ## 概述
 
@@ -87,7 +88,7 @@ List<User> users = userDao.findByOrgIdAndNameLike(orgId, name);
 - ✅ XML 优先级最高，永远不会被覆盖
 
 ### 🔗 声明式关联查询
-类似 JPA，但提供三种抓取模式，性能可控
+类似 JPA，但提供四种抓取模式，性能可控
 
 ```java
 @Entity
@@ -99,15 +100,16 @@ public class Org {
 
     // 声明式关联 + 批量抓取避免 N+1 问题
     @OneToMany(mappedBy = "org", fetch = FetchType.EAGER)
-    @Fetch(FetchMode.BATCH)  // 三种模式：SIMPLE / BATCH / JOIN
+    @Fetch(FetchMode.BATCH)  // 四种模式：SIMPLE / BATCH / JOIN / NONE
     private List<User> users;
 }
 ```
 
-**三种抓取模式**：
-- `SIMPLE`：简单模式（可能产生 N+1）
-- `BATCH`：批量模式（使用 IN 查询避免 N+1）
-- `JOIN`：连接模式（一次性 JOIN 查询）
+**四种抓取模式**：
+- `SIMPLE`：简单抓取模式，会造成 N+1 问题
+- `BATCH`：批量模式，对单张表进行批量查询再组装数据，用于解决 N+1 问题。会发出 1+m 张表的 SQL（默认模式）
+- `JOIN`：连接模式，采用 1+1 模式，第一级单表查询获取 key 后，第二条 SQL 无限 JOIN 直到不存在关联实体。避免分页时的数据爆炸问题
+- `NONE`：不进行关联查询抓取
 
 ### 🎨 动态查询
 使用 QueryEntity 实现类型安全的动态查询
@@ -301,11 +303,11 @@ public List<User> queryUsers(String name, Integer minAge) {
 | MyBatis | 手写 ResultMap + JOIN | ⚠️ 需手动优化 | ⚠️ 需配置 | ✅ 完全控制 |
 | MP/Flex | ❌ 不支持（需手动） | - | - | 手动 JOIN |
 | JPA | ✅ @OneToMany 等 | ⚠️ 常见 | ✅ 支持 | ⚠️ 有限（Fetch Join） |
-| **MyBatisGX** | ✅ @OneToMany + @Fetch | ✅ 可选 BATCH/JOIN 避免 | ✅ 支持 | ✅ 三种模式可选 |
+| **MyBatisGX** | ✅ @OneToMany + @Fetch | ✅ 可选 BATCH/JOIN 避免 | ✅ 支持 | ✅ 四种模式可选 |
 
 **MyBatisGX 优势**：
 - 声明式关联（学习 JPA）
-- 三种抓取模式（SIMPLE/BATCH/JOIN）精确控制性能
+- 四种抓取模式（SIMPLE/BATCH/JOIN/NONE）精确控制性能
 - 不引入 JPA 的持久化上下文和隐式行为
 
 ## 技术优势

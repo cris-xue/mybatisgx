@@ -1,18 +1,19 @@
 package com.mybatisgx.executor.genval;
 
 import com.mybatisgx.annotation.Id;
-import com.mybatisgx.api.FieldMeta;
-import com.mybatisgx.api.ValueProcessContext;
-import com.mybatisgx.api.ValueProcessPhase;
-import com.mybatisgx.api.ValueProcessor;
 import com.mybatisgx.context.MybatisgxObjectFactory;
 import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.executor.keygen.KeyGenerator;
+import com.mybatisgx.spi.FieldMeta;
+import com.mybatisgx.spi.ValueProcessContext;
+import com.mybatisgx.spi.ValueProcessPhase;
+import com.mybatisgx.spi.ValueProcessor;
 
 import java.util.EnumSet;
 
 /**
  * 一句话描述
+ *
  * @author 薛承城
  * @date 2025/12/14 19:05
  */

@@ -8,22 +8,23 @@ options {
 
 sql_statement: (insert_statement | delete_statement | update_statement | select_statement) end ;
 
-insert_statement: insert_clause ;
-insert_clause: INSERT_ACTION ignore_reserved_word ;
+insert_statement: insert_clause business_semantic* ;
+insert_clause: INSERT_ACTION ;
 
-delete_statement: delete_clause where_clause ;
-delete_clause: DELETE_ACTION ignore_reserved_word ;
+delete_statement: delete_clause business_semantic* where_clause ;
+delete_clause: DELETE_ACTION ;
 
-update_statement: update_clause where_clause ;
-update_clause: UPDATE_ACTION ignore_reserved_word ;
+update_statement: update_clause business_semantic* where_clause ;
+update_clause: UPDATE_ACTION ;
 
-select_statement: select_item where_clause order_by_clause? ;
-select_item: (select_column limit? | select_count) ignore_reserved_word ;
+// 查询语法：1、findList findAll 2、findTop5 3、count  规则：查询方法名条件以By开始，查询实体不支持By语法、OrderBy语法
+select_statement: select_item_clause business_semantic* limit? where_clause? order_by_clause? ;
+select_item_clause: select_column | select_count ;
 select_column: SELECT_COLUMN_ACTION ;
 select_count: SELECT_COUNT_ACTION ;
 
 // 条件语法   ByNameLikeAndAgeEq
-where_clause: (where_start condition_expression)? ignore_reserved_word? ;
+where_clause: where_start condition_expression ignore_reserved_word? ;
 
 // 分层处理条件表达式，明确运算符优先级
 condition_expression: or_expression ;
@@ -38,17 +39,19 @@ and_expression: condition_term (logic_op_and condition_term)* ;
 condition_term: field_comparison_op_clause | (left_bracket condition_expression right_bracket) ;
 
 // 解析方法名和实体字段
-field_comparison_op_clause: field_clause ((comparison_not_op? comparison_op) | comparison_null_op)? ;
+field_comparison_op_clause: field_clause ((comparison_not_op? comparison_op) | comparison_null_op)* ;
 
 // 排序 OrderByNameDesc、OrderByName
-order_by_clause: order_by order_by_item_clause* ;
-order_by_item_clause: field_clause order_by_direction ;
+order_by_clause: order_by order_by_item_clause+ ;
+order_by_item_clause: field_clause order_by_direction? ;
 
 // 分页
 limit: limit_top ;
 
 // 忽略保留关键字
-ignore_reserved_word: (RESERVED_WORD)* ;
+ignore_reserved_word: RESERVED_WORD* ;
+// 业务语义（在解析中忽略）
+business_semantic: FIELD | RESERVED_WORD ;
 where_start: BY ;
 logic_op_and: LOGIC_OP_AND ;
 logic_op_or: LOGIC_OP_OR ;

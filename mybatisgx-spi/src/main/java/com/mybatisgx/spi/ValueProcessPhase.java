@@ -1,4 +1,4 @@
-package com.mybatisgx.api;
+package com.mybatisgx.spi;
 
 /**
  * 数据值生命周期枚举

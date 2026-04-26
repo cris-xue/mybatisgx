@@ -1,4 +1,4 @@
-// Generated from F:/owner_project/mybatisgx-ai_conding/mybatisgx/mybatisgx-core/src/main/resources/antlr/MethodNameParser.g4 by ANTLR 4.13.2
+// Generated from E:/project/wuyue/mybatisgx-ai_coding/mybatisgx/mybatisgx-core/src/main/resources/antlr/MethodNameParser.g4 by ANTLR 4.13.2
 package com.mybatisgx.syntax;
 
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -113,13 +113,13 @@ public class MethodNameParserBaseListener implements MethodNameParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterSelect_item(MethodNameParser.Select_itemContext ctx) { }
+	@Override public void enterSelect_item_clause(MethodNameParser.Select_item_clauseContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitSelect_item(MethodNameParser.Select_itemContext ctx) { }
+	@Override public void exitSelect_item_clause(MethodNameParser.Select_item_clauseContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -264,6 +264,18 @@ public class MethodNameParserBaseListener implements MethodNameParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitIgnore_reserved_word(MethodNameParser.Ignore_reserved_wordContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterBusiness_semantic(MethodNameParser.Business_semanticContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitBusiness_semantic(MethodNameParser.Business_semanticContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

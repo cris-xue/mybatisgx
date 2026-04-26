@@ -25,8 +25,9 @@
 	
 	<modules>
 		<module>mybatisgx-annotation</module>
-		<module>mybatisgx-core</module>
+		<module>mybatisgx-spi</module>
 		<module>mybatisgx-core-patch</module>
+		<module>mybatisgx-core</module>
 		<module>mybatisgx-spring</module>
 	</modules>
 	
@@ -35,6 +36,11 @@
 			<dependency>
 				<groupId>com.mybatisgx</groupId>
 				<artifactId>mybatisgx-annotation</artifactId>
+				<version>${mybatisgx.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.mybatisgx</groupId>
+				<artifactId>mybatisgx-spi</artifactId>
 				<version>${mybatisgx.version}</version>
 			</dependency>
 			<dependency>

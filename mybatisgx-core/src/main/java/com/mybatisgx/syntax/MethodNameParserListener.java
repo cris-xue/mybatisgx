@@ -1,4 +1,4 @@
-// Generated from F:/owner_project/mybatisgx-ai_conding/mybatisgx/mybatisgx-core/src/main/resources/antlr/MethodNameParser.g4 by ANTLR 4.13.2
+// Generated from E:/project/wuyue/mybatisgx-ai_coding/mybatisgx/mybatisgx-core/src/main/resources/antlr/MethodNameParser.g4 by ANTLR 4.13.2
 package com.mybatisgx.syntax;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
@@ -88,15 +88,15 @@ public interface MethodNameParserListener extends ParseTreeListener {
 	 */
 	void exitSelect_statement(MethodNameParser.Select_statementContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#select_item}.
+	 * Enter a parse tree produced by {@link MethodNameParser#select_item_clause}.
 	 * @param ctx the parse tree
 	 */
-	void enterSelect_item(MethodNameParser.Select_itemContext ctx);
+	void enterSelect_item_clause(MethodNameParser.Select_item_clauseContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#select_item}.
+	 * Exit a parse tree produced by {@link MethodNameParser#select_item_clause}.
 	 * @param ctx the parse tree
 	 */
-	void exitSelect_item(MethodNameParser.Select_itemContext ctx);
+	void exitSelect_item_clause(MethodNameParser.Select_item_clauseContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MethodNameParser#select_column}.
 	 * @param ctx the parse tree
@@ -217,6 +217,16 @@ public interface MethodNameParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitIgnore_reserved_word(MethodNameParser.Ignore_reserved_wordContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MethodNameParser#business_semantic}.
+	 * @param ctx the parse tree
+	 */
+	void enterBusiness_semantic(MethodNameParser.Business_semanticContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MethodNameParser#business_semantic}.
+	 * @param ctx the parse tree
+	 */
+	void exitBusiness_semantic(MethodNameParser.Business_semanticContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MethodNameParser#where_start}.
 	 * @param ctx the parse tree

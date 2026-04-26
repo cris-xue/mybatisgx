@@ -131,6 +131,12 @@ public interface MethodNameParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitLimit(MethodNameParser.LimitContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link MethodNameParser#ignore_reserved_word}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIgnore_reserved_word(MethodNameParser.Ignore_reserved_wordContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link MethodNameParser#business_semantic}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

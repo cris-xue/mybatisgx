@@ -5,7 +5,7 @@
 	<groupId>com.mybatisgx</groupId>
 	<artifactId>mybatisgx</artifactId>
 	<packaging>pom</packaging>
-	<version>0.0.8-SNAPSHOT</version>
+	<version>0.0.8-sb4</version>
 	<name>mybatisgx</name>
 	<url>http://www.mybatisgx.com</url>
 
@@ -20,7 +20,7 @@
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<java.version>1.8</java.version>
 		<mybatis.version>3.5.19</mybatis.version>
-		<mybatisgx.version>0.0.8-SNAPSHOT</mybatisgx.version>
+		<mybatisgx.version>0.0.8-sb4</mybatisgx.version>
 	</properties>
 	
 	<modules>
@@ -164,7 +164,7 @@
 		<connection>scm:git:git://github.com/cris-xue/mybatisgx.git</connection>
 		<developerConnection>scm:git:ssh://github.com/cris-xue/mybatisgx.git</developerConnection>
 		<url>https://github.com/cris-xue/mybatisgx</url>
-		<tag>HEAD</tag>
+		<tag>mybatisgx-0.0.8-sb4</tag>
 	</scm>
 
 	<distributionManagement>

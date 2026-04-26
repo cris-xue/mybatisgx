@@ -4,15 +4,21 @@ import com.mybatisgx.ext.LinkObjectHelper;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.executor.Executor;
+import org.apache.ibatis.executor.ExecutorException;
 import org.apache.ibatis.executor.loader.ResultLoader;
 import org.apache.ibatis.mapping.BoundSql;
+import org.apache.ibatis.mapping.Environment;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.ResultMapping;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.SystemMetaObject;
 import org.apache.ibatis.session.Configuration;
+import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.RowBounds;
+import org.apache.ibatis.transaction.Transaction;
+import org.apache.ibatis.transaction.TransactionFactory;
 
+import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -77,17 +83,49 @@ public class BatchResultLoader extends ResultLoader {
         if (ObjectUtils.isEmpty(resultObjectMap)) {
             List<Object> parameterObjectList = this.batchResultLoaderContext.getParameterObjectList();
             if (ObjectUtils.isNotEmpty(parameterObjectList)) {
-                Map<String, List<Object>> parameterObjectMap = new HashMap();
-                parameterObjectMap.put(NESTED_SELECT_PARAM_COLLECTION, parameterObjectList);
-
-                BoundSql boundSql = mappedStatement.getBoundSql(parameterObjectMap);
-                CacheKey cacheKey = executor.createCacheKey(mappedStatement, parameterObjectMap, RowBounds.DEFAULT, boundSql);
-                ResultLoader resultLoader = new ResultLoader(configuration, executor, mappedStatement, parameterObjectMap, List.class, cacheKey, boundSql);
-                Object result = resultLoader.loadResult();
+                Map<String, List<Object>> parameterObjectMap = this.getParameterObjectMap(parameterObjectList);
+                Object result = this.select(parameterObjectMap);
                 resultObjectMap = this.batchResultLoaderContext.addResultObject(result, this.idResultMappings, propertyMapping).getResultObject();
             }
         }
         return resultObjectMap;
+    }
+
+    private Map<String, List<Object>> getParameterObjectMap(List<Object> parameterObjectList) {
+        Map<String, List<Object>> parameterObjectMap = new HashMap();
+        parameterObjectMap.put(NESTED_SELECT_PARAM_COLLECTION, parameterObjectList);
+        return parameterObjectMap;
+    }
+
+    private Object select(Map<String, List<Object>> parameterObjectMap) throws SQLException {
+        Executor localExecutor = executor;
+        if (Thread.currentThread().getId() != this.creatorThreadId || localExecutor.isClosed()) {
+            localExecutor = newExecutor();
+        }
+        try {
+            BoundSql boundSql = mappedStatement.getBoundSql(parameterObjectMap);
+            CacheKey cacheKey = localExecutor.createCacheKey(mappedStatement, parameterObjectMap, RowBounds.DEFAULT, boundSql);
+            ResultLoader resultLoader = new ResultLoader(configuration, localExecutor, mappedStatement, parameterObjectMap, List.class, cacheKey, boundSql);
+            return resultLoader.loadResult();
+        } finally {
+            if (localExecutor != executor) {
+                localExecutor.close(false);
+            }
+        }
+    }
+
+    private Executor newExecutor() {
+        final Environment environment = configuration.getEnvironment();
+        if (environment == null) {
+            throw new ExecutorException("ResultLoader could not load lazily.  Environment was not configured.");
+        }
+        final DataSource ds = environment.getDataSource();
+        if (ds == null) {
+            throw new ExecutorException("ResultLoader could not load lazily.  DataSource was not configured.");
+        }
+        final TransactionFactory transactionFactory = environment.getTransactionFactory();
+        final Transaction tx = transactionFactory.newTransaction(ds, null, false);
+        return configuration.newExecutor(tx, ExecutorType.SIMPLE);
     }
 
     public static class BatchResultLoaderContext {

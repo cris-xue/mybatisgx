@@ -2,22 +2,23 @@ package com.mybatisgx.model.handler;
 
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.model.*;
 import com.mybatisgx.syntax.MethodNameParser;
 import com.mybatisgx.syntax.MethodNameParserBaseVisitor;
+import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.RuleNode;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.mapping.SqlCommandType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * mybatisgx语法处理器
@@ -28,6 +29,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class MybatisgxSyntaxHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MybatisgxSyntaxHandler.class);
+
+    private static final Set<String> END_SEMANTIC = Sets.newHashSet("Selective");
 
     private static final Map<Class<?>, SqlCommandType> COMMAND_MAPPINGS = Maps.newHashMap();
 
@@ -55,6 +58,24 @@ public class MybatisgxSyntaxHandler {
         boolean support(ParseTree node);
 
         void handle(ParseTree node, ParserContext context);
+    }
+
+    public static class SelectStatementHandler implements SyntaxNodeHandler {
+
+        @Override
+        public int getOrder() {
+            return 0;
+        }
+
+        @Override
+        public boolean support(ParseTree node) {
+            return node instanceof MethodNameParser.Select_statementContext;
+        }
+
+        @Override
+        public void handle(ParseTree node, ParserContext context) {
+
+        }
     }
 
     public static class SelectItemHandler implements SyntaxNodeHandler {
@@ -321,9 +342,22 @@ public class MybatisgxSyntaxHandler {
 
         @Override
         public void apply(ParseTree node, ConditionInfo conditionInfo, ParserContext context) {
-            String token = node.getText();
-            String conditionColumnName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, token);
+            String conditionColumnName = this.getFullTokenJavaColumn(node, context);
             ColumnInfo columnInfo = context.getEntityInfo().getColumnInfo(conditionColumnName);
+
+            // 解决方法名末尾存在 Selective 的情况
+            int rootStopIndex = ((MethodNameParser.Sql_statementContext) context.getRoot()).getStop().getStopIndex();
+            int fieldStopIndex = ((MethodNameParser.Field_clauseContext) node).getStop().getStopIndex();
+            if (fieldStopIndex == rootStopIndex && columnInfo == null) {
+                conditionColumnName = this.getEndTokenJavaColumn(node, context);
+                columnInfo = context.getEntityInfo().getColumnInfo(conditionColumnName);
+            }
+            // 解决字段中存在操作符的情况
+            /*if (columnInfo == null) {
+                conditionColumnName = this.getOperJavaColumn(node, context);
+                columnInfo = context.getEntityInfo().getColumnInfo(conditionColumnName);
+            }*/
+
             if (columnInfo == null) {
                 throw new MybatisgxException("%s 方法条件字段或者实体条件字段在 %s 实体类中不存在", conditionColumnName, context.getEntityInfo().getClazzName());
             }
@@ -332,6 +366,43 @@ public class MybatisgxSyntaxHandler {
                 conditionInfo.setColumnName(conditionColumnName);
             }
             conditionInfo.setColumnInfo(columnInfo);
+        }
+
+        private String getFullTokenJavaColumn(ParseTree node, ParserContext context) {
+            String token = node.getText();
+            return this.tokenToJavaColumn(token);
+        }
+
+        private String getEndTokenJavaColumn(ParseTree node, ParserContext context) {
+            List<TerminalNode> terminalNodeList = ((MethodNameParser.Field_clauseContext) node).FIELD();
+            for (int i = terminalNodeList.size() - 1; i > 0; i--) {
+                TerminalNode terminalNode = terminalNodeList.get(i);
+                if (END_SEMANTIC.contains(terminalNode.getText())) {
+                    int startTokenIndex = ((MethodNameParser.Field_clauseContext) node).getStart().getTokenIndex();
+                    int stopTokenIndex = terminalNode.getSymbol().getTokenIndex();
+                    String aaa = context.getTokens().get(startTokenIndex, stopTokenIndex - 1).stream().map(t -> t.getText()).collect(Collectors.joining(""));
+                    return this.tokenToJavaColumn(aaa);
+                }
+            }
+            return "";
+        }
+
+        private String getComparisonJavaColumn(ParseTree node, ParserContext context) {
+            List<TerminalNode> terminalNodeList = ((MethodNameParser.Field_clauseContext) node).FIELD();
+            for (int i = terminalNodeList.size() - 1; i > 0; i--) {
+                TerminalNode terminalNode = terminalNodeList.get(i);
+                if (END_SEMANTIC.contains(terminalNode.getText())) {
+                    int startTokenIndex = ((MethodNameParser.Field_clauseContext) node).getStart().getTokenIndex();
+                    int stopTokenIndex = terminalNode.getSymbol().getTokenIndex();
+                    String aaa = context.getTokens().get(startTokenIndex, stopTokenIndex - 1).stream().map(t -> t.getText()).collect(Collectors.joining(""));
+                    return this.tokenToJavaColumn(aaa);
+                }
+            }
+            return "";
+        }
+
+        private String tokenToJavaColumn(String token) {
+            return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, token);
         }
     }
 
@@ -364,20 +435,38 @@ public class MybatisgxSyntaxHandler {
 
     public static class ParserContext {
 
+        private CommonTokenStream tokens;
+        private ParseTree root;
         private EntityInfo entityInfo;
         private MethodInfo methodInfo;
         private MethodParamInfo methodParamInfo;
         private ConditionOriginType conditionOriginType;
         private String methodName;
 
-        public ParserContext(EntityInfo entityInfo, MethodInfo methodInfo,
-                             MethodParamInfo methodParamInfo, ConditionOriginType conditionOriginType,
-                             String methodName) {
+        public ParserContext(
+                CommonTokenStream tokens,
+                ParseTree root,
+                EntityInfo entityInfo,
+                MethodInfo methodInfo,
+                MethodParamInfo methodParamInfo,
+                ConditionOriginType conditionOriginType,
+                String methodName
+        ) {
+            this.tokens = tokens;
+            this.root = root;
             this.entityInfo = entityInfo;
             this.methodInfo = methodInfo;
             this.methodParamInfo = methodParamInfo;
             this.conditionOriginType = conditionOriginType;
             this.methodName = methodName;
+        }
+
+        public CommonTokenStream getTokens() {
+            return tokens;
+        }
+
+        public ParseTree getRoot() {
+            return root;
         }
 
         public EntityInfo getEntityInfo() {

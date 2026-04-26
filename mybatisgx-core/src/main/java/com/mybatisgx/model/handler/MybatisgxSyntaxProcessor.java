@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 public class MybatisgxSyntaxProcessor {
 
     private final List<MybatisgxSyntaxHandler.SyntaxNodeHandler> handlers = Arrays.asList(
+            new MybatisgxSyntaxHandler.SelectStatementHandler(),
             new MybatisgxSyntaxHandler.SelectItemHandler(),
             new MybatisgxSyntaxHandler.BusinessSemanticHandler(),
             new MybatisgxSyntaxHandler.LimitHandler(),
@@ -64,8 +65,16 @@ public class MybatisgxSyntaxProcessor {
     }
 
     public void execute(EntityInfo entityInfo, MethodInfo methodInfo, MethodParamInfo methodParamInfo, ConditionOriginType conditionOriginType, String methodName) {
-        ParseTree parseTree = this.parseMethodName(methodName);
+        CharStream charStream = CharStreams.fromString(methodName);
+        MethodNameLexer methodNameLexer = new MethodNameLexer(charStream);
+        CommonTokenStream tokens = new CommonTokenStream(methodNameLexer);
+        MethodNameParser methodNameParser = new MethodNameParser(tokens);
+        this.addErrorListeners(methodNameLexer, methodNameParser);
+        ParseTree parseTree = methodNameParser.sql_statement();
+
         MybatisgxSyntaxHandler.ParserContext parserContext = new MybatisgxSyntaxHandler.ParserContext(
+                tokens,
+                parseTree,
                 entityInfo,
                 methodInfo,
                 methodParamInfo,
@@ -73,15 +82,6 @@ public class MybatisgxSyntaxProcessor {
                 methodName
         );
         this.traverseSyntaxTree(parseTree, parserContext);
-    }
-
-    private ParseTree parseMethodName(String methodName) {
-        CharStream charStream = CharStreams.fromString(methodName);
-        MethodNameLexer methodNameLexer = new MethodNameLexer(charStream);
-        CommonTokenStream commonStream = new CommonTokenStream(methodNameLexer);
-        MethodNameParser methodNameParser = new MethodNameParser(commonStream);
-        this.addErrorListeners(methodNameLexer, methodNameParser);
-        return methodNameParser.sql_statement();
     }
 
     /**

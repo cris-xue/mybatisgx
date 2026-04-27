@@ -30,16 +30,16 @@ where_clause: where_start condition_expression ignore_reserved_word? ;
 condition_expression: or_expression ;
 
 // OR 运算符 (最低优先级)
-or_expression: and_expression (logic_op_or and_expression)* ;
+or_expression: and_expression (logic_or and_expression)* ;
 
 // AND 运算符 (较高优先级)
-and_expression: condition_term (logic_op_and condition_term)* ;
+and_expression: condition_term (logic_and condition_term)* ;
 
 // 条件项：基础条件或括号表达式
-condition_term: field_comparison_op_clause | (left_bracket condition_expression right_bracket) ;
+condition_term: field_comparison_op | (left_bracket condition_expression right_bracket) ;
 
 // 解析方法名和实体字段
-field_comparison_op_clause: field ((comparison_not_op? comparison_op) | comparison_null_op)* ;
+field_comparison_op: field ((comparison_op_not? comparison_op) | comparison_op_null)* ;
 
 // 排序 OrderByNameDesc、OrderByName
 order_by_clause: order_by order_by_item+ ;
@@ -49,13 +49,16 @@ order_by_item: field order_by_direction? ;
 limit: limit_top ;
 
 where_start: BY ;
-logic_op_and: LOGIC_OP_AND ;
-logic_op_or: LOGIC_OP_OR ;
+logic_and: LOGIC_AND ;
+logic_or: LOGIC_OR ;
+
 comparison_op: COMPARISON_OP ;
-comparison_not_op: COMPARISON_NOT_OP ;
-comparison_null_op: COMPARISON_NULL_OP ;
+comparison_op_not: COMPARISON_OP_NOT ;
+comparison_op_null: COMPARISON_OP_NULL ;
+
 order_by: ORDER_BY ;
 order_by_direction: ORDER_BY_DIRECTION ;
+
 limit_top: LIMIT_TOP ;
 field: (FIELD)+ ;
 left_bracket: LEFT_BRACKET ;

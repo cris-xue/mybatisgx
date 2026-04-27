@@ -5,11 +5,13 @@ DELETE_ACTION: 'delete' | 'remove' ;
 UPDATE_ACTION: 'update' | 'modify' ;
 SELECT_COLUMN_ACTION: 'find' | 'get' | 'select' | 'query' ;
 SELECT_COUNT_ACTION: 'count' ;
+
 BY: 'By' ;
-LOGIC_OP_AND: 'And' ;
-LOGIC_OP_OR: 'Or' ;
+LOGIC_AND: 'And' ;
+LOGIC_OR: 'Or' ;
+
 // 比较运算符
-COMPARISON_NOT_OP: 'Not';
+COMPARISON_OP_NOT: 'Not';
 COMPARISON_OP: 'Lt'
     | 'Lteq'
     | 'Gt'
@@ -19,7 +21,7 @@ COMPARISON_OP: 'Lt'
     | 'In'
     | 'Between'
     ;
-COMPARISON_NULL_OP: 'IsNull' | 'IsNotNull' | 'NotNull' ;
+COMPARISON_OP_NULL: 'IsNull' | 'IsNotNull' | 'NotNull' ;
 
 ORDER_BY: 'OrderBy' ;
 ORDER_BY_DIRECTION: 'Desc' | 'Asc' ;

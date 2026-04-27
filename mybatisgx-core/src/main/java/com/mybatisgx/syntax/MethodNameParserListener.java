@@ -208,6 +208,16 @@ public interface MethodNameParserListener extends ParseTreeListener {
 	 */
 	void exitLimit(MethodNameParser.LimitContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link MethodNameParser#ignore_reserved_word}.
+	 * @param ctx the parse tree
+	 */
+	void enterIgnore_reserved_word(MethodNameParser.Ignore_reserved_wordContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MethodNameParser#ignore_reserved_word}.
+	 * @param ctx the parse tree
+	 */
+	void exitIgnore_reserved_word(MethodNameParser.Ignore_reserved_wordContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link MethodNameParser#business_semantic}.
 	 * @param ctx the parse tree
 	 */

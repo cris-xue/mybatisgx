@@ -24,7 +24,7 @@ select_column: SELECT_COLUMN_ACTION ;
 select_count: SELECT_COUNT_ACTION ;
 
 // 条件语法   ByNameLikeAndAgeEq
-where_clause: where_start condition_expression ;
+where_clause: where_start condition_expression ignore_reserved_word? ;
 
 // 分层处理条件表达式，明确运算符优先级
 condition_expression: or_expression ;
@@ -48,8 +48,10 @@ order_by_item_clause: field_clause order_by_direction? ;
 // 分页
 limit: limit_top ;
 
+// 忽略保留关键字
+ignore_reserved_word: RESERVED_WORD* ;
 // 业务语义（在解析中忽略）
-business_semantic: FIELD ;
+business_semantic: FIELD | RESERVED_WORD ;
 where_start: BY ;
 logic_op_and: LOGIC_OP_AND ;
 logic_op_or: LOGIC_OP_OR ;

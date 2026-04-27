@@ -158,6 +158,13 @@ public class MethodNameParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> 
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
+	@Override public T visitIgnore_reserved_word(MethodNameParser.Ignore_reserved_wordContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
 	@Override public T visitBusiness_semantic(MethodNameParser.Business_semanticContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}

@@ -257,6 +257,18 @@ public class MethodNameParserBaseListener implements MethodNameParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterIgnore_reserved_word(MethodNameParser.Ignore_reserved_wordContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitIgnore_reserved_word(MethodNameParser.Ignore_reserved_wordContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterBusiness_semantic(MethodNameParser.Business_semanticContext ctx) { }
 	/**
 	 * {@inheritDoc}

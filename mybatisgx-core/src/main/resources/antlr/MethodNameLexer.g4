@@ -35,7 +35,7 @@ LEFT_BRACKET: '(' ;
 RIGHT_BRACKET: ')' ;
 
 // 保留关键字
-RESERVED_WORD: 'List' | 'One' | 'Page' | 'Batch' | 'Selective' ;
+// RESERVED_WORD: 'List' | 'One' | 'Page' | 'Batch' | 'Selective' ;
 
 // antlr是从上向下解析的，常量一定要放在正则的上面
 NUMBER: [0-9]+ ;

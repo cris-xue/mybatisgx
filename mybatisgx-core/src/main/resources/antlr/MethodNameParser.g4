@@ -39,7 +39,7 @@ and_expression: condition_term (logic_and condition_term)* ;
 condition_term: field_comparison_op | (left_bracket condition_expression right_bracket) ;
 
 // 解析方法名和实体字段
-field_comparison_op: field ((comparison_op_not? comparison_op) | comparison_op_null)* ;
+field_comparison_op: field ((comparison_op_not? comparison_op) | comparison_op_null)? ;
 
 // 排序 OrderByNameDesc、OrderByName
 order_by_clause: order_by order_by_item+ ;
@@ -60,14 +60,14 @@ order_by: ORDER_BY ;
 order_by_direction: ORDER_BY_DIRECTION ;
 
 limit_top: LIMIT_TOP ;
-field: (FIELD)+ ;
+field: (FIELD_IDENTIFIER)+ | ESCAPED_IDENTIFIER ;
 left_bracket: LEFT_BRACKET ;
 right_bracket: RIGHT_BRACKET ;
 
 // 忽略保留关键字
 ignore_reserved_word: RESERVED_WORD* ;
 // 业务语义（在解析中忽略）
-business_semantic: (FIELD)+ ;
+business_semantic: (FIELD_IDENTIFIER)+ ;
 
 // EOF(end of file)表示文件结束符，这个是Antlr中已经定义好的
 end: EOF ;

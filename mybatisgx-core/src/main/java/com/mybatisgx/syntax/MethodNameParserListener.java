@@ -308,6 +308,26 @@ public interface MethodNameParserListener extends ParseTreeListener {
 	 */
 	void exitField(MethodNameParser.FieldContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link MethodNameParser#field_identifier}.
+	 * @param ctx the parse tree
+	 */
+	void enterField_identifier(MethodNameParser.Field_identifierContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MethodNameParser#field_identifier}.
+	 * @param ctx the parse tree
+	 */
+	void exitField_identifier(MethodNameParser.Field_identifierContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MethodNameParser#escaped_identifier}.
+	 * @param ctx the parse tree
+	 */
+	void enterEscaped_identifier(MethodNameParser.Escaped_identifierContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MethodNameParser#escaped_identifier}.
+	 * @param ctx the parse tree
+	 */
+	void exitEscaped_identifier(MethodNameParser.Escaped_identifierContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link MethodNameParser#left_bracket}.
 	 * @param ctx the parse tree
 	 */

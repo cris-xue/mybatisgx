@@ -61,7 +61,9 @@ order_by: ORDER_BY ;
 order_by_direction: ORDER_BY_DIRECTION ;
 
 limit_top: LIMIT_TOP ;
-field: FIELD_IDENTIFIER+ | ESCAPED_IDENTIFIER ;
+field: field_identifier | escaped_identifier ;
+field_identifier: FIELD_IDENTIFIER+ ;
+escaped_identifier: ESCAPED_IDENTIFIER ;
 left_bracket: LEFT_BRACKET ;
 right_bracket: RIGHT_BRACKET ;
 

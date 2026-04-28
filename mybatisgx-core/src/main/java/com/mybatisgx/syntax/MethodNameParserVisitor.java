@@ -191,6 +191,18 @@ public interface MethodNameParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitField(MethodNameParser.FieldContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link MethodNameParser#field_identifier}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitField_identifier(MethodNameParser.Field_identifierContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MethodNameParser#escaped_identifier}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitEscaped_identifier(MethodNameParser.Escaped_identifierContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link MethodNameParser#left_bracket}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

@@ -166,7 +166,7 @@ public class UserDaoTest {
 
         user.setName("test");
         user.setVersion(0);
-        int updateCount = userDao.updateByIdSelective(user);
+        int updateCount = userDao.updateSelectiveById(user);
         Assert.assertEquals(1, updateCount);
 
         User dbUser = userDao.findById(user.getId());

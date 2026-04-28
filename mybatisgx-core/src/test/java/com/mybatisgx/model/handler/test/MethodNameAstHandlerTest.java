@@ -95,16 +95,64 @@ public class MethodNameAstHandlerTest {
         EntityInfo entityInfo = entityInfoHandler.execute(User.class);
         MethodInfo methodInfo = new MethodInfo();
         MybatisgxSyntaxProcessor processor = this.buildProcessor();
+        processor.execute(
+                entityInfo,
+                methodInfo,
+                null,
+                ConditionOriginType.METHOD_NAME,
+                "findCustomByName"
+        );
+
+        List<ConditionInfo> conditionInfoList = methodInfo.getConditionInfoList();
+        Assert.assertTrue(conditionInfoList != null && conditionInfoList.size() > 0);
+
+        ConditionInfo conditionInfo1 = conditionInfoList.get(0);
+        Assert.assertEquals("name", conditionInfo1.getColumnName());
+        Assert.assertEquals("Name", conditionInfo1.getOriginSegment());
+    }
+
+    @Test
+    public void test05() {
+        // 测试方法名中存在错误语法
+        EntityInfo entityInfo = entityInfoHandler.execute(User.class);
+        MethodInfo methodInfo = new MethodInfo();
+        MybatisgxSyntaxProcessor processor = this.buildProcessor();
         try {
             processor.execute(
                     entityInfo,
                     methodInfo,
                     null,
                     ConditionOriginType.METHOD_NAME,
-                    "findCustomByName"
+                    "findCustomByNameAndNameEqEq"
             );
         } catch (MybatisgxException e) {
-            Assert.assertEquals("findCustomByName 语法错误，在(1:4)，非法输入：Custom，当前位置可使用：By、OrderBy、top", e.getMessage());
+            Assert.assertEquals("findCustomByNameAndNameEqEq 语法错误: extraneous input 'Eq' expecting <EOF>", e.getMessage());
         }
+    }
+
+    @Test
+    public void test06() {
+        // 测试方法名中存在错误语法
+        EntityInfo entityInfo = entityInfoHandler.execute(User.class);
+        MethodInfo methodInfo = new MethodInfo();
+        MybatisgxSyntaxProcessor processor = this.buildProcessor();
+        processor.execute(
+                entityInfo,
+                methodInfo,
+                null,
+                ConditionOriginType.METHOD_NAME,
+                "findCustomByNameAnd$NameEq$Eq"
+        );
+
+        List<ConditionInfo> conditionInfoList = methodInfo.getConditionInfoList();
+        Assert.assertTrue(conditionInfoList != null && conditionInfoList.size() > 0);
+
+        ConditionInfo conditionInfo1 = conditionInfoList.get(0);
+        Assert.assertEquals("name", conditionInfo1.getColumnName());
+        Assert.assertEquals("Name", conditionInfo1.getOriginSegment());
+
+        ConditionInfo conditionInfo2 = conditionInfoList.get(1);
+        Assert.assertEquals("nameEq", conditionInfo2.getColumnName());
+        Assert.assertEquals("$NameEq$Eq", conditionInfo2.getOriginSegment());
     }
 }

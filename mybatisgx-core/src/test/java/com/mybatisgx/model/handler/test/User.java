@@ -16,6 +16,8 @@ public class User extends BaseEntity<Long> {
 
     private String name;
 
+    private String nameEq;
+
     private Integer age;
 
     private String phone;

@@ -1,4 +1,4 @@
-// Generated from E:/project/wuyue/mybatisgx-ai_coding/mybatisgx/mybatisgx-core/src/main/resources/antlr/MethodNameParser.g4 by ANTLR 4.13.2
+// Generated from F:/owner_project/mybatisgx-ai_conding/mybatisgx/mybatisgx-core/src/main/resources/antlr/MethodNameParser.g4 by ANTLR 4.13.2
 package com.mybatisgx.syntax;
 
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -209,13 +209,13 @@ public class MethodNameParserBaseListener implements MethodNameParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterField_comparison_op_clause(MethodNameParser.Field_comparison_op_clauseContext ctx) { }
+	@Override public void enterField_comparison_op(MethodNameParser.Field_comparison_opContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitField_comparison_op_clause(MethodNameParser.Field_comparison_op_clauseContext ctx) { }
+	@Override public void exitField_comparison_op(MethodNameParser.Field_comparison_opContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -233,13 +233,13 @@ public class MethodNameParserBaseListener implements MethodNameParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterOrder_by_item_clause(MethodNameParser.Order_by_item_clauseContext ctx) { }
+	@Override public void enterOrder_by_item(MethodNameParser.Order_by_itemContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitOrder_by_item_clause(MethodNameParser.Order_by_item_clauseContext ctx) { }
+	@Override public void exitOrder_by_item(MethodNameParser.Order_by_itemContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -257,30 +257,6 @@ public class MethodNameParserBaseListener implements MethodNameParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterIgnore_reserved_word(MethodNameParser.Ignore_reserved_wordContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitIgnore_reserved_word(MethodNameParser.Ignore_reserved_wordContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterBusiness_semantic(MethodNameParser.Business_semanticContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitBusiness_semantic(MethodNameParser.Business_semanticContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterWhere_start(MethodNameParser.Where_startContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -293,25 +269,25 @@ public class MethodNameParserBaseListener implements MethodNameParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterLogic_op_and(MethodNameParser.Logic_op_andContext ctx) { }
+	@Override public void enterLogic_and(MethodNameParser.Logic_andContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitLogic_op_and(MethodNameParser.Logic_op_andContext ctx) { }
+	@Override public void exitLogic_and(MethodNameParser.Logic_andContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterLogic_op_or(MethodNameParser.Logic_op_orContext ctx) { }
+	@Override public void enterLogic_or(MethodNameParser.Logic_orContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitLogic_op_or(MethodNameParser.Logic_op_orContext ctx) { }
+	@Override public void exitLogic_or(MethodNameParser.Logic_orContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -329,25 +305,25 @@ public class MethodNameParserBaseListener implements MethodNameParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterComparison_not_op(MethodNameParser.Comparison_not_opContext ctx) { }
+	@Override public void enterComparison_op_not(MethodNameParser.Comparison_op_notContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitComparison_not_op(MethodNameParser.Comparison_not_opContext ctx) { }
+	@Override public void exitComparison_op_not(MethodNameParser.Comparison_op_notContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterComparison_null_op(MethodNameParser.Comparison_null_opContext ctx) { }
+	@Override public void enterComparison_op_null(MethodNameParser.Comparison_op_nullContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitComparison_null_op(MethodNameParser.Comparison_null_opContext ctx) { }
+	@Override public void exitComparison_op_null(MethodNameParser.Comparison_op_nullContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -389,13 +365,13 @@ public class MethodNameParserBaseListener implements MethodNameParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterField_clause(MethodNameParser.Field_clauseContext ctx) { }
+	@Override public void enterField(MethodNameParser.FieldContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitField_clause(MethodNameParser.Field_clauseContext ctx) { }
+	@Override public void exitField(MethodNameParser.FieldContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -420,6 +396,18 @@ public class MethodNameParserBaseListener implements MethodNameParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitRight_bracket(MethodNameParser.Right_bracketContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterBusiness_semantic(MethodNameParser.Business_semanticContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitBusiness_semantic(MethodNameParser.Business_semanticContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

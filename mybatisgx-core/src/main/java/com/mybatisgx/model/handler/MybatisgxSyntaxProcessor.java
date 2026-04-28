@@ -54,13 +54,6 @@ public class MybatisgxSyntaxProcessor {
                 return SQL_COMMAND_TYPE_MAP.get(key);
             }
         }
-        /*ParseTree node = this.parseMethodName(methodName, ConditionOriginType.METHOD_NAME);
-        for (int i = 0; i < node.getChildCount(); i++) {
-            SqlCommandType sqlCommandType = mybatisgxSyntaxHandler.getSqlCommandType(node.getChild(i));
-            if (sqlCommandType != null) {
-                return sqlCommandType;
-            }
-        }*/
         throw new MybatisgxException("未知的方法类型：%s", methodName);
     }
 

@@ -2,7 +2,6 @@ package com.mybatisgx.model.handler;
 
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.model.*;
 import com.mybatisgx.syntax.MethodNameParser;
@@ -15,7 +14,10 @@ import org.apache.ibatis.mapping.SqlCommandType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -28,8 +30,6 @@ public class MybatisgxSyntaxHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MybatisgxSyntaxHandler.class);
 
-    private static final Set<String> END_SEMANTIC = Sets.newHashSet("Selective");
-
     private static final Map<Class<?>, SqlCommandType> COMMAND_MAPPINGS = Maps.newHashMap();
 
     static {
@@ -37,10 +37,6 @@ public class MybatisgxSyntaxHandler {
         COMMAND_MAPPINGS.put(MethodNameParser.Delete_statementContext.class, SqlCommandType.DELETE);
         COMMAND_MAPPINGS.put(MethodNameParser.Update_statementContext.class, SqlCommandType.UPDATE);
         COMMAND_MAPPINGS.put(MethodNameParser.Select_statementContext.class, SqlCommandType.SELECT);
-    }
-
-    public SqlCommandType getSqlCommandType(ParseTree node) {
-        return COMMAND_MAPPINGS.get(node.getClass());
     }
 
     /**

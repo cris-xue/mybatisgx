@@ -26,22 +26,15 @@ COMPARISON_OP_NULL: 'IsNull' | 'IsNotNull' | 'NotNull' ;
 ORDER_BY: 'OrderBy' ;
 ORDER_BY_DIRECTION: 'Desc' | 'Asc' ;
 
-LIMIT_TOP: TOP NUMBER ;
-
-TOP: 'Top' ;
+LIMIT_TOP: 'Top'[0-9]+ ;
 
 // 括号
 LEFT_BRACKET: '(' ;
 RIGHT_BRACKET: ')' ;
 
-// 保留关键字
-// RESERVED_WORD: 'List' | 'One' | 'Page' | 'Batch' | 'Selective' ;
-
 // antlr是从上向下解析的，常量一定要放在正则的上面
-NUMBER: [0-9]+ ;
-FIELD_IDENTIFIER: [A-Z]+[a-z0-9]+ ;
-
-// 分隔符
+FIELD_IDENTIFIER: [A-Z]+[a-z0-9]* ;
+// 特殊字段
 ESCAPED_IDENTIFIER: '$' (~'$')+ '$' ;
 
 // 忽略空白符

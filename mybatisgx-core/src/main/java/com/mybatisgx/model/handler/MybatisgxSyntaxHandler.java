@@ -10,7 +10,6 @@ import com.mybatisgx.syntax.MethodNameParserBaseVisitor;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.RuleNode;
-import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.mapping.SqlCommandType;
 import org.slf4j.Logger;
@@ -18,7 +17,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 /**
  * mybatisgx语法处理器
@@ -369,8 +367,18 @@ public class MybatisgxSyntaxHandler {
         }
 
         private String getFullTokenJavaColumn(ParseTree node, ParserContext context) {
-            String token = node.getText();
-            return this.tokenToJavaColumn(token);
+            MethodNameParser.FieldContext fieldContext = (MethodNameParser.FieldContext) node;
+            MethodNameParser.Field_identifierContext fieldIdentifierContext = fieldContext.field_identifier();
+            if (fieldIdentifierContext != null) {
+                String token = fieldIdentifierContext.getText();
+                return this.tokenToJavaColumn(token);
+            }
+            MethodNameParser.Escaped_identifierContext escapedIdentifierContext = fieldContext.escaped_identifier();
+            if (escapedIdentifierContext != null) {
+                String token = escapedIdentifierContext.getText();
+                return this.tokenToJavaColumn(token.replace("$", ""));
+            }
+            return StringUtils.EMPTY;
         }
 
         private String getEndTokenJavaColumn(ParseTree node, ParserContext context) {

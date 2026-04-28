@@ -4,21 +4,22 @@ parser grammar MethodNameParser ;
 options {
     // 表示解析token的词法解析器使用MethodNameLexer
     tokenVocab = MethodNameLexer ;
+    superClass = MethodNameParserBase ;
 }
 
 sql_statement: (insert_statement | delete_statement | update_statement | select_statement) end ;
 
-insert_statement: insert_clause ;
+insert_statement: insert_clause business_semantic? ;
 insert_clause: INSERT_ACTION ;
 
-delete_statement: delete_clause where_clause ;
+delete_statement: delete_clause business_semantic? where_clause ;
 delete_clause: DELETE_ACTION ;
 
-update_statement: update_clause where_clause ;
+update_statement: update_clause business_semantic? where_clause ;
 update_clause: UPDATE_ACTION ;
 
 // 查询语法：1、findList findAll 2、findTop5 3、count  规则：查询方法名条件以By开始，查询实体不支持By语法、OrderBy语法
-select_statement: select_item_clause limit? where_clause? order_by_clause? ;
+select_statement: select_item_clause business_semantic? limit? where_clause? order_by_clause? ;
 select_item_clause: select_column | select_count ;
 select_column: SELECT_COLUMN_ACTION ;
 select_count: SELECT_COUNT_ACTION ;
@@ -63,6 +64,9 @@ limit_top: LIMIT_TOP ;
 field: FIELD_IDENTIFIER+ | ESCAPED_IDENTIFIER ;
 left_bracket: LEFT_BRACKET ;
 right_bracket: RIGHT_BRACKET ;
+
+// 业务语义（在解析中忽略）
+business_semantic: (FIELD_IDENTIFIER)+ {isBusinessSemanticEnd()}? ;
 
 // EOF(end of file)表示文件结束符，这个是Antlr中已经定义好的
 end: EOF ;

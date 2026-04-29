@@ -6,6 +6,7 @@ import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.model.*;
 import com.mybatisgx.syntax.MethodNameParser;
 import com.mybatisgx.syntax.MethodNameParserBaseVisitor;
+import com.mybatisgx.utils.FieldNameUtils;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.RuleNode;
@@ -310,7 +311,8 @@ public class MybatisgxSyntaxHandler {
             LOGGER.debug("处理条件: {}", ctx.getText());
             ConditionInfo conditionInfo = new ConditionInfo(index, context.conditionOriginType, context.methodParamInfo);
             if (context.conditionOriginType == ConditionOriginType.ENTITY_FIELD) {
-                String conditionColumnName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, ctx.getText());
+                String conditionColumnName = ctx.getText();
+                conditionColumnName = FieldNameUtils.upperCamelToLowerCamel(conditionColumnName.replace("$", ""));
                 conditionInfo.setColumnName(conditionColumnName);
             }
             for (int i = 0; i < ctx.getChildCount(); i++) {

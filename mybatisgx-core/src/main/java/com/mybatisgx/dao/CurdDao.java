@@ -47,7 +47,7 @@ public interface CurdDao<ENTITY, ID extends Serializable> extends Dao {
     int updateBatchById(@BatchData List<ENTITY> entityList, @BatchSize int batchSize);
 
     @Dynamic
-    int updateByIdSelective(ENTITY entity);
+    int updateSelectiveById(ENTITY entity);
 
     ENTITY findById(@Param("id") ID id);
 }

@@ -25,7 +25,7 @@ public @interface Column {
      * 对应的数据库字段名称
      * @return
      */
-    String name() default "";
+    String name();
 
     /**
      * 数据库字段的类型定义描述，仅作为元信息使用。

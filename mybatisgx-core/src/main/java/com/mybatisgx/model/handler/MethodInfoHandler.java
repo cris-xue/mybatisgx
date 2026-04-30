@@ -1,6 +1,5 @@
 package com.mybatisgx.model.handler;
 
-import com.google.common.base.CaseFormat;
 import com.google.common.collect.Lists;
 import com.mybatisgx.annotation.*;
 import com.mybatisgx.context.EntityInfoContextHolder;
@@ -10,6 +9,7 @@ import com.mybatisgx.exception.MethodNotConditionException;
 import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.model.*;
+import com.mybatisgx.utils.FieldNameUtils;
 import com.mybatisgx.utils.TypeUtils;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -338,7 +338,23 @@ public class MethodInfoHandler {
                     continue;
                 }
             }
-            String javaColumnName = CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, columnInfo.getJavaColumnName());
+            String javaColumnName = columnInfo.getJavaColumnName();
+            javaColumnName = FieldNameUtils.lowerCamelToUpperCamel(javaColumnName);
+            Property property = columnInfo.getProperty();
+            if (property != null) {
+                String propertyName = property.name();
+                propertyName = FieldNameUtils.lowerCamelToUpperCamel(propertyName);
+                if (!javaColumnName.startsWith(propertyName)) {
+                    throw new MybatisgxException(
+                            "查询字段 '%s' 的 @Property(name=\"%s\") 配置非法：字段名必须以 '%s' 为前缀，否则会导致方法名 DSL 解析歧义。",
+                            columnInfo.getJavaColumnName(),
+                            property.name(),
+                            property.name()
+                    );
+                }
+                javaColumnName = javaColumnName.replace(propertyName, "");
+                javaColumnName = String.format("%s%s%s%s", "$", propertyName, "$", javaColumnName);
+            }
             columnConditionList.add(javaColumnName);
         }
         StringBuilder stringBuilder = new StringBuilder(methodInfo.getSqlCommandType().name().toLowerCase())

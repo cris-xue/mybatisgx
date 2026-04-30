@@ -1,4 +1,4 @@
-// Generated from E:/project/wuyue/mybatisgx-ai_coding/mybatisgx/mybatisgx-core/src/main/resources/antlr/MethodNameParser.g4 by ANTLR 4.13.2
+// Generated from F:/owner_project/mybatisgx-ai_conding/mybatisgx/mybatisgx-core/src/main/resources/antlr/MethodNameParser.g4 by ANTLR 4.13.2
 package com.mybatisgx.syntax;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
@@ -168,15 +168,15 @@ public interface MethodNameParserListener extends ParseTreeListener {
 	 */
 	void exitCondition_term(MethodNameParser.Condition_termContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#field_comparison_op_clause}.
+	 * Enter a parse tree produced by {@link MethodNameParser#field_comparison_op}.
 	 * @param ctx the parse tree
 	 */
-	void enterField_comparison_op_clause(MethodNameParser.Field_comparison_op_clauseContext ctx);
+	void enterField_comparison_op(MethodNameParser.Field_comparison_opContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#field_comparison_op_clause}.
+	 * Exit a parse tree produced by {@link MethodNameParser#field_comparison_op}.
 	 * @param ctx the parse tree
 	 */
-	void exitField_comparison_op_clause(MethodNameParser.Field_comparison_op_clauseContext ctx);
+	void exitField_comparison_op(MethodNameParser.Field_comparison_opContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MethodNameParser#order_by_clause}.
 	 * @param ctx the parse tree
@@ -188,15 +188,15 @@ public interface MethodNameParserListener extends ParseTreeListener {
 	 */
 	void exitOrder_by_clause(MethodNameParser.Order_by_clauseContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#order_by_item_clause}.
+	 * Enter a parse tree produced by {@link MethodNameParser#order_by_item}.
 	 * @param ctx the parse tree
 	 */
-	void enterOrder_by_item_clause(MethodNameParser.Order_by_item_clauseContext ctx);
+	void enterOrder_by_item(MethodNameParser.Order_by_itemContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#order_by_item_clause}.
+	 * Exit a parse tree produced by {@link MethodNameParser#order_by_item}.
 	 * @param ctx the parse tree
 	 */
-	void exitOrder_by_item_clause(MethodNameParser.Order_by_item_clauseContext ctx);
+	void exitOrder_by_item(MethodNameParser.Order_by_itemContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MethodNameParser#limit}.
 	 * @param ctx the parse tree
@@ -208,26 +208,6 @@ public interface MethodNameParserListener extends ParseTreeListener {
 	 */
 	void exitLimit(MethodNameParser.LimitContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#ignore_reserved_word}.
-	 * @param ctx the parse tree
-	 */
-	void enterIgnore_reserved_word(MethodNameParser.Ignore_reserved_wordContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#ignore_reserved_word}.
-	 * @param ctx the parse tree
-	 */
-	void exitIgnore_reserved_word(MethodNameParser.Ignore_reserved_wordContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#business_semantic}.
-	 * @param ctx the parse tree
-	 */
-	void enterBusiness_semantic(MethodNameParser.Business_semanticContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#business_semantic}.
-	 * @param ctx the parse tree
-	 */
-	void exitBusiness_semantic(MethodNameParser.Business_semanticContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link MethodNameParser#where_start}.
 	 * @param ctx the parse tree
 	 */
@@ -238,25 +218,25 @@ public interface MethodNameParserListener extends ParseTreeListener {
 	 */
 	void exitWhere_start(MethodNameParser.Where_startContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#logic_op_and}.
+	 * Enter a parse tree produced by {@link MethodNameParser#logic_and}.
 	 * @param ctx the parse tree
 	 */
-	void enterLogic_op_and(MethodNameParser.Logic_op_andContext ctx);
+	void enterLogic_and(MethodNameParser.Logic_andContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#logic_op_and}.
+	 * Exit a parse tree produced by {@link MethodNameParser#logic_and}.
 	 * @param ctx the parse tree
 	 */
-	void exitLogic_op_and(MethodNameParser.Logic_op_andContext ctx);
+	void exitLogic_and(MethodNameParser.Logic_andContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#logic_op_or}.
+	 * Enter a parse tree produced by {@link MethodNameParser#logic_or}.
 	 * @param ctx the parse tree
 	 */
-	void enterLogic_op_or(MethodNameParser.Logic_op_orContext ctx);
+	void enterLogic_or(MethodNameParser.Logic_orContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#logic_op_or}.
+	 * Exit a parse tree produced by {@link MethodNameParser#logic_or}.
 	 * @param ctx the parse tree
 	 */
-	void exitLogic_op_or(MethodNameParser.Logic_op_orContext ctx);
+	void exitLogic_or(MethodNameParser.Logic_orContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MethodNameParser#comparison_op}.
 	 * @param ctx the parse tree
@@ -268,25 +248,25 @@ public interface MethodNameParserListener extends ParseTreeListener {
 	 */
 	void exitComparison_op(MethodNameParser.Comparison_opContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#comparison_not_op}.
+	 * Enter a parse tree produced by {@link MethodNameParser#comparison_op_not}.
 	 * @param ctx the parse tree
 	 */
-	void enterComparison_not_op(MethodNameParser.Comparison_not_opContext ctx);
+	void enterComparison_op_not(MethodNameParser.Comparison_op_notContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#comparison_not_op}.
+	 * Exit a parse tree produced by {@link MethodNameParser#comparison_op_not}.
 	 * @param ctx the parse tree
 	 */
-	void exitComparison_not_op(MethodNameParser.Comparison_not_opContext ctx);
+	void exitComparison_op_not(MethodNameParser.Comparison_op_notContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#comparison_null_op}.
+	 * Enter a parse tree produced by {@link MethodNameParser#comparison_op_null}.
 	 * @param ctx the parse tree
 	 */
-	void enterComparison_null_op(MethodNameParser.Comparison_null_opContext ctx);
+	void enterComparison_op_null(MethodNameParser.Comparison_op_nullContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#comparison_null_op}.
+	 * Exit a parse tree produced by {@link MethodNameParser#comparison_op_null}.
 	 * @param ctx the parse tree
 	 */
-	void exitComparison_null_op(MethodNameParser.Comparison_null_opContext ctx);
+	void exitComparison_op_null(MethodNameParser.Comparison_op_nullContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MethodNameParser#order_by}.
 	 * @param ctx the parse tree
@@ -318,15 +298,35 @@ public interface MethodNameParserListener extends ParseTreeListener {
 	 */
 	void exitLimit_top(MethodNameParser.Limit_topContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MethodNameParser#field_clause}.
+	 * Enter a parse tree produced by {@link MethodNameParser#field}.
 	 * @param ctx the parse tree
 	 */
-	void enterField_clause(MethodNameParser.Field_clauseContext ctx);
+	void enterField(MethodNameParser.FieldContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MethodNameParser#field_clause}.
+	 * Exit a parse tree produced by {@link MethodNameParser#field}.
 	 * @param ctx the parse tree
 	 */
-	void exitField_clause(MethodNameParser.Field_clauseContext ctx);
+	void exitField(MethodNameParser.FieldContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MethodNameParser#field_identifier}.
+	 * @param ctx the parse tree
+	 */
+	void enterField_identifier(MethodNameParser.Field_identifierContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MethodNameParser#field_identifier}.
+	 * @param ctx the parse tree
+	 */
+	void exitField_identifier(MethodNameParser.Field_identifierContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MethodNameParser#escaped_identifier}.
+	 * @param ctx the parse tree
+	 */
+	void enterEscaped_identifier(MethodNameParser.Escaped_identifierContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MethodNameParser#escaped_identifier}.
+	 * @param ctx the parse tree
+	 */
+	void exitEscaped_identifier(MethodNameParser.Escaped_identifierContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MethodNameParser#left_bracket}.
 	 * @param ctx the parse tree
@@ -347,6 +347,16 @@ public interface MethodNameParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitRight_bracket(MethodNameParser.Right_bracketContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MethodNameParser#business_semantic}.
+	 * @param ctx the parse tree
+	 */
+	void enterBusiness_semantic(MethodNameParser.Business_semanticContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MethodNameParser#business_semantic}.
+	 * @param ctx the parse tree
+	 */
+	void exitBusiness_semantic(MethodNameParser.Business_semanticContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MethodNameParser#end}.
 	 * @param ctx the parse tree

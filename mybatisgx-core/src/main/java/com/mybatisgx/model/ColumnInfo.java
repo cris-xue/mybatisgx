@@ -71,9 +71,13 @@ public class ColumnInfo {
      */
     private List<ColumnInfo> composites;
     /**
-     * 字段注解
+     * 数据库字段注解
      */
     private Column column;
+    /**
+     * 实体字段注解
+     */
+    private Property property;
     /**
      * 非持久化字段
      */
@@ -223,6 +227,14 @@ public class ColumnInfo {
 
     public void setColumn(Column column) {
         this.column = column;
+    }
+
+    public Property getProperty() {
+        return property;
+    }
+
+    public void setProperty(Property property) {
+        this.property = property;
     }
 
     public Transient getNonPersistent() {

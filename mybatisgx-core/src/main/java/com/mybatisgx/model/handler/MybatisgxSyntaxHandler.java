@@ -1,11 +1,13 @@
 package com.mybatisgx.model.handler;
 
-import com.google.common.base.CaseFormat;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.model.*;
 import com.mybatisgx.syntax.MethodNameParser;
 import com.mybatisgx.syntax.MethodNameParserBaseVisitor;
+import com.mybatisgx.utils.FieldNameUtils;
+import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.RuleNode;
 import org.apache.commons.lang3.StringUtils;
@@ -13,10 +15,7 @@ import org.apache.ibatis.mapping.SqlCommandType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -38,10 +37,6 @@ public class MybatisgxSyntaxHandler {
         COMMAND_MAPPINGS.put(MethodNameParser.Select_statementContext.class, SqlCommandType.SELECT);
     }
 
-    public SqlCommandType getSqlCommandType(ParseTree node) {
-        return COMMAND_MAPPINGS.get(node.getClass());
-    }
-
     /**
      * 语法节点处理器接口
      *
@@ -55,6 +50,24 @@ public class MybatisgxSyntaxHandler {
         boolean support(ParseTree node);
 
         void handle(ParseTree node, ParserContext context);
+    }
+
+    public static class SelectStatementHandler implements SyntaxNodeHandler {
+
+        @Override
+        public int getOrder() {
+            return 0;
+        }
+
+        @Override
+        public boolean support(ParseTree node) {
+            return node instanceof MethodNameParser.Select_statementContext;
+        }
+
+        @Override
+        public void handle(ParseTree node, ParserContext context) {
+
+        }
     }
 
     public static class SelectItemHandler implements SyntaxNodeHandler {
@@ -169,8 +182,8 @@ public class MybatisgxSyntaxHandler {
             LOGGER.debug("排序函数: {}", node.getText());
             List<SelectOrderByInfo> selectOrderByInfoList = new ArrayList<>();
             MethodNameParser.Order_by_clauseContext orderByClauseContext = (MethodNameParser.Order_by_clauseContext) node;
-            for (MethodNameParser.Order_by_item_clauseContext orderByItem : orderByClauseContext.order_by_item_clause()) {
-                selectOrderByInfoList.add(new SelectOrderByInfo(orderByItem.field_clause().getText(), orderByItem.order_by_direction().getText()));
+            for (MethodNameParser.Order_by_itemContext orderByItem : orderByClauseContext.order_by_item()) {
+                selectOrderByInfoList.add(new SelectOrderByInfo(orderByItem.field().getText(), orderByItem.order_by_direction().getText()));
             }
             context.getMethodInfo().setSelectOrderByInfoList(selectOrderByInfoList);
         }
@@ -192,14 +205,14 @@ public class MybatisgxSyntaxHandler {
             LOGGER.debug("处理条件表达式: {}", ctx.getText());
             List<ConditionInfo> conditionInfoList = new ArrayList();
             MethodNameParser.Or_expressionContext orExpressionContext = ctx.or_expression();
-            MethodNameParser.Logic_op_orContext logicOpOrContext = null;
+            MethodNameParser.Logic_orContext logicOrContext = null;
             for (int i = 0; i < orExpressionContext.getChildCount(); i++) {
                 ParseTree parseTree = orExpressionContext.getChild(i);
-                if (parseTree instanceof MethodNameParser.Logic_op_orContext) {
-                    logicOpOrContext = (MethodNameParser.Logic_op_orContext) parseTree;
+                if (parseTree instanceof MethodNameParser.Logic_orContext) {
+                    logicOrContext = (MethodNameParser.Logic_orContext) parseTree;
                 }
                 if (parseTree instanceof MethodNameParser.And_expressionContext) {
-                    List<ConditionInfo> andConditionInfoList = this.parseAndExpression((MethodNameParser.And_expressionContext) parseTree, logicOpOrContext);
+                    List<ConditionInfo> andConditionInfoList = this.parseAndExpression((MethodNameParser.And_expressionContext) parseTree, logicOrContext);
                     conditionInfoList.addAll(andConditionInfoList);
                 }
             }
@@ -210,9 +223,9 @@ public class MybatisgxSyntaxHandler {
             return conditionIndex.getAndIncrement();
         }
 
-        private List<ConditionInfo> parseAndExpression(MethodNameParser.And_expressionContext andExpressionContext, MethodNameParser.Logic_op_orContext logicOpOrContext) {
+        private List<ConditionInfo> parseAndExpression(MethodNameParser.And_expressionContext andExpressionContext, MethodNameParser.Logic_orContext logicOrContext) {
             List<ConditionInfo> conditionInfoList = new ArrayList();
-            MethodNameParser.Logic_op_andContext logicOpAndContext = null;
+            MethodNameParser.Logic_andContext logicAndContext = null;
             for (int i = 0; i < andExpressionContext.getChildCount(); i++) {
                 ParseTree parseTree = andExpressionContext.getChild(i);
                 if (parseTree instanceof MethodNameParser.Condition_termContext) {
@@ -221,21 +234,21 @@ public class MybatisgxSyntaxHandler {
                     if (conditionExpressionContext != null) {
                         List<ConditionInfo> childConditionInfoList = this.visitCondition_expression(conditionExpressionContext);
                         ConditionInfo conditionInfo = new ConditionInfo(this.getConditionIndex(), context.conditionOriginType, context.methodParamInfo);
-                        this.setLogicOperator(conditionInfo, logicOpOrContext, logicOpAndContext);
+                        this.setLogicOperator(conditionInfo, logicOrContext, logicAndContext);
                         this.handleBrackets(conditionTermContext, conditionInfo);
                         conditionInfo.setConditionInfoList(childConditionInfoList);
                         conditionInfoList.add(conditionInfo);
                     }
-                    MethodNameParser.Field_comparison_op_clauseContext fieldComparisonOpClauseContext = conditionTermContext.field_comparison_op_clause();
-                    if (fieldComparisonOpClauseContext != null) {
-                        ConditionInfo conditionInfo = this.conditionTermParser.parse(this.getConditionIndex(), fieldComparisonOpClauseContext);
+                    MethodNameParser.Field_comparison_opContext fieldComparisonOpContext = conditionTermContext.field_comparison_op();
+                    if (fieldComparisonOpContext != null) {
+                        ConditionInfo conditionInfo = this.conditionTermParser.parse(this.getConditionIndex(), fieldComparisonOpContext);
                         conditionInfo.setOriginSegment(conditionTermContext.getText());
-                        this.setLogicOperator(conditionInfo, logicOpOrContext, logicOpAndContext);
+                        this.setLogicOperator(conditionInfo, logicOrContext, logicAndContext);
                         conditionInfoList.add(conditionInfo);
                     }
                 }
-                if (parseTree instanceof MethodNameParser.Logic_op_andContext) {
-                    logicOpAndContext = (MethodNameParser.Logic_op_andContext) parseTree;
+                if (parseTree instanceof MethodNameParser.Logic_andContext) {
+                    logicAndContext = (MethodNameParser.Logic_andContext) parseTree;
                 }
             }
             return conditionInfoList;
@@ -253,8 +266,8 @@ public class MybatisgxSyntaxHandler {
         }
 
         private void setLogicOperator(ConditionInfo conditionInfo,
-                                      MethodNameParser.Logic_op_orContext logicOpOrClauseContext,
-                                      MethodNameParser.Logic_op_andContext logicOpAndClauseContext) {
+                                      MethodNameParser.Logic_orContext logicOpOrClauseContext,
+                                      MethodNameParser.Logic_andContext logicOpAndClauseContext) {
             if (logicOpOrClauseContext != null) {
                 conditionInfo.setLogicOperator(LogicOperator.OR);
             } else if (logicOpAndClauseContext != null) {
@@ -284,18 +297,19 @@ public class MybatisgxSyntaxHandler {
 
         public ConditionTermParser(ParserContext context) {
             this.context = context;
-            this.strategies.put(MethodNameParser.Field_clauseContext.class, new FieldStrategyHandler());
+            this.strategies.put(MethodNameParser.FieldContext.class, new FieldStrategyHandler());
             this.strategies.put(MethodNameParser.Comparison_opContext.class, new ComparisonOperatorStrategyHandler());
-            this.strategies.put(MethodNameParser.Comparison_not_opContext.class, new ComparisonNotOperatorStrategyHandler());
-            this.strategies.put(MethodNameParser.Comparison_null_opContext.class, new ComparisonNullOperatorStrategyHandler());
+            this.strategies.put(MethodNameParser.Comparison_op_notContext.class, new ComparisonNotOperatorStrategyHandler());
+            this.strategies.put(MethodNameParser.Comparison_op_nullContext.class, new ComparisonNullOperatorStrategyHandler());
 
         }
 
-        public ConditionInfo parse(int index, MethodNameParser.Field_comparison_op_clauseContext ctx) {
+        public ConditionInfo parse(int index, MethodNameParser.Field_comparison_opContext ctx) {
             LOGGER.debug("处理条件: {}", ctx.getText());
             ConditionInfo conditionInfo = new ConditionInfo(index, context.conditionOriginType, context.methodParamInfo);
             if (context.conditionOriginType == ConditionOriginType.ENTITY_FIELD) {
-                String conditionColumnName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, ctx.getText());
+                String conditionColumnName = ctx.getText();
+                conditionColumnName = FieldNameUtils.upperCamelToLowerCamel(conditionColumnName.replace("$", ""));
                 conditionInfo.setColumnName(conditionColumnName);
             }
             for (int i = 0; i < ctx.getChildCount(); i++) {
@@ -319,19 +333,37 @@ public class MybatisgxSyntaxHandler {
 
     private static class FieldStrategyHandler implements ConditionStrategy {
 
+        private static final Set<ConditionOriginType> conditionOriginTypeSet = Sets.newHashSet(
+                ConditionOriginType.METHOD_NAME,
+                ConditionOriginType.STATEMENT_METHOD_NAME
+        );
+
         @Override
         public void apply(ParseTree node, ConditionInfo conditionInfo, ParserContext context) {
-            String token = node.getText();
-            String conditionColumnName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, token);
+            String conditionColumnName = this.getFullTokenJavaColumn(node, context);
             ColumnInfo columnInfo = context.getEntityInfo().getColumnInfo(conditionColumnName);
             if (columnInfo == null) {
                 throw new MybatisgxException("%s 方法条件字段或者实体条件字段在 %s 实体类中不存在", conditionColumnName, context.getEntityInfo().getClazzName());
             }
-            if (context.getConditionOriginType() == ConditionOriginType.METHOD_NAME
-                    || context.getConditionOriginType() == ConditionOriginType.STATEMENT_METHOD_NAME) {
+            if (conditionOriginTypeSet.contains(context.getConditionOriginType())) {
                 conditionInfo.setColumnName(conditionColumnName);
             }
             conditionInfo.setColumnInfo(columnInfo);
+        }
+
+        private String getFullTokenJavaColumn(ParseTree node, ParserContext context) {
+            MethodNameParser.FieldContext fieldContext = (MethodNameParser.FieldContext) node;
+            MethodNameParser.Field_identifierContext fieldIdentifierContext = fieldContext.field_identifier();
+            if (fieldIdentifierContext != null) {
+                String token = fieldIdentifierContext.getText();
+                return FieldNameUtils.upperCamelToLowerCamel(token);
+            }
+            MethodNameParser.Escaped_identifierContext escapedIdentifierContext = fieldContext.escaped_identifier();
+            if (escapedIdentifierContext != null) {
+                String token = escapedIdentifierContext.getText();
+                return FieldNameUtils.upperCamelToLowerCamel(token.replace("$", ""));
+            }
+            return StringUtils.EMPTY;
         }
     }
 
@@ -364,20 +396,38 @@ public class MybatisgxSyntaxHandler {
 
     public static class ParserContext {
 
+        private CommonTokenStream tokens;
+        private ParseTree root;
         private EntityInfo entityInfo;
         private MethodInfo methodInfo;
         private MethodParamInfo methodParamInfo;
         private ConditionOriginType conditionOriginType;
         private String methodName;
 
-        public ParserContext(EntityInfo entityInfo, MethodInfo methodInfo,
-                             MethodParamInfo methodParamInfo, ConditionOriginType conditionOriginType,
-                             String methodName) {
+        public ParserContext(
+                CommonTokenStream tokens,
+                ParseTree root,
+                EntityInfo entityInfo,
+                MethodInfo methodInfo,
+                MethodParamInfo methodParamInfo,
+                ConditionOriginType conditionOriginType,
+                String methodName
+        ) {
+            this.tokens = tokens;
+            this.root = root;
             this.entityInfo = entityInfo;
             this.methodInfo = methodInfo;
             this.methodParamInfo = methodParamInfo;
             this.conditionOriginType = conditionOriginType;
             this.methodName = methodName;
+        }
+
+        public CommonTokenStream getTokens() {
+            return tokens;
+        }
+
+        public ParseTree getRoot() {
+            return root;
         }
 
         public EntityInfo getEntityInfo() {

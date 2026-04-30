@@ -33,7 +33,7 @@ public class MethodSyntaxErrorListener extends BaseErrorListener {
             String friendlyExpected = this.friendlyExpected(expected, recognizer.getVocabulary());
             errorDescription = String.format("%s 语法错误，在(%s:%s)，非法输入：%s，当前位置可使用：%s", tokenSource, line, charPositionInLine, token.getText(), friendlyExpected);
         } else {
-            errorDescription = String.format("%s 语法错误", tokenSource);
+            errorDescription = String.format("%s 语法错误: %s", tokenSource, msg);
         }
         throw new MybatisgxException(errorDescription);
     }

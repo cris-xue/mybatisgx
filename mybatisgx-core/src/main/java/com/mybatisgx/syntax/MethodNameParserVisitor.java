@@ -1,4 +1,4 @@
-// Generated from E:/project/wuyue/mybatisgx-ai_coding/mybatisgx/mybatisgx-core/src/main/resources/antlr/MethodNameParser.g4 by ANTLR 4.13.2
+// Generated from F:/owner_project/mybatisgx-ai_conding/mybatisgx/mybatisgx-core/src/main/resources/antlr/MethodNameParser.g4 by ANTLR 4.13.2
 package com.mybatisgx.syntax;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
@@ -107,11 +107,11 @@ public interface MethodNameParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitCondition_term(MethodNameParser.Condition_termContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MethodNameParser#field_comparison_op_clause}.
+	 * Visit a parse tree produced by {@link MethodNameParser#field_comparison_op}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitField_comparison_op_clause(MethodNameParser.Field_comparison_op_clauseContext ctx);
+	T visitField_comparison_op(MethodNameParser.Field_comparison_opContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MethodNameParser#order_by_clause}.
 	 * @param ctx the parse tree
@@ -119,11 +119,11 @@ public interface MethodNameParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitOrder_by_clause(MethodNameParser.Order_by_clauseContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MethodNameParser#order_by_item_clause}.
+	 * Visit a parse tree produced by {@link MethodNameParser#order_by_item}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitOrder_by_item_clause(MethodNameParser.Order_by_item_clauseContext ctx);
+	T visitOrder_by_item(MethodNameParser.Order_by_itemContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MethodNameParser#limit}.
 	 * @param ctx the parse tree
@@ -131,35 +131,23 @@ public interface MethodNameParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitLimit(MethodNameParser.LimitContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MethodNameParser#ignore_reserved_word}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitIgnore_reserved_word(MethodNameParser.Ignore_reserved_wordContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link MethodNameParser#business_semantic}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitBusiness_semantic(MethodNameParser.Business_semanticContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link MethodNameParser#where_start}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitWhere_start(MethodNameParser.Where_startContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MethodNameParser#logic_op_and}.
+	 * Visit a parse tree produced by {@link MethodNameParser#logic_and}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitLogic_op_and(MethodNameParser.Logic_op_andContext ctx);
+	T visitLogic_and(MethodNameParser.Logic_andContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MethodNameParser#logic_op_or}.
+	 * Visit a parse tree produced by {@link MethodNameParser#logic_or}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitLogic_op_or(MethodNameParser.Logic_op_orContext ctx);
+	T visitLogic_or(MethodNameParser.Logic_orContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MethodNameParser#comparison_op}.
 	 * @param ctx the parse tree
@@ -167,17 +155,17 @@ public interface MethodNameParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitComparison_op(MethodNameParser.Comparison_opContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MethodNameParser#comparison_not_op}.
+	 * Visit a parse tree produced by {@link MethodNameParser#comparison_op_not}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitComparison_not_op(MethodNameParser.Comparison_not_opContext ctx);
+	T visitComparison_op_not(MethodNameParser.Comparison_op_notContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MethodNameParser#comparison_null_op}.
+	 * Visit a parse tree produced by {@link MethodNameParser#comparison_op_null}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitComparison_null_op(MethodNameParser.Comparison_null_opContext ctx);
+	T visitComparison_op_null(MethodNameParser.Comparison_op_nullContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MethodNameParser#order_by}.
 	 * @param ctx the parse tree
@@ -197,11 +185,23 @@ public interface MethodNameParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitLimit_top(MethodNameParser.Limit_topContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MethodNameParser#field_clause}.
+	 * Visit a parse tree produced by {@link MethodNameParser#field}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitField_clause(MethodNameParser.Field_clauseContext ctx);
+	T visitField(MethodNameParser.FieldContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MethodNameParser#field_identifier}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitField_identifier(MethodNameParser.Field_identifierContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MethodNameParser#escaped_identifier}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitEscaped_identifier(MethodNameParser.Escaped_identifierContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MethodNameParser#left_bracket}.
 	 * @param ctx the parse tree
@@ -214,6 +214,12 @@ public interface MethodNameParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitRight_bracket(MethodNameParser.Right_bracketContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MethodNameParser#business_semantic}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBusiness_semantic(MethodNameParser.Business_semanticContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MethodNameParser#end}.
 	 * @param ctx the parse tree

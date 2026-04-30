@@ -51,6 +51,7 @@ public class ColumnInfoHandler {
             columnInfo.setJavaColumnNamePathList(this.getJavaColumnNamePathList(parentColumnInfo, columnInfo));
             columnInfo.setDbTypeName(column != null ? column.columnDefinition() : null);
             columnInfo.setDbColumnName(tableColumnName);
+            columnInfo.setProperty(field.getAnnotation(Property.class));
 
             columnInfo.setVersion(field.getAnnotation(Version.class));
             columnInfo.setLogicDelete(field.getAnnotation(LogicDelete.class));

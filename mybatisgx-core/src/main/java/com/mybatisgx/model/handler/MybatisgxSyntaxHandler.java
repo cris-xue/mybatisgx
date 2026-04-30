@@ -1,7 +1,7 @@
 package com.mybatisgx.model.handler;
 
-import com.google.common.base.CaseFormat;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.model.*;
 import com.mybatisgx.syntax.MethodNameParser;
@@ -15,10 +15,7 @@ import org.apache.ibatis.mapping.SqlCommandType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -336,29 +333,19 @@ public class MybatisgxSyntaxHandler {
 
     private static class FieldStrategyHandler implements ConditionStrategy {
 
+        private static final Set<ConditionOriginType> conditionOriginTypeSet = Sets.newHashSet(
+                ConditionOriginType.METHOD_NAME,
+                ConditionOriginType.STATEMENT_METHOD_NAME
+        );
+
         @Override
         public void apply(ParseTree node, ConditionInfo conditionInfo, ParserContext context) {
             String conditionColumnName = this.getFullTokenJavaColumn(node, context);
             ColumnInfo columnInfo = context.getEntityInfo().getColumnInfo(conditionColumnName);
-
-            // 解决方法名末尾存在 Selective 的情况
-            int rootStopIndex = ((MethodNameParser.Sql_statementContext) context.getRoot()).getStop().getStopIndex();
-            int fieldStopIndex = ((MethodNameParser.FieldContext) node).getStop().getStopIndex();
-            if (fieldStopIndex == rootStopIndex && columnInfo == null) {
-                conditionColumnName = this.getEndTokenJavaColumn(node, context);
-                columnInfo = context.getEntityInfo().getColumnInfo(conditionColumnName);
-            }
-            // 解决字段中存在操作符的情况
-            /*if (columnInfo == null) {
-                conditionColumnName = this.getOperJavaColumn(node, context);
-                columnInfo = context.getEntityInfo().getColumnInfo(conditionColumnName);
-            }*/
-
             if (columnInfo == null) {
                 throw new MybatisgxException("%s 方法条件字段或者实体条件字段在 %s 实体类中不存在", conditionColumnName, context.getEntityInfo().getClazzName());
             }
-            if (context.getConditionOriginType() == ConditionOriginType.METHOD_NAME
-                    || context.getConditionOriginType() == ConditionOriginType.STATEMENT_METHOD_NAME) {
+            if (conditionOriginTypeSet.contains(context.getConditionOriginType())) {
                 conditionInfo.setColumnName(conditionColumnName);
             }
             conditionInfo.setColumnInfo(columnInfo);
@@ -369,46 +356,14 @@ public class MybatisgxSyntaxHandler {
             MethodNameParser.Field_identifierContext fieldIdentifierContext = fieldContext.field_identifier();
             if (fieldIdentifierContext != null) {
                 String token = fieldIdentifierContext.getText();
-                return this.tokenToJavaColumn(token);
+                return FieldNameUtils.upperCamelToLowerCamel(token);
             }
             MethodNameParser.Escaped_identifierContext escapedIdentifierContext = fieldContext.escaped_identifier();
             if (escapedIdentifierContext != null) {
                 String token = escapedIdentifierContext.getText();
-                return this.tokenToJavaColumn(token.replace("$", ""));
+                return FieldNameUtils.upperCamelToLowerCamel(token.replace("$", ""));
             }
             return StringUtils.EMPTY;
-        }
-
-        private String getEndTokenJavaColumn(ParseTree node, ParserContext context) {
-            /*List<MethodNameParser.Field_identifierContext> terminalNodeList = ((MethodNameParser.FieldContext) node).field_identifier();
-            for (int i = terminalNodeList.size() - 1; i > 0; i--) {
-                TerminalNode terminalNode = terminalNodeList.get(i);
-                if (END_SEMANTIC.contains(terminalNode.getText())) {
-                    int startTokenIndex = ((MethodNameParser.FieldContext) node).getStart().getTokenIndex();
-                    int stopTokenIndex = terminalNode.getSymbol().getTokenIndex();
-                    String aaa = context.getTokens().get(startTokenIndex, stopTokenIndex - 1).stream().map(t -> t.getText()).collect(Collectors.joining(""));
-                    return this.tokenToJavaColumn(aaa);
-                }
-            }*/
-            return "";
-        }
-
-        private String getComparisonJavaColumn(ParseTree node, ParserContext context) {
-            /*List<TerminalNode> terminalNodeList = ((MethodNameParser.FieldContext) node).field_identifier();
-            for (int i = terminalNodeList.size() - 1; i > 0; i--) {
-                TerminalNode terminalNode = terminalNodeList.get(i);
-                if (END_SEMANTIC.contains(terminalNode.getText())) {
-                    int startTokenIndex = ((MethodNameParser.FieldContext) node).getStart().getTokenIndex();
-                    int stopTokenIndex = terminalNode.getSymbol().getTokenIndex();
-                    String aaa = context.getTokens().get(startTokenIndex, stopTokenIndex - 1).stream().map(t -> t.getText()).collect(Collectors.joining(""));
-                    return this.tokenToJavaColumn(aaa);
-                }
-            }*/
-            return "";
-        }
-
-        private String tokenToJavaColumn(String token) {
-            return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, token);
         }
     }
 

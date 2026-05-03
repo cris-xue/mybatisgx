@@ -22,8 +22,12 @@ import java.util.*;
 public class WhereTemplateHandler {
 
     public Element execute(EntityInfo entityInfo, MethodInfo methodInfo) {
-        ConditionProcessorFactory factory = new ConditionProcessorFactory();
+        // 如果不存在条件
         Element whereElement = DocumentHelper.createElement("where");
+        if (!methodInfo.getExistCondition()) {
+            return whereElement;
+        }
+        ConditionProcessorFactory factory = new ConditionProcessorFactory();
         this.handleConditionGroup(methodInfo, whereElement, methodInfo.getConditionInfoList(), factory);
         this.addOptimisticLockCondition(entityInfo, methodInfo, whereElement);
         this.addLogicDeleteCondition(entityInfo, whereElement);

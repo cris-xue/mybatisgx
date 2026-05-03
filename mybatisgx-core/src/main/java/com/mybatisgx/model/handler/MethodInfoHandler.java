@@ -5,7 +5,6 @@ import com.mybatisgx.annotation.*;
 import com.mybatisgx.context.EntityInfoContextHolder;
 import com.mybatisgx.context.MethodInfoContextHolder;
 import com.mybatisgx.dao.Dao;
-import com.mybatisgx.exception.MethodNotConditionException;
 import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.model.*;
@@ -371,8 +370,15 @@ public class MethodInfoHandler {
      * @param conditionInfoList
      */
     private void bindConditionParam(MapperInfo mapperInfo, MethodInfo methodInfo, List<ConditionInfo> conditionInfoList) {
-        if (methodInfo.getSqlCommandType() != SqlCommandType.INSERT && ObjectUtils.isEmpty(conditionInfoList)) {
-            throw new MethodNotConditionException("%s.%s方法无条件", mapperInfo.getNamespace(), methodInfo.getMethodName());
+        if (methodInfo.getSqlCommandType() == SqlCommandType.INSERT) {
+            return;
+        }
+        if (ObjectUtils.isEmpty(conditionInfoList)) {
+            if (methodInfo.getSqlCommandType() == SqlCommandType.DELETE || methodInfo.getSqlCommandType() == SqlCommandType.UPDATE) {
+                throw new MybatisgxException("%s.%s方法禁止无条件执行！", mapperInfo.getNamespace(), methodInfo.getMethodName());
+            }
+            LOGGER.warn("{}.{}方法无查询条件，可能触发全表扫描", mapperInfo.getNamespace(), methodInfo.getMethodName());
+            return;
         }
         for (ConditionInfo conditionInfo : conditionInfoList) {
             List<ConditionInfo> childConditionInfoList = conditionInfo.getConditionInfoList();

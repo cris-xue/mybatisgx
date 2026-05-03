@@ -1,6 +1,7 @@
 package com.mybatisgx.ext.executor;
 
 import com.mybatisgx.context.MethodInfoContextHolder;
+import com.mybatisgx.model.BatchParamInfo;
 import com.mybatisgx.model.MethodInfo;
 import com.mybatisgx.model.MethodParamInfo;
 import org.apache.ibatis.binding.MapperMethod;
@@ -33,15 +34,16 @@ public class MybatisgxBatchExecutor implements Executor {
     public int update(MappedStatement ms, Object parameter) throws SQLException {
         MethodInfo methodInfo = MethodInfoContextHolder.get(ms.getId());
         if (methodInfo.getBatch()) {
-            MethodParamInfo batchDataParamInfo = methodInfo.getBatchDataParamInfo();
-            MethodParamInfo batchSizeParamInfo = methodInfo.getBatchSizeParamInfo();
-            String batchItemName = batchDataParamInfo.getBatchItemName();
+            BatchParamInfo batchParamInfo = methodInfo.getBatchParamInfo();
+            MethodParamInfo dataParamInfo = batchParamInfo.getDataParamInfo();
+            MethodParamInfo sizeParamInfo = batchParamInfo.getSizeParamInfo();
+            String batchItemName = dataParamInfo.getBatchItemName();
 
             int affectedRows = 0;
 
             MapperMethod.ParamMap<Object> mapperMethodParamMap = (MapperMethod.ParamMap<Object>) parameter;
-            Collection<?> batchDataCollection = (Collection) mapperMethodParamMap.get(batchDataParamInfo.getArgName());
-            int batchSize = (int) mapperMethodParamMap.get(batchSizeParamInfo.getArgName());
+            Collection<?> batchDataCollection = (Collection) mapperMethodParamMap.get(dataParamInfo.getArgName());
+            int batchSize = (int) mapperMethodParamMap.get(sizeParamInfo.getArgName());
             List<?> batchDataList = (batchDataCollection instanceof List) ? (List<?>) batchDataCollection : new ArrayList<>(batchDataCollection);
             for (int i = 0; i < batchDataList.size(); i++) {
                 Object batchData = batchDataList.get(i);

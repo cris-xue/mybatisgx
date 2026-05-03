@@ -27,13 +27,13 @@ import java.util.Map;
  * @author ccxuef
  * @date 2025/7/24 8:33
  */
-public class MybatisgxMixExecutor implements Executor {
+public class MybatisgxRoutingExecutor implements Executor {
 
     private Executor delegate;
     private Executor defaultExecutor;
     private Executor batchExecutor;
 
-    public MybatisgxMixExecutor(Executor defaultExecutor, Executor batchExecutor) {
+    public MybatisgxRoutingExecutor(Executor defaultExecutor, Executor batchExecutor) {
         this.defaultExecutor = defaultExecutor;
         this.batchExecutor = batchExecutor;
     }

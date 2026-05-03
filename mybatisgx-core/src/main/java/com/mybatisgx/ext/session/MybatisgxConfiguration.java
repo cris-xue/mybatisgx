@@ -3,7 +3,7 @@ package com.mybatisgx.ext.session;
 import com.mybatisgx.context.MybatisgxObjectFactory;
 import com.mybatisgx.executor.MybatisgxValueProcessor;
 import com.mybatisgx.ext.executor.MybatisgxBatchExecutor;
-import com.mybatisgx.ext.executor.MybatisgxMixExecutor;
+import com.mybatisgx.ext.executor.MybatisgxRoutingExecutor;
 import com.mybatisgx.ext.executor.resultset.MybatisgxResultSetHandler;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.parameter.ParameterHandler;
@@ -32,7 +32,7 @@ public class MybatisgxConfiguration extends Configuration {
     public Executor newExecutor(Transaction transaction, ExecutorType executorType) {
         Executor defaultExecutor = super.newExecutor(transaction, executorType);
         Executor batchExecutor = super.newExecutor(transaction, ExecutorType.BATCH);
-        return new MybatisgxMixExecutor(defaultExecutor, new MybatisgxBatchExecutor(batchExecutor));
+        return new MybatisgxRoutingExecutor(defaultExecutor, new MybatisgxBatchExecutor(batchExecutor));
     }
 
     @Override

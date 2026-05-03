@@ -1,5 +1,6 @@
 package com.mybatisgx.model;
 
+import com.mybatisgx.exception.MybatisgxException;
 import org.apache.ibatis.mapping.SqlCommandType;
 
 import java.lang.reflect.Method;
@@ -44,13 +45,9 @@ public class MethodInfo {
      */
     private Boolean isBatch = false;
     /**
-     * 批量处理数据参数信息
+     * 批量参数信息
      */
-    private MethodParamInfo batchDataParamInfo;
-    /**
-     * 批量处理尺寸参数信息
-     */
-    private MethodParamInfo batchSizeParamInfo;
+    private BatchParamInfo batchParamInfo;
     /**
      * 查询节点信息
      */
@@ -149,20 +146,12 @@ public class MethodInfo {
         isBatch = batch;
     }
 
-    public MethodParamInfo getBatchDataParamInfo() {
-        return batchDataParamInfo;
+    public BatchParamInfo getBatchParamInfo() {
+        return batchParamInfo;
     }
 
-    public void setBatchDataParamInfo(MethodParamInfo batchDataParamInfo) {
-        this.batchDataParamInfo = batchDataParamInfo;
-    }
-
-    public MethodParamInfo getBatchSizeParamInfo() {
-        return batchSizeParamInfo;
-    }
-
-    public void setBatchSizeParamInfo(MethodParamInfo batchSizeParamInfo) {
-        this.batchSizeParamInfo = batchSizeParamInfo;
+    public void setBatchParamInfo(BatchParamInfo batchParamInfo) {
+        this.batchParamInfo = batchParamInfo;
     }
 
     public SelectItemInfo getSelectItemInfo() {
@@ -225,13 +214,28 @@ public class MethodInfo {
             methodParamInfoMap.put(methodParamInfo.getArgName().toLowerCase(), methodParamInfo);
         }
         // 批量参数处理
+        MethodParamInfo dataParamInfo = null;
+        MethodParamInfo sizeParamInfo = null;
         for (MethodParamInfo methodParamInfo : methodParamInfoList) {
             if (methodParamInfo.getBatchData()) {
-                batchDataParamInfo = methodParamInfo;
+                dataParamInfo = methodParamInfo;
             }
             if (methodParamInfo.getBatchSize()) {
-                batchSizeParamInfo = methodParamInfo;
+                sizeParamInfo = methodParamInfo;
             }
+        }
+
+        if (dataParamInfo != null && sizeParamInfo == null) {
+            throw new MybatisgxException("%s 方法没有批量大小参数", methodName);
+        }
+        if (dataParamInfo == null && sizeParamInfo != null) {
+            throw new MybatisgxException("%s 方法没有批量数据参数", methodName);
+        }
+        if (dataParamInfo != null && sizeParamInfo != null) {
+            this.isBatch = true;
+            this.batchParamInfo = new BatchParamInfo();
+            this.batchParamInfo.setDataParamInfo(dataParamInfo);
+            this.batchParamInfo.setSizeParamInfo(sizeParamInfo);
         }
     }
 

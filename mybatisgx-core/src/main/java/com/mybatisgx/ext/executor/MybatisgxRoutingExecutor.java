@@ -5,6 +5,7 @@ import com.mybatisgx.context.MethodInfoContextHolder;
 import com.mybatisgx.executor.page.Page;
 import com.mybatisgx.executor.page.Pageable;
 import com.mybatisgx.model.MethodInfo;
+import com.mybatisgx.model.MethodParamInfo;
 import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.executor.BatchResult;
@@ -47,22 +48,26 @@ public class MybatisgxRoutingExecutor implements Executor {
     @Override
     public <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, CacheKey cacheKey, BoundSql boundSql) throws SQLException {
         this.newExecutor(ms);
-        Pageable pageable = this.getPageable(parameter);
-        if (pageable != null) {
-            return this.query(ms, parameter, rowBounds, resultHandler, cacheKey, boundSql, pageable);
-        } else {
+        MethodInfo methodInfo = MethodInfoContextHolder.get(ms.getId());
+        MethodParamInfo pageParamInfo = methodInfo.getPageParamInfo();
+        if (pageParamInfo == null) {
             return this.delegate.query(ms, parameter, rowBounds, resultHandler, cacheKey, boundSql);
+        } else {
+            Pageable pageable = this.getPageable(parameter, pageParamInfo);
+            return this.query(ms, parameter, rowBounds, resultHandler, cacheKey, boundSql, pageable);
         }
     }
 
     @Override
     public <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler) throws SQLException {
         this.newExecutor(ms);
-        Pageable pageable = this.getPageable(parameter);
-        if (pageable != null) {
-            return this.query(ms, parameter, rowBounds, resultHandler, null, null, pageable);
-        } else {
+        MethodInfo methodInfo = MethodInfoContextHolder.get(ms.getId());
+        MethodParamInfo pageParamInfo = methodInfo.getPageParamInfo();
+        if (pageParamInfo == null) {
             return this.delegate.query(ms, parameter, rowBounds, resultHandler);
+        } else {
+            Pageable pageable = this.getPageable(parameter, pageParamInfo);
+            return this.query(ms, parameter, rowBounds, resultHandler, null, null, pageable);
         }
     }
 
@@ -78,16 +83,13 @@ public class MybatisgxRoutingExecutor implements Executor {
         return (List<E>) Arrays.asList(page);
     }
 
-    private Pageable getPageable(Object parameterObject) {
-        if (parameterObject instanceof Map) {
-            Map<String, Object> parameterObjectMap = (Map<String, Object>) parameterObject;
-            for (Object object : parameterObjectMap.values()) {
-                if (object instanceof Pageable) {
-                    return (Pageable) object;
-                }
-            }
+    private Pageable getPageable(Object parameter, MethodParamInfo pageParamInfo) {
+        if (pageParamInfo.getWrapper()) {
+            Map<String, Object> parameterMap = (Map<String, Object>) parameter;
+            return (Pageable) parameterMap.get(pageParamInfo.getArgName());
+        } else {
+            return (Pageable) parameter;
         }
-        return null;
     }
 
     @Override

@@ -1,6 +1,8 @@
 package com.mybatisgx.model;
 
 import com.mybatisgx.exception.MybatisgxException;
+import com.mybatisgx.executor.page.Pageable;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.ibatis.mapping.SqlCommandType;
 
 import java.lang.reflect.Method;
@@ -61,6 +63,10 @@ public class MethodInfo {
      */
     private SelectPageInfo selectPageInfo;
     /**
+     * 是否存在条件
+     */
+    private Boolean isExistCondition = false;
+    /**
      * 方法名条件信息【修改、删除、查询都可以存在条件】
      */
     private List<ConditionInfo> conditionInfoList = new ArrayList<>();
@@ -73,6 +79,10 @@ public class MethodInfo {
      * 新增：为空<br/>
      */
     private MethodParamInfo queryEntityParamInfo;
+    /**
+     * 分页参数信息
+     */
+    private MethodParamInfo pageParamInfo;
     /**
      * 方法参数信息
      */
@@ -178,12 +188,23 @@ public class MethodInfo {
         this.selectPageInfo = selectPageInfo;
     }
 
+    public Boolean getExistCondition() {
+        return isExistCondition;
+    }
+
+    public void setExistCondition(Boolean existCondition) {
+        isExistCondition = existCondition;
+    }
+
     public List<ConditionInfo> getConditionInfoList() {
         return conditionInfoList;
     }
 
     public void setConditionInfoList(List<ConditionInfo> conditionInfoList) {
         this.conditionInfoList = conditionInfoList;
+        if (ObjectUtils.isNotEmpty(conditionInfoList)) {
+            this.isExistCondition = true;
+        }
     }
 
     public MethodParamInfo getEntityParamInfo() {
@@ -202,6 +223,14 @@ public class MethodInfo {
         this.queryEntityParamInfo = queryEntityParamInfo;
     }
 
+    public MethodParamInfo getPageParamInfo() {
+        return pageParamInfo;
+    }
+
+    public void setPageParamInfo(MethodParamInfo pageParamInfo) {
+        this.pageParamInfo = pageParamInfo;
+    }
+
     public List<MethodParamInfo> getMethodParamInfoList() {
         return methodParamInfoList;
     }
@@ -213,6 +242,7 @@ public class MethodInfo {
             methodParamInfoMap.put(methodParamInfo.getArgName(), methodParamInfo);
             methodParamInfoMap.put(methodParamInfo.getArgName().toLowerCase(), methodParamInfo);
         }
+
         // 批量参数处理
         MethodParamInfo dataParamInfo = null;
         MethodParamInfo sizeParamInfo = null;
@@ -224,7 +254,6 @@ public class MethodInfo {
                 sizeParamInfo = methodParamInfo;
             }
         }
-
         if (dataParamInfo != null && sizeParamInfo == null) {
             throw new MybatisgxException("%s 方法没有批量大小参数", methodName);
         }
@@ -236,6 +265,13 @@ public class MethodInfo {
             this.batchParamInfo = new BatchParamInfo();
             this.batchParamInfo.setDataParamInfo(dataParamInfo);
             this.batchParamInfo.setSizeParamInfo(sizeParamInfo);
+        }
+
+        // 分页参数
+        for (MethodParamInfo methodParamInfo : methodParamInfoList) {
+            if (methodParamInfo.getType() == Pageable.class) {
+                this.pageParamInfo = methodParamInfo;
+            }
         }
     }
 

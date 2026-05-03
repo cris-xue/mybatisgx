@@ -39,8 +39,6 @@ public class MybatisgxBatchExecutor implements Executor {
             MethodParamInfo sizeParamInfo = batchParamInfo.getSizeParamInfo();
             String batchItemName = dataParamInfo.getBatchItemName();
 
-            int affectedRows = 0;
-
             MapperMethod.ParamMap<Object> mapperMethodParamMap = (MapperMethod.ParamMap<Object>) parameter;
             Collection<?> batchDataCollection = (Collection) mapperMethodParamMap.get(dataParamInfo.getArgName());
             int batchSize = (int) mapperMethodParamMap.get(sizeParamInfo.getArgName());
@@ -48,13 +46,13 @@ public class MybatisgxBatchExecutor implements Executor {
             for (int i = 0; i < batchDataList.size(); i++) {
                 Object batchData = batchDataList.get(i);
                 mapperMethodParamMap.put(batchItemName, batchData);
-                affectedRows += this.delegate.update(ms, mapperMethodParamMap);
+                this.delegate.update(ms, mapperMethodParamMap);
                 if ((i + 1) % batchSize == 0 || (i + 1) == batchDataList.size()) {
                     this.flushStatements();
                     this.clearLocalCache();
                 }
             }
-            return affectedRows;
+            return batchDataList.size();
         } else {
             return this.delegate.update(ms, parameter);
         }

@@ -283,4 +283,10 @@ public class UserDaoTest {
     public void testCustomQuery04() {
         userDao.findCustomSql(111L, "name", Arrays.asList("name1", "name2"));
     }
+
+    @Test
+    public void testCustomPageQuery() {
+        userDao.findCustomPage1(new Pageable(1, 10));
+        userDao.findCustomPage2(new UserQuery(), new Pageable(1, 10));
+    }
 }

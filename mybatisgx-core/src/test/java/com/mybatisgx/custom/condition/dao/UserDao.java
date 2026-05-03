@@ -5,6 +5,8 @@ import com.mybatisgx.annotation.Statement;
 import com.mybatisgx.custom.condition.entity.User;
 import com.mybatisgx.custom.condition.entity.UserQuery;
 import com.mybatisgx.dao.SimpleDao;
+import com.mybatisgx.executor.page.Page;
+import com.mybatisgx.executor.page.Pageable;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -60,4 +62,9 @@ public interface UserDao extends SimpleDao<User, UserQuery, Long> {
 
     @Statement("findByIdAnd(NameLikeOrNameIn)")
     List<User> findCustomSql(Long id, String name, List<String> nameList);
+
+    Page<User> findCustomPage1(Pageable pageable);
+
+    @Dynamic
+    Page<User> findCustomPage2(UserQuery userQuery, Pageable pageable);
 }

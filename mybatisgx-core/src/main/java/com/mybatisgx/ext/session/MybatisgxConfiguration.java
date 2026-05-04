@@ -22,7 +22,7 @@ import org.apache.ibatis.transaction.Transaction;
 
 public class MybatisgxConfiguration extends Configuration {
 
-    private MybatisgxValueProcessor mybatisgxValueProcessor;
+    private static final MybatisgxValueProcessor mybatisgxValueProcessor = new MybatisgxValueProcessor();
 
     public MybatisgxConfiguration() {
         super();
@@ -61,9 +61,5 @@ public class MybatisgxConfiguration extends Configuration {
         ResultSetHandler resultSetHandler = new MybatisgxResultSetHandler(executor, mappedStatement, parameterHandler, resultHandler, boundSql, rowBounds);
         resultSetHandler = (ResultSetHandler) interceptorChain.pluginAll(resultSetHandler);
         return resultSetHandler;
-    }
-
-    public void setMybatisgxValueProcessor(MybatisgxValueProcessor mybatisgxValueProcessor) {
-        this.mybatisgxValueProcessor = mybatisgxValueProcessor;
     }
 }

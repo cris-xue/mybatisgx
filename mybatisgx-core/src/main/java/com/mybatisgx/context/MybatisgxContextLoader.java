@@ -3,7 +3,6 @@ package com.mybatisgx.context;
 import com.mybatisgx.annotation.Entity;
 import com.mybatisgx.annotation.QueryEntity;
 import com.mybatisgx.dao.Dao;
-import com.mybatisgx.executor.MybatisgxValueProcessor;
 import com.mybatisgx.executor.keygen.KeyGenerator;
 import com.mybatisgx.ext.builder.xml.MybatisgxXMLMapperBuilder;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
@@ -94,8 +93,6 @@ public class MybatisgxContextLoader {
         this.processTemplate();
 
         this.registerMapperTemplate(configuration);
-
-        this.registerMybatisgxValueProcessor();
 
         long endTime = System.currentTimeMillis();
         LOGGER.info("MyBatisGX process total time {} ms", endTime - startTime);
@@ -234,11 +231,6 @@ public class MybatisgxContextLoader {
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
         }
-    }
-
-    private void registerMybatisgxValueProcessor() {
-        MybatisgxValueProcessor mybatisgxValueProcessor = MybatisgxObjectFactory.get(MybatisgxValueProcessor.class);
-        this.configuration.setMybatisgxValueProcessor(mybatisgxValueProcessor);
     }
 
     private List<Resource> getMapperList() throws IOException {

@@ -1,5 +1,6 @@
 package com.mybatisgx.model;
 
+import com.mybatisgx.api.MethodCommandType;
 import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.executor.page.Pageable;
 import org.apache.commons.lang3.ObjectUtils;

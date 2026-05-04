@@ -2,6 +2,7 @@ package com.mybatisgx.model.handler;
 
 import com.google.common.collect.Lists;
 import com.mybatisgx.annotation.*;
+import com.mybatisgx.api.MethodCommandType;
 import com.mybatisgx.context.EntityInfoContextHolder;
 import com.mybatisgx.context.MethodInfoContextHolder;
 import com.mybatisgx.dao.Dao;

@@ -1,9 +1,9 @@
 package com.mybatisgx.custom.condition.test;
 
 import com.mybatisgx.annotation.LogicDeleteId;
+import com.mybatisgx.api.MethodCommandType;
 import com.mybatisgx.executor.keygen.SnowKeyGenerator;
 import com.mybatisgx.spi.FieldMeta;
-import com.mybatisgx.spi.ValueProcessCommandType;
 import com.mybatisgx.spi.ValueProcessContext;
 import com.mybatisgx.spi.ValueProcessor;
 
@@ -19,16 +19,16 @@ public class LogicDeleteIdValueProcessor implements ValueProcessor {
     }
 
     @Override
-    public EnumSet<ValueProcessCommandType> commandTypes() {
-        return EnumSet.of(ValueProcessCommandType.INSERT, ValueProcessCommandType.LOGIC_DELETE);
+    public EnumSet<MethodCommandType> commandTypes() {
+        return EnumSet.of(MethodCommandType.INSERT, MethodCommandType.LOGIC_DELETE);
     }
 
     @Override
     public Object process(ValueProcessContext context) {
-        if (context.getCommandType() == ValueProcessCommandType.INSERT) {
+        if (context.getCommandType() == MethodCommandType.INSERT) {
             return 0;
         }
-        if (context.getCommandType() == ValueProcessCommandType.LOGIC_DELETE) {
+        if (context.getCommandType() == MethodCommandType.LOGIC_DELETE) {
             return snowKeyGenerator.get();
         }
         throw new RuntimeException("不支持的ValueProcessPhase");

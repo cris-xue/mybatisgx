@@ -1,18 +1,18 @@
 package com.mybatisgx.executor;
 
+import com.mybatisgx.api.MethodCommandType;
 import com.mybatisgx.spi.FieldMeta;
-import com.mybatisgx.spi.ValueProcessCommandType;
 import com.mybatisgx.spi.ValueProcessContext;
 import org.apache.ibatis.reflection.MetaObject;
 
 public class DefaultValueProcessContext implements ValueProcessContext {
 
-    private ValueProcessCommandType commandType;
+    private MethodCommandType commandType;
     private FieldMeta fieldMeta;
     private Object fieldValue;
     private MetaObject entityMetaObject;
 
-    public DefaultValueProcessContext(ValueProcessCommandType commandType, FieldMeta fieldMeta, Object fieldValue, MetaObject entityMetaObject) {
+    public DefaultValueProcessContext(MethodCommandType commandType, FieldMeta fieldMeta, Object fieldValue, MetaObject entityMetaObject) {
         this.commandType = commandType;
         this.fieldMeta = fieldMeta;
         this.fieldValue = fieldValue;
@@ -20,7 +20,7 @@ public class DefaultValueProcessContext implements ValueProcessContext {
     }
 
     @Override
-    public ValueProcessCommandType getCommandType() {
+    public MethodCommandType getCommandType() {
         return commandType;
     }
 

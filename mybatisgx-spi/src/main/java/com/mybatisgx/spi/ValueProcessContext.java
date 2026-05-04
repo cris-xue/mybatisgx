@@ -9,11 +9,11 @@ package com.mybatisgx.spi;
 public interface ValueProcessContext {
 
     /**
-     * 获取数据处理阶段
+     * 获取值处理类型
      *
      * @return
      */
-    ValueProcessPhase getPhase();
+    ValueProcessCommandType getCommandType();
 
     /**
      * 获取字段元信息

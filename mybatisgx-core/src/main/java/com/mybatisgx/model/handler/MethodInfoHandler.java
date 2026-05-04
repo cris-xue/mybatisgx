@@ -87,7 +87,8 @@ public class MethodInfoHandler {
                 continue;
             }
 
-            SqlCommandType sqlCommandType = this.mybatisgxSyntaxProcessor.getSqlCommandType(methodName);
+            CommandTypeContext commandTypeContext = this.getCommandType(mapperInfo, methodName);
+            SqlCommandType sqlCommandType = commandTypeContext.getSqlCommandType();
             MethodParamContext methodParamContext = this.getMethodParam(mapperInfo, method, sqlCommandType);
             MethodReturnInfo methodReturnInfo = this.getMethodReturn(mapperInfo, method);
 
@@ -96,6 +97,7 @@ public class MethodInfoHandler {
             methodInfo.setMethod(method);
             methodInfo.setMethodName(methodName);
             methodInfo.setSqlCommandType(sqlCommandType);
+            methodInfo.setMethodCommandType(commandTypeContext.getMethodCommandType());
             methodInfo.setDynamic(method.getAnnotation(Dynamic.class) != null);
             methodInfo.setBatch(method.getAnnotation(BatchOperation.class) != null);
             methodInfo.setEntityParamInfo(methodParamContext.getEntityParamInfo());
@@ -118,6 +120,17 @@ public class MethodInfoHandler {
             methodInfoMap.put(methodName, methodInfo);
         }
         return methodInfoMap;
+    }
+
+    private CommandTypeContext getCommandType(MapperInfo mapperInfo, String methodName) {
+        SqlCommandType sqlCommandType = this.mybatisgxSyntaxProcessor.getSqlCommandType(methodName);
+        MethodCommandType methodCommandType;
+        if (sqlCommandType == SqlCommandType.DELETE && mapperInfo.getEntityInfo().getLogicDeleteColumnInfo() != null) {
+            methodCommandType = MethodCommandType.LOGIC_DELETE;
+        } else {
+            methodCommandType = MethodCommandType.valueOf(sqlCommandType.name());
+        }
+        return new CommandTypeContext(sqlCommandType, methodCommandType);
     }
 
     /**
@@ -561,6 +574,26 @@ public class MethodInfoHandler {
             return true;
         }
         return false;
+    }
+
+    private static class CommandTypeContext {
+
+        private SqlCommandType sqlCommandType;
+
+        private MethodCommandType methodCommandType;
+
+        public CommandTypeContext(SqlCommandType sqlCommandType, MethodCommandType methodCommandType) {
+            this.sqlCommandType = sqlCommandType;
+            this.methodCommandType = methodCommandType;
+        }
+
+        public SqlCommandType getSqlCommandType() {
+            return sqlCommandType;
+        }
+
+        public MethodCommandType getMethodCommandType() {
+            return methodCommandType;
+        }
     }
 
     private static class MethodParamContext {

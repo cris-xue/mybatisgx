@@ -31,6 +31,10 @@ public class MethodInfo {
      */
     private SqlCommandType sqlCommandType;
     /**
+     * 方法动作，insert、delete、update、logic_delete、select
+     */
+    private MethodCommandType methodCommandType;
+    /**
      * 方法名
      */
     private String methodName;
@@ -122,6 +126,14 @@ public class MethodInfo {
 
     public void setSqlCommandType(SqlCommandType sqlCommandType) {
         this.sqlCommandType = sqlCommandType;
+    }
+
+    public MethodCommandType getMethodCommandType() {
+        return methodCommandType;
+    }
+
+    public void setMethodCommandType(MethodCommandType methodCommandType) {
+        this.methodCommandType = methodCommandType;
     }
 
     public String getMethodName() {

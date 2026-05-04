@@ -10,9 +10,9 @@ public interface ValueProcessor {
     boolean supports(FieldMeta fieldMeta);
 
     /**
-     * 支持的生命周期
+     * 支持的命令类型
      */
-    EnumSet<ValueProcessPhase> phases();
+    EnumSet<ValueProcessCommandType> commandTypes();
 
     /**
      * 执行值处理

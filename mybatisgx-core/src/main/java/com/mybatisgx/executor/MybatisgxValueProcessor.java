@@ -10,7 +10,6 @@ import com.mybatisgx.spi.ValueProcessor;
 import org.apache.ibatis.binding.MapperMethod;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
-import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.SystemMetaObject;
 
@@ -34,27 +33,12 @@ public class MybatisgxValueProcessor {
     }
 
     public ValueProcessPrepareContext prepare(MappedStatement mappedStatement, Object parameterObject) {
-        Boolean isProcess = true;
-
         MethodInfo methodInfo = MethodInfoContextHolder.get(mappedStatement.getId());
-        if (parameterObject == null || methodInfo == null) {
-            isProcess = false;
-        }
-        SqlCommandType sqlCommandType = mappedStatement.getSqlCommandType();
-        if (sqlCommandType == SqlCommandType.SELECT || sqlCommandType == SqlCommandType.DELETE) {
-            isProcess = false;
-        }
-        MethodCommandType methodCommandType = methodInfo.getMethodCommandType();
-        // 逻辑删除可能没有实体参数，但是新增和修改必须有实体参数
-        if (methodCommandType != MethodCommandType.LOGIC_DELETE) {
-            if (methodInfo.getEntityParamInfo() == null) {
-                isProcess = false;
-            }
-        }
+        boolean isProcess = this.isProcess(methodInfo, parameterObject);
 
         ValueProcessPrepareContext valueProcessPrepareContext = new ValueProcessPrepareContext();
         valueProcessPrepareContext.setProcess(isProcess);
-        valueProcessPrepareContext.setCommandType(methodCommandType);
+        valueProcessPrepareContext.setCommandType(methodInfo.getMethodCommandType());
         valueProcessPrepareContext.setMethodInfo(methodInfo);
         return valueProcessPrepareContext;
     }
@@ -70,6 +54,23 @@ public class MybatisgxValueProcessor {
             fieldValueHandler.handle(context, columnInfo, useParameterObject, boundSql);
         }
         return useParameterObject;
+    }
+
+    private boolean isProcess(MethodInfo methodInfo, Object parameterObject) {
+        if (parameterObject == null || methodInfo == null) {
+            return false;
+        }
+        MethodCommandType methodCommandType = methodInfo.getMethodCommandType();
+        if (methodCommandType == MethodCommandType.SELECT || methodCommandType == MethodCommandType.DELETE) {
+            return false;
+        }
+        // 逻辑删除可能没有实体参数，但是新增和修改必须有实体参数
+        if (methodCommandType != MethodCommandType.LOGIC_DELETE) {
+            if (methodInfo.getEntityParamInfo() == null) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private Object unwrapParameterObject(MethodInfo methodInfo, Object parameterObject) {

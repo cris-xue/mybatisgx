@@ -1,5 +1,7 @@
 package com.mybatisgx.spi;
 
+import com.mybatisgx.api.MethodCommandType;
+
 import java.util.EnumSet;
 
 public interface ValueProcessor {
@@ -12,7 +14,7 @@ public interface ValueProcessor {
     /**
      * 支持的命令类型
      */
-    EnumSet<ValueProcessCommandType> commandTypes();
+    EnumSet<MethodCommandType> commandTypes();
 
     /**
      * 执行值处理

@@ -1,5 +1,7 @@
 package com.mybatisgx.spi;
 
+import com.mybatisgx.api.MethodCommandType;
+
 /**
  * 字段值处理上下文
  *
@@ -13,7 +15,7 @@ public interface ValueProcessContext {
      *
      * @return
      */
-    ValueProcessCommandType getCommandType();
+    MethodCommandType getCommandType();
 
     /**
      * 获取字段元信息

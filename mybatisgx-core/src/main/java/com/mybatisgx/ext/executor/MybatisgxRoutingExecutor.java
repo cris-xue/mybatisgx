@@ -30,9 +30,8 @@ import java.util.Map;
  */
 public class MybatisgxRoutingExecutor implements Executor {
 
-    private Executor delegate;
-    private Executor defaultExecutor;
-    private Executor batchExecutor;
+    private final Executor defaultExecutor;
+    private final Executor batchExecutor;
 
     public MybatisgxRoutingExecutor(Executor defaultExecutor, Executor batchExecutor) {
         this.defaultExecutor = defaultExecutor;
@@ -41,43 +40,43 @@ public class MybatisgxRoutingExecutor implements Executor {
 
     @Override
     public int update(MappedStatement ms, Object parameter) throws SQLException {
-        this.newExecutor(ms);
-        return this.delegate.update(ms, parameter);
+        Executor delegate = this.resolveExecutor(ms);
+        return delegate.update(ms, parameter);
     }
 
     @Override
     public <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, CacheKey cacheKey, BoundSql boundSql) throws SQLException {
-        this.newExecutor(ms);
+        Executor delegate = this.resolveExecutor(ms);
         MethodInfo methodInfo = MethodInfoContextHolder.get(ms.getId());
         MethodParamInfo pageParamInfo = methodInfo.getPageParamInfo();
         if (pageParamInfo == null) {
-            return this.delegate.query(ms, parameter, rowBounds, resultHandler, cacheKey, boundSql);
+            return delegate.query(ms, parameter, rowBounds, resultHandler, cacheKey, boundSql);
         } else {
             Pageable pageable = this.getPageable(parameter, pageParamInfo);
-            return this.query(ms, parameter, rowBounds, resultHandler, cacheKey, boundSql, pageable);
+            return this.query(delegate, ms, parameter, rowBounds, resultHandler, cacheKey, boundSql, pageable);
         }
     }
 
     @Override
     public <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler) throws SQLException {
-        this.newExecutor(ms);
+        Executor delegate = this.resolveExecutor(ms);
         MethodInfo methodInfo = MethodInfoContextHolder.get(ms.getId());
         MethodParamInfo pageParamInfo = methodInfo.getPageParamInfo();
         if (pageParamInfo == null) {
-            return this.delegate.query(ms, parameter, rowBounds, resultHandler);
+            return delegate.query(ms, parameter, rowBounds, resultHandler);
         } else {
             Pageable pageable = this.getPageable(parameter, pageParamInfo);
-            return this.query(ms, parameter, rowBounds, resultHandler, null, null, pageable);
+            return this.query(delegate, ms, parameter, rowBounds, resultHandler, null, null, pageable);
         }
     }
 
-    private <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, CacheKey cacheKey, BoundSql boundSql, Pageable pageable) throws SQLException {
+    private <E> List<E> query(Executor delegate, MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, CacheKey cacheKey, BoundSql boundSql, Pageable pageable) throws SQLException {
         com.github.pagehelper.Page pagehelperPage = PageHelper.startPage(pageable.getPageNo(), pageable.getPageSize());
         List<Object> list;
         if (cacheKey == null && boundSql == null) {
-            list = this.delegate.query(ms, parameter, rowBounds, resultHandler);
+            list = delegate.query(ms, parameter, rowBounds, resultHandler);
         } else {
-            list = this.delegate.query(ms, parameter, rowBounds, resultHandler, cacheKey, boundSql);
+            list = delegate.query(ms, parameter, rowBounds, resultHandler, cacheKey, boundSql);
         }
         Page<Object> page = new Page(pagehelperPage.getTotal(), list);
         return (List<E>) Arrays.asList(page);
@@ -94,84 +93,84 @@ public class MybatisgxRoutingExecutor implements Executor {
 
     @Override
     public <E> Cursor<E> queryCursor(MappedStatement ms, Object parameter, RowBounds rowBounds) throws SQLException {
-        this.newExecutor(ms);
-        return this.delegate.queryCursor(ms, parameter, rowBounds);
+        Executor delegate = this.resolveExecutor(ms);
+        return delegate.queryCursor(ms, parameter, rowBounds);
     }
 
     @Override
     public List<BatchResult> flushStatements() throws SQLException {
-        this.newExecutor();
-        return this.delegate.flushStatements();
+        Executor delegate = this.resolveExecutor();
+        return delegate.flushStatements();
     }
 
     @Override
     public void commit(boolean required) throws SQLException {
-        this.newExecutor();
-        this.delegate.commit(required);
+        Executor delegate = this.resolveExecutor();
+        delegate.commit(required);
     }
 
     @Override
     public void rollback(boolean required) throws SQLException {
-        this.newExecutor();
-        this.delegate.rollback(required);
+        Executor delegate = this.resolveExecutor();
+        delegate.rollback(required);
     }
 
     @Override
     public CacheKey createCacheKey(MappedStatement ms, Object parameterObject, RowBounds rowBounds, BoundSql boundSql) {
-        this.newExecutor(ms);
-        return this.delegate.createCacheKey(ms, parameterObject, rowBounds, boundSql);
+        Executor delegate = this.resolveExecutor(ms);
+        return delegate.createCacheKey(ms, parameterObject, rowBounds, boundSql);
     }
 
     @Override
     public boolean isCached(MappedStatement ms, CacheKey key) {
-        this.newExecutor(ms);
-        return this.delegate.isCached(ms, key);
+        Executor delegate = this.resolveExecutor(ms);
+        return delegate.isCached(ms, key);
     }
 
     @Override
     public void clearLocalCache() {
-        this.newExecutor();
-        this.delegate.clearLocalCache();
+        Executor delegate = this.resolveExecutor();
+        delegate.clearLocalCache();
     }
 
     @Override
     public void deferLoad(MappedStatement ms, MetaObject resultObject, String property, CacheKey key, Class<?> targetType) {
-        this.newExecutor(ms);
-        this.delegate.deferLoad(ms, resultObject, property, key, targetType);
+        Executor delegate = this.resolveExecutor(ms);
+        delegate.deferLoad(ms, resultObject, property, key, targetType);
     }
 
     @Override
     public Transaction getTransaction() {
-        this.newExecutor();
-        return this.delegate.getTransaction();
+        Executor delegate = this.resolveExecutor();
+        return delegate.getTransaction();
     }
 
     @Override
     public void close(boolean forceRollback) {
-        this.newExecutor();
-        this.delegate.close(forceRollback);
+        Executor delegate = this.resolveExecutor();
+        delegate.close(forceRollback);
     }
 
     @Override
     public boolean isClosed() {
-        this.newExecutor();
-        return this.delegate.isClosed();
+        Executor delegate = this.resolveExecutor();
+        return delegate.isClosed();
     }
 
     @Override
     public void setExecutorWrapper(Executor executor) {
-        this.delegate.setExecutorWrapper(executor);
+        // delegate.setExecutorWrapper(executor);
     }
 
-    void newExecutor() {
-        this.newExecutor(null);
+    private Executor resolveExecutor() {
+        return this.resolveExecutor(null);
     }
 
-    void newExecutor(MappedStatement mappedStatement) {
+    private Executor resolveExecutor(MappedStatement mappedStatement) {
         MethodInfo methodInfo = null;
         if (mappedStatement != null) {
             methodInfo = MethodInfoContextHolder.get(mappedStatement.getId());
         }
-        this.delegate = methodInfo != null && methodInfo.getBatch() ? batchExecutor : defaultExecutor;
+        return methodInfo != null && methodInfo.getBatch() ? batchExecutor : defaultExecutor;
     }
 }

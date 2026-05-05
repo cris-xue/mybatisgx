@@ -11,7 +11,6 @@ import org.apache.ibatis.binding.MapperMethod;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.reflection.MetaObject;
-import org.apache.ibatis.reflection.SystemMetaObject;
 
 import java.util.List;
 import java.util.Map;
@@ -45,15 +44,14 @@ public class MybatisgxValueProcessor {
 
     public Object process(ValueProcessPrepareContext context, Object parameterObject, BoundSql boundSql) {
         MethodInfo methodInfo = context.getMethodInfo();
-        Object useParameterObject = this.unwrapParameterObject(methodInfo, parameterObject);
-        MetaObject metaObject = SystemMetaObject.forObject(useParameterObject);
-        context.setMetaObject(metaObject);
+        Object unwrapParameterObject = this.unwrapParameterObject(methodInfo, parameterObject);
+        context.setParameterObject(unwrapParameterObject);
 
         for (ColumnInfo columnInfo : methodInfo.getEntityParamInfo().getEntityInfo().getGenerateValueColumnInfoList()) {
             AbstractFieldValueHandler fieldValueHandler = this.VALUE_HANDLER_MAP.get(columnInfo.getClass());
-            fieldValueHandler.handle(context, columnInfo, useParameterObject, boundSql);
+            fieldValueHandler.handle(context, columnInfo, unwrapParameterObject, boundSql);
         }
-        return useParameterObject;
+        return unwrapParameterObject;
     }
 
     private boolean isProcess(MethodInfo methodInfo, Object parameterObject) {

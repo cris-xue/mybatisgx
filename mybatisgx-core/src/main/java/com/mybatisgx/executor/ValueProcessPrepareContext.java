@@ -3,6 +3,7 @@ package com.mybatisgx.executor;
 import com.mybatisgx.api.MethodCommandType;
 import com.mybatisgx.model.MethodInfo;
 import org.apache.ibatis.reflection.MetaObject;
+import org.apache.ibatis.reflection.SystemMetaObject;
 
 /**
  * @author：薛承城
@@ -16,6 +17,8 @@ public class ValueProcessPrepareContext {
     private boolean isProcess = false;
 
     private MethodCommandType commandType;
+
+    private Object parameterObject;
 
     private MetaObject metaObject;
 
@@ -41,6 +44,15 @@ public class ValueProcessPrepareContext {
 
     public void setCommandType(MethodCommandType commandType) {
         this.commandType = commandType;
+    }
+
+    public Object getParameterObject() {
+        return parameterObject;
+    }
+
+    public void setParameterObject(Object parameterObject) {
+        this.parameterObject = parameterObject;
+        this.metaObject = SystemMetaObject.forObject(parameterObject);
     }
 
     public MetaObject getMetaObject() {

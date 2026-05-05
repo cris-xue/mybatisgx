@@ -33,12 +33,7 @@ public class MybatisgxValueProcessor {
     public ValueProcessPrepareContext prepare(MappedStatement ms, Object parameterObject) {
         MethodInfo methodInfo = DaoMethodManager.getMethodInfo(ms);
         boolean isProcess = this.isProcess(methodInfo, parameterObject);
-
-        ValueProcessPrepareContext valueProcessPrepareContext = new ValueProcessPrepareContext();
-        valueProcessPrepareContext.setProcess(isProcess);
-        valueProcessPrepareContext.setCommandType(methodInfo.getMethodCommandType());
-        valueProcessPrepareContext.setMethodInfo(methodInfo);
-        return valueProcessPrepareContext;
+        return new ValueProcessPrepareContext(isProcess, methodInfo);
     }
 
     public Object process(ValueProcessPrepareContext context, Object parameterObject, BoundSql boundSql) {
@@ -46,7 +41,7 @@ public class MybatisgxValueProcessor {
         Object unwrapParameterObject = this.unwrapParameterObject(methodInfo, parameterObject);
         context.setParameterObject(unwrapParameterObject);
 
-        for (ColumnInfo columnInfo : methodInfo.getEntityParamInfo().getEntityInfo().getGenerateValueColumnInfoList()) {
+        for (ColumnInfo columnInfo : methodInfo.getMapperInfo().getEntityInfo().getGenerateValueColumnInfoList()) {
             AbstractFieldValueHandler fieldValueHandler = this.VALUE_HANDLER_MAP.get(columnInfo.getClass());
             fieldValueHandler.handle(context, columnInfo, unwrapParameterObject, boundSql);
         }
@@ -125,8 +120,8 @@ public class MybatisgxValueProcessor {
             MethodCommandType commandType = context.getCommandType();
             MetaObject metaObject = context.getMetaObject();
 
-            Class<?> entityParamClass = methodInfo.getEntityParamInfo().getType();
-            if (!entityParamClass.isAssignableFrom(parameterObject.getClass())) {
+            Class<?> entityClass = methodInfo.getMapperInfo().getEntityClass();
+            if (!entityClass.isAssignableFrom(parameterObject.getClass())) {
                 return;
             }
 

@@ -62,7 +62,11 @@ public class MybatisgxConfiguration extends Configuration {
     }
 
     public MethodInfo getMethodInfo(MappedStatement ms) {
-        return this.methodInfoMap.get(ms.getId());
+        return this.getMethodInfo(ms.getId());
+    }
+
+    public MethodInfo getMethodInfo(String msId) {
+        return this.methodInfoMap.containsKey(msId) ? this.methodInfoMap.get(msId) : null;
     }
 
     public void addMethodInfo(MethodInfo methodInfo) {

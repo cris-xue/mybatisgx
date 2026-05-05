@@ -22,12 +22,20 @@ public class ValueProcessPrepareContext {
 
     private MetaObject metaObject;
 
+    public ValueProcessPrepareContext(boolean isProcess, MethodInfo methodInfo) {
+        this.isProcess = isProcess;
+        this.setMethodInfo(methodInfo);
+    }
+
     public MethodInfo getMethodInfo() {
         return methodInfo;
     }
 
     public void setMethodInfo(MethodInfo methodInfo) {
-        this.methodInfo = methodInfo;
+        if (methodInfo != null) {
+            this.methodInfo = methodInfo;
+            this.commandType = methodInfo.getMethodCommandType();
+        }
     }
 
     public boolean getProcess() {

@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * mybatisgx混合执行器
+ * mybatisgx路由执行器，根据分页、批量处理调用不用的执行器
  *
  * @author ccxuef
  * @date 2025/7/24 8:33

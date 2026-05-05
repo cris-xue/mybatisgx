@@ -27,13 +27,12 @@ public class ColumnInfoHandler {
     private TypeResolver typeResolver = new TypeResolver();
 
     public List<ColumnInfo> getColumnInfoList(Class<?> clazz, Map<Type, Class<?>> typeParameterMap) {
-        Field[] fields = FieldUtils.getAllFields(clazz);
-        return this.processColumnInfo(null, fields, typeParameterMap);
+        return this.processColumnInfo(clazz, null, typeParameterMap);
     }
 
-    private List<ColumnInfo> processColumnInfo(ColumnInfo parentColumnInfo, Field[] fields, Map<Type, Class<?>> typeParameterMap) {
+    private List<ColumnInfo> processColumnInfo(Class<?> clazz, ColumnInfo parentColumnInfo, Map<Type, Class<?>> typeParameterMap) {
         List<ColumnInfo> columnInfoList = new ArrayList<>();
-        for (Field field : fields) {
+        for (Field field : FieldUtils.getAllFields(clazz)) {
             int modifiers = field.getModifiers();
             Boolean isStatic = Modifier.isStatic(modifiers);
             if (isStatic) {
@@ -215,12 +214,12 @@ public class ColumnInfoHandler {
             Map<Type, Class<?>> childTypeParameterMap = new HashMap<>();
             Map<TypeVariable<?>, Type> typeMap = TypeUtils.getTypeArguments(parameterizedType);
             typeMap.forEach((typeVariable, typeValue) -> childTypeParameterMap.put(typeVariable, typeParameterMap.get(typeValue)));
-            Field[] fields = FieldUtils.getAllFields((Class<?>) parameterizedType.getRawType());
-            return this.processColumnInfo(columnInfo, fields, childTypeParameterMap);
+            Class<?> clazz = (Class<?>) parameterizedType.getRawType();
+            return this.processColumnInfo(clazz, columnInfo, childTypeParameterMap);
         }
         if (type instanceof ParameterizedType) {
-            Field[] fields = FieldUtils.getAllFields((Class<?>) type);
-            return this.processColumnInfo(columnInfo, fields, typeParameterMap);
+            Class<?> clazz = (Class<?>) type;
+            return this.processColumnInfo(clazz, columnInfo, typeParameterMap);
         }
         return new ArrayList<>();
     }

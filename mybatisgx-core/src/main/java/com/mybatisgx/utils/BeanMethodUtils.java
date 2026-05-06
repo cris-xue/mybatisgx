@@ -37,6 +37,4 @@ public class BeanMethodUtils {
             throw new MybatisgxException(e);
         }
     }
-
-    public
 }

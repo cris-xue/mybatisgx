@@ -374,8 +374,15 @@ public class ColumnInfoHandler {
     }
 
     private void processPropertyMethod(Map<String, PropertyDescriptor> getterMethodMap, Map<String, PropertyDescriptor> setterMethodMap, ColumnInfo columnInfo) {
-        PropertyDescriptor getterPropertyDescriptor = getterMethodMap.get(columnInfo.getJavaColumnName());
-        PropertyDescriptor setterPropertyDescriptor = setterMethodMap.get(columnInfo.getJavaColumnName());
+        String javaColumnName = columnInfo.getJavaColumnName();
+        PropertyDescriptor getterPropertyDescriptor = getterMethodMap.get(javaColumnName);
+        PropertyDescriptor setterPropertyDescriptor = setterMethodMap.get(javaColumnName);
+        if (getterPropertyDescriptor == null) {
+            throw new MybatisgxException("字段 %s 不存在get方法", javaColumnName);
+        }
+        if (setterPropertyDescriptor == null) {
+            throw new MybatisgxException("字段 %s 不存在set方法", javaColumnName);
+        }
         columnInfo.setPropertyGetter(LambdaPropertyAccessorFactory.createGetter(getterPropertyDescriptor.getReadMethod()));
         columnInfo.setPropertySetter(LambdaPropertyAccessorFactory.createSetter(setterPropertyDescriptor.getWriteMethod()));
     }

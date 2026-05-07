@@ -5,6 +5,7 @@ import com.mybatisgx.executor.ValueProcessPrepareContext;
 import com.mybatisgx.ext.executor.MybatisgxBatchExecutor;
 import com.mybatisgx.ext.executor.MybatisgxRoutingExecutor;
 import com.mybatisgx.ext.executor.resultset.MybatisgxResultSetHandler;
+import com.mybatisgx.model.EntityInfo;
 import com.mybatisgx.model.MapperInfo;
 import com.mybatisgx.model.MethodInfo;
 import com.mybatisgx.utils.MethodInfoUtils;
@@ -21,11 +22,16 @@ import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.transaction.Transaction;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class MybatisgxConfiguration extends Configuration {
 
     private static final MybatisgxValueProcessor mybatisgxValueProcessor = new MybatisgxValueProcessor();
+
+    protected final Map<Class<?>, EntityInfo> entityInfoMap = new ConcurrentHashMap();
 
     protected final Map<String, MethodInfo> methodInfoMap = new StrictMap("methodInfo collection");
 
@@ -59,6 +65,18 @@ public class MybatisgxConfiguration extends Configuration {
         ResultSetHandler resultSetHandler = new MybatisgxResultSetHandler(executor, mappedStatement, parameterHandler, resultHandler, boundSql, rowBounds);
         resultSetHandler = (ResultSetHandler) interceptorChain.pluginAll(resultSetHandler);
         return resultSetHandler;
+    }
+
+    public EntityInfo getEntityInfo(Class<?> clazz) {
+        return this.entityInfoMap.containsKey(clazz) ? this.entityInfoMap.get(clazz) : null;
+    }
+
+    public List<Class<?>> getEntityClassList() {
+        return new ArrayList(this.entityInfoMap.keySet());
+    }
+
+    public void addEntityInfo(EntityInfo entityInfo) {
+        this.entityInfoMap.put(entityInfo.getClazz(), entityInfo);
     }
 
     public MethodInfo getMethodInfo(MappedStatement ms) {

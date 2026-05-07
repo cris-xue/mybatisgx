@@ -4,8 +4,8 @@ import com.mybatisgx.annotation.Entity;
 import com.mybatisgx.annotation.Property;
 import com.mybatisgx.annotation.QueryEntity;
 import com.mybatisgx.annotation.Table;
-import com.mybatisgx.context.EntityInfoContextHolder;
 import com.mybatisgx.exception.MybatisgxException;
+import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.model.ColumnInfo;
 import com.mybatisgx.model.EntityInfo;
 import com.mybatisgx.utils.TypeUtils;
@@ -63,10 +63,9 @@ public class EntityInfoHandler {
         return entityInfo;
     }
 
-    public void processColumnRelation() {
-        List<Class<?>> entityClassList = EntityInfoContextHolder.getEntityClassList();
-        for (Class<?> entityClass : entityClassList) {
-            EntityInfo entityInfo = EntityInfoContextHolder.get(entityClass);
+    public void processColumnRelation(MybatisgxConfiguration configuration) {
+        for (Class<?> entityClass : configuration.getEntityClassList()) {
+            EntityInfo entityInfo = configuration.getEntityInfo(entityClass);
             this.columnInfoHandler.processRelation(entityInfo);
         }
     }

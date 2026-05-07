@@ -120,11 +120,12 @@ public class MybatisgxContextLoader {
         if (entity != null || queryEntity != null) {
             EntityInfo entityInfo = entityInfoHandler.execute(clazz);
             EntityInfoContextHolder.set(clazz, entityInfo);
+            configuration.addEntityInfo(entityInfo);
         }
     }
 
     private void processEntityRelation() {
-        entityInfoHandler.processColumnRelation();
+        entityInfoHandler.processColumnRelation(configuration);
     }
 
     private List<Resource> getDaoResourceList(String basePackage) {

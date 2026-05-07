@@ -192,6 +192,10 @@ public class ColumnInfoHandler {
         idColumnInfo.setId(id);
         idColumnInfo.setEmbeddedId(embeddedId);
         idColumnInfo.setComposites(idColumnInfoComposites);
+
+        for (ColumnInfo idColumnInfoComposite : idColumnInfoComposites) {
+            idColumnInfo.addColumnInfo(idColumnInfoComposite);
+        }
     }
 
     private void setGenerateValue(Field field, ColumnInfo columnInfo) {

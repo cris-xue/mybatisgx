@@ -4,7 +4,9 @@ import com.mybatisgx.annotation.*;
 import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Field;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 字段信息信息
@@ -78,6 +80,10 @@ public class ColumnInfo {
      * 复合字段列表
      */
     private List<ColumnInfo> composites;
+    /**
+     * java字段映射字段信息，userName={userName=1}
+     */
+    private Map<String, ColumnInfo> columnInfoMap = new LinkedHashMap();
     /**
      * 数据库字段注解
      */
@@ -243,6 +249,14 @@ public class ColumnInfo {
 
     public void setComposites(List<ColumnInfo> composites) {
         this.composites = composites;
+    }
+
+    public ColumnInfo getColumnInfo(String javaColumnName) {
+        return this.columnInfoMap.get(javaColumnName);
+    }
+
+    public void addColumnInfo(ColumnInfo columnInfo) {
+        this.columnInfoMap.put(columnInfo.getJavaColumnName(), columnInfo);
     }
 
     public Column getColumn() {

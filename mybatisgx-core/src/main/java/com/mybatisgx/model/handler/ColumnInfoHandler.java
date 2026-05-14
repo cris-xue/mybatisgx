@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 字段处理器
@@ -51,14 +52,16 @@ public class ColumnInfoHandler {
             columnInfo.setParent(parentColumnInfo);
             columnInfo.setField(field);
             columnInfo.setJavaColumnName(fieldName);
-            columnInfo.setJavaColumnNamePathList(this.getJavaColumnNamePathList(parentColumnInfo, columnInfo));
             columnInfo.setDbTypeName(column != null ? column.columnDefinition() : null);
             columnInfo.setDbColumnName(tableColumnName);
-            columnInfo.setProperty(field.getAnnotation(Property.class));
 
+            columnInfo.setProperty(field.getAnnotation(Property.class));
             columnInfo.setVersion(field.getAnnotation(Version.class));
             columnInfo.setLogicDelete(field.getAnnotation(LogicDelete.class));
-            this.setGenerateValue(field, columnInfo);
+
+            this.processGenerateValue(field, columnInfo);
+            this.processJavaColumnChain(parentColumnInfo, columnInfo);
+            this.processPropertyMethod(getterMethodMap, setterMethodMap, columnInfo);
 
             this.processColumnType(field, columnInfo, typeParameterMap);
             if (columnInfo instanceof IdColumnInfo) {
@@ -67,8 +70,6 @@ public class ColumnInfoHandler {
             if (columnInfo instanceof RelationColumnInfo) {
                 this.setRelationColumnInfo(field, (RelationColumnInfo) columnInfo);
             }
-
-            this.processPropertyMethod(getterMethodMap, setterMethodMap, columnInfo);
 
             columnInfoList.add(columnInfo);
         }
@@ -198,7 +199,7 @@ public class ColumnInfoHandler {
         }
     }
 
-    private void setGenerateValue(Field field, ColumnInfo columnInfo) {
+    private void processGenerateValue(Field field, ColumnInfo columnInfo) {
         GeneratedValue generatedValue = field.getAnnotation(GeneratedValue.class);
         if (generatedValue != null) {
             // 校验生成值类型是否为 ValueProcessor 类型
@@ -355,13 +356,20 @@ public class ColumnInfoHandler {
         }
     }
 
-    private List<String> getJavaColumnNamePathList(ColumnInfo parentColumnInfo, ColumnInfo columnInfo) {
-        List<String> javaColumnNamePathList = new ArrayList<>();
-        if (parentColumnInfo != null) {
-            javaColumnNamePathList.addAll(parentColumnInfo.getJavaColumnNamePathList());
+    private void processJavaColumnChain(ColumnInfo parentColumnInfo, ColumnInfo columnInfo) {
+        List<ColumnInfo> columnInfoList = this.getJavaColumnNamePathList(parentColumnInfo, columnInfo);
+        List<String> javaColumnNamePathList = columnInfoList.stream().map(item -> item.getJavaColumnName()).collect(Collectors.toList());
+        columnInfo.setJavaColumnChain(columnInfoList);
+        columnInfo.setJavaColumnNamePathList(javaColumnNamePathList);
+    }
+
+    private List<ColumnInfo> getJavaColumnNamePathList(ColumnInfo parentColumnInfo, ColumnInfo columnInfo) {
+        List<ColumnInfo> javaColumnPathList = new ArrayList();
+        if (parentColumnInfo != null && parentColumnInfo.getJavaColumnChain() != null) {
+            javaColumnPathList.addAll(parentColumnInfo.getJavaColumnChain());
         }
-        javaColumnNamePathList.add(columnInfo.getJavaColumnName());
-        return javaColumnNamePathList;
+        javaColumnPathList.add(columnInfo);
+        return javaColumnPathList;
     }
 
     private ColumnInfo validateEntityRelation(RelationColumnInfo relationColumnInfo, String mappedBy) {

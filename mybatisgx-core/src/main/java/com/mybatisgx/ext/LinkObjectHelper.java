@@ -10,22 +10,17 @@ import java.util.List;
 public class LinkObjectHelper {
 
     public static String getObjectKey(List<ResultMapping> idResultMappings, MetaObject metaObject) {
-        if (metaObject.getOriginalObject() == null) {
+        if (metaObject == null || metaObject.getOriginalObject() == null || idResultMappings == null || idResultMappings.isEmpty()) {
             return "";
         }
-        List<String> idValueList = new ArrayList<>();
+        List<String> idValueList = new ArrayList(idResultMappings.size());
         for (ResultMapping idResultMapping : idResultMappings) {
             Object idValue = metaObject.getValue(idResultMapping.getProperty());
-            String idValueString;
-            if (idValue instanceof Integer) {
-                idValueString = idValue.toString();
-            } else if (idValue instanceof Long) {
-                idValueString = idValue.toString();
-            } else {
-                idValueString = (String) idValue;
+            if (idValue == null) {
+                return "";
             }
-            idValueList.add(idValueString);
+            idValueList.add(String.valueOf(idValue));
         }
-        return StringUtils.join(idValueList, "");
+        return StringUtils.join(idValueList, "_");
     }
 }

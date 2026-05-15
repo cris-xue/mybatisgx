@@ -1,13 +1,18 @@
 package com.mybatisgx.model.handler;
 
+import com.google.common.collect.Sets;
 import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.model.ObjectFactory;
 import com.mybatisgx.model.PropertyGetter;
 import com.mybatisgx.model.PropertySetter;
+import org.apache.commons.beanutils.ConstructorUtils;
+import org.apache.commons.lang3.reflect.TypeUtils;
+import org.springframework.util.ReflectionUtils;
 
 import java.lang.invoke.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.Set;
 
 /**
  * @author：薛承城
@@ -16,11 +21,19 @@ import java.lang.reflect.Method;
  */
 public class LambdaAccessorFactory {
 
+    private static final Set<Class<?>> SIMPLE_TYPE_SET = Sets.newHashSet(Integer.class, Long.class, String.class);
     private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
 
     public static <T> ObjectFactory<T> createObjectFactory(Class<?> clazz) {
         try {
-            Constructor<?> constructor = clazz.getDeclaredConstructor();
+            Constructor<?> constructor;
+            try {
+                constructor = clazz.getDeclaredConstructor();
+            } catch (NoSuchMethodException e) {
+                return null;
+            } catch (SecurityException e) {
+                return null;
+            }
             constructor.setAccessible(true);
 
             MethodHandle constructorHandle = LOOKUP.unreflectConstructor(constructor);

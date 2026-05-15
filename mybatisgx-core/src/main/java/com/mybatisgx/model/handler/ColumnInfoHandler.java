@@ -8,6 +8,7 @@ import com.mybatisgx.model.*;
 import com.mybatisgx.spi.ValueProcessor;
 import com.mybatisgx.utils.BeanMethodUtils;
 import com.mybatisgx.utils.TypeUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
 
@@ -61,9 +62,9 @@ public class ColumnInfoHandler {
 
             this.processGenerateValue(field, columnInfo);
             this.processJavaColumnChain(parentColumnInfo, columnInfo);
+            this.processColumnType(field, columnInfo, typeParameterMap);
             this.processPropertyMethod(getterMethodMap, setterMethodMap, columnInfo);
 
-            this.processColumnType(field, columnInfo, typeParameterMap);
             if (columnInfo instanceof IdColumnInfo) {
                 this.setIdColumnInfo(field, (IdColumnInfo) columnInfo, typeParameterMap);
             }
@@ -224,11 +225,17 @@ public class ColumnInfoHandler {
             ParameterizedType parameterizedType = (ParameterizedType) type;
             Map<Type, Class<?>> childTypeParameterMap = new HashMap<>();
             Map<TypeVariable<?>, Type> typeMap = TypeUtils.getTypeArguments(parameterizedType);
-            typeMap.forEach((typeVariable, typeValue) -> childTypeParameterMap.put(typeVariable, typeParameterMap.get(typeValue)));
-            Class<?> clazz = (Class<?>) parameterizedType.getRawType();
-            return this.processColumnInfo(clazz, columnInfo, childTypeParameterMap);
+            if (ObjectUtils.isNotEmpty(typeParameterMap)) {
+                typeMap.forEach((typeVariable, typeValue) -> childTypeParameterMap.put(typeVariable, typeParameterMap.get(typeValue)));
+                Class<?> clazz = (Class<?>) parameterizedType.getRawType();
+                return this.processColumnInfo(clazz, columnInfo, childTypeParameterMap);
+            } else {
+                typeMap.forEach((typeVariable, typeValue) -> childTypeParameterMap.put(typeVariable, (Class<?>) typeValue));
+                Class<?> clazz = (Class<?>) parameterizedType.getRawType();
+                return this.processColumnInfo(clazz, columnInfo, childTypeParameterMap);
+            }
         }
-        if (type instanceof ParameterizedType) {
+        if (type instanceof Class) {
             Class<?> clazz = (Class<?>) type;
             return this.processColumnInfo(clazz, columnInfo, typeParameterMap);
         }

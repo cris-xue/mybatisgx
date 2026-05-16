@@ -421,10 +421,10 @@ public class ColumnInfoHandler {
 
                 this.processIdColumnInfo(entityInfo, columnInfo);
                 this.processGenerateValue(entityInfo, columnInfo);
-                ColumnInfo tableColumnInfo = this.getTableColumnInfo(columnInfo);
 
+                ColumnInfo tableColumnInfo = this.getTableColumnInfo(columnInfo);
                 if (tableColumnInfo != null) {
-                    entityInfo.getTableColumnInfoList().add(columnInfo);
+                    entityInfo.addTableColumnInfo(columnInfo);
                     if (TypeUtils.typeEquals(columnInfo, RelationColumnInfo.class)) {
                         RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
                         List<ForeignKeyInfo> inverseForeignKeyInfoList = relationColumnInfo.getInverseForeignKeyInfoList();

@@ -129,6 +129,10 @@ public class EntityInfo {
         return tableColumnInfoList;
     }
 
+    public void addTableColumnInfo(ColumnInfo columnInfo) {
+        this.tableColumnInfoList.add(columnInfo);
+    }
+
     public ColumnInfo getLogicDeleteColumnInfo() {
         return logicDeleteColumnInfo;
     }

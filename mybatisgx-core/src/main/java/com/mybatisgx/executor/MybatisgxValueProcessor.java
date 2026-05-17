@@ -3,6 +3,7 @@ package com.mybatisgx.executor;
 import com.mybatisgx.annotation.LogicDeleteId;
 import com.mybatisgx.api.MethodCommandType;
 import com.mybatisgx.context.DaoMethodManager;
+import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.model.*;
 import com.mybatisgx.spi.ValueProcessContext;
 import com.mybatisgx.spi.ValueProcessor;
@@ -153,20 +154,34 @@ public class MybatisgxValueProcessor {
             List<ColumnInfo> chain = columnInfo.getJavaColumnChain();
             int lastIndex = chain.size() - 1;
 
+            // 处理中间链路对象
             for (int i = 0; i < lastIndex; i++) {
                 ColumnInfo currentColumn = chain.get(i);
-
                 Object next = currentColumn.getValue(current);
 
                 if (next == null) {
-                    next = currentColumn.getObjectFactory().create();
+                    ObjectFactory<?> factory = currentColumn.getObjectFactory();
+                    if (factory == null) {
+                        throw new MybatisgxException("Cannot instantiate property: " + currentColumn.getField().getName());
+                    }
+
+                    next = factory.create();
                     currentColumn.setValue(current, next);
                 }
 
                 current = next;
             }
 
-            chain.get(lastIndex).setValue(current, value);
+            // 最终字段
+            ColumnInfo targetColumn = chain.get(lastIndex);
+
+            // 已有值则跳过
+            Object existingValue = targetColumn.getValue(current);
+            if (existingValue != null) {
+                return;
+            }
+
+            targetColumn.setValue(current, value);
         }
     }
 }

@@ -276,6 +276,16 @@ public class WhereTemplateHandler {
             return dynamic ? MybatisXmlHelper.buildIfElement(whereElement, testExpression) : whereElement;
         }
 
+        /**
+         * 获取参数值路径
+         * <code>
+         *     id1 = #{multiId.id1}
+         *     code = #{code}
+         * </code>
+         * @param columnInfo
+         * @param columnInfoComposite
+         * @return
+         */
         protected List<String> getParamValuePathItemList(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
             List<String> argValueCommonPathItemList = Lists.newArrayList(methodParamInfo.getArgValueCommonPathItemList());
             if (columnInfoComposite != null) {
@@ -284,7 +294,13 @@ public class WhereTemplateHandler {
             return argValueCommonPathItemList;
         }
 
-        protected List<String> getParamValuePathItemList(ColumnInfo relationColumnComposite) {
+        /**
+         * 获取关联对象复合类型参数值路径
+         * and user_id1 = #{user.multiId.id1}
+         * @param relationColumnComposite
+         * @return
+         */
+        protected List<String> getRelationComplexTypeParamValuePathItemList(ColumnInfo relationColumnComposite) {
             List<String> argValueCommonPathItemList = Lists.newArrayList(methodParamInfo.getArgValueCommonPathItemList());
             if (relationColumnComposite != null && relationColumnComposite.getJavaColumnNamePathList() != null) {
                 argValueCommonPathItemList.addAll(relationColumnComposite.getJavaColumnNamePathList());
@@ -408,7 +424,7 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleRelationComplexTypeParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo, ColumnInfo columnInfo) {
-            List<String> paramValuePathItemList = this.getParamValuePathItemList(columnInfo);
+            List<String> paramValuePathItemList = this.getRelationComplexTypeParamValuePathItemList(columnInfo);
             return this.buildWhereItemContext(foreignKeyInfo.getColumnInfo(), paramValuePathItemList);
         }
 
@@ -450,7 +466,7 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleRelationComplexTypeParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo, ColumnInfo columnInfo) {
-            List<String> paramValuePathItemList = this.getParamValuePathItemList(columnInfo);
+            List<String> paramValuePathItemList = this.getRelationComplexTypeParamValuePathItemList(columnInfo);
             return this.buildWhereItemContext(foreignKeyInfo.getColumnInfo(), paramValuePathItemList);
         }
 
@@ -497,7 +513,7 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleRelationComplexTypeParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo, ColumnInfo columnInfo) {
-            List<String> paramValuePathItemList = this.getParamValuePathItemList(columnInfo);
+            List<String> paramValuePathItemList = this.getRelationComplexTypeParamValuePathItemList(columnInfo);
             return this.buildWhereItemContext(foreignKeyInfo.getColumnInfo(), paramValuePathItemList);
         }
 

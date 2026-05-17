@@ -286,11 +286,11 @@ public class WhereTemplateHandler {
          * @return
          */
         protected List<String> getParamValuePathItemList(ColumnInfo columnInfoComposite) {
-            List<String> argValueCommonPathItemList = Lists.newArrayList(methodParamInfo.getArgValueCommonPathItemList());
+            List<String> javaColumnNamePathList = new ArrayList<>();
             if (columnInfoComposite != null) {
-                argValueCommonPathItemList.add(columnInfoComposite.getJavaColumnName());
+                javaColumnNamePathList.add(columnInfoComposite.getJavaColumnName());
             }
-            return argValueCommonPathItemList;
+            return this.getPathItemList(javaColumnNamePathList);
         }
 
         /**
@@ -300,10 +300,16 @@ public class WhereTemplateHandler {
          * @return
          */
         protected List<String> getRelationComplexTypeParamValuePathItemList(ColumnInfo relationColumnComposite) {
-            List<String> argValueCommonPathItemList = Lists.newArrayList(methodParamInfo.getArgValueCommonPathItemList());
+            List<String> javaColumnNamePathList = new ArrayList<>();
             if (relationColumnComposite != null && relationColumnComposite.getJavaColumnNamePathList() != null) {
-                argValueCommonPathItemList.addAll(relationColumnComposite.getJavaColumnNamePathList());
+                javaColumnNamePathList.addAll(relationColumnComposite.getJavaColumnNamePathList());
             }
+            return this.getPathItemList(javaColumnNamePathList);
+        }
+
+        private List<String> getPathItemList(List<String> javaColumnNamePathList) {
+            List<String> argValueCommonPathItemList = Lists.newArrayList(methodParamInfo.getArgValueCommonPathItemList());
+            argValueCommonPathItemList.addAll(javaColumnNamePathList);
             return argValueCommonPathItemList;
         }
     }

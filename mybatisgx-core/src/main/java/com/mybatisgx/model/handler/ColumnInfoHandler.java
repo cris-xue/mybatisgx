@@ -421,15 +421,9 @@ public class ColumnInfoHandler {
                     return;
                 }
                 for (ColumnInfo composite : composites) {
-                    IdColumnInfo wrapIdColumnInfo = new IdColumnInfo();
-                    wrapIdColumnInfo.setJavaColumnName(idColumnInfo.getJavaColumnName());
-                    wrapIdColumnInfo.setDbColumnName(idColumnInfo.getDbColumnName());
-                    wrapIdColumnInfo.setEmbeddedId(idColumnInfo.getEmbeddedId());
-                    wrapIdColumnInfo.setComposites(Arrays.asList(composite));
-                    entityInfo.addColumnMap(composite.getJavaColumnName(), wrapIdColumnInfo);
-
-                    String wrapJavaColumnName = String.format("%s.%s", idColumnInfo.getJavaColumnName(), composite.getJavaColumnName());
-                    entityInfo.addColumnMap(wrapJavaColumnName, wrapIdColumnInfo);
+                    entityInfo.addColumnMap(composite.getJavaColumnName(), composite);
+                    String javaColumnNamePath = String.format("%s.%s", idColumnInfo.getJavaColumnName(), composite.getJavaColumnName());
+                    entityInfo.addColumnMap(javaColumnNamePath, composite);
                 }
             }
         }

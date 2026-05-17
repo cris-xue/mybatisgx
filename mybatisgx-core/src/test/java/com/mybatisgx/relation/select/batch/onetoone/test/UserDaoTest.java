@@ -52,6 +52,10 @@ public class UserDaoTest {
                 multiId.setId1(111111L);
                 multiId.setId2(111111L);
                 user.setMultiId(multiId);
+            } else {
+                MultiId<Long> multiId = user.getMultiId();
+                multiId.setId1(null);
+                multiId.setId2(null);
             }
             UserDetail userDetail = user.getUserDetail();
             if (i == 0) {
@@ -59,6 +63,10 @@ public class UserDaoTest {
                 multiId.setId1(111111L);
                 multiId.setId2(111111L);
                 userDetail.setMultiId(multiId);
+            } else {
+                MultiId<Long> multiId = userDetail.getMultiId();
+                multiId.setId1(null);
+                multiId.setId2(null);
             }
             userDetail.setUser(user);
 

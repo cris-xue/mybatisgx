@@ -343,10 +343,8 @@ public class ColumnInfoHandler {
 
     private void processPropertyMethod(Map<String, PropertyDescriptor> getterMethodMap, Map<String, PropertyDescriptor> setterMethodMap, ColumnInfo columnInfo) {
         // 简单类型字段没有生成值注解和关系字段生成 LambdaAccessor 访问器
-        if (TypeUtils.typeNotEquals(columnInfo, RelationColumnInfo.class)) {
-            if ((ObjectUtils.isEmpty(columnInfo.getComposites()) && columnInfo.getGenerateValue() == null)) {
-                return;
-            }
+        if (TypeUtils.typeEquals(columnInfo, ColumnInfo.class, LogicDeleteIdColumnInfo.class) && columnInfo.getGenerateValue() == null) {
+            return;
         }
 
         String javaColumnName = columnInfo.getJavaColumnName();

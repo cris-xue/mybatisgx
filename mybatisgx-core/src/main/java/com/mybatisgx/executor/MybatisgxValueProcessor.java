@@ -39,16 +39,16 @@ public class MybatisgxValueProcessor {
         return new ValueProcessPrepareContext(isValueProcessor, methodInfo);
     }
 
-    public Object process(ValueProcessPrepareContext context, Object parameterObject, BoundSql boundSql) {
-        MethodInfo methodInfo = context.getMethodInfo();
+    public void process(MappedStatement ms, Object parameterObject, BoundSql boundSql) {
+        MethodInfo methodInfo = DaoMethodManager.getMethodInfo(ms);
+        if (!this.isValueProcessor(methodInfo, parameterObject)) {
+            return;
+        }
         Object unwrapParameterObject = this.unwrapParameterObject(methodInfo, parameterObject);
-        context.setParameterObject(unwrapParameterObject);
-
         for (ColumnInfo columnInfo : methodInfo.getMapperInfo().getEntityInfo().getGenerateValueColumnInfoList()) {
             AbstractFieldValueHandler fieldValueHandler = this.VALUE_HANDLER_MAP.get(columnInfo.getClass());
-            fieldValueHandler.handle(context, columnInfo, unwrapParameterObject, boundSql);
+            fieldValueHandler.handle(methodInfo, columnInfo, unwrapParameterObject, boundSql);
         }
-        return unwrapParameterObject;
     }
 
     private boolean isValueProcessor(MethodInfo methodInfo, Object parameterObject) {
@@ -70,7 +70,7 @@ public class MybatisgxValueProcessor {
 
     private static abstract class AbstractFieldValueHandler {
 
-        public abstract void handle(ValueProcessPrepareContext context, ColumnInfo columnInfo, Object parameterObject, BoundSql boundSql);
+        public abstract void handle(MethodInfo methodInfo, ColumnInfo columnInfo, Object parameterObject, BoundSql boundSql);
 
         protected Object valueHandle(MethodCommandType commandType, ColumnInfo columnInfo, Object originalValue, Object parameterObject) {
             FieldInfo fieldInfo = columnInfo.getFieldInfo();
@@ -90,10 +90,8 @@ public class MybatisgxValueProcessor {
     private static class LogicDeleteIdFieldValueHandler extends AbstractFieldValueHandler {
 
         @Override
-        public void handle(ValueProcessPrepareContext context, ColumnInfo columnInfo, Object parameterObject, BoundSql boundSql) {
-            MethodInfo methodInfo = context.getMethodInfo();
-            MethodCommandType commandType = context.getCommandType();
-
+        public void handle(MethodInfo methodInfo, ColumnInfo columnInfo, Object parameterObject, BoundSql boundSql) {
+            MethodCommandType commandType = methodInfo.getMethodCommandType();
             EntityInfo entityInfo = methodInfo.getMapperInfo().getEntityInfo();
             LogicDeleteIdColumnInfo logicDeleteIdColumnInfo = (LogicDeleteIdColumnInfo) entityInfo.getLogicDeleteIdColumnInfo();
             if (logicDeleteIdColumnInfo != null) {
@@ -107,8 +105,8 @@ public class MybatisgxValueProcessor {
     private static class CommonFieldValueHandler extends AbstractFieldValueHandler {
 
         @Override
-        public void handle(ValueProcessPrepareContext context, ColumnInfo columnInfo, Object parameterObject, BoundSql boundSql) {
-            MethodCommandType commandType = context.getCommandType();
+        public void handle(MethodInfo methodInfo, ColumnInfo columnInfo, Object parameterObject, BoundSql boundSql) {
+            MethodCommandType commandType = methodInfo.getMethodCommandType();
             Object originalValue = this.getValueByChain(parameterObject, columnInfo);
             Object value = this.valueHandle(commandType, columnInfo, originalValue, parameterObject);
             this.setValueByChain(parameterObject, columnInfo, value);

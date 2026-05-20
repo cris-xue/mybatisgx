@@ -1,7 +1,6 @@
 package com.mybatisgx.ext.session;
 
 import com.mybatisgx.executor.MybatisgxValueProcessor;
-import com.mybatisgx.executor.ValueProcessPrepareContext;
 import com.mybatisgx.ext.executor.MybatisgxBatchExecutor;
 import com.mybatisgx.ext.executor.MybatisgxRoutingExecutor;
 import com.mybatisgx.ext.executor.resultset.MybatisgxResultSetHandler;
@@ -53,10 +52,7 @@ public class MybatisgxConfiguration extends Configuration {
     @Override
     public StatementHandler newStatementHandler(Executor executor, MappedStatement mappedStatement, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
         StatementHandler statementHandler = super.newStatementHandler(executor, mappedStatement, parameterObject, rowBounds, resultHandler, boundSql);
-        ValueProcessPrepareContext context = this.mybatisgxValueProcessor.prepare(mappedStatement, parameterObject);
-        if (context.getProcess()) {
-            this.mybatisgxValueProcessor.process(context, parameterObject, statementHandler.getBoundSql());
-        }
+        this.mybatisgxValueProcessor.process(mappedStatement, parameterObject, statementHandler.getBoundSql());
         return statementHandler;
     }
 

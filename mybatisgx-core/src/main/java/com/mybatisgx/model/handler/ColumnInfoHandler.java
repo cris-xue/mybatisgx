@@ -209,8 +209,30 @@ public class ColumnInfoHandler {
                     );
                 }
             }
+            ValueProcessor[] valueProcessors = this.getValueProcessors(generatedValue.value());
+            columnInfo.setValueProcessors(valueProcessors);
+            columnInfo.setGenerateValue(generatedValue);
         }
-        columnInfo.setGenerateValue(generatedValue);
+    }
+
+    private ValueProcessor[] getValueProcessors(Class<?>[] generatedValues) {
+        ValueProcessor[] valueProcessors = new ValueProcessor[generatedValues.length];
+        try {
+            for (int i = 0; i < generatedValues.length; i++) {
+                Class<ValueProcessor> generatedValueClass = (Class<ValueProcessor>) generatedValues[i];
+                ValueProcessor valueProcessor = DaoMethodManager.get(generatedValueClass);
+                if (valueProcessor == null) {
+                    valueProcessor = generatedValueClass.newInstance();
+                    DaoMethodManager.register(generatedValueClass);
+                }
+                valueProcessors[i] = valueProcessor;
+            }
+        } catch (InstantiationException e) {
+            throw new MybatisgxException(e);
+        } catch (IllegalAccessException e) {
+            throw new MybatisgxException(e);
+        }
+        return valueProcessors;
     }
 
     private List<ColumnInfo> getColumnInfoList(ColumnInfo columnInfo, Type type, Map<Type, Class<?>> typeParameterMap) {
@@ -477,7 +499,6 @@ public class ColumnInfoHandler {
             for (ColumnInfo generateValueColumnInfo : generateValueColumnInfoList) {
                 if (generateValueColumnInfo.getGenerateValue() != null) {
                     entityInfo.addGenerateValueColumnInfo(generateValueColumnInfo);
-                    DaoMethodManager.register((Class<ValueProcessor>[]) generateValueColumnInfo.getGenerateValue().value());
                 }
             }
         }

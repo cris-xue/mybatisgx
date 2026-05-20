@@ -1,6 +1,7 @@
 package com.mybatisgx.model;
 
 import com.mybatisgx.annotation.*;
+import com.mybatisgx.spi.ValueProcessor;
 
 import java.lang.reflect.Field;
 import java.util.LinkedHashMap;
@@ -87,6 +88,10 @@ public class ColumnInfo {
      * java字段映射字段信息，userName={userName=1}
      */
     private Map<String, ColumnInfo> columnInfoMap = new LinkedHashMap();
+    /**
+     * 值处理列表，数组中的顺序就是执行值处理的顺序
+     */
+    private ValueProcessor[] valueProcessors;
     /**
      * 数据库字段注解
      */
@@ -268,6 +273,14 @@ public class ColumnInfo {
 
     public void addColumnInfo(ColumnInfo columnInfo) {
         this.columnInfoMap.put(columnInfo.getJavaColumnName(), columnInfo);
+    }
+
+    public ValueProcessor[] getValueProcessors() {
+        return valueProcessors;
+    }
+
+    public void setValueProcessors(ValueProcessor[] valueProcessors) {
+        this.valueProcessors = valueProcessors;
     }
 
     public Column getColumn() {

@@ -85,8 +85,7 @@ public class MybatisgxValueProcessor {
         protected Object valueHandle(MethodCommandType commandType, ColumnInfo columnInfo, Object originalValue, Object parameterObject) {
             FieldInfo fieldInfo = columnInfo.getFieldInfo();
             ValueProcessContext context = new DefaultValueProcessContext(commandType, fieldInfo, originalValue, parameterObject);
-            List<ValueProcessor> valueProcessors = DaoMethodManager.get(columnInfo.getGenerateValue().value());
-            for (ValueProcessor valueProcessor : valueProcessors) {
+            for (ValueProcessor valueProcessor : columnInfo.getValueProcessors()) {
                 if (valueProcessor.supports(fieldInfo)) {
                     if (valueProcessor.commandTypes().contains(commandType)) {
                         Object fieldValue = valueProcessor.process(context);

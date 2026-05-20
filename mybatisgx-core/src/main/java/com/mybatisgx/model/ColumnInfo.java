@@ -24,6 +24,10 @@ public class ColumnInfo {
      */
     private Field field;
     /**
+     * java字段信息
+     */
+    private FieldInfo fieldInfo;
+    /**
      * 访问器
      */
     private LambdaAccessor lambdaAccessor;
@@ -108,6 +112,10 @@ public class ColumnInfo {
      */
     private GeneratedValue generatedValue;
 
+    public ColumnInfo() {
+        this.fieldInfo = new FieldInfo(this);
+    }
+
     public ColumnInfo getParent() {
         return parent;
     }
@@ -122,6 +130,14 @@ public class ColumnInfo {
 
     public void setField(Field field) {
         this.field = field;
+    }
+
+    public FieldInfo getFieldInfo() {
+        return fieldInfo;
+    }
+
+    public void setFieldInfo(FieldInfo fieldInfo) {
+        this.fieldInfo = fieldInfo;
     }
 
     public LambdaAccessor getLambdaAccessor() {

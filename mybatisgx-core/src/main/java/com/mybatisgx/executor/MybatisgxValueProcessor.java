@@ -83,7 +83,7 @@ public class MybatisgxValueProcessor {
         public abstract void handle(ValueProcessPrepareContext context, ColumnInfo columnInfo, Object parameterObject, BoundSql boundSql);
 
         protected Object valueHandle(MethodCommandType commandType, ColumnInfo columnInfo, Object originalValue, Object parameterObject) {
-            FieldInfo fieldInfo = new FieldInfo(columnInfo);
+            FieldInfo fieldInfo = columnInfo.getFieldInfo();
             ValueProcessContext context = new DefaultValueProcessContext(commandType, fieldInfo, originalValue, parameterObject);
             List<ValueProcessor> valueProcessors = DaoMethodManager.get(columnInfo.getGenerateValue().value());
             for (ValueProcessor valueProcessor : valueProcessors) {

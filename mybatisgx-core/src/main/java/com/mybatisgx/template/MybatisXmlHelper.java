@@ -50,6 +50,14 @@ public class MybatisXmlHelper {
         return foreachElement;
     }
 
+    public static Element buildTrimElement(String prefix, String suffix, String suffixOverrides) {
+        Element trimElement = DocumentHelper.createElement("trim");
+        trimElement.addAttribute("prefix", prefix);
+        trimElement.addAttribute("suffix", suffix);
+        trimElement.addAttribute("suffixOverrides", suffixOverrides);
+        return trimElement;
+    }
+
     public static String getTestExpression(List<String> pathItemList) {
         List<String> isNotEmptyList = new ArrayList(5);
         List<String> lastPathItem = new ArrayList(5);

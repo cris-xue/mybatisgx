@@ -45,19 +45,23 @@ public class InsertTemplateHandler {
         insertElement.addAttribute("useGeneratedKeys", "true");
         insertElement.addText(String.format("insert into %s", entityInfo.getTableName()));
 
-        Element dbTrimElement = insertElement.addElement("trim");
-        dbTrimElement.addAttribute("prefix", "(");
-        dbTrimElement.addAttribute("suffix", ")");
-        dbTrimElement.addAttribute("suffixOverrides", ",");
-
+        Element dbTrimElement = MybatisXmlHelper.buildTrimElement("(", ")", ",");
         insertHandler.setColumn(methodInfo, dbTrimElement);
+        if (methodInfo.getDynamic()) {
+            insertElement.add(dbTrimElement);
+        } else {
+            String dbTrimElementString = String.format(" %s", XmlCompiler.compile(dbTrimElement));
+            insertElement.addText(dbTrimElementString);
+        }
 
-        Element javaTrimElement = insertElement.addElement("trim");
-        javaTrimElement.addAttribute("prefix", "values (");
-        javaTrimElement.addAttribute("suffix", ")");
-        javaTrimElement.addAttribute("suffixOverrides", ",");
-
+        Element javaTrimElement = MybatisXmlHelper.buildTrimElement("values (", ")", ",");
         insertHandler.setValue(methodInfo, javaTrimElement);
+        if (methodInfo.getDynamic()) {
+            insertElement.add(javaTrimElement);
+        } else {
+            String javaTrimElementString = String.format(" %s", XmlCompiler.compile(javaTrimElement));
+            insertElement.addText(javaTrimElementString);
+        }
 
         return document.asXML();
     }

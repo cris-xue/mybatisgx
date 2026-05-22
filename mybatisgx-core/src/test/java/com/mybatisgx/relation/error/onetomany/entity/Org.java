@@ -37,11 +37,11 @@ public class Org extends IdBaseEntity<Integer> {
         this.code = code;
     }
 
-    /*public List<User> getUserList() {
+    public List<User> getUserList() {
         return userList;
     }
 
     public void setUserList(List<User> userList) {
         this.userList = userList;
-    }*/
+    }
 }

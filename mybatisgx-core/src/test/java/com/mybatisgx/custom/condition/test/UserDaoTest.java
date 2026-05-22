@@ -37,6 +37,7 @@ public class UserDaoTest {
         for (int i = 0; i < count; i++) {
             User user = fixtureGenerator.createRandomized(User.class);
             user.setId(null);
+            user.setLogicDeleteId(null);
             userList.add(user);
         }
         userDao.insertBatch(userList, 3000);
@@ -97,6 +98,7 @@ public class UserDaoTest {
         fixtureGenerator.configure().ignoreCyclicReferences();
         User user = fixtureGenerator.createRandomized(User.class);
         user.setId(null);
+        user.setLogicDeleteId(null);
         int insertCount = userDao.insert(user);
         Assert.assertEquals(1, insertCount);
 
@@ -113,6 +115,7 @@ public class UserDaoTest {
         fixtureGenerator.configure().ignoreCyclicReferences();
         User user = fixtureGenerator.createRandomized(User.class);
         user.setId(null);
+        user.setLogicDeleteId(null);
         int insertCount = userDao.insert(user);
         Assert.assertEquals(1, insertCount);
 

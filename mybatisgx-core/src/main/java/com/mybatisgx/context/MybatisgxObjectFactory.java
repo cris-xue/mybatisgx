@@ -1,6 +1,5 @@
 package com.mybatisgx.context;
 
-import com.mybatisgx.executor.MybatisgxValueProcessor;
 import com.mybatisgx.executor.keygen.KeyGenerator;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.model.handler.MethodInfoHandler;
@@ -16,6 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 一句话描述
+ *
  * @author 薛承城
  * @date 2025/11/25 18:08
  */
@@ -38,7 +38,6 @@ public class MybatisgxObjectFactory {
         OBJECTO_MAP.put(DeleteTemplateHandler.class, new DeleteTemplateHandler());
         OBJECTO_MAP.put(UpdateTemplateHandler.class, new UpdateTemplateHandler());
 
-        OBJECTO_MAP.put(MybatisgxValueProcessor.class, new MybatisgxValueProcessor());
         if (keyGenerator != null) {
             OBJECTO_MAP.put(KeyGenerator.class, keyGenerator);
         }

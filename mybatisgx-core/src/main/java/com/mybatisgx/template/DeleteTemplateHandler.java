@@ -46,6 +46,9 @@ public class DeleteTemplateHandler {
 
         Element whereElement = whereTemplateHandler.execute(entityInfo, methodInfo);
         deleteElement.add(whereElement);
+        if (!methodInfo.getDynamic()) {
+            XmlCompiler.where(whereElement);
+        }
         return document.asXML();
     }
 
@@ -67,11 +70,10 @@ public class DeleteTemplateHandler {
     private Element logicDelete(EntityInfo entityInfo, MethodInfo methodInfo) {
         Element updateElement = DocumentHelper.createElement("update");
         updateElement.addAttribute("id", methodInfo.getMethodName());
-        updateElement.addText(String.format("update %s", entityInfo.getTableName()));
-        Element setElement = updateElement.addElement("set");
+        updateElement.addText(String.format("update %s set ", entityInfo.getTableName()));
 
         List<String> expressionList = this.getLogicDeleteExpressionList(entityInfo);
-        setElement.addText(StringUtils.join(expressionList, ", "));
+        updateElement.addText(StringUtils.join(expressionList, ", "));
         return updateElement;
     }
 

@@ -1,5 +1,7 @@
 package com.mybatisgx.spi;
 
+import com.mybatisgx.api.MethodCommandType;
+
 import java.util.EnumSet;
 
 public interface ValueProcessor {
@@ -10,9 +12,9 @@ public interface ValueProcessor {
     boolean supports(FieldMeta fieldMeta);
 
     /**
-     * 支持的生命周期
+     * 支持的命令类型
      */
-    EnumSet<ValueProcessPhase> phases();
+    EnumSet<MethodCommandType> commandTypes();
 
     /**
      * 执行值处理

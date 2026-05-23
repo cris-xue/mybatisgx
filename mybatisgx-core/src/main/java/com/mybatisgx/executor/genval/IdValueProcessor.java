@@ -1,12 +1,12 @@
 package com.mybatisgx.executor.genval;
 
 import com.mybatisgx.annotation.Id;
+import com.mybatisgx.api.MethodCommandType;
 import com.mybatisgx.context.MybatisgxObjectFactory;
 import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.executor.keygen.KeyGenerator;
 import com.mybatisgx.spi.FieldMeta;
 import com.mybatisgx.spi.ValueProcessContext;
-import com.mybatisgx.spi.ValueProcessPhase;
 import com.mybatisgx.spi.ValueProcessor;
 
 import java.util.EnumSet;
@@ -25,8 +25,8 @@ public class IdValueProcessor implements ValueProcessor {
     }
 
     @Override
-    public EnumSet<ValueProcessPhase> phases() {
-        return EnumSet.of(ValueProcessPhase.INSERT);
+    public EnumSet<MethodCommandType> commandTypes() {
+        return EnumSet.of(MethodCommandType.INSERT);
     }
 
     @Override

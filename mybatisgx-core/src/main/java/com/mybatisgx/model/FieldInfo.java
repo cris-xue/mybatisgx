@@ -1,6 +1,5 @@
-package com.mybatisgx.executor;
+package com.mybatisgx.model;
 
-import com.mybatisgx.model.ColumnInfo;
 import com.mybatisgx.spi.FieldMeta;
 
 import java.lang.annotation.Annotation;

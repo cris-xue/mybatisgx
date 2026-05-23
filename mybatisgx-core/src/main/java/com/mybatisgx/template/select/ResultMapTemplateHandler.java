@@ -5,6 +5,7 @@ import com.mybatisgx.model.*;
 import com.mybatisgx.utils.TypeUtils;
 import com.mybatisgx.utils.XmlUtils;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.parsing.XPathParser;
 import org.dom4j.Document;
@@ -13,6 +14,7 @@ import org.dom4j.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,7 +65,8 @@ public class ResultMapTemplateHandler {
             ResultMapHelper.idColumnElement(resultMapElement, resultMapInfo, idColumnInfo);
         } else {
             for (ColumnInfo columnInfoComposite : columnInfoComposites) {
-                String javaColumnName = String.format("%s.%s", idColumnInfo.getJavaColumnName(), columnInfoComposite.getJavaColumnName());
+                List<String> javaColumnNamePathList = columnInfoComposite.getJavaColumnNamePathList();
+                String javaColumnName = StringUtils.join(javaColumnNamePathList, ".");
                 ColumnInfo composite = new ColumnInfo.Builder().columnInfo(columnInfoComposite).javaColumnName(javaColumnName).build();
                 ResultMapHelper.idColumnElement(resultMapElement, resultMapInfo, composite);
             }
@@ -109,18 +112,15 @@ public class ResultMapTemplateHandler {
                     ColumnInfo foreignKeyColumnInfo = inverseForeignKeyColumnInfo.getColumnInfo();
                     ColumnInfo referencedColumnInfo = inverseForeignKeyColumnInfo.getReferencedColumnInfo();
                     if (TypeUtils.typeEquals(referencedColumnInfo, IdColumnInfo.class)) {
-                        List<ColumnInfo> idColumnInfoComposites = referencedColumnInfo.getComposites();
-                        if (ObjectUtils.isEmpty(idColumnInfoComposites)) {
-                            String javaColumnName = String.format("%s.%s", relationColumnInfo.getJavaColumnName(), referencedColumnInfo.getJavaColumnName());
-                            ColumnInfo composite = new ColumnInfo.Builder().columnInfo(foreignKeyColumnInfo).javaColumnName(javaColumnName).build();
-                            ResultMapHelper.resultColumnElement(resultMapElement, resultMapInfo, composite);
-                        } else {
-                            for (ColumnInfo idColumnComposite : idColumnInfoComposites) {
-                                String javaColumnName = String.format("%s.%s.%s", relationColumnInfo.getJavaColumnName(), referencedColumnInfo.getJavaColumnName(), idColumnComposite.getJavaColumnName());
-                                ColumnInfo composite = new ColumnInfo.Builder().columnInfo(foreignKeyColumnInfo).javaColumnName(javaColumnName).build();
-                                ResultMapHelper.resultColumnElement(resultMapElement, resultMapInfo, composite);
-                            }
-                        }
+                        List<String> relationJavaColumnNamePathList = relationColumnInfo.getJavaColumnNamePathList();
+                        List<String> referencedJavaColumnNamePathList = referencedColumnInfo.getJavaColumnNamePathList();
+                        List<String> javaColumnNamePathList = new ArrayList(5);
+                        javaColumnNamePathList.addAll(relationJavaColumnNamePathList);
+                        javaColumnNamePathList.addAll(referencedJavaColumnNamePathList);
+
+                        String javaColumnName = StringUtils.join(javaColumnNamePathList, ".");
+                        ColumnInfo composite = new ColumnInfo.Builder().columnInfo(foreignKeyColumnInfo).javaColumnName(javaColumnName).build();
+                        ResultMapHelper.resultColumnElement(resultMapElement, resultMapInfo, composite);
                     }
                 }
             }

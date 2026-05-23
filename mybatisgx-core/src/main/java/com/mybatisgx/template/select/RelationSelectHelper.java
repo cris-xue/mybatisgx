@@ -37,10 +37,9 @@ public class RelationSelectHelper {
         return selectElement.addElement("where");
     }
 
-    public static Element buildWhereElement(Element selectElement, Expression whereCondition) {
-        Element whereElement = buildWhereElement(selectElement);
-        whereElement.addText(whereCondition.toString());
-        return whereElement;
+    public static void buildWhereElement(Element selectElement, Expression whereCondition) {
+        String whereString = String.format(" where %s", whereCondition.toString());
+        selectElement.addText(whereString);
     }
 
     public static Element buildForeachElement(Element whereElement, Expression whereCondition) {

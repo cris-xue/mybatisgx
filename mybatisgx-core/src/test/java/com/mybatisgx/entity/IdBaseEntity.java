@@ -1,6 +1,8 @@
 package com.mybatisgx.entity;
 
+import com.mybatisgx.annotation.GeneratedValue;
 import com.mybatisgx.annotation.Id;
+import com.mybatisgx.executor.genval.IdValueProcessor;
 
 /**
  * @author ：薛承城
@@ -10,6 +12,7 @@ import com.mybatisgx.annotation.Id;
 public abstract class IdBaseEntity<ID> {
 
     @Id
+    @GeneratedValue(IdValueProcessor.class)
     protected ID id;
 
     public ID getId() {

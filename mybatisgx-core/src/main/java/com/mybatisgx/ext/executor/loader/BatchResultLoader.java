@@ -30,13 +30,10 @@ public class BatchResultLoader extends ResultLoader {
 
     public static final String NESTED_SELECT_PARAM_COLLECTION = "nested_select_param_collection";
 
-    private MetaObject parameterObjectMetaObject;
-
-    private ResultMapping propertyMapping;
-
-    private List<ResultMapping> idResultMappings;
-
-    private BatchResultLoaderContext batchResultLoaderContext;
+    private final List<ResultMapping> idResultMappings;
+    private final MetaObject parameterObjectMetaObject;
+    private final ResultMapping propertyMapping;
+    private final BatchResultLoaderContext batchResultLoaderContext;
 
     public BatchResultLoader(
             Configuration configuration,

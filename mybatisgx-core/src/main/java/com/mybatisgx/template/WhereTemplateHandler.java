@@ -22,8 +22,12 @@ import java.util.*;
 public class WhereTemplateHandler {
 
     public Element execute(EntityInfo entityInfo, MethodInfo methodInfo) {
-        ConditionProcessorFactory factory = new ConditionProcessorFactory();
+        // 如果不存在条件
+        if (!methodInfo.getExistCondition()) {
+            return null;
+        }
         Element whereElement = DocumentHelper.createElement("where");
+        ConditionProcessorFactory factory = new ConditionProcessorFactory();
         this.handleConditionGroup(methodInfo, whereElement, methodInfo.getConditionInfoList(), factory);
         this.addOptimisticLockCondition(entityInfo, methodInfo, whereElement);
         this.addLogicDeleteCondition(entityInfo, whereElement);
@@ -120,7 +124,9 @@ public class WhereTemplateHandler {
 
         WhereItemContext handleComplexTypeParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite);
 
-        WhereItemContext handleRelationTypeParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo);
+        WhereItemContext handleRelationSimpleTypeParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo);
+
+        WhereItemContext handleRelationComplexTypeParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo, ColumnInfo columnInfo);
     }
 
     static abstract class AbstractConditionHandler implements ConditionHandler {
@@ -202,8 +208,17 @@ public class WhereTemplateHandler {
                 if (relationColumnInfo.getMappedByRelationColumnInfo() == null) {
                     for (ForeignKeyInfo foreignKeyInfo : relationColumnInfo.getInverseForeignKeyInfoList()) {
                         this.columnInfoCompositeIndex++;
-                        WhereItemContext whereItemContext = this.handleRelationTypeParam(relationColumnInfo, foreignKeyInfo);
-                        whereItemContextList.add(whereItemContext);
+                        ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();
+                        if (ObjectUtils.isEmpty(referencedColumnInfo.getComposites())) {
+                            WhereItemContext whereItemContext = this.handleRelationSimpleTypeParam(relationColumnInfo, foreignKeyInfo);
+                            whereItemContextList.add(whereItemContext);
+                        }
+                        if (ObjectUtils.isNotEmpty(referencedColumnInfo.getComposites())) {
+                            for (ColumnInfo composite : referencedColumnInfo.getComposites()) {
+                                WhereItemContext whereItemContext = this.handleRelationComplexTypeParam(relationColumnInfo, foreignKeyInfo, composite);
+                                whereItemContextList.add(whereItemContext);
+                            }
+                        }
                     }
                 }
             }
@@ -223,20 +238,6 @@ public class WhereTemplateHandler {
                 }
             }
             throw new MybatisgxException("columnInfoClassCategory is null");
-        }
-
-        protected String getTestExpression(List<String> pathItemList) {
-            String[] paths = pathItemList.toArray(new String[pathItemList.size()]);
-            if (paths.length == 1) {
-                return String.format("%1$s != null", paths);
-            }
-            if (paths.length == 2) {
-                return String.format("%1$s != null and %1$s.%2$s != null", paths);
-            }
-            if (paths.length == 3) {
-                return String.format("%1$s != null and %1$s.%2$s != null and %1$s.%2$s.%3$s != null", paths);
-            }
-            return "";
         }
 
         protected String getParamValueExpression(List<String> pathItemList) {
@@ -272,27 +273,43 @@ public class WhereTemplateHandler {
             if (this.comparisonOperator.isNullComparisonOperator()) {
                 return whereElement;
             }
-            if (dynamic) {
-                return MybatisXmlHelper.buildIfElement(whereElement, testExpression);
-                /*Element ifElement = whereElement.addElement("if");
-                ifElement.addAttribute("test", testExpression);
-                return ifElement;*/
-            }
-            return whereElement;
+            return dynamic ? MybatisXmlHelper.buildIfElement(whereElement, testExpression) : whereElement;
         }
 
-        protected Element buildBindElement(String name, String value) {
-            Element bindElement = DocumentHelper.createElement("bind");
-            bindElement.addAttribute("name", name);
-            bindElement.addAttribute("value", value);
-            return bindElement;
-        }
-
-        protected List<String> getParamValuePathItemList(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            List<String> argValueCommonPathItemList = Lists.newArrayList(methodParamInfo.getArgValueCommonPathItemList());
+        /**
+         * 获取参数值路径
+         * <code>
+         *     id1 = #{multiId.id1}
+         *     code = #{code}
+         * </code>
+         * @param columnInfoComposite
+         * @return
+         */
+        protected List<String> getParamValuePathItemList(ColumnInfo columnInfoComposite) {
+            List<String> javaColumnNamePathList = new ArrayList<>();
             if (columnInfoComposite != null) {
-                argValueCommonPathItemList.add(columnInfoComposite.getJavaColumnName());
+                javaColumnNamePathList.add(columnInfoComposite.getJavaColumnName());
             }
+            return this.getPathItemList(javaColumnNamePathList);
+        }
+
+        /**
+         * 获取关联对象复合类型参数值路径
+         * and user_id1 = #{user.multiId.id1}
+         * @param relationColumnComposite
+         * @return
+         */
+        protected List<String> getRelationComplexTypeParamValuePathItemList(ColumnInfo relationColumnComposite) {
+            List<String> javaColumnNamePathList = new ArrayList<>();
+            if (relationColumnComposite != null && relationColumnComposite.getJavaColumnNamePathList() != null) {
+                javaColumnNamePathList.addAll(relationColumnComposite.getJavaColumnNamePathList());
+            }
+            return this.getPathItemList(javaColumnNamePathList);
+        }
+
+        private List<String> getPathItemList(List<String> javaColumnNamePathList) {
+            List<String> argValueCommonPathItemList = Lists.newArrayList(methodParamInfo.getArgValueCommonPathItemList());
+            argValueCommonPathItemList.addAll(javaColumnNamePathList);
             return argValueCommonPathItemList;
         }
     }
@@ -310,18 +327,23 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleSimpleTypeParam(ColumnInfo columnInfo) {
-            List<String> paramValuePathItemList = this.getParamValuePathItemList(columnInfo, null);
+            List<String> paramValuePathItemList = this.getParamValuePathItemList(null);
             return this.buildWhereItemContext(columnInfo, paramValuePathItemList);
         }
 
         @Override
         public WhereItemContext handleComplexTypeParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            List<String> paramValuePathItemList = this.getParamValuePathItemList(columnInfo, columnInfoComposite);
+            List<String> paramValuePathItemList = this.getParamValuePathItemList(columnInfoComposite);
             return this.buildWhereItemContext(columnInfoComposite, paramValuePathItemList);
         }
 
         @Override
-        public WhereItemContext handleRelationTypeParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo) {
+        public WhereItemContext handleRelationSimpleTypeParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo) {
+            throw new UnsupportedOperationException("多对多关系字段不支持模糊查询");
+        }
+
+        @Override
+        public WhereItemContext handleRelationComplexTypeParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo, ColumnInfo columnInfo) {
             throw new UnsupportedOperationException("多对多关系字段不支持模糊查询");
         }
 
@@ -389,19 +411,25 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleSimpleTypeParam(ColumnInfo columnInfo) {
-            List<String> paramValuePathItemList = this.getParamValuePathItemList(columnInfo, null);
+            List<String> paramValuePathItemList = this.getParamValuePathItemList(null);
             return this.buildWhereItemContext(columnInfo, paramValuePathItemList);
         }
 
         @Override
         public WhereItemContext handleComplexTypeParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            List<String> paramValuePathItemList = this.getParamValuePathItemList(columnInfo, columnInfoComposite);
+            List<String> paramValuePathItemList = this.getParamValuePathItemList(columnInfoComposite);
             return this.buildWhereItemContext(columnInfoComposite, paramValuePathItemList);
         }
 
         @Override
-        public WhereItemContext handleRelationTypeParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo) {
-            List<String> paramValuePathItemList = this.getParamValuePathItemList(relationColumnInfo, foreignKeyInfo.getReferencedColumnInfo());
+        public WhereItemContext handleRelationSimpleTypeParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo) {
+            List<String> paramValuePathItemList = this.getParamValuePathItemList(foreignKeyInfo.getReferencedColumnInfo());
+            return this.buildWhereItemContext(foreignKeyInfo.getColumnInfo(), paramValuePathItemList);
+        }
+
+        @Override
+        public WhereItemContext handleRelationComplexTypeParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo, ColumnInfo columnInfo) {
+            List<String> paramValuePathItemList = this.getRelationComplexTypeParamValuePathItemList(columnInfo);
             return this.buildWhereItemContext(foreignKeyInfo.getColumnInfo(), paramValuePathItemList);
         }
 
@@ -419,37 +447,31 @@ public class WhereTemplateHandler {
             Element foreachElement = MybatisXmlHelper.buildForeachElement(paramValueExpression);
             return new WhereItemContext(testExpression, Arrays.asList(conditionExpression, foreachElement));
         }
-
-        private Element buildForeachElement(String collection) {
-            Element foreachElement = DocumentHelper.createElement("foreach");
-            foreachElement.addAttribute("index", "index");
-            foreachElement.addAttribute("item", "item");
-            foreachElement.addAttribute("collection", collection);
-            foreachElement.addAttribute("open", "(");
-            foreachElement.addAttribute("close", ")");
-            foreachElement.addAttribute("separator", ",");
-            foreachElement.addText("#{item}");
-            return foreachElement;
-        }
     }
 
     static class BetweenConditionHandler extends AbstractConditionHandler {
 
         @Override
         public WhereItemContext handleSimpleTypeParam(ColumnInfo columnInfo) {
-            List<String> paramValuePathItemList = this.getParamValuePathItemList(columnInfo, null);
+            List<String> paramValuePathItemList = this.getParamValuePathItemList(null);
             return this.buildWhereItemContext(columnInfo, paramValuePathItemList);
         }
 
         @Override
         public WhereItemContext handleComplexTypeParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            List<String> paramValuePathItemList = this.getParamValuePathItemList(columnInfo, columnInfoComposite);
+            List<String> paramValuePathItemList = this.getParamValuePathItemList(columnInfoComposite);
             return this.buildWhereItemContext(columnInfoComposite, paramValuePathItemList);
         }
 
         @Override
-        public WhereItemContext handleRelationTypeParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo) {
-            List<String> paramValuePathItemList = this.getParamValuePathItemList(relationColumnInfo, foreignKeyInfo.getReferencedColumnInfo());
+        public WhereItemContext handleRelationSimpleTypeParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo) {
+            List<String> paramValuePathItemList = this.getParamValuePathItemList(foreignKeyInfo.getReferencedColumnInfo());
+            return this.buildWhereItemContext(foreignKeyInfo.getColumnInfo(), paramValuePathItemList);
+        }
+
+        @Override
+        public WhereItemContext handleRelationComplexTypeParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo, ColumnInfo columnInfo) {
+            List<String> paramValuePathItemList = this.getRelationComplexTypeParamValuePathItemList(columnInfo);
             return this.buildWhereItemContext(foreignKeyInfo.getColumnInfo(), paramValuePathItemList);
         }
 
@@ -478,19 +500,25 @@ public class WhereTemplateHandler {
 
         @Override
         public WhereItemContext handleSimpleTypeParam(ColumnInfo columnInfo) {
-            List<String> paramValuePathItemList = this.getParamValuePathItemList(columnInfo, null);
+            List<String> paramValuePathItemList = this.getParamValuePathItemList(null);
             return this.buildWhereItemContext(columnInfo, paramValuePathItemList);
         }
 
         @Override
         public WhereItemContext handleComplexTypeParam(ColumnInfo columnInfo, ColumnInfo columnInfoComposite) {
-            List<String> paramValuePathItemList = this.getParamValuePathItemList(columnInfo, columnInfoComposite);
+            List<String> paramValuePathItemList = this.getParamValuePathItemList(columnInfoComposite);
             return this.buildWhereItemContext(columnInfoComposite, paramValuePathItemList);
         }
 
         @Override
-        public WhereItemContext handleRelationTypeParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo) {
-            List<String> paramValuePathItemList = this.getParamValuePathItemList(relationColumnInfo, foreignKeyInfo.getReferencedColumnInfo());
+        public WhereItemContext handleRelationSimpleTypeParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo) {
+            List<String> paramValuePathItemList = this.getParamValuePathItemList(foreignKeyInfo.getReferencedColumnInfo());
+            return this.buildWhereItemContext(foreignKeyInfo.getColumnInfo(), paramValuePathItemList);
+        }
+
+        @Override
+        public WhereItemContext handleRelationComplexTypeParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo, ColumnInfo columnInfo) {
+            List<String> paramValuePathItemList = this.getRelationComplexTypeParamValuePathItemList(columnInfo);
             return this.buildWhereItemContext(foreignKeyInfo.getColumnInfo(), paramValuePathItemList);
         }
 
@@ -524,10 +552,14 @@ public class WhereTemplateHandler {
         }
 
         @Override
-        public WhereItemContext handleRelationTypeParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo) {
+        public WhereItemContext handleRelationSimpleTypeParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo) {
             throw new UnsupportedOperationException("不支持单参数关系字段");
         }
 
+        @Override
+        public WhereItemContext handleRelationComplexTypeParam(RelationColumnInfo relationColumnInfo, ForeignKeyInfo foreignKeyInfo, ColumnInfo columnInfo) {
+            throw new UnsupportedOperationException("不支持单参数关系字段");
+        }
     }
 
     static class TemplateParamContext {

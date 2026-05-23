@@ -4,8 +4,8 @@ import com.mybatisgx.annotation.Entity;
 import com.mybatisgx.annotation.Property;
 import com.mybatisgx.annotation.QueryEntity;
 import com.mybatisgx.annotation.Table;
-import com.mybatisgx.context.EntityInfoContextHolder;
 import com.mybatisgx.exception.MybatisgxException;
+import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.model.ColumnInfo;
 import com.mybatisgx.model.EntityInfo;
 import com.mybatisgx.utils.TypeUtils;
@@ -26,7 +26,9 @@ public class EntityInfoHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(EntityInfoHandler.class);
 
-    private ColumnInfoHandler columnInfoHandler = new ColumnInfoHandler();
+    private static final ColumnInfoHandler columnInfoHandler = new ColumnInfoHandler();
+    private static final ColumnInfoHandler.ColumnMap columnMapHandler = new ColumnInfoHandler.ColumnMap();
+    private static final ColumnInfoHandler.ColumnRelation columnRelationHandler = new ColumnInfoHandler.ColumnRelation();
 
     public EntityInfo execute(Class<?> entityClass) {
         Entity entity = entityClass.getAnnotation(Entity.class);
@@ -57,17 +59,16 @@ public class EntityInfoHandler {
                 .setClazz(entityClass)
                 .setColumnInfoList(columnInfoList)
                 .setTypeParameterMap(typeParameterMap)
-                .process()
                 .build();
+        this.columnMapHandler.process(entityInfo);
         this.validatePropertyExist(entityInfo);
         return entityInfo;
     }
 
-    public void processColumnRelation() {
-        List<Class<?>> entityClassList = EntityInfoContextHolder.getEntityClassList();
-        for (Class<?> entityClass : entityClassList) {
-            EntityInfo entityInfo = EntityInfoContextHolder.get(entityClass);
-            this.columnInfoHandler.processRelation(entityInfo);
+    public void processColumnRelation(MybatisgxConfiguration configuration) {
+        for (Class<?> entityClass : configuration.getEntityClassList()) {
+            EntityInfo entityInfo = configuration.getEntityInfo(entityClass);
+            this.columnRelationHandler.processRelation(entityInfo);
         }
     }
 

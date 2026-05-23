@@ -4,7 +4,6 @@ import com.mybatisgx.context.MybatisgxContextLoader;
 import com.mybatisgx.executor.keygen.SnowKeyGenerator;
 import com.mybatisgx.ext.builder.xml.MybatisgxXMLConfigBuilder;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
-import com.mybatisgx.ext.session.defaults.MybatisgxDefaultSqlSessionFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -65,7 +64,10 @@ public class DaoTestUtils {
     public static SqlSession getSqlSession(String[] entityBasePackages, String[] daoBasePackages) {
         MybatisgxConfiguration mybatisgxConfiguration = context(entityBasePackages, daoBasePackages);
         SqlSessionFactory sqlSessionFactory = new DefaultSqlSessionFactory(mybatisgxConfiguration);
-        MybatisgxDefaultSqlSessionFactory mybatisgxDefaultSqlSessionFactory = new MybatisgxDefaultSqlSessionFactory(sqlSessionFactory);
-        return mybatisgxDefaultSqlSessionFactory.openSession();
+        return sqlSessionFactory.openSession();
+    }
+
+    public static MybatisgxConfiguration getMybatisgxConfiguration(String[] entityBasePackages, String[] daoBasePackages) {
+        return context(entityBasePackages, daoBasePackages);
     }
 }

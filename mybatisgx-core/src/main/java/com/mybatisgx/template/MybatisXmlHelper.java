@@ -6,7 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -16,9 +16,7 @@ import java.util.List;
  */
 public class MybatisXmlHelper {
 
-    private static final String IS_NOT_EMPTY_1 = "@com.mybatisgx.utils.ObjectUtils@isNotEmpty(%1$s)";
-    private static final String IS_NOT_EMPTY_2 = "@com.mybatisgx.utils.ObjectUtils@isNotEmpty(%1$s.%2$s)";
-    private static final String IS_NOT_EMPTY_3 = "@com.mybatisgx.utils.ObjectUtils@isNotEmpty(%1$s.%2$s.%3$s)";
+    private static final String IS_NOT_EMPTY = "@com.mybatisgx.utils.ObjectUtils@isNotEmpty(%s)";
 
     public static Element buildTrimOrIfElement(MethodInfo methodInfo, ColumnInfo columnInfo, Element trimElement, String testExpression) {
         if (methodInfo.getDynamic() && columnInfo.getGenerateValue() == null) {
@@ -52,21 +50,25 @@ public class MybatisXmlHelper {
         return foreachElement;
     }
 
+    public static Element buildTrimElement(String prefix, String suffix, String suffixOverrides) {
+        Element trimElement = DocumentHelper.createElement("trim");
+        trimElement.addAttribute("prefix", prefix);
+        trimElement.addAttribute("suffix", suffix);
+        trimElement.addAttribute("suffixOverrides", suffixOverrides);
+        return trimElement;
+    }
+
     public static String getTestExpression(List<String> pathItemList) {
+        List<String> isNotEmptyList = new ArrayList(5);
+        List<String> lastPathItem = new ArrayList(5);
+        for (int i = 0; i < pathItemList.size(); i++) {
+            String isNotEmptyIndex = "%" + (i + 1) + "$s";
+            lastPathItem.add(isNotEmptyIndex);
+            String lastPathItemString = StringUtils.join(lastPathItem, ".");
+            isNotEmptyList.add(String.format(IS_NOT_EMPTY, lastPathItemString));
+        }
         String[] paths = pathItemList.toArray(new String[pathItemList.size()]);
-        if (paths.length == 1) {
-            List<String> isNotEmptyList = Arrays.asList(IS_NOT_EMPTY_1);
-            return String.format(StringUtils.join(isNotEmptyList, " and "), paths);
-        }
-        if (paths.length == 2) {
-            List<String> isNotEmptyList = Arrays.asList(IS_NOT_EMPTY_1, IS_NOT_EMPTY_2);
-            return String.format(StringUtils.join(isNotEmptyList, " and "), paths);
-        }
-        if (paths.length == 3) {
-            List<String> isNotEmptyList = Arrays.asList(IS_NOT_EMPTY_1, IS_NOT_EMPTY_2, IS_NOT_EMPTY_3);
-            return String.format(StringUtils.join(isNotEmptyList, " and "), paths);
-        }
-        return "";
+        return String.format(StringUtils.join(isNotEmptyList, " and "), paths);
     }
 
     public static String getValueExpression(List<String> pathItemList, ColumnInfo columnInfo) {

@@ -72,4 +72,12 @@ public class Role extends BaseEntity<Long> {
     public void setUserList(List<User> userList) {
         this.userList = userList;
     }
+
+    public List<Menu> getMenuList() {
+        return menuList;
+    }
+
+    public void setMenuList(List<Menu> menuList) {
+        this.menuList = menuList;
+    }
 }

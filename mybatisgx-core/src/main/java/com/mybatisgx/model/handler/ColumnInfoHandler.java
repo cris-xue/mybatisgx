@@ -1,20 +1,22 @@
 package com.mybatisgx.model.handler;
 
-import com.google.common.base.CaseFormat;
 import com.mybatisgx.annotation.*;
+import com.mybatisgx.context.DaoMethodManager;
 import com.mybatisgx.context.EntityInfoContextHolder;
 import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.model.*;
 import com.mybatisgx.spi.ValueProcessor;
+import com.mybatisgx.utils.BeanMethodUtils;
+import com.mybatisgx.utils.FieldNameUtils;
 import com.mybatisgx.utils.TypeUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
 
+import java.beans.PropertyDescriptor;
 import java.lang.reflect.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 字段处理器
@@ -27,13 +29,14 @@ public class ColumnInfoHandler {
     private TypeResolver typeResolver = new TypeResolver();
 
     public List<ColumnInfo> getColumnInfoList(Class<?> clazz, Map<Type, Class<?>> typeParameterMap) {
-        Field[] fields = FieldUtils.getAllFields(clazz);
-        return this.processColumnInfo(null, fields, typeParameterMap);
+        return this.processColumnInfo(clazz, null, typeParameterMap);
     }
 
-    private List<ColumnInfo> processColumnInfo(ColumnInfo parentColumnInfo, Field[] fields, Map<Type, Class<?>> typeParameterMap) {
+    private List<ColumnInfo> processColumnInfo(Class<?> clazz, ColumnInfo parentColumnInfo, Map<Type, Class<?>> typeParameterMap) {
+        Map<String, PropertyDescriptor> getterMethodMap = BeanMethodUtils.getGetterMethodMap(clazz);
+        Map<String, PropertyDescriptor> setterMethodMap = BeanMethodUtils.getSetterMethodMap(clazz);
         List<ColumnInfo> columnInfoList = new ArrayList<>();
-        for (Field field : fields) {
+        for (Field field : FieldUtils.getAllFields(clazz)) {
             int modifiers = field.getModifiers();
             Boolean isStatic = Modifier.isStatic(modifiers);
             if (isStatic) {
@@ -48,16 +51,18 @@ public class ColumnInfoHandler {
             columnInfo.setParent(parentColumnInfo);
             columnInfo.setField(field);
             columnInfo.setJavaColumnName(fieldName);
-            columnInfo.setJavaColumnNamePathList(this.getJavaColumnNamePathList(parentColumnInfo, columnInfo));
             columnInfo.setDbTypeName(column != null ? column.columnDefinition() : null);
             columnInfo.setDbColumnName(tableColumnName);
-            columnInfo.setProperty(field.getAnnotation(Property.class));
 
+            columnInfo.setProperty(field.getAnnotation(Property.class));
             columnInfo.setVersion(field.getAnnotation(Version.class));
             columnInfo.setLogicDelete(field.getAnnotation(LogicDelete.class));
-            this.setGenerateValue(field, columnInfo);
 
+            this.processGenerateValue(field, columnInfo);
+            this.processJavaColumnChain(parentColumnInfo, columnInfo);
             this.processColumnType(field, columnInfo, typeParameterMap);
+            this.processPropertyMethod(getterMethodMap, setterMethodMap, columnInfo);
+
             if (columnInfo instanceof IdColumnInfo) {
                 this.setIdColumnInfo(field, (IdColumnInfo) columnInfo, typeParameterMap);
             }
@@ -71,20 +76,8 @@ public class ColumnInfoHandler {
     }
 
     private String getTableColumnName(Field field) {
-        OneToOne oneToOne = field.getAnnotation(OneToOne.class);
-        OneToMany oneToMany = field.getAnnotation(OneToMany.class);
-        ManyToOne manyToOne = field.getAnnotation(ManyToOne.class);
-        ManyToMany manyToMany = field.getAnnotation(ManyToMany.class);
-
         String tableColumnName = "";
-        if (oneToOne != null || oneToMany != null || manyToOne != null) {
-            JoinColumn joinColumn = field.getAnnotation(JoinColumn.class);
-            if (joinColumn != null) {
-                tableColumnName = joinColumn.name();
-            }
-        } else if (manyToMany != null) {
-
-        } else {
+        if (!isGenerateTableColumnName(field)) {
             Column column = field.getAnnotation(Column.class);
             if (column != null) {
                 if (StringUtils.isNotBlank(column.name())) {
@@ -92,10 +85,18 @@ public class ColumnInfoHandler {
                 }
             } else {
                 String fieldName = field.getName();
-                tableColumnName = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, fieldName);
+                tableColumnName = FieldNameUtils.lowerCamelToLowerUnderscore(fieldName);
             }
         }
         return tableColumnName;
+    }
+
+    private boolean isGenerateTableColumnName(Field field) {
+        return field.isAnnotationPresent(OneToOne.class)
+                || field.isAnnotationPresent(OneToMany.class)
+                || field.isAnnotationPresent(ManyToOne.class)
+                || field.isAnnotationPresent(ManyToMany.class)
+                || field.isAnnotationPresent(Transient.class);
     }
 
     private void processColumnType(Field field, ColumnInfo columnInfo, Map<Type, Class<?>> typeParameterMap) {
@@ -187,9 +188,13 @@ public class ColumnInfoHandler {
         idColumnInfo.setId(id);
         idColumnInfo.setEmbeddedId(embeddedId);
         idColumnInfo.setComposites(idColumnInfoComposites);
+
+        for (ColumnInfo idColumnInfoComposite : idColumnInfoComposites) {
+            idColumnInfo.addColumnInfo(idColumnInfoComposite);
+        }
     }
 
-    private void setGenerateValue(Field field, ColumnInfo columnInfo) {
+    private void processGenerateValue(Field field, ColumnInfo columnInfo) {
         GeneratedValue generatedValue = field.getAnnotation(GeneratedValue.class);
         if (generatedValue != null) {
             // 校验生成值类型是否为 ValueProcessor 类型
@@ -204,8 +209,30 @@ public class ColumnInfoHandler {
                     );
                 }
             }
+            ValueProcessor[] valueProcessors = this.getValueProcessors(generatedValue.value());
+            columnInfo.setValueProcessors(valueProcessors);
+            columnInfo.setGenerateValue(generatedValue);
         }
-        columnInfo.setGenerateValue(generatedValue);
+    }
+
+    private ValueProcessor[] getValueProcessors(Class<?>[] generatedValues) {
+        ValueProcessor[] valueProcessors = new ValueProcessor[generatedValues.length];
+        try {
+            for (int i = 0; i < generatedValues.length; i++) {
+                Class<ValueProcessor> generatedValueClass = (Class<ValueProcessor>) generatedValues[i];
+                ValueProcessor valueProcessor = DaoMethodManager.get(generatedValueClass);
+                if (valueProcessor == null) {
+                    valueProcessor = generatedValueClass.newInstance();
+                    DaoMethodManager.register(generatedValueClass);
+                }
+                valueProcessors[i] = valueProcessor;
+            }
+        } catch (InstantiationException e) {
+            throw new MybatisgxException(e);
+        } catch (IllegalAccessException e) {
+            throw new MybatisgxException(e);
+        }
+        return valueProcessors;
     }
 
     private List<ColumnInfo> getColumnInfoList(ColumnInfo columnInfo, Type type, Map<Type, Class<?>> typeParameterMap) {
@@ -214,13 +241,19 @@ public class ColumnInfoHandler {
             ParameterizedType parameterizedType = (ParameterizedType) type;
             Map<Type, Class<?>> childTypeParameterMap = new HashMap<>();
             Map<TypeVariable<?>, Type> typeMap = TypeUtils.getTypeArguments(parameterizedType);
-            typeMap.forEach((typeVariable, typeValue) -> childTypeParameterMap.put(typeVariable, typeParameterMap.get(typeValue)));
-            Field[] fields = FieldUtils.getAllFields((Class<?>) parameterizedType.getRawType());
-            return this.processColumnInfo(columnInfo, fields, childTypeParameterMap);
+            if (ObjectUtils.isNotEmpty(typeParameterMap)) {
+                typeMap.forEach((typeVariable, typeValue) -> childTypeParameterMap.put(typeVariable, typeParameterMap.get(typeValue)));
+                Class<?> clazz = (Class<?>) parameterizedType.getRawType();
+                return this.processColumnInfo(clazz, columnInfo, childTypeParameterMap);
+            } else {
+                typeMap.forEach((typeVariable, typeValue) -> childTypeParameterMap.put(typeVariable, (Class<?>) typeValue));
+                Class<?> clazz = (Class<?>) parameterizedType.getRawType();
+                return this.processColumnInfo(clazz, columnInfo, childTypeParameterMap);
+            }
         }
-        if (type instanceof ParameterizedType) {
-            Field[] fields = FieldUtils.getAllFields((Class<?>) type);
-            return this.processColumnInfo(columnInfo, fields, typeParameterMap);
+        if (type instanceof Class) {
+            Class<?> clazz = (Class<?>) type;
+            return this.processColumnInfo(clazz, columnInfo, typeParameterMap);
         }
         return new ArrayList<>();
     }
@@ -300,13 +333,13 @@ public class ColumnInfoHandler {
         for (JoinColumn joinColumn : joinColumnList) {
             String name = joinColumn.name();
             // orderColumn、order_column -> order_column
-            String dbColumnName = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name);
+            String tableColumnName = FieldNameUtils.lowerCamelToLowerUnderscore(name);
             // order_column -> orderColumn
-            String javaColumnName = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, dbColumnName);
+            String javaColumnName = FieldNameUtils.lowerUnderscoreToLowerCamel(tableColumnName);
 
             ColumnInfo columnInfo = new ColumnInfo();
             columnInfo.setJavaColumnName(javaColumnName);
-            columnInfo.setDbColumnName(dbColumnName);
+            columnInfo.setDbColumnName(tableColumnName);
             String referencedColumnName = joinColumn.referencedColumnName();
             ForeignKeyInfo foreignKeyColumnInfo = new ForeignKeyInfo(columnInfo, referencedColumnName);
             foreignKeyColumnInfoList.add(foreignKeyColumnInfo);
@@ -314,57 +347,267 @@ public class ColumnInfoHandler {
         return foreignKeyColumnInfoList;
     }
 
-    public void processRelation(EntityInfo entityInfo) {
-        for (RelationColumnInfo relationColumnInfo : entityInfo.getRelationColumnInfoList()) {
-            String mappedBy = relationColumnInfo.getMappedBy();
-            if (StringUtils.isNotBlank(mappedBy)) {
-                ColumnInfo mappedByRelationColumnInfo = this.validateEntityRelation(relationColumnInfo, mappedBy);
-                relationColumnInfo.setMappedByRelationColumnInfo((RelationColumnInfo) mappedByRelationColumnInfo);
-            } else {
-                if (relationColumnInfo.getRelationType() != RelationType.MANY_TO_MANY) {
-                    for (ForeignKeyInfo inverseForeignKeyColumn : relationColumnInfo.getInverseForeignKeyInfoList()) {
-                        EntityInfo relationColumnEntityInfo = EntityInfoContextHolder.get(relationColumnInfo.getJavaType());
-                        String referencedColumnName = inverseForeignKeyColumn.getReferencedColumnName();
-                        ColumnInfo referencedColumnInfo = relationColumnEntityInfo.getColumnInfo(referencedColumnName);
-                        inverseForeignKeyColumn.setReferencedColumnInfo(referencedColumnInfo);
-                    }
-                } else {
-                    for (ForeignKeyInfo foreignKeyColumnInfo : relationColumnInfo.getForeignKeyInfoList()) {
-                        String referencedColumnName = foreignKeyColumnInfo.getReferencedColumnName();
-                        ColumnInfo referencedColumnInfo = entityInfo.getColumnInfo(referencedColumnName);
-                        foreignKeyColumnInfo.setReferencedColumnInfo(referencedColumnInfo);
-                    }
+    private void processJavaColumnChain(ColumnInfo parentColumnInfo, ColumnInfo columnInfo) {
+        List<ColumnInfo> columnInfoList = this.getJavaColumnNamePathList(parentColumnInfo, columnInfo);
+        List<String> javaColumnNamePathList = columnInfoList.stream().map(item -> item.getJavaColumnName()).collect(Collectors.toList());
+        columnInfo.setJavaColumnChain(columnInfoList);
+        columnInfo.setJavaColumnNamePathList(javaColumnNamePathList);
+    }
 
-                    for (ForeignKeyInfo inverseForeignKeyColumnInfo : relationColumnInfo.getInverseForeignKeyInfoList()) {
-                        EntityInfo relationColumnEntityInfo = EntityInfoContextHolder.get(relationColumnInfo.getJavaType());
-                        String referencedColumnName = inverseForeignKeyColumnInfo.getReferencedColumnName();
-                        ColumnInfo referencedColumnInfo = relationColumnEntityInfo.getDbColumnInfo(referencedColumnName);
-                        inverseForeignKeyColumnInfo.setReferencedColumnInfo(referencedColumnInfo);
+    private List<ColumnInfo> getJavaColumnNamePathList(ColumnInfo parentColumnInfo, ColumnInfo columnInfo) {
+        List<ColumnInfo> javaColumnPathList = new ArrayList();
+        if (parentColumnInfo != null && parentColumnInfo.getJavaColumnChain() != null) {
+            javaColumnPathList.addAll(parentColumnInfo.getJavaColumnChain());
+        }
+        javaColumnPathList.add(columnInfo);
+        return javaColumnPathList;
+    }
+
+    private void processPropertyMethod(Map<String, PropertyDescriptor> getterMethodMap, Map<String, PropertyDescriptor> setterMethodMap, ColumnInfo columnInfo) {
+        // 简单类型字段没有生成值注解和关系字段生成 LambdaAccessor 访问器
+        if (TypeUtils.typeEquals(columnInfo, ColumnInfo.class, LogicDeleteIdColumnInfo.class) && columnInfo.getGenerateValue() == null) {
+            return;
+        }
+
+        String javaColumnName = columnInfo.getJavaColumnName();
+        PropertyDescriptor getterPropertyDescriptor = getterMethodMap.get(javaColumnName);
+        PropertyDescriptor setterPropertyDescriptor = setterMethodMap.get(javaColumnName);
+        if (getterPropertyDescriptor == null) {
+            throw new MybatisgxException("字段 %s 不存在get方法", javaColumnName);
+        }
+        if (setterPropertyDescriptor == null) {
+            throw new MybatisgxException("字段 %s 不存在set方法", javaColumnName);
+        }
+
+        LambdaAccessor lambdaAccessor = new LambdaAccessor();
+        lambdaAccessor.setObjectFactory(LambdaAccessorFactory.createObjectFactory(columnInfo.getJavaType()));
+        lambdaAccessor.setPropertyGetter(LambdaAccessorFactory.createGetter(getterPropertyDescriptor.getReadMethod()));
+        lambdaAccessor.setPropertySetter(LambdaAccessorFactory.createSetter(setterPropertyDescriptor.getWriteMethod()));
+        columnInfo.setLambdaAccessor(lambdaAccessor);
+    }
+
+    public static class ColumnMap {
+
+        public void process(EntityInfo entityInfo) {
+            for (ColumnInfo columnInfo : entityInfo.getColumnInfoList()) {
+                this.validatorEntityColumn(entityInfo, columnInfo);
+                if (columnInfo.getVersion() != null) {
+                    entityInfo.setVersionColumnInfo(columnInfo);
+                }
+                if (columnInfo.getLogicDelete() != null) {
+                    entityInfo.setLogicDeleteColumnInfo(columnInfo);
+                }
+                if (TypeUtils.typeEquals(columnInfo, LogicDeleteIdColumnInfo.class)) {
+                    entityInfo.setLogicDeleteIdColumnInfo(columnInfo);
+                }
+                if (columnInfo instanceof RelationColumnInfo) {
+                    entityInfo.getRelationColumnInfoList().add((RelationColumnInfo) columnInfo);
+                }
+
+                this.processIdColumnInfo(entityInfo, columnInfo);
+                this.processGenerateValue(entityInfo, columnInfo);
+
+                ColumnInfo tableColumnInfo = this.getTableColumnInfo(columnInfo);
+                {
+                    if (tableColumnInfo != null) {
+                        entityInfo.addTableColumnInfo(columnInfo);
+                    }
+                    if (tableColumnInfo != null && TypeUtils.typeNotEquals(tableColumnInfo, RelationColumnInfo.class)) {
+                        entityInfo.addTableColumnMap(columnInfo.getDbColumnName(), columnInfo.getJavaColumnName());
+                    } else {
+                        RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
+                        for (ForeignKeyInfo inverseForeignKeyInfo : relationColumnInfo.getInverseForeignKeyInfoList()) {
+                            entityInfo.addTableColumnMap(inverseForeignKeyInfo.getColumnInfo().getDbColumnName(), columnInfo.getJavaColumnName());
+                        }
+                    }
+                }
+                {
+                    if (tableColumnInfo != null && TypeUtils.typeEquals(tableColumnInfo, RelationColumnInfo.class)) {
+                        RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
+                        for (ForeignKeyInfo inverseForeignKeyInfo : relationColumnInfo.getInverseForeignKeyInfoList()) {
+                            ColumnInfo independenceColumnInfo = this.relationColumnInfoToColumnInfo(inverseForeignKeyInfo.getColumnInfo());
+                            entityInfo.addColumnMap(independenceColumnInfo.getJavaColumnName(), independenceColumnInfo);
+                        }
+                    }
+                    entityInfo.addColumnMap(columnInfo.getJavaColumnName(), columnInfo);
+                }
+            }
+        }
+
+        /**
+         * id字段特殊，如果是联合主键，则自动生成一个id映射到联合主键
+         *
+         * @param columnInfo
+         */
+        private void processIdColumnInfo(EntityInfo entityInfo, ColumnInfo columnInfo) {
+            if (columnInfo instanceof IdColumnInfo) {
+                IdColumnInfo idColumnInfo = (IdColumnInfo) columnInfo;
+                entityInfo.setIdColumnInfo(idColumnInfo);
+                entityInfo.addColumnMap("id", idColumnInfo);
+                entityInfo.addTableColumnMap("id", idColumnInfo.getJavaColumnName());
+
+                List<ColumnInfo> composites = idColumnInfo.getComposites();
+                if (ObjectUtils.isEmpty(composites)) {
+                    return;
+                }
+                for (ColumnInfo composite : composites) {
+                    entityInfo.addColumnMap(composite.getJavaColumnName(), composite);
+                    String javaColumnNamePath = String.format("%s.%s", idColumnInfo.getJavaColumnName(), composite.getJavaColumnName());
+                    entityInfo.addColumnMap(javaColumnNamePath, composite);
+                }
+            }
+        }
+
+        /**
+         * 获取表字段
+         * 1、字段不存在关联实体为表字段
+         * 2、存在关联实体并且是关系维护方才是表字段【多对多关联字段在中间表，所以实体中是不存在表字段的】
+         * @param columnInfo
+         * @return
+         */
+        private ColumnInfo getTableColumnInfo(ColumnInfo columnInfo) {
+            ColumnInfo tableColumnInfo = null;
+            if (TypeUtils.typeEquals(columnInfo, RelationColumnInfo.class)) {
+                RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
+                String mappedBy = relationColumnInfo.getMappedBy();
+                if (relationColumnInfo.getManyToMany() == null && StringUtils.isBlank(mappedBy)) {
+                    tableColumnInfo = columnInfo;
+                }
+            } else {
+                Transient nonPersistent = columnInfo.getNonPersistent();
+                if (nonPersistent == null) {
+                    tableColumnInfo = columnInfo;
+                }
+            }
+            return tableColumnInfo;
+        }
+
+        private void processGenerateValue(EntityInfo entityInfo, ColumnInfo columnInfo) {
+            List<ColumnInfo> generateValueColumnInfoList = new ArrayList<>();
+            if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class)) {
+                List<ColumnInfo> columnInfoComposites = columnInfo.getComposites();
+                if (ObjectUtils.isEmpty(columnInfoComposites)) {
+                    generateValueColumnInfoList.add(columnInfo);
+                } else {
+                    for (ColumnInfo compositeColumnInfo : columnInfoComposites) {
+                        generateValueColumnInfoList.add(compositeColumnInfo);
+                    }
+                }
+            } else {
+                generateValueColumnInfoList.add(columnInfo);
+            }
+            for (ColumnInfo generateValueColumnInfo : generateValueColumnInfoList) {
+                if (generateValueColumnInfo.getGenerateValue() != null) {
+                    entityInfo.addGenerateValueColumnInfo(generateValueColumnInfo);
+                }
+            }
+        }
+
+        /**
+         * 把关联字段转成普通表字段
+         * @param inverseForeignKeyColumnInfo
+         * @return
+         */
+        private ColumnInfo relationColumnInfoToColumnInfo(ColumnInfo inverseForeignKeyColumnInfo) {
+            // 解决关联字段单独作为条件查询
+            ColumnInfo columnInfo = new ColumnInfo();
+            columnInfo.setColumn(inverseForeignKeyColumnInfo.getColumn());
+            columnInfo.setJavaColumnName(inverseForeignKeyColumnInfo.getJavaColumnName());
+            columnInfo.setDbColumnName(inverseForeignKeyColumnInfo.getDbColumnName());
+            columnInfo.setTypeCategory(TypeCategory.SIMPLE);
+            return columnInfo;
+        }
+
+        private void validatorEntityColumn(EntityInfo entityInfo, ColumnInfo columnInfo) {
+            if (TypeUtils.typeEquals(columnInfo, RelationColumnInfo.class)) {
+                RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
+                RelationType relationType = relationColumnInfo.getRelationType();
+                if (relationType == RelationType.ONE_TO_ONE) {
+                    Class<?> collectionType = relationColumnInfo.getCollectionType();
+                    if (collectionType != null) {
+                        throw new MybatisgxException("%s 类中的字段 %s 关系为一对一，字段类型不能使用Set或者List", entityInfo.getClazzName(), relationColumnInfo.getJavaColumnName());
+                    }
+                }
+                if (relationType == RelationType.ONE_TO_MANY) {
+                    Class<?> collectionType = relationColumnInfo.getCollectionType();
+                    if (collectionType == null || TypeUtils.typeNotEquals(collectionType, List.class, Set.class)) {
+                        throw new MybatisgxException("%s 类中的字段 %s 关系为一对多，字段类型不能是对象，需要使用Set或者List", entityInfo.getClazzName(), relationColumnInfo.getJavaColumnName());
+                    }
+                }
+                if (relationType == RelationType.MANY_TO_ONE) {
+                    Class<?> collectionType = relationColumnInfo.getCollectionType();
+                    if (collectionType != null) {
+                        throw new MybatisgxException("%s 类中的字段 %s 关系为多对一，字段类型不能使用Set或者List", entityInfo.getClazzName(), relationColumnInfo.getJavaColumnName());
+                    }
+                }
+                if (relationType == RelationType.MANY_TO_MANY) {
+                    Class<?> collectionType = relationColumnInfo.getCollectionType();
+                    if (collectionType == null || TypeUtils.typeNotEquals(collectionType, List.class, Set.class)) {
+                        throw new MybatisgxException("%s 类中的字段 %s 关系为多对多，字段类型不能是对象，需要使用Set或者List", entityInfo.getClazzName(), relationColumnInfo.getJavaColumnName());
                     }
                 }
             }
         }
     }
 
-    private List<String> getJavaColumnNamePathList(ColumnInfo parentColumnInfo, ColumnInfo columnInfo) {
-        List<String> javaColumnNamePathList = new ArrayList<>();
-        if (parentColumnInfo != null) {
-            javaColumnNamePathList.addAll(parentColumnInfo.getJavaColumnNamePathList());
-        }
-        javaColumnNamePathList.add(columnInfo.getJavaColumnName());
-        return javaColumnNamePathList;
-    }
+    public static class ColumnRelation {
 
-    private ColumnInfo validateEntityRelation(RelationColumnInfo relationColumnInfo, String mappedBy) {
-        Class<?> javaType = relationColumnInfo.getJavaType();
-        EntityInfo relationColumnEntityInfo = EntityInfoContextHolder.get(javaType);
-        if (relationColumnEntityInfo == null) {
-            throw new MybatisgxException("实体类 %s 不存在", javaType.getTypeName());
+        public void processRelation(EntityInfo entityInfo) {
+            for (RelationColumnInfo relationColumnInfo : entityInfo.getRelationColumnInfoList()) {
+                String mappedBy = relationColumnInfo.getMappedBy();
+                if (StringUtils.isNotBlank(mappedBy)) {
+                    ColumnInfo mappedByRelationColumnInfo = this.validateEntityRelation(relationColumnInfo, mappedBy);
+                    relationColumnInfo.setMappedByRelationColumnInfo((RelationColumnInfo) mappedByRelationColumnInfo);
+                } else {
+                    if (relationColumnInfo.getRelationType() != RelationType.MANY_TO_MANY) {
+                        for (ForeignKeyInfo inverseForeignKeyColumn : relationColumnInfo.getInverseForeignKeyInfoList()) {
+                            EntityInfo relationColumnEntityInfo = EntityInfoContextHolder.get(relationColumnInfo.getJavaType());
+
+                            String referencedColumnName = inverseForeignKeyColumn.getReferencedColumnName();
+                            ColumnInfo referencedColumnInfo = relationColumnEntityInfo.getColumnInfo(referencedColumnName);
+
+                            // 复制主键基础信息到关联字段中
+                            ColumnInfo columnInfo = inverseForeignKeyColumn.getColumnInfo();
+                            this.copyReferencedColumnInfoToColumnInfo(referencedColumnInfo, columnInfo);
+
+                            inverseForeignKeyColumn.setColumnInfo(columnInfo);
+                            inverseForeignKeyColumn.setReferencedColumnInfo(referencedColumnInfo);
+                        }
+                    } else {
+                        for (ForeignKeyInfo foreignKeyColumnInfo : relationColumnInfo.getForeignKeyInfoList()) {
+                            String referencedColumnName = foreignKeyColumnInfo.getReferencedColumnName();
+                            ColumnInfo referencedColumnInfo = entityInfo.getColumnInfo(referencedColumnName);
+                            foreignKeyColumnInfo.setReferencedColumnInfo(referencedColumnInfo);
+                        }
+
+                        for (ForeignKeyInfo inverseForeignKeyColumnInfo : relationColumnInfo.getInverseForeignKeyInfoList()) {
+                            EntityInfo relationColumnEntityInfo = EntityInfoContextHolder.get(relationColumnInfo.getJavaType());
+                            String referencedColumnName = inverseForeignKeyColumnInfo.getReferencedColumnName();
+                            ColumnInfo referencedColumnInfo = relationColumnEntityInfo.getDbColumnInfo(referencedColumnName);
+                            inverseForeignKeyColumnInfo.setReferencedColumnInfo(referencedColumnInfo);
+                        }
+                    }
+                }
+            }
         }
-        ColumnInfo mappedByRelationColumnInfo = relationColumnEntityInfo.getColumnInfo(mappedBy);
-        if (mappedByRelationColumnInfo == null) {
-            throw new MybatisgxException("实体类 %s 不存在 %s 字段", javaType.getTypeName(), mappedBy);
+
+        private void copyReferencedColumnInfoToColumnInfo(ColumnInfo referencedColumnInfo, ColumnInfo columnInfo) {
+            columnInfo.setJavaType(referencedColumnInfo.getJavaType());
+            columnInfo.setTypeCategory(referencedColumnInfo.getTypeCategory());
+            columnInfo.setDbTypeName(referencedColumnInfo.getDbTypeName());
         }
-        return mappedByRelationColumnInfo;
+
+        private ColumnInfo validateEntityRelation(RelationColumnInfo relationColumnInfo, String mappedBy) {
+            Class<?> javaType = relationColumnInfo.getJavaType();
+            EntityInfo relationColumnEntityInfo = EntityInfoContextHolder.get(javaType);
+            if (relationColumnEntityInfo == null) {
+                throw new MybatisgxException("实体类 %s 不存在", javaType.getTypeName());
+            }
+            ColumnInfo mappedByRelationColumnInfo = relationColumnEntityInfo.getColumnInfo(mappedBy);
+            if (mappedByRelationColumnInfo == null) {
+                throw new MybatisgxException("实体类 %s 不存在 %s 字段", javaType.getTypeName(), mappedBy);
+            }
+            return mappedByRelationColumnInfo;
+        }
     }
 }

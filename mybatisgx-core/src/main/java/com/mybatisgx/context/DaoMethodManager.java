@@ -1,6 +1,9 @@
 package com.mybatisgx.context;
 
+import com.mybatisgx.ext.session.MybatisgxConfiguration;
+import com.mybatisgx.model.MethodInfo;
 import com.mybatisgx.spi.ValueProcessor;
+import org.apache.ibatis.mapping.MappedStatement;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,5 +42,9 @@ public class DaoMethodManager {
             valueProcessors.add(VALUE_PROCESSOR_MAP.get(clazz));
         }
         return valueProcessors;
+    }
+
+    public static MethodInfo getMethodInfo(MappedStatement ms) {
+        return ((MybatisgxConfiguration) ms.getConfiguration()).getMethodInfo(ms);
     }
 }

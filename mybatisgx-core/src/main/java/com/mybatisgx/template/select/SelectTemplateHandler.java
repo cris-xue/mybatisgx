@@ -4,6 +4,7 @@ import com.mybatisgx.context.MybatisgxObjectFactory;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.model.*;
 import com.mybatisgx.template.WhereTemplateHandler;
+import com.mybatisgx.template.XmlCompiler;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import org.apache.commons.lang3.ObjectUtils;
 import org.dom4j.Document;
@@ -60,7 +61,9 @@ public class SelectTemplateHandler {
         }
 
         Element whereElement = whereTemplateHandler.execute(mapperInfo.getEntityInfo(), methodInfo);
-        selectXmlItemList.add(whereElement);
+        if (whereElement != null) {
+            selectXmlItemList.add(whereElement);
+        }
 
         List<SelectOrderByInfo> selectOrderByInfoList = methodInfo.getSelectOrderByInfoList();
         if (ObjectUtils.isNotEmpty(selectOrderByInfoList)) {
@@ -81,6 +84,11 @@ public class SelectTemplateHandler {
             if (selectSql instanceof String) {
                 selectElement.addText((String) selectSql);
             }
+        }
+
+        // 脱去where标签
+        if (!methodInfo.getDynamic() && whereElement != null) {
+            XmlCompiler.where(whereElement);
         }
 
         return document.asXML();

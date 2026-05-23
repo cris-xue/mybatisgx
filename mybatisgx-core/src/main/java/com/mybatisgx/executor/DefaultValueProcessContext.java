@@ -1,27 +1,29 @@
 package com.mybatisgx.executor;
 
+import com.mybatisgx.api.MethodCommandType;
 import com.mybatisgx.spi.FieldMeta;
 import com.mybatisgx.spi.ValueProcessContext;
-import com.mybatisgx.spi.ValueProcessPhase;
 import org.apache.ibatis.reflection.MetaObject;
+import org.apache.ibatis.reflection.SystemMetaObject;
 
 public class DefaultValueProcessContext implements ValueProcessContext {
 
-    private ValueProcessPhase phase;
+    private MethodCommandType commandType;
     private FieldMeta fieldMeta;
     private Object fieldValue;
+    private Object parameterObject;
     private MetaObject entityMetaObject;
 
-    public DefaultValueProcessContext(ValueProcessPhase phase, FieldMeta fieldMeta, Object fieldValue, MetaObject entityMetaObject) {
-        this.phase = phase;
+    public DefaultValueProcessContext(MethodCommandType commandType, FieldMeta fieldMeta, Object fieldValue, Object parameterObject) {
+        this.commandType = commandType;
         this.fieldMeta = fieldMeta;
         this.fieldValue = fieldValue;
-        this.entityMetaObject = entityMetaObject;
+        this.parameterObject = parameterObject;
     }
 
     @Override
-    public ValueProcessPhase getPhase() {
-        return phase;
+    public MethodCommandType getCommandType() {
+        return commandType;
     }
 
     @Override
@@ -41,6 +43,9 @@ public class DefaultValueProcessContext implements ValueProcessContext {
 
     @Override
     public Object getFieldValue(String fieldName) {
+        if (entityMetaObject == null && parameterObject != null) {
+            this.entityMetaObject = SystemMetaObject.forObject(parameterObject);
+        }
         if (entityMetaObject.hasGetter(fieldName)) {
             return entityMetaObject.getValue(fieldName);
         }

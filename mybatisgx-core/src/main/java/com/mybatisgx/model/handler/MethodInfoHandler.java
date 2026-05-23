@@ -2,14 +2,14 @@ package com.mybatisgx.model.handler;
 
 import com.google.common.collect.Lists;
 import com.mybatisgx.annotation.*;
+import com.mybatisgx.api.MethodCommandType;
 import com.mybatisgx.context.EntityInfoContextHolder;
-import com.mybatisgx.context.MethodInfoContextHolder;
 import com.mybatisgx.dao.Dao;
-import com.mybatisgx.exception.MethodNotConditionException;
 import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.model.*;
 import com.mybatisgx.utils.FieldNameUtils;
+import com.mybatisgx.utils.MethodInfoUtils;
 import com.mybatisgx.utils.TypeUtils;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -36,7 +36,7 @@ public class MethodInfoHandler {
     private MybatisgxSyntaxProcessor mybatisgxSyntaxProcessor = new MybatisgxSyntaxProcessor();
     private EntityRelationTreeHandler entityRelationTreeHandler = new EntityRelationTreeHandler();
     private ResultMapInfoHandler resultMapInfoHandler = new ResultMapInfoHandler();
-    private MybatisgxConfiguration configuration;
+    private final MybatisgxConfiguration configuration;
 
     public MethodInfoHandler(MybatisgxConfiguration configuration) {
         this.configuration = configuration;
@@ -47,8 +47,7 @@ public class MethodInfoHandler {
         Map<String, MethodInfo> methodInfoMap = this.processMethod(methodList, mapperInfo);
         List<MethodInfo> methodInfoList = new ArrayList(20);
         for (MethodInfo methodInfo : methodInfoMap.values()) {
-            String namespaceMethodName = this.getNamespaceMethodName(mapperInfo, methodInfo.getMethodName());
-            MethodInfoContextHolder.set(namespaceMethodName, methodInfo);
+            this.configuration.addMethodInfo(methodInfo);
             methodInfoList.add(methodInfo);
         }
         return methodInfoList;
@@ -82,13 +81,14 @@ public class MethodInfoHandler {
             if (methodInfoMap.containsKey(methodName)) {
                 throw new MybatisgxException("dao接口方法无法重载，请修改方法名: %s", methodName);
             }
-            String namespaceMethodName = this.getNamespaceMethodName(mapperInfo, methodName);
+            String namespaceMethodName = MethodInfoUtils.getNamespaceMethodName(mapperInfo.getNamespace(), methodName);
             if (this.configuration.hasStatement(namespaceMethodName)) {
                 LOGGER.debug("方法{}已在mapper存在，无需处理该方法！", namespaceMethodName);
                 continue;
             }
 
-            SqlCommandType sqlCommandType = this.mybatisgxSyntaxProcessor.getSqlCommandType(methodName);
+            CommandTypeContext commandTypeContext = this.getCommandType(mapperInfo, methodName);
+            SqlCommandType sqlCommandType = commandTypeContext.getSqlCommandType();
             MethodParamContext methodParamContext = this.getMethodParam(mapperInfo, method, sqlCommandType);
             MethodReturnInfo methodReturnInfo = this.getMethodReturn(mapperInfo, method);
 
@@ -97,12 +97,17 @@ public class MethodInfoHandler {
             methodInfo.setMethod(method);
             methodInfo.setMethodName(methodName);
             methodInfo.setSqlCommandType(sqlCommandType);
+            methodInfo.setMethodCommandType(commandTypeContext.getMethodCommandType());
             methodInfo.setDynamic(method.getAnnotation(Dynamic.class) != null);
             methodInfo.setBatch(method.getAnnotation(BatchOperation.class) != null);
             methodInfo.setEntityParamInfo(methodParamContext.getEntityParamInfo());
             methodInfo.setQueryEntityParamInfo(methodParamContext.getQueryEntityParamInfo());
             methodInfo.setMethodParamInfoList(methodParamContext.getMethodParamInfoList());
             methodInfo.setMethodReturnInfo(methodReturnInfo);
+
+            // 预处理该方法是否需要值生成处理
+            boolean isValueProcessor = this.isValueProcessor(methodInfo);
+            methodInfo.setValueProcessor(isValueProcessor);
 
             // 条件解析
             this.methodConditionParse(methodInfo);
@@ -119,6 +124,17 @@ public class MethodInfoHandler {
             methodInfoMap.put(methodName, methodInfo);
         }
         return methodInfoMap;
+    }
+
+    private CommandTypeContext getCommandType(MapperInfo mapperInfo, String methodName) {
+        SqlCommandType sqlCommandType = this.mybatisgxSyntaxProcessor.getSqlCommandType(methodName);
+        MethodCommandType methodCommandType;
+        if (sqlCommandType == SqlCommandType.DELETE && mapperInfo.getEntityInfo().getLogicDeleteColumnInfo() != null) {
+            methodCommandType = MethodCommandType.LOGIC_DELETE;
+        } else {
+            methodCommandType = MethodCommandType.valueOf(sqlCommandType.name());
+        }
+        return new CommandTypeContext(sqlCommandType, methodCommandType);
     }
 
     /**
@@ -277,6 +293,20 @@ public class MethodInfoHandler {
         return methodReturnInfo;
     }
 
+    private boolean isValueProcessor(MethodInfo methodInfo) {
+        MethodCommandType methodCommandType = methodInfo.getMethodCommandType();
+        if (methodCommandType == MethodCommandType.SELECT || methodCommandType == MethodCommandType.DELETE) {
+            return false;
+        }
+        // 逻辑删除可能没有实体参数，但是新增和修改必须有实体参数
+        if (methodCommandType != MethodCommandType.LOGIC_DELETE) {
+            if (methodInfo.getEntityParamInfo() == null) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /**
      * 条件实体只有非SimpleDao、SelectDao、CurdDao方法才会处理，SelectDao只有findOne、findList、findPage会特殊处理。
      * 查询实体作为条件支持查询、修改、删除。
@@ -371,8 +401,15 @@ public class MethodInfoHandler {
      * @param conditionInfoList
      */
     private void bindConditionParam(MapperInfo mapperInfo, MethodInfo methodInfo, List<ConditionInfo> conditionInfoList) {
-        if (methodInfo.getSqlCommandType() != SqlCommandType.INSERT && ObjectUtils.isEmpty(conditionInfoList)) {
-            throw new MethodNotConditionException("%s.%s方法无条件", mapperInfo.getNamespace(), methodInfo.getMethodName());
+        if (methodInfo.getSqlCommandType() == SqlCommandType.INSERT) {
+            return;
+        }
+        if (ObjectUtils.isEmpty(conditionInfoList)) {
+            if (methodInfo.getSqlCommandType() == SqlCommandType.DELETE || methodInfo.getSqlCommandType() == SqlCommandType.UPDATE) {
+                throw new MybatisgxException("%s.%s方法禁止无条件执行！", mapperInfo.getNamespace(), methodInfo.getMethodName());
+            }
+            LOGGER.warn("{}.{}方法无查询条件，可能触发全表扫描", mapperInfo.getNamespace(), methodInfo.getMethodName());
+            return;
         }
         for (ConditionInfo conditionInfo : conditionInfoList) {
             List<ConditionInfo> childConditionInfoList = conditionInfo.getConditionInfoList();
@@ -527,10 +564,6 @@ public class MethodInfoHandler {
         return null;
     }
 
-    private String getNamespaceMethodName(MapperInfo mapperInfo, String methodName) {
-        return String.format("%s.%s", mapperInfo.getNamespace(), methodName);
-    }
-
     /**
      * 忽略方法
      *
@@ -555,6 +588,26 @@ public class MethodInfoHandler {
             return true;
         }
         return false;
+    }
+
+    private static class CommandTypeContext {
+
+        private SqlCommandType sqlCommandType;
+
+        private MethodCommandType methodCommandType;
+
+        public CommandTypeContext(SqlCommandType sqlCommandType, MethodCommandType methodCommandType) {
+            this.sqlCommandType = sqlCommandType;
+            this.methodCommandType = methodCommandType;
+        }
+
+        public SqlCommandType getSqlCommandType() {
+            return sqlCommandType;
+        }
+
+        public MethodCommandType getMethodCommandType() {
+            return methodCommandType;
+        }
     }
 
     private static class MethodParamContext {

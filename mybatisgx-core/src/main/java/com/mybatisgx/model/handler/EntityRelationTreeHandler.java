@@ -24,7 +24,8 @@ public class EntityRelationTreeHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EntityRelationTreeHandler.class);
 
-    private TableColumnNameAlias tableColumnNameAlias = new TableColumnNameAlias();
+    private static final ColumnInfoHandler.ColumnMap columnMapHandler = new ColumnInfoHandler.ColumnMap();
+    private static final TableColumnNameAlias tableColumnNameAlias = new TableColumnNameAlias();
 
     public void execute(MapperInfo mapperInfo, MethodInfo methodInfo) {
         SqlCommandType sqlCommandType = methodInfo.getSqlCommandType();
@@ -43,20 +44,19 @@ public class EntityRelationTreeHandler {
                 entityColumnInfoList.add(entityColumnInfo);
             }
 
-            EntityInfo newEntityInfo = new EntityInfo.Builder()
+            EntityInfo projectionEntityInfo = new EntityInfo.Builder()
                     .setClazz(resultClass)
                     .setTableName(mapperInfo.getTableName())
                     .setColumnInfoList(entityColumnInfoList)
-                    .process()
                     .build();
+            this.columnMapHandler.process(projectionEntityInfo);
 
-            String tableNameAlias = this.tableColumnNameAlias.process(1, 1, newEntityInfo);
-
+            String tableNameAlias = this.tableColumnNameAlias.process(1, 1, projectionEntityInfo);
             EntityRelationTree entityRelationTree = new EntityRelationTree();
             entityRelationTree.setTableNameAlias(tableNameAlias);
             entityRelationTree.setLevel(1);
             entityRelationTree.setIndex(1);
-            entityRelationTree.setEntityInfo(newEntityInfo);
+            entityRelationTree.setEntityInfo(projectionEntityInfo);
             mapperInfo.addEntityRelationTree(entityRelationTree);
         } else {
             // 1、创建实体关系树   2、解决循环引用问题

@@ -1,14 +1,21 @@
 package com.mybatisgx.entity;
 
+import com.mybatisgx.annotation.GeneratedValue;
+import com.mybatisgx.annotation.Id;
 import com.mybatisgx.annotation.IdClass;
+import com.mybatisgx.executor.genval.IdValueProcessor;
 
 import java.io.Serializable;
 
 @IdClass(MultiId.class)
 public class MultiId<ID> implements Serializable {
 
+    @Id
+    @GeneratedValue(IdValueProcessor.class)
     private ID id1;
 
+    @Id
+    @GeneratedValue(IdValueProcessor.class)
     private ID id2;
 
     public ID getId1() {

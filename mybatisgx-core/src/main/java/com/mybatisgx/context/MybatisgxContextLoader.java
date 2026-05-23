@@ -95,7 +95,7 @@ public class MybatisgxContextLoader {
         this.registerMapperTemplate(configuration);
 
         long endTime = System.currentTimeMillis();
-        LOGGER.info("Mybatisgx process total time {} ms", endTime - startTime);
+        LOGGER.info("MyBatisGX process total time {} ms", endTime - startTime);
     }
 
     private void processEntity(String basePackage) {
@@ -120,11 +120,12 @@ public class MybatisgxContextLoader {
         if (entity != null || queryEntity != null) {
             EntityInfo entityInfo = entityInfoHandler.execute(clazz);
             EntityInfoContextHolder.set(clazz, entityInfo);
+            configuration.addEntityInfo(entityInfo);
         }
     }
 
     private void processEntityRelation() {
-        entityInfoHandler.processColumnRelation();
+        entityInfoHandler.processColumnRelation(configuration);
     }
 
     private List<Resource> getDaoResourceList(String basePackage) {
@@ -167,7 +168,6 @@ public class MybatisgxContextLoader {
     public void removeDaoInfo() {
         MapperInfoContextHolder.remove();
         MapperTemplateContextHolder.remove();
-        MethodInfoContextHolder.remove();
     }
 
     public void processTemplate() {

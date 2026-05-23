@@ -1,5 +1,9 @@
 package com.mybatisgx.model;
 
+import com.mybatisgx.api.MethodCommandType;
+import com.mybatisgx.exception.MybatisgxException;
+import com.mybatisgx.executor.page.Pageable;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.ibatis.mapping.SqlCommandType;
 
 import java.lang.reflect.Method;
@@ -28,6 +32,10 @@ public class MethodInfo {
      */
     private SqlCommandType sqlCommandType;
     /**
+     * 方法动作，insert、delete、update、logic_delete、select
+     */
+    private MethodCommandType methodCommandType;
+    /**
      * 方法名
      */
     private String methodName;
@@ -44,6 +52,14 @@ public class MethodInfo {
      */
     private Boolean isBatch = false;
     /**
+     * 是否需要值处理
+     */
+    private boolean isValueProcessor = false;
+    /**
+     * 批量参数信息
+     */
+    private BatchParamInfo batchParamInfo;
+    /**
      * 查询节点信息
      */
     private SelectItemInfo selectItemInfo;
@@ -55,6 +71,10 @@ public class MethodInfo {
      * 查询数量限制
      */
     private SelectPageInfo selectPageInfo;
+    /**
+     * 是否存在条件
+     */
+    private Boolean isExistCondition = false;
     /**
      * 方法名条件信息【修改、删除、查询都可以存在条件】
      */
@@ -68,6 +88,10 @@ public class MethodInfo {
      * 新增：为空<br/>
      */
     private MethodParamInfo queryEntityParamInfo;
+    /**
+     * 分页参数信息
+     */
+    private MethodParamInfo pageParamInfo;
     /**
      * 方法参数信息
      */
@@ -109,6 +133,14 @@ public class MethodInfo {
         this.sqlCommandType = sqlCommandType;
     }
 
+    public MethodCommandType getMethodCommandType() {
+        return methodCommandType;
+    }
+
+    public void setMethodCommandType(MethodCommandType methodCommandType) {
+        this.methodCommandType = methodCommandType;
+    }
+
     public String getMethodName() {
         return methodName;
     }
@@ -141,6 +173,22 @@ public class MethodInfo {
         isBatch = batch;
     }
 
+    public boolean isValueProcessor() {
+        return isValueProcessor;
+    }
+
+    public void setValueProcessor(boolean valueProcessor) {
+        isValueProcessor = valueProcessor;
+    }
+
+    public BatchParamInfo getBatchParamInfo() {
+        return batchParamInfo;
+    }
+
+    public void setBatchParamInfo(BatchParamInfo batchParamInfo) {
+        this.batchParamInfo = batchParamInfo;
+    }
+
     public SelectItemInfo getSelectItemInfo() {
         return selectItemInfo;
     }
@@ -165,12 +213,23 @@ public class MethodInfo {
         this.selectPageInfo = selectPageInfo;
     }
 
+    public Boolean getExistCondition() {
+        return isExistCondition;
+    }
+
+    public void setExistCondition(Boolean existCondition) {
+        isExistCondition = existCondition;
+    }
+
     public List<ConditionInfo> getConditionInfoList() {
         return conditionInfoList;
     }
 
     public void setConditionInfoList(List<ConditionInfo> conditionInfoList) {
         this.conditionInfoList = conditionInfoList;
+        if (ObjectUtils.isNotEmpty(conditionInfoList)) {
+            this.isExistCondition = true;
+        }
     }
 
     public MethodParamInfo getEntityParamInfo() {
@@ -189,6 +248,14 @@ public class MethodInfo {
         this.queryEntityParamInfo = queryEntityParamInfo;
     }
 
+    public MethodParamInfo getPageParamInfo() {
+        return pageParamInfo;
+    }
+
+    public void setPageParamInfo(MethodParamInfo pageParamInfo) {
+        this.pageParamInfo = pageParamInfo;
+    }
+
     public List<MethodParamInfo> getMethodParamInfoList() {
         return methodParamInfoList;
     }
@@ -199,6 +266,37 @@ public class MethodInfo {
         for (MethodParamInfo methodParamInfo : methodParamInfoList) {
             methodParamInfoMap.put(methodParamInfo.getArgName(), methodParamInfo);
             methodParamInfoMap.put(methodParamInfo.getArgName().toLowerCase(), methodParamInfo);
+        }
+
+        // 批量参数处理
+        MethodParamInfo dataParamInfo = null;
+        MethodParamInfo sizeParamInfo = null;
+        for (MethodParamInfo methodParamInfo : methodParamInfoList) {
+            if (methodParamInfo.getBatchData()) {
+                dataParamInfo = methodParamInfo;
+            }
+            if (methodParamInfo.getBatchSize()) {
+                sizeParamInfo = methodParamInfo;
+            }
+        }
+        if (dataParamInfo != null && sizeParamInfo == null) {
+            throw new MybatisgxException("%s 方法没有批量大小参数", methodName);
+        }
+        if (dataParamInfo == null && sizeParamInfo != null) {
+            throw new MybatisgxException("%s 方法没有批量数据参数", methodName);
+        }
+        if (dataParamInfo != null && sizeParamInfo != null) {
+            this.isBatch = true;
+            this.batchParamInfo = new BatchParamInfo();
+            this.batchParamInfo.setDataParamInfo(dataParamInfo);
+            this.batchParamInfo.setSizeParamInfo(sizeParamInfo);
+        }
+
+        // 分页参数
+        for (MethodParamInfo methodParamInfo : methodParamInfoList) {
+            if (methodParamInfo.getType() == Pageable.class) {
+                this.pageParamInfo = methodParamInfo;
+            }
         }
     }
 

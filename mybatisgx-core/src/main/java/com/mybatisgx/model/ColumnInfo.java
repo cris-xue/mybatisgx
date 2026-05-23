@@ -1,10 +1,12 @@
 package com.mybatisgx.model;
 
 import com.mybatisgx.annotation.*;
-import org.apache.commons.lang3.StringUtils;
+import com.mybatisgx.spi.ValueProcessor;
 
 import java.lang.reflect.Field;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 字段信息信息
@@ -23,6 +25,14 @@ public class ColumnInfo {
      */
     private Field field;
     /**
+     * java字段信息
+     */
+    private FieldInfo fieldInfo;
+    /**
+     * 访问器
+     */
+    private LambdaAccessor lambdaAccessor;
+    /**
      * 类型类别
      */
     private TypeCategory typeCategory;
@@ -39,9 +49,13 @@ public class ColumnInfo {
      */
     private String javaColumnName;
     /**
-     * java字段名路径列表
+     * java字段名访问路径
      */
     private List<String> javaColumnNamePathList;
+    /**
+     * java字段访问链
+     */
+    private List<ColumnInfo> javaColumnChain;
     /**
      * 容器类型，List、Set
      */
@@ -71,6 +85,14 @@ public class ColumnInfo {
      */
     private List<ColumnInfo> composites;
     /**
+     * java字段映射字段信息，userName={userName=1}
+     */
+    private Map<String, ColumnInfo> columnInfoMap = new LinkedHashMap();
+    /**
+     * 值处理列表，数组中的顺序就是执行值处理的顺序
+     */
+    private ValueProcessor[] valueProcessors;
+    /**
      * 数据库字段注解
      */
     private Column column;
@@ -95,6 +117,10 @@ public class ColumnInfo {
      */
     private GeneratedValue generatedValue;
 
+    public ColumnInfo() {
+        this.fieldInfo = new FieldInfo(this);
+    }
+
     public ColumnInfo getParent() {
         return parent;
     }
@@ -109,6 +135,22 @@ public class ColumnInfo {
 
     public void setField(Field field) {
         this.field = field;
+    }
+
+    public FieldInfo getFieldInfo() {
+        return fieldInfo;
+    }
+
+    public void setFieldInfo(FieldInfo fieldInfo) {
+        this.fieldInfo = fieldInfo;
+    }
+
+    public LambdaAccessor getLambdaAccessor() {
+        return lambdaAccessor;
+    }
+
+    public void setLambdaAccessor(LambdaAccessor lambdaAccessor) {
+        this.lambdaAccessor = lambdaAccessor;
     }
 
     public TypeCategory getTypeCategory() {
@@ -146,16 +188,20 @@ public class ColumnInfo {
         this.javaColumnName = javaColumnName;
     }
 
-    public String getJavaColumnNamePath() {
-        return StringUtils.join(javaColumnNamePathList, ".");
-    }
-
     public List<String> getJavaColumnNamePathList() {
         return javaColumnNamePathList;
     }
 
     public void setJavaColumnNamePathList(List<String> javaColumnNamePathList) {
         this.javaColumnNamePathList = javaColumnNamePathList;
+    }
+
+    public List<ColumnInfo> getJavaColumnChain() {
+        return javaColumnChain;
+    }
+
+    public void setJavaColumnChain(List<ColumnInfo> javaColumnChain) {
+        this.javaColumnChain = javaColumnChain;
     }
 
     public Class<?> getCollectionType() {
@@ -219,6 +265,22 @@ public class ColumnInfo {
 
     public void setComposites(List<ColumnInfo> composites) {
         this.composites = composites;
+    }
+
+    public ColumnInfo getColumnInfo(String javaColumnName) {
+        return this.columnInfoMap.get(javaColumnName);
+    }
+
+    public void addColumnInfo(ColumnInfo columnInfo) {
+        this.columnInfoMap.put(columnInfo.getJavaColumnName(), columnInfo);
+    }
+
+    public ValueProcessor[] getValueProcessors() {
+        return valueProcessors;
+    }
+
+    public void setValueProcessors(ValueProcessor[] valueProcessors) {
+        this.valueProcessors = valueProcessors;
     }
 
     public Column getColumn() {

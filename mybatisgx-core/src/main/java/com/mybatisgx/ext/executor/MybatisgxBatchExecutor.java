@@ -1,6 +1,7 @@
 package com.mybatisgx.ext.executor;
 
-import com.mybatisgx.context.MethodInfoContextHolder;
+import com.mybatisgx.context.DaoMethodManager;
+import com.mybatisgx.model.BatchParamInfo;
 import com.mybatisgx.model.MethodInfo;
 import com.mybatisgx.model.MethodParamInfo;
 import org.apache.ibatis.binding.MapperMethod;
@@ -16,44 +17,38 @@ import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.transaction.Transaction;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 public class MybatisgxBatchExecutor implements Executor {
 
-    private Executor delegate;
+    private final Executor delegate;
 
     public MybatisgxBatchExecutor(Executor delegate) {
         this.delegate = delegate;
-        // delegate.setExecutorWrapper(this);
     }
 
     @Override
     public int update(MappedStatement ms, Object parameter) throws SQLException {
-        MethodInfo methodInfo = MethodInfoContextHolder.get(ms.getId());
+        MethodInfo methodInfo = DaoMethodManager.getMethodInfo(ms);
         if (methodInfo.getBatch()) {
-            List<MethodParamInfo> methodParamInfoList = methodInfo.getMethodParamInfoList();
-            MethodParamInfo batchDataMethodParamInfo = null;
-            MethodParamInfo batchSizeMethodParamInfo = null;
-            for (MethodParamInfo methodParamInfo : methodParamInfoList) {
-                if (methodParamInfo.getBatchData()) {
-                    batchDataMethodParamInfo = methodParamInfo;
-                }
-                if (methodParamInfo.getBatchSize()) {
-                    batchSizeMethodParamInfo = methodParamInfo;
-                }
-            }
+            BatchParamInfo batchParamInfo = methodInfo.getBatchParamInfo();
+            MethodParamInfo dataParamInfo = batchParamInfo.getDataParamInfo();
+            MethodParamInfo sizeParamInfo = batchParamInfo.getSizeParamInfo();
+            String batchItemName = dataParamInfo.getBatchItemName();
 
-            MapperMethod.ParamMap<Object> mapperMethodParam = (MapperMethod.ParamMap<Object>) parameter;
-            Collection batchDataCollection = (Collection) mapperMethodParam.get(batchDataMethodParamInfo.getArgName());
-            int batchSize = (int) mapperMethodParam.get(batchSizeMethodParamInfo.getArgName());
-            List<Object> batchDataList = (List<Object>) batchDataCollection;
+            MapperMethod.ParamMap<Object> mapperMethodParamMap = (MapperMethod.ParamMap<Object>) parameter;
+            Collection<?> batchDataCollection = (Collection) mapperMethodParamMap.get(dataParamInfo.getArgName());
+            int batchSize = (int) mapperMethodParamMap.get(sizeParamInfo.getArgName());
+            List<?> batchDataList = (batchDataCollection instanceof List) ? (List<?>) batchDataCollection : new ArrayList<>(batchDataCollection);
             for (int i = 0; i < batchDataList.size(); i++) {
                 Object batchData = batchDataList.get(i);
-                mapperMethodParam.put(batchDataMethodParamInfo.getBatchItemName(), batchData);
-                this.delegate.update(ms, mapperMethodParam);
+                mapperMethodParamMap.put(batchItemName, batchData);
+                this.delegate.update(ms, mapperMethodParamMap);
                 if ((i + 1) % batchSize == 0 || (i + 1) == batchDataList.size()) {
                     this.flushStatements();
+                    this.clearLocalCache();
                 }
             }
             return batchDataList.size();

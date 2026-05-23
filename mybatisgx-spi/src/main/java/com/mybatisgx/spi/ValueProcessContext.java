@@ -1,5 +1,7 @@
 package com.mybatisgx.spi;
 
+import com.mybatisgx.api.MethodCommandType;
+
 /**
  * 字段值处理上下文
  *
@@ -9,11 +11,11 @@ package com.mybatisgx.spi;
 public interface ValueProcessContext {
 
     /**
-     * 获取数据处理阶段
+     * 获取值处理类型
      *
      * @return
      */
-    ValueProcessPhase getPhase();
+    MethodCommandType getCommandType();
 
     /**
      * 获取字段元信息

@@ -3,6 +3,7 @@ package com.mybatisgx.template.select;
 import com.mybatisgx.annotation.ManyToMany;
 import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.model.*;
+import com.mybatisgx.utils.ArrayUtils;
 import com.mybatisgx.utils.TypeUtils;
 import com.mybatisgx.utils.XmlUtils;
 import net.sf.jsqlparser.JSQLParserException;
@@ -173,12 +174,12 @@ public class RelationSelectTemplateHandler {
                 Expression whereConditionExpression = null;
                 if (ObjectUtils.isEmpty(idColumnInfoComposites)) {
                     String leftEq = String.format("%s.%s", resultMapInfo.getTableNameAlias(), idColumnInfo.getDbColumnName());
-                    String rightEq = String.format("#{%s.%s}", "item", idColumnInfo.getJavaColumnName());
+                    String rightEq = String.format("#{%s.%s}", "item", ArrayUtils.listToArray(idColumnInfo.getJavaColumnNamePathList()));
                     whereConditionExpression = RelationSelectHelper.buildWhereConditionExpression(whereConditionExpression, leftEq, rightEq);
                 } else {
                     for (ColumnInfo idColumnInfoComposite : idColumnInfoComposites) {
                         String leftEq = String.format("%s.%s", resultMapInfo.getTableNameAlias(), idColumnInfoComposite.getDbColumnName());
-                        String rightEq = String.format("#{%s.%s.%s}", "item", idColumnInfo.getJavaColumnName(), idColumnInfoComposite.getJavaColumnName());
+                        String rightEq = String.format("#{%s.%s.%s}", "item", ArrayUtils.listToArray(idColumnInfoComposite.getJavaColumnNamePathList()));
                         whereConditionExpression = RelationSelectHelper.buildWhereConditionExpression(whereConditionExpression, leftEq, rightEq);
                     }
                 }
@@ -187,12 +188,12 @@ public class RelationSelectTemplateHandler {
                 Expression whereConditionExpression = null;
                 if (ObjectUtils.isEmpty(idColumnInfoComposites)) {
                     String leftEq = String.format("%s.%s", resultMapInfo.getTableNameAlias(), idColumnInfo.getDbColumnName());
-                    String rightEq = String.format("#{%s.%s}", "item", idColumnInfo.getJavaColumnName());
+                    String rightEq = String.format("#{%s.%s}", "item", ArrayUtils.listToArray(idColumnInfo.getJavaColumnNamePathList()));
                     whereConditionExpression = RelationSelectHelper.buildWhereConditionExpression(whereConditionExpression, leftEq, rightEq);
                 } else {
                     for (ColumnInfo idColumnInfoComposite : idColumnInfoComposites) {
                         String leftEq = String.format("%s.%s", resultMapInfo.getTableNameAlias(), idColumnInfoComposite.getDbColumnName());
-                        String rightEq = String.format("#{%s.%s.%s}", "item", idColumnInfo.getJavaColumnName(), idColumnInfoComposite.getJavaColumnName());
+                        String rightEq = String.format("#{%s.%s.%s}", "item", ArrayUtils.listToArray(idColumnInfoComposite.getJavaColumnNamePathList()));
                         whereConditionExpression = RelationSelectHelper.buildWhereConditionExpression(whereConditionExpression, leftEq, rightEq);
                     }
                 }
@@ -216,11 +217,13 @@ public class RelationSelectTemplateHandler {
             Expression whereConditionExpression = null;
             if (ObjectUtils.isEmpty(idColumnInfoComposites)) {
                 String leftEq = String.format("%s.%s", leftTableNameAlias, idColumnInfo.getDbColumnName());
-                String rightEq = String.format("#{%s.%s}", "item", idColumnInfo.getDbColumnName());
+                String rightEq = String.format("#{%s.%s}", "item", ArrayUtils.listToArray(idColumnInfo.getJavaColumnNamePathList()));
                 whereConditionExpression = RelationSelectHelper.buildWhereConditionExpression(whereConditionExpression, leftEq, rightEq);
             } else {
                 for (ColumnInfo idColumnComposite : idColumnInfoComposites) {
-
+                    String leftEq = String.format("%s.%s", leftTableNameAlias, idColumnComposite.getDbColumnName());
+                    String rightEq = String.format("#{%s.%s.%s}", "item", ArrayUtils.listToArray(idColumnComposite.getJavaColumnNamePathList()));
+                    whereConditionExpression = RelationSelectHelper.buildWhereConditionExpression(whereConditionExpression, leftEq, rightEq);
                 }
             }
             return whereConditionExpression;

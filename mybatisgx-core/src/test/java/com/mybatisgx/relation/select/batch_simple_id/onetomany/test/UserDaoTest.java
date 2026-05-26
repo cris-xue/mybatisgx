@@ -22,7 +22,7 @@ import java.util.Collections;
 import java.util.List;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class OrgDaoTest {
+public class UserDaoTest {
 
     private static int count = 10;
     private static OrgDao orgDao;
@@ -64,10 +64,10 @@ public class OrgDaoTest {
             Org org = dept.getOrg();
 
             if (i == 0) {
-                org.setId(555111L);
-                dept.setId(555112L);
-                team.setId(555113L);
-                user.setId(555114L);
+                org.setId(555411L);
+                dept.setId(555412L);
+                team.setId(555413L);
+                user.setId(555414L);
             } else {
                 org.setId(null);
                 dept.setId(null);
@@ -90,99 +90,84 @@ public class OrgDaoTest {
 
     @Test
     public void testFindById() {
-        Org dbOrg = orgDao.findById(555111L);
-        Assert.assertNotNull(dbOrg);
+        User dbUser = userDao.findById(555414L);
+        Assert.assertNotNull(dbUser);
 
-        Org org = orgList.get(0);
-        Assert.assertEquals(org.getId(), dbOrg.getId());
-        Assert.assertEquals(org.getCode(), dbOrg.getCode());
+        User user = userList.get(0);
+        Assert.assertEquals(user.getId(), dbUser.getId());
+        Assert.assertEquals(user.getCode(), dbUser.getCode());
 
-        List<Dept> dbDeptList = dbOrg.getDeptList();
-        Assert.assertNotNull(dbDeptList);
-        Assert.assertFalse(dbDeptList.isEmpty());
-        Dept dbDept = dbDeptList.get(0);
-        Dept dept = deptList.get(0);
-        Assert.assertEquals(dept.getId(), dbDept.getId());
-        Assert.assertEquals(dept.getCode(), dbDept.getCode());
-
-        List<Team> dbTeamList = dbDept.getTeamList();
-        Assert.assertNotNull(dbTeamList);
-        Assert.assertFalse(dbTeamList.isEmpty());
-        Team dbTeam = dbTeamList.get(0);
+        Team dbTeam = dbUser.getTeam();
+        Assert.assertNotNull(dbTeam);
         Team team = teamList.get(0);
         Assert.assertEquals(team.getId(), dbTeam.getId());
         Assert.assertEquals(team.getCode(), dbTeam.getCode());
 
-        List<User> dbUserList = dbTeam.getUserList();
-        Assert.assertNotNull(dbUserList);
-        Assert.assertFalse(dbUserList.isEmpty());
-        User dbUser = dbUserList.get(0);
-        User user = userList.get(0);
-        Assert.assertEquals(user.getId(), dbUser.getId());
-        Assert.assertEquals(user.getCode(), dbUser.getCode());
+        Dept dbDept = dbTeam.getDept();
+        Assert.assertNotNull(dbDept);
+        Dept dept = deptList.get(0);
+        Assert.assertEquals(dept.getId(), dbDept.getId());
+        Assert.assertEquals(dept.getCode(), dbDept.getCode());
+
+        Org dbOrg = dbDept.getOrg();
+        Assert.assertNotNull(dbOrg);
+        Org org = orgList.get(0);
+        Assert.assertEquals(org.getId(), dbOrg.getId());
+        Assert.assertEquals(org.getCode(), dbOrg.getCode());
     }
 
     @Test
     public void testFindList() {
-        List<Org> dbOrgList = orgDao.findList(new Org());
-        Assert.assertNotNull(dbOrgList);
-        Assert.assertEquals(count, dbOrgList.size());
+        List<User> dbUserList = userDao.findList(new User());
+        Assert.assertNotNull(dbUserList);
+        Assert.assertEquals(count, dbUserList.size());
 
         for (int i = 0; i < count; i++) {
-            Org org = orgList.get(i);
-            Org dbOrg = dbOrgList.get(i);
+            User user = userList.get(i);
+            User dbUser = dbUserList.get(i);
 
-            Assert.assertEquals(org.getId(), dbOrg.getId());
-            Assert.assertEquals(org.getCode(), dbOrg.getCode());
+            Assert.assertEquals(user.getId(), dbUser.getId());
+            Assert.assertEquals(user.getCode(), dbUser.getCode());
 
-            List<Dept> dbDeptList = dbOrg.getDeptList();
-            Assert.assertNotNull(dbDeptList);
-            Assert.assertFalse(dbDeptList.isEmpty());
-            Dept dbDept = dbDeptList.get(0);
-            Dept dept = deptList.get(i);
-            Assert.assertEquals(dept.getId(), dbDept.getId());
-            Assert.assertEquals(dept.getCode(), dbDept.getCode());
-
-            List<Team> dbTeamList = dbDept.getTeamList();
-            Assert.assertNotNull(dbTeamList);
-            Assert.assertFalse(dbTeamList.isEmpty());
-            Team dbTeam = dbTeamList.get(0);
+            Team dbTeam = dbUser.getTeam();
+            Assert.assertNotNull(dbTeam);
             Team team = teamList.get(i);
             Assert.assertEquals(team.getId(), dbTeam.getId());
             Assert.assertEquals(team.getCode(), dbTeam.getCode());
 
-            List<User> dbUserList = dbTeam.getUserList();
-            Assert.assertNotNull(dbUserList);
-            Assert.assertFalse(dbUserList.isEmpty());
-            User dbUser = dbUserList.get(0);
-            User user = userList.get(i);
-            Assert.assertEquals(user.getId(), dbUser.getId());
-            Assert.assertEquals(user.getCode(), dbUser.getCode());
+            Dept dbDept = dbTeam.getDept();
+            Assert.assertNotNull(dbDept);
+            Dept dept = deptList.get(i);
+            Assert.assertEquals(dept.getId(), dbDept.getId());
+            Assert.assertEquals(dept.getCode(), dbDept.getCode());
+
+            Org dbOrg = dbDept.getOrg();
+            Assert.assertNotNull(dbOrg);
+            Org org = orgList.get(i);
+            Assert.assertEquals(org.getId(), dbOrg.getId());
+            Assert.assertEquals(org.getCode(), dbOrg.getCode());
         }
     }
 
     @Test
     public void testFindListWithCondition() {
-        Org condition = new Org();
-        condition.setCode(orgList.get(0).getCode());
-        List<Org> dbOrgList = orgDao.findList(condition);
-        Assert.assertNotNull(dbOrgList);
-        Assert.assertFalse(dbOrgList.isEmpty());
+        User condition = new User();
+        condition.setCode(userList.get(0).getCode());
+        List<User> dbUserList = userDao.findList(condition);
+        Assert.assertNotNull(dbUserList);
+        Assert.assertFalse(dbUserList.isEmpty());
 
-        for (Org dbOrg : dbOrgList) {
-            Assert.assertEquals(orgList.get(0).getCode(), dbOrg.getCode());
+        for (User dbUser : dbUserList) {
+            Assert.assertEquals(userList.get(0).getCode(), dbUser.getCode());
 
-            List<Dept> dbDeptList = dbOrg.getDeptList();
-            Assert.assertNotNull(dbDeptList);
-            Assert.assertFalse(dbDeptList.isEmpty());
+            Team dbTeam = dbUser.getTeam();
+            Assert.assertNotNull(dbTeam);
 
-            List<Team> dbTeamList = dbDeptList.get(0).getTeamList();
-            Assert.assertNotNull(dbTeamList);
-            Assert.assertFalse(dbTeamList.isEmpty());
+            Dept dbDept = dbTeam.getDept();
+            Assert.assertNotNull(dbDept);
 
-            List<User> dbUserList = dbTeamList.get(0).getUserList();
-            Assert.assertNotNull(dbUserList);
-            Assert.assertFalse(dbUserList.isEmpty());
+            Org dbOrg = dbDept.getOrg();
+            Assert.assertNotNull(dbOrg);
         }
     }
 }

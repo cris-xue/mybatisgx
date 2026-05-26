@@ -2,19 +2,21 @@ package com.mybatisgx.relation.select.batch_simple_id.onetomany.entity;
 
 import com.mybatisgx.annotation.*;
 import com.mybatisgx.entity.BaseEntity;
-
 import org.apache.ibatis.mapping.FetchType;
 
 @Entity
-@Table(name = "bsi_otm_user")
+@Table(name = "batch_otm_user_simple")
 public class User extends BaseEntity<Long> {
 
     private String code;
 
     @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "team_id")
     @Fetch(FetchMode.BATCH)
-    @JoinColumn(name = "org_id")
-    private Org org;
+    private Team team;
+
+    public User() {
+    }
 
     public String getCode() {
         return code;
@@ -24,11 +26,11 @@ public class User extends BaseEntity<Long> {
         this.code = code;
     }
 
-    public Org getOrg() {
-        return org;
+    public Team getTeam() {
+        return team;
     }
 
-    public void setOrg(Org org) {
-        this.org = org;
+    public void setTeam(Team team) {
+        this.team = team;
     }
 }

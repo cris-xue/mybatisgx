@@ -27,10 +27,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class RoleDaoTest {
+public class ResourceDaoTest {
 
     private static int count = 10;
-    private static long joinId = 300000;
+    private static long joinId = 500000;
     private static UserDao userDao;
     private static RoleDao roleDao;
     private static MenuDao menuDao;
@@ -92,10 +92,10 @@ public class RoleDaoTest {
             resource.getMenuList().add(menu);
 
             if (i == 0) {
-                user.setId(666211L);
-                role.setId(666212L);
-                menu.setId(666213L);
-                resource.setId(666214L);
+                user.setId(666411L);
+                role.setId(666412L);
+                menu.setId(666413L);
+                resource.setId(666414L);
             } else {
                 user.setId(null);
                 role.setId(null);
@@ -150,9 +150,25 @@ public class RoleDaoTest {
 
     @Test
     public void testFindById() {
-        Role dbRole = roleDao.findById(666212L);
-        Assert.assertNotNull(dbRole);
+        Resource dbResource = resourceDao.findById(666414L);
+        Assert.assertNotNull(dbResource);
 
+        Resource resource = resourceList.get(0);
+        Assert.assertEquals(resource.getId(), dbResource.getId());
+        Assert.assertEquals(resource.getCode(), dbResource.getCode());
+
+        List<Menu> dbMenuList = dbResource.getMenuList();
+        Assert.assertNotNull(dbMenuList);
+        Assert.assertFalse(dbMenuList.isEmpty());
+        Menu dbMenu = dbMenuList.get(0);
+        Menu menu = menuList.get(0);
+        Assert.assertEquals(menu.getId(), dbMenu.getId());
+        Assert.assertEquals(menu.getCode(), dbMenu.getCode());
+
+        List<Role> dbRoleList = dbMenu.getRoleList();
+        Assert.assertNotNull(dbRoleList);
+        Assert.assertFalse(dbRoleList.isEmpty());
+        Role dbRole = dbRoleList.get(0);
         Role role = roleList.get(0);
         Assert.assertEquals(role.getId(), dbRole.getId());
         Assert.assertEquals(role.getCode(), dbRole.getCode());
@@ -164,34 +180,34 @@ public class RoleDaoTest {
         User user = userList.get(0);
         Assert.assertEquals(user.getId(), dbUser.getId());
         Assert.assertEquals(user.getCode(), dbUser.getCode());
-
-        List<Menu> dbMenuList = dbRole.getMenuList();
-        Assert.assertNotNull(dbMenuList);
-        Assert.assertFalse(dbMenuList.isEmpty());
-        Menu dbMenu = dbMenuList.get(0);
-        Menu menu = menuList.get(0);
-        Assert.assertEquals(menu.getId(), dbMenu.getId());
-        Assert.assertEquals(menu.getCode(), dbMenu.getCode());
-
-        List<Resource> dbResourceList = dbMenu.getResourceList();
-        Assert.assertNotNull(dbResourceList);
-        Assert.assertFalse(dbResourceList.isEmpty());
-        Resource dbResource = dbResourceList.get(0);
-        Resource resource = resourceList.get(0);
-        Assert.assertEquals(resource.getId(), dbResource.getId());
-        Assert.assertEquals(resource.getCode(), dbResource.getCode());
     }
 
     @Test
     public void testFindList() {
-        List<Role> dbRoleList = roleDao.findList(new Role());
-        Assert.assertNotNull(dbRoleList);
-        Assert.assertEquals(count, dbRoleList.size());
+        List<Resource> dbResourceList = resourceDao.findList(new Resource());
+        Assert.assertNotNull(dbResourceList);
+        Assert.assertEquals(count, dbResourceList.size());
 
         for (int i = 0; i < count; i++) {
-            Role role = roleList.get(i);
-            Role dbRole = dbRoleList.get(i);
+            Resource resource = resourceList.get(i);
+            Resource dbResource = dbResourceList.get(i);
 
+            Assert.assertEquals(resource.getId(), dbResource.getId());
+            Assert.assertEquals(resource.getCode(), dbResource.getCode());
+
+            List<Menu> dbMenuList = dbResource.getMenuList();
+            Assert.assertNotNull(dbMenuList);
+            Assert.assertFalse(dbMenuList.isEmpty());
+            Menu dbMenu = dbMenuList.get(0);
+            Menu menu = menuList.get(i);
+            Assert.assertEquals(menu.getId(), dbMenu.getId());
+            Assert.assertEquals(menu.getCode(), dbMenu.getCode());
+
+            List<Role> dbRoleList = dbMenu.getRoleList();
+            Assert.assertNotNull(dbRoleList);
+            Assert.assertFalse(dbRoleList.isEmpty());
+            Role dbRole = dbRoleList.get(0);
+            Role role = roleList.get(i);
             Assert.assertEquals(role.getId(), dbRole.getId());
             Assert.assertEquals(role.getCode(), dbRole.getCode());
 
@@ -202,47 +218,31 @@ public class RoleDaoTest {
             User user = userList.get(i);
             Assert.assertEquals(user.getId(), dbUser.getId());
             Assert.assertEquals(user.getCode(), dbUser.getCode());
-
-            List<Menu> dbMenuList = dbRole.getMenuList();
-            Assert.assertNotNull(dbMenuList);
-            Assert.assertFalse(dbMenuList.isEmpty());
-            Menu dbMenu = dbMenuList.get(0);
-            Menu menu = menuList.get(i);
-            Assert.assertEquals(menu.getId(), dbMenu.getId());
-            Assert.assertEquals(menu.getCode(), dbMenu.getCode());
-
-            List<Resource> dbResourceList = dbMenu.getResourceList();
-            Assert.assertNotNull(dbResourceList);
-            Assert.assertFalse(dbResourceList.isEmpty());
-            Resource dbResource = dbResourceList.get(0);
-            Resource resource = resourceList.get(i);
-            Assert.assertEquals(resource.getId(), dbResource.getId());
-            Assert.assertEquals(resource.getCode(), dbResource.getCode());
         }
     }
 
     @Test
     public void testFindListWithCondition() {
-        Role condition = new Role();
-        condition.setCode(roleList.get(0).getCode());
-        List<Role> dbRoleList = roleDao.findList(condition);
-        Assert.assertNotNull(dbRoleList);
-        Assert.assertFalse(dbRoleList.isEmpty());
+        Resource condition = new Resource();
+        condition.setCode(resourceList.get(0).getCode());
+        List<Resource> dbResourceList = resourceDao.findList(condition);
+        Assert.assertNotNull(dbResourceList);
+        Assert.assertFalse(dbResourceList.isEmpty());
 
-        for (Role dbRole : dbRoleList) {
-            Assert.assertEquals(roleList.get(0).getCode(), dbRole.getCode());
+        for (Resource dbResource : dbResourceList) {
+            Assert.assertEquals(resourceList.get(0).getCode(), dbResource.getCode());
 
-            List<User> dbUserList = dbRole.getUserList();
-            Assert.assertNotNull(dbUserList);
-            Assert.assertFalse(dbUserList.isEmpty());
-
-            List<Menu> dbMenuList = dbRole.getMenuList();
+            List<Menu> dbMenuList = dbResource.getMenuList();
             Assert.assertNotNull(dbMenuList);
             Assert.assertFalse(dbMenuList.isEmpty());
 
-            List<Resource> dbResourceList = dbMenuList.get(0).getResourceList();
-            Assert.assertNotNull(dbResourceList);
-            Assert.assertFalse(dbResourceList.isEmpty());
+            List<Role> dbRoleList = dbMenuList.get(0).getRoleList();
+            Assert.assertNotNull(dbRoleList);
+            Assert.assertFalse(dbRoleList.isEmpty());
+
+            List<User> dbUserList = dbRoleList.get(0).getUserList();
+            Assert.assertNotNull(dbUserList);
+            Assert.assertFalse(dbUserList.isEmpty());
         }
     }
 }

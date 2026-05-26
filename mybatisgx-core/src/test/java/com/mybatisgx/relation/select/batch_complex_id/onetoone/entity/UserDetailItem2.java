@@ -2,11 +2,10 @@ package com.mybatisgx.relation.select.batch_complex_id.onetoone.entity;
 
 import com.mybatisgx.annotation.*;
 import com.mybatisgx.entity.EmbeddedIdBaseEntity;
-
 import org.apache.ibatis.mapping.FetchType;
 
 @Entity
-@Table(name = "bci_oto_user_detail_item2")
+@Table(name = "batch_oto_user_detail_item2_complex")
 public class UserDetailItem2 extends EmbeddedIdBaseEntity<Long> {
 
     private String code;

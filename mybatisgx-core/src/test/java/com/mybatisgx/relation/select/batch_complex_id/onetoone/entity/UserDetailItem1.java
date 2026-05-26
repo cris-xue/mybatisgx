@@ -5,7 +5,7 @@ import com.mybatisgx.entity.EmbeddedIdBaseEntity;
 import org.apache.ibatis.mapping.FetchType;
 
 @Entity
-@Table(name = "bci_oto_user_detail_item1")
+@Table(name = "batch_oto_user_detail_item1_complex")
 public class UserDetailItem1 extends EmbeddedIdBaseEntity<Long> {
 
     private String code;

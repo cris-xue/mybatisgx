@@ -1,4 +1,4 @@
-create table if not exists batch_otm_user
+create table if not exists batch_otm_user_complex
 (
     id             bigint      not null,
     code           varchar(64) null comment '',
@@ -12,7 +12,7 @@ create table if not exists batch_otm_user
 ) engine = InnoDB
   default charset = utf8mb4;
 
-create table if not exists batch_otm_org
+create table if not exists batch_otm_org_complex
 (
     id        varchar(64) not null,
     code      varchar(64) null comment '',

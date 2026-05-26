@@ -23,7 +23,7 @@ import java.util.Collections;
 import java.util.List;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class OrgDaoTest {
+public class DeptDaoTest {
 
     private static int count = 10;
     private static OrgDao orgDao;
@@ -66,20 +66,20 @@ public class OrgDaoTest {
 
             if (i == 0) {
                 MultiId<Long> multiId = new MultiId();
-                multiId.setId1(111111L);
-                multiId.setId2(111111L);
+                multiId.setId1(222111L);
+                multiId.setId2(222111L);
                 org.setMultiId(multiId);
                 multiId = new MultiId();
-                multiId.setId1(111112L);
-                multiId.setId2(111112L);
+                multiId.setId1(222112L);
+                multiId.setId2(222112L);
                 dept.setMultiId(multiId);
                 multiId = new MultiId();
-                multiId.setId1(111113L);
-                multiId.setId2(111113L);
+                multiId.setId1(222113L);
+                multiId.setId2(222113L);
                 team.setMultiId(multiId);
                 multiId = new MultiId();
-                multiId.setId1(111114L);
-                multiId.setId2(111114L);
+                multiId.setId1(222114L);
+                multiId.setId2(222114L);
                 user.setMultiId(multiId);
             } else {
                 org.getMultiId().setId1(null);
@@ -108,22 +108,20 @@ public class OrgDaoTest {
     @Test
     public void testFindById() {
         MultiId<Long> multiId = new MultiId();
-        multiId.setId1(111111L);
-        multiId.setId2(111111L);
-        Org dbOrg = orgDao.findById(multiId);
-        Assert.assertNotNull(dbOrg);
+        multiId.setId1(222112L);
+        multiId.setId2(222112L);
+        Dept dbDept = deptDao.findById(multiId);
+        Assert.assertNotNull(dbDept);
 
-        Org org = orgList.get(0);
-        Assert.assertEquals(org.getMultiId().getId1(), dbOrg.getMultiId().getId1());
-        Assert.assertEquals(org.getMultiId().getId2(), dbOrg.getMultiId().getId2());
-
-        List<Dept> dbDeptList = dbOrg.getDeptList();
-        Assert.assertNotNull(dbDeptList);
-        Assert.assertFalse(dbDeptList.isEmpty());
-        Dept dbDept = dbDeptList.get(0);
         Dept dept = deptList.get(0);
         Assert.assertEquals(dept.getMultiId().getId1(), dbDept.getMultiId().getId1());
         Assert.assertEquals(dept.getMultiId().getId2(), dbDept.getMultiId().getId2());
+
+        Org dbOrg = dbDept.getOrg();
+        Assert.assertNotNull(dbOrg);
+        Org org = orgList.get(0);
+        Assert.assertEquals(org.getMultiId().getId1(), dbOrg.getMultiId().getId1());
+        Assert.assertEquals(org.getMultiId().getId2(), dbOrg.getMultiId().getId2());
 
         List<Team> dbTeamList = dbDept.getTeamList();
         Assert.assertNotNull(dbTeamList);
@@ -144,24 +142,22 @@ public class OrgDaoTest {
 
     @Test
     public void testFindList() {
-        List<Org> dbOrgList = orgDao.findList(new Org());
-        Assert.assertNotNull(dbOrgList);
-        Assert.assertEquals(count, dbOrgList.size());
+        List<Dept> dbDeptList = deptDao.findList(new Dept());
+        Assert.assertNotNull(dbDeptList);
+        Assert.assertEquals(count, dbDeptList.size());
 
         for (int i = 0; i < count; i++) {
-            Org org = orgList.get(i);
-            Org dbOrg = dbOrgList.get(i);
-
-            Assert.assertEquals(org.getMultiId().getId1(), dbOrg.getMultiId().getId1());
-            Assert.assertEquals(org.getMultiId().getId2(), dbOrg.getMultiId().getId2());
-
-            List<Dept> dbDeptList = dbOrg.getDeptList();
-            Assert.assertNotNull(dbDeptList);
-            Assert.assertFalse(dbDeptList.isEmpty());
-            Dept dbDept = dbDeptList.get(0);
             Dept dept = deptList.get(i);
+            Dept dbDept = dbDeptList.get(i);
+
             Assert.assertEquals(dept.getMultiId().getId1(), dbDept.getMultiId().getId1());
             Assert.assertEquals(dept.getMultiId().getId2(), dbDept.getMultiId().getId2());
+
+            Org dbOrg = dbDept.getOrg();
+            Assert.assertNotNull(dbOrg);
+            Org org = orgList.get(i);
+            Assert.assertEquals(org.getMultiId().getId1(), dbOrg.getMultiId().getId1());
+            Assert.assertEquals(org.getMultiId().getId2(), dbOrg.getMultiId().getId2());
 
             List<Team> dbTeamList = dbDept.getTeamList();
             Assert.assertNotNull(dbTeamList);
@@ -183,20 +179,19 @@ public class OrgDaoTest {
 
     @Test
     public void testFindListWithCondition() {
-        Org condition = new Org();
-        condition.setCode(orgList.get(0).getCode());
-        List<Org> dbOrgList = orgDao.findList(condition);
-        Assert.assertNotNull(dbOrgList);
-        Assert.assertFalse(dbOrgList.isEmpty());
+        Dept condition = new Dept();
+        condition.setCode(deptList.get(0).getCode());
+        List<Dept> dbDeptList = deptDao.findList(condition);
+        Assert.assertNotNull(dbDeptList);
+        Assert.assertFalse(dbDeptList.isEmpty());
 
-        for (Org dbOrg : dbOrgList) {
-            Assert.assertEquals(orgList.get(0).getCode(), dbOrg.getCode());
+        for (Dept dbDept : dbDeptList) {
+            Assert.assertEquals(deptList.get(0).getCode(), dbDept.getCode());
 
-            List<Dept> dbDeptList = dbOrg.getDeptList();
-            Assert.assertNotNull(dbDeptList);
-            Assert.assertFalse(dbDeptList.isEmpty());
+            Org dbOrg = dbDept.getOrg();
+            Assert.assertNotNull(dbOrg);
 
-            List<Team> dbTeamList = dbDeptList.get(0).getTeamList();
+            List<Team> dbTeamList = dbDept.getTeamList();
             Assert.assertNotNull(dbTeamList);
             Assert.assertFalse(dbTeamList.isEmpty());
 

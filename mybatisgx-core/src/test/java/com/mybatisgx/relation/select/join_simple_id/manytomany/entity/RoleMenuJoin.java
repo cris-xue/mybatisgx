@@ -5,20 +5,12 @@ import com.mybatisgx.annotation.Table;
 import com.mybatisgx.entity.IdBaseEntity;
 
 @Entity
-@Table(name = "join_mtm_user_role_simple")
-public class UserRoleJoin extends IdBaseEntity<Long> {
-
-    private Long userId;
+@Table(name = "join_mtm_role_menu_simple")
+public class RoleMenuJoin extends IdBaseEntity<Long> {
 
     private Long roleId;
 
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
+    private Long menuId;
 
     public Long getRoleId() {
         return roleId;
@@ -26,5 +18,13 @@ public class UserRoleJoin extends IdBaseEntity<Long> {
 
     public void setRoleId(Long roleId) {
         this.roleId = roleId;
+    }
+
+    public Long getMenuId() {
+        return menuId;
+    }
+
+    public void setMenuId(Long menuId) {
+        this.menuId = menuId;
     }
 }

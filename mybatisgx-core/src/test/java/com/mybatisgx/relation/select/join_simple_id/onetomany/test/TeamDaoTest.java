@@ -22,7 +22,7 @@ import java.util.Collections;
 import java.util.List;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class OrgDaoTest {
+public class TeamDaoTest {
 
     private static int count = 10;
     private static OrgDao orgDao;
@@ -64,10 +64,10 @@ public class OrgDaoTest {
             Org org = dept.getOrg();
 
             if (i == 0) {
-                org.setId(777111L);
-                dept.setId(777112L);
-                team.setId(777113L);
-                user.setId(777114L);
+                org.setId(777311L);
+                dept.setId(777312L);
+                team.setId(777313L);
+                user.setId(777314L);
             } else {
                 org.setId(null);
                 dept.setId(null);
@@ -90,28 +90,24 @@ public class OrgDaoTest {
 
     @Test
     public void testFindById() {
-        Org dbOrg = orgDao.findById(777111L);
-        Assert.assertNotNull(dbOrg);
+        Team dbTeam = teamDao.findById(777313L);
+        Assert.assertNotNull(dbTeam);
 
-        Org org = orgList.get(0);
-        Assert.assertEquals(org.getId(), dbOrg.getId());
-        Assert.assertEquals(org.getCode(), dbOrg.getCode());
+        Team team = teamList.get(0);
+        Assert.assertEquals(team.getId(), dbTeam.getId());
+        Assert.assertEquals(team.getCode(), dbTeam.getCode());
 
-        List<Dept> dbDeptList = dbOrg.getDeptList();
-        Assert.assertNotNull(dbDeptList);
-        Assert.assertFalse(dbDeptList.isEmpty());
-        Dept dbDept = dbDeptList.get(0);
+        Dept dbDept = dbTeam.getDept();
+        Assert.assertNotNull(dbDept);
         Dept dept = deptList.get(0);
         Assert.assertEquals(dept.getId(), dbDept.getId());
         Assert.assertEquals(dept.getCode(), dbDept.getCode());
 
-        List<Team> dbTeamList = dbDept.getTeamList();
-        Assert.assertNotNull(dbTeamList);
-        Assert.assertFalse(dbTeamList.isEmpty());
-        Team dbTeam = dbTeamList.get(0);
-        Team team = teamList.get(0);
-        Assert.assertEquals(team.getId(), dbTeam.getId());
-        Assert.assertEquals(team.getCode(), dbTeam.getCode());
+        Org dbOrg = dbDept.getOrg();
+        Assert.assertNotNull(dbOrg);
+        Org org = orgList.get(0);
+        Assert.assertEquals(org.getId(), dbOrg.getId());
+        Assert.assertEquals(org.getCode(), dbOrg.getCode());
 
         List<User> dbUserList = dbTeam.getUserList();
         Assert.assertNotNull(dbUserList);
@@ -124,32 +120,28 @@ public class OrgDaoTest {
 
     @Test
     public void testFindList() {
-        List<Org> dbOrgList = orgDao.findList(new Org());
-        Assert.assertNotNull(dbOrgList);
-        Assert.assertEquals(count, dbOrgList.size());
+        List<Team> dbTeamList = teamDao.findList(new Team());
+        Assert.assertNotNull(dbTeamList);
+        Assert.assertEquals(count, dbTeamList.size());
 
         for (int i = 0; i < count; i++) {
-            Org org = orgList.get(i);
-            Org dbOrg = dbOrgList.get(i);
+            Team team = teamList.get(i);
+            Team dbTeam = dbTeamList.get(i);
 
-            Assert.assertEquals(org.getId(), dbOrg.getId());
-            Assert.assertEquals(org.getCode(), dbOrg.getCode());
+            Assert.assertEquals(team.getId(), dbTeam.getId());
+            Assert.assertEquals(team.getCode(), dbTeam.getCode());
 
-            List<Dept> dbDeptList = dbOrg.getDeptList();
-            Assert.assertNotNull(dbDeptList);
-            Assert.assertFalse(dbDeptList.isEmpty());
-            Dept dbDept = dbDeptList.get(0);
+            Dept dbDept = dbTeam.getDept();
+            Assert.assertNotNull(dbDept);
             Dept dept = deptList.get(i);
             Assert.assertEquals(dept.getId(), dbDept.getId());
             Assert.assertEquals(dept.getCode(), dbDept.getCode());
 
-            List<Team> dbTeamList = dbDept.getTeamList();
-            Assert.assertNotNull(dbTeamList);
-            Assert.assertFalse(dbTeamList.isEmpty());
-            Team dbTeam = dbTeamList.get(0);
-            Team team = teamList.get(i);
-            Assert.assertEquals(team.getId(), dbTeam.getId());
-            Assert.assertEquals(team.getCode(), dbTeam.getCode());
+            Org dbOrg = dbDept.getOrg();
+            Assert.assertNotNull(dbOrg);
+            Org org = orgList.get(i);
+            Assert.assertEquals(org.getId(), dbOrg.getId());
+            Assert.assertEquals(org.getCode(), dbOrg.getCode());
 
             List<User> dbUserList = dbTeam.getUserList();
             Assert.assertNotNull(dbUserList);
@@ -163,24 +155,22 @@ public class OrgDaoTest {
 
     @Test
     public void testFindListWithCondition() {
-        Org condition = new Org();
-        condition.setCode(orgList.get(0).getCode());
-        List<Org> dbOrgList = orgDao.findList(condition);
-        Assert.assertNotNull(dbOrgList);
-        Assert.assertFalse(dbOrgList.isEmpty());
+        Team condition = new Team();
+        condition.setCode(teamList.get(0).getCode());
+        List<Team> dbTeamList = teamDao.findList(condition);
+        Assert.assertNotNull(dbTeamList);
+        Assert.assertFalse(dbTeamList.isEmpty());
 
-        for (Org dbOrg : dbOrgList) {
-            Assert.assertEquals(orgList.get(0).getCode(), dbOrg.getCode());
+        for (Team dbTeam : dbTeamList) {
+            Assert.assertEquals(teamList.get(0).getCode(), dbTeam.getCode());
 
-            List<Dept> dbDeptList = dbOrg.getDeptList();
-            Assert.assertNotNull(dbDeptList);
-            Assert.assertFalse(dbDeptList.isEmpty());
+            Dept dbDept = dbTeam.getDept();
+            Assert.assertNotNull(dbDept);
 
-            List<Team> dbTeamList = dbDeptList.get(0).getTeamList();
-            Assert.assertNotNull(dbTeamList);
-            Assert.assertFalse(dbTeamList.isEmpty());
+            Org dbOrg = dbDept.getOrg();
+            Assert.assertNotNull(dbOrg);
 
-            List<User> dbUserList = dbTeamList.get(0).getUserList();
+            List<User> dbUserList = dbTeam.getUserList();
             Assert.assertNotNull(dbUserList);
             Assert.assertFalse(dbUserList.isEmpty());
         }

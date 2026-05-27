@@ -5,17 +5,13 @@ import com.mybatisgx.entity.BaseEntity;
 import org.apache.ibatis.mapping.FetchType;
 
 @Entity
-@Table(name = "join_oto_user_detail_simple")
-public class UserDetail extends BaseEntity<Long> {
+@Table(name = "join_oto_user_detail_item2_simple")
+public class UserDetailItem2 extends BaseEntity<Long> {
 
     private String code;
 
     @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "user_id")
-    @Fetch(FetchMode.JOIN)
-    private User user;
-
-    @OneToOne(mappedBy = "userDetail", fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_detail_item1_id")
     @Fetch(FetchMode.JOIN)
     private UserDetailItem1 userDetailItem1;
 
@@ -25,14 +21,6 @@ public class UserDetail extends BaseEntity<Long> {
 
     public void setCode(String code) {
         this.code = code;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 
     public UserDetailItem1 getUserDetailItem1() {

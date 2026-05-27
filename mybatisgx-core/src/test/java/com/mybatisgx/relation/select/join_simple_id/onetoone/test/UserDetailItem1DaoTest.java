@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class UserDaoTest {
+public class UserDetailItem1DaoTest {
 
     private static int count = 10;
     private static UserDao userDao;
@@ -33,7 +33,7 @@ public class UserDaoTest {
     private static List<UserDetail> userDetailList = new ArrayList();
     private static List<UserDetailItem1> userDetailItem1List = new ArrayList();
     private static List<UserDetailItem2> userDetailItem2List = new ArrayList();
-    private static Long firstUserId;
+    private static Long firstUserDetailItem1Id;
 
     @BeforeClass
     public static void beforeClass() {
@@ -52,7 +52,7 @@ public class UserDaoTest {
         userDetailItem1Dao.insertBatch(userDetailItem1List, count);
         userDetailItem2Dao.insertBatch(userDetailItem2List, count);
 
-        firstUserId = userList.get(0).getId();
+        firstUserDetailItem1Id = userDetailItem1List.get(0).getId();
     }
 
     private static void buildData() {
@@ -84,24 +84,23 @@ public class UserDaoTest {
 
     @Test
     public void testFindById() {
-        User dbUser = userDao.findById(firstUserId);
-        Assert.assertNotNull(dbUser);
+        UserDetailItem1 dbUserDetailItem1 = userDetailItem1Dao.findById(firstUserDetailItem1Id);
+        Assert.assertNotNull(dbUserDetailItem1);
 
-        User user = userList.get(0);
-        Assert.assertEquals(user.getId(), dbUser.getId());
-        Assert.assertEquals(user.getCode(), dbUser.getCode());
+        UserDetailItem1 userDetailItem1 = userDetailItem1List.get(0);
+        Assert.assertEquals(userDetailItem1.getId(), dbUserDetailItem1.getId());
+        Assert.assertEquals(userDetailItem1.getCode(), dbUserDetailItem1.getCode());
 
-        UserDetail dbUserDetail = dbUser.getUserDetail();
+        UserDetail dbUserDetail = dbUserDetailItem1.getUserDetail();
         Assert.assertNotNull(dbUserDetail);
         UserDetail userDetail = userDetailList.get(0);
         Assert.assertEquals(userDetail.getId(), dbUserDetail.getId());
         Assert.assertEquals(userDetail.getCode(), dbUserDetail.getCode());
 
-        UserDetailItem1 dbUserDetailItem1 = dbUserDetail.getUserDetailItem1();
-        Assert.assertNotNull(dbUserDetailItem1);
-        UserDetailItem1 userDetailItem1 = userDetailItem1List.get(0);
-        Assert.assertEquals(userDetailItem1.getId(), dbUserDetailItem1.getId());
-        Assert.assertEquals(userDetailItem1.getCode(), dbUserDetailItem1.getCode());
+        User dbUser = dbUserDetail.getUser();
+        Assert.assertNotNull(dbUser);
+        User user = userList.get(0);
+        Assert.assertEquals(user.getId(), dbUser.getId());
 
         UserDetailItem2 dbUserDetailItem2 = dbUserDetailItem1.getUserDetailItem2();
         Assert.assertNotNull(dbUserDetailItem2);
@@ -112,25 +111,25 @@ public class UserDaoTest {
 
     @Test
     public void testFindList() {
-        List<User> dbUserList = userDao.findList(new User());
-        Assert.assertNotNull(dbUserList);
-        Assert.assertEquals(count, dbUserList.size());
+        List<UserDetailItem1> dbUserDetailItem1List = userDetailItem1Dao.findList(new UserDetailItem1());
+        Assert.assertNotNull(dbUserDetailItem1List);
+        Assert.assertEquals(count, dbUserDetailItem1List.size());
 
         for (int i = 0; i < count; i++) {
-            User user = userList.get(i);
-            User dbUser = dbUserList.get(i);
+            UserDetailItem1 userDetailItem1 = userDetailItem1List.get(i);
+            UserDetailItem1 dbUserDetailItem1 = dbUserDetailItem1List.get(i);
 
-            Assert.assertEquals(user.getId(), dbUser.getId());
+            Assert.assertEquals(userDetailItem1.getId(), dbUserDetailItem1.getId());
 
-            UserDetail dbUserDetail = dbUser.getUserDetail();
+            UserDetail dbUserDetail = dbUserDetailItem1.getUserDetail();
             Assert.assertNotNull(dbUserDetail);
             UserDetail userDetail = userDetailList.get(i);
             Assert.assertEquals(userDetail.getId(), dbUserDetail.getId());
 
-            UserDetailItem1 dbUserDetailItem1 = dbUserDetail.getUserDetailItem1();
-            Assert.assertNotNull(dbUserDetailItem1);
-            UserDetailItem1 userDetailItem1 = userDetailItem1List.get(i);
-            Assert.assertEquals(userDetailItem1.getId(), dbUserDetailItem1.getId());
+            User dbUser = dbUserDetail.getUser();
+            Assert.assertNotNull(dbUser);
+            User user = userList.get(i);
+            Assert.assertEquals(user.getId(), dbUser.getId());
 
             UserDetailItem2 dbUserDetailItem2 = dbUserDetailItem1.getUserDetailItem2();
             Assert.assertNotNull(dbUserDetailItem2);
@@ -141,20 +140,20 @@ public class UserDaoTest {
 
     @Test
     public void testFindListWithCondition() {
-        User condition = new User();
-        condition.setCode(userList.get(0).getCode());
-        List<User> dbUserList = userDao.findList(condition);
-        Assert.assertNotNull(dbUserList);
-        Assert.assertFalse(dbUserList.isEmpty());
+        UserDetailItem1 condition = new UserDetailItem1();
+        condition.setCode(userDetailItem1List.get(0).getCode());
+        List<UserDetailItem1> dbUserDetailItem1List = userDetailItem1Dao.findList(condition);
+        Assert.assertNotNull(dbUserDetailItem1List);
+        Assert.assertFalse(dbUserDetailItem1List.isEmpty());
 
-        for (User dbUser : dbUserList) {
-            Assert.assertEquals(userList.get(0).getCode(), dbUser.getCode());
+        for (UserDetailItem1 dbUserDetailItem1 : dbUserDetailItem1List) {
+            Assert.assertEquals(userDetailItem1List.get(0).getCode(), dbUserDetailItem1.getCode());
 
-            UserDetail dbUserDetail = dbUser.getUserDetail();
+            UserDetail dbUserDetail = dbUserDetailItem1.getUserDetail();
             Assert.assertNotNull(dbUserDetail);
 
-            UserDetailItem1 dbUserDetailItem1 = dbUserDetail.getUserDetailItem1();
-            Assert.assertNotNull(dbUserDetailItem1);
+            User dbUser = dbUserDetail.getUser();
+            Assert.assertNotNull(dbUser);
 
             UserDetailItem2 dbUserDetailItem2 = dbUserDetailItem1.getUserDetailItem2();
             Assert.assertNotNull(dbUserDetailItem2);

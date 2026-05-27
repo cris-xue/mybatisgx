@@ -7,8 +7,8 @@ import org.apache.ibatis.mapping.FetchType;
 import java.util.List;
 
 @Entity
-@Table(name = "join_mtm_role_simple")
-public class Role extends BaseEntity<Long> {
+@Table(name = "join_mtm_resource_simple")
+public class Resource extends BaseEntity<Long> {
 
     private String code;
 
@@ -16,14 +16,10 @@ public class Role extends BaseEntity<Long> {
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-            name = "join_mtm_user_role_simple",
-            joinColumns = @JoinColumn(name = "role_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
+            name = "join_mtm_menu_resource_simple",
+            joinColumns = @JoinColumn(name = "resource_id"),
+            inverseJoinColumns = @JoinColumn(name = "menu_id")
     )
-    @Fetch(FetchMode.JOIN)
-    private List<User> userList;
-
-    @ManyToMany(mappedBy = "roleList", fetch = FetchType.LAZY)
     @Fetch(FetchMode.JOIN)
     private List<Menu> menuList;
 
@@ -41,14 +37,6 @@ public class Role extends BaseEntity<Long> {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public List<User> getUserList() {
-        return userList;
-    }
-
-    public void setUserList(List<User> userList) {
-        this.userList = userList;
     }
 
     public List<Menu> getMenuList() {

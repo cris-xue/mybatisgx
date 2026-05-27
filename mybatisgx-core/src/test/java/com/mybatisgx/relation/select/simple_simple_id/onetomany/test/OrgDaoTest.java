@@ -1,29 +1,39 @@
 package com.mybatisgx.relation.select.simple_simple_id.onetomany.test;
 
+import com.github.swierkosz.fixture.generator.FixtureGenerator;
+import com.mybatisgx.relation.select.simple_simple_id.onetomany.dao.DeptDao;
 import com.mybatisgx.relation.select.simple_simple_id.onetomany.dao.OrgDao;
+import com.mybatisgx.relation.select.simple_simple_id.onetomany.dao.TeamDao;
 import com.mybatisgx.relation.select.simple_simple_id.onetomany.dao.UserDao;
+import com.mybatisgx.relation.select.simple_simple_id.onetomany.entity.Dept;
 import com.mybatisgx.relation.select.simple_simple_id.onetomany.entity.Org;
+import com.mybatisgx.relation.select.simple_simple_id.onetomany.entity.Team;
 import com.mybatisgx.relation.select.simple_simple_id.onetomany.entity.User;
 import com.mybatisgx.util.DaoTestUtils;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.ibatis.session.SqlSession;
 import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.runners.MethodSorters;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class OrgDaoTest {
 
+    private static int count = 10;
     private static OrgDao orgDao;
+    private static DeptDao deptDao;
+    private static TeamDao teamDao;
     private static UserDao userDao;
 
-    private static List<Org> allOrgList = new ArrayList();
-    private static List<User> allUserList = new ArrayList();
-
-    private static int counter = 0;
+    private static List<Org> orgList = new ArrayList();
+    private static List<Dept> deptList = new ArrayList();
+    private static List<Team> teamList = new ArrayList();
+    private static List<User> userList = new ArrayList();
 
     @BeforeClass
     public static void beforeClass() {
@@ -32,102 +42,147 @@ public class OrgDaoTest {
                 new String[]{"com.mybatisgx.relation.select.simple_simple_id.onetomany.dao"}
         );
         orgDao = sqlSession.getMapper(OrgDao.class);
+        deptDao = sqlSession.getMapper(DeptDao.class);
+        teamDao = sqlSession.getMapper(TeamDao.class);
         userDao = sqlSession.getMapper(UserDao.class);
 
         buildData();
+        orgDao.insertBatch(orgList, count);
+        deptDao.insertBatch(deptList, count);
+        teamDao.insertBatch(teamList, count);
+        userDao.insertBatch(userList, count);
     }
 
     private static void buildData() {
-        // 创建根节点
-        Org rootOrg = new Org(counter++, UUID.randomUUID().toString());
-        allOrgList.add(rootOrg);
+        FixtureGenerator fixtureGenerator = new FixtureGenerator();
+        fixtureGenerator.configure().ignoreCyclicReferences();
 
-        List<Org> childrenOrgs = buildChildren(3, 0, rootOrg);
-        List<User> users = new ArrayList();
-        for (Org org : allOrgList) {
-            for (int i = 0; i < 3; i++) {
-                User user = new User();
-                user.setCode(UUID.randomUUID().toString());
-                user.setOrg(org);
-                users.add(user);
+        for (int i = 0; i < count; i++) {
+            User user = fixtureGenerator.createRandomized(User.class);
+            Team team = user.getTeam();
+            Dept dept = team.getDept();
+            Org org = dept.getOrg();
+
+            if (i == 0) {
+                org.setId(777111L);
+                dept.setId(777112L);
+                team.setId(777113L);
+                user.setId(777114L);
+            } else {
+                org.setId(null);
+                dept.setId(null);
+                team.setId(null);
+                user.setId(null);
             }
-        }
-        allUserList.addAll(users);
 
-        orgDao.insertBatch(allOrgList, 100);
-        userDao.insertBatch(allUserList, 100);
-    }
+            team.setDept(dept);
+            dept.setOrg(org);
+            org.setDeptList(Collections.singletonList(dept));
+            dept.setTeamList(Collections.singletonList(team));
+            team.setUserList(Collections.singletonList(user));
 
-    private static List<Org> buildChildren(int maxDepth, int currentDepth, Org parentOrg) {
-        if (currentDepth >= maxDepth) {
-            return null;
-        }
-        List<Org> orgList = new ArrayList();
-        for (int i = 0; i < 3; i++) {
-            Org org = new Org(counter++, UUID.randomUUID().toString());
-            org.setParent(parentOrg);
             orgList.add(org);
-            allOrgList.add(org);
-
-            List<Org> children = buildChildren(maxDepth, currentDepth + 1, org);
-            if (ObjectUtils.isNotEmpty(children)) {
-                orgList.addAll(children);
-            }
+            deptList.add(dept);
+            teamList.add(team);
+            userList.add(user);
         }
-        return orgList;
     }
 
     @Test
-    public void testOrgFindById() {
-        Org dbOrg = orgDao.findById(0);
+    public void testFindById() {
+        Org dbOrg = orgDao.findById(777111L);
         Assert.assertNotNull(dbOrg);
-        Assert.assertEquals(Integer.valueOf(0), dbOrg.getId());
 
-        Org rootOrg = allOrgList.get(0);
-        Assert.assertEquals(rootOrg.getCode(), dbOrg.getCode());
-        Assert.assertNotNull(dbOrg.getUserList());
-        Assert.assertFalse(dbOrg.getUserList().isEmpty());
+        Org org = orgList.get(0);
+        Assert.assertEquals(org.getId(), dbOrg.getId());
+        Assert.assertEquals(org.getCode(), dbOrg.getCode());
+
+        List<Dept> dbDeptList = dbOrg.getDeptList();
+        Assert.assertNotNull(dbDeptList);
+        Assert.assertFalse(dbDeptList.isEmpty());
+        Dept dbDept = dbDeptList.get(0);
+        Dept dept = deptList.get(0);
+        Assert.assertEquals(dept.getId(), dbDept.getId());
+        Assert.assertEquals(dept.getCode(), dbDept.getCode());
+
+        List<Team> dbTeamList = dbDept.getTeamList();
+        Assert.assertNotNull(dbTeamList);
+        Assert.assertFalse(dbTeamList.isEmpty());
+        Team dbTeam = dbTeamList.get(0);
+        Team team = teamList.get(0);
+        Assert.assertEquals(team.getId(), dbTeam.getId());
+        Assert.assertEquals(team.getCode(), dbTeam.getCode());
+
+        List<User> dbUserList = dbTeam.getUserList();
+        Assert.assertNotNull(dbUserList);
+        Assert.assertFalse(dbUserList.isEmpty());
+        User dbUser = dbUserList.get(0);
+        User user = userList.get(0);
+        Assert.assertEquals(user.getId(), dbUser.getId());
+        Assert.assertEquals(user.getCode(), dbUser.getCode());
     }
 
     @Test
-    public void testOrgFindList() {
-        Org query = new Org();
-        query.setId(0);
-        Org parent = new Org();
-        parent.setId(0);
-        query.setParent(parent);
-        List<Org> dbOrgList = orgDao.findList(query);
+    public void testFindList() {
+        List<Org> dbOrgList = orgDao.findList(new Org());
+        Assert.assertNotNull(dbOrgList);
+        Assert.assertEquals(count, dbOrgList.size());
+
+        for (int i = 0; i < count; i++) {
+            Org org = orgList.get(i);
+            Org dbOrg = dbOrgList.get(i);
+
+            Assert.assertEquals(org.getId(), dbOrg.getId());
+            Assert.assertEquals(org.getCode(), dbOrg.getCode());
+
+            List<Dept> dbDeptList = dbOrg.getDeptList();
+            Assert.assertNotNull(dbDeptList);
+            Assert.assertFalse(dbDeptList.isEmpty());
+            Dept dbDept = dbDeptList.get(0);
+            Dept dept = deptList.get(i);
+            Assert.assertEquals(dept.getId(), dbDept.getId());
+            Assert.assertEquals(dept.getCode(), dbDept.getCode());
+
+            List<Team> dbTeamList = dbDept.getTeamList();
+            Assert.assertNotNull(dbTeamList);
+            Assert.assertFalse(dbTeamList.isEmpty());
+            Team dbTeam = dbTeamList.get(0);
+            Team team = teamList.get(i);
+            Assert.assertEquals(team.getId(), dbTeam.getId());
+            Assert.assertEquals(team.getCode(), dbTeam.getCode());
+
+            List<User> dbUserList = dbTeam.getUserList();
+            Assert.assertNotNull(dbUserList);
+            Assert.assertFalse(dbUserList.isEmpty());
+            User dbUser = dbUserList.get(0);
+            User user = userList.get(i);
+            Assert.assertEquals(user.getId(), dbUser.getId());
+            Assert.assertEquals(user.getCode(), dbUser.getCode());
+        }
+    }
+
+    @Test
+    public void testFindListWithCondition() {
+        Org condition = new Org();
+        condition.setCode(orgList.get(0).getCode());
+        List<Org> dbOrgList = orgDao.findList(condition);
         Assert.assertNotNull(dbOrgList);
         Assert.assertFalse(dbOrgList.isEmpty());
 
         for (Org dbOrg : dbOrgList) {
-            Assert.assertNotNull(dbOrg.getUserList());
-            Assert.assertFalse(dbOrg.getUserList().isEmpty());
-            for (User user : dbOrg.getUserList()) {
-                Assert.assertNotNull(user.getOrg());
-            }
-        }
-    }
+            Assert.assertEquals(orgList.get(0).getCode(), dbOrg.getCode());
 
-    @Test
-    public void testUserFindById() {
-        User firstUser = allUserList.get(0);
-        User dbUser = userDao.findById(firstUser.getId());
-        Assert.assertNotNull(dbUser);
-        Assert.assertEquals(firstUser.getCode(), dbUser.getCode());
-        Assert.assertNotNull(dbUser.getOrg());
-        Assert.assertEquals(firstUser.getOrg().getId(), dbUser.getOrg().getId());
-    }
+            List<Dept> dbDeptList = dbOrg.getDeptList();
+            Assert.assertNotNull(dbDeptList);
+            Assert.assertFalse(dbDeptList.isEmpty());
 
-    @Test
-    public void testUserFindList() {
-        List<User> dbUserList = userDao.findList(new User());
-        Assert.assertNotNull(dbUserList);
-        Assert.assertEquals(allUserList.size(), dbUserList.size());
+            List<Team> dbTeamList = dbDeptList.get(0).getTeamList();
+            Assert.assertNotNull(dbTeamList);
+            Assert.assertFalse(dbTeamList.isEmpty());
 
-        for (int i = 0; i < dbUserList.size(); i++) {
-            User dbUser = dbUserList.get(i);
-            Assert.assertNotNull(dbUser.getOrg());
+            List<User> dbUserList = dbTeamList.get(0).getUserList();
+            Assert.assertNotNull(dbUserList);
+            Assert.assertFalse(dbUserList.isEmpty());
         }
     }
 }

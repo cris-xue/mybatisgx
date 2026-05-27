@@ -5,7 +5,7 @@ import com.mybatisgx.entity.BaseEntity;
 import org.apache.ibatis.mapping.FetchType;
 
 @Entity
-@Table(name = "ssi_oto_user")
+@Table(name = "simple_oto_user_simple")
 public class User extends BaseEntity<Long> {
 
     private String code;

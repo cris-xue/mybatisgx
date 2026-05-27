@@ -5,4 +5,6 @@ import com.mybatisgx.entity.MultiId;
 import com.mybatisgx.relation.select.simple_complex_id.onetoone.entity.User;
 import org.apache.ibatis.annotations.Mapper;
 
-@Mapper public interface UserDao extends SimpleDao<User, User, MultiId> {}
+@Mapper
+public interface UserDao extends SimpleDao<User, User, MultiId> {
+}

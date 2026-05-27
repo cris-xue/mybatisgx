@@ -5,16 +5,28 @@ import com.mybatisgx.entity.EmbeddedIdBaseEntity;
 import org.apache.ibatis.mapping.FetchType;
 
 @Entity
-@Table(name = "sci_oto_user")
+@Table(name = "simple_oto_user_complex")
 public class User extends EmbeddedIdBaseEntity<Long> {
+
     private String code;
 
     @OneToOne(mappedBy = "user", fetch = FetchType.EAGER)
     @Fetch(FetchMode.SIMPLE)
     private UserDetail userDetail;
 
-    public String getCode() { return code; }
-    public void setCode(String code) { this.code = code; }
-    public UserDetail getUserDetail() { return userDetail; }
-    public void setUserDetail(UserDetail userDetail) { this.userDetail = userDetail; }
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public UserDetail getUserDetail() {
+        return userDetail;
+    }
+
+    public void setUserDetail(UserDetail userDetail) {
+        this.userDetail = userDetail;
+    }
 }

@@ -7,27 +7,25 @@ import org.apache.ibatis.mapping.FetchType;
 import java.util.List;
 
 @Entity
-@Table(name = "ssi_mtm_role")
+@Table(name = "simple_mtm_role_simple")
 public class Role extends BaseEntity<Long> {
 
     private String code;
 
     private String name;
 
-    @LogicDelete
-    private Integer status;
-
-    @Version
-    private Integer version;
-
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-            name = "ssi_mtm_user_role",
+            name = "simple_mtm_user_role_simple",
             joinColumns = @JoinColumn(name = "role_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     @Fetch(FetchMode.SIMPLE)
     private List<User> userList;
+
+    @ManyToMany(mappedBy = "roleList", fetch = FetchType.LAZY)
+    @Fetch(FetchMode.SIMPLE)
+    private List<Menu> menuList;
 
     public String getCode() {
         return code;
@@ -45,27 +43,19 @@ public class Role extends BaseEntity<Long> {
         this.name = name;
     }
 
-    public Integer getStatus() {
-        return status;
-    }
-
-    public void setStatus(Integer status) {
-        this.status = status;
-    }
-
-    public Integer getVersion() {
-        return version;
-    }
-
-    public void setVersion(Integer version) {
-        this.version = version;
-    }
-
     public List<User> getUserList() {
         return userList;
     }
 
     public void setUserList(List<User> userList) {
         this.userList = userList;
+    }
+
+    public List<Menu> getMenuList() {
+        return menuList;
+    }
+
+    public void setMenuList(List<Menu> menuList) {
+        this.menuList = menuList;
     }
 }

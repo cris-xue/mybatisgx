@@ -1,13 +1,39 @@
 package com.mybatisgx.relation.select.simple_complex_id.onetomany.entity;
 
-import com.mybatisgx.annotation.*; import com.mybatisgx.entity.BaseEntity;
+import com.mybatisgx.annotation.*;
+import com.mybatisgx.entity.EmbeddedIdBaseEntity;
 import org.apache.ibatis.mapping.FetchType;
 
-@Entity @Table(name = "sci_otm_user")
-public class User extends BaseEntity<Long> {
-    private String code;
-    @ManyToOne(fetch = FetchType.EAGER) @Fetch(FetchMode.SIMPLE) @JoinColumn(name = "org_id") private Org org;
+@Entity
+@Table(name = "simple_otm_user_complex")
+public class User extends EmbeddedIdBaseEntity<Long> {
 
-    public String getCode() { return code; } public void setCode(String code) { this.code = code; }
-    public Org getOrg() { return org; } public void setOrg(Org org) { this.org = org; }
+    private String code;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumns({
+            @JoinColumn(name = "team_id1", referencedColumnName = "id1"),
+            @JoinColumn(name = "team_id2", referencedColumnName = "id2")
+    })
+    @Fetch(FetchMode.SIMPLE)
+    private Team team;
+
+    public User() {
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public Team getTeam() {
+        return team;
+    }
+
+    public void setTeam(Team team) {
+        this.team = team;
+    }
 }

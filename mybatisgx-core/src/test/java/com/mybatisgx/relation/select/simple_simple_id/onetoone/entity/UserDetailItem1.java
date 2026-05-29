@@ -1,0 +1,45 @@
+package com.mybatisgx.relation.select.simple_simple_id.onetoone.entity;
+
+import com.mybatisgx.annotation.*;
+import com.mybatisgx.entity.BaseEntity;
+import org.apache.ibatis.mapping.FetchType;
+
+@Entity
+@Table(name = "simple_oto_user_detail_item1_simple")
+public class UserDetailItem1 extends BaseEntity<Long> {
+
+    private String code;
+
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_detail_id")
+    @Fetch(FetchMode.SIMPLE)
+    private UserDetail userDetail;
+
+    @OneToOne(mappedBy = "userDetailItem1", fetch = FetchType.EAGER)
+    @Fetch(FetchMode.SIMPLE)
+    private UserDetailItem2 userDetailItem2;
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public UserDetail getUserDetail() {
+        return userDetail;
+    }
+
+    public void setUserDetail(UserDetail userDetail) {
+        this.userDetail = userDetail;
+    }
+
+    public UserDetailItem2 getUserDetailItem2() {
+        return userDetailItem2;
+    }
+
+    public void setUserDetailItem2(UserDetailItem2 userDetailItem2) {
+        this.userDetailItem2 = userDetailItem2;
+    }
+}

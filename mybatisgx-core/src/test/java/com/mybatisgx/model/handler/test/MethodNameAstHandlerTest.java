@@ -7,6 +7,7 @@ import com.mybatisgx.model.EntityInfo;
 import com.mybatisgx.model.MethodInfo;
 import com.mybatisgx.model.handler.EntityInfoHandler;
 import com.mybatisgx.model.handler.MybatisgxSyntaxProcessor;
+import com.mybatisgx.model.handler.test.entity.User;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -85,7 +86,7 @@ public class MethodNameAstHandlerTest {
                     "findByName1"
             );
         } catch (MybatisgxException e) {
-            Assert.assertEquals("name1 方法条件字段或者实体条件字段在 com.mybatisgx.model.handler.test.User 实体类中不存在", e.getMessage());
+            Assert.assertEquals("name1 方法条件字段或者实体条件字段在 com.mybatisgx.model.handler.test.entity.User 实体类中不存在", e.getMessage());
         }
     }
 

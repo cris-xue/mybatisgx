@@ -27,11 +27,11 @@ public abstract class EmbeddedIdBaseEntity<ID> {
     @Column(name = "update_time")
     private LocalDateTime updateTime;
 
-    public MultiId getMultiId() {
+    public MultiId<ID> getMultiId() {
         return multiId;
     }
 
-    public void setMultiId(MultiId multiId) {
+    public void setMultiId(MultiId<ID> multiId) {
         this.multiId = multiId;
     }
 

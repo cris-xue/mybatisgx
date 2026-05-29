@@ -15,10 +15,10 @@ public class EntityAstHandlerTest {
     public void test01() {
         MybatisgxConfiguration configuration = DaoTestUtils.getMybatisgxConfiguration(
                 new String[]{"com.mybatisgx.model.handler.test.entity"},
-                new String[]{"com.mybatisgx.model.handler.test.entity"}
+                new String[]{"com.mybatisgx.model.handler.test.dao"}
         );
 
-        MethodInfo methodInfo = configuration.getMethodInfo("com.mybatisgx.model.handler.test.entity.UserEntityDao.findOne");
+        MethodInfo methodInfo = configuration.getMethodInfo("com.mybatisgx.model.handler.test.dao.UserEntityDao.findOne");
         List<ConditionInfo> conditionInfoList = methodInfo.getConditionInfoList();
 
         ConditionInfo conditionInfo1 = conditionInfoList.get(2);

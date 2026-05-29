@@ -2,7 +2,6 @@ package com.mybatisgx.model.handler.test.entity;
 
 import com.mybatisgx.annotation.*;
 import com.mybatisgx.entity.BaseEntity;
-import com.mybatisgx.relation.select.batch_simple_id.manytomany.entity.User;
 import org.apache.ibatis.mapping.FetchType;
 
 import java.util.List;

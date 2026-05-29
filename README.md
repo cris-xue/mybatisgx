@@ -8,6 +8,13 @@
 [![Spring Boot 3](https://img.shields.io/badge/Spring%20Boot-3.x-green.svg)](https://spring.io/projects/spring-boot)
 [![Spring Boot 4](https://img.shields.io/badge/Spring%20Boot-4.x-green.svg)](https://spring.io/projects/spring-boot)
 
+## 社区交流
+
+欢迎交流 MyBatisGX 使用问题、ORM 设计与 SQL 架构实践。
+
+微信：xcc137396549
+备注：进 MyBatisGX 群
+
 ## 概述
 
 MyBatisGX 是一个基于 MyBatis 的增强框架，致力于解决一个核心问题：**让代码不被数据库腐蚀**。

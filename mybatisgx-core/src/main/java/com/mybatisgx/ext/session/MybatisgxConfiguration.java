@@ -35,7 +35,7 @@ public class MybatisgxConfiguration extends Configuration {
     protected final Map<String, MethodInfo> methodInfoMap = new StrictMap("methodInfo collection");
 
     public MybatisgxConfiguration() {
-        super();
+        this(null);
     }
 
     public MybatisgxConfiguration(Environment environment) {

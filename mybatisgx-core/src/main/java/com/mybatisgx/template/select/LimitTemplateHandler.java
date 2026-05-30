@@ -1,5 +1,6 @@
 package com.mybatisgx.template.select;
 
+import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.model.MethodRowLimitInfo;
 
@@ -17,19 +18,38 @@ public class LimitTemplateHandler {
     private static final Map<String, MethodRowLimitHandler> METHOD_ROW_LIMIT_MAP = new ConcurrentHashMap<>();
     private final MybatisgxConfiguration configuration;
 
+    static {
+        register("MySQL", new LimitTemplateHandler.MysqlMethodRowLimitHandler());
+        register("MariaDB", new LimitTemplateHandler.MysqlMethodRowLimitHandler());
+        register("OceanBase_MySQL", new LimitTemplateHandler.MysqlMethodRowLimitHandler());
+        register("SinoDB", new LimitTemplateHandler.MysqlMethodRowLimitHandler());
+
+        register("Oracle", new LimitTemplateHandler.OracleMethodRowLimitHandler());
+        register("Dameng", new LimitTemplateHandler.OracleMethodRowLimitHandler());
+        register("UXDB", new LimitTemplateHandler.OracleMethodRowLimitHandler());
+        register("OceanBase", new LimitTemplateHandler.OracleMethodRowLimitHandler());
+
+        register("PostgreSQL", new LimitTemplateHandler.PgsqlMethodRowLimitHandler());
+        register("GaussDB", new LimitTemplateHandler.PgsqlMethodRowLimitHandler());
+        register("Vastbase", new LimitTemplateHandler.PgsqlMethodRowLimitHandler());
+        register("Kingbase", new LimitTemplateHandler.PgsqlMethodRowLimitHandler());
+        register("GBase", new LimitTemplateHandler.PgsqlMethodRowLimitHandler());
+    }
+
     public LimitTemplateHandler(MybatisgxConfiguration configuration) {
         this.configuration = configuration;
-        register("MySQL", new LimitTemplateHandler.MysqlMethodRowLimitHandler());
-        register("Oracle", new LimitTemplateHandler.OracleMethodRowLimitHandler());
-        register("PostgreSQL", new LimitTemplateHandler.PgsqlMethodRowLimitHandler());
     }
 
     public void execute(List<Object> selectXmlItemList, MethodRowLimitInfo methodRowLimitInfo) {
-        MethodRowLimitHandler methodRowLimitHandler = METHOD_ROW_LIMIT_MAP.get(this.configuration.getDatabaseId());
+        String databaseId = this.configuration.getDatabaseId().toLowerCase();
+        MethodRowLimitHandler methodRowLimitHandler = METHOD_ROW_LIMIT_MAP.get(databaseId);
+        if (methodRowLimitHandler == null) {
+            throw new MybatisgxException("Unsupported databaseId '%s', please register MethodRowLimitHandler first.", databaseId);
+        }
         methodRowLimitHandler.apply(selectXmlItemList, methodRowLimitInfo);
     }
 
-    public static class MysqlMethodRowLimitHandler implements MethodRowLimitHandler {
+    private static class MysqlMethodRowLimitHandler implements MethodRowLimitHandler {
 
         private static final String LIMIT_SQL_EXPRESSION = " limit %s, %s";
 
@@ -41,7 +61,7 @@ public class LimitTemplateHandler {
         }
     }
 
-    public static class OracleMethodRowLimitHandler implements MethodRowLimitHandler {
+    private static class OracleMethodRowLimitHandler implements MethodRowLimitHandler {
 
         private static final String LIMIT_SQL_EXPRESSION_START = "SELECT * FROM (SELECT t.*, ROWNUM AS rn FROM (";
         private static final String LIMIT_SQL_EXPRESSION_END = ") t WHERE ROWNUM <= %s) WHERE rn > %s";
@@ -55,7 +75,7 @@ public class LimitTemplateHandler {
         }
     }
 
-    public static class PgsqlMethodRowLimitHandler implements MethodRowLimitHandler {
+    private static class PgsqlMethodRowLimitHandler implements MethodRowLimitHandler {
 
         private static final String LIMIT_SQL_EXPRESSION = " limit %s OFFSET %s";
 

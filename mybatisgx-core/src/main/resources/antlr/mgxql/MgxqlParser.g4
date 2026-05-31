@@ -26,7 +26,7 @@ update_clause: UPDATE_ACTION ;
 // 查询语法：6、select max(id) from User where name = :name and (age < :age or status = :status)
 // 查询语法：7、select min(id) from User where name = :name and (age < :age or status = :status)
 // 查询语法：8、select avg(age) from User where name = :name and (age < :age or status = :status)
-select_statement: select_action select_item_clause select_from_clause where_clause? order_by_clause? limit? ;
+select_statement: select_action select_item_clause select_from_clause where_clause? group_by_clause? order_by_clause? limit? ;
 select_item_clause: select_item (comma_identifier select_item)* ;
 select_item: select_column_all | select_column_custom | aggregate_function ;
 
@@ -72,6 +72,9 @@ condition_term: field_comparison_op | (left_bracket condition_expression right_b
 field_comparison_op: where_param_name_field_access_chain (field_comparison_op_param | field_comparison_op_not_param) ;
 field_comparison_op_param: (relational_op | matching_op) param_colon where_param_value_field_access_chain ;
 field_comparison_op_not_param: comparison_op_null ;
+
+// group by
+group_by_clause: group_by (entity_field_access_chain comma_identifier?)+ ;
 
 // 排序 OrderByNameDesc、OrderByName
 order_by_clause: order_by order_by_item+ ;
@@ -123,6 +126,8 @@ comparison_op_is_not_null: COMPARISON_OP_IS_NOT_NULL ;
 where_param_name_field_access_chain: param_name_field_access_chain ;
 param_colon: COLON ;
 where_param_value_field_access_chain: param_value_field_access_chain ;
+
+group_by: GROUP_BY ;
 
 order_by: ORDER_BY ;
 order_by_direction: ORDER_BY_DIRECTION ;

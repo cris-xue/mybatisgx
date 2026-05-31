@@ -31,7 +31,6 @@ COMPARISON_OP_RIGHT_LIKE: 'right like' ;
 
 COMPARISON_OP_IS_NULL: 'is null' ;
 COMPARISON_OP_IS_NOT_NULL: 'is not null' ;
-COMPARISON_OP_NOT_NULL: 'is not null' ;
 
 ORDER_BY: 'order by' ;
 ORDER_BY_DIRECTION: 'desc' | 'asc' ;

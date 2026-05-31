@@ -97,10 +97,9 @@ comparison_op_like: COMPARISON_OP_LIKE ;
 comparison_op_left_like: COMPARISON_OP_LEFT_LIKE ;
 comparison_op_right_like: COMPARISON_OP_RIGHT_LIKE ;
 
-comparison_op_null: comparison_op_is_null | comparison_op_is_not_null | comparison_op_not_null ;
+comparison_op_null: comparison_op_is_null | comparison_op_is_not_null ;
 comparison_op_is_null: COMPARISON_OP_IS_NULL ;
 comparison_op_is_not_null: COMPARISON_OP_IS_NOT_NULL ;
-comparison_op_not_null: COMPARISON_OP_NOT_NULL ;
 
 param_colon: COLON ;
 param_identifier: FIELD_IDENTIFIER+ ;

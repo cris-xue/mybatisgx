@@ -31,7 +31,8 @@ select_item_clause: select_item (comma_identifier select_item)* ;
 select_item: select_column_all | select_column_custom | aggregate_function ;
 
 select_action: SELECT_ACTION ;
-select_column_all: (entity_name_alias dot)? SELECT_ASTERISK ;
+select_column_all: (entity_name_alias dot)? select_asterisk ;
+select_asterisk: SELECT_ASTERISK ;
 select_column_custom: (entity_name_alias dot)? field_name ;
 
 // 聚合函数
@@ -135,7 +136,7 @@ entity_name_alias: LOWER_NAME ;
 field_name: LOWER_NAME ;
 
 // 参数字段访问链，role.name
-param_name_field_access_chain: field_name (dot field_name)? ;
+param_name_field_access_chain: entity_name_alias (dot field_name)? ;
 param_value_field_access_chain: field_name (dot field_name)? ;
 
 left_bracket: LEFT_BRACKET ;

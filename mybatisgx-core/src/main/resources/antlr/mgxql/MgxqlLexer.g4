@@ -19,17 +19,15 @@ COMPARISON_OP_LT: '<' ;
 COMPARISON_OP_LT_EQ: '<=' ;
 COMPARISON_OP_GT: '>' ;
 COMPARISON_OP_GT_EQ: '>=' ;
-
 COMPARISON_OP_EQ: '=' ;
-COMPARISON_OP_EQUAL: '=' ;
 COMPARISON_OP_NOT_EQ: '!=' ;
 
 COMPARISON_OP_NOT: 'not' ;
 COMPARISON_OP_BETWEEN: 'between' ;
 COMPARISON_OP_IN: 'in' ;
 COMPARISON_OP_LIKE: 'like' ;
-COMPARISON_OP_STARTING_WITH: 'left like' ;
-COMPARISON_OP_ENDING_WITH: 'right like' ;
+COMPARISON_OP_LEFT_LIKE: 'left like' ;
+COMPARISON_OP_RIGHT_LIKE: 'right like' ;
 
 COMPARISON_OP_IS_NULL: 'is null' ;
 COMPARISON_OP_IS_NOT_NULL: 'is not null' ;
@@ -45,6 +43,7 @@ LEFT_BRACKET: '(' ;
 RIGHT_BRACKET: ')' ;
 // 逗号
 COMMA: ',' ;
+COLON: ':' ;
 
 ENTITY_IDENTIFIER: [A-Z]+[a-z0-9]* ;
 // antlr是从上向下解析的，常量一定要放在正则的上面

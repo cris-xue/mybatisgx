@@ -50,9 +50,7 @@ COMMA: ',' ;
 COLON: ':' ;
 DOT: '.' ;
 
-// ENTITY_IDENTIFIER: [A-Z]+[a-z0-9]* ;
 // antlr是从上向下解析的，常量一定要放在正则的上面
-// FIELD_IDENTIFIER: [a-z0-9]+ ;
 UPPER_NAME: UPPER+ (NUMBER | UPPER | LOWER)* ;
 LOWER_NAME: LOWER+ (NUMBER | UPPER | LOWER)* ;
 UPPER: [A-Z] ;

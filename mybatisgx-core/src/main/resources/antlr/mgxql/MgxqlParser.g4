@@ -122,17 +122,13 @@ comparison_op_is_not_null: COMPARISON_OP_IS_NOT_NULL ;
 
 where_param_name_field_access_chain: param_name_field_access_chain ;
 param_colon: COLON ;
-// param_identifier: FIELD_IDENTIFIER (DOT FIELD_IDENTIFIER)? ;
 where_param_value_field_access_chain: param_value_field_access_chain ;
 
 order_by: ORDER_BY ;
 order_by_direction: ORDER_BY_DIRECTION ;
 
-// field: (field_identifier dot)? field_identifier ;
-// entity_name: UPPER+ (NUMBER | UPPER | LOWER)* ;
 entity_name: UPPER_NAME ;
 entity_name_alias: LOWER_NAME ;
-// field_name: LOWER+ (NUMBER | UPPER | LOWER)* ;
 field_name: LOWER_NAME ;
 
 // 参数字段访问链，role.name

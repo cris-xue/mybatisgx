@@ -37,7 +37,7 @@ select_column_custom: (entity_name_alias dot)? field_name ;
 
 // 聚合函数
 aggregate_function: select_count | select_max | select_min | select_avg ;
-select_count: select_aggregate_function_count left_bracket (select_column_all | field_name) right_bracket ;
+select_count: select_aggregate_function_count left_bracket (number| select_column_all | field_name) right_bracket ;
 select_max: select_aggregate_function_max left_bracket field_name right_bracket ;
 select_min: select_aggregate_function_min left_bracket field_name right_bracket ;
 select_avg: select_aggregate_function_avg left_bracket field_name right_bracket ;
@@ -131,13 +131,14 @@ entity_name: UPPER_NAME ;
 entity_name_alias: LOWER_NAME ;
 field_name: LOWER_NAME ;
 
-// 参数字段访问链，role.name
+// 参数字段访问链，role.name = :role.name   menu.name = :role.menu.name
 param_name_field_access_chain: entity_name_alias (dot field_name)? ;
-param_value_field_access_chain: field_name (dot field_name)? ;
+param_value_field_access_chain: field_name (dot field_name)* ;
 
 left_bracket: LEFT_BRACKET ;
 right_bracket: RIGHT_BRACKET ;
 dot: DOT ;
+number: NUMBER ;
 
 // EOF(end of file)表示文件结束符，这个是Antlr中已经定义好的
 end: EOF ;

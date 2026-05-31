@@ -38,6 +38,7 @@ COMPARISON_OP_IS_NULL: 'is null' ;
 COMPARISON_OP_IS_NOT_NULL: 'is not null' ;
 
 GROUP_BY: 'group by' ;
+HAVING: 'having' ;
 ORDER_BY: 'order by' ;
 ORDER_BY_DIRECTION: 'desc' | 'asc' ;
 LIMIT_IDENTIFIER: 'limit' ;

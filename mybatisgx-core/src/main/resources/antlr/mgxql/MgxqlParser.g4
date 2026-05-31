@@ -75,7 +75,7 @@ field_comparison_op_not_param: comparison_op_null ;
 
 // 排序 OrderByNameDesc、OrderByName
 order_by_clause: order_by order_by_item+ ;
-order_by_item: field_name order_by_direction? ;
+order_by_item: entity_field_access_chain order_by_direction? ;
 
 // 分页
 limit: limit_identifier offset comma_identifier size ;
@@ -132,6 +132,7 @@ entity_name_alias: LOWER_NAME ;
 field_name: LOWER_NAME ;
 
 // 参数字段访问链，role.name = :role.name   menu.name = :role.menu.name
+entity_field_access_chain: entity_name_alias (dot field_name)? ;
 param_name_field_access_chain: entity_name_alias (dot field_name)? ;
 param_value_field_access_chain: field_name (dot field_name)* ;
 

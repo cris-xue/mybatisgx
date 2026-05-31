@@ -27,17 +27,30 @@ update_clause: UPDATE_ACTION ;
 // 查询语法：7、select min(id) from User where name = :name and (age < :age or status = :status)
 // 查询语法：8、select avg(age) from User where name = :name and (age < :age or status = :status)
 select_statement: select_action select_item_clause select_from_clause where_clause? order_by_clause? limit? ;
-select_action: SELECT_ACTION ;
 select_item_clause: select_item (comma_identifier select_item)* ;
-select_item: select_all_column | aggregate_function | field ;
-select_all_column: SELECT_ALL_COLUMN ;
-aggregate_function: select_count | select_max | select_min | select_avg ;
-select_count: SELECT_COUNT left_bracket (SELECT_ALL_COLUMN | field) right_bracket ;
-select_max: SELECT_MAX left_bracket field right_bracket ;
-select_min: SELECT_MIN left_bracket field right_bracket ;
-select_avg: SELECT_AVG left_bracket field right_bracket ;
+select_item: select_column_all | select_column_custom | aggregate_function ;
 
-select_from_clause: FROM ENTITY_IDENTIFIER FIELD_IDENTIFIER? (LEFT JOIN ENTITY_IDENTIFIER FIELD_IDENTIFIER?)* ;
+select_action: SELECT_ACTION ;
+select_column_all: (entity_name_alias dot)? SELECT_ASTERISK ;
+select_column_custom: (entity_name_alias dot)? field_name ;
+
+// 聚合函数
+aggregate_function: select_count | select_max | select_min | select_avg ;
+select_count: select_aggregate_function_count left_bracket (select_column_all | field_name) right_bracket ;
+select_max: select_aggregate_function_max left_bracket field_name right_bracket ;
+select_min: select_aggregate_function_min left_bracket field_name right_bracket ;
+select_avg: select_aggregate_function_avg left_bracket field_name right_bracket ;
+select_aggregate_function_count: SELECT_COUNT ;
+select_aggregate_function_max: SELECT_MAX ;
+select_aggregate_function_min: SELECT_MIN ;
+select_aggregate_function_avg: SELECT_AVG ;
+
+// from left join
+select_from_clause: select_from select_entity select_entity_alias? (select_left_join select_entity select_entity_alias?)* ;
+select_from: FROM ;
+select_left_join: LEFT JOIN ;
+select_entity: entity_name ;
+select_entity_alias: entity_name_alias ;
 
 // 条件语法   ByNameLikeAndAgeEq
 where_clause: where_start condition_expression ;
@@ -55,13 +68,13 @@ and_expression: condition_term (logic_and condition_term)* ;
 condition_term: field_comparison_op | (left_bracket condition_expression right_bracket) ;
 
 // 解析方法名和实体字段
-field_comparison_op: field (field_comparison_op_param | field_comparison_op_not_param) ;
-field_comparison_op_param: (comparison_op_1 | comparison_op_2) param_colon param_identifier ;
+field_comparison_op: where_param_name_field_access_chain (field_comparison_op_param | field_comparison_op_not_param) ;
+field_comparison_op_param: (relational_op | matching_op) param_colon where_param_value_field_access_chain ;
 field_comparison_op_not_param: comparison_op_null ;
 
 // 排序 OrderByNameDesc、OrderByName
 order_by_clause: order_by order_by_item+ ;
-order_by_item: field order_by_direction? ;
+order_by_item: field_name order_by_direction? ;
 
 // 分页
 limit: limit_identifier offset comma_identifier size ;
@@ -74,7 +87,7 @@ where_start: WHERE ;
 logic_and: LOGIC_AND ;
 logic_or: LOGIC_OR ;
 
-comparison_op_1: comparison_op_lt
+relational_op: comparison_op_lt
     | comparison_op_lt_eq
     | comparison_op_gt
     | comparison_op_gt_eq
@@ -88,7 +101,7 @@ comparison_op_gt_eq: COMPARISON_OP_GT_EQ ;
 comparison_op_eq: COMPARISON_OP_EQ ;
 comparison_op_not_eq: COMPARISON_OP_NOT_EQ ;
 
-comparison_op_2: comparison_op_not? (
+matching_op: comparison_op_not? (
     comparison_op_between
     | comparison_op_in
     | comparison_op_like
@@ -106,16 +119,28 @@ comparison_op_null: comparison_op_is_null | comparison_op_is_not_null ;
 comparison_op_is_null: COMPARISON_OP_IS_NULL ;
 comparison_op_is_not_null: COMPARISON_OP_IS_NOT_NULL ;
 
+where_param_name_field_access_chain: param_name_field_access_chain ;
 param_colon: COLON ;
-param_identifier: FIELD_IDENTIFIER (DOT FIELD_IDENTIFIER)? ;
+// param_identifier: FIELD_IDENTIFIER (DOT FIELD_IDENTIFIER)? ;
+where_param_value_field_access_chain: param_value_field_access_chain ;
 
 order_by: ORDER_BY ;
 order_by_direction: ORDER_BY_DIRECTION ;
 
-field: (FIELD_IDENTIFIER DOT)? field_identifier ;
-field_identifier: FIELD_IDENTIFIER+ ;
+// field: (field_identifier dot)? field_identifier ;
+// entity_name: UPPER+ (NUMBER | UPPER | LOWER)* ;
+entity_name: UPPER_NAME ;
+entity_name_alias: LOWER_NAME ;
+// field_name: LOWER+ (NUMBER | UPPER | LOWER)* ;
+field_name: LOWER_NAME ;
+
+// 参数字段访问链，role.name
+param_name_field_access_chain: field_name (dot field_name)? ;
+param_value_field_access_chain: field_name (dot field_name)? ;
+
 left_bracket: LEFT_BRACKET ;
 right_bracket: RIGHT_BRACKET ;
+dot: DOT ;
 
 // EOF(end of file)表示文件结束符，这个是Antlr中已经定义好的
 end: EOF ;

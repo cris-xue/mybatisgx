@@ -28,11 +28,16 @@ update_clause: UPDATE_ACTION ;
 // 查询语法：8、select avg(age) from User where name = :name and (age < :age or status = :status)
 select_statement: select_action select_item_clause select_from_clause where_clause? order_by_clause? limit? ;
 select_action: SELECT_ACTION ;
-select_item_clause: select_column | select_count ;
-select_column: SELECT_COLUMN ;
-select_count: SELECT_COUNT ;
+select_item_clause: select_item (comma_identifier select_item)* ;
+select_item: select_all_column | aggregate_function | field ;
+select_all_column: SELECT_ALL_COLUMN ;
+aggregate_function: select_count | select_max | select_min | select_avg ;
+select_count: SELECT_COUNT left_bracket (SELECT_ALL_COLUMN | field) right_bracket ;
+select_max: SELECT_MAX left_bracket field right_bracket ;
+select_min: SELECT_MIN left_bracket field right_bracket ;
+select_avg: SELECT_AVG left_bracket field right_bracket ;
 
-select_from_clause: FROM ENTITY_IDENTIFIER ;
+select_from_clause: FROM ENTITY_IDENTIFIER FIELD_IDENTIFIER? (LEFT JOIN ENTITY_IDENTIFIER FIELD_IDENTIFIER?)* ;
 
 // 条件语法   ByNameLikeAndAgeEq
 where_clause: where_start condition_expression ;
@@ -51,8 +56,8 @@ condition_term: field_comparison_op | (left_bracket condition_expression right_b
 
 // 解析方法名和实体字段
 field_comparison_op: field (field_comparison_op_param | field_comparison_op_not_param) ;
-field_comparison_op_param: field (comparison_op_1 | comparison_op_2) param_colon param_identifier ;
-field_comparison_op_not_param: field comparison_op_null ;
+field_comparison_op_param: (comparison_op_1 | comparison_op_2) param_colon param_identifier ;
+field_comparison_op_not_param: comparison_op_null ;
 
 // 排序 OrderByNameDesc、OrderByName
 order_by_clause: order_by order_by_item+ ;
@@ -102,12 +107,12 @@ comparison_op_is_null: COMPARISON_OP_IS_NULL ;
 comparison_op_is_not_null: COMPARISON_OP_IS_NOT_NULL ;
 
 param_colon: COLON ;
-param_identifier: FIELD_IDENTIFIER+ ;
+param_identifier: FIELD_IDENTIFIER (DOT FIELD_IDENTIFIER)? ;
 
 order_by: ORDER_BY ;
 order_by_direction: ORDER_BY_DIRECTION ;
 
-field: field_identifier ;
+field: (FIELD_IDENTIFIER DOT)? field_identifier ;
 field_identifier: FIELD_IDENTIFIER+ ;
 left_bracket: LEFT_BRACKET ;
 right_bracket: RIGHT_BRACKET ;

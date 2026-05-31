@@ -2,7 +2,7 @@
 parser grammar MgxqlParser ;
 
 options {
-    // 表示解析token的词法解析器使用MethodNameLexer
+    // 表示解析token的词法解析器使用MgxqlLexer
     tokenVocab = MgxqlLexer ;
     superClass = MgxqlParserBase ;
 }
@@ -18,7 +18,14 @@ delete_clause: DELETE_ACTION ;
 update_statement: update_clause where_clause ;
 update_clause: UPDATE_ACTION ;
 
-// 查询语法：1、findList findAll 2、findTop5 3、count  规则：查询方法名条件以By开始，查询实体不支持By语法、OrderBy语法
+// 查询语法：1、select * from User where name = :name and (age < :age or status = :status)
+// 查询语法：2、select id, name, inputTime from User where name = :name and (age < :age or status = :status)
+// 查询语法：3、select user.id, user.name, user.inputTime, role.name from User user left join Role role where user.name = :user.name and (user.age < :user.age or role.status = :role.status)
+// 查询语法：4、select count(1) from User where name = :name and (age < :age or status = :status)
+// 查询语法：5、select count(*) from User where name = :name and (age < :age or status = :status)
+// 查询语法：6、select max(id) from User where name = :name and (age < :age or status = :status)
+// 查询语法：7、select min(id) from User where name = :name and (age < :age or status = :status)
+// 查询语法：8、select avg(age) from User where name = :name and (age < :age or status = :status)
 select_statement: select_action select_item_clause select_from_clause where_clause? order_by_clause? limit? ;
 select_action: SELECT_ACTION ;
 select_item_clause: select_column | select_count ;
@@ -50,7 +57,11 @@ order_by_clause: order_by order_by_item+ ;
 order_by_item: field order_by_direction? ;
 
 // 分页
-limit: LIMIT ;
+limit: limit_identifier offset comma_identifier size ;
+limit_identifier: LIMIT_IDENTIFIER ;
+offset: NUMBER ;
+comma_identifier: LIMIT_IDENTIFIER ;
+size: NUMBER ;
 
 where_start: WHERE ;
 logic_and: LOGIC_AND ;

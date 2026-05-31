@@ -1,17 +1,21 @@
-lexer grammar MethodNameLexer;
+lexer grammar MgxqlLexer;
 
-INSERT_ACTION: 'insert' | 'add' ;
-DELETE_ACTION: 'delete' | 'remove' ;
-UPDATE_ACTION: 'update' | 'modify' ;
-SELECT_COLUMN_ACTION: 'find' | 'get' | 'select' | 'query' ;
-SELECT_COUNT_ACTION: 'count' ;
+INSERT_ACTION: 'insert' ;
+DELETE_ACTION: 'delete' ;
+UPDATE_ACTION: 'update' ;
+SELECT_ACTION: 'select' ;
 
-BY: 'By' ;
-LOGIC_AND: 'And' ;
-LOGIC_OR: 'Or' ;
+SELECT_COLUMN: '*' ;
+SELECT_COUNT: 'count' ;
+
+FROM: 'from' ;
+
+WHERE: 'where' ;
+LOGIC_AND: 'and' ;
+LOGIC_OR: 'or' ;
 
 // 比较运算符
-COMPARISON_OP_NOT: 'Not';
+COMPARISON_OP_NOT: 'not';
 COMPARISON_OP: 'Lt'
     | 'Lteq'
     | 'Gt'
@@ -23,19 +27,18 @@ COMPARISON_OP: 'Lt'
     ;
 COMPARISON_OP_NULL: 'IsNull' | 'IsNotNull' | 'NotNull' ;
 
-ORDER_BY: 'OrderBy' ;
-ORDER_BY_DIRECTION: 'Desc' | 'Asc' ;
+ORDER_BY: 'order by' ;
+ORDER_BY_DIRECTION: 'desc' | 'asc' ;
 
-LIMIT_TOP: 'Top'[0-9]+ ;
+LIMIT: 'limit' ;
 
 // 括号
 LEFT_BRACKET: '(' ;
 RIGHT_BRACKET: ')' ;
 
+ENTITY_IDENTIFIER: [A-Z]+[a-z0-9]* ;
 // antlr是从上向下解析的，常量一定要放在正则的上面
-FIELD_IDENTIFIER: [A-Z]+[a-z0-9]* ;
-// 特殊字段
-ESCAPED_IDENTIFIER: '$' (~'$')+ '$' ;
+FIELD_IDENTIFIER: [a-z0-9]* ;
 
 // 忽略空白符
 WS: [ \t\r\n]+ -> skip ;

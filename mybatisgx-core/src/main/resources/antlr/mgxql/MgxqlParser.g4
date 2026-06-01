@@ -45,14 +45,14 @@ select_aggregate_function_max: SELECT_MAX ;
 select_aggregate_function_min: SELECT_MIN ;
 select_aggregate_function_avg: SELECT_AVG ;
 
-// from left join
+// from entity_1 left join entity_2
 select_from_clause: select_from select_entity select_entity_alias? (select_left_join select_entity select_entity_alias?)* ;
 select_from: FROM ;
 select_left_join: LEFT JOIN ;
 select_entity: entity_name ;
 select_entity_alias: entity_name_alias ;
 
-// 条件语法   ByNameLikeAndAgeEq
+// 条件语法   where name = :name and (age = :age or status = :status)
 where_clause: where_start condition_expression ;
 
 // 分层处理条件表达式，明确运算符优先级
@@ -72,18 +72,18 @@ field_comparison_op: where_param_name_field_access_chain (field_comparison_op_pa
 field_comparison_op_param: (relational_op | matching_op) param_colon where_param_value_field_access_chain ;
 field_comparison_op_not_param: comparison_op_null ;
 
-// group by
+// group by phone
 group_by_clause: group_by (entity_field_access_chain comma_identifier?)+ ;
 
-// having
+// having max(age) > :age
 having_clause: having (aggregate_function having_comparison_op_param)+ ;
 having_comparison_op_param: relational_op param_colon where_param_value_field_access_chain ;
 
-// 排序 OrderByNameDesc、OrderByName
+// 排序 order by name desc、order by name
 order_by_clause: order_by order_by_item+ ;
 order_by_item: entity_field_access_chain order_by_direction? ;
 
-// 分页
+// 分页 limit 2, 10
 limit: limit_identifier offset comma_identifier size ;
 limit_identifier: LIMIT_IDENTIFIER ;
 offset: NUMBER ;

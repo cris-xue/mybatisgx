@@ -1,7 +1,5 @@
 // Generated from F:/owner_project/mybatisgx-ai_conding/mybatisgx/mybatisgx-core/src/main/resources/antlr/mgxql/MgxqlParser.g4 by ANTLR 4.13.2
 package com.mybatisgx.dsl.mgxql.syntax;
-import com.mybatisgx.syntax.mgxql.MgxqlParser;
-import com.mybatisgx.syntax.mgxql.MgxqlParserVisitor;
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 
 /**

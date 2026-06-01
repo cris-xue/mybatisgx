@@ -1,19 +1,13 @@
 // Generated from F:/owner_project/mybatisgx-ai_conding/mybatisgx/mybatisgx-core/src/main/resources/antlr/mgxql/MgxqlParser.g4 by ANTLR 4.13.2
 package com.mybatisgx.dsl.mgxql.syntax;
-
-import com.mybatisgx.syntax.mgxql.MgxqlParserListener;
-import com.mybatisgx.syntax.mgxql.MgxqlParserVisitor;
-import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.atn.ATN;
-import org.antlr.v4.runtime.atn.ATNDeserializer;
-import org.antlr.v4.runtime.atn.ParserATNSimulator;
-import org.antlr.v4.runtime.atn.PredictionContextCache;
+import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
-import org.antlr.v4.runtime.tree.ParseTreeListener;
-import org.antlr.v4.runtime.tree.ParseTreeVisitor;
-import org.antlr.v4.runtime.tree.TerminalNode;
-
+import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.misc.*;
+import org.antlr.v4.runtime.tree.*;
 import java.util.List;
+import java.util.Iterator;
+import java.util.ArrayList;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast", "CheckReturnValue", "this-escape"})
 public class MgxqlParser extends Parser {
@@ -189,7 +183,7 @@ public class MgxqlParser extends Parser {
 		@Override public int getRuleIndex() { return RULE_sql_statement; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MgxqlParserListener) ((MgxqlParserListener)listener).enterSql_statement(this);
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterSql_statement(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
@@ -197,7 +191,7 @@ public class MgxqlParser extends Parser {
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MgxqlParserVisitor) return ((MgxqlParserVisitor<? extends T>)visitor).visitSql_statement(this);
+			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitSql_statement(this);
 			else return visitor.visitChildren(this);
 		}
 	}

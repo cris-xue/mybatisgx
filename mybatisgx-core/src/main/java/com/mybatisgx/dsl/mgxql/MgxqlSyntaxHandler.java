@@ -2,6 +2,7 @@ package com.mybatisgx.dsl.mgxql;
 
 import com.google.common.collect.Maps;
 import com.mybatisgx.dsl.mgxql.syntax.MgxqlParser;
+import com.mybatisgx.dsl.mgxql.syntax.MgxqlParserBaseVisitor;
 import com.mybatisgx.model.*;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;

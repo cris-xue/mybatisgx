@@ -1,10 +1,11 @@
-package com.mybatisgx.model.handler;
+package com.mybatisgx.dsl.method;
 
 import com.mybatisgx.exception.MybatisgxException;
-import com.mybatisgx.model.ConditionOriginType;
 import com.mybatisgx.model.EntityInfo;
 import com.mybatisgx.model.MethodInfo;
 import com.mybatisgx.model.MethodParamInfo;
+import com.mybatisgx.model.MgxqlContext;
+import com.mybatisgx.model.handler.MethodSyntaxErrorListener;
 import com.mybatisgx.syntax.MethodNameLexer;
 import com.mybatisgx.syntax.MethodNameParser;
 import org.antlr.v4.runtime.CharStream;
@@ -18,13 +19,14 @@ import java.util.stream.Collectors;
 
 public class MethodSyntaxProcessor {
 
-    private final List<MybatisgxSyntaxHandler.SyntaxNodeHandler> handlers = Arrays.asList(
-            new MybatisgxSyntaxHandler.SelectStatementHandler(),
-            new MybatisgxSyntaxHandler.SelectItemHandler(),
-            new MybatisgxSyntaxHandler.BusinessSemanticHandler(),
-            new MybatisgxSyntaxHandler.LimitHandler(),
-            new MybatisgxSyntaxHandler.WhereClauseHandler(),
-            new MybatisgxSyntaxHandler.OrderByHandler()
+    private final List<MethodSyntaxHandler.SyntaxNodeHandler> handlers = Arrays.asList(
+            // new MethodSyntaxHandler.SelectStatementHandler(),
+            new MethodSyntaxHandler.SelectItemHandler(),
+            new MethodSyntaxHandler.SelectFromHandler(),
+            new MethodSyntaxHandler.BusinessSemanticHandler(),
+            new MethodSyntaxHandler.LimitHandler(),
+            new MethodSyntaxHandler.WhereClauseHandler(),
+            new MethodSyntaxHandler.OrderByHandler()
     );
     private final static Map<String, SqlCommandType> SQL_COMMAND_TYPE_MAP = new HashMap<>();
 
@@ -44,7 +46,7 @@ public class MethodSyntaxProcessor {
 
     public MethodSyntaxProcessor() {
         this.handlers.stream()
-                .sorted(Comparator.comparingInt(MybatisgxSyntaxHandler.SyntaxNodeHandler::getOrder))
+                .sorted(Comparator.comparingInt(MethodSyntaxHandler.SyntaxNodeHandler::getOrder))
                 .collect(Collectors.toList());
     }
 
@@ -57,7 +59,7 @@ public class MethodSyntaxProcessor {
         throw new MybatisgxException("未知的方法类型：%s", methodName);
     }
 
-    public void execute(EntityInfo entityInfo, MethodInfo methodInfo, MethodParamInfo methodParamInfo, ConditionOriginType conditionOriginType, String methodName) {
+    public MgxqlContext execute(EntityInfo entityInfo, MethodInfo methodInfo, MethodParamInfo methodParamInfo, String methodName) {
         CharStream charStream = CharStreams.fromString(methodName);
         MethodNameLexer methodNameLexer = new MethodNameLexer(charStream);
         CommonTokenStream tokens = new CommonTokenStream(methodNameLexer);
@@ -65,16 +67,19 @@ public class MethodSyntaxProcessor {
         this.addErrorListeners(methodNameLexer, methodNameParser);
         ParseTree parseTree = methodNameParser.sql_statement();
 
-        MybatisgxSyntaxHandler.ParserContext parserContext = new MybatisgxSyntaxHandler.ParserContext(
+        MgxqlContext mgxqlContext = new MgxqlContext();
+        MethodSyntaxHandler.ParserContext parserContext = new MethodSyntaxHandler.ParserContext(
                 tokens,
                 parseTree,
                 entityInfo,
+                mgxqlContext,
                 methodInfo,
                 methodParamInfo,
-                conditionOriginType,
+                null,
                 methodName
         );
         this.traverseSyntaxTree(parseTree, parserContext);
+        return mgxqlContext;
     }
 
     /**
@@ -91,8 +96,8 @@ public class MethodSyntaxProcessor {
         methodNameParser.addErrorListener(methodSyntaxErrorListener);
     }
 
-    private void traverseSyntaxTree(ParseTree node, MybatisgxSyntaxHandler.ParserContext context) {
-        for (MybatisgxSyntaxHandler.SyntaxNodeHandler handler : handlers) {
+    private void traverseSyntaxTree(ParseTree node, MethodSyntaxHandler.ParserContext context) {
+        for (MethodSyntaxHandler.SyntaxNodeHandler handler : handlers) {
             if (handler.support(node)) {
                 handler.handle(node, context);
                 break;

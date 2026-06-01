@@ -4,7 +4,6 @@ parser grammar MgxqlParser ;
 options {
     // 表示解析token的词法解析器使用MgxqlLexer
     tokenVocab = MgxqlLexer ;
-    superClass = MgxqlParserBase ;
 }
 
 sql_statement: (insert_statement | delete_statement | update_statement | select_statement) end ;

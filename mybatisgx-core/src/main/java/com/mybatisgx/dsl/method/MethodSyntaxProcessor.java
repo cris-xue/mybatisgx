@@ -4,7 +4,7 @@ import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.model.EntityInfo;
 import com.mybatisgx.model.MethodInfo;
 import com.mybatisgx.model.MethodParamInfo;
-import com.mybatisgx.model.MgxqlContext;
+import com.mybatisgx.dsl.method.model.MgxqlContext;
 import com.mybatisgx.model.handler.MethodSyntaxErrorListener;
 import com.mybatisgx.syntax.MethodNameLexer;
 import com.mybatisgx.syntax.MethodNameParser;

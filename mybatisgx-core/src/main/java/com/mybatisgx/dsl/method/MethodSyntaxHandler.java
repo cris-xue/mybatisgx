@@ -1,6 +1,7 @@
 package com.mybatisgx.dsl.method;
 
 import com.google.common.collect.Maps;
+import com.mybatisgx.dsl.method.model.MgxqlContext;
 import com.mybatisgx.model.*;
 import com.mybatisgx.model.handler.MybatisgxSyntaxHandler;
 import com.mybatisgx.syntax.MethodNameParser;

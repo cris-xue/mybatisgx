@@ -35,22 +35,24 @@ select_asterisk: SELECT_ASTERISK ;
 select_column_custom: (entity_name_alias dot)? field_name ;
 
 // 聚合函数
-aggregate_function: select_count | select_max | select_min | select_avg ;
-select_count: select_aggregate_function_count left_bracket (number| select_column_all | field_name) right_bracket ;
-select_max: select_aggregate_function_max left_bracket field_name right_bracket ;
-select_min: select_aggregate_function_min left_bracket field_name right_bracket ;
-select_avg: select_aggregate_function_avg left_bracket field_name right_bracket ;
-select_aggregate_function_count: SELECT_COUNT ;
-select_aggregate_function_max: SELECT_MAX ;
-select_aggregate_function_min: SELECT_MIN ;
-select_aggregate_function_avg: SELECT_AVG ;
+aggregate_function: select_count_function | select_max_function | select_min_function | select_avg_function ;
+select_count_function: select_count left_bracket (number| select_column_all | field_name) right_bracket ;
+select_max_function: select_max left_bracket field_name right_bracket ;
+select_min_function: select_min left_bracket field_name right_bracket ;
+select_avg_function: select_avg left_bracket field_name right_bracket ;
+select_count: SELECT_COUNT ;
+select_max: SELECT_MAX ;
+select_min: SELECT_MIN ;
+select_avg: SELECT_AVG ;
 
 // from entity_1 left join entity_2
-select_from_clause: select_from select_entity select_entity_alias? (select_left_join select_entity select_entity_alias?)* ;
-select_from: FROM ;
-select_left_join: LEFT JOIN ;
+select_from_clause: select_from select_primary_entity select_join_entity* ;
+select_primary_entity: select_entity select_entity_alias? ;
+select_join_entity: select_left_join select_entity select_entity_alias? ;
 select_entity: entity_name ;
 select_entity_alias: entity_name_alias ;
+select_from: FROM ;
+select_left_join: LEFT JOIN ;
 
 // 条件语法   where name = :name and (age = :age or status = :status)
 where_clause: where_start condition_expression ;

@@ -101,6 +101,30 @@ public interface MgxqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitAggregate_function(MgxqlParser.Aggregate_functionContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#select_count_function}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSelect_count_function(MgxqlParser.Select_count_functionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#select_max_function}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSelect_max_function(MgxqlParser.Select_max_functionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#select_min_function}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSelect_min_function(MgxqlParser.Select_min_functionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#select_avg_function}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSelect_avg_function(MgxqlParser.Select_avg_functionContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link MgxqlParser#select_count}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -125,47 +149,23 @@ public interface MgxqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitSelect_avg(MgxqlParser.Select_avgContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MgxqlParser#select_aggregate_function_count}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitSelect_aggregate_function_count(MgxqlParser.Select_aggregate_function_countContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link MgxqlParser#select_aggregate_function_max}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitSelect_aggregate_function_max(MgxqlParser.Select_aggregate_function_maxContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link MgxqlParser#select_aggregate_function_min}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitSelect_aggregate_function_min(MgxqlParser.Select_aggregate_function_minContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link MgxqlParser#select_aggregate_function_avg}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitSelect_aggregate_function_avg(MgxqlParser.Select_aggregate_function_avgContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link MgxqlParser#select_from_clause}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitSelect_from_clause(MgxqlParser.Select_from_clauseContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MgxqlParser#select_from}.
+	 * Visit a parse tree produced by {@link MgxqlParser#select_primary_entity}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitSelect_from(MgxqlParser.Select_fromContext ctx);
+	T visitSelect_primary_entity(MgxqlParser.Select_primary_entityContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MgxqlParser#select_left_join}.
+	 * Visit a parse tree produced by {@link MgxqlParser#select_join_entity}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitSelect_left_join(MgxqlParser.Select_left_joinContext ctx);
+	T visitSelect_join_entity(MgxqlParser.Select_join_entityContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MgxqlParser#select_entity}.
 	 * @param ctx the parse tree
@@ -178,6 +178,18 @@ public interface MgxqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitSelect_entity_alias(MgxqlParser.Select_entity_aliasContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#select_from}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSelect_from(MgxqlParser.Select_fromContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#select_left_join}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSelect_left_join(MgxqlParser.Select_left_joinContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MgxqlParser#where_clause}.
 	 * @param ctx the parse tree

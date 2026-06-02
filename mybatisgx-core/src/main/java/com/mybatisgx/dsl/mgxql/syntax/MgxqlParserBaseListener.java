@@ -197,6 +197,54 @@ public class MgxqlParserBaseListener implements MgxqlParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterSelect_count_function(MgxqlParser.Select_count_functionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSelect_count_function(MgxqlParser.Select_count_functionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterSelect_max_function(MgxqlParser.Select_max_functionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSelect_max_function(MgxqlParser.Select_max_functionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterSelect_min_function(MgxqlParser.Select_min_functionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSelect_min_function(MgxqlParser.Select_min_functionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterSelect_avg_function(MgxqlParser.Select_avg_functionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSelect_avg_function(MgxqlParser.Select_avg_functionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterSelect_count(MgxqlParser.Select_countContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -245,54 +293,6 @@ public class MgxqlParserBaseListener implements MgxqlParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterSelect_aggregate_function_count(MgxqlParser.Select_aggregate_function_countContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitSelect_aggregate_function_count(MgxqlParser.Select_aggregate_function_countContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterSelect_aggregate_function_max(MgxqlParser.Select_aggregate_function_maxContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitSelect_aggregate_function_max(MgxqlParser.Select_aggregate_function_maxContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterSelect_aggregate_function_min(MgxqlParser.Select_aggregate_function_minContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitSelect_aggregate_function_min(MgxqlParser.Select_aggregate_function_minContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterSelect_aggregate_function_avg(MgxqlParser.Select_aggregate_function_avgContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitSelect_aggregate_function_avg(MgxqlParser.Select_aggregate_function_avgContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterSelect_from_clause(MgxqlParser.Select_from_clauseContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -305,25 +305,25 @@ public class MgxqlParserBaseListener implements MgxqlParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterSelect_from(MgxqlParser.Select_fromContext ctx) { }
+	@Override public void enterSelect_primary_entity(MgxqlParser.Select_primary_entityContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitSelect_from(MgxqlParser.Select_fromContext ctx) { }
+	@Override public void exitSelect_primary_entity(MgxqlParser.Select_primary_entityContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterSelect_left_join(MgxqlParser.Select_left_joinContext ctx) { }
+	@Override public void enterSelect_join_entity(MgxqlParser.Select_join_entityContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitSelect_left_join(MgxqlParser.Select_left_joinContext ctx) { }
+	@Override public void exitSelect_join_entity(MgxqlParser.Select_join_entityContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -348,6 +348,30 @@ public class MgxqlParserBaseListener implements MgxqlParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitSelect_entity_alias(MgxqlParser.Select_entity_aliasContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterSelect_from(MgxqlParser.Select_fromContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSelect_from(MgxqlParser.Select_fromContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterSelect_left_join(MgxqlParser.Select_left_joinContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSelect_left_join(MgxqlParser.Select_left_joinContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

@@ -158,6 +158,46 @@ public interface MgxqlParserListener extends ParseTreeListener {
 	 */
 	void exitAggregate_function(MgxqlParser.Aggregate_functionContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#select_count_function}.
+	 * @param ctx the parse tree
+	 */
+	void enterSelect_count_function(MgxqlParser.Select_count_functionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#select_count_function}.
+	 * @param ctx the parse tree
+	 */
+	void exitSelect_count_function(MgxqlParser.Select_count_functionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#select_max_function}.
+	 * @param ctx the parse tree
+	 */
+	void enterSelect_max_function(MgxqlParser.Select_max_functionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#select_max_function}.
+	 * @param ctx the parse tree
+	 */
+	void exitSelect_max_function(MgxqlParser.Select_max_functionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#select_min_function}.
+	 * @param ctx the parse tree
+	 */
+	void enterSelect_min_function(MgxqlParser.Select_min_functionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#select_min_function}.
+	 * @param ctx the parse tree
+	 */
+	void exitSelect_min_function(MgxqlParser.Select_min_functionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#select_avg_function}.
+	 * @param ctx the parse tree
+	 */
+	void enterSelect_avg_function(MgxqlParser.Select_avg_functionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#select_avg_function}.
+	 * @param ctx the parse tree
+	 */
+	void exitSelect_avg_function(MgxqlParser.Select_avg_functionContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link MgxqlParser#select_count}.
 	 * @param ctx the parse tree
 	 */
@@ -198,46 +238,6 @@ public interface MgxqlParserListener extends ParseTreeListener {
 	 */
 	void exitSelect_avg(MgxqlParser.Select_avgContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MgxqlParser#select_aggregate_function_count}.
-	 * @param ctx the parse tree
-	 */
-	void enterSelect_aggregate_function_count(MgxqlParser.Select_aggregate_function_countContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link MgxqlParser#select_aggregate_function_count}.
-	 * @param ctx the parse tree
-	 */
-	void exitSelect_aggregate_function_count(MgxqlParser.Select_aggregate_function_countContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link MgxqlParser#select_aggregate_function_max}.
-	 * @param ctx the parse tree
-	 */
-	void enterSelect_aggregate_function_max(MgxqlParser.Select_aggregate_function_maxContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link MgxqlParser#select_aggregate_function_max}.
-	 * @param ctx the parse tree
-	 */
-	void exitSelect_aggregate_function_max(MgxqlParser.Select_aggregate_function_maxContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link MgxqlParser#select_aggregate_function_min}.
-	 * @param ctx the parse tree
-	 */
-	void enterSelect_aggregate_function_min(MgxqlParser.Select_aggregate_function_minContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link MgxqlParser#select_aggregate_function_min}.
-	 * @param ctx the parse tree
-	 */
-	void exitSelect_aggregate_function_min(MgxqlParser.Select_aggregate_function_minContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link MgxqlParser#select_aggregate_function_avg}.
-	 * @param ctx the parse tree
-	 */
-	void enterSelect_aggregate_function_avg(MgxqlParser.Select_aggregate_function_avgContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link MgxqlParser#select_aggregate_function_avg}.
-	 * @param ctx the parse tree
-	 */
-	void exitSelect_aggregate_function_avg(MgxqlParser.Select_aggregate_function_avgContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link MgxqlParser#select_from_clause}.
 	 * @param ctx the parse tree
 	 */
@@ -248,25 +248,25 @@ public interface MgxqlParserListener extends ParseTreeListener {
 	 */
 	void exitSelect_from_clause(MgxqlParser.Select_from_clauseContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MgxqlParser#select_from}.
+	 * Enter a parse tree produced by {@link MgxqlParser#select_primary_entity}.
 	 * @param ctx the parse tree
 	 */
-	void enterSelect_from(MgxqlParser.Select_fromContext ctx);
+	void enterSelect_primary_entity(MgxqlParser.Select_primary_entityContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MgxqlParser#select_from}.
+	 * Exit a parse tree produced by {@link MgxqlParser#select_primary_entity}.
 	 * @param ctx the parse tree
 	 */
-	void exitSelect_from(MgxqlParser.Select_fromContext ctx);
+	void exitSelect_primary_entity(MgxqlParser.Select_primary_entityContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MgxqlParser#select_left_join}.
+	 * Enter a parse tree produced by {@link MgxqlParser#select_join_entity}.
 	 * @param ctx the parse tree
 	 */
-	void enterSelect_left_join(MgxqlParser.Select_left_joinContext ctx);
+	void enterSelect_join_entity(MgxqlParser.Select_join_entityContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MgxqlParser#select_left_join}.
+	 * Exit a parse tree produced by {@link MgxqlParser#select_join_entity}.
 	 * @param ctx the parse tree
 	 */
-	void exitSelect_left_join(MgxqlParser.Select_left_joinContext ctx);
+	void exitSelect_join_entity(MgxqlParser.Select_join_entityContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MgxqlParser#select_entity}.
 	 * @param ctx the parse tree
@@ -287,6 +287,26 @@ public interface MgxqlParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitSelect_entity_alias(MgxqlParser.Select_entity_aliasContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#select_from}.
+	 * @param ctx the parse tree
+	 */
+	void enterSelect_from(MgxqlParser.Select_fromContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#select_from}.
+	 * @param ctx the parse tree
+	 */
+	void exitSelect_from(MgxqlParser.Select_fromContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#select_left_join}.
+	 * @param ctx the parse tree
+	 */
+	void enterSelect_left_join(MgxqlParser.Select_left_joinContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#select_left_join}.
+	 * @param ctx the parse tree
+	 */
+	void exitSelect_left_join(MgxqlParser.Select_left_joinContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MgxqlParser#where_clause}.
 	 * @param ctx the parse tree

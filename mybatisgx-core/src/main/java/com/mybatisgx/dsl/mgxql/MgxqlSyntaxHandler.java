@@ -1,31 +1,11 @@
 package com.mybatisgx.dsl.mgxql;
 
 import com.google.common.collect.Maps;
-import com.mybatisgx.dsl.mgxql.model.ConditionExpression;
-import com.mybatisgx.dsl.mgxql.model.ConditionNode;
-import com.mybatisgx.dsl.mgxql.model.FieldReference;
-import com.mybatisgx.dsl.mgxql.model.FromClause;
-import com.mybatisgx.dsl.mgxql.model.FromEntity;
-import com.mybatisgx.dsl.mgxql.model.GroupByClause;
-import com.mybatisgx.dsl.mgxql.model.HavingClause;
-import com.mybatisgx.dsl.mgxql.model.HavingCondition;
-import com.mybatisgx.dsl.mgxql.model.JoinEntity;
-import com.mybatisgx.dsl.mgxql.model.JoinType;
-import com.mybatisgx.dsl.mgxql.model.LimitClause;
-import com.mybatisgx.dsl.mgxql.model.MgxqlStatement;
-import com.mybatisgx.dsl.mgxql.model.OrderByClause;
-import com.mybatisgx.dsl.mgxql.model.OrderByItem;
-import com.mybatisgx.dsl.mgxql.model.SelectItem;
 import com.mybatisgx.dsl.mgxql.model.SelectItemType;
-import com.mybatisgx.dsl.mgxql.model.WhereClause;
+import com.mybatisgx.dsl.mgxql.model.*;
 import com.mybatisgx.dsl.mgxql.syntax.MgxqlParser;
 import com.mybatisgx.dsl.mgxql.syntax.MgxqlParserBaseVisitor;
-import com.mybatisgx.model.ComparisonOperator;
-import com.mybatisgx.model.ConditionOriginType;
-import com.mybatisgx.model.EntityInfo;
-import com.mybatisgx.model.LogicOperator;
-import com.mybatisgx.model.MethodInfo;
-import com.mybatisgx.model.MethodParamInfo;
+import com.mybatisgx.model.*;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.RuleNode;
@@ -162,25 +142,25 @@ public class MgxqlSyntaxHandler {
         }
 
         private void parseAggregateFunction(SelectItem item, MgxqlParser.Aggregate_functionContext aggregateFunction) {
-            if (aggregateFunction.select_count() != null) {
+            if (aggregateFunction.select_count_function() != null) {
                 item.setType(SelectItemType.COUNT);
-                MgxqlParser.Select_countContext countCtx = aggregateFunction.select_count();
-                if (countCtx.number() != null) {
-                    item.setAggregateArg(countCtx.number().getText());
-                } else if (countCtx.select_column_all() != null) {
+                MgxqlParser.Select_count_functionContext countFuncCtx = aggregateFunction.select_count_function();
+                if (countFuncCtx.number() != null) {
+                    item.setAggregateArg(countFuncCtx.number().getText());
+                } else if (countFuncCtx.select_column_all() != null) {
                     item.setAggregateArg("*");
-                } else if (countCtx.field_name() != null) {
-                    item.setAggregateArg(countCtx.field_name().getText());
+                } else if (countFuncCtx.field_name() != null) {
+                    item.setAggregateArg(countFuncCtx.field_name().getText());
                 }
-            } else if (aggregateFunction.select_max() != null) {
+            } else if (aggregateFunction.select_max_function() != null) {
                 item.setType(SelectItemType.MAX);
-                item.setAggregateArg(aggregateFunction.select_max().field_name().getText());
-            } else if (aggregateFunction.select_min() != null) {
+                item.setAggregateArg(aggregateFunction.select_max_function().field_name().getText());
+            } else if (aggregateFunction.select_min_function() != null) {
                 item.setType(SelectItemType.MIN);
-                item.setAggregateArg(aggregateFunction.select_min().field_name().getText());
-            } else if (aggregateFunction.select_avg() != null) {
+                item.setAggregateArg(aggregateFunction.select_min_function().field_name().getText());
+            } else if (aggregateFunction.select_avg_function() != null) {
                 item.setType(SelectItemType.AVG);
-                item.setAggregateArg(aggregateFunction.select_avg().field_name().getText());
+                item.setAggregateArg(aggregateFunction.select_avg_function().field_name().getText());
             }
         }
     }
@@ -206,28 +186,18 @@ public class MgxqlSyntaxHandler {
             FromClause fromClause = new FromClause();
 
             // 解析主实体
-            List<MgxqlParser.Select_entityContext> entities = fromClauseCtx.select_entity();
-            List<MgxqlParser.Select_entity_aliasContext> aliases = fromClauseCtx.select_entity_alias();
-
-            if (!entities.isEmpty()) {
-                MgxqlParser.Select_entityContext primaryEntityCtx = entities.get(0);
-                String primaryAlias = (!aliases.isEmpty() && aliases.get(0) != null) ? aliases.get(0).getText() : null;
-                fromClause.setPrimaryEntity(new FromEntity(primaryEntityCtx.getText(), primaryAlias));
-            }
+            MgxqlParser.Select_primary_entityContext primaryEntityCtx = fromClauseCtx.select_primary_entity();
+            String primaryEntityName = primaryEntityCtx.select_entity().getText();
+            String primaryAlias = primaryEntityCtx.select_entity_alias() != null ? primaryEntityCtx.select_entity_alias().getText() : null;
+            fromClause.setPrimaryEntity(new FromEntity(primaryEntityName, primaryAlias));
 
             // 解析LEFT JOIN实体
-            List<MgxqlParser.Select_left_joinContext> leftJoins = fromClauseCtx.select_left_join();
-            if (leftJoins != null) {
-                // JOIN实体从entities列表的第2个开始
-                for (int i = 0; i < leftJoins.size(); i++) {
-                    int entityIndex = i + 1;
-                    if (entityIndex < entities.size()) {
-                        String joinEntityName = entities.get(entityIndex).getText();
-                        int aliasIndex = entityIndex;
-                        String joinAlias = (aliasIndex < aliases.size() && aliases.get(aliasIndex) != null)
-                                ? aliases.get(aliasIndex).getText() : null;
-                        fromClause.addJoinEntity(new JoinEntity(joinEntityName, joinAlias, JoinType.LEFT));
-                    }
+            List<MgxqlParser.Select_join_entityContext> joinEntities = fromClauseCtx.select_join_entity();
+            if (joinEntities != null) {
+                for (MgxqlParser.Select_join_entityContext joinEntityCtx : joinEntities) {
+                    String joinEntityName = joinEntityCtx.select_entity().getText();
+                    String joinAlias = joinEntityCtx.select_entity_alias() != null ? joinEntityCtx.select_entity_alias().getText() : null;
+                    fromClause.addJoinEntity(new JoinEntity(joinEntityName, joinAlias, JoinType.LEFT));
                 }
             }
 
@@ -278,8 +248,7 @@ public class MgxqlSyntaxHandler {
             OrderByClause orderByClause = new OrderByClause();
             for (MgxqlParser.Order_by_itemContext orderByItem : orderByClauseCtx.order_by_item()) {
                 FieldReference fieldRef = parseFieldReference(orderByItem.entity_field_access_chain());
-                String direction = orderByItem.order_by_direction() != null
-                        ? orderByItem.order_by_direction().getText() : "asc";
+                String direction = orderByItem.order_by_direction() != null ? orderByItem.order_by_direction().getText() : "asc";
                 orderByClause.addItem(new OrderByItem(fieldRef, direction));
             }
             statement.setOrderByClause(orderByClause);

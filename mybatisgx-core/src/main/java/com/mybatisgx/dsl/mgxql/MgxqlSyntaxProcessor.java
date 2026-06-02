@@ -1,5 +1,7 @@
 package com.mybatisgx.dsl.mgxql;
 
+import com.mybatisgx.dsl.mgxql.checker.MgxqlCheckerChain;
+import com.mybatisgx.dsl.mgxql.model.MgxqlStatement;
 import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.model.ConditionOriginType;
 import com.mybatisgx.model.EntityInfo;
@@ -67,16 +69,17 @@ public class MgxqlSyntaxProcessor {
     }
 
     /**
-     * 解析mgxql表达式并填充MethodInfo
+     * 解析mgxql表达式并构建MgxqlStatement模型
      *
      * @param entityInfo          实体信息
      * @param methodInfo          方法信息
      * @param methodParamInfo     方法参数信息
      * @param conditionOriginType 条件来源类型
      * @param expression          mgxql表达式
+     * @return MgxqlStatement模型
      */
-    public void execute(EntityInfo entityInfo, MethodInfo methodInfo, MethodParamInfo methodParamInfo,
-                        ConditionOriginType conditionOriginType, String expression) {
+    public MgxqlStatement execute(EntityInfo entityInfo, MethodInfo methodInfo, MethodParamInfo methodParamInfo,
+                                  ConditionOriginType conditionOriginType, String expression) {
         CharStream charStream = CharStreams.fromString(expression);
         MgxqlLexer mgxqlLexer = new MgxqlLexer(charStream);
         CommonTokenStream tokens = new CommonTokenStream(mgxqlLexer);
@@ -84,6 +87,7 @@ public class MgxqlSyntaxProcessor {
         this.addErrorListeners(mgxqlLexer, mgxqlParser);
         ParseTree parseTree = mgxqlParser.sql_statement();
 
+        MgxqlStatement mgxqlStatement = new MgxqlStatement();
         MgxqlSyntaxHandler.ParserContext parserContext = new MgxqlSyntaxHandler.ParserContext(
                 tokens,
                 parseTree,
@@ -91,9 +95,29 @@ public class MgxqlSyntaxProcessor {
                 methodInfo,
                 methodParamInfo,
                 conditionOriginType,
-                expression
+                expression,
+                mgxqlStatement
         );
         this.traverseSyntaxTree(parseTree, parserContext);
+        return mgxqlStatement;
+    }
+
+    /**
+     * 解析mgxql表达式并执行语义校验
+     *
+     * @param entityInfo          实体信息
+     * @param methodInfo          方法信息
+     * @param methodParamInfo     方法参数信息
+     * @param conditionOriginType 条件来源类型
+     * @param expression          mgxql表达式
+     * @return 经过校验的MgxqlStatement模型
+     */
+    public MgxqlStatement executeAndCheck(EntityInfo entityInfo, MethodInfo methodInfo, MethodParamInfo methodParamInfo,
+                                          ConditionOriginType conditionOriginType, String expression) {
+        MgxqlStatement statement = this.execute(entityInfo, methodInfo, methodParamInfo, conditionOriginType, expression);
+        MgxqlCheckerChain checkerChain = new MgxqlCheckerChain();
+        checkerChain.check(statement, entityInfo);
+        return statement;
     }
 
     /**

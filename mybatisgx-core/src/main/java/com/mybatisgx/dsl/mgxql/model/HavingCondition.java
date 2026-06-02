@@ -1,0 +1,53 @@
+package com.mybatisgx.dsl.mgxql.model;
+
+import com.mybatisgx.model.ComparisonOperator;
+
+import java.util.List;
+
+/**
+ * MGXQL HAVING条件模型
+ *
+ * @author 薛承城
+ * @date 2025/11/17 10:19
+ */
+public class HavingCondition {
+
+    /**
+     * 聚合函数（如 max(age)、count(*)）
+     */
+    private SelectItem aggregateFunction;
+
+    /**
+     * 比较运算符（>、<、= 等）
+     */
+    private ComparisonOperator operator;
+
+    /**
+     * 右侧参数值路径
+     */
+    private List<String> paramValuePath;
+
+    public SelectItem getAggregateFunction() {
+        return aggregateFunction;
+    }
+
+    public void setAggregateFunction(SelectItem aggregateFunction) {
+        this.aggregateFunction = aggregateFunction;
+    }
+
+    public ComparisonOperator getOperator() {
+        return operator;
+    }
+
+    public void setOperator(ComparisonOperator operator) {
+        this.operator = operator;
+    }
+
+    public List<String> getParamValuePath() {
+        return paramValuePath;
+    }
+
+    public void setParamValuePath(List<String> paramValuePath) {
+        this.paramValuePath = paramValuePath;
+    }
+}

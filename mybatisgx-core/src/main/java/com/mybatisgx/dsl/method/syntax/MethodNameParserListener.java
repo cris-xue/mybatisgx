@@ -1,370 +1,369 @@
-// Generated from F:/owner_project/mybatisgx-ai_conding/mybatisgx/mybatisgx-core/src/main/resources/antlr/MethodNameParser.g4 by ANTLR 4.13.2
+// Generated from F:/owner_project/mybatisgx-ai_conding/mybatisgx/mybatisgx-core/src/main/resources/antlr/method/MethodNameParser.g4 by ANTLR 4.13.2
 package com.mybatisgx.dsl.method.syntax;
-import com.mybatisgx.syntax.MethodNameParser;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
 /**
  * This interface defines a complete listener for a parse tree produced by
- * {@link com.mybatisgx.syntax.MethodNameParser}.
+ * {@link MethodNameParser}.
  */
 public interface MethodNameParserListener extends ParseTreeListener {
 	/**
-	 * Enter a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#sql_statement}.
+	 * Enter a parse tree produced by {@link MethodNameParser#sql_statement}.
 	 * @param ctx the parse tree
 	 */
-	void enterSql_statement(com.mybatisgx.syntax.MethodNameParser.Sql_statementContext ctx);
+	void enterSql_statement(MethodNameParser.Sql_statementContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#sql_statement}.
+	 * Exit a parse tree produced by {@link MethodNameParser#sql_statement}.
 	 * @param ctx the parse tree
 	 */
-	void exitSql_statement(com.mybatisgx.syntax.MethodNameParser.Sql_statementContext ctx);
+	void exitSql_statement(MethodNameParser.Sql_statementContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#insert_statement}.
+	 * Enter a parse tree produced by {@link MethodNameParser#insert_statement}.
 	 * @param ctx the parse tree
 	 */
-	void enterInsert_statement(com.mybatisgx.syntax.MethodNameParser.Insert_statementContext ctx);
+	void enterInsert_statement(MethodNameParser.Insert_statementContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#insert_statement}.
+	 * Exit a parse tree produced by {@link MethodNameParser#insert_statement}.
 	 * @param ctx the parse tree
 	 */
-	void exitInsert_statement(com.mybatisgx.syntax.MethodNameParser.Insert_statementContext ctx);
+	void exitInsert_statement(MethodNameParser.Insert_statementContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#insert_clause}.
+	 * Enter a parse tree produced by {@link MethodNameParser#insert_clause}.
 	 * @param ctx the parse tree
 	 */
-	void enterInsert_clause(com.mybatisgx.syntax.MethodNameParser.Insert_clauseContext ctx);
+	void enterInsert_clause(MethodNameParser.Insert_clauseContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#insert_clause}.
+	 * Exit a parse tree produced by {@link MethodNameParser#insert_clause}.
 	 * @param ctx the parse tree
 	 */
-	void exitInsert_clause(com.mybatisgx.syntax.MethodNameParser.Insert_clauseContext ctx);
+	void exitInsert_clause(MethodNameParser.Insert_clauseContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#delete_statement}.
+	 * Enter a parse tree produced by {@link MethodNameParser#delete_statement}.
 	 * @param ctx the parse tree
 	 */
-	void enterDelete_statement(com.mybatisgx.syntax.MethodNameParser.Delete_statementContext ctx);
+	void enterDelete_statement(MethodNameParser.Delete_statementContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#delete_statement}.
+	 * Exit a parse tree produced by {@link MethodNameParser#delete_statement}.
 	 * @param ctx the parse tree
 	 */
-	void exitDelete_statement(com.mybatisgx.syntax.MethodNameParser.Delete_statementContext ctx);
+	void exitDelete_statement(MethodNameParser.Delete_statementContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#delete_clause}.
+	 * Enter a parse tree produced by {@link MethodNameParser#delete_clause}.
 	 * @param ctx the parse tree
 	 */
-	void enterDelete_clause(com.mybatisgx.syntax.MethodNameParser.Delete_clauseContext ctx);
+	void enterDelete_clause(MethodNameParser.Delete_clauseContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#delete_clause}.
+	 * Exit a parse tree produced by {@link MethodNameParser#delete_clause}.
 	 * @param ctx the parse tree
 	 */
-	void exitDelete_clause(com.mybatisgx.syntax.MethodNameParser.Delete_clauseContext ctx);
+	void exitDelete_clause(MethodNameParser.Delete_clauseContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#update_statement}.
+	 * Enter a parse tree produced by {@link MethodNameParser#update_statement}.
 	 * @param ctx the parse tree
 	 */
-	void enterUpdate_statement(com.mybatisgx.syntax.MethodNameParser.Update_statementContext ctx);
+	void enterUpdate_statement(MethodNameParser.Update_statementContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#update_statement}.
+	 * Exit a parse tree produced by {@link MethodNameParser#update_statement}.
 	 * @param ctx the parse tree
 	 */
-	void exitUpdate_statement(com.mybatisgx.syntax.MethodNameParser.Update_statementContext ctx);
+	void exitUpdate_statement(MethodNameParser.Update_statementContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#update_clause}.
+	 * Enter a parse tree produced by {@link MethodNameParser#update_clause}.
 	 * @param ctx the parse tree
 	 */
-	void enterUpdate_clause(com.mybatisgx.syntax.MethodNameParser.Update_clauseContext ctx);
+	void enterUpdate_clause(MethodNameParser.Update_clauseContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#update_clause}.
+	 * Exit a parse tree produced by {@link MethodNameParser#update_clause}.
 	 * @param ctx the parse tree
 	 */
-	void exitUpdate_clause(com.mybatisgx.syntax.MethodNameParser.Update_clauseContext ctx);
+	void exitUpdate_clause(MethodNameParser.Update_clauseContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#select_statement}.
+	 * Enter a parse tree produced by {@link MethodNameParser#select_statement}.
 	 * @param ctx the parse tree
 	 */
-	void enterSelect_statement(com.mybatisgx.syntax.MethodNameParser.Select_statementContext ctx);
+	void enterSelect_statement(MethodNameParser.Select_statementContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#select_statement}.
+	 * Exit a parse tree produced by {@link MethodNameParser#select_statement}.
 	 * @param ctx the parse tree
 	 */
-	void exitSelect_statement(com.mybatisgx.syntax.MethodNameParser.Select_statementContext ctx);
+	void exitSelect_statement(MethodNameParser.Select_statementContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#select_item_clause}.
+	 * Enter a parse tree produced by {@link MethodNameParser#select_item_clause}.
 	 * @param ctx the parse tree
 	 */
-	void enterSelect_item_clause(com.mybatisgx.syntax.MethodNameParser.Select_item_clauseContext ctx);
+	void enterSelect_item_clause(MethodNameParser.Select_item_clauseContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#select_item_clause}.
+	 * Exit a parse tree produced by {@link MethodNameParser#select_item_clause}.
 	 * @param ctx the parse tree
 	 */
-	void exitSelect_item_clause(com.mybatisgx.syntax.MethodNameParser.Select_item_clauseContext ctx);
+	void exitSelect_item_clause(MethodNameParser.Select_item_clauseContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#select_column}.
+	 * Enter a parse tree produced by {@link MethodNameParser#select_column}.
 	 * @param ctx the parse tree
 	 */
-	void enterSelect_column(com.mybatisgx.syntax.MethodNameParser.Select_columnContext ctx);
+	void enterSelect_column(MethodNameParser.Select_columnContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#select_column}.
+	 * Exit a parse tree produced by {@link MethodNameParser#select_column}.
 	 * @param ctx the parse tree
 	 */
-	void exitSelect_column(com.mybatisgx.syntax.MethodNameParser.Select_columnContext ctx);
+	void exitSelect_column(MethodNameParser.Select_columnContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#select_count}.
+	 * Enter a parse tree produced by {@link MethodNameParser#select_count}.
 	 * @param ctx the parse tree
 	 */
-	void enterSelect_count(com.mybatisgx.syntax.MethodNameParser.Select_countContext ctx);
+	void enterSelect_count(MethodNameParser.Select_countContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#select_count}.
+	 * Exit a parse tree produced by {@link MethodNameParser#select_count}.
 	 * @param ctx the parse tree
 	 */
-	void exitSelect_count(com.mybatisgx.syntax.MethodNameParser.Select_countContext ctx);
+	void exitSelect_count(MethodNameParser.Select_countContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#where_clause}.
+	 * Enter a parse tree produced by {@link MethodNameParser#where_clause}.
 	 * @param ctx the parse tree
 	 */
-	void enterWhere_clause(com.mybatisgx.syntax.MethodNameParser.Where_clauseContext ctx);
+	void enterWhere_clause(MethodNameParser.Where_clauseContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#where_clause}.
+	 * Exit a parse tree produced by {@link MethodNameParser#where_clause}.
 	 * @param ctx the parse tree
 	 */
-	void exitWhere_clause(com.mybatisgx.syntax.MethodNameParser.Where_clauseContext ctx);
+	void exitWhere_clause(MethodNameParser.Where_clauseContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#condition_expression}.
+	 * Enter a parse tree produced by {@link MethodNameParser#condition_expression}.
 	 * @param ctx the parse tree
 	 */
-	void enterCondition_expression(com.mybatisgx.syntax.MethodNameParser.Condition_expressionContext ctx);
+	void enterCondition_expression(MethodNameParser.Condition_expressionContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#condition_expression}.
+	 * Exit a parse tree produced by {@link MethodNameParser#condition_expression}.
 	 * @param ctx the parse tree
 	 */
-	void exitCondition_expression(com.mybatisgx.syntax.MethodNameParser.Condition_expressionContext ctx);
+	void exitCondition_expression(MethodNameParser.Condition_expressionContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#or_expression}.
+	 * Enter a parse tree produced by {@link MethodNameParser#or_expression}.
 	 * @param ctx the parse tree
 	 */
-	void enterOr_expression(com.mybatisgx.syntax.MethodNameParser.Or_expressionContext ctx);
+	void enterOr_expression(MethodNameParser.Or_expressionContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#or_expression}.
+	 * Exit a parse tree produced by {@link MethodNameParser#or_expression}.
 	 * @param ctx the parse tree
 	 */
-	void exitOr_expression(com.mybatisgx.syntax.MethodNameParser.Or_expressionContext ctx);
+	void exitOr_expression(MethodNameParser.Or_expressionContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#and_expression}.
+	 * Enter a parse tree produced by {@link MethodNameParser#and_expression}.
 	 * @param ctx the parse tree
 	 */
-	void enterAnd_expression(com.mybatisgx.syntax.MethodNameParser.And_expressionContext ctx);
+	void enterAnd_expression(MethodNameParser.And_expressionContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#and_expression}.
+	 * Exit a parse tree produced by {@link MethodNameParser#and_expression}.
 	 * @param ctx the parse tree
 	 */
-	void exitAnd_expression(com.mybatisgx.syntax.MethodNameParser.And_expressionContext ctx);
+	void exitAnd_expression(MethodNameParser.And_expressionContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#condition_term}.
+	 * Enter a parse tree produced by {@link MethodNameParser#condition_term}.
 	 * @param ctx the parse tree
 	 */
-	void enterCondition_term(com.mybatisgx.syntax.MethodNameParser.Condition_termContext ctx);
+	void enterCondition_term(MethodNameParser.Condition_termContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#condition_term}.
+	 * Exit a parse tree produced by {@link MethodNameParser#condition_term}.
 	 * @param ctx the parse tree
 	 */
-	void exitCondition_term(com.mybatisgx.syntax.MethodNameParser.Condition_termContext ctx);
+	void exitCondition_term(MethodNameParser.Condition_termContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#field_comparison_op}.
+	 * Enter a parse tree produced by {@link MethodNameParser#field_comparison_op}.
 	 * @param ctx the parse tree
 	 */
-	void enterField_comparison_op(com.mybatisgx.syntax.MethodNameParser.Field_comparison_opContext ctx);
+	void enterField_comparison_op(MethodNameParser.Field_comparison_opContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#field_comparison_op}.
+	 * Exit a parse tree produced by {@link MethodNameParser#field_comparison_op}.
 	 * @param ctx the parse tree
 	 */
-	void exitField_comparison_op(com.mybatisgx.syntax.MethodNameParser.Field_comparison_opContext ctx);
+	void exitField_comparison_op(MethodNameParser.Field_comparison_opContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#order_by_clause}.
+	 * Enter a parse tree produced by {@link MethodNameParser#order_by_clause}.
 	 * @param ctx the parse tree
 	 */
-	void enterOrder_by_clause(com.mybatisgx.syntax.MethodNameParser.Order_by_clauseContext ctx);
+	void enterOrder_by_clause(MethodNameParser.Order_by_clauseContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#order_by_clause}.
+	 * Exit a parse tree produced by {@link MethodNameParser#order_by_clause}.
 	 * @param ctx the parse tree
 	 */
-	void exitOrder_by_clause(com.mybatisgx.syntax.MethodNameParser.Order_by_clauseContext ctx);
+	void exitOrder_by_clause(MethodNameParser.Order_by_clauseContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#order_by_item}.
+	 * Enter a parse tree produced by {@link MethodNameParser#order_by_item}.
 	 * @param ctx the parse tree
 	 */
-	void enterOrder_by_item(com.mybatisgx.syntax.MethodNameParser.Order_by_itemContext ctx);
+	void enterOrder_by_item(MethodNameParser.Order_by_itemContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#order_by_item}.
+	 * Exit a parse tree produced by {@link MethodNameParser#order_by_item}.
 	 * @param ctx the parse tree
 	 */
-	void exitOrder_by_item(com.mybatisgx.syntax.MethodNameParser.Order_by_itemContext ctx);
+	void exitOrder_by_item(MethodNameParser.Order_by_itemContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#limit}.
+	 * Enter a parse tree produced by {@link MethodNameParser#limit}.
 	 * @param ctx the parse tree
 	 */
-	void enterLimit(com.mybatisgx.syntax.MethodNameParser.LimitContext ctx);
+	void enterLimit(MethodNameParser.LimitContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#limit}.
+	 * Exit a parse tree produced by {@link MethodNameParser#limit}.
 	 * @param ctx the parse tree
 	 */
-	void exitLimit(com.mybatisgx.syntax.MethodNameParser.LimitContext ctx);
+	void exitLimit(MethodNameParser.LimitContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#where_start}.
+	 * Enter a parse tree produced by {@link MethodNameParser#where_start}.
 	 * @param ctx the parse tree
 	 */
-	void enterWhere_start(com.mybatisgx.syntax.MethodNameParser.Where_startContext ctx);
+	void enterWhere_start(MethodNameParser.Where_startContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#where_start}.
+	 * Exit a parse tree produced by {@link MethodNameParser#where_start}.
 	 * @param ctx the parse tree
 	 */
-	void exitWhere_start(com.mybatisgx.syntax.MethodNameParser.Where_startContext ctx);
+	void exitWhere_start(MethodNameParser.Where_startContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#logic_and}.
+	 * Enter a parse tree produced by {@link MethodNameParser#logic_and}.
 	 * @param ctx the parse tree
 	 */
-	void enterLogic_and(com.mybatisgx.syntax.MethodNameParser.Logic_andContext ctx);
+	void enterLogic_and(MethodNameParser.Logic_andContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#logic_and}.
+	 * Exit a parse tree produced by {@link MethodNameParser#logic_and}.
 	 * @param ctx the parse tree
 	 */
-	void exitLogic_and(com.mybatisgx.syntax.MethodNameParser.Logic_andContext ctx);
+	void exitLogic_and(MethodNameParser.Logic_andContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#logic_or}.
+	 * Enter a parse tree produced by {@link MethodNameParser#logic_or}.
 	 * @param ctx the parse tree
 	 */
-	void enterLogic_or(com.mybatisgx.syntax.MethodNameParser.Logic_orContext ctx);
+	void enterLogic_or(MethodNameParser.Logic_orContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#logic_or}.
+	 * Exit a parse tree produced by {@link MethodNameParser#logic_or}.
 	 * @param ctx the parse tree
 	 */
-	void exitLogic_or(com.mybatisgx.syntax.MethodNameParser.Logic_orContext ctx);
+	void exitLogic_or(MethodNameParser.Logic_orContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#comparison_op}.
+	 * Enter a parse tree produced by {@link MethodNameParser#comparison_op}.
 	 * @param ctx the parse tree
 	 */
-	void enterComparison_op(com.mybatisgx.syntax.MethodNameParser.Comparison_opContext ctx);
+	void enterComparison_op(MethodNameParser.Comparison_opContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#comparison_op}.
+	 * Exit a parse tree produced by {@link MethodNameParser#comparison_op}.
 	 * @param ctx the parse tree
 	 */
-	void exitComparison_op(com.mybatisgx.syntax.MethodNameParser.Comparison_opContext ctx);
+	void exitComparison_op(MethodNameParser.Comparison_opContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#comparison_op_not}.
+	 * Enter a parse tree produced by {@link MethodNameParser#comparison_op_not}.
 	 * @param ctx the parse tree
 	 */
-	void enterComparison_op_not(com.mybatisgx.syntax.MethodNameParser.Comparison_op_notContext ctx);
+	void enterComparison_op_not(MethodNameParser.Comparison_op_notContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#comparison_op_not}.
+	 * Exit a parse tree produced by {@link MethodNameParser#comparison_op_not}.
 	 * @param ctx the parse tree
 	 */
-	void exitComparison_op_not(com.mybatisgx.syntax.MethodNameParser.Comparison_op_notContext ctx);
+	void exitComparison_op_not(MethodNameParser.Comparison_op_notContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#comparison_op_null}.
+	 * Enter a parse tree produced by {@link MethodNameParser#comparison_op_null}.
 	 * @param ctx the parse tree
 	 */
-	void enterComparison_op_null(com.mybatisgx.syntax.MethodNameParser.Comparison_op_nullContext ctx);
+	void enterComparison_op_null(MethodNameParser.Comparison_op_nullContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#comparison_op_null}.
+	 * Exit a parse tree produced by {@link MethodNameParser#comparison_op_null}.
 	 * @param ctx the parse tree
 	 */
-	void exitComparison_op_null(com.mybatisgx.syntax.MethodNameParser.Comparison_op_nullContext ctx);
+	void exitComparison_op_null(MethodNameParser.Comparison_op_nullContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#order_by}.
+	 * Enter a parse tree produced by {@link MethodNameParser#order_by}.
 	 * @param ctx the parse tree
 	 */
-	void enterOrder_by(com.mybatisgx.syntax.MethodNameParser.Order_byContext ctx);
+	void enterOrder_by(MethodNameParser.Order_byContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#order_by}.
+	 * Exit a parse tree produced by {@link MethodNameParser#order_by}.
 	 * @param ctx the parse tree
 	 */
-	void exitOrder_by(com.mybatisgx.syntax.MethodNameParser.Order_byContext ctx);
+	void exitOrder_by(MethodNameParser.Order_byContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#order_by_direction}.
+	 * Enter a parse tree produced by {@link MethodNameParser#order_by_direction}.
 	 * @param ctx the parse tree
 	 */
-	void enterOrder_by_direction(com.mybatisgx.syntax.MethodNameParser.Order_by_directionContext ctx);
+	void enterOrder_by_direction(MethodNameParser.Order_by_directionContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#order_by_direction}.
+	 * Exit a parse tree produced by {@link MethodNameParser#order_by_direction}.
 	 * @param ctx the parse tree
 	 */
-	void exitOrder_by_direction(com.mybatisgx.syntax.MethodNameParser.Order_by_directionContext ctx);
+	void exitOrder_by_direction(MethodNameParser.Order_by_directionContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#limit_top}.
+	 * Enter a parse tree produced by {@link MethodNameParser#limit_top}.
 	 * @param ctx the parse tree
 	 */
-	void enterLimit_top(com.mybatisgx.syntax.MethodNameParser.Limit_topContext ctx);
+	void enterLimit_top(MethodNameParser.Limit_topContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#limit_top}.
+	 * Exit a parse tree produced by {@link MethodNameParser#limit_top}.
 	 * @param ctx the parse tree
 	 */
-	void exitLimit_top(com.mybatisgx.syntax.MethodNameParser.Limit_topContext ctx);
+	void exitLimit_top(MethodNameParser.Limit_topContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#field}.
+	 * Enter a parse tree produced by {@link MethodNameParser#field}.
 	 * @param ctx the parse tree
 	 */
-	void enterField(com.mybatisgx.syntax.MethodNameParser.FieldContext ctx);
+	void enterField(MethodNameParser.FieldContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#field}.
+	 * Exit a parse tree produced by {@link MethodNameParser#field}.
 	 * @param ctx the parse tree
 	 */
-	void exitField(com.mybatisgx.syntax.MethodNameParser.FieldContext ctx);
+	void exitField(MethodNameParser.FieldContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#field_identifier}.
+	 * Enter a parse tree produced by {@link MethodNameParser#field_identifier}.
 	 * @param ctx the parse tree
 	 */
-	void enterField_identifier(com.mybatisgx.syntax.MethodNameParser.Field_identifierContext ctx);
+	void enterField_identifier(MethodNameParser.Field_identifierContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#field_identifier}.
+	 * Exit a parse tree produced by {@link MethodNameParser#field_identifier}.
 	 * @param ctx the parse tree
 	 */
-	void exitField_identifier(com.mybatisgx.syntax.MethodNameParser.Field_identifierContext ctx);
+	void exitField_identifier(MethodNameParser.Field_identifierContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#escaped_identifier}.
+	 * Enter a parse tree produced by {@link MethodNameParser#escaped_identifier}.
 	 * @param ctx the parse tree
 	 */
-	void enterEscaped_identifier(com.mybatisgx.syntax.MethodNameParser.Escaped_identifierContext ctx);
+	void enterEscaped_identifier(MethodNameParser.Escaped_identifierContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#escaped_identifier}.
+	 * Exit a parse tree produced by {@link MethodNameParser#escaped_identifier}.
 	 * @param ctx the parse tree
 	 */
-	void exitEscaped_identifier(com.mybatisgx.syntax.MethodNameParser.Escaped_identifierContext ctx);
+	void exitEscaped_identifier(MethodNameParser.Escaped_identifierContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#left_bracket}.
+	 * Enter a parse tree produced by {@link MethodNameParser#left_bracket}.
 	 * @param ctx the parse tree
 	 */
-	void enterLeft_bracket(com.mybatisgx.syntax.MethodNameParser.Left_bracketContext ctx);
+	void enterLeft_bracket(MethodNameParser.Left_bracketContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#left_bracket}.
+	 * Exit a parse tree produced by {@link MethodNameParser#left_bracket}.
 	 * @param ctx the parse tree
 	 */
-	void exitLeft_bracket(com.mybatisgx.syntax.MethodNameParser.Left_bracketContext ctx);
+	void exitLeft_bracket(MethodNameParser.Left_bracketContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#right_bracket}.
+	 * Enter a parse tree produced by {@link MethodNameParser#right_bracket}.
 	 * @param ctx the parse tree
 	 */
-	void enterRight_bracket(com.mybatisgx.syntax.MethodNameParser.Right_bracketContext ctx);
+	void enterRight_bracket(MethodNameParser.Right_bracketContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#right_bracket}.
+	 * Exit a parse tree produced by {@link MethodNameParser#right_bracket}.
 	 * @param ctx the parse tree
 	 */
-	void exitRight_bracket(com.mybatisgx.syntax.MethodNameParser.Right_bracketContext ctx);
+	void exitRight_bracket(MethodNameParser.Right_bracketContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#business_semantic}.
+	 * Enter a parse tree produced by {@link MethodNameParser#business_semantic}.
 	 * @param ctx the parse tree
 	 */
-	void enterBusiness_semantic(com.mybatisgx.syntax.MethodNameParser.Business_semanticContext ctx);
+	void enterBusiness_semantic(MethodNameParser.Business_semanticContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#business_semantic}.
+	 * Exit a parse tree produced by {@link MethodNameParser#business_semantic}.
 	 * @param ctx the parse tree
 	 */
-	void exitBusiness_semantic(com.mybatisgx.syntax.MethodNameParser.Business_semanticContext ctx);
+	void exitBusiness_semantic(MethodNameParser.Business_semanticContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#end}.
+	 * Enter a parse tree produced by {@link MethodNameParser#end}.
 	 * @param ctx the parse tree
 	 */
-	void enterEnd(com.mybatisgx.syntax.MethodNameParser.EndContext ctx);
+	void enterEnd(MethodNameParser.EndContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link com.mybatisgx.syntax.MethodNameParser#end}.
+	 * Exit a parse tree produced by {@link MethodNameParser#end}.
 	 * @param ctx the parse tree
 	 */
 	void exitEnd(MethodNameParser.EndContext ctx);

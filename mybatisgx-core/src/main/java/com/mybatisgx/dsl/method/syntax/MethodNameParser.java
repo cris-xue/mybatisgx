@@ -1,19 +1,13 @@
-// Generated from F:/owner_project/mybatisgx-ai_conding/mybatisgx/mybatisgx-core/src/main/resources/antlr/MethodNameParser.g4 by ANTLR 4.13.2
+// Generated from F:/owner_project/mybatisgx-ai_conding/mybatisgx/mybatisgx-core/src/main/resources/antlr/method/MethodNameParser.g4 by ANTLR 4.13.2
 package com.mybatisgx.dsl.method.syntax;
-
-import com.mybatisgx.syntax.MethodNameParserListener;
-import com.mybatisgx.syntax.MethodNameParserVisitor;
-import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.atn.ATN;
-import org.antlr.v4.runtime.atn.ATNDeserializer;
-import org.antlr.v4.runtime.atn.ParserATNSimulator;
-import org.antlr.v4.runtime.atn.PredictionContextCache;
+import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
-import org.antlr.v4.runtime.tree.ParseTreeListener;
-import org.antlr.v4.runtime.tree.ParseTreeVisitor;
-import org.antlr.v4.runtime.tree.TerminalNode;
-
+import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.misc.*;
+import org.antlr.v4.runtime.tree.*;
 import java.util.List;
+import java.util.Iterator;
+import java.util.ArrayList;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast", "CheckReturnValue", "this-escape"})
 public class MethodNameParser extends MethodNameParserBase {
@@ -146,15 +140,15 @@ public class MethodNameParser extends MethodNameParserBase {
 		@Override public int getRuleIndex() { return RULE_sql_statement; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof com.mybatisgx.dsl.method.syntax.MethodNameParserListener) ((com.mybatisgx.dsl.method.syntax.MethodNameParserListener)listener).enterSql_statement(this);
+			if ( listener instanceof MethodNameParserListener ) ((MethodNameParserListener)listener).enterSql_statement(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof com.mybatisgx.dsl.method.syntax.MethodNameParserListener) ((com.mybatisgx.dsl.method.syntax.MethodNameParserListener)listener).exitSql_statement(this);
+			if ( listener instanceof MethodNameParserListener ) ((MethodNameParserListener)listener).exitSql_statement(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof com.mybatisgx.dsl.method.syntax.MethodNameParserVisitor) return ((com.mybatisgx.dsl.method.syntax.MethodNameParserVisitor<? extends T>)visitor).visitSql_statement(this);
+			if ( visitor instanceof MethodNameParserVisitor ) return ((MethodNameParserVisitor<? extends T>)visitor).visitSql_statement(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -225,15 +219,15 @@ public class MethodNameParser extends MethodNameParserBase {
 		@Override public int getRuleIndex() { return RULE_insert_statement; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof com.mybatisgx.dsl.method.syntax.MethodNameParserListener) ((com.mybatisgx.dsl.method.syntax.MethodNameParserListener)listener).enterInsert_statement(this);
+			if ( listener instanceof MethodNameParserListener ) ((MethodNameParserListener)listener).enterInsert_statement(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof com.mybatisgx.dsl.method.syntax.MethodNameParserListener) ((com.mybatisgx.dsl.method.syntax.MethodNameParserListener)listener).exitInsert_statement(this);
+			if ( listener instanceof MethodNameParserListener ) ((MethodNameParserListener)listener).exitInsert_statement(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof com.mybatisgx.dsl.method.syntax.MethodNameParserVisitor) return ((com.mybatisgx.dsl.method.syntax.MethodNameParserVisitor<? extends T>)visitor).visitInsert_statement(this);
+			if ( visitor instanceof MethodNameParserVisitor ) return ((MethodNameParserVisitor<? extends T>)visitor).visitInsert_statement(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -279,15 +273,15 @@ public class MethodNameParser extends MethodNameParserBase {
 		@Override public int getRuleIndex() { return RULE_insert_clause; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof com.mybatisgx.dsl.method.syntax.MethodNameParserListener) ((com.mybatisgx.dsl.method.syntax.MethodNameParserListener)listener).enterInsert_clause(this);
+			if ( listener instanceof MethodNameParserListener ) ((MethodNameParserListener)listener).enterInsert_clause(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof com.mybatisgx.dsl.method.syntax.MethodNameParserListener) ((com.mybatisgx.dsl.method.syntax.MethodNameParserListener)listener).exitInsert_clause(this);
+			if ( listener instanceof MethodNameParserListener ) ((MethodNameParserListener)listener).exitInsert_clause(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof com.mybatisgx.dsl.method.syntax.MethodNameParserVisitor) return ((com.mybatisgx.dsl.method.syntax.MethodNameParserVisitor<? extends T>)visitor).visitInsert_clause(this);
+			if ( visitor instanceof MethodNameParserVisitor ) return ((MethodNameParserVisitor<? extends T>)visitor).visitInsert_clause(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -330,15 +324,15 @@ public class MethodNameParser extends MethodNameParserBase {
 		@Override public int getRuleIndex() { return RULE_delete_statement; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof com.mybatisgx.dsl.method.syntax.MethodNameParserListener) ((com.mybatisgx.dsl.method.syntax.MethodNameParserListener)listener).enterDelete_statement(this);
+			if ( listener instanceof MethodNameParserListener ) ((MethodNameParserListener)listener).enterDelete_statement(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof com.mybatisgx.dsl.method.syntax.MethodNameParserListener) ((com.mybatisgx.dsl.method.syntax.MethodNameParserListener)listener).exitDelete_statement(this);
+			if ( listener instanceof MethodNameParserListener ) ((MethodNameParserListener)listener).exitDelete_statement(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof com.mybatisgx.dsl.method.syntax.MethodNameParserVisitor) return ((com.mybatisgx.dsl.method.syntax.MethodNameParserVisitor<? extends T>)visitor).visitDelete_statement(this);
+			if ( visitor instanceof MethodNameParserVisitor ) return ((MethodNameParserVisitor<? extends T>)visitor).visitDelete_statement(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -386,15 +380,15 @@ public class MethodNameParser extends MethodNameParserBase {
 		@Override public int getRuleIndex() { return RULE_delete_clause; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof com.mybatisgx.dsl.method.syntax.MethodNameParserListener) ((com.mybatisgx.dsl.method.syntax.MethodNameParserListener)listener).enterDelete_clause(this);
+			if ( listener instanceof MethodNameParserListener ) ((MethodNameParserListener)listener).enterDelete_clause(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof com.mybatisgx.dsl.method.syntax.MethodNameParserListener) ((com.mybatisgx.dsl.method.syntax.MethodNameParserListener)listener).exitDelete_clause(this);
+			if ( listener instanceof MethodNameParserListener ) ((MethodNameParserListener)listener).exitDelete_clause(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof com.mybatisgx.dsl.method.syntax.MethodNameParserVisitor) return ((com.mybatisgx.dsl.method.syntax.MethodNameParserVisitor<? extends T>)visitor).visitDelete_clause(this);
+			if ( visitor instanceof MethodNameParserVisitor ) return ((MethodNameParserVisitor<? extends T>)visitor).visitDelete_clause(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -437,15 +431,15 @@ public class MethodNameParser extends MethodNameParserBase {
 		@Override public int getRuleIndex() { return RULE_update_statement; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof com.mybatisgx.dsl.method.syntax.MethodNameParserListener) ((com.mybatisgx.dsl.method.syntax.MethodNameParserListener)listener).enterUpdate_statement(this);
+			if ( listener instanceof MethodNameParserListener ) ((MethodNameParserListener)listener).enterUpdate_statement(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof com.mybatisgx.dsl.method.syntax.MethodNameParserListener) ((com.mybatisgx.dsl.method.syntax.MethodNameParserListener)listener).exitUpdate_statement(this);
+			if ( listener instanceof MethodNameParserListener ) ((MethodNameParserListener)listener).exitUpdate_statement(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof com.mybatisgx.dsl.method.syntax.MethodNameParserVisitor) return ((com.mybatisgx.dsl.method.syntax.MethodNameParserVisitor<? extends T>)visitor).visitUpdate_statement(this);
+			if ( visitor instanceof MethodNameParserVisitor ) return ((MethodNameParserVisitor<? extends T>)visitor).visitUpdate_statement(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -493,15 +487,15 @@ public class MethodNameParser extends MethodNameParserBase {
 		@Override public int getRuleIndex() { return RULE_update_clause; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof com.mybatisgx.dsl.method.syntax.MethodNameParserListener) ((com.mybatisgx.dsl.method.syntax.MethodNameParserListener)listener).enterUpdate_clause(this);
+			if ( listener instanceof MethodNameParserListener ) ((MethodNameParserListener)listener).enterUpdate_clause(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof com.mybatisgx.dsl.method.syntax.MethodNameParserListener) ((com.mybatisgx.dsl.method.syntax.MethodNameParserListener)listener).exitUpdate_clause(this);
+			if ( listener instanceof MethodNameParserListener ) ((MethodNameParserListener)listener).exitUpdate_clause(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof com.mybatisgx.dsl.method.syntax.MethodNameParserVisitor) return ((com.mybatisgx.dsl.method.syntax.MethodNameParserVisitor<? extends T>)visitor).visitUpdate_clause(this);
+			if ( visitor instanceof MethodNameParserVisitor ) return ((MethodNameParserVisitor<? extends T>)visitor).visitUpdate_clause(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -550,15 +544,15 @@ public class MethodNameParser extends MethodNameParserBase {
 		@Override public int getRuleIndex() { return RULE_select_statement; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof com.mybatisgx.dsl.method.syntax.MethodNameParserListener) ((com.mybatisgx.dsl.method.syntax.MethodNameParserListener)listener).enterSelect_statement(this);
+			if ( listener instanceof MethodNameParserListener ) ((MethodNameParserListener)listener).enterSelect_statement(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof com.mybatisgx.dsl.method.syntax.MethodNameParserListener) ((com.mybatisgx.dsl.method.syntax.MethodNameParserListener)listener).exitSelect_statement(this);
+			if ( listener instanceof MethodNameParserListener ) ((MethodNameParserListener)listener).exitSelect_statement(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof com.mybatisgx.dsl.method.syntax.MethodNameParserVisitor) return ((com.mybatisgx.dsl.method.syntax.MethodNameParserVisitor<? extends T>)visitor).visitSelect_statement(this);
+			if ( visitor instanceof MethodNameParserVisitor ) return ((MethodNameParserVisitor<? extends T>)visitor).visitSelect_statement(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -639,15 +633,15 @@ public class MethodNameParser extends MethodNameParserBase {
 		@Override public int getRuleIndex() { return RULE_select_item_clause; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof com.mybatisgx.dsl.method.syntax.MethodNameParserListener) ((com.mybatisgx.dsl.method.syntax.MethodNameParserListener)listener).enterSelect_item_clause(this);
+			if ( listener instanceof MethodNameParserListener ) ((MethodNameParserListener)listener).enterSelect_item_clause(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof com.mybatisgx.dsl.method.syntax.MethodNameParserListener) ((com.mybatisgx.dsl.method.syntax.MethodNameParserListener)listener).exitSelect_item_clause(this);
+			if ( listener instanceof MethodNameParserListener ) ((MethodNameParserListener)listener).exitSelect_item_clause(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof com.mybatisgx.dsl.method.syntax.MethodNameParserVisitor) return ((com.mybatisgx.dsl.method.syntax.MethodNameParserVisitor<? extends T>)visitor).visitSelect_item_clause(this);
+			if ( visitor instanceof MethodNameParserVisitor ) return ((MethodNameParserVisitor<? extends T>)visitor).visitSelect_item_clause(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -697,15 +691,15 @@ public class MethodNameParser extends MethodNameParserBase {
 		@Override public int getRuleIndex() { return RULE_select_column; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof com.mybatisgx.dsl.method.syntax.MethodNameParserListener) ((com.mybatisgx.dsl.method.syntax.MethodNameParserListener)listener).enterSelect_column(this);
+			if ( listener instanceof MethodNameParserListener ) ((MethodNameParserListener)listener).enterSelect_column(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof com.mybatisgx.dsl.method.syntax.MethodNameParserListener) ((com.mybatisgx.dsl.method.syntax.MethodNameParserListener)listener).exitSelect_column(this);
+			if ( listener instanceof MethodNameParserListener ) ((MethodNameParserListener)listener).exitSelect_column(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof com.mybatisgx.dsl.method.syntax.MethodNameParserVisitor) return ((com.mybatisgx.dsl.method.syntax.MethodNameParserVisitor<? extends T>)visitor).visitSelect_column(this);
+			if ( visitor instanceof MethodNameParserVisitor ) return ((MethodNameParserVisitor<? extends T>)visitor).visitSelect_column(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -740,7 +734,7 @@ public class MethodNameParser extends MethodNameParserBase {
 		@Override public int getRuleIndex() { return RULE_select_count; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof com.mybatisgx.dsl.method.syntax.MethodNameParserListener) ((com.mybatisgx.dsl.method.syntax.MethodNameParserListener)listener).enterSelect_count(this);
+			if ( listener instanceof MethodNameParserListener ) ((MethodNameParserListener)listener).enterSelect_count(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
@@ -1850,7 +1844,7 @@ public class MethodNameParser extends MethodNameParserBase {
 				setState(198); 
 				_errHandler.sync(this);
 				_alt = getInterpreter().adaptivePredict(_input,17,_ctx);
-			} while ( _alt!=2 && _alt!= ATN.INVALID_ALT_NUMBER );
+			} while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER );
 			}
 		}
 		catch (RecognitionException re) {
@@ -2044,7 +2038,7 @@ public class MethodNameParser extends MethodNameParserBase {
 				setState(209); 
 				_errHandler.sync(this);
 				_alt = getInterpreter().adaptivePredict(_input,18,_ctx);
-			} while ( _alt!=2 && _alt!= ATN.INVALID_ALT_NUMBER );
+			} while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER );
 			setState(211);
 			if (!(isBusinessSemanticEnd())) throw new FailedPredicateException(this, "isBusinessSemanticEnd()");
 			}

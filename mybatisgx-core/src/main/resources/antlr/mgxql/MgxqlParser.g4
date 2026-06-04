@@ -25,21 +25,21 @@ update_clause: UPDATE_ACTION ;
 // 查询语法：6、select max(id) from User where name = :name and (age < :age or status = :status)
 // 查询语法：7、select min(id) from User where name = :name and (age < :age or status = :status)
 // 查询语法：8、select avg(age) from User where name = :name and (age < :age or status = :status)
-select_statement: select_action select_item_clause select_from_clause where_clause? group_by_clause? having_clause? order_by_clause? limit? ;
-select_item_clause: select_item (comma_identifier select_item)* ;
+select_statement: select_action select_item_clause select_from_clause where_clause? group_by_clause? having_clause? order_by_clause? limit_clause? ;
+select_item_clause: select_item (comma select_item)* ;
 select_item: select_column_all | select_column_custom | aggregate_function ;
 
 select_action: SELECT_ACTION ;
-select_column_all: (lower_name dot)? select_asterisk ;
+select_column_all: (entity_name_alias dot)? select_asterisk ;
 select_asterisk: SELECT_ASTERISK ;
-select_column_custom: (lower_name dot)? lower_name ;
+select_column_custom: (entity_name_alias dot)? field_name ;
 
 // 聚合函数
 aggregate_function: select_count_function | select_max_function | select_min_function | select_avg_function ;
-select_count_function: select_count left_bracket (number| select_column_all | lower_name) right_bracket ;
-select_max_function: select_max left_bracket lower_name right_bracket ;
-select_min_function: select_min left_bracket lower_name right_bracket ;
-select_avg_function: select_avg left_bracket lower_name right_bracket ;
+select_count_function: select_count left_bracket (number| select_column_all | field_reference) right_bracket ;
+select_max_function: select_max left_bracket field_reference right_bracket ;
+select_min_function: select_min left_bracket field_reference right_bracket ;
+select_avg_function: select_avg left_bracket field_reference right_bracket ;
 select_count: SELECT_COUNT ;
 select_max: SELECT_MAX ;
 select_min: SELECT_MIN ;
@@ -49,14 +49,16 @@ select_avg: SELECT_AVG ;
 select_from_clause: select_from select_primary_entity select_join_entity* ;
 select_primary_entity: select_entity select_entity_alias? ;
 select_join_entity: select_left_join select_entity select_entity_alias? select_on select_on_expression ;
-select_entity: upper_name ;
-select_entity_alias: lower_name ;
+select_entity: entity_name ;
+select_entity_alias: entity_name_alias ;
 select_from: FROM ;
 select_left_join: LEFT JOIN ;
 select_on: ON ;
+// user.id = userRole.userId
 select_on_expression: left_expression EQUAL right_expression ;
-left_expression: (lower_name dot)? lower_name ;
-right_expression: (lower_name dot)? lower_name ;
+// left_expression: (lower_name dot)? lower_name ;
+left_expression: field_reference ;
+right_expression: field_reference ;
 
 // 条件语法   where name = :name and (age = :age or status = :status)
 // 条件语法   where ?name = :name and (?age = :age or status = :status)
@@ -75,26 +77,26 @@ and_expression: condition_term (logic_and condition_term)* ;
 condition_term: field_comparison_op | (left_bracket condition_expression right_bracket) ;
 
 // 解析方法名和实体字段
-field_comparison_op: question_mark? where_param_name_field_access_chain (field_comparison_op_param | field_comparison_op_not_param) ;
-field_comparison_op_param: (relational_op | matching_op) param_colon where_param_value_field_access_chain ;
+field_comparison_op: question_mark? field_reference (field_comparison_op_param | field_comparison_op_not_param) ;
+field_comparison_op_param: (relational_op | matching_op) parameter_reference ;
 field_comparison_op_not_param: comparison_op_null ;
 
 // group by phone
-group_by_clause: group_by (entity_field_access_chain comma_identifier?)+ ;
+group_by_clause: group_by group_by_expression ;
+group_by_expression: field_reference (comma field_reference)* ;
 
 // having max(age) > :age
 having_clause: having (aggregate_function having_comparison_op_param)+ ;
-having_comparison_op_param: relational_op param_colon where_param_value_field_access_chain ;
+having_comparison_op_param: relational_op parameter_reference ;
 
-// 排序 order by name desc、order by name
-order_by_clause: order_by order_by_item+ ;
-order_by_item: entity_field_access_chain order_by_direction? ;
+// 排序 order by name desc、order by name , age
+order_by_clause: order_by order_by_expression (comma order_by_expression)* ;
+order_by_expression: field_reference order_by_direction? ;
 
-// 分页 limit 2, 10
-limit: limit_identifier offset comma_identifier size ;
-limit_identifier: LIMIT_IDENTIFIER ;
+// 只支持固定分页 limit 2, 10 这种形式，动态分页采用Pageable或者PageHelper
+limit_clause: limit offset comma size ;
+limit: LIMIT ;
 offset: NUMBER ;
-comma_identifier: COMMA ;
 size: NUMBER ;
 
 where_start: WHERE ;
@@ -133,30 +135,25 @@ comparison_op_null: comparison_op_is_null | comparison_op_is_not_null ;
 comparison_op_is_null: COMPARISON_OP_IS_NULL ;
 comparison_op_is_not_null: COMPARISON_OP_IS_NOT_NULL ;
 
-where_param_name_field_access_chain: param_name_field_access_chain ;
-param_colon: COLON ;
-where_param_value_field_access_chain: param_value_field_access_chain ;
-
 having: HAVING ;
-
 group_by: GROUP_BY ;
-
 order_by: ORDER_BY ;
 order_by_direction: ORDER_BY_DIRECTION ;
 
-upper_name: UPPER_NAME ;
-lower_name: LOWER_NAME ;
+// 字段引用，user.name  role.status   只支持一级，需要和from和join中的实体对应
+field_reference: field_name | entity_name_alias dot field_name ;
+// 参数引用（对应查询实体和@Param）。:name   :表示从根节点开始取值
+parameter_reference: param_colon field_name (dot field_name)* ;
 
-// 实体字段访问，user.name  role.status   只支持一级，需要和from和join中的实体对应
-entity_field_access_chain: (lower_name dot)? lower_name ;
-// ?user.name  问号为动态条件
-param_name_field_access_chain: (lower_name dot)? lower_name ;
-// :name   :表示从根节点开始取值
-param_value_field_access_chain: (lower_name dot)* lower_name ;
+entity_name: UPPER_NAME ;
+entity_name_alias: LOWER_NAME ;
+field_name: LOWER_NAME ;
 
 left_bracket: LEFT_BRACKET ;
 right_bracket: RIGHT_BRACKET ;
 dot: DOT ;
+param_colon: COLON ;
+comma: COMMA ;
 question_mark: QUESTION_MARK ;
 number: NUMBER ;
 

@@ -42,7 +42,7 @@ GROUP_BY: 'group by' ;
 HAVING: 'having' ;
 ORDER_BY: 'order by' ;
 ORDER_BY_DIRECTION: 'desc' | 'asc' ;
-LIMIT_IDENTIFIER: 'limit' ;
+LIMIT: 'limit' ;
 
 // 括号
 LEFT_BRACKET: '(' ;

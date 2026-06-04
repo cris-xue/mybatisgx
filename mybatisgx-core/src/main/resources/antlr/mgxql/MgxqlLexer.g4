@@ -14,6 +14,7 @@ SELECT_AVG: 'avg' ;
 FROM: 'from' ;
 LEFT: 'left' ;
 JOIN: 'join' ;
+ON: 'on' ;
 
 WHERE: 'where' ;
 LOGIC_AND: 'and' ;
@@ -24,7 +25,7 @@ COMPARISON_OP_LT: '<' ;
 COMPARISON_OP_LT_EQ: '<=' ;
 COMPARISON_OP_GT: '>' ;
 COMPARISON_OP_GT_EQ: '>=' ;
-COMPARISON_OP_EQ: '=' ;
+EQUAL: '=' ;
 COMPARISON_OP_NOT_EQ: '!=' ;
 
 COMPARISON_OP_NOT: 'not' ;
@@ -50,6 +51,7 @@ RIGHT_BRACKET: ')' ;
 COMMA: ',' ;
 COLON: ':' ;
 DOT: '.' ;
+QUESTION_MARK: '?' ;
 
 // antlr是从上向下解析的，常量一定要放在正则的上面
 UPPER_NAME: UPPER+ (NUMBER | UPPER | LOWER)* ;

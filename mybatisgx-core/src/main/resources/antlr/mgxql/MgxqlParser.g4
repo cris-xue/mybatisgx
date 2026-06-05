@@ -75,7 +75,7 @@ condition_value: parameter_reference | number ;
 group_by_clause: group_by group_by_expression ;
 group_by_expression: field_reference (comma field_reference)* ;
 
-// 1、having max(age) > :age count(*) > :count   2、having max(age) > :age AND count(*) > :count
+// 1、having max(age) > :age count(id) > :count   2、having max(age) > :age AND count(id) > :count
 having_clause: having having_or_expression ;
 // OR 层，AND 优先
 having_or_expression: having_and_expression (logic_or having_and_expression)* ;

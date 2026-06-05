@@ -64,9 +64,6 @@ public class MgxqlSyntaxHandler {
 
     /**
      * 语法节点处理器接口
-     *
-     * @author 薛承城
-     * @date 2025/11/17 10:47
      */
     public interface SyntaxNodeHandler {
 
@@ -117,7 +114,6 @@ public class MgxqlSyntaxHandler {
             for (MgxqlParser.Select_itemContext selectItem : selectItemClauseContext.select_item()) {
                 SelectItem item = new SelectItem();
                 if (selectItem.select_column_all() != null) {
-                    // select * 或 entity.*
                     item.setType(SelectItemType.COLUMN_ALL);
                     MgxqlParser.Select_column_allContext columnAll = selectItem.select_column_all();
                     if (columnAll.entity_name_alias() != null) {
@@ -125,15 +121,12 @@ public class MgxqlSyntaxHandler {
                     }
                     item.setFieldName("*");
                 } else if (selectItem.select_column_custom() != null) {
-                    // 自定义列：select id, name 或 entity.name
                     item.setType(SelectItemType.COLUMN);
                     MgxqlParser.Select_column_customContext columnCustom = selectItem.select_column_custom();
-                    if (columnCustom.entity_name_alias() != null) {
-                        item.setEntityAlias(columnCustom.entity_name_alias().getText());
-                    }
-                    item.setFieldName(columnCustom.field_name().getText());
+                    FieldReference fieldRef = parseFieldReference(columnCustom.field_reference());
+                    item.setEntityAlias(fieldRef.getEntityAlias());
+                    item.setFieldName(fieldRef.getFieldName());
                 } else if (selectItem.aggregate_function() != null) {
-                    // 聚合函数：count/max/min/avg
                     MgxqlParser.Aggregate_functionContext aggregateFunction = selectItem.aggregate_function();
                     parseAggregateFunction(item, aggregateFunction);
                 }
@@ -142,26 +135,22 @@ public class MgxqlSyntaxHandler {
         }
 
         private void parseAggregateFunction(SelectItem item, MgxqlParser.Aggregate_functionContext aggregateFunction) {
-            if (aggregateFunction.select_count_function() != null) {
+            MgxqlParser.Aggregate_function_nameContext funcNameCtx = aggregateFunction.aggregate_function_name();
+            MgxqlParser.Aggregate_function_argumentContext funcArgCtx = aggregateFunction.aggregate_function_argument();
+            String argText = parseFieldReference(funcArgCtx.field_reference()).getFieldName();
+
+            if (funcNameCtx.select_count() != null) {
                 item.setType(SelectItemType.COUNT);
-                MgxqlParser.Select_count_functionContext countFuncCtx = aggregateFunction.select_count_function();
-                if (countFuncCtx.number() != null) {
-                    item.setAggregateArg(countFuncCtx.number().getText());
-                } else if (countFuncCtx.select_column_all() != null) {
-                    item.setAggregateArg("*");
-                } else if (countFuncCtx.field_name() != null) {
-                    item.setAggregateArg(countFuncCtx.field_name().getText());
-                }
-            } else if (aggregateFunction.select_max_function() != null) {
+            } else if (funcNameCtx.select_max() != null) {
                 item.setType(SelectItemType.MAX);
-                item.setAggregateArg(aggregateFunction.select_max_function().field_name().getText());
-            } else if (aggregateFunction.select_min_function() != null) {
+            } else if (funcNameCtx.select_min() != null) {
                 item.setType(SelectItemType.MIN);
-                item.setAggregateArg(aggregateFunction.select_min_function().field_name().getText());
-            } else if (aggregateFunction.select_avg_function() != null) {
+            } else if (funcNameCtx.select_avg() != null) {
                 item.setType(SelectItemType.AVG);
-                item.setAggregateArg(aggregateFunction.select_avg_function().field_name().getText());
+            } else if (funcNameCtx.select_sum() != null) {
+                item.setType(SelectItemType.SUM);
             }
+            item.setAggregateArg(argText);
         }
     }
 
@@ -246,9 +235,9 @@ public class MgxqlSyntaxHandler {
             MgxqlParser.Order_by_clauseContext orderByClauseCtx = (MgxqlParser.Order_by_clauseContext) node;
 
             OrderByClause orderByClause = new OrderByClause();
-            for (MgxqlParser.Order_by_itemContext orderByItem : orderByClauseCtx.order_by_item()) {
-                FieldReference fieldRef = parseFieldReference(orderByItem.entity_field_access_chain());
-                String direction = orderByItem.order_by_direction() != null ? orderByItem.order_by_direction().getText() : "asc";
+            for (MgxqlParser.Order_by_expressionContext orderByExpr : orderByClauseCtx.order_by_expression()) {
+                FieldReference fieldRef = parseFieldReference(orderByExpr.field_reference());
+                String direction = orderByExpr.order_by_direction() != null ? orderByExpr.order_by_direction().getText() : "asc";
                 orderByClause.addItem(new OrderByItem(fieldRef, direction));
             }
             statement.setOrderByClause(orderByClause);
@@ -264,14 +253,14 @@ public class MgxqlSyntaxHandler {
 
         @Override
         public boolean support(ParseTree node) {
-            return node instanceof MgxqlParser.LimitContext;
+            return node instanceof MgxqlParser.Limit_clauseContext;
         }
 
         @Override
         public void handle(ParseTree node, ParserContext context) {
             LOGGER.debug("处理mgxql分页: {}", node.getText());
             MgxqlStatement statement = context.getMgxqlStatement();
-            MgxqlParser.LimitContext limitCtx = (MgxqlParser.LimitContext) node;
+            MgxqlParser.Limit_clauseContext limitCtx = (MgxqlParser.Limit_clauseContext) node;
 
             int offset = Integer.parseInt(limitCtx.offset().getText());
             int size = Integer.parseInt(limitCtx.size().getText());
@@ -298,8 +287,9 @@ public class MgxqlSyntaxHandler {
             MgxqlParser.Group_by_clauseContext groupByCtx = (MgxqlParser.Group_by_clauseContext) node;
 
             GroupByClause groupByClause = new GroupByClause();
-            for (MgxqlParser.Entity_field_access_chainContext chainCtx : groupByCtx.entity_field_access_chain()) {
-                groupByClause.addField(parseFieldReference(chainCtx));
+            MgxqlParser.Group_by_expressionContext groupByExprCtx = groupByCtx.group_by_expression();
+            for (MgxqlParser.Field_referenceContext fieldRefCtx : groupByExprCtx.field_reference()) {
+                groupByClause.addField(parseFieldReference(fieldRefCtx));
             }
             statement.setGroupByClause(groupByClause);
         }
@@ -324,49 +314,63 @@ public class MgxqlSyntaxHandler {
             MgxqlParser.Having_clauseContext havingCtx = (MgxqlParser.Having_clauseContext) node;
 
             HavingClause havingClause = new HavingClause();
-            for (MgxqlParser.Aggregate_functionContext aggFuncCtx : havingCtx.aggregate_function()) {
-                HavingCondition condition = new HavingCondition();
-                SelectItem aggItem = new SelectItem();
-                new SelectItemHandler().parseAggregateFunction(aggItem, aggFuncCtx);
-                condition.setAggregateFunction(aggItem);
-                condition.setOperator(ComparisonOperator.EQ);
-                havingClause.addCondition(condition);
-            }
-
-            // 解析having中的运算符和参数
-            List<MgxqlParser.Having_comparison_op_paramContext> havingOps = havingCtx.having_comparison_op_param();
-            for (int i = 0; i < havingOps.size() && i < havingClause.getConditions().size(); i++) {
-                MgxqlParser.Having_comparison_op_paramContext opCtx = havingOps.get(i);
-                HavingCondition condition = havingClause.getConditions().get(i);
-                condition.setOperator(MGXQL_OPERATOR_MAP.getOrDefault(opCtx.relational_op().getText(), ComparisonOperator.EQ));
-                condition.setParamValuePath(parseParamValuePath(opCtx.where_param_value_field_access_chain()));
-            }
+            MgxqlParser.Having_or_expressionContext havingOrExpr = havingCtx.having_or_expression();
+            parseHavingOrExpression(havingOrExpr, havingClause);
 
             statement.setHavingClause(havingClause);
+        }
+
+        private void parseHavingOrExpression(MgxqlParser.Having_or_expressionContext ctx, HavingClause havingClause) {
+            for (MgxqlParser.Having_and_expressionContext andExpr : ctx.having_and_expression()) {
+                parseHavingAndExpression(andExpr, havingClause);
+            }
+        }
+
+        private void parseHavingAndExpression(MgxqlParser.Having_and_expressionContext ctx, HavingClause havingClause) {
+            for (MgxqlParser.Having_termContext term : ctx.having_term()) {
+                MgxqlParser.Having_comparisonContext comparisonCtx = term.having_comparison();
+                if (comparisonCtx != null) {
+                    HavingCondition condition = new HavingCondition();
+                    // 解析聚合函数
+                    SelectItem aggItem = new SelectItem();
+                    new SelectItemHandler().parseAggregateFunction(aggItem, comparisonCtx.aggregate_function());
+                    condition.setAggregateFunction(aggItem);
+                    // 解析运算符
+                    condition.setOperator(MGXQL_OPERATOR_MAP.getOrDefault(
+                            comparisonCtx.relational_op().getText(), ComparisonOperator.EQ));
+                    // 解析比较值
+                    MgxqlParser.Having_valueContext havingValueCtx = comparisonCtx.having_value();
+                    if (havingValueCtx.parameter_reference() != null) {
+                        condition.setParamValuePath(parseParameterReference(havingValueCtx.parameter_reference()));
+                    } else if (havingValueCtx.number() != null) {
+                        condition.setHavingValue(Integer.parseInt(havingValueCtx.number().getText()));
+                    }
+                    havingClause.addCondition(condition);
+                }
+            }
         }
     }
 
     /**
-     * 解析entity_field_access_chain为FieldReference
+     * 解析Field_referenceContext为FieldReference
      */
-    static FieldReference parseFieldReference(MgxqlParser.Entity_field_access_chainContext chainCtx) {
+    static FieldReference parseFieldReference(MgxqlParser.Field_referenceContext fieldRefCtx) {
         FieldReference fieldRef = new FieldReference();
-        if (chainCtx.dot() != null) {
-            fieldRef.setEntityAlias(chainCtx.entity_name_alias().getText());
-            fieldRef.setFieldName(chainCtx.field_name().getText());
+        if (fieldRefCtx.dot() != null && fieldRefCtx.dot().size() > 0) {
+            fieldRef.setEntityAlias(fieldRefCtx.entity_name_alias().getText());
+            fieldRef.setFieldName(fieldRefCtx.field_name().getText());
         } else {
-            fieldRef.setFieldName(chainCtx.entity_name_alias().getText());
+            fieldRef.setFieldName(fieldRefCtx.field_name().getText());
         }
         return fieldRef;
     }
 
     /**
-     * 解析参数值访问链
+     * 解析Parameter_referenceContext为参数路径列表
      */
-    static List<String> parseParamValuePath(MgxqlParser.Where_param_value_field_access_chainContext accessChain) {
-        MgxqlParser.Param_value_field_access_chainContext chainCtx = accessChain.param_value_field_access_chain();
+    static List<String> parseParameterReference(MgxqlParser.Parameter_referenceContext paramRefCtx) {
         List<String> pathItems = new ArrayList<>();
-        for (MgxqlParser.Field_nameContext fieldNameCtx : chainCtx.field_name()) {
+        for (MgxqlParser.Field_nameContext fieldNameCtx : paramRefCtx.field_name()) {
             pathItems.add(fieldNameCtx.getText());
         }
         return pathItems;
@@ -384,21 +388,19 @@ public class MgxqlSyntaxHandler {
         }
 
         @Override
-        public ConditionExpression visitCondition_expression(MgxqlParser.Condition_expressionContext ctx) {
+        public ConditionExpression visitCondition_or_expression(MgxqlParser.Condition_or_expressionContext ctx) {
             LOGGER.debug("处理mgxql条件表达式: {}", ctx.getText());
             ConditionExpression expression = new ConditionExpression(LogicOperator.NULL);
-            MgxqlParser.Or_expressionContext orExpressionCtx = ctx.or_expression();
             LogicOperator currentOrOp = null;
 
-            for (int i = 0; i < orExpressionCtx.getChildCount(); i++) {
-                ParseTree child = orExpressionCtx.getChild(i);
+            for (int i = 0; i < ctx.getChildCount(); i++) {
+                ParseTree child = ctx.getChild(i);
                 if (child instanceof MgxqlParser.Logic_orContext) {
                     currentOrOp = LogicOperator.OR;
                 }
-                if (child instanceof MgxqlParser.And_expressionContext) {
-                    List<ConditionNode> andNodes = parseAndExpression((MgxqlParser.And_expressionContext) child);
+                if (child instanceof MgxqlParser.Condition_and_expressionContext) {
+                    List<ConditionNode> andNodes = parseAndExpression((MgxqlParser.Condition_and_expressionContext) child);
                     if (currentOrOp != null && !expression.getNodes().isEmpty()) {
-                        // 有OR关系时，将AND节点组作为嵌套表达式添加
                         for (ConditionNode node : andNodes) {
                             node.setLogicOperator(currentOrOp);
                             expression.addNode(node);
@@ -414,12 +416,12 @@ public class MgxqlSyntaxHandler {
             return expression;
         }
 
-        private List<ConditionNode> parseAndExpression(MgxqlParser.And_expressionContext andExpressionCtx) {
+        private List<ConditionNode> parseAndExpression(MgxqlParser.Condition_and_expressionContext andExprCtx) {
             List<ConditionNode> nodes = new ArrayList<>();
             LogicOperator currentAndOp = null;
 
-            for (int i = 0; i < andExpressionCtx.getChildCount(); i++) {
-                ParseTree child = andExpressionCtx.getChild(i);
+            for (int i = 0; i < andExprCtx.getChildCount(); i++) {
+                ParseTree child = andExprCtx.getChild(i);
                 if (child instanceof MgxqlParser.Logic_andContext) {
                     currentAndOp = LogicOperator.AND;
                 }
@@ -440,43 +442,40 @@ public class MgxqlSyntaxHandler {
             ConditionNode node = new ConditionNode();
 
             // 检查是否是括号表达式
-            MgxqlParser.Condition_expressionContext subExprCtx = termCtx.condition_expression();
+            MgxqlParser.Condition_or_expressionContext subExprCtx = termCtx.condition_or_expression();
             if (subExprCtx != null) {
-                // 嵌套括号表达式
                 node.setLeftBracket("(");
                 node.setRightBracket(")");
-                node.setSubExpression(this.visitCondition_expression(subExprCtx));
+                node.setSubExpression(this.visitCondition_or_expression(subExprCtx));
                 return node;
             }
 
-            // 基础条件：field_comparison_op
-            MgxqlParser.Field_comparison_opContext fieldOpCtx = termCtx.field_comparison_op();
-            if (fieldOpCtx != null) {
-                parseFieldComparisonOp(node, fieldOpCtx);
+            // 基础条件：condition_comparison
+            MgxqlParser.Condition_comparisonContext compCtx = termCtx.condition_comparison();
+            if (compCtx != null) {
+                parseConditionComparison(node, compCtx);
             }
             return node;
         }
 
-        private void parseFieldComparisonOp(ConditionNode node, MgxqlParser.Field_comparison_opContext fieldOpCtx) {
-            // 解析左侧字段名
-            MgxqlParser.Where_param_name_field_access_chainContext nameChain = fieldOpCtx.where_param_name_field_access_chain();
-            MgxqlParser.Param_name_field_access_chainContext chainCtx = nameChain.param_name_field_access_chain();
-            if (chainCtx.dot() != null) {
-                node.setFieldAlias(chainCtx.entity_name_alias().getText());
-                node.setFieldName(chainCtx.field_name().getText());
-            } else {
-                node.setFieldName(chainCtx.entity_name_alias().getText());
-            }
+        private void parseConditionComparison(ConditionNode node, MgxqlParser.Condition_comparisonContext compCtx) {
+            // 解析 ? 前缀（可选条件）
+            node.setOptional(compCtx.question_mark() != null);
+
+            // 解析左侧字段引用
+            FieldReference fieldRef = parseFieldReference(compCtx.field_reference());
+            node.setFieldAlias(fieldRef.getEntityAlias());
+            node.setFieldName(fieldRef.getFieldName());
 
             // 解析运算符和参数
-            MgxqlParser.Field_comparison_op_paramContext paramOpCtx = fieldOpCtx.field_comparison_op_param();
-            if (paramOpCtx != null) {
+            MgxqlParser.Condition_comparison_paramContext paramCtx = compCtx.condition_comparison_param();
+            if (paramCtx != null) {
                 // 关系运算符或匹配运算符
-                if (paramOpCtx.relational_op() != null) {
-                    node.setOperator(MGXQL_OPERATOR_MAP.get(paramOpCtx.relational_op().getText()));
+                if (paramCtx.relational_op() != null) {
+                    node.setOperator(MGXQL_OPERATOR_MAP.get(paramCtx.relational_op().getText()));
                 }
-                if (paramOpCtx.matching_op() != null) {
-                    MgxqlParser.Matching_opContext matchingOp = paramOpCtx.matching_op();
+                if (paramCtx.matching_op() != null) {
+                    MgxqlParser.Matching_opContext matchingOp = paramCtx.matching_op();
                     if (matchingOp.comparison_op_not() != null) {
                         node.setNotOperator(ComparisonOperator.NOT);
                     }
@@ -486,14 +485,17 @@ public class MgxqlSyntaxHandler {
                     }
                     node.setOperator(MGXQL_OPERATOR_MAP.get(token));
                 }
-                // 解析右侧参数路径
-                if (paramOpCtx.where_param_value_field_access_chain() != null) {
-                    node.setParamValuePath(parseParamValuePath(paramOpCtx.where_param_value_field_access_chain()));
+                // 解析右侧条件值
+                MgxqlParser.Condition_valueContext condValueCtx = paramCtx.condition_value();
+                if (condValueCtx.parameter_reference() != null) {
+                    node.setParamValuePath(parseParameterReference(condValueCtx.parameter_reference()));
+                } else if (condValueCtx.number() != null) {
+                    node.setConditionValue(Integer.parseInt(condValueCtx.number().getText()));
                 }
             }
 
             // NULL运算符：is null / is not null
-            MgxqlParser.Field_comparison_op_not_paramContext notParamCtx = fieldOpCtx.field_comparison_op_not_param();
+            MgxqlParser.Condition_comparison_not_paramContext notParamCtx = compCtx.condition_comparison_not_param();
             if (notParamCtx != null) {
                 MgxqlParser.Comparison_op_nullContext nullOpCtx = notParamCtx.comparison_op_null();
                 node.setOperator(MGXQL_OPERATOR_MAP.get(nullOpCtx.getText()));

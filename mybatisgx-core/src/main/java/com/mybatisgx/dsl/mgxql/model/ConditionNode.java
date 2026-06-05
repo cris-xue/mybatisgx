@@ -19,6 +19,11 @@ public class ConditionNode {
     private LogicOperator logicOperator = LogicOperator.NULL;
 
     /**
+     * 是否为可选条件（对应 ? 前缀，等价于 MyBatis if 标签）
+     */
+    private boolean optional;
+
+    /**
      * 左括号
      */
     private String leftBracket;
@@ -52,6 +57,11 @@ public class ConditionNode {
      * 右侧参数值路径（如 [name] 或 [role, menu, name]）
      */
     private List<String> paramValuePath;
+
+    /**
+     * 右侧数字字面量值（如 where age > 18 中的 18）
+     */
+    private Integer conditionValue;
 
     /**
      * 嵌套子表达式（括号内的表达式）
@@ -128,6 +138,22 @@ public class ConditionNode {
 
     public void setSubExpression(ConditionExpression subExpression) {
         this.subExpression = subExpression;
+    }
+
+    public boolean isOptional() {
+        return optional;
+    }
+
+    public void setOptional(boolean optional) {
+        this.optional = optional;
+    }
+
+    public Integer getConditionValue() {
+        return conditionValue;
+    }
+
+    public void setConditionValue(Integer conditionValue) {
+        this.conditionValue = conditionValue;
     }
 
     /**

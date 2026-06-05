@@ -31,5 +31,9 @@ public enum SelectItemType {
     /**
      * avg聚合函数
      */
-    AVG
+    AVG,
+    /**
+     * sum聚合函数
+     */
+    SUM
 }

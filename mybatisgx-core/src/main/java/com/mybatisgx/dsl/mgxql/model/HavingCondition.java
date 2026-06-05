@@ -13,7 +13,7 @@ import java.util.List;
 public class HavingCondition {
 
     /**
-     * 聚合函数（如 max(age)、count(*)）
+     * 聚合函数（如 max(age)、count(id)）
      */
     private SelectItem aggregateFunction;
 
@@ -26,6 +26,11 @@ public class HavingCondition {
      * 右侧参数值路径
      */
     private List<String> paramValuePath;
+
+    /**
+     * 右侧数字字面量值（如 having count(id) > 10 中的 10）
+     */
+    private Integer havingValue;
 
     public SelectItem getAggregateFunction() {
         return aggregateFunction;
@@ -49,5 +54,13 @@ public class HavingCondition {
 
     public void setParamValuePath(List<String> paramValuePath) {
         this.paramValuePath = paramValuePath;
+    }
+
+    public Integer getHavingValue() {
+        return havingValue;
+    }
+
+    public void setHavingValue(Integer havingValue) {
+        this.havingValue = havingValue;
     }
 }

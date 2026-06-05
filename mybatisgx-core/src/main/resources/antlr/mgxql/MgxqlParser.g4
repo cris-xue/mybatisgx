@@ -29,21 +29,20 @@ select_statement: select_action select_item_clause select_from_clause where_clau
 select_item_clause: select_item (comma select_item)* ;
 select_item: select_column_all | select_column_custom | aggregate_function ;
 
+select_column_all: entity_name_alias ;
+select_column_custom: field_reference ;
 select_action: SELECT_ACTION ;
-select_column_all: (entity_name_alias dot)? select_asterisk ;
 select_asterisk: SELECT_ASTERISK ;
-select_column_custom: (entity_name_alias dot)? field_name ;
 
-// 聚合函数
-aggregate_function: select_count_function | select_max_function | select_min_function | select_avg_function ;
-select_count_function: select_count left_bracket (number| select_column_all | field_reference) right_bracket ;
-select_max_function: select_max left_bracket field_reference right_bracket ;
-select_min_function: select_min left_bracket field_reference right_bracket ;
-select_avg_function: select_avg left_bracket field_reference right_bracket ;
+// 聚合函数，count只支持count（field）
+aggregate_function: aggregate_function_name left_bracket aggregate_function_argument right_bracket ;
+aggregate_function_name: select_count | select_max | select_min | select_avg | select_sum ;
+aggregate_function_argument: field_reference ;
 select_count: SELECT_COUNT ;
 select_max: SELECT_MAX ;
 select_min: SELECT_MIN ;
 select_avg: SELECT_AVG ;
+select_sum: SELECT_SUM ;
 
 // from User user left join Role role on aaa.id = bbb.aaa_id
 select_from_clause: select_from select_primary_entity select_join_entity* ;
@@ -54,25 +53,19 @@ select_entity_alias: entity_name_alias ;
 select_from: FROM ;
 select_left_join: LEFT JOIN ;
 select_on: ON ;
-// user.id = userRole.userId
-select_on_expression: left_expression EQUAL right_expression ;
-// left_expression: (lower_name dot)? lower_name ;
-left_expression: field_reference ;
-right_expression: field_reference ;
+// user left join role on user = role
+select_on_expression: entity_name_alias on_equal entity_name_alias ;
+on_equal: EQUAL ;
 
 // 条件语法   where name = :name and (age = :age or status = :status)
 // 条件语法   where ?name = :name and (?age = :age or status = :status)
 where_clause: where_start condition_expression ;
-
 // 分层处理条件表达式，明确运算符优先级
 condition_expression: or_expression ;
-
 // OR 运算符 (最低优先级)
 or_expression: and_expression (logic_or and_expression)* ;
-
 // AND 运算符 (较高优先级)
 and_expression: condition_term (logic_and condition_term)* ;
-
 // 条件项：基础条件或括号表达式
 condition_term: field_comparison_op | (left_bracket condition_expression right_bracket) ;
 
@@ -85,9 +78,17 @@ field_comparison_op_not_param: comparison_op_null ;
 group_by_clause: group_by group_by_expression ;
 group_by_expression: field_reference (comma field_reference)* ;
 
-// having max(age) > :age
-having_clause: having (aggregate_function having_comparison_op_param)+ ;
-having_comparison_op_param: relational_op parameter_reference ;
+// 1、having max(age) > :age count(*) > :count   2、having max(age) > :age AND count(*) > :count
+having_clause: having having_or_expression ;
+// OR 层，AND 优先
+having_or_expression: having_and_expression (logic_or having_and_expression)* ;
+// AND 层，每个项可能是单条聚合比较，也可能是括号包裹的表达式
+having_and_expression: having_term (logic_and having_term)* ;
+// 单条表达式或括号表达式
+having_term: having_comparison | left_bracket having_or_expression right_bracket ;
+// 单条聚合函数比较，例如 max(age) > :age 或 count(*) > 10
+having_comparison: aggregate_function relational_op having_value ;
+having_value: parameter_reference | number | field_reference ;
 
 // 排序 order by name desc、order by name , age
 order_by_clause: order_by order_by_expression (comma order_by_expression)* ;
@@ -140,7 +141,7 @@ group_by: GROUP_BY ;
 order_by: ORDER_BY ;
 order_by_direction: ORDER_BY_DIRECTION ;
 
-// 字段引用，user.name  role.status   只支持一级，需要和from和join中的实体对应
+// 字段引用，user.name  role.status   只允许实体别名.字段，不支持嵌套属性链
 field_reference: field_name | entity_name_alias dot field_name ;
 // 参数引用（对应查询实体和@Param）。:name   :表示从根节点开始取值
 parameter_reference: param_colon field_name (dot field_name)* ;

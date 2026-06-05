@@ -10,6 +10,7 @@ SELECT_COUNT: 'count' ;
 SELECT_MAX: 'max' ;
 SELECT_MIN: 'min' ;
 SELECT_AVG: 'avg' ;
+SELECT_SUM: 'sum' ;
 
 FROM: 'from' ;
 LEFT: 'left' ;

@@ -20,16 +20,15 @@ update_clause: UPDATE_ACTION ;
 // 查询语法：1、select * from User where name = :name and (age < :age or status = :status)
 // 查询语法：2、select id, name, inputTime from User where name = :name and (age < :age or status = :status)
 // 查询语法：3、select user.id, user.name, user.inputTime, role.name from User user left join Role role where user.name = :user.name and (user.age < :user.age or role.status = :role.status)
-// 查询语法：4、select count(1) from User where name = :name and (age < :age or status = :status)
-// 查询语法：5、select count(*) from User where name = :name and (age < :age or status = :status)
-// 查询语法：6、select max(id) from User where name = :name and (age < :age or status = :status)
-// 查询语法：7、select min(id) from User where name = :name and (age < :age or status = :status)
-// 查询语法：8、select avg(age) from User where name = :name and (age < :age or status = :status)
+// 查询语法：4、select count(id) from User where name = :name and (age < :age or status = :status)
+// 查询语法：5、select max(id) from User where name = :name and (age < :age or status = :status)
+// 查询语法：6、select min(id) from User where name = :name and (age < :age or status = :status)
+// 查询语法：7、select avg(age) from User where name = :name and (age < :age or status = :status)
 select_statement: select_action select_item_clause select_from_clause where_clause? group_by_clause? having_clause? order_by_clause? limit_clause? ;
 select_item_clause: select_item (comma select_item)* ;
 select_item: select_column_all | select_column_custom | aggregate_function ;
 
-select_column_all: entity_name_alias ;
+select_column_all: entity_name_alias dot select_asterisk ;
 select_column_custom: field_reference ;
 select_action: SELECT_ACTION ;
 select_asterisk: SELECT_ASTERISK ;

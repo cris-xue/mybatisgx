@@ -57,8 +57,8 @@ QUESTION_MARK: '?' ;
 // antlr是从上向下解析的，常量一定要放在正则的上面
 UPPER_NAME: UPPER+ (NUMBER | UPPER | LOWER)* ;
 LOWER_NAME: LOWER+ (NUMBER | UPPER | LOWER)* ;
-UPPER: [A-Z] ;
-LOWER: [a-z] ;
+fragment UPPER: [A-Z] ;
+fragment LOWER: [a-z] ;
 NUMBER: [0-9]+ ;
 
 // 忽略空白符

@@ -58,20 +58,18 @@ on_equal: EQUAL ;
 
 // 条件语法   where name = :name and (age = :age or status = :status)
 // 条件语法   where ?name = :name and (?age = :age or status = :status)
-where_clause: where_start condition_expression ;
-// 分层处理条件表达式，明确运算符优先级
-condition_expression: or_expression ;
-// OR 运算符 (最低优先级)
-or_expression: and_expression (logic_or and_expression)* ;
+where_clause: where_start condition_or_expression ;
+// OR 运算符 (最低优先级)   分层处理条件表达式，明确运算符优先级
+condition_or_expression: condition_and_expression (logic_or condition_and_expression)* ;
 // AND 运算符 (较高优先级)
-and_expression: condition_term (logic_and condition_term)* ;
+condition_and_expression: condition_term (logic_and condition_term)* ;
 // 条件项：基础条件或括号表达式
-condition_term: field_comparison_op | (left_bracket condition_expression right_bracket) ;
-
+condition_term: condition_comparison | (left_bracket condition_or_expression right_bracket) ;
 // 解析方法名和实体字段
-field_comparison_op: question_mark? field_reference (field_comparison_op_param | field_comparison_op_not_param) ;
-field_comparison_op_param: (relational_op | matching_op) parameter_reference ;
-field_comparison_op_not_param: comparison_op_null ;
+condition_comparison: question_mark? field_reference (condition_comparison_param | condition_comparison_not_param) ;
+condition_comparison_param: (relational_op | matching_op) condition_value ;
+condition_comparison_not_param: comparison_op_null ;
+condition_value: parameter_reference | number ;
 
 // group by phone
 group_by_clause: group_by group_by_expression ;

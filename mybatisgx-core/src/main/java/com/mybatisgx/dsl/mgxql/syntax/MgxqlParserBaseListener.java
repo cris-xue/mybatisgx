@@ -137,18 +137,6 @@ public class MgxqlParserBaseListener implements MgxqlParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterSelect_action(MgxqlParser.Select_actionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitSelect_action(MgxqlParser.Select_actionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterSelect_column_all(MgxqlParser.Select_column_allContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -156,18 +144,6 @@ public class MgxqlParserBaseListener implements MgxqlParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitSelect_column_all(MgxqlParser.Select_column_allContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterSelect_asterisk(MgxqlParser.Select_asteriskContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitSelect_asterisk(MgxqlParser.Select_asteriskContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -185,6 +161,30 @@ public class MgxqlParserBaseListener implements MgxqlParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterSelect_action(MgxqlParser.Select_actionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSelect_action(MgxqlParser.Select_actionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterSelect_asterisk(MgxqlParser.Select_asteriskContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSelect_asterisk(MgxqlParser.Select_asteriskContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterAggregate_function(MgxqlParser.Aggregate_functionContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -197,49 +197,25 @@ public class MgxqlParserBaseListener implements MgxqlParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterSelect_count_function(MgxqlParser.Select_count_functionContext ctx) { }
+	@Override public void enterAggregate_function_name(MgxqlParser.Aggregate_function_nameContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitSelect_count_function(MgxqlParser.Select_count_functionContext ctx) { }
+	@Override public void exitAggregate_function_name(MgxqlParser.Aggregate_function_nameContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterSelect_max_function(MgxqlParser.Select_max_functionContext ctx) { }
+	@Override public void enterAggregate_function_argument(MgxqlParser.Aggregate_function_argumentContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitSelect_max_function(MgxqlParser.Select_max_functionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterSelect_min_function(MgxqlParser.Select_min_functionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitSelect_min_function(MgxqlParser.Select_min_functionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterSelect_avg_function(MgxqlParser.Select_avg_functionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitSelect_avg_function(MgxqlParser.Select_avg_functionContext ctx) { }
+	@Override public void exitAggregate_function_argument(MgxqlParser.Aggregate_function_argumentContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -288,6 +264,18 @@ public class MgxqlParserBaseListener implements MgxqlParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitSelect_avg(MgxqlParser.Select_avgContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterSelect_sum(MgxqlParser.Select_sumContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSelect_sum(MgxqlParser.Select_sumContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -377,6 +365,42 @@ public class MgxqlParserBaseListener implements MgxqlParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterSelect_on(MgxqlParser.Select_onContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSelect_on(MgxqlParser.Select_onContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterSelect_on_expression(MgxqlParser.Select_on_expressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSelect_on_expression(MgxqlParser.Select_on_expressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterOn_equal(MgxqlParser.On_equalContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitOn_equal(MgxqlParser.On_equalContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterWhere_clause(MgxqlParser.Where_clauseContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -389,37 +413,25 @@ public class MgxqlParserBaseListener implements MgxqlParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterCondition_expression(MgxqlParser.Condition_expressionContext ctx) { }
+	@Override public void enterCondition_or_expression(MgxqlParser.Condition_or_expressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitCondition_expression(MgxqlParser.Condition_expressionContext ctx) { }
+	@Override public void exitCondition_or_expression(MgxqlParser.Condition_or_expressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterOr_expression(MgxqlParser.Or_expressionContext ctx) { }
+	@Override public void enterCondition_and_expression(MgxqlParser.Condition_and_expressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitOr_expression(MgxqlParser.Or_expressionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterAnd_expression(MgxqlParser.And_expressionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitAnd_expression(MgxqlParser.And_expressionContext ctx) { }
+	@Override public void exitCondition_and_expression(MgxqlParser.Condition_and_expressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -437,37 +449,49 @@ public class MgxqlParserBaseListener implements MgxqlParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterField_comparison_op(MgxqlParser.Field_comparison_opContext ctx) { }
+	@Override public void enterCondition_comparison(MgxqlParser.Condition_comparisonContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitField_comparison_op(MgxqlParser.Field_comparison_opContext ctx) { }
+	@Override public void exitCondition_comparison(MgxqlParser.Condition_comparisonContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterField_comparison_op_param(MgxqlParser.Field_comparison_op_paramContext ctx) { }
+	@Override public void enterCondition_comparison_param(MgxqlParser.Condition_comparison_paramContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitField_comparison_op_param(MgxqlParser.Field_comparison_op_paramContext ctx) { }
+	@Override public void exitCondition_comparison_param(MgxqlParser.Condition_comparison_paramContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterField_comparison_op_not_param(MgxqlParser.Field_comparison_op_not_paramContext ctx) { }
+	@Override public void enterCondition_comparison_not_param(MgxqlParser.Condition_comparison_not_paramContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitField_comparison_op_not_param(MgxqlParser.Field_comparison_op_not_paramContext ctx) { }
+	@Override public void exitCondition_comparison_not_param(MgxqlParser.Condition_comparison_not_paramContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterCondition_value(MgxqlParser.Condition_valueContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitCondition_value(MgxqlParser.Condition_valueContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -485,6 +509,18 @@ public class MgxqlParserBaseListener implements MgxqlParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterGroup_by_expression(MgxqlParser.Group_by_expressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitGroup_by_expression(MgxqlParser.Group_by_expressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterHaving_clause(MgxqlParser.Having_clauseContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -497,13 +533,61 @@ public class MgxqlParserBaseListener implements MgxqlParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterHaving_comparison_op_param(MgxqlParser.Having_comparison_op_paramContext ctx) { }
+	@Override public void enterHaving_or_expression(MgxqlParser.Having_or_expressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitHaving_comparison_op_param(MgxqlParser.Having_comparison_op_paramContext ctx) { }
+	@Override public void exitHaving_or_expression(MgxqlParser.Having_or_expressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterHaving_and_expression(MgxqlParser.Having_and_expressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitHaving_and_expression(MgxqlParser.Having_and_expressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterHaving_term(MgxqlParser.Having_termContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitHaving_term(MgxqlParser.Having_termContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterHaving_comparison(MgxqlParser.Having_comparisonContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitHaving_comparison(MgxqlParser.Having_comparisonContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterHaving_value(MgxqlParser.Having_valueContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitHaving_value(MgxqlParser.Having_valueContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -521,13 +605,25 @@ public class MgxqlParserBaseListener implements MgxqlParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterOrder_by_item(MgxqlParser.Order_by_itemContext ctx) { }
+	@Override public void enterOrder_by_expression(MgxqlParser.Order_by_expressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitOrder_by_item(MgxqlParser.Order_by_itemContext ctx) { }
+	@Override public void exitOrder_by_expression(MgxqlParser.Order_by_expressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterLimit_clause(MgxqlParser.Limit_clauseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitLimit_clause(MgxqlParser.Limit_clauseContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -545,18 +641,6 @@ public class MgxqlParserBaseListener implements MgxqlParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterLimit_identifier(MgxqlParser.Limit_identifierContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitLimit_identifier(MgxqlParser.Limit_identifierContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterOffset(MgxqlParser.OffsetContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -564,18 +648,6 @@ public class MgxqlParserBaseListener implements MgxqlParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitOffset(MgxqlParser.OffsetContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterComma_identifier(MgxqlParser.Comma_identifierContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitComma_identifier(MgxqlParser.Comma_identifierContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -833,42 +905,6 @@ public class MgxqlParserBaseListener implements MgxqlParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterWhere_param_name_field_access_chain(MgxqlParser.Where_param_name_field_access_chainContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitWhere_param_name_field_access_chain(MgxqlParser.Where_param_name_field_access_chainContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterParam_colon(MgxqlParser.Param_colonContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitParam_colon(MgxqlParser.Param_colonContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterWhere_param_value_field_access_chain(MgxqlParser.Where_param_value_field_access_chainContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitWhere_param_value_field_access_chain(MgxqlParser.Where_param_value_field_access_chainContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterHaving(MgxqlParser.HavingContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -917,6 +953,30 @@ public class MgxqlParserBaseListener implements MgxqlParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterField_reference(MgxqlParser.Field_referenceContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitField_reference(MgxqlParser.Field_referenceContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterParameter_reference(MgxqlParser.Parameter_referenceContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitParameter_reference(MgxqlParser.Parameter_referenceContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterEntity_name(MgxqlParser.Entity_nameContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -953,42 +1013,6 @@ public class MgxqlParserBaseListener implements MgxqlParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterEntity_field_access_chain(MgxqlParser.Entity_field_access_chainContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitEntity_field_access_chain(MgxqlParser.Entity_field_access_chainContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterParam_name_field_access_chain(MgxqlParser.Param_name_field_access_chainContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitParam_name_field_access_chain(MgxqlParser.Param_name_field_access_chainContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterParam_value_field_access_chain(MgxqlParser.Param_value_field_access_chainContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitParam_value_field_access_chain(MgxqlParser.Param_value_field_access_chainContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterLeft_bracket(MgxqlParser.Left_bracketContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -1020,6 +1044,42 @@ public class MgxqlParserBaseListener implements MgxqlParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitDot(MgxqlParser.DotContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterParam_colon(MgxqlParser.Param_colonContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitParam_colon(MgxqlParser.Param_colonContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterComma(MgxqlParser.CommaContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitComma(MgxqlParser.CommaContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterQuestion_mark(MgxqlParser.Question_markContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitQuestion_mark(MgxqlParser.Question_markContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

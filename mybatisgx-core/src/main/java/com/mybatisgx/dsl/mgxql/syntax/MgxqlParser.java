@@ -18,67 +18,70 @@ public class MgxqlParser extends Parser {
 		new PredictionContextCache();
 	public static final int
 		INSERT_ACTION=1, DELETE_ACTION=2, UPDATE_ACTION=3, SELECT_ACTION=4, SELECT_ASTERISK=5, 
-		SELECT_COUNT=6, SELECT_MAX=7, SELECT_MIN=8, SELECT_AVG=9, FROM=10, LEFT=11, 
-		JOIN=12, WHERE=13, LOGIC_AND=14, LOGIC_OR=15, COMPARISON_OP_LT=16, COMPARISON_OP_LT_EQ=17, 
-		COMPARISON_OP_GT=18, COMPARISON_OP_GT_EQ=19, COMPARISON_OP_EQ=20, COMPARISON_OP_NOT_EQ=21, 
-		COMPARISON_OP_NOT=22, COMPARISON_OP_BETWEEN=23, COMPARISON_OP_IN=24, COMPARISON_OP_LIKE=25, 
-		COMPARISON_OP_LEFT_LIKE=26, COMPARISON_OP_RIGHT_LIKE=27, COMPARISON_OP_IS_NULL=28, 
-		COMPARISON_OP_IS_NOT_NULL=29, GROUP_BY=30, HAVING=31, ORDER_BY=32, ORDER_BY_DIRECTION=33, 
-		LIMIT_IDENTIFIER=34, LEFT_BRACKET=35, RIGHT_BRACKET=36, COMMA=37, COLON=38, 
-		DOT=39, UPPER_NAME=40, LOWER_NAME=41, UPPER=42, LOWER=43, NUMBER=44, WS=45;
+		SELECT_COUNT=6, SELECT_MAX=7, SELECT_MIN=8, SELECT_AVG=9, SELECT_SUM=10, 
+		FROM=11, LEFT=12, JOIN=13, ON=14, WHERE=15, LOGIC_AND=16, LOGIC_OR=17, 
+		COMPARISON_OP_LT=18, COMPARISON_OP_LT_EQ=19, COMPARISON_OP_GT=20, COMPARISON_OP_GT_EQ=21, 
+		EQUAL=22, COMPARISON_OP_NOT_EQ=23, COMPARISON_OP_NOT=24, COMPARISON_OP_BETWEEN=25, 
+		COMPARISON_OP_IN=26, COMPARISON_OP_LIKE=27, COMPARISON_OP_LEFT_LIKE=28, 
+		COMPARISON_OP_RIGHT_LIKE=29, COMPARISON_OP_IS_NULL=30, COMPARISON_OP_IS_NOT_NULL=31, 
+		GROUP_BY=32, HAVING=33, ORDER_BY=34, ORDER_BY_DIRECTION=35, LIMIT=36, 
+		LEFT_BRACKET=37, RIGHT_BRACKET=38, COMMA=39, COLON=40, DOT=41, QUESTION_MARK=42, 
+		UPPER_NAME=43, LOWER_NAME=44, NUMBER=45, WS=46;
 	public static final int
 		RULE_sql_statement = 0, RULE_insert_statement = 1, RULE_insert_clause = 2, 
 		RULE_delete_statement = 3, RULE_delete_clause = 4, RULE_update_statement = 5, 
 		RULE_update_clause = 6, RULE_select_statement = 7, RULE_select_item_clause = 8, 
-		RULE_select_item = 9, RULE_select_action = 10, RULE_select_column_all = 11, 
-		RULE_select_asterisk = 12, RULE_select_column_custom = 13, RULE_aggregate_function = 14, 
-		RULE_select_count_function = 15, RULE_select_max_function = 16, RULE_select_min_function = 17, 
-		RULE_select_avg_function = 18, RULE_select_count = 19, RULE_select_max = 20, 
-		RULE_select_min = 21, RULE_select_avg = 22, RULE_select_from_clause = 23, 
-		RULE_select_primary_entity = 24, RULE_select_join_entity = 25, RULE_select_entity = 26, 
-		RULE_select_entity_alias = 27, RULE_select_from = 28, RULE_select_left_join = 29, 
-		RULE_where_clause = 30, RULE_condition_expression = 31, RULE_or_expression = 32, 
-		RULE_and_expression = 33, RULE_condition_term = 34, RULE_field_comparison_op = 35, 
-		RULE_field_comparison_op_param = 36, RULE_field_comparison_op_not_param = 37, 
-		RULE_group_by_clause = 38, RULE_having_clause = 39, RULE_having_comparison_op_param = 40, 
-		RULE_order_by_clause = 41, RULE_order_by_item = 42, RULE_limit = 43, RULE_limit_identifier = 44, 
-		RULE_offset = 45, RULE_comma_identifier = 46, RULE_size = 47, RULE_where_start = 48, 
-		RULE_logic_and = 49, RULE_logic_or = 50, RULE_relational_op = 51, RULE_comparison_op_lt = 52, 
-		RULE_comparison_op_lt_eq = 53, RULE_comparison_op_gt = 54, RULE_comparison_op_gt_eq = 55, 
-		RULE_comparison_op_eq = 56, RULE_comparison_op_not_eq = 57, RULE_matching_op = 58, 
-		RULE_comparison_op_not = 59, RULE_comparison_op_between = 60, RULE_comparison_op_in = 61, 
-		RULE_comparison_op_like = 62, RULE_comparison_op_left_like = 63, RULE_comparison_op_right_like = 64, 
-		RULE_comparison_op_null = 65, RULE_comparison_op_is_null = 66, RULE_comparison_op_is_not_null = 67, 
-		RULE_where_param_name_field_access_chain = 68, RULE_param_colon = 69, 
-		RULE_where_param_value_field_access_chain = 70, RULE_having = 71, RULE_group_by = 72, 
-		RULE_order_by = 73, RULE_order_by_direction = 74, RULE_entity_name = 75, 
-		RULE_entity_name_alias = 76, RULE_field_name = 77, RULE_entity_field_access_chain = 78, 
-		RULE_param_name_field_access_chain = 79, RULE_param_value_field_access_chain = 80, 
-		RULE_left_bracket = 81, RULE_right_bracket = 82, RULE_dot = 83, RULE_number = 84, 
-		RULE_end = 85;
+		RULE_select_item = 9, RULE_select_column_all = 10, RULE_select_column_custom = 11, 
+		RULE_select_action = 12, RULE_select_asterisk = 13, RULE_aggregate_function = 14, 
+		RULE_aggregate_function_name = 15, RULE_aggregate_function_argument = 16, 
+		RULE_select_count = 17, RULE_select_max = 18, RULE_select_min = 19, RULE_select_avg = 20, 
+		RULE_select_sum = 21, RULE_select_from_clause = 22, RULE_select_primary_entity = 23, 
+		RULE_select_join_entity = 24, RULE_select_entity = 25, RULE_select_entity_alias = 26, 
+		RULE_select_from = 27, RULE_select_left_join = 28, RULE_select_on = 29, 
+		RULE_select_on_expression = 30, RULE_on_equal = 31, RULE_where_clause = 32, 
+		RULE_condition_or_expression = 33, RULE_condition_and_expression = 34, 
+		RULE_condition_term = 35, RULE_condition_comparison = 36, RULE_condition_comparison_param = 37, 
+		RULE_condition_comparison_not_param = 38, RULE_condition_value = 39, RULE_group_by_clause = 40, 
+		RULE_group_by_expression = 41, RULE_having_clause = 42, RULE_having_or_expression = 43, 
+		RULE_having_and_expression = 44, RULE_having_term = 45, RULE_having_comparison = 46, 
+		RULE_having_value = 47, RULE_order_by_clause = 48, RULE_order_by_expression = 49, 
+		RULE_limit_clause = 50, RULE_limit = 51, RULE_offset = 52, RULE_size = 53, 
+		RULE_where_start = 54, RULE_logic_and = 55, RULE_logic_or = 56, RULE_relational_op = 57, 
+		RULE_comparison_op_lt = 58, RULE_comparison_op_lt_eq = 59, RULE_comparison_op_gt = 60, 
+		RULE_comparison_op_gt_eq = 61, RULE_comparison_op_eq = 62, RULE_comparison_op_not_eq = 63, 
+		RULE_matching_op = 64, RULE_comparison_op_not = 65, RULE_comparison_op_between = 66, 
+		RULE_comparison_op_in = 67, RULE_comparison_op_like = 68, RULE_comparison_op_left_like = 69, 
+		RULE_comparison_op_right_like = 70, RULE_comparison_op_null = 71, RULE_comparison_op_is_null = 72, 
+		RULE_comparison_op_is_not_null = 73, RULE_having = 74, RULE_group_by = 75, 
+		RULE_order_by = 76, RULE_order_by_direction = 77, RULE_field_reference = 78, 
+		RULE_parameter_reference = 79, RULE_entity_name = 80, RULE_entity_name_alias = 81, 
+		RULE_field_name = 82, RULE_left_bracket = 83, RULE_right_bracket = 84, 
+		RULE_dot = 85, RULE_param_colon = 86, RULE_comma = 87, RULE_question_mark = 88, 
+		RULE_number = 89, RULE_end = 90;
 	private static String[] makeRuleNames() {
 		return new String[] {
 			"sql_statement", "insert_statement", "insert_clause", "delete_statement", 
 			"delete_clause", "update_statement", "update_clause", "select_statement", 
-			"select_item_clause", "select_item", "select_action", "select_column_all", 
-			"select_asterisk", "select_column_custom", "aggregate_function", "select_count_function", 
-			"select_max_function", "select_min_function", "select_avg_function", 
-			"select_count", "select_max", "select_min", "select_avg", "select_from_clause", 
-			"select_primary_entity", "select_join_entity", "select_entity", "select_entity_alias", 
-			"select_from", "select_left_join", "where_clause", "condition_expression", 
-			"or_expression", "and_expression", "condition_term", "field_comparison_op", 
-			"field_comparison_op_param", "field_comparison_op_not_param", "group_by_clause", 
-			"having_clause", "having_comparison_op_param", "order_by_clause", "order_by_item", 
-			"limit", "limit_identifier", "offset", "comma_identifier", "size", "where_start", 
+			"select_item_clause", "select_item", "select_column_all", "select_column_custom", 
+			"select_action", "select_asterisk", "aggregate_function", "aggregate_function_name", 
+			"aggregate_function_argument", "select_count", "select_max", "select_min", 
+			"select_avg", "select_sum", "select_from_clause", "select_primary_entity", 
+			"select_join_entity", "select_entity", "select_entity_alias", "select_from", 
+			"select_left_join", "select_on", "select_on_expression", "on_equal", 
+			"where_clause", "condition_or_expression", "condition_and_expression", 
+			"condition_term", "condition_comparison", "condition_comparison_param", 
+			"condition_comparison_not_param", "condition_value", "group_by_clause", 
+			"group_by_expression", "having_clause", "having_or_expression", "having_and_expression", 
+			"having_term", "having_comparison", "having_value", "order_by_clause", 
+			"order_by_expression", "limit_clause", "limit", "offset", "size", "where_start", 
 			"logic_and", "logic_or", "relational_op", "comparison_op_lt", "comparison_op_lt_eq", 
 			"comparison_op_gt", "comparison_op_gt_eq", "comparison_op_eq", "comparison_op_not_eq", 
 			"matching_op", "comparison_op_not", "comparison_op_between", "comparison_op_in", 
 			"comparison_op_like", "comparison_op_left_like", "comparison_op_right_like", 
 			"comparison_op_null", "comparison_op_is_null", "comparison_op_is_not_null", 
-			"where_param_name_field_access_chain", "param_colon", "where_param_value_field_access_chain", 
-			"having", "group_by", "order_by", "order_by_direction", "entity_name", 
-			"entity_name_alias", "field_name", "entity_field_access_chain", "param_name_field_access_chain", 
-			"param_value_field_access_chain", "left_bracket", "right_bracket", "dot", 
+			"having", "group_by", "order_by", "order_by_direction", "field_reference", 
+			"parameter_reference", "entity_name", "entity_name_alias", "field_name", 
+			"left_bracket", "right_bracket", "dot", "param_colon", "comma", "question_mark", 
 			"number", "end"
 		};
 	}
@@ -87,11 +90,11 @@ public class MgxqlParser extends Parser {
 	private static String[] makeLiteralNames() {
 		return new String[] {
 			null, "'insert'", "'delete'", "'update'", "'select'", "'*'", "'count'", 
-			"'max'", "'min'", "'avg'", "'from'", "'left'", "'join'", "'where'", "'and'", 
-			"'or'", "'<'", "'<='", "'>'", "'>='", "'='", "'!='", "'not'", "'between'", 
-			"'in'", "'like'", "'left like'", "'right like'", "'is null'", "'is not null'", 
-			"'group by'", "'having'", "'order by'", null, "'limit'", "'('", "')'", 
-			"','", "':'", "'.'"
+			"'max'", "'min'", "'avg'", "'sum'", "'from'", "'left'", "'join'", "'on'", 
+			"'where'", "'and'", "'or'", "'<'", "'<='", "'>'", "'>='", "'='", "'!='", 
+			"'not'", "'between'", "'in'", "'like'", "'left like'", "'right like'", 
+			"'is null'", "'is not null'", "'group by'", "'having'", "'order by'", 
+			null, "'limit'", "'('", "')'", "','", "':'", "'.'", "'?'"
 		};
 	}
 	private static final String[] _LITERAL_NAMES = makeLiteralNames();
@@ -99,14 +102,14 @@ public class MgxqlParser extends Parser {
 		return new String[] {
 			null, "INSERT_ACTION", "DELETE_ACTION", "UPDATE_ACTION", "SELECT_ACTION", 
 			"SELECT_ASTERISK", "SELECT_COUNT", "SELECT_MAX", "SELECT_MIN", "SELECT_AVG", 
-			"FROM", "LEFT", "JOIN", "WHERE", "LOGIC_AND", "LOGIC_OR", "COMPARISON_OP_LT", 
-			"COMPARISON_OP_LT_EQ", "COMPARISON_OP_GT", "COMPARISON_OP_GT_EQ", "COMPARISON_OP_EQ", 
-			"COMPARISON_OP_NOT_EQ", "COMPARISON_OP_NOT", "COMPARISON_OP_BETWEEN", 
+			"SELECT_SUM", "FROM", "LEFT", "JOIN", "ON", "WHERE", "LOGIC_AND", "LOGIC_OR", 
+			"COMPARISON_OP_LT", "COMPARISON_OP_LT_EQ", "COMPARISON_OP_GT", "COMPARISON_OP_GT_EQ", 
+			"EQUAL", "COMPARISON_OP_NOT_EQ", "COMPARISON_OP_NOT", "COMPARISON_OP_BETWEEN", 
 			"COMPARISON_OP_IN", "COMPARISON_OP_LIKE", "COMPARISON_OP_LEFT_LIKE", 
 			"COMPARISON_OP_RIGHT_LIKE", "COMPARISON_OP_IS_NULL", "COMPARISON_OP_IS_NOT_NULL", 
-			"GROUP_BY", "HAVING", "ORDER_BY", "ORDER_BY_DIRECTION", "LIMIT_IDENTIFIER", 
-			"LEFT_BRACKET", "RIGHT_BRACKET", "COMMA", "COLON", "DOT", "UPPER_NAME", 
-			"LOWER_NAME", "UPPER", "LOWER", "NUMBER", "WS"
+			"GROUP_BY", "HAVING", "ORDER_BY", "ORDER_BY_DIRECTION", "LIMIT", "LEFT_BRACKET", 
+			"RIGHT_BRACKET", "COMMA", "COLON", "DOT", "QUESTION_MARK", "UPPER_NAME", 
+			"LOWER_NAME", "NUMBER", "WS"
 		};
 	}
 	private static final String[] _SYMBOLIC_NAMES = makeSymbolicNames();
@@ -202,37 +205,37 @@ public class MgxqlParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(176);
+			setState(186);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case INSERT_ACTION:
 				{
-				setState(172);
+				setState(182);
 				insert_statement();
 				}
 				break;
 			case DELETE_ACTION:
 				{
-				setState(173);
+				setState(183);
 				delete_statement();
 				}
 				break;
 			case UPDATE_ACTION:
 				{
-				setState(174);
+				setState(184);
 				update_statement();
 				}
 				break;
 			case SELECT_ACTION:
 				{
-				setState(175);
+				setState(185);
 				select_statement();
 				}
 				break;
 			default:
 				throw new NoViableAltException(this);
 			}
-			setState(178);
+			setState(188);
 			end();
 			}
 		}
@@ -277,7 +280,7 @@ public class MgxqlParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(180);
+			setState(190);
 			insert_clause();
 			}
 		}
@@ -320,7 +323,7 @@ public class MgxqlParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(182);
+			setState(192);
 			match(INSERT_ACTION);
 			}
 		}
@@ -368,9 +371,9 @@ public class MgxqlParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(184);
+			setState(194);
 			delete_clause();
-			setState(185);
+			setState(195);
 			where_clause();
 			}
 		}
@@ -413,7 +416,7 @@ public class MgxqlParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(187);
+			setState(197);
 			match(DELETE_ACTION);
 			}
 		}
@@ -461,9 +464,9 @@ public class MgxqlParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(189);
+			setState(199);
 			update_clause();
-			setState(190);
+			setState(200);
 			where_clause();
 			}
 		}
@@ -506,7 +509,7 @@ public class MgxqlParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(192);
+			setState(202);
 			match(UPDATE_ACTION);
 			}
 		}
@@ -544,8 +547,8 @@ public class MgxqlParser extends Parser {
 		public Order_by_clauseContext order_by_clause() {
 			return getRuleContext(Order_by_clauseContext.class,0);
 		}
-		public LimitContext limit() {
-			return getRuleContext(LimitContext.class,0);
+		public Limit_clauseContext limit_clause() {
+			return getRuleContext(Limit_clauseContext.class,0);
 		}
 		public Select_statementContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -573,59 +576,59 @@ public class MgxqlParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(194);
+			setState(204);
 			select_action();
-			setState(195);
+			setState(205);
 			select_item_clause();
-			setState(196);
+			setState(206);
 			select_from_clause();
-			setState(198);
+			setState(208);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==WHERE) {
 				{
-				setState(197);
+				setState(207);
 				where_clause();
 				}
 			}
 
-			setState(201);
+			setState(211);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==GROUP_BY) {
 				{
-				setState(200);
+				setState(210);
 				group_by_clause();
 				}
 			}
 
-			setState(204);
+			setState(214);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==HAVING) {
 				{
-				setState(203);
+				setState(213);
 				having_clause();
 				}
 			}
 
-			setState(207);
+			setState(217);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==ORDER_BY) {
 				{
-				setState(206);
+				setState(216);
 				order_by_clause();
 				}
 			}
 
-			setState(210);
+			setState(220);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			if (_la==LIMIT_IDENTIFIER) {
+			if (_la==LIMIT) {
 				{
-				setState(209);
-				limit();
+				setState(219);
+				limit_clause();
 				}
 			}
 
@@ -650,11 +653,11 @@ public class MgxqlParser extends Parser {
 		public Select_itemContext select_item(int i) {
 			return getRuleContext(Select_itemContext.class,i);
 		}
-		public List<Comma_identifierContext> comma_identifier() {
-			return getRuleContexts(Comma_identifierContext.class);
+		public List<CommaContext> comma() {
+			return getRuleContexts(CommaContext.class);
 		}
-		public Comma_identifierContext comma_identifier(int i) {
-			return getRuleContext(Comma_identifierContext.class,i);
+		public CommaContext comma(int i) {
+			return getRuleContext(CommaContext.class,i);
 		}
 		public Select_item_clauseContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -682,21 +685,21 @@ public class MgxqlParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(212);
+			setState(222);
 			select_item();
-			setState(218);
+			setState(228);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while (_la==COMMA) {
 				{
 				{
-				setState(213);
-				comma_identifier();
-				setState(214);
+				setState(223);
+				comma();
+				setState(224);
 				select_item();
 				}
 				}
-				setState(220);
+				setState(230);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
@@ -747,73 +750,30 @@ public class MgxqlParser extends Parser {
 		Select_itemContext _localctx = new Select_itemContext(_ctx, getState());
 		enterRule(_localctx, 18, RULE_select_item);
 		try {
-			setState(224);
+			setState(234);
 			_errHandler.sync(this);
 			switch ( getInterpreter().adaptivePredict(_input,7,_ctx) ) {
 			case 1:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(221);
+				setState(231);
 				select_column_all();
 				}
 				break;
 			case 2:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(222);
+				setState(232);
 				select_column_custom();
 				}
 				break;
 			case 3:
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(223);
+				setState(233);
 				aggregate_function();
 				}
 				break;
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	@SuppressWarnings("CheckReturnValue")
-	public static class Select_actionContext extends ParserRuleContext {
-		public TerminalNode SELECT_ACTION() { return getToken(MgxqlParser.SELECT_ACTION, 0); }
-		public Select_actionContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_select_action; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterSelect_action(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitSelect_action(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitSelect_action(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final Select_actionContext select_action() throws RecognitionException {
-		Select_actionContext _localctx = new Select_actionContext(_ctx, getState());
-		enterRule(_localctx, 20, RULE_select_action);
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(226);
-			match(SELECT_ACTION);
 			}
 		}
 		catch (RecognitionException re) {
@@ -859,25 +819,119 @@ public class MgxqlParser extends Parser {
 
 	public final Select_column_allContext select_column_all() throws RecognitionException {
 		Select_column_allContext _localctx = new Select_column_allContext(_ctx, getState());
-		enterRule(_localctx, 22, RULE_select_column_all);
-		int _la;
+		enterRule(_localctx, 20, RULE_select_column_all);
+		try {
+			setState(241);
+			_errHandler.sync(this);
+			switch (_input.LA(1)) {
+			case SELECT_ASTERISK:
+				enterOuterAlt(_localctx, 1);
+				{
+				setState(236);
+				select_asterisk();
+				}
+				break;
+			case LOWER_NAME:
+				enterOuterAlt(_localctx, 2);
+				{
+				setState(237);
+				entity_name_alias();
+				setState(238);
+				dot();
+				setState(239);
+				select_asterisk();
+				}
+				break;
+			default:
+				throw new NoViableAltException(this);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	@SuppressWarnings("CheckReturnValue")
+	public static class Select_column_customContext extends ParserRuleContext {
+		public Field_referenceContext field_reference() {
+			return getRuleContext(Field_referenceContext.class,0);
+		}
+		public Select_column_customContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_select_column_custom; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterSelect_column_custom(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitSelect_column_custom(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitSelect_column_custom(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final Select_column_customContext select_column_custom() throws RecognitionException {
+		Select_column_customContext _localctx = new Select_column_customContext(_ctx, getState());
+		enterRule(_localctx, 22, RULE_select_column_custom);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(231);
-			_errHandler.sync(this);
-			_la = _input.LA(1);
-			if (_la==LOWER_NAME) {
-				{
-				setState(228);
-				entity_name_alias();
-				setState(229);
-				dot();
-				}
+			setState(243);
+			field_reference();
 			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
 
-			setState(233);
-			select_asterisk();
+	@SuppressWarnings("CheckReturnValue")
+	public static class Select_actionContext extends ParserRuleContext {
+		public TerminalNode SELECT_ACTION() { return getToken(MgxqlParser.SELECT_ACTION, 0); }
+		public Select_actionContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_select_action; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterSelect_action(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitSelect_action(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitSelect_action(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final Select_actionContext select_action() throws RecognitionException {
+		Select_actionContext _localctx = new Select_actionContext(_ctx, getState());
+		enterRule(_localctx, 24, RULE_select_action);
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(245);
+			match(SELECT_ACTION);
 			}
 		}
 		catch (RecognitionException re) {
@@ -915,11 +969,11 @@ public class MgxqlParser extends Parser {
 
 	public final Select_asteriskContext select_asterisk() throws RecognitionException {
 		Select_asteriskContext _localctx = new Select_asteriskContext(_ctx, getState());
-		enterRule(_localctx, 24, RULE_select_asterisk);
+		enterRule(_localctx, 26, RULE_select_asterisk);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(235);
+			setState(247);
 			match(SELECT_ASTERISK);
 			}
 		}
@@ -935,81 +989,18 @@ public class MgxqlParser extends Parser {
 	}
 
 	@SuppressWarnings("CheckReturnValue")
-	public static class Select_column_customContext extends ParserRuleContext {
-		public Field_nameContext field_name() {
-			return getRuleContext(Field_nameContext.class,0);
-		}
-		public Entity_name_aliasContext entity_name_alias() {
-			return getRuleContext(Entity_name_aliasContext.class,0);
-		}
-		public DotContext dot() {
-			return getRuleContext(DotContext.class,0);
-		}
-		public Select_column_customContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_select_column_custom; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterSelect_column_custom(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitSelect_column_custom(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitSelect_column_custom(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final Select_column_customContext select_column_custom() throws RecognitionException {
-		Select_column_customContext _localctx = new Select_column_customContext(_ctx, getState());
-		enterRule(_localctx, 26, RULE_select_column_custom);
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(240);
-			_errHandler.sync(this);
-			switch ( getInterpreter().adaptivePredict(_input,9,_ctx) ) {
-			case 1:
-				{
-				setState(237);
-				entity_name_alias();
-				setState(238);
-				dot();
-				}
-				break;
-			}
-			setState(242);
-			field_name();
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	@SuppressWarnings("CheckReturnValue")
 	public static class Aggregate_functionContext extends ParserRuleContext {
-		public Select_count_functionContext select_count_function() {
-			return getRuleContext(Select_count_functionContext.class,0);
+		public Aggregate_function_nameContext aggregate_function_name() {
+			return getRuleContext(Aggregate_function_nameContext.class,0);
 		}
-		public Select_max_functionContext select_max_function() {
-			return getRuleContext(Select_max_functionContext.class,0);
+		public Left_bracketContext left_bracket() {
+			return getRuleContext(Left_bracketContext.class,0);
 		}
-		public Select_min_functionContext select_min_function() {
-			return getRuleContext(Select_min_functionContext.class,0);
+		public Aggregate_function_argumentContext aggregate_function_argument() {
+			return getRuleContext(Aggregate_function_argumentContext.class,0);
 		}
-		public Select_avg_functionContext select_avg_function() {
-			return getRuleContext(Select_avg_functionContext.class,0);
+		public Right_bracketContext right_bracket() {
+			return getRuleContext(Right_bracketContext.class,0);
 		}
 		public Aggregate_functionContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -1034,35 +1025,105 @@ public class MgxqlParser extends Parser {
 		Aggregate_functionContext _localctx = new Aggregate_functionContext(_ctx, getState());
 		enterRule(_localctx, 28, RULE_aggregate_function);
 		try {
-			setState(248);
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(249);
+			aggregate_function_name();
+			setState(250);
+			left_bracket();
+			setState(251);
+			aggregate_function_argument();
+			setState(252);
+			right_bracket();
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	@SuppressWarnings("CheckReturnValue")
+	public static class Aggregate_function_nameContext extends ParserRuleContext {
+		public Select_countContext select_count() {
+			return getRuleContext(Select_countContext.class,0);
+		}
+		public Select_maxContext select_max() {
+			return getRuleContext(Select_maxContext.class,0);
+		}
+		public Select_minContext select_min() {
+			return getRuleContext(Select_minContext.class,0);
+		}
+		public Select_avgContext select_avg() {
+			return getRuleContext(Select_avgContext.class,0);
+		}
+		public Select_sumContext select_sum() {
+			return getRuleContext(Select_sumContext.class,0);
+		}
+		public Aggregate_function_nameContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_aggregate_function_name; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterAggregate_function_name(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitAggregate_function_name(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitAggregate_function_name(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final Aggregate_function_nameContext aggregate_function_name() throws RecognitionException {
+		Aggregate_function_nameContext _localctx = new Aggregate_function_nameContext(_ctx, getState());
+		enterRule(_localctx, 30, RULE_aggregate_function_name);
+		try {
+			setState(259);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case SELECT_COUNT:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(244);
-				select_count_function();
+				setState(254);
+				select_count();
 				}
 				break;
 			case SELECT_MAX:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(245);
-				select_max_function();
+				setState(255);
+				select_max();
 				}
 				break;
 			case SELECT_MIN:
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(246);
-				select_min_function();
+				setState(256);
+				select_min();
 				}
 				break;
 			case SELECT_AVG:
 				enterOuterAlt(_localctx, 4);
 				{
-				setState(247);
-				select_avg_function();
+				setState(257);
+				select_avg();
+				}
+				break;
+			case SELECT_SUM:
+				enterOuterAlt(_localctx, 5);
+				{
+				setState(258);
+				select_sum();
 				}
 				break;
 			default:
@@ -1081,258 +1142,37 @@ public class MgxqlParser extends Parser {
 	}
 
 	@SuppressWarnings("CheckReturnValue")
-	public static class Select_count_functionContext extends ParserRuleContext {
-		public Select_countContext select_count() {
-			return getRuleContext(Select_countContext.class,0);
+	public static class Aggregate_function_argumentContext extends ParserRuleContext {
+		public Field_referenceContext field_reference() {
+			return getRuleContext(Field_referenceContext.class,0);
 		}
-		public Left_bracketContext left_bracket() {
-			return getRuleContext(Left_bracketContext.class,0);
-		}
-		public Right_bracketContext right_bracket() {
-			return getRuleContext(Right_bracketContext.class,0);
-		}
-		public NumberContext number() {
-			return getRuleContext(NumberContext.class,0);
-		}
-		public Select_column_allContext select_column_all() {
-			return getRuleContext(Select_column_allContext.class,0);
-		}
-		public Field_nameContext field_name() {
-			return getRuleContext(Field_nameContext.class,0);
-		}
-		public Select_count_functionContext(ParserRuleContext parent, int invokingState) {
+		public Aggregate_function_argumentContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_select_count_function; }
+		@Override public int getRuleIndex() { return RULE_aggregate_function_argument; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterSelect_count_function(this);
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterAggregate_function_argument(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitSelect_count_function(this);
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitAggregate_function_argument(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitSelect_count_function(this);
+			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitAggregate_function_argument(this);
 			else return visitor.visitChildren(this);
 		}
 	}
 
-	public final Select_count_functionContext select_count_function() throws RecognitionException {
-		Select_count_functionContext _localctx = new Select_count_functionContext(_ctx, getState());
-		enterRule(_localctx, 30, RULE_select_count_function);
+	public final Aggregate_function_argumentContext aggregate_function_argument() throws RecognitionException {
+		Aggregate_function_argumentContext _localctx = new Aggregate_function_argumentContext(_ctx, getState());
+		enterRule(_localctx, 32, RULE_aggregate_function_argument);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(250);
-			select_count();
-			setState(251);
-			left_bracket();
-			setState(255);
-			_errHandler.sync(this);
-			switch ( getInterpreter().adaptivePredict(_input,11,_ctx) ) {
-			case 1:
-				{
-				setState(252);
-				number();
-				}
-				break;
-			case 2:
-				{
-				setState(253);
-				select_column_all();
-				}
-				break;
-			case 3:
-				{
-				setState(254);
-				field_name();
-				}
-				break;
-			}
-			setState(257);
-			right_bracket();
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	@SuppressWarnings("CheckReturnValue")
-	public static class Select_max_functionContext extends ParserRuleContext {
-		public Select_maxContext select_max() {
-			return getRuleContext(Select_maxContext.class,0);
-		}
-		public Left_bracketContext left_bracket() {
-			return getRuleContext(Left_bracketContext.class,0);
-		}
-		public Field_nameContext field_name() {
-			return getRuleContext(Field_nameContext.class,0);
-		}
-		public Right_bracketContext right_bracket() {
-			return getRuleContext(Right_bracketContext.class,0);
-		}
-		public Select_max_functionContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_select_max_function; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterSelect_max_function(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitSelect_max_function(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitSelect_max_function(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final Select_max_functionContext select_max_function() throws RecognitionException {
-		Select_max_functionContext _localctx = new Select_max_functionContext(_ctx, getState());
-		enterRule(_localctx, 32, RULE_select_max_function);
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(259);
-			select_max();
-			setState(260);
-			left_bracket();
 			setState(261);
-			field_name();
-			setState(262);
-			right_bracket();
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	@SuppressWarnings("CheckReturnValue")
-	public static class Select_min_functionContext extends ParserRuleContext {
-		public Select_minContext select_min() {
-			return getRuleContext(Select_minContext.class,0);
-		}
-		public Left_bracketContext left_bracket() {
-			return getRuleContext(Left_bracketContext.class,0);
-		}
-		public Field_nameContext field_name() {
-			return getRuleContext(Field_nameContext.class,0);
-		}
-		public Right_bracketContext right_bracket() {
-			return getRuleContext(Right_bracketContext.class,0);
-		}
-		public Select_min_functionContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_select_min_function; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterSelect_min_function(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitSelect_min_function(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitSelect_min_function(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final Select_min_functionContext select_min_function() throws RecognitionException {
-		Select_min_functionContext _localctx = new Select_min_functionContext(_ctx, getState());
-		enterRule(_localctx, 34, RULE_select_min_function);
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(264);
-			select_min();
-			setState(265);
-			left_bracket();
-			setState(266);
-			field_name();
-			setState(267);
-			right_bracket();
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	@SuppressWarnings("CheckReturnValue")
-	public static class Select_avg_functionContext extends ParserRuleContext {
-		public Select_avgContext select_avg() {
-			return getRuleContext(Select_avgContext.class,0);
-		}
-		public Left_bracketContext left_bracket() {
-			return getRuleContext(Left_bracketContext.class,0);
-		}
-		public Field_nameContext field_name() {
-			return getRuleContext(Field_nameContext.class,0);
-		}
-		public Right_bracketContext right_bracket() {
-			return getRuleContext(Right_bracketContext.class,0);
-		}
-		public Select_avg_functionContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_select_avg_function; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterSelect_avg_function(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitSelect_avg_function(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitSelect_avg_function(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final Select_avg_functionContext select_avg_function() throws RecognitionException {
-		Select_avg_functionContext _localctx = new Select_avg_functionContext(_ctx, getState());
-		enterRule(_localctx, 36, RULE_select_avg_function);
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(269);
-			select_avg();
-			setState(270);
-			left_bracket();
-			setState(271);
-			field_name();
-			setState(272);
-			right_bracket();
+			field_reference();
 			}
 		}
 		catch (RecognitionException re) {
@@ -1370,11 +1210,11 @@ public class MgxqlParser extends Parser {
 
 	public final Select_countContext select_count() throws RecognitionException {
 		Select_countContext _localctx = new Select_countContext(_ctx, getState());
-		enterRule(_localctx, 38, RULE_select_count);
+		enterRule(_localctx, 34, RULE_select_count);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(274);
+			setState(263);
 			match(SELECT_COUNT);
 			}
 		}
@@ -1413,11 +1253,11 @@ public class MgxqlParser extends Parser {
 
 	public final Select_maxContext select_max() throws RecognitionException {
 		Select_maxContext _localctx = new Select_maxContext(_ctx, getState());
-		enterRule(_localctx, 40, RULE_select_max);
+		enterRule(_localctx, 36, RULE_select_max);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(276);
+			setState(265);
 			match(SELECT_MAX);
 			}
 		}
@@ -1456,11 +1296,11 @@ public class MgxqlParser extends Parser {
 
 	public final Select_minContext select_min() throws RecognitionException {
 		Select_minContext _localctx = new Select_minContext(_ctx, getState());
-		enterRule(_localctx, 42, RULE_select_min);
+		enterRule(_localctx, 38, RULE_select_min);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(278);
+			setState(267);
 			match(SELECT_MIN);
 			}
 		}
@@ -1499,12 +1339,55 @@ public class MgxqlParser extends Parser {
 
 	public final Select_avgContext select_avg() throws RecognitionException {
 		Select_avgContext _localctx = new Select_avgContext(_ctx, getState());
-		enterRule(_localctx, 44, RULE_select_avg);
+		enterRule(_localctx, 40, RULE_select_avg);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(280);
+			setState(269);
 			match(SELECT_AVG);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	@SuppressWarnings("CheckReturnValue")
+	public static class Select_sumContext extends ParserRuleContext {
+		public TerminalNode SELECT_SUM() { return getToken(MgxqlParser.SELECT_SUM, 0); }
+		public Select_sumContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_select_sum; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterSelect_sum(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitSelect_sum(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitSelect_sum(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final Select_sumContext select_sum() throws RecognitionException {
+		Select_sumContext _localctx = new Select_sumContext(_ctx, getState());
+		enterRule(_localctx, 42, RULE_select_sum);
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(271);
+			match(SELECT_SUM);
 			}
 		}
 		catch (RecognitionException re) {
@@ -1553,26 +1436,26 @@ public class MgxqlParser extends Parser {
 
 	public final Select_from_clauseContext select_from_clause() throws RecognitionException {
 		Select_from_clauseContext _localctx = new Select_from_clauseContext(_ctx, getState());
-		enterRule(_localctx, 46, RULE_select_from_clause);
+		enterRule(_localctx, 44, RULE_select_from_clause);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(282);
+			setState(273);
 			select_from();
-			setState(283);
+			setState(274);
 			select_primary_entity();
-			setState(287);
+			setState(278);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while (_la==LEFT) {
 				{
 				{
-				setState(284);
+				setState(275);
 				select_join_entity();
 				}
 				}
-				setState(289);
+				setState(280);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
@@ -1618,19 +1501,19 @@ public class MgxqlParser extends Parser {
 
 	public final Select_primary_entityContext select_primary_entity() throws RecognitionException {
 		Select_primary_entityContext _localctx = new Select_primary_entityContext(_ctx, getState());
-		enterRule(_localctx, 48, RULE_select_primary_entity);
+		enterRule(_localctx, 46, RULE_select_primary_entity);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(290);
+			setState(281);
 			select_entity();
-			setState(292);
+			setState(283);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==LOWER_NAME) {
 				{
-				setState(291);
+				setState(282);
 				select_entity_alias();
 				}
 			}
@@ -1656,6 +1539,12 @@ public class MgxqlParser extends Parser {
 		public Select_entityContext select_entity() {
 			return getRuleContext(Select_entityContext.class,0);
 		}
+		public Select_onContext select_on() {
+			return getRuleContext(Select_onContext.class,0);
+		}
+		public Select_on_expressionContext select_on_expression() {
+			return getRuleContext(Select_on_expressionContext.class,0);
+		}
 		public Select_entity_aliasContext select_entity_alias() {
 			return getRuleContext(Select_entity_aliasContext.class,0);
 		}
@@ -1680,25 +1569,29 @@ public class MgxqlParser extends Parser {
 
 	public final Select_join_entityContext select_join_entity() throws RecognitionException {
 		Select_join_entityContext _localctx = new Select_join_entityContext(_ctx, getState());
-		enterRule(_localctx, 50, RULE_select_join_entity);
+		enterRule(_localctx, 48, RULE_select_join_entity);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(294);
+			setState(285);
 			select_left_join();
-			setState(295);
+			setState(286);
 			select_entity();
-			setState(297);
+			setState(288);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==LOWER_NAME) {
 				{
-				setState(296);
+				setState(287);
 				select_entity_alias();
 				}
 			}
 
+			setState(290);
+			select_on();
+			setState(291);
+			select_on_expression();
 			}
 		}
 		catch (RecognitionException re) {
@@ -1738,11 +1631,11 @@ public class MgxqlParser extends Parser {
 
 	public final Select_entityContext select_entity() throws RecognitionException {
 		Select_entityContext _localctx = new Select_entityContext(_ctx, getState());
-		enterRule(_localctx, 52, RULE_select_entity);
+		enterRule(_localctx, 50, RULE_select_entity);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(299);
+			setState(293);
 			entity_name();
 			}
 		}
@@ -1783,11 +1676,11 @@ public class MgxqlParser extends Parser {
 
 	public final Select_entity_aliasContext select_entity_alias() throws RecognitionException {
 		Select_entity_aliasContext _localctx = new Select_entity_aliasContext(_ctx, getState());
-		enterRule(_localctx, 54, RULE_select_entity_alias);
+		enterRule(_localctx, 52, RULE_select_entity_alias);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(301);
+			setState(295);
 			entity_name_alias();
 			}
 		}
@@ -1826,11 +1719,11 @@ public class MgxqlParser extends Parser {
 
 	public final Select_fromContext select_from() throws RecognitionException {
 		Select_fromContext _localctx = new Select_fromContext(_ctx, getState());
-		enterRule(_localctx, 56, RULE_select_from);
+		enterRule(_localctx, 54, RULE_select_from);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(303);
+			setState(297);
 			match(FROM);
 			}
 		}
@@ -1870,14 +1763,155 @@ public class MgxqlParser extends Parser {
 
 	public final Select_left_joinContext select_left_join() throws RecognitionException {
 		Select_left_joinContext _localctx = new Select_left_joinContext(_ctx, getState());
-		enterRule(_localctx, 58, RULE_select_left_join);
+		enterRule(_localctx, 56, RULE_select_left_join);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(305);
+			setState(299);
 			match(LEFT);
-			setState(306);
+			setState(300);
 			match(JOIN);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	@SuppressWarnings("CheckReturnValue")
+	public static class Select_onContext extends ParserRuleContext {
+		public TerminalNode ON() { return getToken(MgxqlParser.ON, 0); }
+		public Select_onContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_select_on; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterSelect_on(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitSelect_on(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitSelect_on(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final Select_onContext select_on() throws RecognitionException {
+		Select_onContext _localctx = new Select_onContext(_ctx, getState());
+		enterRule(_localctx, 58, RULE_select_on);
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(302);
+			match(ON);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	@SuppressWarnings("CheckReturnValue")
+	public static class Select_on_expressionContext extends ParserRuleContext {
+		public List<Entity_name_aliasContext> entity_name_alias() {
+			return getRuleContexts(Entity_name_aliasContext.class);
+		}
+		public Entity_name_aliasContext entity_name_alias(int i) {
+			return getRuleContext(Entity_name_aliasContext.class,i);
+		}
+		public On_equalContext on_equal() {
+			return getRuleContext(On_equalContext.class,0);
+		}
+		public Select_on_expressionContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_select_on_expression; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterSelect_on_expression(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitSelect_on_expression(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitSelect_on_expression(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final Select_on_expressionContext select_on_expression() throws RecognitionException {
+		Select_on_expressionContext _localctx = new Select_on_expressionContext(_ctx, getState());
+		enterRule(_localctx, 60, RULE_select_on_expression);
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(304);
+			entity_name_alias();
+			setState(305);
+			on_equal();
+			setState(306);
+			entity_name_alias();
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	@SuppressWarnings("CheckReturnValue")
+	public static class On_equalContext extends ParserRuleContext {
+		public TerminalNode EQUAL() { return getToken(MgxqlParser.EQUAL, 0); }
+		public On_equalContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_on_equal; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterOn_equal(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitOn_equal(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitOn_equal(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final On_equalContext on_equal() throws RecognitionException {
+		On_equalContext _localctx = new On_equalContext(_ctx, getState());
+		enterRule(_localctx, 62, RULE_on_equal);
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(308);
+			match(EQUAL);
 			}
 		}
 		catch (RecognitionException re) {
@@ -1896,8 +1930,8 @@ public class MgxqlParser extends Parser {
 		public Where_startContext where_start() {
 			return getRuleContext(Where_startContext.class,0);
 		}
-		public Condition_expressionContext condition_expression() {
-			return getRuleContext(Condition_expressionContext.class,0);
+		public Condition_or_expressionContext condition_or_expression() {
+			return getRuleContext(Condition_or_expressionContext.class,0);
 		}
 		public Where_clauseContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -1920,59 +1954,14 @@ public class MgxqlParser extends Parser {
 
 	public final Where_clauseContext where_clause() throws RecognitionException {
 		Where_clauseContext _localctx = new Where_clauseContext(_ctx, getState());
-		enterRule(_localctx, 60, RULE_where_clause);
+		enterRule(_localctx, 64, RULE_where_clause);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(308);
+			setState(310);
 			where_start();
-			setState(309);
-			condition_expression();
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	@SuppressWarnings("CheckReturnValue")
-	public static class Condition_expressionContext extends ParserRuleContext {
-		public Or_expressionContext or_expression() {
-			return getRuleContext(Or_expressionContext.class,0);
-		}
-		public Condition_expressionContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_condition_expression; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterCondition_expression(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitCondition_expression(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitCondition_expression(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final Condition_expressionContext condition_expression() throws RecognitionException {
-		Condition_expressionContext _localctx = new Condition_expressionContext(_ctx, getState());
-		enterRule(_localctx, 62, RULE_condition_expression);
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
 			setState(311);
-			or_expression();
+			condition_or_expression();
 			}
 		}
 		catch (RecognitionException re) {
@@ -1987,12 +1976,12 @@ public class MgxqlParser extends Parser {
 	}
 
 	@SuppressWarnings("CheckReturnValue")
-	public static class Or_expressionContext extends ParserRuleContext {
-		public List<And_expressionContext> and_expression() {
-			return getRuleContexts(And_expressionContext.class);
+	public static class Condition_or_expressionContext extends ParserRuleContext {
+		public List<Condition_and_expressionContext> condition_and_expression() {
+			return getRuleContexts(Condition_and_expressionContext.class);
 		}
-		public And_expressionContext and_expression(int i) {
-			return getRuleContext(And_expressionContext.class,i);
+		public Condition_and_expressionContext condition_and_expression(int i) {
+			return getRuleContext(Condition_and_expressionContext.class,i);
 		}
 		public List<Logic_orContext> logic_or() {
 			return getRuleContexts(Logic_orContext.class);
@@ -2000,34 +1989,34 @@ public class MgxqlParser extends Parser {
 		public Logic_orContext logic_or(int i) {
 			return getRuleContext(Logic_orContext.class,i);
 		}
-		public Or_expressionContext(ParserRuleContext parent, int invokingState) {
+		public Condition_or_expressionContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_or_expression; }
+		@Override public int getRuleIndex() { return RULE_condition_or_expression; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterOr_expression(this);
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterCondition_or_expression(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitOr_expression(this);
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitCondition_or_expression(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitOr_expression(this);
+			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitCondition_or_expression(this);
 			else return visitor.visitChildren(this);
 		}
 	}
 
-	public final Or_expressionContext or_expression() throws RecognitionException {
-		Or_expressionContext _localctx = new Or_expressionContext(_ctx, getState());
-		enterRule(_localctx, 64, RULE_or_expression);
+	public final Condition_or_expressionContext condition_or_expression() throws RecognitionException {
+		Condition_or_expressionContext _localctx = new Condition_or_expressionContext(_ctx, getState());
+		enterRule(_localctx, 66, RULE_condition_or_expression);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
 			setState(313);
-			and_expression();
+			condition_and_expression();
 			setState(319);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
@@ -2037,7 +2026,7 @@ public class MgxqlParser extends Parser {
 				setState(314);
 				logic_or();
 				setState(315);
-				and_expression();
+				condition_and_expression();
 				}
 				}
 				setState(321);
@@ -2058,7 +2047,7 @@ public class MgxqlParser extends Parser {
 	}
 
 	@SuppressWarnings("CheckReturnValue")
-	public static class And_expressionContext extends ParserRuleContext {
+	public static class Condition_and_expressionContext extends ParserRuleContext {
 		public List<Condition_termContext> condition_term() {
 			return getRuleContexts(Condition_termContext.class);
 		}
@@ -2071,28 +2060,28 @@ public class MgxqlParser extends Parser {
 		public Logic_andContext logic_and(int i) {
 			return getRuleContext(Logic_andContext.class,i);
 		}
-		public And_expressionContext(ParserRuleContext parent, int invokingState) {
+		public Condition_and_expressionContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_and_expression; }
+		@Override public int getRuleIndex() { return RULE_condition_and_expression; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterAnd_expression(this);
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterCondition_and_expression(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitAnd_expression(this);
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitCondition_and_expression(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitAnd_expression(this);
+			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitCondition_and_expression(this);
 			else return visitor.visitChildren(this);
 		}
 	}
 
-	public final And_expressionContext and_expression() throws RecognitionException {
-		And_expressionContext _localctx = new And_expressionContext(_ctx, getState());
-		enterRule(_localctx, 66, RULE_and_expression);
+	public final Condition_and_expressionContext condition_and_expression() throws RecognitionException {
+		Condition_and_expressionContext _localctx = new Condition_and_expressionContext(_ctx, getState());
+		enterRule(_localctx, 68, RULE_condition_and_expression);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
@@ -2130,14 +2119,14 @@ public class MgxqlParser extends Parser {
 
 	@SuppressWarnings("CheckReturnValue")
 	public static class Condition_termContext extends ParserRuleContext {
-		public Field_comparison_opContext field_comparison_op() {
-			return getRuleContext(Field_comparison_opContext.class,0);
+		public Condition_comparisonContext condition_comparison() {
+			return getRuleContext(Condition_comparisonContext.class,0);
 		}
 		public Left_bracketContext left_bracket() {
 			return getRuleContext(Left_bracketContext.class,0);
 		}
-		public Condition_expressionContext condition_expression() {
-			return getRuleContext(Condition_expressionContext.class,0);
+		public Condition_or_expressionContext condition_or_expression() {
+			return getRuleContext(Condition_or_expressionContext.class,0);
 		}
 		public Right_bracketContext right_bracket() {
 			return getRuleContext(Right_bracketContext.class,0);
@@ -2163,16 +2152,17 @@ public class MgxqlParser extends Parser {
 
 	public final Condition_termContext condition_term() throws RecognitionException {
 		Condition_termContext _localctx = new Condition_termContext(_ctx, getState());
-		enterRule(_localctx, 68, RULE_condition_term);
+		enterRule(_localctx, 70, RULE_condition_term);
 		try {
 			setState(336);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
+			case QUESTION_MARK:
 			case LOWER_NAME:
 				enterOuterAlt(_localctx, 1);
 				{
 				setState(331);
-				field_comparison_op();
+				condition_comparison();
 				}
 				break;
 			case LEFT_BRACKET:
@@ -2182,7 +2172,7 @@ public class MgxqlParser extends Parser {
 				setState(332);
 				left_bracket();
 				setState(333);
-				condition_expression();
+				condition_or_expression();
 				setState(334);
 				right_bracket();
 				}
@@ -2204,51 +2194,65 @@ public class MgxqlParser extends Parser {
 	}
 
 	@SuppressWarnings("CheckReturnValue")
-	public static class Field_comparison_opContext extends ParserRuleContext {
-		public Where_param_name_field_access_chainContext where_param_name_field_access_chain() {
-			return getRuleContext(Where_param_name_field_access_chainContext.class,0);
+	public static class Condition_comparisonContext extends ParserRuleContext {
+		public Field_referenceContext field_reference() {
+			return getRuleContext(Field_referenceContext.class,0);
 		}
-		public Field_comparison_op_paramContext field_comparison_op_param() {
-			return getRuleContext(Field_comparison_op_paramContext.class,0);
+		public Condition_comparison_paramContext condition_comparison_param() {
+			return getRuleContext(Condition_comparison_paramContext.class,0);
 		}
-		public Field_comparison_op_not_paramContext field_comparison_op_not_param() {
-			return getRuleContext(Field_comparison_op_not_paramContext.class,0);
+		public Condition_comparison_not_paramContext condition_comparison_not_param() {
+			return getRuleContext(Condition_comparison_not_paramContext.class,0);
 		}
-		public Field_comparison_opContext(ParserRuleContext parent, int invokingState) {
+		public Question_markContext question_mark() {
+			return getRuleContext(Question_markContext.class,0);
+		}
+		public Condition_comparisonContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_field_comparison_op; }
+		@Override public int getRuleIndex() { return RULE_condition_comparison; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterField_comparison_op(this);
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterCondition_comparison(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitField_comparison_op(this);
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitCondition_comparison(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitField_comparison_op(this);
+			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitCondition_comparison(this);
 			else return visitor.visitChildren(this);
 		}
 	}
 
-	public final Field_comparison_opContext field_comparison_op() throws RecognitionException {
-		Field_comparison_opContext _localctx = new Field_comparison_opContext(_ctx, getState());
-		enterRule(_localctx, 70, RULE_field_comparison_op);
+	public final Condition_comparisonContext condition_comparison() throws RecognitionException {
+		Condition_comparisonContext _localctx = new Condition_comparisonContext(_ctx, getState());
+		enterRule(_localctx, 72, RULE_condition_comparison);
+		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(338);
-			where_param_name_field_access_chain();
+			setState(339);
+			_errHandler.sync(this);
+			_la = _input.LA(1);
+			if (_la==QUESTION_MARK) {
+				{
+				setState(338);
+				question_mark();
+				}
+			}
+
 			setState(341);
+			field_reference();
+			setState(344);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case COMPARISON_OP_LT:
 			case COMPARISON_OP_LT_EQ:
 			case COMPARISON_OP_GT:
 			case COMPARISON_OP_GT_EQ:
-			case COMPARISON_OP_EQ:
+			case EQUAL:
 			case COMPARISON_OP_NOT_EQ:
 			case COMPARISON_OP_NOT:
 			case COMPARISON_OP_BETWEEN:
@@ -2257,15 +2261,15 @@ public class MgxqlParser extends Parser {
 			case COMPARISON_OP_LEFT_LIKE:
 			case COMPARISON_OP_RIGHT_LIKE:
 				{
-				setState(339);
-				field_comparison_op_param();
+				setState(342);
+				condition_comparison_param();
 				}
 				break;
 			case COMPARISON_OP_IS_NULL:
 			case COMPARISON_OP_IS_NOT_NULL:
 				{
-				setState(340);
-				field_comparison_op_not_param();
+				setState(343);
+				condition_comparison_not_param();
 				}
 				break;
 			default:
@@ -2285,12 +2289,9 @@ public class MgxqlParser extends Parser {
 	}
 
 	@SuppressWarnings("CheckReturnValue")
-	public static class Field_comparison_op_paramContext extends ParserRuleContext {
-		public Param_colonContext param_colon() {
-			return getRuleContext(Param_colonContext.class,0);
-		}
-		public Where_param_value_field_access_chainContext where_param_value_field_access_chain() {
-			return getRuleContext(Where_param_value_field_access_chainContext.class,0);
+	public static class Condition_comparison_paramContext extends ParserRuleContext {
+		public Condition_valueContext condition_value() {
+			return getRuleContext(Condition_valueContext.class,0);
 		}
 		public Relational_opContext relational_op() {
 			return getRuleContext(Relational_opContext.class,0);
@@ -2298,42 +2299,42 @@ public class MgxqlParser extends Parser {
 		public Matching_opContext matching_op() {
 			return getRuleContext(Matching_opContext.class,0);
 		}
-		public Field_comparison_op_paramContext(ParserRuleContext parent, int invokingState) {
+		public Condition_comparison_paramContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_field_comparison_op_param; }
+		@Override public int getRuleIndex() { return RULE_condition_comparison_param; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterField_comparison_op_param(this);
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterCondition_comparison_param(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitField_comparison_op_param(this);
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitCondition_comparison_param(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitField_comparison_op_param(this);
+			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitCondition_comparison_param(this);
 			else return visitor.visitChildren(this);
 		}
 	}
 
-	public final Field_comparison_op_paramContext field_comparison_op_param() throws RecognitionException {
-		Field_comparison_op_paramContext _localctx = new Field_comparison_op_paramContext(_ctx, getState());
-		enterRule(_localctx, 72, RULE_field_comparison_op_param);
+	public final Condition_comparison_paramContext condition_comparison_param() throws RecognitionException {
+		Condition_comparison_paramContext _localctx = new Condition_comparison_paramContext(_ctx, getState());
+		enterRule(_localctx, 74, RULE_condition_comparison_param);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(345);
+			setState(348);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case COMPARISON_OP_LT:
 			case COMPARISON_OP_LT_EQ:
 			case COMPARISON_OP_GT:
 			case COMPARISON_OP_GT_EQ:
-			case COMPARISON_OP_EQ:
+			case EQUAL:
 			case COMPARISON_OP_NOT_EQ:
 				{
-				setState(343);
+				setState(346);
 				relational_op();
 				}
 				break;
@@ -2344,17 +2345,15 @@ public class MgxqlParser extends Parser {
 			case COMPARISON_OP_LEFT_LIKE:
 			case COMPARISON_OP_RIGHT_LIKE:
 				{
-				setState(344);
+				setState(347);
 				matching_op();
 				}
 				break;
 			default:
 				throw new NoViableAltException(this);
 			}
-			setState(347);
-			param_colon();
-			setState(348);
-			where_param_value_field_access_chain();
+			setState(350);
+			condition_value();
 			}
 		}
 		catch (RecognitionException re) {
@@ -2369,37 +2368,100 @@ public class MgxqlParser extends Parser {
 	}
 
 	@SuppressWarnings("CheckReturnValue")
-	public static class Field_comparison_op_not_paramContext extends ParserRuleContext {
+	public static class Condition_comparison_not_paramContext extends ParserRuleContext {
 		public Comparison_op_nullContext comparison_op_null() {
 			return getRuleContext(Comparison_op_nullContext.class,0);
 		}
-		public Field_comparison_op_not_paramContext(ParserRuleContext parent, int invokingState) {
+		public Condition_comparison_not_paramContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_field_comparison_op_not_param; }
+		@Override public int getRuleIndex() { return RULE_condition_comparison_not_param; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterField_comparison_op_not_param(this);
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterCondition_comparison_not_param(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitField_comparison_op_not_param(this);
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitCondition_comparison_not_param(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitField_comparison_op_not_param(this);
+			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitCondition_comparison_not_param(this);
 			else return visitor.visitChildren(this);
 		}
 	}
 
-	public final Field_comparison_op_not_paramContext field_comparison_op_not_param() throws RecognitionException {
-		Field_comparison_op_not_paramContext _localctx = new Field_comparison_op_not_paramContext(_ctx, getState());
-		enterRule(_localctx, 74, RULE_field_comparison_op_not_param);
+	public final Condition_comparison_not_paramContext condition_comparison_not_param() throws RecognitionException {
+		Condition_comparison_not_paramContext _localctx = new Condition_comparison_not_paramContext(_ctx, getState());
+		enterRule(_localctx, 76, RULE_condition_comparison_not_param);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(350);
+			setState(352);
 			comparison_op_null();
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	@SuppressWarnings("CheckReturnValue")
+	public static class Condition_valueContext extends ParserRuleContext {
+		public Parameter_referenceContext parameter_reference() {
+			return getRuleContext(Parameter_referenceContext.class,0);
+		}
+		public NumberContext number() {
+			return getRuleContext(NumberContext.class,0);
+		}
+		public Condition_valueContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_condition_value; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterCondition_value(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitCondition_value(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitCondition_value(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final Condition_valueContext condition_value() throws RecognitionException {
+		Condition_valueContext _localctx = new Condition_valueContext(_ctx, getState());
+		enterRule(_localctx, 78, RULE_condition_value);
+		try {
+			setState(356);
+			_errHandler.sync(this);
+			switch (_input.LA(1)) {
+			case COLON:
+				enterOuterAlt(_localctx, 1);
+				{
+				setState(354);
+				parameter_reference();
+				}
+				break;
+			case NUMBER:
+				enterOuterAlt(_localctx, 2);
+				{
+				setState(355);
+				number();
+				}
+				break;
+			default:
+				throw new NoViableAltException(this);
 			}
 		}
 		catch (RecognitionException re) {
@@ -2418,17 +2480,8 @@ public class MgxqlParser extends Parser {
 		public Group_byContext group_by() {
 			return getRuleContext(Group_byContext.class,0);
 		}
-		public List<Entity_field_access_chainContext> entity_field_access_chain() {
-			return getRuleContexts(Entity_field_access_chainContext.class);
-		}
-		public Entity_field_access_chainContext entity_field_access_chain(int i) {
-			return getRuleContext(Entity_field_access_chainContext.class,i);
-		}
-		public List<Comma_identifierContext> comma_identifier() {
-			return getRuleContexts(Comma_identifierContext.class);
-		}
-		public Comma_identifierContext comma_identifier(int i) {
-			return getRuleContext(Comma_identifierContext.class,i);
+		public Group_by_expressionContext group_by_expression() {
+			return getRuleContext(Group_by_expressionContext.class,0);
 		}
 		public Group_by_clauseContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -2451,37 +2504,85 @@ public class MgxqlParser extends Parser {
 
 	public final Group_by_clauseContext group_by_clause() throws RecognitionException {
 		Group_by_clauseContext _localctx = new Group_by_clauseContext(_ctx, getState());
-		enterRule(_localctx, 76, RULE_group_by_clause);
+		enterRule(_localctx, 80, RULE_group_by_clause);
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(358);
+			group_by();
+			setState(359);
+			group_by_expression();
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	@SuppressWarnings("CheckReturnValue")
+	public static class Group_by_expressionContext extends ParserRuleContext {
+		public List<Field_referenceContext> field_reference() {
+			return getRuleContexts(Field_referenceContext.class);
+		}
+		public Field_referenceContext field_reference(int i) {
+			return getRuleContext(Field_referenceContext.class,i);
+		}
+		public List<CommaContext> comma() {
+			return getRuleContexts(CommaContext.class);
+		}
+		public CommaContext comma(int i) {
+			return getRuleContext(CommaContext.class,i);
+		}
+		public Group_by_expressionContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_group_by_expression; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterGroup_by_expression(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitGroup_by_expression(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitGroup_by_expression(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final Group_by_expressionContext group_by_expression() throws RecognitionException {
+		Group_by_expressionContext _localctx = new Group_by_expressionContext(_ctx, getState());
+		enterRule(_localctx, 82, RULE_group_by_expression);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(352);
-			group_by();
-			setState(357); 
+			setState(361);
+			field_reference();
+			setState(367);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			do {
+			while (_la==COMMA) {
 				{
 				{
-				setState(353);
-				entity_field_access_chain();
-				setState(355);
+				setState(362);
+				comma();
+				setState(363);
+				field_reference();
+				}
+				}
+				setState(369);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-				if (_la==COMMA) {
-					{
-					setState(354);
-					comma_identifier();
-					}
-				}
-
-				}
-				}
-				setState(359); 
-				_errHandler.sync(this);
-				_la = _input.LA(1);
-			} while ( _la==LOWER_NAME );
+			}
 			}
 		}
 		catch (RecognitionException re) {
@@ -2500,17 +2601,8 @@ public class MgxqlParser extends Parser {
 		public HavingContext having() {
 			return getRuleContext(HavingContext.class,0);
 		}
-		public List<Aggregate_functionContext> aggregate_function() {
-			return getRuleContexts(Aggregate_functionContext.class);
-		}
-		public Aggregate_functionContext aggregate_function(int i) {
-			return getRuleContext(Aggregate_functionContext.class,i);
-		}
-		public List<Having_comparison_op_paramContext> having_comparison_op_param() {
-			return getRuleContexts(Having_comparison_op_paramContext.class);
-		}
-		public Having_comparison_op_paramContext having_comparison_op_param(int i) {
-			return getRuleContext(Having_comparison_op_paramContext.class,i);
+		public Having_or_expressionContext having_or_expression() {
+			return getRuleContext(Having_or_expressionContext.class,0);
 		}
 		public Having_clauseContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -2533,29 +2625,14 @@ public class MgxqlParser extends Parser {
 
 	public final Having_clauseContext having_clause() throws RecognitionException {
 		Having_clauseContext _localctx = new Having_clauseContext(_ctx, getState());
-		enterRule(_localctx, 78, RULE_having_clause);
-		int _la;
+		enterRule(_localctx, 84, RULE_having_clause);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(361);
+			setState(370);
 			having();
-			setState(365); 
-			_errHandler.sync(this);
-			_la = _input.LA(1);
-			do {
-				{
-				{
-				setState(362);
-				aggregate_function();
-				setState(363);
-				having_comparison_op_param();
-				}
-				}
-				setState(367); 
-				_errHandler.sync(this);
-				_la = _input.LA(1);
-			} while ( (((_la) & ~0x3f) == 0 && ((1L << _la) & 960L) != 0) );
+			setState(371);
+			having_or_expression();
 			}
 		}
 		catch (RecognitionException re) {
@@ -2570,47 +2647,329 @@ public class MgxqlParser extends Parser {
 	}
 
 	@SuppressWarnings("CheckReturnValue")
-	public static class Having_comparison_op_paramContext extends ParserRuleContext {
-		public Relational_opContext relational_op() {
-			return getRuleContext(Relational_opContext.class,0);
+	public static class Having_or_expressionContext extends ParserRuleContext {
+		public List<Having_and_expressionContext> having_and_expression() {
+			return getRuleContexts(Having_and_expressionContext.class);
 		}
-		public Param_colonContext param_colon() {
-			return getRuleContext(Param_colonContext.class,0);
+		public Having_and_expressionContext having_and_expression(int i) {
+			return getRuleContext(Having_and_expressionContext.class,i);
 		}
-		public Where_param_value_field_access_chainContext where_param_value_field_access_chain() {
-			return getRuleContext(Where_param_value_field_access_chainContext.class,0);
+		public List<Logic_orContext> logic_or() {
+			return getRuleContexts(Logic_orContext.class);
 		}
-		public Having_comparison_op_paramContext(ParserRuleContext parent, int invokingState) {
+		public Logic_orContext logic_or(int i) {
+			return getRuleContext(Logic_orContext.class,i);
+		}
+		public Having_or_expressionContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_having_comparison_op_param; }
+		@Override public int getRuleIndex() { return RULE_having_or_expression; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterHaving_comparison_op_param(this);
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterHaving_or_expression(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitHaving_comparison_op_param(this);
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitHaving_or_expression(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitHaving_comparison_op_param(this);
+			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitHaving_or_expression(this);
 			else return visitor.visitChildren(this);
 		}
 	}
 
-	public final Having_comparison_op_paramContext having_comparison_op_param() throws RecognitionException {
-		Having_comparison_op_paramContext _localctx = new Having_comparison_op_paramContext(_ctx, getState());
-		enterRule(_localctx, 80, RULE_having_comparison_op_param);
+	public final Having_or_expressionContext having_or_expression() throws RecognitionException {
+		Having_or_expressionContext _localctx = new Having_or_expressionContext(_ctx, getState());
+		enterRule(_localctx, 86, RULE_having_or_expression);
+		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(369);
+			setState(373);
+			having_and_expression();
+			setState(379);
+			_errHandler.sync(this);
+			_la = _input.LA(1);
+			while (_la==LOGIC_OR) {
+				{
+				{
+				setState(374);
+				logic_or();
+				setState(375);
+				having_and_expression();
+				}
+				}
+				setState(381);
+				_errHandler.sync(this);
+				_la = _input.LA(1);
+			}
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	@SuppressWarnings("CheckReturnValue")
+	public static class Having_and_expressionContext extends ParserRuleContext {
+		public List<Having_termContext> having_term() {
+			return getRuleContexts(Having_termContext.class);
+		}
+		public Having_termContext having_term(int i) {
+			return getRuleContext(Having_termContext.class,i);
+		}
+		public List<Logic_andContext> logic_and() {
+			return getRuleContexts(Logic_andContext.class);
+		}
+		public Logic_andContext logic_and(int i) {
+			return getRuleContext(Logic_andContext.class,i);
+		}
+		public Having_and_expressionContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_having_and_expression; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterHaving_and_expression(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitHaving_and_expression(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitHaving_and_expression(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final Having_and_expressionContext having_and_expression() throws RecognitionException {
+		Having_and_expressionContext _localctx = new Having_and_expressionContext(_ctx, getState());
+		enterRule(_localctx, 88, RULE_having_and_expression);
+		int _la;
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(382);
+			having_term();
+			setState(388);
+			_errHandler.sync(this);
+			_la = _input.LA(1);
+			while (_la==LOGIC_AND) {
+				{
+				{
+				setState(383);
+				logic_and();
+				setState(384);
+				having_term();
+				}
+				}
+				setState(390);
+				_errHandler.sync(this);
+				_la = _input.LA(1);
+			}
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	@SuppressWarnings("CheckReturnValue")
+	public static class Having_termContext extends ParserRuleContext {
+		public Having_comparisonContext having_comparison() {
+			return getRuleContext(Having_comparisonContext.class,0);
+		}
+		public Left_bracketContext left_bracket() {
+			return getRuleContext(Left_bracketContext.class,0);
+		}
+		public Having_or_expressionContext having_or_expression() {
+			return getRuleContext(Having_or_expressionContext.class,0);
+		}
+		public Right_bracketContext right_bracket() {
+			return getRuleContext(Right_bracketContext.class,0);
+		}
+		public Having_termContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_having_term; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterHaving_term(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitHaving_term(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitHaving_term(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final Having_termContext having_term() throws RecognitionException {
+		Having_termContext _localctx = new Having_termContext(_ctx, getState());
+		enterRule(_localctx, 90, RULE_having_term);
+		try {
+			setState(396);
+			_errHandler.sync(this);
+			switch (_input.LA(1)) {
+			case SELECT_COUNT:
+			case SELECT_MAX:
+			case SELECT_MIN:
+			case SELECT_AVG:
+			case SELECT_SUM:
+				enterOuterAlt(_localctx, 1);
+				{
+				setState(391);
+				having_comparison();
+				}
+				break;
+			case LEFT_BRACKET:
+				enterOuterAlt(_localctx, 2);
+				{
+				setState(392);
+				left_bracket();
+				setState(393);
+				having_or_expression();
+				setState(394);
+				right_bracket();
+				}
+				break;
+			default:
+				throw new NoViableAltException(this);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	@SuppressWarnings("CheckReturnValue")
+	public static class Having_comparisonContext extends ParserRuleContext {
+		public Aggregate_functionContext aggregate_function() {
+			return getRuleContext(Aggregate_functionContext.class,0);
+		}
+		public Relational_opContext relational_op() {
+			return getRuleContext(Relational_opContext.class,0);
+		}
+		public Having_valueContext having_value() {
+			return getRuleContext(Having_valueContext.class,0);
+		}
+		public Having_comparisonContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_having_comparison; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterHaving_comparison(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitHaving_comparison(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitHaving_comparison(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final Having_comparisonContext having_comparison() throws RecognitionException {
+		Having_comparisonContext _localctx = new Having_comparisonContext(_ctx, getState());
+		enterRule(_localctx, 92, RULE_having_comparison);
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(398);
+			aggregate_function();
+			setState(399);
 			relational_op();
-			setState(370);
-			param_colon();
-			setState(371);
-			where_param_value_field_access_chain();
+			setState(400);
+			having_value();
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	@SuppressWarnings("CheckReturnValue")
+	public static class Having_valueContext extends ParserRuleContext {
+		public Parameter_referenceContext parameter_reference() {
+			return getRuleContext(Parameter_referenceContext.class,0);
+		}
+		public NumberContext number() {
+			return getRuleContext(NumberContext.class,0);
+		}
+		public Having_valueContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_having_value; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterHaving_value(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitHaving_value(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitHaving_value(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final Having_valueContext having_value() throws RecognitionException {
+		Having_valueContext _localctx = new Having_valueContext(_ctx, getState());
+		enterRule(_localctx, 94, RULE_having_value);
+		try {
+			setState(404);
+			_errHandler.sync(this);
+			switch (_input.LA(1)) {
+			case COLON:
+				enterOuterAlt(_localctx, 1);
+				{
+				setState(402);
+				parameter_reference();
+				}
+				break;
+			case NUMBER:
+				enterOuterAlt(_localctx, 2);
+				{
+				setState(403);
+				number();
+				}
+				break;
+			default:
+				throw new NoViableAltException(this);
 			}
 		}
 		catch (RecognitionException re) {
@@ -2629,11 +2988,17 @@ public class MgxqlParser extends Parser {
 		public Order_byContext order_by() {
 			return getRuleContext(Order_byContext.class,0);
 		}
-		public List<Order_by_itemContext> order_by_item() {
-			return getRuleContexts(Order_by_itemContext.class);
+		public List<Order_by_expressionContext> order_by_expression() {
+			return getRuleContexts(Order_by_expressionContext.class);
 		}
-		public Order_by_itemContext order_by_item(int i) {
-			return getRuleContext(Order_by_itemContext.class,i);
+		public Order_by_expressionContext order_by_expression(int i) {
+			return getRuleContext(Order_by_expressionContext.class,i);
+		}
+		public List<CommaContext> comma() {
+			return getRuleContexts(CommaContext.class);
+		}
+		public CommaContext comma(int i) {
+			return getRuleContext(CommaContext.class,i);
 		}
 		public Order_by_clauseContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -2656,27 +3021,31 @@ public class MgxqlParser extends Parser {
 
 	public final Order_by_clauseContext order_by_clause() throws RecognitionException {
 		Order_by_clauseContext _localctx = new Order_by_clauseContext(_ctx, getState());
-		enterRule(_localctx, 82, RULE_order_by_clause);
+		enterRule(_localctx, 96, RULE_order_by_clause);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(373);
+			setState(406);
 			order_by();
-			setState(375); 
+			setState(407);
+			order_by_expression();
+			setState(413);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			do {
+			while (_la==COMMA) {
 				{
 				{
-				setState(374);
-				order_by_item();
+				setState(408);
+				comma();
+				setState(409);
+				order_by_expression();
 				}
 				}
-				setState(377); 
+				setState(415);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-			} while ( _la==LOWER_NAME );
+			}
 			}
 		}
 		catch (RecognitionException re) {
@@ -2691,47 +3060,47 @@ public class MgxqlParser extends Parser {
 	}
 
 	@SuppressWarnings("CheckReturnValue")
-	public static class Order_by_itemContext extends ParserRuleContext {
-		public Entity_field_access_chainContext entity_field_access_chain() {
-			return getRuleContext(Entity_field_access_chainContext.class,0);
+	public static class Order_by_expressionContext extends ParserRuleContext {
+		public Field_referenceContext field_reference() {
+			return getRuleContext(Field_referenceContext.class,0);
 		}
 		public Order_by_directionContext order_by_direction() {
 			return getRuleContext(Order_by_directionContext.class,0);
 		}
-		public Order_by_itemContext(ParserRuleContext parent, int invokingState) {
+		public Order_by_expressionContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_order_by_item; }
+		@Override public int getRuleIndex() { return RULE_order_by_expression; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterOrder_by_item(this);
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterOrder_by_expression(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitOrder_by_item(this);
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitOrder_by_expression(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitOrder_by_item(this);
+			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitOrder_by_expression(this);
 			else return visitor.visitChildren(this);
 		}
 	}
 
-	public final Order_by_itemContext order_by_item() throws RecognitionException {
-		Order_by_itemContext _localctx = new Order_by_itemContext(_ctx, getState());
-		enterRule(_localctx, 84, RULE_order_by_item);
+	public final Order_by_expressionContext order_by_expression() throws RecognitionException {
+		Order_by_expressionContext _localctx = new Order_by_expressionContext(_ctx, getState());
+		enterRule(_localctx, 98, RULE_order_by_expression);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(379);
-			entity_field_access_chain();
-			setState(381);
+			setState(416);
+			field_reference();
+			setState(418);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==ORDER_BY_DIRECTION) {
 				{
-				setState(380);
+				setState(417);
 				order_by_direction();
 				}
 			}
@@ -2750,19 +3119,68 @@ public class MgxqlParser extends Parser {
 	}
 
 	@SuppressWarnings("CheckReturnValue")
-	public static class LimitContext extends ParserRuleContext {
-		public Limit_identifierContext limit_identifier() {
-			return getRuleContext(Limit_identifierContext.class,0);
+	public static class Limit_clauseContext extends ParserRuleContext {
+		public LimitContext limit() {
+			return getRuleContext(LimitContext.class,0);
 		}
 		public OffsetContext offset() {
 			return getRuleContext(OffsetContext.class,0);
 		}
-		public Comma_identifierContext comma_identifier() {
-			return getRuleContext(Comma_identifierContext.class,0);
+		public CommaContext comma() {
+			return getRuleContext(CommaContext.class,0);
 		}
 		public SizeContext size() {
 			return getRuleContext(SizeContext.class,0);
 		}
+		public Limit_clauseContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_limit_clause; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterLimit_clause(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitLimit_clause(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitLimit_clause(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final Limit_clauseContext limit_clause() throws RecognitionException {
+		Limit_clauseContext _localctx = new Limit_clauseContext(_ctx, getState());
+		enterRule(_localctx, 100, RULE_limit_clause);
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(420);
+			limit();
+			setState(421);
+			offset();
+			setState(422);
+			comma();
+			setState(423);
+			size();
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	@SuppressWarnings("CheckReturnValue")
+	public static class LimitContext extends ParserRuleContext {
+		public TerminalNode LIMIT() { return getToken(MgxqlParser.LIMIT, 0); }
 		public LimitContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -2784,61 +3202,12 @@ public class MgxqlParser extends Parser {
 
 	public final LimitContext limit() throws RecognitionException {
 		LimitContext _localctx = new LimitContext(_ctx, getState());
-		enterRule(_localctx, 86, RULE_limit);
+		enterRule(_localctx, 102, RULE_limit);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(383);
-			limit_identifier();
-			setState(384);
-			offset();
-			setState(385);
-			comma_identifier();
-			setState(386);
-			size();
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	@SuppressWarnings("CheckReturnValue")
-	public static class Limit_identifierContext extends ParserRuleContext {
-		public TerminalNode LIMIT_IDENTIFIER() { return getToken(MgxqlParser.LIMIT_IDENTIFIER, 0); }
-		public Limit_identifierContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_limit_identifier; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterLimit_identifier(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitLimit_identifier(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitLimit_identifier(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final Limit_identifierContext limit_identifier() throws RecognitionException {
-		Limit_identifierContext _localctx = new Limit_identifierContext(_ctx, getState());
-		enterRule(_localctx, 88, RULE_limit_identifier);
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(388);
-			match(LIMIT_IDENTIFIER);
+			setState(425);
+			match(LIMIT);
 			}
 		}
 		catch (RecognitionException re) {
@@ -2876,55 +3245,12 @@ public class MgxqlParser extends Parser {
 
 	public final OffsetContext offset() throws RecognitionException {
 		OffsetContext _localctx = new OffsetContext(_ctx, getState());
-		enterRule(_localctx, 90, RULE_offset);
+		enterRule(_localctx, 104, RULE_offset);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(390);
+			setState(427);
 			match(NUMBER);
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	@SuppressWarnings("CheckReturnValue")
-	public static class Comma_identifierContext extends ParserRuleContext {
-		public TerminalNode COMMA() { return getToken(MgxqlParser.COMMA, 0); }
-		public Comma_identifierContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_comma_identifier; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterComma_identifier(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitComma_identifier(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitComma_identifier(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final Comma_identifierContext comma_identifier() throws RecognitionException {
-		Comma_identifierContext _localctx = new Comma_identifierContext(_ctx, getState());
-		enterRule(_localctx, 92, RULE_comma_identifier);
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(392);
-			match(COMMA);
 			}
 		}
 		catch (RecognitionException re) {
@@ -2962,11 +3288,11 @@ public class MgxqlParser extends Parser {
 
 	public final SizeContext size() throws RecognitionException {
 		SizeContext _localctx = new SizeContext(_ctx, getState());
-		enterRule(_localctx, 94, RULE_size);
+		enterRule(_localctx, 106, RULE_size);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(394);
+			setState(429);
 			match(NUMBER);
 			}
 		}
@@ -3005,11 +3331,11 @@ public class MgxqlParser extends Parser {
 
 	public final Where_startContext where_start() throws RecognitionException {
 		Where_startContext _localctx = new Where_startContext(_ctx, getState());
-		enterRule(_localctx, 96, RULE_where_start);
+		enterRule(_localctx, 108, RULE_where_start);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(396);
+			setState(431);
 			match(WHERE);
 			}
 		}
@@ -3048,11 +3374,11 @@ public class MgxqlParser extends Parser {
 
 	public final Logic_andContext logic_and() throws RecognitionException {
 		Logic_andContext _localctx = new Logic_andContext(_ctx, getState());
-		enterRule(_localctx, 98, RULE_logic_and);
+		enterRule(_localctx, 110, RULE_logic_and);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(398);
+			setState(433);
 			match(LOGIC_AND);
 			}
 		}
@@ -3091,11 +3417,11 @@ public class MgxqlParser extends Parser {
 
 	public final Logic_orContext logic_or() throws RecognitionException {
 		Logic_orContext _localctx = new Logic_orContext(_ctx, getState());
-		enterRule(_localctx, 100, RULE_logic_or);
+		enterRule(_localctx, 112, RULE_logic_or);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(400);
+			setState(435);
 			match(LOGIC_OR);
 			}
 		}
@@ -3151,50 +3477,50 @@ public class MgxqlParser extends Parser {
 
 	public final Relational_opContext relational_op() throws RecognitionException {
 		Relational_opContext _localctx = new Relational_opContext(_ctx, getState());
-		enterRule(_localctx, 102, RULE_relational_op);
+		enterRule(_localctx, 114, RULE_relational_op);
 		try {
-			setState(408);
+			setState(443);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case COMPARISON_OP_LT:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(402);
+				setState(437);
 				comparison_op_lt();
 				}
 				break;
 			case COMPARISON_OP_LT_EQ:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(403);
+				setState(438);
 				comparison_op_lt_eq();
 				}
 				break;
 			case COMPARISON_OP_GT:
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(404);
+				setState(439);
 				comparison_op_gt();
 				}
 				break;
 			case COMPARISON_OP_GT_EQ:
 				enterOuterAlt(_localctx, 4);
 				{
-				setState(405);
+				setState(440);
 				comparison_op_gt_eq();
 				}
 				break;
-			case COMPARISON_OP_EQ:
+			case EQUAL:
 				enterOuterAlt(_localctx, 5);
 				{
-				setState(406);
+				setState(441);
 				comparison_op_eq();
 				}
 				break;
 			case COMPARISON_OP_NOT_EQ:
 				enterOuterAlt(_localctx, 6);
 				{
-				setState(407);
+				setState(442);
 				comparison_op_not_eq();
 				}
 				break;
@@ -3237,11 +3563,11 @@ public class MgxqlParser extends Parser {
 
 	public final Comparison_op_ltContext comparison_op_lt() throws RecognitionException {
 		Comparison_op_ltContext _localctx = new Comparison_op_ltContext(_ctx, getState());
-		enterRule(_localctx, 104, RULE_comparison_op_lt);
+		enterRule(_localctx, 116, RULE_comparison_op_lt);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(410);
+			setState(445);
 			match(COMPARISON_OP_LT);
 			}
 		}
@@ -3280,11 +3606,11 @@ public class MgxqlParser extends Parser {
 
 	public final Comparison_op_lt_eqContext comparison_op_lt_eq() throws RecognitionException {
 		Comparison_op_lt_eqContext _localctx = new Comparison_op_lt_eqContext(_ctx, getState());
-		enterRule(_localctx, 106, RULE_comparison_op_lt_eq);
+		enterRule(_localctx, 118, RULE_comparison_op_lt_eq);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(412);
+			setState(447);
 			match(COMPARISON_OP_LT_EQ);
 			}
 		}
@@ -3323,11 +3649,11 @@ public class MgxqlParser extends Parser {
 
 	public final Comparison_op_gtContext comparison_op_gt() throws RecognitionException {
 		Comparison_op_gtContext _localctx = new Comparison_op_gtContext(_ctx, getState());
-		enterRule(_localctx, 108, RULE_comparison_op_gt);
+		enterRule(_localctx, 120, RULE_comparison_op_gt);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(414);
+			setState(449);
 			match(COMPARISON_OP_GT);
 			}
 		}
@@ -3366,11 +3692,11 @@ public class MgxqlParser extends Parser {
 
 	public final Comparison_op_gt_eqContext comparison_op_gt_eq() throws RecognitionException {
 		Comparison_op_gt_eqContext _localctx = new Comparison_op_gt_eqContext(_ctx, getState());
-		enterRule(_localctx, 110, RULE_comparison_op_gt_eq);
+		enterRule(_localctx, 122, RULE_comparison_op_gt_eq);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(416);
+			setState(451);
 			match(COMPARISON_OP_GT_EQ);
 			}
 		}
@@ -3387,7 +3713,7 @@ public class MgxqlParser extends Parser {
 
 	@SuppressWarnings("CheckReturnValue")
 	public static class Comparison_op_eqContext extends ParserRuleContext {
-		public TerminalNode COMPARISON_OP_EQ() { return getToken(MgxqlParser.COMPARISON_OP_EQ, 0); }
+		public TerminalNode EQUAL() { return getToken(MgxqlParser.EQUAL, 0); }
 		public Comparison_op_eqContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -3409,12 +3735,12 @@ public class MgxqlParser extends Parser {
 
 	public final Comparison_op_eqContext comparison_op_eq() throws RecognitionException {
 		Comparison_op_eqContext _localctx = new Comparison_op_eqContext(_ctx, getState());
-		enterRule(_localctx, 112, RULE_comparison_op_eq);
+		enterRule(_localctx, 124, RULE_comparison_op_eq);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(418);
-			match(COMPARISON_OP_EQ);
+			setState(453);
+			match(EQUAL);
 			}
 		}
 		catch (RecognitionException re) {
@@ -3452,11 +3778,11 @@ public class MgxqlParser extends Parser {
 
 	public final Comparison_op_not_eqContext comparison_op_not_eq() throws RecognitionException {
 		Comparison_op_not_eqContext _localctx = new Comparison_op_not_eqContext(_ctx, getState());
-		enterRule(_localctx, 114, RULE_comparison_op_not_eq);
+		enterRule(_localctx, 126, RULE_comparison_op_not_eq);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(420);
+			setState(455);
 			match(COMPARISON_OP_NOT_EQ);
 			}
 		}
@@ -3512,51 +3838,51 @@ public class MgxqlParser extends Parser {
 
 	public final Matching_opContext matching_op() throws RecognitionException {
 		Matching_opContext _localctx = new Matching_opContext(_ctx, getState());
-		enterRule(_localctx, 116, RULE_matching_op);
+		enterRule(_localctx, 128, RULE_matching_op);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(423);
+			setState(458);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==COMPARISON_OP_NOT) {
 				{
-				setState(422);
+				setState(457);
 				comparison_op_not();
 				}
 			}
 
-			setState(430);
+			setState(465);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case COMPARISON_OP_BETWEEN:
 				{
-				setState(425);
+				setState(460);
 				comparison_op_between();
 				}
 				break;
 			case COMPARISON_OP_IN:
 				{
-				setState(426);
+				setState(461);
 				comparison_op_in();
 				}
 				break;
 			case COMPARISON_OP_LIKE:
 				{
-				setState(427);
+				setState(462);
 				comparison_op_like();
 				}
 				break;
 			case COMPARISON_OP_LEFT_LIKE:
 				{
-				setState(428);
+				setState(463);
 				comparison_op_left_like();
 				}
 				break;
 			case COMPARISON_OP_RIGHT_LIKE:
 				{
-				setState(429);
+				setState(464);
 				comparison_op_right_like();
 				}
 				break;
@@ -3600,11 +3926,11 @@ public class MgxqlParser extends Parser {
 
 	public final Comparison_op_notContext comparison_op_not() throws RecognitionException {
 		Comparison_op_notContext _localctx = new Comparison_op_notContext(_ctx, getState());
-		enterRule(_localctx, 118, RULE_comparison_op_not);
+		enterRule(_localctx, 130, RULE_comparison_op_not);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(432);
+			setState(467);
 			match(COMPARISON_OP_NOT);
 			}
 		}
@@ -3643,11 +3969,11 @@ public class MgxqlParser extends Parser {
 
 	public final Comparison_op_betweenContext comparison_op_between() throws RecognitionException {
 		Comparison_op_betweenContext _localctx = new Comparison_op_betweenContext(_ctx, getState());
-		enterRule(_localctx, 120, RULE_comparison_op_between);
+		enterRule(_localctx, 132, RULE_comparison_op_between);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(434);
+			setState(469);
 			match(COMPARISON_OP_BETWEEN);
 			}
 		}
@@ -3686,11 +4012,11 @@ public class MgxqlParser extends Parser {
 
 	public final Comparison_op_inContext comparison_op_in() throws RecognitionException {
 		Comparison_op_inContext _localctx = new Comparison_op_inContext(_ctx, getState());
-		enterRule(_localctx, 122, RULE_comparison_op_in);
+		enterRule(_localctx, 134, RULE_comparison_op_in);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(436);
+			setState(471);
 			match(COMPARISON_OP_IN);
 			}
 		}
@@ -3729,11 +4055,11 @@ public class MgxqlParser extends Parser {
 
 	public final Comparison_op_likeContext comparison_op_like() throws RecognitionException {
 		Comparison_op_likeContext _localctx = new Comparison_op_likeContext(_ctx, getState());
-		enterRule(_localctx, 124, RULE_comparison_op_like);
+		enterRule(_localctx, 136, RULE_comparison_op_like);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(438);
+			setState(473);
 			match(COMPARISON_OP_LIKE);
 			}
 		}
@@ -3772,11 +4098,11 @@ public class MgxqlParser extends Parser {
 
 	public final Comparison_op_left_likeContext comparison_op_left_like() throws RecognitionException {
 		Comparison_op_left_likeContext _localctx = new Comparison_op_left_likeContext(_ctx, getState());
-		enterRule(_localctx, 126, RULE_comparison_op_left_like);
+		enterRule(_localctx, 138, RULE_comparison_op_left_like);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(440);
+			setState(475);
 			match(COMPARISON_OP_LEFT_LIKE);
 			}
 		}
@@ -3815,11 +4141,11 @@ public class MgxqlParser extends Parser {
 
 	public final Comparison_op_right_likeContext comparison_op_right_like() throws RecognitionException {
 		Comparison_op_right_likeContext _localctx = new Comparison_op_right_likeContext(_ctx, getState());
-		enterRule(_localctx, 128, RULE_comparison_op_right_like);
+		enterRule(_localctx, 140, RULE_comparison_op_right_like);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(442);
+			setState(477);
 			match(COMPARISON_OP_RIGHT_LIKE);
 			}
 		}
@@ -3863,22 +4189,22 @@ public class MgxqlParser extends Parser {
 
 	public final Comparison_op_nullContext comparison_op_null() throws RecognitionException {
 		Comparison_op_nullContext _localctx = new Comparison_op_nullContext(_ctx, getState());
-		enterRule(_localctx, 130, RULE_comparison_op_null);
+		enterRule(_localctx, 142, RULE_comparison_op_null);
 		try {
-			setState(446);
+			setState(481);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case COMPARISON_OP_IS_NULL:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(444);
+				setState(479);
 				comparison_op_is_null();
 				}
 				break;
 			case COMPARISON_OP_IS_NOT_NULL:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(445);
+				setState(480);
 				comparison_op_is_not_null();
 				}
 				break;
@@ -3921,11 +4247,11 @@ public class MgxqlParser extends Parser {
 
 	public final Comparison_op_is_nullContext comparison_op_is_null() throws RecognitionException {
 		Comparison_op_is_nullContext _localctx = new Comparison_op_is_nullContext(_ctx, getState());
-		enterRule(_localctx, 132, RULE_comparison_op_is_null);
+		enterRule(_localctx, 144, RULE_comparison_op_is_null);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(448);
+			setState(483);
 			match(COMPARISON_OP_IS_NULL);
 			}
 		}
@@ -3964,145 +4290,12 @@ public class MgxqlParser extends Parser {
 
 	public final Comparison_op_is_not_nullContext comparison_op_is_not_null() throws RecognitionException {
 		Comparison_op_is_not_nullContext _localctx = new Comparison_op_is_not_nullContext(_ctx, getState());
-		enterRule(_localctx, 134, RULE_comparison_op_is_not_null);
+		enterRule(_localctx, 146, RULE_comparison_op_is_not_null);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(450);
+			setState(485);
 			match(COMPARISON_OP_IS_NOT_NULL);
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	@SuppressWarnings("CheckReturnValue")
-	public static class Where_param_name_field_access_chainContext extends ParserRuleContext {
-		public Param_name_field_access_chainContext param_name_field_access_chain() {
-			return getRuleContext(Param_name_field_access_chainContext.class,0);
-		}
-		public Where_param_name_field_access_chainContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_where_param_name_field_access_chain; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterWhere_param_name_field_access_chain(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitWhere_param_name_field_access_chain(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitWhere_param_name_field_access_chain(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final Where_param_name_field_access_chainContext where_param_name_field_access_chain() throws RecognitionException {
-		Where_param_name_field_access_chainContext _localctx = new Where_param_name_field_access_chainContext(_ctx, getState());
-		enterRule(_localctx, 136, RULE_where_param_name_field_access_chain);
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(452);
-			param_name_field_access_chain();
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	@SuppressWarnings("CheckReturnValue")
-	public static class Param_colonContext extends ParserRuleContext {
-		public TerminalNode COLON() { return getToken(MgxqlParser.COLON, 0); }
-		public Param_colonContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_param_colon; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterParam_colon(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitParam_colon(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitParam_colon(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final Param_colonContext param_colon() throws RecognitionException {
-		Param_colonContext _localctx = new Param_colonContext(_ctx, getState());
-		enterRule(_localctx, 138, RULE_param_colon);
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(454);
-			match(COLON);
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	@SuppressWarnings("CheckReturnValue")
-	public static class Where_param_value_field_access_chainContext extends ParserRuleContext {
-		public Param_value_field_access_chainContext param_value_field_access_chain() {
-			return getRuleContext(Param_value_field_access_chainContext.class,0);
-		}
-		public Where_param_value_field_access_chainContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_where_param_value_field_access_chain; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterWhere_param_value_field_access_chain(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitWhere_param_value_field_access_chain(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitWhere_param_value_field_access_chain(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final Where_param_value_field_access_chainContext where_param_value_field_access_chain() throws RecognitionException {
-		Where_param_value_field_access_chainContext _localctx = new Where_param_value_field_access_chainContext(_ctx, getState());
-		enterRule(_localctx, 140, RULE_where_param_value_field_access_chain);
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(456);
-			param_value_field_access_chain();
 			}
 		}
 		catch (RecognitionException re) {
@@ -4140,11 +4333,11 @@ public class MgxqlParser extends Parser {
 
 	public final HavingContext having() throws RecognitionException {
 		HavingContext _localctx = new HavingContext(_ctx, getState());
-		enterRule(_localctx, 142, RULE_having);
+		enterRule(_localctx, 148, RULE_having);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(458);
+			setState(487);
 			match(HAVING);
 			}
 		}
@@ -4183,11 +4376,11 @@ public class MgxqlParser extends Parser {
 
 	public final Group_byContext group_by() throws RecognitionException {
 		Group_byContext _localctx = new Group_byContext(_ctx, getState());
-		enterRule(_localctx, 144, RULE_group_by);
+		enterRule(_localctx, 150, RULE_group_by);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(460);
+			setState(489);
 			match(GROUP_BY);
 			}
 		}
@@ -4226,11 +4419,11 @@ public class MgxqlParser extends Parser {
 
 	public final Order_byContext order_by() throws RecognitionException {
 		Order_byContext _localctx = new Order_byContext(_ctx, getState());
-		enterRule(_localctx, 146, RULE_order_by);
+		enterRule(_localctx, 152, RULE_order_by);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(462);
+			setState(491);
 			match(ORDER_BY);
 			}
 		}
@@ -4269,12 +4462,156 @@ public class MgxqlParser extends Parser {
 
 	public final Order_by_directionContext order_by_direction() throws RecognitionException {
 		Order_by_directionContext _localctx = new Order_by_directionContext(_ctx, getState());
-		enterRule(_localctx, 148, RULE_order_by_direction);
+		enterRule(_localctx, 154, RULE_order_by_direction);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(464);
+			setState(493);
 			match(ORDER_BY_DIRECTION);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	@SuppressWarnings("CheckReturnValue")
+	public static class Field_referenceContext extends ParserRuleContext {
+		public Field_nameContext field_name() {
+			return getRuleContext(Field_nameContext.class,0);
+		}
+		public Entity_name_aliasContext entity_name_alias() {
+			return getRuleContext(Entity_name_aliasContext.class,0);
+		}
+		public DotContext dot() {
+			return getRuleContext(DotContext.class,0);
+		}
+		public Field_referenceContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_field_reference; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterField_reference(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitField_reference(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitField_reference(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final Field_referenceContext field_reference() throws RecognitionException {
+		Field_referenceContext _localctx = new Field_referenceContext(_ctx, getState());
+		enterRule(_localctx, 156, RULE_field_reference);
+		try {
+			setState(500);
+			_errHandler.sync(this);
+			switch ( getInterpreter().adaptivePredict(_input,31,_ctx) ) {
+			case 1:
+				enterOuterAlt(_localctx, 1);
+				{
+				setState(495);
+				field_name();
+				}
+				break;
+			case 2:
+				enterOuterAlt(_localctx, 2);
+				{
+				setState(496);
+				entity_name_alias();
+				setState(497);
+				dot();
+				setState(498);
+				field_name();
+				}
+				break;
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	@SuppressWarnings("CheckReturnValue")
+	public static class Parameter_referenceContext extends ParserRuleContext {
+		public Param_colonContext param_colon() {
+			return getRuleContext(Param_colonContext.class,0);
+		}
+		public List<Field_nameContext> field_name() {
+			return getRuleContexts(Field_nameContext.class);
+		}
+		public Field_nameContext field_name(int i) {
+			return getRuleContext(Field_nameContext.class,i);
+		}
+		public List<DotContext> dot() {
+			return getRuleContexts(DotContext.class);
+		}
+		public DotContext dot(int i) {
+			return getRuleContext(DotContext.class,i);
+		}
+		public Parameter_referenceContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_parameter_reference; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterParameter_reference(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitParameter_reference(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitParameter_reference(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final Parameter_referenceContext parameter_reference() throws RecognitionException {
+		Parameter_referenceContext _localctx = new Parameter_referenceContext(_ctx, getState());
+		enterRule(_localctx, 158, RULE_parameter_reference);
+		int _la;
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(502);
+			param_colon();
+			setState(503);
+			field_name();
+			setState(509);
+			_errHandler.sync(this);
+			_la = _input.LA(1);
+			while (_la==DOT) {
+				{
+				{
+				setState(504);
+				dot();
+				setState(505);
+				field_name();
+				}
+				}
+				setState(511);
+				_errHandler.sync(this);
+				_la = _input.LA(1);
+			}
 			}
 		}
 		catch (RecognitionException re) {
@@ -4312,11 +4649,11 @@ public class MgxqlParser extends Parser {
 
 	public final Entity_nameContext entity_name() throws RecognitionException {
 		Entity_nameContext _localctx = new Entity_nameContext(_ctx, getState());
-		enterRule(_localctx, 150, RULE_entity_name);
+		enterRule(_localctx, 160, RULE_entity_name);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(466);
+			setState(512);
 			match(UPPER_NAME);
 			}
 		}
@@ -4355,11 +4692,11 @@ public class MgxqlParser extends Parser {
 
 	public final Entity_name_aliasContext entity_name_alias() throws RecognitionException {
 		Entity_name_aliasContext _localctx = new Entity_name_aliasContext(_ctx, getState());
-		enterRule(_localctx, 152, RULE_entity_name_alias);
+		enterRule(_localctx, 162, RULE_entity_name_alias);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(468);
+			setState(514);
 			match(LOWER_NAME);
 			}
 		}
@@ -4398,211 +4735,12 @@ public class MgxqlParser extends Parser {
 
 	public final Field_nameContext field_name() throws RecognitionException {
 		Field_nameContext _localctx = new Field_nameContext(_ctx, getState());
-		enterRule(_localctx, 154, RULE_field_name);
+		enterRule(_localctx, 164, RULE_field_name);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(470);
+			setState(516);
 			match(LOWER_NAME);
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	@SuppressWarnings("CheckReturnValue")
-	public static class Entity_field_access_chainContext extends ParserRuleContext {
-		public Entity_name_aliasContext entity_name_alias() {
-			return getRuleContext(Entity_name_aliasContext.class,0);
-		}
-		public DotContext dot() {
-			return getRuleContext(DotContext.class,0);
-		}
-		public Field_nameContext field_name() {
-			return getRuleContext(Field_nameContext.class,0);
-		}
-		public Entity_field_access_chainContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_entity_field_access_chain; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterEntity_field_access_chain(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitEntity_field_access_chain(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitEntity_field_access_chain(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final Entity_field_access_chainContext entity_field_access_chain() throws RecognitionException {
-		Entity_field_access_chainContext _localctx = new Entity_field_access_chainContext(_ctx, getState());
-		enterRule(_localctx, 156, RULE_entity_field_access_chain);
-		int _la;
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(472);
-			entity_name_alias();
-			setState(476);
-			_errHandler.sync(this);
-			_la = _input.LA(1);
-			if (_la==DOT) {
-				{
-				setState(473);
-				dot();
-				setState(474);
-				field_name();
-				}
-			}
-
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	@SuppressWarnings("CheckReturnValue")
-	public static class Param_name_field_access_chainContext extends ParserRuleContext {
-		public Entity_name_aliasContext entity_name_alias() {
-			return getRuleContext(Entity_name_aliasContext.class,0);
-		}
-		public DotContext dot() {
-			return getRuleContext(DotContext.class,0);
-		}
-		public Field_nameContext field_name() {
-			return getRuleContext(Field_nameContext.class,0);
-		}
-		public Param_name_field_access_chainContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_param_name_field_access_chain; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterParam_name_field_access_chain(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitParam_name_field_access_chain(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitParam_name_field_access_chain(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final Param_name_field_access_chainContext param_name_field_access_chain() throws RecognitionException {
-		Param_name_field_access_chainContext _localctx = new Param_name_field_access_chainContext(_ctx, getState());
-		enterRule(_localctx, 158, RULE_param_name_field_access_chain);
-		int _la;
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(478);
-			entity_name_alias();
-			setState(482);
-			_errHandler.sync(this);
-			_la = _input.LA(1);
-			if (_la==DOT) {
-				{
-				setState(479);
-				dot();
-				setState(480);
-				field_name();
-				}
-			}
-
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	@SuppressWarnings("CheckReturnValue")
-	public static class Param_value_field_access_chainContext extends ParserRuleContext {
-		public List<Field_nameContext> field_name() {
-			return getRuleContexts(Field_nameContext.class);
-		}
-		public Field_nameContext field_name(int i) {
-			return getRuleContext(Field_nameContext.class,i);
-		}
-		public List<DotContext> dot() {
-			return getRuleContexts(DotContext.class);
-		}
-		public DotContext dot(int i) {
-			return getRuleContext(DotContext.class,i);
-		}
-		public Param_value_field_access_chainContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_param_value_field_access_chain; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterParam_value_field_access_chain(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitParam_value_field_access_chain(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitParam_value_field_access_chain(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final Param_value_field_access_chainContext param_value_field_access_chain() throws RecognitionException {
-		Param_value_field_access_chainContext _localctx = new Param_value_field_access_chainContext(_ctx, getState());
-		enterRule(_localctx, 160, RULE_param_value_field_access_chain);
-		int _la;
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(484);
-			field_name();
-			setState(490);
-			_errHandler.sync(this);
-			_la = _input.LA(1);
-			while (_la==DOT) {
-				{
-				{
-				setState(485);
-				dot();
-				setState(486);
-				field_name();
-				}
-				}
-				setState(492);
-				_errHandler.sync(this);
-				_la = _input.LA(1);
-			}
 			}
 		}
 		catch (RecognitionException re) {
@@ -4640,11 +4778,11 @@ public class MgxqlParser extends Parser {
 
 	public final Left_bracketContext left_bracket() throws RecognitionException {
 		Left_bracketContext _localctx = new Left_bracketContext(_ctx, getState());
-		enterRule(_localctx, 162, RULE_left_bracket);
+		enterRule(_localctx, 166, RULE_left_bracket);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(493);
+			setState(518);
 			match(LEFT_BRACKET);
 			}
 		}
@@ -4683,11 +4821,11 @@ public class MgxqlParser extends Parser {
 
 	public final Right_bracketContext right_bracket() throws RecognitionException {
 		Right_bracketContext _localctx = new Right_bracketContext(_ctx, getState());
-		enterRule(_localctx, 164, RULE_right_bracket);
+		enterRule(_localctx, 168, RULE_right_bracket);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(495);
+			setState(520);
 			match(RIGHT_BRACKET);
 			}
 		}
@@ -4726,12 +4864,141 @@ public class MgxqlParser extends Parser {
 
 	public final DotContext dot() throws RecognitionException {
 		DotContext _localctx = new DotContext(_ctx, getState());
-		enterRule(_localctx, 166, RULE_dot);
+		enterRule(_localctx, 170, RULE_dot);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(497);
+			setState(522);
 			match(DOT);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	@SuppressWarnings("CheckReturnValue")
+	public static class Param_colonContext extends ParserRuleContext {
+		public TerminalNode COLON() { return getToken(MgxqlParser.COLON, 0); }
+		public Param_colonContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_param_colon; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterParam_colon(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitParam_colon(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitParam_colon(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final Param_colonContext param_colon() throws RecognitionException {
+		Param_colonContext _localctx = new Param_colonContext(_ctx, getState());
+		enterRule(_localctx, 172, RULE_param_colon);
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(524);
+			match(COLON);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	@SuppressWarnings("CheckReturnValue")
+	public static class CommaContext extends ParserRuleContext {
+		public TerminalNode COMMA() { return getToken(MgxqlParser.COMMA, 0); }
+		public CommaContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_comma; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterComma(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitComma(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitComma(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final CommaContext comma() throws RecognitionException {
+		CommaContext _localctx = new CommaContext(_ctx, getState());
+		enterRule(_localctx, 174, RULE_comma);
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(526);
+			match(COMMA);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	@SuppressWarnings("CheckReturnValue")
+	public static class Question_markContext extends ParserRuleContext {
+		public TerminalNode QUESTION_MARK() { return getToken(MgxqlParser.QUESTION_MARK, 0); }
+		public Question_markContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_question_mark; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).enterQuestion_mark(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MgxqlParserListener ) ((MgxqlParserListener)listener).exitQuestion_mark(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MgxqlParserVisitor ) return ((MgxqlParserVisitor<? extends T>)visitor).visitQuestion_mark(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final Question_markContext question_mark() throws RecognitionException {
+		Question_markContext _localctx = new Question_markContext(_ctx, getState());
+		enterRule(_localctx, 176, RULE_question_mark);
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(528);
+			match(QUESTION_MARK);
 			}
 		}
 		catch (RecognitionException re) {
@@ -4769,11 +5036,11 @@ public class MgxqlParser extends Parser {
 
 	public final NumberContext number() throws RecognitionException {
 		NumberContext _localctx = new NumberContext(_ctx, getState());
-		enterRule(_localctx, 168, RULE_number);
+		enterRule(_localctx, 178, RULE_number);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(499);
+			setState(530);
 			match(NUMBER);
 			}
 		}
@@ -4812,11 +5079,11 @@ public class MgxqlParser extends Parser {
 
 	public final EndContext end() throws RecognitionException {
 		EndContext _localctx = new EndContext(_ctx, getState());
-		enterRule(_localctx, 170, RULE_end);
+		enterRule(_localctx, 180, RULE_end);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(501);
+			setState(532);
 			match(EOF);
 			}
 		}
@@ -4832,7 +5099,7 @@ public class MgxqlParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\u0004\u0001-\u01f8\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001\u0002"+
+		"\u0004\u0001.\u0217\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001\u0002"+
 		"\u0002\u0007\u0002\u0002\u0003\u0007\u0003\u0002\u0004\u0007\u0004\u0002"+
 		"\u0005\u0007\u0005\u0002\u0006\u0007\u0006\u0002\u0007\u0007\u0007\u0002"+
 		"\b\u0007\b\u0002\t\u0007\t\u0002\n\u0007\n\u0002\u000b\u0007\u000b\u0002"+
@@ -4853,267 +5120,282 @@ public class MgxqlParser extends Parser {
 		"F\u0007F\u0002G\u0007G\u0002H\u0007H\u0002I\u0007I\u0002J\u0007J\u0002"+
 		"K\u0007K\u0002L\u0007L\u0002M\u0007M\u0002N\u0007N\u0002O\u0007O\u0002"+
 		"P\u0007P\u0002Q\u0007Q\u0002R\u0007R\u0002S\u0007S\u0002T\u0007T\u0002"+
-		"U\u0007U\u0001\u0000\u0001\u0000\u0001\u0000\u0001\u0000\u0003\u0000\u00b1"+
+		"U\u0007U\u0002V\u0007V\u0002W\u0007W\u0002X\u0007X\u0002Y\u0007Y\u0002"+
+		"Z\u0007Z\u0001\u0000\u0001\u0000\u0001\u0000\u0001\u0000\u0003\u0000\u00bb"+
 		"\b\u0000\u0001\u0000\u0001\u0000\u0001\u0001\u0001\u0001\u0001\u0002\u0001"+
 		"\u0002\u0001\u0003\u0001\u0003\u0001\u0003\u0001\u0004\u0001\u0004\u0001"+
 		"\u0005\u0001\u0005\u0001\u0005\u0001\u0006\u0001\u0006\u0001\u0007\u0001"+
-		"\u0007\u0001\u0007\u0001\u0007\u0003\u0007\u00c7\b\u0007\u0001\u0007\u0003"+
-		"\u0007\u00ca\b\u0007\u0001\u0007\u0003\u0007\u00cd\b\u0007\u0001\u0007"+
-		"\u0003\u0007\u00d0\b\u0007\u0001\u0007\u0003\u0007\u00d3\b\u0007\u0001"+
-		"\b\u0001\b\u0001\b\u0001\b\u0005\b\u00d9\b\b\n\b\f\b\u00dc\t\b\u0001\t"+
-		"\u0001\t\u0001\t\u0003\t\u00e1\b\t\u0001\n\u0001\n\u0001\u000b\u0001\u000b"+
-		"\u0001\u000b\u0003\u000b\u00e8\b\u000b\u0001\u000b\u0001\u000b\u0001\f"+
-		"\u0001\f\u0001\r\u0001\r\u0001\r\u0003\r\u00f1\b\r\u0001\r\u0001\r\u0001"+
-		"\u000e\u0001\u000e\u0001\u000e\u0001\u000e\u0003\u000e\u00f9\b\u000e\u0001"+
-		"\u000f\u0001\u000f\u0001\u000f\u0001\u000f\u0001\u000f\u0003\u000f\u0100"+
-		"\b\u000f\u0001\u000f\u0001\u000f\u0001\u0010\u0001\u0010\u0001\u0010\u0001"+
-		"\u0010\u0001\u0010\u0001\u0011\u0001\u0011\u0001\u0011\u0001\u0011\u0001"+
-		"\u0011\u0001\u0012\u0001\u0012\u0001\u0012\u0001\u0012\u0001\u0012\u0001"+
-		"\u0013\u0001\u0013\u0001\u0014\u0001\u0014\u0001\u0015\u0001\u0015\u0001"+
-		"\u0016\u0001\u0016\u0001\u0017\u0001\u0017\u0001\u0017\u0005\u0017\u011e"+
-		"\b\u0017\n\u0017\f\u0017\u0121\t\u0017\u0001\u0018\u0001\u0018\u0003\u0018"+
-		"\u0125\b\u0018\u0001\u0019\u0001\u0019\u0001\u0019\u0003\u0019\u012a\b"+
-		"\u0019\u0001\u001a\u0001\u001a\u0001\u001b\u0001\u001b\u0001\u001c\u0001"+
-		"\u001c\u0001\u001d\u0001\u001d\u0001\u001d\u0001\u001e\u0001\u001e\u0001"+
-		"\u001e\u0001\u001f\u0001\u001f\u0001 \u0001 \u0001 \u0001 \u0005 \u013e"+
-		"\b \n \f \u0141\t \u0001!\u0001!\u0001!\u0001!\u0005!\u0147\b!\n!\f!\u014a"+
-		"\t!\u0001\"\u0001\"\u0001\"\u0001\"\u0001\"\u0003\"\u0151\b\"\u0001#\u0001"+
-		"#\u0001#\u0003#\u0156\b#\u0001$\u0001$\u0003$\u015a\b$\u0001$\u0001$\u0001"+
-		"$\u0001%\u0001%\u0001&\u0001&\u0001&\u0003&\u0164\b&\u0004&\u0166\b&\u000b"+
-		"&\f&\u0167\u0001\'\u0001\'\u0001\'\u0001\'\u0004\'\u016e\b\'\u000b\'\f"+
-		"\'\u016f\u0001(\u0001(\u0001(\u0001(\u0001)\u0001)\u0004)\u0178\b)\u000b"+
-		")\f)\u0179\u0001*\u0001*\u0003*\u017e\b*\u0001+\u0001+\u0001+\u0001+\u0001"+
-		"+\u0001,\u0001,\u0001-\u0001-\u0001.\u0001.\u0001/\u0001/\u00010\u0001"+
-		"0\u00011\u00011\u00012\u00012\u00013\u00013\u00013\u00013\u00013\u0001"+
-		"3\u00033\u0199\b3\u00014\u00014\u00015\u00015\u00016\u00016\u00017\u0001"+
-		"7\u00018\u00018\u00019\u00019\u0001:\u0003:\u01a8\b:\u0001:\u0001:\u0001"+
-		":\u0001:\u0001:\u0003:\u01af\b:\u0001;\u0001;\u0001<\u0001<\u0001=\u0001"+
-		"=\u0001>\u0001>\u0001?\u0001?\u0001@\u0001@\u0001A\u0001A\u0003A\u01bf"+
-		"\bA\u0001B\u0001B\u0001C\u0001C\u0001D\u0001D\u0001E\u0001E\u0001F\u0001"+
-		"F\u0001G\u0001G\u0001H\u0001H\u0001I\u0001I\u0001J\u0001J\u0001K\u0001"+
-		"K\u0001L\u0001L\u0001M\u0001M\u0001N\u0001N\u0001N\u0001N\u0003N\u01dd"+
-		"\bN\u0001O\u0001O\u0001O\u0001O\u0003O\u01e3\bO\u0001P\u0001P\u0001P\u0001"+
-		"P\u0005P\u01e9\bP\nP\fP\u01ec\tP\u0001Q\u0001Q\u0001R\u0001R\u0001S\u0001"+
-		"S\u0001T\u0001T\u0001U\u0001U\u0001U\u0000\u0000V\u0000\u0002\u0004\u0006"+
+		"\u0007\u0001\u0007\u0001\u0007\u0003\u0007\u00d1\b\u0007\u0001\u0007\u0003"+
+		"\u0007\u00d4\b\u0007\u0001\u0007\u0003\u0007\u00d7\b\u0007\u0001\u0007"+
+		"\u0003\u0007\u00da\b\u0007\u0001\u0007\u0003\u0007\u00dd\b\u0007\u0001"+
+		"\b\u0001\b\u0001\b\u0001\b\u0005\b\u00e3\b\b\n\b\f\b\u00e6\t\b\u0001\t"+
+		"\u0001\t\u0001\t\u0003\t\u00eb\b\t\u0001\n\u0001\n\u0001\n\u0001\n\u0001"+
+		"\n\u0003\n\u00f2\b\n\u0001\u000b\u0001\u000b\u0001\f\u0001\f\u0001\r\u0001"+
+		"\r\u0001\u000e\u0001\u000e\u0001\u000e\u0001\u000e\u0001\u000e\u0001\u000f"+
+		"\u0001\u000f\u0001\u000f\u0001\u000f\u0001\u000f\u0003\u000f\u0104\b\u000f"+
+		"\u0001\u0010\u0001\u0010\u0001\u0011\u0001\u0011\u0001\u0012\u0001\u0012"+
+		"\u0001\u0013\u0001\u0013\u0001\u0014\u0001\u0014\u0001\u0015\u0001\u0015"+
+		"\u0001\u0016\u0001\u0016\u0001\u0016\u0005\u0016\u0115\b\u0016\n\u0016"+
+		"\f\u0016\u0118\t\u0016\u0001\u0017\u0001\u0017\u0003\u0017\u011c\b\u0017"+
+		"\u0001\u0018\u0001\u0018\u0001\u0018\u0003\u0018\u0121\b\u0018\u0001\u0018"+
+		"\u0001\u0018\u0001\u0018\u0001\u0019\u0001\u0019\u0001\u001a\u0001\u001a"+
+		"\u0001\u001b\u0001\u001b\u0001\u001c\u0001\u001c\u0001\u001c\u0001\u001d"+
+		"\u0001\u001d\u0001\u001e\u0001\u001e\u0001\u001e\u0001\u001e\u0001\u001f"+
+		"\u0001\u001f\u0001 \u0001 \u0001 \u0001!\u0001!\u0001!\u0001!\u0005!\u013e"+
+		"\b!\n!\f!\u0141\t!\u0001\"\u0001\"\u0001\"\u0001\"\u0005\"\u0147\b\"\n"+
+		"\"\f\"\u014a\t\"\u0001#\u0001#\u0001#\u0001#\u0001#\u0003#\u0151\b#\u0001"+
+		"$\u0003$\u0154\b$\u0001$\u0001$\u0001$\u0003$\u0159\b$\u0001%\u0001%\u0003"+
+		"%\u015d\b%\u0001%\u0001%\u0001&\u0001&\u0001\'\u0001\'\u0003\'\u0165\b"+
+		"\'\u0001(\u0001(\u0001(\u0001)\u0001)\u0001)\u0001)\u0005)\u016e\b)\n"+
+		")\f)\u0171\t)\u0001*\u0001*\u0001*\u0001+\u0001+\u0001+\u0001+\u0005+"+
+		"\u017a\b+\n+\f+\u017d\t+\u0001,\u0001,\u0001,\u0001,\u0005,\u0183\b,\n"+
+		",\f,\u0186\t,\u0001-\u0001-\u0001-\u0001-\u0001-\u0003-\u018d\b-\u0001"+
+		".\u0001.\u0001.\u0001.\u0001/\u0001/\u0003/\u0195\b/\u00010\u00010\u0001"+
+		"0\u00010\u00010\u00050\u019c\b0\n0\f0\u019f\t0\u00011\u00011\u00031\u01a3"+
+		"\b1\u00012\u00012\u00012\u00012\u00012\u00013\u00013\u00014\u00014\u0001"+
+		"5\u00015\u00016\u00016\u00017\u00017\u00018\u00018\u00019\u00019\u0001"+
+		"9\u00019\u00019\u00019\u00039\u01bc\b9\u0001:\u0001:\u0001;\u0001;\u0001"+
+		"<\u0001<\u0001=\u0001=\u0001>\u0001>\u0001?\u0001?\u0001@\u0003@\u01cb"+
+		"\b@\u0001@\u0001@\u0001@\u0001@\u0001@\u0003@\u01d2\b@\u0001A\u0001A\u0001"+
+		"B\u0001B\u0001C\u0001C\u0001D\u0001D\u0001E\u0001E\u0001F\u0001F\u0001"+
+		"G\u0001G\u0003G\u01e2\bG\u0001H\u0001H\u0001I\u0001I\u0001J\u0001J\u0001"+
+		"K\u0001K\u0001L\u0001L\u0001M\u0001M\u0001N\u0001N\u0001N\u0001N\u0001"+
+		"N\u0003N\u01f5\bN\u0001O\u0001O\u0001O\u0001O\u0001O\u0005O\u01fc\bO\n"+
+		"O\fO\u01ff\tO\u0001P\u0001P\u0001Q\u0001Q\u0001R\u0001R\u0001S\u0001S"+
+		"\u0001T\u0001T\u0001U\u0001U\u0001V\u0001V\u0001W\u0001W\u0001X\u0001"+
+		"X\u0001Y\u0001Y\u0001Z\u0001Z\u0001Z\u0000\u0000[\u0000\u0002\u0004\u0006"+
 		"\b\n\f\u000e\u0010\u0012\u0014\u0016\u0018\u001a\u001c\u001e \"$&(*,."+
 		"02468:<>@BDFHJLNPRTVXZ\\^`bdfhjlnprtvxz|~\u0080\u0082\u0084\u0086\u0088"+
 		"\u008a\u008c\u008e\u0090\u0092\u0094\u0096\u0098\u009a\u009c\u009e\u00a0"+
-		"\u00a2\u00a4\u00a6\u00a8\u00aa\u0000\u0000\u01ce\u0000\u00b0\u0001\u0000"+
-		"\u0000\u0000\u0002\u00b4\u0001\u0000\u0000\u0000\u0004\u00b6\u0001\u0000"+
-		"\u0000\u0000\u0006\u00b8\u0001\u0000\u0000\u0000\b\u00bb\u0001\u0000\u0000"+
-		"\u0000\n\u00bd\u0001\u0000\u0000\u0000\f\u00c0\u0001\u0000\u0000\u0000"+
-		"\u000e\u00c2\u0001\u0000\u0000\u0000\u0010\u00d4\u0001\u0000\u0000\u0000"+
-		"\u0012\u00e0\u0001\u0000\u0000\u0000\u0014\u00e2\u0001\u0000\u0000\u0000"+
-		"\u0016\u00e7\u0001\u0000\u0000\u0000\u0018\u00eb\u0001\u0000\u0000\u0000"+
-		"\u001a\u00f0\u0001\u0000\u0000\u0000\u001c\u00f8\u0001\u0000\u0000\u0000"+
-		"\u001e\u00fa\u0001\u0000\u0000\u0000 \u0103\u0001\u0000\u0000\u0000\""+
-		"\u0108\u0001\u0000\u0000\u0000$\u010d\u0001\u0000\u0000\u0000&\u0112\u0001"+
-		"\u0000\u0000\u0000(\u0114\u0001\u0000\u0000\u0000*\u0116\u0001\u0000\u0000"+
-		"\u0000,\u0118\u0001\u0000\u0000\u0000.\u011a\u0001\u0000\u0000\u00000"+
-		"\u0122\u0001\u0000\u0000\u00002\u0126\u0001\u0000\u0000\u00004\u012b\u0001"+
-		"\u0000\u0000\u00006\u012d\u0001\u0000\u0000\u00008\u012f\u0001\u0000\u0000"+
-		"\u0000:\u0131\u0001\u0000\u0000\u0000<\u0134\u0001\u0000\u0000\u0000>"+
-		"\u0137\u0001\u0000\u0000\u0000@\u0139\u0001\u0000\u0000\u0000B\u0142\u0001"+
-		"\u0000\u0000\u0000D\u0150\u0001\u0000\u0000\u0000F\u0152\u0001\u0000\u0000"+
-		"\u0000H\u0159\u0001\u0000\u0000\u0000J\u015e\u0001\u0000\u0000\u0000L"+
-		"\u0160\u0001\u0000\u0000\u0000N\u0169\u0001\u0000\u0000\u0000P\u0171\u0001"+
-		"\u0000\u0000\u0000R\u0175\u0001\u0000\u0000\u0000T\u017b\u0001\u0000\u0000"+
-		"\u0000V\u017f\u0001\u0000\u0000\u0000X\u0184\u0001\u0000\u0000\u0000Z"+
-		"\u0186\u0001\u0000\u0000\u0000\\\u0188\u0001\u0000\u0000\u0000^\u018a"+
-		"\u0001\u0000\u0000\u0000`\u018c\u0001\u0000\u0000\u0000b\u018e\u0001\u0000"+
-		"\u0000\u0000d\u0190\u0001\u0000\u0000\u0000f\u0198\u0001\u0000\u0000\u0000"+
-		"h\u019a\u0001\u0000\u0000\u0000j\u019c\u0001\u0000\u0000\u0000l\u019e"+
-		"\u0001\u0000\u0000\u0000n\u01a0\u0001\u0000\u0000\u0000p\u01a2\u0001\u0000"+
-		"\u0000\u0000r\u01a4\u0001\u0000\u0000\u0000t\u01a7\u0001\u0000\u0000\u0000"+
-		"v\u01b0\u0001\u0000\u0000\u0000x\u01b2\u0001\u0000\u0000\u0000z\u01b4"+
-		"\u0001\u0000\u0000\u0000|\u01b6\u0001\u0000\u0000\u0000~\u01b8\u0001\u0000"+
-		"\u0000\u0000\u0080\u01ba\u0001\u0000\u0000\u0000\u0082\u01be\u0001\u0000"+
-		"\u0000\u0000\u0084\u01c0\u0001\u0000\u0000\u0000\u0086\u01c2\u0001\u0000"+
-		"\u0000\u0000\u0088\u01c4\u0001\u0000\u0000\u0000\u008a\u01c6\u0001\u0000"+
-		"\u0000\u0000\u008c\u01c8\u0001\u0000\u0000\u0000\u008e\u01ca\u0001\u0000"+
-		"\u0000\u0000\u0090\u01cc\u0001\u0000\u0000\u0000\u0092\u01ce\u0001\u0000"+
-		"\u0000\u0000\u0094\u01d0\u0001\u0000\u0000\u0000\u0096\u01d2\u0001\u0000"+
-		"\u0000\u0000\u0098\u01d4\u0001\u0000\u0000\u0000\u009a\u01d6\u0001\u0000"+
-		"\u0000\u0000\u009c\u01d8\u0001\u0000\u0000\u0000\u009e\u01de\u0001\u0000"+
-		"\u0000\u0000\u00a0\u01e4\u0001\u0000\u0000\u0000\u00a2\u01ed\u0001\u0000"+
-		"\u0000\u0000\u00a4\u01ef\u0001\u0000\u0000\u0000\u00a6\u01f1\u0001\u0000"+
-		"\u0000\u0000\u00a8\u01f3\u0001\u0000\u0000\u0000\u00aa\u01f5\u0001\u0000"+
-		"\u0000\u0000\u00ac\u00b1\u0003\u0002\u0001\u0000\u00ad\u00b1\u0003\u0006"+
-		"\u0003\u0000\u00ae\u00b1\u0003\n\u0005\u0000\u00af\u00b1\u0003\u000e\u0007"+
-		"\u0000\u00b0\u00ac\u0001\u0000\u0000\u0000\u00b0\u00ad\u0001\u0000\u0000"+
-		"\u0000\u00b0\u00ae\u0001\u0000\u0000\u0000\u00b0\u00af\u0001\u0000\u0000"+
-		"\u0000\u00b1\u00b2\u0001\u0000\u0000\u0000\u00b2\u00b3\u0003\u00aaU\u0000"+
-		"\u00b3\u0001\u0001\u0000\u0000\u0000\u00b4\u00b5\u0003\u0004\u0002\u0000"+
-		"\u00b5\u0003\u0001\u0000\u0000\u0000\u00b6\u00b7\u0005\u0001\u0000\u0000"+
-		"\u00b7\u0005\u0001\u0000\u0000\u0000\u00b8\u00b9\u0003\b\u0004\u0000\u00b9"+
-		"\u00ba\u0003<\u001e\u0000\u00ba\u0007\u0001\u0000\u0000\u0000\u00bb\u00bc"+
-		"\u0005\u0002\u0000\u0000\u00bc\t\u0001\u0000\u0000\u0000\u00bd\u00be\u0003"+
-		"\f\u0006\u0000\u00be\u00bf\u0003<\u001e\u0000\u00bf\u000b\u0001\u0000"+
-		"\u0000\u0000\u00c0\u00c1\u0005\u0003\u0000\u0000\u00c1\r\u0001\u0000\u0000"+
-		"\u0000\u00c2\u00c3\u0003\u0014\n\u0000\u00c3\u00c4\u0003\u0010\b\u0000"+
-		"\u00c4\u00c6\u0003.\u0017\u0000\u00c5\u00c7\u0003<\u001e\u0000\u00c6\u00c5"+
-		"\u0001\u0000\u0000\u0000\u00c6\u00c7\u0001\u0000\u0000\u0000\u00c7\u00c9"+
-		"\u0001\u0000\u0000\u0000\u00c8\u00ca\u0003L&\u0000\u00c9\u00c8\u0001\u0000"+
-		"\u0000\u0000\u00c9\u00ca\u0001\u0000\u0000\u0000\u00ca\u00cc\u0001\u0000"+
-		"\u0000\u0000\u00cb\u00cd\u0003N\'\u0000\u00cc\u00cb\u0001\u0000\u0000"+
-		"\u0000\u00cc\u00cd\u0001\u0000\u0000\u0000\u00cd\u00cf\u0001\u0000\u0000"+
-		"\u0000\u00ce\u00d0\u0003R)\u0000\u00cf\u00ce\u0001\u0000\u0000\u0000\u00cf"+
-		"\u00d0\u0001\u0000\u0000\u0000\u00d0\u00d2\u0001\u0000\u0000\u0000\u00d1"+
-		"\u00d3\u0003V+\u0000\u00d2\u00d1\u0001\u0000\u0000\u0000\u00d2\u00d3\u0001"+
-		"\u0000\u0000\u0000\u00d3\u000f\u0001\u0000\u0000\u0000\u00d4\u00da\u0003"+
-		"\u0012\t\u0000\u00d5\u00d6\u0003\\.\u0000\u00d6\u00d7\u0003\u0012\t\u0000"+
-		"\u00d7\u00d9\u0001\u0000\u0000\u0000\u00d8\u00d5\u0001\u0000\u0000\u0000"+
-		"\u00d9\u00dc\u0001\u0000\u0000\u0000\u00da\u00d8\u0001\u0000\u0000\u0000"+
-		"\u00da\u00db\u0001\u0000\u0000\u0000\u00db\u0011\u0001\u0000\u0000\u0000"+
-		"\u00dc\u00da\u0001\u0000\u0000\u0000\u00dd\u00e1\u0003\u0016\u000b\u0000"+
-		"\u00de\u00e1\u0003\u001a\r\u0000\u00df\u00e1\u0003\u001c\u000e\u0000\u00e0"+
-		"\u00dd\u0001\u0000\u0000\u0000\u00e0\u00de\u0001\u0000\u0000\u0000\u00e0"+
-		"\u00df\u0001\u0000\u0000\u0000\u00e1\u0013\u0001\u0000\u0000\u0000\u00e2"+
-		"\u00e3\u0005\u0004\u0000\u0000\u00e3\u0015\u0001\u0000\u0000\u0000\u00e4"+
-		"\u00e5\u0003\u0098L\u0000\u00e5\u00e6\u0003\u00a6S\u0000\u00e6\u00e8\u0001"+
-		"\u0000\u0000\u0000\u00e7\u00e4\u0001\u0000\u0000\u0000\u00e7\u00e8\u0001"+
-		"\u0000\u0000\u0000\u00e8\u00e9\u0001\u0000\u0000\u0000\u00e9\u00ea\u0003"+
-		"\u0018\f\u0000\u00ea\u0017\u0001\u0000\u0000\u0000\u00eb\u00ec\u0005\u0005"+
-		"\u0000\u0000\u00ec\u0019\u0001\u0000\u0000\u0000\u00ed\u00ee\u0003\u0098"+
-		"L\u0000\u00ee\u00ef\u0003\u00a6S\u0000\u00ef\u00f1\u0001\u0000\u0000\u0000"+
-		"\u00f0\u00ed\u0001\u0000\u0000\u0000\u00f0\u00f1\u0001\u0000\u0000\u0000"+
-		"\u00f1\u00f2\u0001\u0000\u0000\u0000\u00f2\u00f3\u0003\u009aM\u0000\u00f3"+
-		"\u001b\u0001\u0000\u0000\u0000\u00f4\u00f9\u0003\u001e\u000f\u0000\u00f5"+
-		"\u00f9\u0003 \u0010\u0000\u00f6\u00f9\u0003\"\u0011\u0000\u00f7\u00f9"+
-		"\u0003$\u0012\u0000\u00f8\u00f4\u0001\u0000\u0000\u0000\u00f8\u00f5\u0001"+
-		"\u0000\u0000\u0000\u00f8\u00f6\u0001\u0000\u0000\u0000\u00f8\u00f7\u0001"+
-		"\u0000\u0000\u0000\u00f9\u001d\u0001\u0000\u0000\u0000\u00fa\u00fb\u0003"+
-		"&\u0013\u0000\u00fb\u00ff\u0003\u00a2Q\u0000\u00fc\u0100\u0003\u00a8T"+
-		"\u0000\u00fd\u0100\u0003\u0016\u000b\u0000\u00fe\u0100\u0003\u009aM\u0000"+
-		"\u00ff\u00fc\u0001\u0000\u0000\u0000\u00ff\u00fd\u0001\u0000\u0000\u0000"+
-		"\u00ff\u00fe\u0001\u0000\u0000\u0000\u0100\u0101\u0001\u0000\u0000\u0000"+
-		"\u0101\u0102\u0003\u00a4R\u0000\u0102\u001f\u0001\u0000\u0000\u0000\u0103"+
-		"\u0104\u0003(\u0014\u0000\u0104\u0105\u0003\u00a2Q\u0000\u0105\u0106\u0003"+
-		"\u009aM\u0000\u0106\u0107\u0003\u00a4R\u0000\u0107!\u0001\u0000\u0000"+
-		"\u0000\u0108\u0109\u0003*\u0015\u0000\u0109\u010a\u0003\u00a2Q\u0000\u010a"+
-		"\u010b\u0003\u009aM\u0000\u010b\u010c\u0003\u00a4R\u0000\u010c#\u0001"+
-		"\u0000\u0000\u0000\u010d\u010e\u0003,\u0016\u0000\u010e\u010f\u0003\u00a2"+
-		"Q\u0000\u010f\u0110\u0003\u009aM\u0000\u0110\u0111\u0003\u00a4R\u0000"+
-		"\u0111%\u0001\u0000\u0000\u0000\u0112\u0113\u0005\u0006\u0000\u0000\u0113"+
-		"\'\u0001\u0000\u0000\u0000\u0114\u0115\u0005\u0007\u0000\u0000\u0115)"+
-		"\u0001\u0000\u0000\u0000\u0116\u0117\u0005\b\u0000\u0000\u0117+\u0001"+
-		"\u0000\u0000\u0000\u0118\u0119\u0005\t\u0000\u0000\u0119-\u0001\u0000"+
-		"\u0000\u0000\u011a\u011b\u00038\u001c\u0000\u011b\u011f\u00030\u0018\u0000"+
-		"\u011c\u011e\u00032\u0019\u0000\u011d\u011c\u0001\u0000\u0000\u0000\u011e"+
-		"\u0121\u0001\u0000\u0000\u0000\u011f\u011d\u0001\u0000\u0000\u0000\u011f"+
-		"\u0120\u0001\u0000\u0000\u0000\u0120/\u0001\u0000\u0000\u0000\u0121\u011f"+
-		"\u0001\u0000\u0000\u0000\u0122\u0124\u00034\u001a\u0000\u0123\u0125\u0003"+
-		"6\u001b\u0000\u0124\u0123\u0001\u0000\u0000\u0000\u0124\u0125\u0001\u0000"+
-		"\u0000\u0000\u01251\u0001\u0000\u0000\u0000\u0126\u0127\u0003:\u001d\u0000"+
-		"\u0127\u0129\u00034\u001a\u0000\u0128\u012a\u00036\u001b\u0000\u0129\u0128"+
-		"\u0001\u0000\u0000\u0000\u0129\u012a\u0001\u0000\u0000\u0000\u012a3\u0001"+
-		"\u0000\u0000\u0000\u012b\u012c\u0003\u0096K\u0000\u012c5\u0001\u0000\u0000"+
-		"\u0000\u012d\u012e\u0003\u0098L\u0000\u012e7\u0001\u0000\u0000\u0000\u012f"+
-		"\u0130\u0005\n\u0000\u0000\u01309\u0001\u0000\u0000\u0000\u0131\u0132"+
-		"\u0005\u000b\u0000\u0000\u0132\u0133\u0005\f\u0000\u0000\u0133;\u0001"+
-		"\u0000\u0000\u0000\u0134\u0135\u0003`0\u0000\u0135\u0136\u0003>\u001f"+
-		"\u0000\u0136=\u0001\u0000\u0000\u0000\u0137\u0138\u0003@ \u0000\u0138"+
-		"?\u0001\u0000\u0000\u0000\u0139\u013f\u0003B!\u0000\u013a\u013b\u0003"+
-		"d2\u0000\u013b\u013c\u0003B!\u0000\u013c\u013e\u0001\u0000\u0000\u0000"+
+		"\u00a2\u00a4\u00a6\u00a8\u00aa\u00ac\u00ae\u00b0\u00b2\u00b4\u0000\u0000"+
+		"\u01e9\u0000\u00ba\u0001\u0000\u0000\u0000\u0002\u00be\u0001\u0000\u0000"+
+		"\u0000\u0004\u00c0\u0001\u0000\u0000\u0000\u0006\u00c2\u0001\u0000\u0000"+
+		"\u0000\b\u00c5\u0001\u0000\u0000\u0000\n\u00c7\u0001\u0000\u0000\u0000"+
+		"\f\u00ca\u0001\u0000\u0000\u0000\u000e\u00cc\u0001\u0000\u0000\u0000\u0010"+
+		"\u00de\u0001\u0000\u0000\u0000\u0012\u00ea\u0001\u0000\u0000\u0000\u0014"+
+		"\u00f1\u0001\u0000\u0000\u0000\u0016\u00f3\u0001\u0000\u0000\u0000\u0018"+
+		"\u00f5\u0001\u0000\u0000\u0000\u001a\u00f7\u0001\u0000\u0000\u0000\u001c"+
+		"\u00f9\u0001\u0000\u0000\u0000\u001e\u0103\u0001\u0000\u0000\u0000 \u0105"+
+		"\u0001\u0000\u0000\u0000\"\u0107\u0001\u0000\u0000\u0000$\u0109\u0001"+
+		"\u0000\u0000\u0000&\u010b\u0001\u0000\u0000\u0000(\u010d\u0001\u0000\u0000"+
+		"\u0000*\u010f\u0001\u0000\u0000\u0000,\u0111\u0001\u0000\u0000\u0000."+
+		"\u0119\u0001\u0000\u0000\u00000\u011d\u0001\u0000\u0000\u00002\u0125\u0001"+
+		"\u0000\u0000\u00004\u0127\u0001\u0000\u0000\u00006\u0129\u0001\u0000\u0000"+
+		"\u00008\u012b\u0001\u0000\u0000\u0000:\u012e\u0001\u0000\u0000\u0000<"+
+		"\u0130\u0001\u0000\u0000\u0000>\u0134\u0001\u0000\u0000\u0000@\u0136\u0001"+
+		"\u0000\u0000\u0000B\u0139\u0001\u0000\u0000\u0000D\u0142\u0001\u0000\u0000"+
+		"\u0000F\u0150\u0001\u0000\u0000\u0000H\u0153\u0001\u0000\u0000\u0000J"+
+		"\u015c\u0001\u0000\u0000\u0000L\u0160\u0001\u0000\u0000\u0000N\u0164\u0001"+
+		"\u0000\u0000\u0000P\u0166\u0001\u0000\u0000\u0000R\u0169\u0001\u0000\u0000"+
+		"\u0000T\u0172\u0001\u0000\u0000\u0000V\u0175\u0001\u0000\u0000\u0000X"+
+		"\u017e\u0001\u0000\u0000\u0000Z\u018c\u0001\u0000\u0000\u0000\\\u018e"+
+		"\u0001\u0000\u0000\u0000^\u0194\u0001\u0000\u0000\u0000`\u0196\u0001\u0000"+
+		"\u0000\u0000b\u01a0\u0001\u0000\u0000\u0000d\u01a4\u0001\u0000\u0000\u0000"+
+		"f\u01a9\u0001\u0000\u0000\u0000h\u01ab\u0001\u0000\u0000\u0000j\u01ad"+
+		"\u0001\u0000\u0000\u0000l\u01af\u0001\u0000\u0000\u0000n\u01b1\u0001\u0000"+
+		"\u0000\u0000p\u01b3\u0001\u0000\u0000\u0000r\u01bb\u0001\u0000\u0000\u0000"+
+		"t\u01bd\u0001\u0000\u0000\u0000v\u01bf\u0001\u0000\u0000\u0000x\u01c1"+
+		"\u0001\u0000\u0000\u0000z\u01c3\u0001\u0000\u0000\u0000|\u01c5\u0001\u0000"+
+		"\u0000\u0000~\u01c7\u0001\u0000\u0000\u0000\u0080\u01ca\u0001\u0000\u0000"+
+		"\u0000\u0082\u01d3\u0001\u0000\u0000\u0000\u0084\u01d5\u0001\u0000\u0000"+
+		"\u0000\u0086\u01d7\u0001\u0000\u0000\u0000\u0088\u01d9\u0001\u0000\u0000"+
+		"\u0000\u008a\u01db\u0001\u0000\u0000\u0000\u008c\u01dd\u0001\u0000\u0000"+
+		"\u0000\u008e\u01e1\u0001\u0000\u0000\u0000\u0090\u01e3\u0001\u0000\u0000"+
+		"\u0000\u0092\u01e5\u0001\u0000\u0000\u0000\u0094\u01e7\u0001\u0000\u0000"+
+		"\u0000\u0096\u01e9\u0001\u0000\u0000\u0000\u0098\u01eb\u0001\u0000\u0000"+
+		"\u0000\u009a\u01ed\u0001\u0000\u0000\u0000\u009c\u01f4\u0001\u0000\u0000"+
+		"\u0000\u009e\u01f6\u0001\u0000\u0000\u0000\u00a0\u0200\u0001\u0000\u0000"+
+		"\u0000\u00a2\u0202\u0001\u0000\u0000\u0000\u00a4\u0204\u0001\u0000\u0000"+
+		"\u0000\u00a6\u0206\u0001\u0000\u0000\u0000\u00a8\u0208\u0001\u0000\u0000"+
+		"\u0000\u00aa\u020a\u0001\u0000\u0000\u0000\u00ac\u020c\u0001\u0000\u0000"+
+		"\u0000\u00ae\u020e\u0001\u0000\u0000\u0000\u00b0\u0210\u0001\u0000\u0000"+
+		"\u0000\u00b2\u0212\u0001\u0000\u0000\u0000\u00b4\u0214\u0001\u0000\u0000"+
+		"\u0000\u00b6\u00bb\u0003\u0002\u0001\u0000\u00b7\u00bb\u0003\u0006\u0003"+
+		"\u0000\u00b8\u00bb\u0003\n\u0005\u0000\u00b9\u00bb\u0003\u000e\u0007\u0000"+
+		"\u00ba\u00b6\u0001\u0000\u0000\u0000\u00ba\u00b7\u0001\u0000\u0000\u0000"+
+		"\u00ba\u00b8\u0001\u0000\u0000\u0000\u00ba\u00b9\u0001\u0000\u0000\u0000"+
+		"\u00bb\u00bc\u0001\u0000\u0000\u0000\u00bc\u00bd\u0003\u00b4Z\u0000\u00bd"+
+		"\u0001\u0001\u0000\u0000\u0000\u00be\u00bf\u0003\u0004\u0002\u0000\u00bf"+
+		"\u0003\u0001\u0000\u0000\u0000\u00c0\u00c1\u0005\u0001\u0000\u0000\u00c1"+
+		"\u0005\u0001\u0000\u0000\u0000\u00c2\u00c3\u0003\b\u0004\u0000\u00c3\u00c4"+
+		"\u0003@ \u0000\u00c4\u0007\u0001\u0000\u0000\u0000\u00c5\u00c6\u0005\u0002"+
+		"\u0000\u0000\u00c6\t\u0001\u0000\u0000\u0000\u00c7\u00c8\u0003\f\u0006"+
+		"\u0000\u00c8\u00c9\u0003@ \u0000\u00c9\u000b\u0001\u0000\u0000\u0000\u00ca"+
+		"\u00cb\u0005\u0003\u0000\u0000\u00cb\r\u0001\u0000\u0000\u0000\u00cc\u00cd"+
+		"\u0003\u0018\f\u0000\u00cd\u00ce\u0003\u0010\b\u0000\u00ce\u00d0\u0003"+
+		",\u0016\u0000\u00cf\u00d1\u0003@ \u0000\u00d0\u00cf\u0001\u0000\u0000"+
+		"\u0000\u00d0\u00d1\u0001\u0000\u0000\u0000\u00d1\u00d3\u0001\u0000\u0000"+
+		"\u0000\u00d2\u00d4\u0003P(\u0000\u00d3\u00d2\u0001\u0000\u0000\u0000\u00d3"+
+		"\u00d4\u0001\u0000\u0000\u0000\u00d4\u00d6\u0001\u0000\u0000\u0000\u00d5"+
+		"\u00d7\u0003T*\u0000\u00d6\u00d5\u0001\u0000\u0000\u0000\u00d6\u00d7\u0001"+
+		"\u0000\u0000\u0000\u00d7\u00d9\u0001\u0000\u0000\u0000\u00d8\u00da\u0003"+
+		"`0\u0000\u00d9\u00d8\u0001\u0000\u0000\u0000\u00d9\u00da\u0001\u0000\u0000"+
+		"\u0000\u00da\u00dc\u0001\u0000\u0000\u0000\u00db\u00dd\u0003d2\u0000\u00dc"+
+		"\u00db\u0001\u0000\u0000\u0000\u00dc\u00dd\u0001\u0000\u0000\u0000\u00dd"+
+		"\u000f\u0001\u0000\u0000\u0000\u00de\u00e4\u0003\u0012\t\u0000\u00df\u00e0"+
+		"\u0003\u00aeW\u0000\u00e0\u00e1\u0003\u0012\t\u0000\u00e1\u00e3\u0001"+
+		"\u0000\u0000\u0000\u00e2\u00df\u0001\u0000\u0000\u0000\u00e3\u00e6\u0001"+
+		"\u0000\u0000\u0000\u00e4\u00e2\u0001\u0000\u0000\u0000\u00e4\u00e5\u0001"+
+		"\u0000\u0000\u0000\u00e5\u0011\u0001\u0000\u0000\u0000\u00e6\u00e4\u0001"+
+		"\u0000\u0000\u0000\u00e7\u00eb\u0003\u0014\n\u0000\u00e8\u00eb\u0003\u0016"+
+		"\u000b\u0000\u00e9\u00eb\u0003\u001c\u000e\u0000\u00ea\u00e7\u0001\u0000"+
+		"\u0000\u0000\u00ea\u00e8\u0001\u0000\u0000\u0000\u00ea\u00e9\u0001\u0000"+
+		"\u0000\u0000\u00eb\u0013\u0001\u0000\u0000\u0000\u00ec\u00f2\u0003\u001a"+
+		"\r\u0000\u00ed\u00ee\u0003\u00a2Q\u0000\u00ee\u00ef\u0003\u00aaU\u0000"+
+		"\u00ef\u00f0\u0003\u001a\r\u0000\u00f0\u00f2\u0001\u0000\u0000\u0000\u00f1"+
+		"\u00ec\u0001\u0000\u0000\u0000\u00f1\u00ed\u0001\u0000\u0000\u0000\u00f2"+
+		"\u0015\u0001\u0000\u0000\u0000\u00f3\u00f4\u0003\u009cN\u0000\u00f4\u0017"+
+		"\u0001\u0000\u0000\u0000\u00f5\u00f6\u0005\u0004\u0000\u0000\u00f6\u0019"+
+		"\u0001\u0000\u0000\u0000\u00f7\u00f8\u0005\u0005\u0000\u0000\u00f8\u001b"+
+		"\u0001\u0000\u0000\u0000\u00f9\u00fa\u0003\u001e\u000f\u0000\u00fa\u00fb"+
+		"\u0003\u00a6S\u0000\u00fb\u00fc\u0003 \u0010\u0000\u00fc\u00fd\u0003\u00a8"+
+		"T\u0000\u00fd\u001d\u0001\u0000\u0000\u0000\u00fe\u0104\u0003\"\u0011"+
+		"\u0000\u00ff\u0104\u0003$\u0012\u0000\u0100\u0104\u0003&\u0013\u0000\u0101"+
+		"\u0104\u0003(\u0014\u0000\u0102\u0104\u0003*\u0015\u0000\u0103\u00fe\u0001"+
+		"\u0000\u0000\u0000\u0103\u00ff\u0001\u0000\u0000\u0000\u0103\u0100\u0001"+
+		"\u0000\u0000\u0000\u0103\u0101\u0001\u0000\u0000\u0000\u0103\u0102\u0001"+
+		"\u0000\u0000\u0000\u0104\u001f\u0001\u0000\u0000\u0000\u0105\u0106\u0003"+
+		"\u009cN\u0000\u0106!\u0001\u0000\u0000\u0000\u0107\u0108\u0005\u0006\u0000"+
+		"\u0000\u0108#\u0001\u0000\u0000\u0000\u0109\u010a\u0005\u0007\u0000\u0000"+
+		"\u010a%\u0001\u0000\u0000\u0000\u010b\u010c\u0005\b\u0000\u0000\u010c"+
+		"\'\u0001\u0000\u0000\u0000\u010d\u010e\u0005\t\u0000\u0000\u010e)\u0001"+
+		"\u0000\u0000\u0000\u010f\u0110\u0005\n\u0000\u0000\u0110+\u0001\u0000"+
+		"\u0000\u0000\u0111\u0112\u00036\u001b\u0000\u0112\u0116\u0003.\u0017\u0000"+
+		"\u0113\u0115\u00030\u0018\u0000\u0114\u0113\u0001\u0000\u0000\u0000\u0115"+
+		"\u0118\u0001\u0000\u0000\u0000\u0116\u0114\u0001\u0000\u0000\u0000\u0116"+
+		"\u0117\u0001\u0000\u0000\u0000\u0117-\u0001\u0000\u0000\u0000\u0118\u0116"+
+		"\u0001\u0000\u0000\u0000\u0119\u011b\u00032\u0019\u0000\u011a\u011c\u0003"+
+		"4\u001a\u0000\u011b\u011a\u0001\u0000\u0000\u0000\u011b\u011c\u0001\u0000"+
+		"\u0000\u0000\u011c/\u0001\u0000\u0000\u0000\u011d\u011e\u00038\u001c\u0000"+
+		"\u011e\u0120\u00032\u0019\u0000\u011f\u0121\u00034\u001a\u0000\u0120\u011f"+
+		"\u0001\u0000\u0000\u0000\u0120\u0121\u0001\u0000\u0000\u0000\u0121\u0122"+
+		"\u0001\u0000\u0000\u0000\u0122\u0123\u0003:\u001d\u0000\u0123\u0124\u0003"+
+		"<\u001e\u0000\u01241\u0001\u0000\u0000\u0000\u0125\u0126\u0003\u00a0P"+
+		"\u0000\u01263\u0001\u0000\u0000\u0000\u0127\u0128\u0003\u00a2Q\u0000\u0128"+
+		"5\u0001\u0000\u0000\u0000\u0129\u012a\u0005\u000b\u0000\u0000\u012a7\u0001"+
+		"\u0000\u0000\u0000\u012b\u012c\u0005\f\u0000\u0000\u012c\u012d\u0005\r"+
+		"\u0000\u0000\u012d9\u0001\u0000\u0000\u0000\u012e\u012f\u0005\u000e\u0000"+
+		"\u0000\u012f;\u0001\u0000\u0000\u0000\u0130\u0131\u0003\u00a2Q\u0000\u0131"+
+		"\u0132\u0003>\u001f\u0000\u0132\u0133\u0003\u00a2Q\u0000\u0133=\u0001"+
+		"\u0000\u0000\u0000\u0134\u0135\u0005\u0016\u0000\u0000\u0135?\u0001\u0000"+
+		"\u0000\u0000\u0136\u0137\u0003l6\u0000\u0137\u0138\u0003B!\u0000\u0138"+
+		"A\u0001\u0000\u0000\u0000\u0139\u013f\u0003D\"\u0000\u013a\u013b\u0003"+
+		"p8\u0000\u013b\u013c\u0003D\"\u0000\u013c\u013e\u0001\u0000\u0000\u0000"+
 		"\u013d\u013a\u0001\u0000\u0000\u0000\u013e\u0141\u0001\u0000\u0000\u0000"+
 		"\u013f\u013d\u0001\u0000\u0000\u0000\u013f\u0140\u0001\u0000\u0000\u0000"+
-		"\u0140A\u0001\u0000\u0000\u0000\u0141\u013f\u0001\u0000\u0000\u0000\u0142"+
-		"\u0148\u0003D\"\u0000\u0143\u0144\u0003b1\u0000\u0144\u0145\u0003D\"\u0000"+
+		"\u0140C\u0001\u0000\u0000\u0000\u0141\u013f\u0001\u0000\u0000\u0000\u0142"+
+		"\u0148\u0003F#\u0000\u0143\u0144\u0003n7\u0000\u0144\u0145\u0003F#\u0000"+
 		"\u0145\u0147\u0001\u0000\u0000\u0000\u0146\u0143\u0001\u0000\u0000\u0000"+
 		"\u0147\u014a\u0001\u0000\u0000\u0000\u0148\u0146\u0001\u0000\u0000\u0000"+
-		"\u0148\u0149\u0001\u0000\u0000\u0000\u0149C\u0001\u0000\u0000\u0000\u014a"+
-		"\u0148\u0001\u0000\u0000\u0000\u014b\u0151\u0003F#\u0000\u014c\u014d\u0003"+
-		"\u00a2Q\u0000\u014d\u014e\u0003>\u001f\u0000\u014e\u014f\u0003\u00a4R"+
-		"\u0000\u014f\u0151\u0001\u0000\u0000\u0000\u0150\u014b\u0001\u0000\u0000"+
-		"\u0000\u0150\u014c\u0001\u0000\u0000\u0000\u0151E\u0001\u0000\u0000\u0000"+
-		"\u0152\u0155\u0003\u0088D\u0000\u0153\u0156\u0003H$\u0000\u0154\u0156"+
-		"\u0003J%\u0000\u0155\u0153\u0001\u0000\u0000\u0000\u0155\u0154\u0001\u0000"+
-		"\u0000\u0000\u0156G\u0001\u0000\u0000\u0000\u0157\u015a\u0003f3\u0000"+
-		"\u0158\u015a\u0003t:\u0000\u0159\u0157\u0001\u0000\u0000\u0000\u0159\u0158"+
-		"\u0001\u0000\u0000\u0000\u015a\u015b\u0001\u0000\u0000\u0000\u015b\u015c"+
-		"\u0003\u008aE\u0000\u015c\u015d\u0003\u008cF\u0000\u015dI\u0001\u0000"+
-		"\u0000\u0000\u015e\u015f\u0003\u0082A\u0000\u015fK\u0001\u0000\u0000\u0000"+
-		"\u0160\u0165\u0003\u0090H\u0000\u0161\u0163\u0003\u009cN\u0000\u0162\u0164"+
-		"\u0003\\.\u0000\u0163\u0162\u0001\u0000\u0000\u0000\u0163\u0164\u0001"+
-		"\u0000\u0000\u0000\u0164\u0166\u0001\u0000\u0000\u0000\u0165\u0161\u0001"+
-		"\u0000\u0000\u0000\u0166\u0167\u0001\u0000\u0000\u0000\u0167\u0165\u0001"+
-		"\u0000\u0000\u0000\u0167\u0168\u0001\u0000\u0000\u0000\u0168M\u0001\u0000"+
-		"\u0000\u0000\u0169\u016d\u0003\u008eG\u0000\u016a\u016b\u0003\u001c\u000e"+
-		"\u0000\u016b\u016c\u0003P(\u0000\u016c\u016e\u0001\u0000\u0000\u0000\u016d"+
-		"\u016a\u0001\u0000\u0000\u0000\u016e\u016f\u0001\u0000\u0000\u0000\u016f"+
-		"\u016d\u0001\u0000\u0000\u0000\u016f\u0170\u0001\u0000\u0000\u0000\u0170"+
-		"O\u0001\u0000\u0000\u0000\u0171\u0172\u0003f3\u0000\u0172\u0173\u0003"+
-		"\u008aE\u0000\u0173\u0174\u0003\u008cF\u0000\u0174Q\u0001\u0000\u0000"+
-		"\u0000\u0175\u0177\u0003\u0092I\u0000\u0176\u0178\u0003T*\u0000\u0177"+
-		"\u0176\u0001\u0000\u0000\u0000\u0178\u0179\u0001\u0000\u0000\u0000\u0179"+
-		"\u0177\u0001\u0000\u0000\u0000\u0179\u017a\u0001\u0000\u0000\u0000\u017a"+
-		"S\u0001\u0000\u0000\u0000\u017b\u017d\u0003\u009cN\u0000\u017c\u017e\u0003"+
-		"\u0094J\u0000\u017d\u017c\u0001\u0000\u0000\u0000\u017d\u017e\u0001\u0000"+
-		"\u0000\u0000\u017eU\u0001\u0000\u0000\u0000\u017f\u0180\u0003X,\u0000"+
-		"\u0180\u0181\u0003Z-\u0000\u0181\u0182\u0003\\.\u0000\u0182\u0183\u0003"+
-		"^/\u0000\u0183W\u0001\u0000\u0000\u0000\u0184\u0185\u0005\"\u0000\u0000"+
-		"\u0185Y\u0001\u0000\u0000\u0000\u0186\u0187\u0005,\u0000\u0000\u0187["+
-		"\u0001\u0000\u0000\u0000\u0188\u0189\u0005%\u0000\u0000\u0189]\u0001\u0000"+
-		"\u0000\u0000\u018a\u018b\u0005,\u0000\u0000\u018b_\u0001\u0000\u0000\u0000"+
-		"\u018c\u018d\u0005\r\u0000\u0000\u018da\u0001\u0000\u0000\u0000\u018e"+
-		"\u018f\u0005\u000e\u0000\u0000\u018fc\u0001\u0000\u0000\u0000\u0190\u0191"+
-		"\u0005\u000f\u0000\u0000\u0191e\u0001\u0000\u0000\u0000\u0192\u0199\u0003"+
-		"h4\u0000\u0193\u0199\u0003j5\u0000\u0194\u0199\u0003l6\u0000\u0195\u0199"+
-		"\u0003n7\u0000\u0196\u0199\u0003p8\u0000\u0197\u0199\u0003r9\u0000\u0198"+
-		"\u0192\u0001\u0000\u0000\u0000\u0198\u0193\u0001\u0000\u0000\u0000\u0198"+
-		"\u0194\u0001\u0000\u0000\u0000\u0198\u0195\u0001\u0000\u0000\u0000\u0198"+
-		"\u0196\u0001\u0000\u0000\u0000\u0198\u0197\u0001\u0000\u0000\u0000\u0199"+
-		"g\u0001\u0000\u0000\u0000\u019a\u019b\u0005\u0010\u0000\u0000\u019bi\u0001"+
-		"\u0000\u0000\u0000\u019c\u019d\u0005\u0011\u0000\u0000\u019dk\u0001\u0000"+
-		"\u0000\u0000\u019e\u019f\u0005\u0012\u0000\u0000\u019fm\u0001\u0000\u0000"+
-		"\u0000\u01a0\u01a1\u0005\u0013\u0000\u0000\u01a1o\u0001\u0000\u0000\u0000"+
-		"\u01a2\u01a3\u0005\u0014\u0000\u0000\u01a3q\u0001\u0000\u0000\u0000\u01a4"+
-		"\u01a5\u0005\u0015\u0000\u0000\u01a5s\u0001\u0000\u0000\u0000\u01a6\u01a8"+
-		"\u0003v;\u0000\u01a7\u01a6\u0001\u0000\u0000\u0000\u01a7\u01a8\u0001\u0000"+
-		"\u0000\u0000\u01a8\u01ae\u0001\u0000\u0000\u0000\u01a9\u01af\u0003x<\u0000"+
-		"\u01aa\u01af\u0003z=\u0000\u01ab\u01af\u0003|>\u0000\u01ac\u01af\u0003"+
-		"~?\u0000\u01ad\u01af\u0003\u0080@\u0000\u01ae\u01a9\u0001\u0000\u0000"+
-		"\u0000\u01ae\u01aa\u0001\u0000\u0000\u0000\u01ae\u01ab\u0001\u0000\u0000"+
-		"\u0000\u01ae\u01ac\u0001\u0000\u0000\u0000\u01ae\u01ad\u0001\u0000\u0000"+
-		"\u0000\u01afu\u0001\u0000\u0000\u0000\u01b0\u01b1\u0005\u0016\u0000\u0000"+
-		"\u01b1w\u0001\u0000\u0000\u0000\u01b2\u01b3\u0005\u0017\u0000\u0000\u01b3"+
-		"y\u0001\u0000\u0000\u0000\u01b4\u01b5\u0005\u0018\u0000\u0000\u01b5{\u0001"+
-		"\u0000\u0000\u0000\u01b6\u01b7\u0005\u0019\u0000\u0000\u01b7}\u0001\u0000"+
-		"\u0000\u0000\u01b8\u01b9\u0005\u001a\u0000\u0000\u01b9\u007f\u0001\u0000"+
-		"\u0000\u0000\u01ba\u01bb\u0005\u001b\u0000\u0000\u01bb\u0081\u0001\u0000"+
-		"\u0000\u0000\u01bc\u01bf\u0003\u0084B\u0000\u01bd\u01bf\u0003\u0086C\u0000"+
-		"\u01be\u01bc\u0001\u0000\u0000\u0000\u01be\u01bd\u0001\u0000\u0000\u0000"+
-		"\u01bf\u0083\u0001\u0000\u0000\u0000\u01c0\u01c1\u0005\u001c\u0000\u0000"+
-		"\u01c1\u0085\u0001\u0000\u0000\u0000\u01c2\u01c3\u0005\u001d\u0000\u0000"+
-		"\u01c3\u0087\u0001\u0000\u0000\u0000\u01c4\u01c5\u0003\u009eO\u0000\u01c5"+
-		"\u0089\u0001\u0000\u0000\u0000\u01c6\u01c7\u0005&\u0000\u0000\u01c7\u008b"+
-		"\u0001\u0000\u0000\u0000\u01c8\u01c9\u0003\u00a0P\u0000\u01c9\u008d\u0001"+
-		"\u0000\u0000\u0000\u01ca\u01cb\u0005\u001f\u0000\u0000\u01cb\u008f\u0001"+
-		"\u0000\u0000\u0000\u01cc\u01cd\u0005\u001e\u0000\u0000\u01cd\u0091\u0001"+
-		"\u0000\u0000\u0000\u01ce\u01cf\u0005 \u0000\u0000\u01cf\u0093\u0001\u0000"+
-		"\u0000\u0000\u01d0\u01d1\u0005!\u0000\u0000\u01d1\u0095\u0001\u0000\u0000"+
-		"\u0000\u01d2\u01d3\u0005(\u0000\u0000\u01d3\u0097\u0001\u0000\u0000\u0000"+
-		"\u01d4\u01d5\u0005)\u0000\u0000\u01d5\u0099\u0001\u0000\u0000\u0000\u01d6"+
-		"\u01d7\u0005)\u0000\u0000\u01d7\u009b\u0001\u0000\u0000\u0000\u01d8\u01dc"+
-		"\u0003\u0098L\u0000\u01d9\u01da\u0003\u00a6S\u0000\u01da\u01db\u0003\u009a"+
-		"M\u0000\u01db\u01dd\u0001\u0000\u0000\u0000\u01dc\u01d9\u0001\u0000\u0000"+
-		"\u0000\u01dc\u01dd\u0001\u0000\u0000\u0000\u01dd\u009d\u0001\u0000\u0000"+
-		"\u0000\u01de\u01e2\u0003\u0098L\u0000\u01df\u01e0\u0003\u00a6S\u0000\u01e0"+
-		"\u01e1\u0003\u009aM\u0000\u01e1\u01e3\u0001\u0000\u0000\u0000\u01e2\u01df"+
-		"\u0001\u0000\u0000\u0000\u01e2\u01e3\u0001\u0000\u0000\u0000\u01e3\u009f"+
-		"\u0001\u0000\u0000\u0000\u01e4\u01ea\u0003\u009aM\u0000\u01e5\u01e6\u0003"+
-		"\u00a6S\u0000\u01e6\u01e7\u0003\u009aM\u0000\u01e7\u01e9\u0001\u0000\u0000"+
-		"\u0000\u01e8\u01e5\u0001\u0000\u0000\u0000\u01e9\u01ec\u0001\u0000\u0000"+
-		"\u0000\u01ea\u01e8\u0001\u0000\u0000\u0000\u01ea\u01eb\u0001\u0000\u0000"+
-		"\u0000\u01eb\u00a1\u0001\u0000\u0000\u0000\u01ec\u01ea\u0001\u0000\u0000"+
-		"\u0000\u01ed\u01ee\u0005#\u0000\u0000\u01ee\u00a3\u0001\u0000\u0000\u0000"+
-		"\u01ef\u01f0\u0005$\u0000\u0000\u01f0\u00a5\u0001\u0000\u0000\u0000\u01f1"+
-		"\u01f2\u0005\'\u0000\u0000\u01f2\u00a7\u0001\u0000\u0000\u0000\u01f3\u01f4"+
-		"\u0005,\u0000\u0000\u01f4\u00a9\u0001\u0000\u0000\u0000\u01f5\u01f6\u0005"+
-		"\u0000\u0000\u0001\u01f6\u00ab\u0001\u0000\u0000\u0000 \u00b0\u00c6\u00c9"+
-		"\u00cc\u00cf\u00d2\u00da\u00e0\u00e7\u00f0\u00f8\u00ff\u011f\u0124\u0129"+
-		"\u013f\u0148\u0150\u0155\u0159\u0163\u0167\u016f\u0179\u017d\u0198\u01a7"+
-		"\u01ae\u01be\u01dc\u01e2\u01ea";
+		"\u0148\u0149\u0001\u0000\u0000\u0000\u0149E\u0001\u0000\u0000\u0000\u014a"+
+		"\u0148\u0001\u0000\u0000\u0000\u014b\u0151\u0003H$\u0000\u014c\u014d\u0003"+
+		"\u00a6S\u0000\u014d\u014e\u0003B!\u0000\u014e\u014f\u0003\u00a8T\u0000"+
+		"\u014f\u0151\u0001\u0000\u0000\u0000\u0150\u014b\u0001\u0000\u0000\u0000"+
+		"\u0150\u014c\u0001\u0000\u0000\u0000\u0151G\u0001\u0000\u0000\u0000\u0152"+
+		"\u0154\u0003\u00b0X\u0000\u0153\u0152\u0001\u0000\u0000\u0000\u0153\u0154"+
+		"\u0001\u0000\u0000\u0000\u0154\u0155\u0001\u0000\u0000\u0000\u0155\u0158"+
+		"\u0003\u009cN\u0000\u0156\u0159\u0003J%\u0000\u0157\u0159\u0003L&\u0000"+
+		"\u0158\u0156\u0001\u0000\u0000\u0000\u0158\u0157\u0001\u0000\u0000\u0000"+
+		"\u0159I\u0001\u0000\u0000\u0000\u015a\u015d\u0003r9\u0000\u015b\u015d"+
+		"\u0003\u0080@\u0000\u015c\u015a\u0001\u0000\u0000\u0000\u015c\u015b\u0001"+
+		"\u0000\u0000\u0000\u015d\u015e\u0001\u0000\u0000\u0000\u015e\u015f\u0003"+
+		"N\'\u0000\u015fK\u0001\u0000\u0000\u0000\u0160\u0161\u0003\u008eG\u0000"+
+		"\u0161M\u0001\u0000\u0000\u0000\u0162\u0165\u0003\u009eO\u0000\u0163\u0165"+
+		"\u0003\u00b2Y\u0000\u0164\u0162\u0001\u0000\u0000\u0000\u0164\u0163\u0001"+
+		"\u0000\u0000\u0000\u0165O\u0001\u0000\u0000\u0000\u0166\u0167\u0003\u0096"+
+		"K\u0000\u0167\u0168\u0003R)\u0000\u0168Q\u0001\u0000\u0000\u0000\u0169"+
+		"\u016f\u0003\u009cN\u0000\u016a\u016b\u0003\u00aeW\u0000\u016b\u016c\u0003"+
+		"\u009cN\u0000\u016c\u016e\u0001\u0000\u0000\u0000\u016d\u016a\u0001\u0000"+
+		"\u0000\u0000\u016e\u0171\u0001\u0000\u0000\u0000\u016f\u016d\u0001\u0000"+
+		"\u0000\u0000\u016f\u0170\u0001\u0000\u0000\u0000\u0170S\u0001\u0000\u0000"+
+		"\u0000\u0171\u016f\u0001\u0000\u0000\u0000\u0172\u0173\u0003\u0094J\u0000"+
+		"\u0173\u0174\u0003V+\u0000\u0174U\u0001\u0000\u0000\u0000\u0175\u017b"+
+		"\u0003X,\u0000\u0176\u0177\u0003p8\u0000\u0177\u0178\u0003X,\u0000\u0178"+
+		"\u017a\u0001\u0000\u0000\u0000\u0179\u0176\u0001\u0000\u0000\u0000\u017a"+
+		"\u017d\u0001\u0000\u0000\u0000\u017b\u0179\u0001\u0000\u0000\u0000\u017b"+
+		"\u017c\u0001\u0000\u0000\u0000\u017cW\u0001\u0000\u0000\u0000\u017d\u017b"+
+		"\u0001\u0000\u0000\u0000\u017e\u0184\u0003Z-\u0000\u017f\u0180\u0003n"+
+		"7\u0000\u0180\u0181\u0003Z-\u0000\u0181\u0183\u0001\u0000\u0000\u0000"+
+		"\u0182\u017f\u0001\u0000\u0000\u0000\u0183\u0186\u0001\u0000\u0000\u0000"+
+		"\u0184\u0182\u0001\u0000\u0000\u0000\u0184\u0185\u0001\u0000\u0000\u0000"+
+		"\u0185Y\u0001\u0000\u0000\u0000\u0186\u0184\u0001\u0000\u0000\u0000\u0187"+
+		"\u018d\u0003\\.\u0000\u0188\u0189\u0003\u00a6S\u0000\u0189\u018a\u0003"+
+		"V+\u0000\u018a\u018b\u0003\u00a8T\u0000\u018b\u018d\u0001\u0000\u0000"+
+		"\u0000\u018c\u0187\u0001\u0000\u0000\u0000\u018c\u0188\u0001\u0000\u0000"+
+		"\u0000\u018d[\u0001\u0000\u0000\u0000\u018e\u018f\u0003\u001c\u000e\u0000"+
+		"\u018f\u0190\u0003r9\u0000\u0190\u0191\u0003^/\u0000\u0191]\u0001\u0000"+
+		"\u0000\u0000\u0192\u0195\u0003\u009eO\u0000\u0193\u0195\u0003\u00b2Y\u0000"+
+		"\u0194\u0192\u0001\u0000\u0000\u0000\u0194\u0193\u0001\u0000\u0000\u0000"+
+		"\u0195_\u0001\u0000\u0000\u0000\u0196\u0197\u0003\u0098L\u0000\u0197\u019d"+
+		"\u0003b1\u0000\u0198\u0199\u0003\u00aeW\u0000\u0199\u019a\u0003b1\u0000"+
+		"\u019a\u019c\u0001\u0000\u0000\u0000\u019b\u0198\u0001\u0000\u0000\u0000"+
+		"\u019c\u019f\u0001\u0000\u0000\u0000\u019d\u019b\u0001\u0000\u0000\u0000"+
+		"\u019d\u019e\u0001\u0000\u0000\u0000\u019ea\u0001\u0000\u0000\u0000\u019f"+
+		"\u019d\u0001\u0000\u0000\u0000\u01a0\u01a2\u0003\u009cN\u0000\u01a1\u01a3"+
+		"\u0003\u009aM\u0000\u01a2\u01a1\u0001\u0000\u0000\u0000\u01a2\u01a3\u0001"+
+		"\u0000\u0000\u0000\u01a3c\u0001\u0000\u0000\u0000\u01a4\u01a5\u0003f3"+
+		"\u0000\u01a5\u01a6\u0003h4\u0000\u01a6\u01a7\u0003\u00aeW\u0000\u01a7"+
+		"\u01a8\u0003j5\u0000\u01a8e\u0001\u0000\u0000\u0000\u01a9\u01aa\u0005"+
+		"$\u0000\u0000\u01aag\u0001\u0000\u0000\u0000\u01ab\u01ac\u0005-\u0000"+
+		"\u0000\u01aci\u0001\u0000\u0000\u0000\u01ad\u01ae\u0005-\u0000\u0000\u01ae"+
+		"k\u0001\u0000\u0000\u0000\u01af\u01b0\u0005\u000f\u0000\u0000\u01b0m\u0001"+
+		"\u0000\u0000\u0000\u01b1\u01b2\u0005\u0010\u0000\u0000\u01b2o\u0001\u0000"+
+		"\u0000\u0000\u01b3\u01b4\u0005\u0011\u0000\u0000\u01b4q\u0001\u0000\u0000"+
+		"\u0000\u01b5\u01bc\u0003t:\u0000\u01b6\u01bc\u0003v;\u0000\u01b7\u01bc"+
+		"\u0003x<\u0000\u01b8\u01bc\u0003z=\u0000\u01b9\u01bc\u0003|>\u0000\u01ba"+
+		"\u01bc\u0003~?\u0000\u01bb\u01b5\u0001\u0000\u0000\u0000\u01bb\u01b6\u0001"+
+		"\u0000\u0000\u0000\u01bb\u01b7\u0001\u0000\u0000\u0000\u01bb\u01b8\u0001"+
+		"\u0000\u0000\u0000\u01bb\u01b9\u0001\u0000\u0000\u0000\u01bb\u01ba\u0001"+
+		"\u0000\u0000\u0000\u01bcs\u0001\u0000\u0000\u0000\u01bd\u01be\u0005\u0012"+
+		"\u0000\u0000\u01beu\u0001\u0000\u0000\u0000\u01bf\u01c0\u0005\u0013\u0000"+
+		"\u0000\u01c0w\u0001\u0000\u0000\u0000\u01c1\u01c2\u0005\u0014\u0000\u0000"+
+		"\u01c2y\u0001\u0000\u0000\u0000\u01c3\u01c4\u0005\u0015\u0000\u0000\u01c4"+
+		"{\u0001\u0000\u0000\u0000\u01c5\u01c6\u0005\u0016\u0000\u0000\u01c6}\u0001"+
+		"\u0000\u0000\u0000\u01c7\u01c8\u0005\u0017\u0000\u0000\u01c8\u007f\u0001"+
+		"\u0000\u0000\u0000\u01c9\u01cb\u0003\u0082A\u0000\u01ca\u01c9\u0001\u0000"+
+		"\u0000\u0000\u01ca\u01cb\u0001\u0000\u0000\u0000\u01cb\u01d1\u0001\u0000"+
+		"\u0000\u0000\u01cc\u01d2\u0003\u0084B\u0000\u01cd\u01d2\u0003\u0086C\u0000"+
+		"\u01ce\u01d2\u0003\u0088D\u0000\u01cf\u01d2\u0003\u008aE\u0000\u01d0\u01d2"+
+		"\u0003\u008cF\u0000\u01d1\u01cc\u0001\u0000\u0000\u0000\u01d1\u01cd\u0001"+
+		"\u0000\u0000\u0000\u01d1\u01ce\u0001\u0000\u0000\u0000\u01d1\u01cf\u0001"+
+		"\u0000\u0000\u0000\u01d1\u01d0\u0001\u0000\u0000\u0000\u01d2\u0081\u0001"+
+		"\u0000\u0000\u0000\u01d3\u01d4\u0005\u0018\u0000\u0000\u01d4\u0083\u0001"+
+		"\u0000\u0000\u0000\u01d5\u01d6\u0005\u0019\u0000\u0000\u01d6\u0085\u0001"+
+		"\u0000\u0000\u0000\u01d7\u01d8\u0005\u001a\u0000\u0000\u01d8\u0087\u0001"+
+		"\u0000\u0000\u0000\u01d9\u01da\u0005\u001b\u0000\u0000\u01da\u0089\u0001"+
+		"\u0000\u0000\u0000\u01db\u01dc\u0005\u001c\u0000\u0000\u01dc\u008b\u0001"+
+		"\u0000\u0000\u0000\u01dd\u01de\u0005\u001d\u0000\u0000\u01de\u008d\u0001"+
+		"\u0000\u0000\u0000\u01df\u01e2\u0003\u0090H\u0000\u01e0\u01e2\u0003\u0092"+
+		"I\u0000\u01e1\u01df\u0001\u0000\u0000\u0000\u01e1\u01e0\u0001\u0000\u0000"+
+		"\u0000\u01e2\u008f\u0001\u0000\u0000\u0000\u01e3\u01e4\u0005\u001e\u0000"+
+		"\u0000\u01e4\u0091\u0001\u0000\u0000\u0000\u01e5\u01e6\u0005\u001f\u0000"+
+		"\u0000\u01e6\u0093\u0001\u0000\u0000\u0000\u01e7\u01e8\u0005!\u0000\u0000"+
+		"\u01e8\u0095\u0001\u0000\u0000\u0000\u01e9\u01ea\u0005 \u0000\u0000\u01ea"+
+		"\u0097\u0001\u0000\u0000\u0000\u01eb\u01ec\u0005\"\u0000\u0000\u01ec\u0099"+
+		"\u0001\u0000\u0000\u0000\u01ed\u01ee\u0005#\u0000\u0000\u01ee\u009b\u0001"+
+		"\u0000\u0000\u0000\u01ef\u01f5\u0003\u00a4R\u0000\u01f0\u01f1\u0003\u00a2"+
+		"Q\u0000\u01f1\u01f2\u0003\u00aaU\u0000\u01f2\u01f3\u0003\u00a4R\u0000"+
+		"\u01f3\u01f5\u0001\u0000\u0000\u0000\u01f4\u01ef\u0001\u0000\u0000\u0000"+
+		"\u01f4\u01f0\u0001\u0000\u0000\u0000\u01f5\u009d\u0001\u0000\u0000\u0000"+
+		"\u01f6\u01f7\u0003\u00acV\u0000\u01f7\u01fd\u0003\u00a4R\u0000\u01f8\u01f9"+
+		"\u0003\u00aaU\u0000\u01f9\u01fa\u0003\u00a4R\u0000\u01fa\u01fc\u0001\u0000"+
+		"\u0000\u0000\u01fb\u01f8\u0001\u0000\u0000\u0000\u01fc\u01ff\u0001\u0000"+
+		"\u0000\u0000\u01fd\u01fb\u0001\u0000\u0000\u0000\u01fd\u01fe\u0001\u0000"+
+		"\u0000\u0000\u01fe\u009f\u0001\u0000\u0000\u0000\u01ff\u01fd\u0001\u0000"+
+		"\u0000\u0000\u0200\u0201\u0005+\u0000\u0000\u0201\u00a1\u0001\u0000\u0000"+
+		"\u0000\u0202\u0203\u0005,\u0000\u0000\u0203\u00a3\u0001\u0000\u0000\u0000"+
+		"\u0204\u0205\u0005,\u0000\u0000\u0205\u00a5\u0001\u0000\u0000\u0000\u0206"+
+		"\u0207\u0005%\u0000\u0000\u0207\u00a7\u0001\u0000\u0000\u0000\u0208\u0209"+
+		"\u0005&\u0000\u0000\u0209\u00a9\u0001\u0000\u0000\u0000\u020a\u020b\u0005"+
+		")\u0000\u0000\u020b\u00ab\u0001\u0000\u0000\u0000\u020c\u020d\u0005(\u0000"+
+		"\u0000\u020d\u00ad\u0001\u0000\u0000\u0000\u020e\u020f\u0005\'\u0000\u0000"+
+		"\u020f\u00af\u0001\u0000\u0000\u0000\u0210\u0211\u0005*\u0000\u0000\u0211"+
+		"\u00b1\u0001\u0000\u0000\u0000\u0212\u0213\u0005-\u0000\u0000\u0213\u00b3"+
+		"\u0001\u0000\u0000\u0000\u0214\u0215\u0005\u0000\u0000\u0001\u0215\u00b5"+
+		"\u0001\u0000\u0000\u0000!\u00ba\u00d0\u00d3\u00d6\u00d9\u00dc\u00e4\u00ea"+
+		"\u00f1\u0103\u0116\u011b\u0120\u013f\u0148\u0150\u0153\u0158\u015c\u0164"+
+		"\u016f\u017b\u0184\u018c\u0194\u019d\u01a2\u01bb\u01ca\u01d1\u01e1\u01f4"+
+		"\u01fd";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {

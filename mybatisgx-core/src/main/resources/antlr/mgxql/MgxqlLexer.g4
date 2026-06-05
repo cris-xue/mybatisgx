@@ -59,7 +59,7 @@ UPPER_NAME: UPPER+ (NUMBER | UPPER | LOWER)* ;
 LOWER_NAME: LOWER+ (NUMBER | UPPER | LOWER)* ;
 UPPER: [A-Z] ;
 LOWER: [a-z] ;
-NUMBER: [0-9] ;
+NUMBER: [0-9]+ ;
 
 // 忽略空白符
 WS: [ \t\r\n]+ -> skip ;

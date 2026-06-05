@@ -28,7 +28,7 @@ select_statement: select_action select_item_clause select_from_clause where_clau
 select_item_clause: select_item (comma select_item)* ;
 select_item: select_column_all | select_column_custom | aggregate_function ;
 
-select_column_all: entity_name_alias dot select_asterisk ;
+select_column_all: select_asterisk | entity_name_alias dot select_asterisk ;
 select_column_custom: field_reference ;
 select_action: SELECT_ACTION ;
 select_asterisk: SELECT_ASTERISK ;
@@ -87,7 +87,7 @@ having_and_expression: having_term (logic_and having_term)* ;
 having_term: having_comparison | left_bracket having_or_expression right_bracket ;
 // 单条聚合函数比较，例如 max(age) > :age 或 count(*) > 10    只支持参数作为比较值，不允许字段引用。
 having_comparison: aggregate_function relational_op having_value ;
-having_value: parameter_reference ;
+having_value: parameter_reference | number ;
 
 // 排序 order by name desc、order by name , age
 order_by_clause: order_by order_by_expression (comma order_by_expression)* ;

@@ -86,9 +86,9 @@ having_or_expression: having_and_expression (logic_or having_and_expression)* ;
 having_and_expression: having_term (logic_and having_term)* ;
 // 单条表达式或括号表达式
 having_term: having_comparison | left_bracket having_or_expression right_bracket ;
-// 单条聚合函数比较，例如 max(age) > :age 或 count(*) > 10
+// 单条聚合函数比较，例如 max(age) > :age 或 count(*) > 10    只支持参数作为比较值，不允许字段引用。
 having_comparison: aggregate_function relational_op having_value ;
-having_value: parameter_reference | number | field_reference ;
+having_value: parameter_reference ;
 
 // 排序 order by name desc、order by name , age
 order_by_clause: order_by order_by_expression (comma order_by_expression)* ;

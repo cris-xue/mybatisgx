@@ -356,7 +356,7 @@ public class MgxqlSyntaxHandler {
      */
     static FieldReference parseFieldReference(MgxqlParser.Field_referenceContext fieldRefCtx) {
         FieldReference fieldRef = new FieldReference();
-        if (fieldRefCtx.dot() != null && fieldRefCtx.dot().size() > 0) {
+        if (fieldRefCtx.dot() != null && fieldRefCtx.dot().getChildCount() > 0) {
             fieldRef.setEntityAlias(fieldRefCtx.entity_name_alias().getText());
             fieldRef.setFieldName(fieldRefCtx.field_name().getText());
         } else {

@@ -338,7 +338,7 @@ public class MgxqlAstHandlerTest {
         List<SelectItem> items = stmt.getSelectItems();
         Assert.assertEquals(1, items.size());
         Assert.assertEquals(SelectItemType.COUNT, items.get(0).getType());
-        Assert.assertEquals("id", items.get(0).getAggregateArg());
+        Assert.assertEquals("id", items.get(0).getAggregateFieldRef().getFieldName());
     }
 
     @Test
@@ -348,7 +348,7 @@ public class MgxqlAstHandlerTest {
         List<SelectItem> items = stmt.getSelectItems();
         Assert.assertEquals(1, items.size());
         Assert.assertEquals(SelectItemType.SUM, items.get(0).getType());
-        Assert.assertEquals("age", items.get(0).getAggregateArg());
+        Assert.assertEquals("age", items.get(0).getAggregateFieldRef().getFieldName());
     }
 
     @Test
@@ -358,7 +358,7 @@ public class MgxqlAstHandlerTest {
         List<SelectItem> items = stmt.getSelectItems();
         Assert.assertEquals(1, items.size());
         Assert.assertEquals(SelectItemType.COUNT, items.get(0).getType());
-        Assert.assertEquals("name", items.get(0).getAggregateArg());
+        Assert.assertEquals("name", items.get(0).getAggregateFieldRef().getFieldName());
     }
 
     @Test
@@ -368,7 +368,7 @@ public class MgxqlAstHandlerTest {
         List<SelectItem> items = stmt.getSelectItems();
         Assert.assertEquals(1, items.size());
         Assert.assertEquals(SelectItemType.MAX, items.get(0).getType());
-        Assert.assertEquals("id", items.get(0).getAggregateArg());
+        Assert.assertEquals("id", items.get(0).getAggregateFieldRef().getFieldName());
     }
 
     @Test
@@ -378,7 +378,7 @@ public class MgxqlAstHandlerTest {
         List<SelectItem> items = stmt.getSelectItems();
         Assert.assertEquals(1, items.size());
         Assert.assertEquals(SelectItemType.MIN, items.get(0).getType());
-        Assert.assertEquals("id", items.get(0).getAggregateArg());
+        Assert.assertEquals("id", items.get(0).getAggregateFieldRef().getFieldName());
     }
 
     @Test
@@ -388,7 +388,7 @@ public class MgxqlAstHandlerTest {
         List<SelectItem> items = stmt.getSelectItems();
         Assert.assertEquals(1, items.size());
         Assert.assertEquals(SelectItemType.AVG, items.get(0).getType());
-        Assert.assertEquals("age", items.get(0).getAggregateArg());
+        Assert.assertEquals("age", items.get(0).getAggregateFieldRef().getFieldName());
     }
 
     // ==================== FROM + JOIN 测试 ====================
@@ -538,7 +538,7 @@ public class MgxqlAstHandlerTest {
         Assert.assertEquals(1, havingClause.getConditions().size());
         HavingCondition condition = havingClause.getConditions().get(0);
         Assert.assertEquals(SelectItemType.MAX, condition.getAggregateFunction().getType());
-        Assert.assertEquals("age", condition.getAggregateFunction().getAggregateArg());
+        Assert.assertEquals("age", condition.getAggregateFunction().getAggregateFieldRef().getFieldName());
         Assert.assertEquals(ComparisonOperator.GT, condition.getOperator());
         Assert.assertEquals("age", condition.getParamValuePath().get(0));
     }
@@ -551,7 +551,7 @@ public class MgxqlAstHandlerTest {
         Assert.assertNotNull(havingClause);
         HavingCondition condition = havingClause.getConditions().get(0);
         Assert.assertEquals(SelectItemType.COUNT, condition.getAggregateFunction().getType());
-        Assert.assertEquals("id", condition.getAggregateFunction().getAggregateArg());
+        Assert.assertEquals("id", condition.getAggregateFunction().getAggregateFieldRef().getFieldName());
         Assert.assertEquals("count", condition.getParamValuePath().get(0));
     }
 
@@ -562,7 +562,7 @@ public class MgxqlAstHandlerTest {
         HavingClause havingClause = stmt.getHavingClause();
         HavingCondition condition = havingClause.getConditions().get(0);
         Assert.assertEquals(SelectItemType.MIN, condition.getAggregateFunction().getType());
-        Assert.assertEquals("id", condition.getAggregateFunction().getAggregateArg());
+        Assert.assertEquals("id", condition.getAggregateFunction().getAggregateFieldRef().getFieldName());
         Assert.assertEquals(ComparisonOperator.LT, condition.getOperator());
     }
 

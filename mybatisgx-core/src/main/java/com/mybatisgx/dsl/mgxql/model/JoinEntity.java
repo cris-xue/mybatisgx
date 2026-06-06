@@ -13,6 +13,10 @@ public class JoinEntity extends FromEntity {
      */
     private JoinType joinType;
 
+    private String onLeftAlias;
+
+    private String onRightAlias;
+
     public JoinEntity() {
     }
 
@@ -27,5 +31,21 @@ public class JoinEntity extends FromEntity {
 
     public void setJoinType(JoinType joinType) {
         this.joinType = joinType;
+    }
+
+    public String getOnLeftAlias() {
+        return onLeftAlias;
+    }
+
+    public void setOnLeftAlias(String onLeftAlias) {
+        this.onLeftAlias = onLeftAlias;
+    }
+
+    public String getOnRightAlias() {
+        return onRightAlias;
+    }
+
+    public void setOnRightAlias(String onRightAlias) {
+        this.onRightAlias = onRightAlias;
     }
 }

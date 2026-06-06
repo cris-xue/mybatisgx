@@ -186,7 +186,13 @@ public class MgxqlSyntaxHandler {
                 for (MgxqlParser.Select_join_entityContext joinEntityCtx : joinEntities) {
                     String joinEntityName = joinEntityCtx.select_entity().getText();
                     String joinAlias = joinEntityCtx.select_entity_alias() != null ? joinEntityCtx.select_entity_alias().getText() : null;
-                    fromClause.addJoinEntity(new JoinEntity(joinEntityName, joinAlias, JoinType.LEFT));
+                    JoinEntity joinEntity = new JoinEntity(joinEntityName, joinAlias, JoinType.LEFT);
+                    MgxqlParser.Select_on_expressionContext onExprCtx = joinEntityCtx.select_on_expression();
+                    if (onExprCtx != null) {
+                        joinEntity.setOnLeftAlias(onExprCtx.entity_name_alias(0).getText());
+                        joinEntity.setOnRightAlias(onExprCtx.entity_name_alias(1).getText());
+                    }
+                    fromClause.addJoinEntity(joinEntity);
                 }
             }
 
@@ -397,6 +403,7 @@ public class MgxqlSyntaxHandler {
                 ParseTree child = ctx.getChild(i);
                 if (child instanceof MgxqlParser.Logic_orContext) {
                     currentOrOp = LogicOperator.OR;
+                    expression.setLogicOperator(LogicOperator.OR);
                 }
                 if (child instanceof MgxqlParser.Condition_and_expressionContext) {
                     List<ConditionNode> andNodes = parseAndExpression((MgxqlParser.Condition_and_expressionContext) child);

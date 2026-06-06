@@ -3,6 +3,7 @@ package com.mybatisgx.dsl.mgxql.checker;
 import com.mybatisgx.dsl.mgxql.model.MgxqlStatement;
 import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.model.EntityInfo;
+import org.apache.ibatis.mapping.SqlCommandType;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -17,22 +18,29 @@ import java.util.stream.Collectors;
  */
 public class MgxqlCheckerChain {
 
-    private final List<MgxqlChecker> checkers;
+    private final List<MgxqlChecker> selectCheckers;
+
+    private final List<MgxqlChecker> dmlCheckers;
 
     private final MgxqlSyntaxCheckerChain syntaxCheckerChain;
 
     public MgxqlCheckerChain() {
-        this.checkers = Arrays.asList(
+        this.selectCheckers = Arrays.asList(
                 new EntityChecker(),
                 new FieldChecker(),
                 new JoinRelationChecker(),
+                new OperatorTypeChecker()
+        );
+        this.dmlCheckers = Arrays.asList(
+                new EntityChecker(),
+                new FieldChecker(),
                 new OperatorTypeChecker()
         );
         this.syntaxCheckerChain = new MgxqlSyntaxCheckerChain();
     }
 
     /**
-     * 执行所有校验器
+     * 执行校验器，根据commandType选择校验链
      *
      * @param statement    MGXQL语句模型
      * @param entityInfo   主实体信息
@@ -44,8 +52,12 @@ public class MgxqlCheckerChain {
 
         CheckerContext context = new CheckerContext(entityInfo);
 
+        SqlCommandType commandType = statement.getCommandType();
+        List<MgxqlChecker> activeCheckers = (commandType == SqlCommandType.DELETE || commandType == SqlCommandType.UPDATE)
+                ? this.dmlCheckers : this.selectCheckers;
+
         // 按order排序执行
-        List<MgxqlChecker> sortedCheckers = this.checkers.stream()
+        List<MgxqlChecker> sortedCheckers = activeCheckers.stream()
                 .sorted(Comparator.comparingInt(MgxqlChecker::getOrder))
                 .collect(Collectors.toList());
 

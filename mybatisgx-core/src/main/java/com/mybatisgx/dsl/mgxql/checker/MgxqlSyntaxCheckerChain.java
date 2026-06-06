@@ -16,32 +16,61 @@ import java.util.List;
  */
 public class MgxqlSyntaxCheckerChain {
 
-    private final List<MgxqlSyntaxChecker> checkers;
+    private final List<MgxqlSyntaxChecker> selectCheckers;
+
+    private final List<MgxqlSyntaxChecker> dmlCheckers;
 
     public MgxqlSyntaxCheckerChain() {
-        this.checkers = Arrays.asList(
+        this.selectCheckers = Arrays.asList(
                 new AliasRequirementChecker(),
                 new FieldAliasChecker(),
                 new OnAliasChecker(),
                 new SelectStarChecker()
         );
+        this.dmlCheckers = Arrays.asList(
+                new WhereRequiredChecker(),
+                new DmlAliasPrefixChecker()
+        );
     }
 
     /**
-     * 执行所有语法校验器
+     * 执行语法校验器，根据commandType选择校验链
      *
      * @param statement MGXQL语句模型
      * @throws MybatisgxException 当存在语法校验错误时抛出
      */
     public void check(MgxqlStatement statement) {
+        SqlCommandType commandType = statement.getCommandType();
+        if (commandType == SqlCommandType.DELETE || commandType == SqlCommandType.UPDATE) {
+            this.checkDml(statement);
+        } else {
+            this.checkSelect(statement);
+        }
+    }
+
+    private void checkSelect(MgxqlStatement statement) {
         SyntaxCheckerContext context = new SyntaxCheckerContext();
         context.setHasMultipleEntities(isMultipleEntities(statement));
-
-        // 收集FROM中定义的所有别名
         collectDefinedAliases(statement, context);
 
-        // 按order排序执行
-        List<MgxqlSyntaxChecker> sortedCheckers = this.checkers.stream()
+        List<MgxqlSyntaxChecker> sortedCheckers = this.selectCheckers.stream()
+                .sorted(Comparator.comparingInt(MgxqlSyntaxChecker::getOrder))
+                .collect(java.util.stream.Collectors.toList());
+
+        for (MgxqlSyntaxChecker checker : sortedCheckers) {
+            checker.check(statement, context);
+        }
+
+        if (context.hasErrors()) {
+            String errorMessage = String.join("; ", context.getErrors());
+            throw new MybatisgxException("MGXQL语法校验失败: %s", errorMessage);
+        }
+    }
+
+    private void checkDml(MgxqlStatement statement) {
+        SyntaxCheckerContext context = new SyntaxCheckerContext();
+
+        List<MgxqlSyntaxChecker> sortedCheckers = this.dmlCheckers.stream()
                 .sorted(Comparator.comparingInt(MgxqlSyntaxChecker::getOrder))
                 .collect(java.util.stream.Collectors.toList());
 

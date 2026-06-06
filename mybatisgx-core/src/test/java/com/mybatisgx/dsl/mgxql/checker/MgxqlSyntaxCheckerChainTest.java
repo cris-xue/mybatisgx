@@ -2,6 +2,7 @@ package com.mybatisgx.dsl.mgxql.checker;
 
 import com.mybatisgx.dsl.mgxql.model.*;
 import com.mybatisgx.exception.MybatisgxException;
+import com.mybatisgx.model.LogicOperator;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
@@ -108,6 +109,66 @@ public class MgxqlSyntaxCheckerChainTest {
         stmt.addSelectItem(item);
         setMultiEntityFrom(stmt);
         return stmt;
+    }
+
+    @Test
+    public void test06_deleteShouldNotTriggerSelectCheckers() {
+        MgxqlStatement stmt = new MgxqlStatement();
+        stmt.setCommandType(org.apache.ibatis.mapping.SqlCommandType.DELETE);
+        WhereClause whereClause = new WhereClause(new ConditionExpression(LogicOperator.NULL));
+        ConditionNode node = new ConditionNode();
+        node.setFieldName("id");
+        whereClause.getRootExpression().addNode(node);
+        stmt.setWhereClause(whereClause);
+
+        // DELETE 走DML校验链，不触发SelectStarChecker等SELECT专属校验
+        chain.check(stmt);
+    }
+
+    @Test
+    public void test07_updateShouldNotTriggerSelectCheckers() {
+        MgxqlStatement stmt = new MgxqlStatement();
+        stmt.setCommandType(org.apache.ibatis.mapping.SqlCommandType.UPDATE);
+        WhereClause whereClause = new WhereClause(new ConditionExpression(LogicOperator.NULL));
+        ConditionNode node = new ConditionNode();
+        node.setFieldName("name");
+        whereClause.getRootExpression().addNode(node);
+        stmt.setWhereClause(whereClause);
+
+        // UPDATE 走DML校验链，不触发AliasRequirementChecker等SELECT专属校验
+        chain.check(stmt);
+    }
+
+    @Test
+    public void test08_deleteWithoutWhereShouldFail() {
+        MgxqlStatement stmt = new MgxqlStatement();
+        stmt.setCommandType(org.apache.ibatis.mapping.SqlCommandType.DELETE);
+
+        try {
+            chain.check(stmt);
+            Assert.fail("Expected MybatisgxException");
+        } catch (MybatisgxException e) {
+            Assert.assertTrue(e.getMessage().contains("MGXQL语法校验失败"));
+        }
+    }
+
+    @Test
+    public void test09_deleteWithAliasPrefixShouldFail() {
+        MgxqlStatement stmt = new MgxqlStatement();
+        stmt.setCommandType(org.apache.ibatis.mapping.SqlCommandType.DELETE);
+        WhereClause whereClause = new WhereClause(new ConditionExpression(LogicOperator.NULL));
+        ConditionNode node = new ConditionNode();
+        node.setFieldAlias("user");
+        node.setFieldName("id");
+        whereClause.getRootExpression().addNode(node);
+        stmt.setWhereClause(whereClause);
+
+        try {
+            chain.check(stmt);
+            Assert.fail("Expected MybatisgxException");
+        } catch (MybatisgxException e) {
+            Assert.assertTrue(e.getMessage().contains("别名前缀"));
+        }
     }
 
     private void setMultiEntityFrom(MgxqlStatement stmt) {

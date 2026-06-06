@@ -27,6 +27,11 @@ public class FieldChecker implements MgxqlChecker {
                 if (selectItem.getType() == SelectItemType.COLUMN && selectItem.getFieldName() != null) {
                     this.checkFieldExistence(selectItem.getEntityAlias(), selectItem.getFieldName(), "SELECT", context);
                 }
+                // 聚合函数参数字段校验
+                if (selectItem.getAggregateFieldRef() != null) {
+                    FieldReference fieldRef = selectItem.getAggregateFieldRef();
+                    this.checkFieldExistence(fieldRef.getEntityAlias(), fieldRef.getFieldName(), "SELECT", context);
+                }
             }
         }
 
@@ -48,6 +53,16 @@ public class FieldChecker implements MgxqlChecker {
         if (statement.getGroupByClause() != null) {
             for (FieldReference fieldRef : statement.getGroupByClause().getFields()) {
                 this.checkFieldExistence(fieldRef.getEntityAlias(), fieldRef.getFieldName(), "GROUP BY", context);
+            }
+        }
+
+        // 校验HAVING聚合函数参数字段
+        if (statement.getHavingClause() != null && statement.getHavingClause().getConditions() != null) {
+            for (HavingCondition condition : statement.getHavingClause().getConditions()) {
+                if (condition.getAggregateFunction() != null && condition.getAggregateFunction().getAggregateFieldRef() != null) {
+                    FieldReference fieldRef = condition.getAggregateFunction().getAggregateFieldRef();
+                    this.checkFieldExistence(fieldRef.getEntityAlias(), fieldRef.getFieldName(), "HAVING", context);
+                }
             }
         }
     }

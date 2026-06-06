@@ -24,9 +24,9 @@ public class SelectItem {
     private String fieldName;
 
     /**
-     * 聚合函数参数，如 count(1) 中的 1，count(*) 中的 *
+     * 聚合函数参数字段引用，如 count(user.id) 中的 FieldReference(entityAlias="user", fieldName="id")
      */
-    private String aggregateArg;
+    private FieldReference aggregateFieldRef;
 
     public SelectItemType getType() {
         return type;
@@ -52,11 +52,11 @@ public class SelectItem {
         this.fieldName = fieldName;
     }
 
-    public String getAggregateArg() {
-        return aggregateArg;
+    public FieldReference getAggregateFieldRef() {
+        return aggregateFieldRef;
     }
 
-    public void setAggregateArg(String aggregateArg) {
-        this.aggregateArg = aggregateArg;
+    public void setAggregateFieldRef(FieldReference aggregateFieldRef) {
+        this.aggregateFieldRef = aggregateFieldRef;
     }
 }

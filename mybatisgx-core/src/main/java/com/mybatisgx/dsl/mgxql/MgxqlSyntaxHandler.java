@@ -137,7 +137,7 @@ public class MgxqlSyntaxHandler {
         private void parseAggregateFunction(SelectItem item, MgxqlParser.Aggregate_functionContext aggregateFunction) {
             MgxqlParser.Aggregate_function_nameContext funcNameCtx = aggregateFunction.aggregate_function_name();
             MgxqlParser.Aggregate_function_argumentContext funcArgCtx = aggregateFunction.aggregate_function_argument();
-            String argText = parseFieldReference(funcArgCtx.field_reference()).getFieldName();
+            FieldReference fieldRef = parseFieldReference(funcArgCtx.field_reference());
 
             if (funcNameCtx.select_count() != null) {
                 item.setType(SelectItemType.COUNT);
@@ -150,7 +150,7 @@ public class MgxqlSyntaxHandler {
             } else if (funcNameCtx.select_sum() != null) {
                 item.setType(SelectItemType.SUM);
             }
-            item.setAggregateArg(argText);
+            item.setAggregateFieldRef(fieldRef);
         }
     }
 

@@ -19,6 +19,8 @@ public class MgxqlCheckerChain {
 
     private final List<MgxqlChecker> checkers;
 
+    private final MgxqlSyntaxCheckerChain syntaxCheckerChain;
+
     public MgxqlCheckerChain() {
         this.checkers = Arrays.asList(
                 new EntityChecker(),
@@ -26,6 +28,7 @@ public class MgxqlCheckerChain {
                 new JoinRelationChecker(),
                 new OperatorTypeChecker()
         );
+        this.syntaxCheckerChain = new MgxqlSyntaxCheckerChain();
     }
 
     /**
@@ -36,6 +39,9 @@ public class MgxqlCheckerChain {
      * @throws MybatisgxException 当存在校验错误时抛出
      */
     public void check(MgxqlStatement statement, EntityInfo entityInfo) {
+        // 先执行语法校验，语法校验失败时直接抛出异常，不继续执行语义校验
+        this.syntaxCheckerChain.check(statement);
+
         CheckerContext context = new CheckerContext(entityInfo);
 
         // 按order排序执行

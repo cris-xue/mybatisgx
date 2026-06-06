@@ -117,7 +117,7 @@ public class MgxqlSyntaxHandler {
                     item.setType(SelectItemType.COLUMN_ALL);
                     MgxqlParser.Select_column_allContext columnAll = selectItem.select_column_all();
                     if (columnAll.entity_name_alias() != null) {
-                        item.setEntityAlias(columnAll.entity_name_alias().getText());
+                        item.setEntityAlias(stripBackticks(columnAll.entity_name_alias().getText()));
                     }
                     item.setFieldName("*");
                 } else if (selectItem.select_column_custom() != null) {
@@ -189,8 +189,8 @@ public class MgxqlSyntaxHandler {
                     JoinEntity joinEntity = new JoinEntity(joinEntityName, joinAlias, JoinType.LEFT);
                     MgxqlParser.Select_on_expressionContext onExprCtx = joinEntityCtx.select_on_expression();
                     if (onExprCtx != null) {
-                        joinEntity.setOnLeftAlias(onExprCtx.entity_name_alias(0).getText());
-                        joinEntity.setOnRightAlias(onExprCtx.entity_name_alias(1).getText());
+                        joinEntity.setOnLeftAlias(stripBackticks(onExprCtx.entity_name_alias(0).getText()));
+                        joinEntity.setOnRightAlias(stripBackticks(onExprCtx.entity_name_alias(1).getText()));
                     }
                     fromClause.addJoinEntity(joinEntity);
                 }
@@ -357,16 +357,23 @@ public class MgxqlSyntaxHandler {
         }
     }
 
+    static String stripBackticks(String text) {
+        if (text != null && text.startsWith("`") && text.endsWith("`")) {
+            return text.substring(1, text.length() - 1);
+        }
+        return text;
+    }
+
     /**
      * 解析Field_referenceContext为FieldReference
      */
     static FieldReference parseFieldReference(MgxqlParser.Field_referenceContext fieldRefCtx) {
         FieldReference fieldRef = new FieldReference();
         if (fieldRefCtx.dot() != null && fieldRefCtx.dot().getChildCount() > 0) {
-            fieldRef.setEntityAlias(fieldRefCtx.entity_name_alias().getText());
-            fieldRef.setFieldName(fieldRefCtx.field_name().getText());
+            fieldRef.setEntityAlias(stripBackticks(fieldRefCtx.entity_name_alias().getText()));
+            fieldRef.setFieldName(stripBackticks(fieldRefCtx.field_name().getText()));
         } else {
-            fieldRef.setFieldName(fieldRefCtx.field_name().getText());
+            fieldRef.setFieldName(stripBackticks(fieldRefCtx.field_name().getText()));
         }
         return fieldRef;
     }
@@ -377,7 +384,7 @@ public class MgxqlSyntaxHandler {
     static List<String> parseParameterReference(MgxqlParser.Parameter_referenceContext paramRefCtx) {
         List<String> pathItems = new ArrayList<>();
         for (MgxqlParser.Field_nameContext fieldNameCtx : paramRefCtx.field_name()) {
-            pathItems.add(fieldNameCtx.getText());
+            pathItems.add(stripBackticks(fieldNameCtx.getText()));
         }
         return pathItems;
     }

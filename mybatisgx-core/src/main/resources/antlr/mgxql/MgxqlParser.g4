@@ -144,8 +144,8 @@ field_reference: field_name | entity_name_alias dot field_name ;
 parameter_reference: param_colon field_name (dot field_name)* ;
 
 entity_name: UPPER_NAME ;
-entity_name_alias: LOWER_NAME ;
-field_name: LOWER_NAME ;
+entity_name_alias: LOWER_NAME | QUOTED_NAME ;
+field_name: LOWER_NAME | QUOTED_NAME ;
 
 left_bracket: LEFT_BRACKET ;
 right_bracket: RIGHT_BRACKET ;

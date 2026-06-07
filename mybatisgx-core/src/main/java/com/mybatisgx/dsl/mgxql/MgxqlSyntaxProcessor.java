@@ -2,14 +2,14 @@ package com.mybatisgx.dsl.mgxql;
 
 import com.mybatisgx.dsl.mgxql.checker.MgxqlCheckerChain;
 import com.mybatisgx.dsl.mgxql.model.MgxqlStatement;
+import com.mybatisgx.dsl.mgxql.syntax.MgxqlLexer;
+import com.mybatisgx.dsl.mgxql.syntax.MgxqlParser;
 import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.model.ConditionOriginType;
 import com.mybatisgx.model.EntityInfo;
 import com.mybatisgx.model.MethodInfo;
 import com.mybatisgx.model.MethodParamInfo;
 import com.mybatisgx.model.handler.MethodSyntaxErrorListener;
-import com.mybatisgx.dsl.mgxql.syntax.MgxqlLexer;
-import com.mybatisgx.dsl.mgxql.syntax.MgxqlParser;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -80,8 +80,7 @@ public class MgxqlSyntaxProcessor {
      * @param expression          mgxql表达式
      * @return MgxqlStatement模型
      */
-    public MgxqlStatement execute(EntityInfo entityInfo, MethodInfo methodInfo, MethodParamInfo methodParamInfo,
-                                  ConditionOriginType conditionOriginType, String expression) {
+    private MgxqlStatement execute(EntityInfo entityInfo, MethodInfo methodInfo, MethodParamInfo methodParamInfo, ConditionOriginType conditionOriginType, String expression) {
         CharStream charStream = CharStreams.fromString(expression);
         MgxqlLexer mgxqlLexer = new MgxqlLexer(charStream);
         CommonTokenStream tokens = new CommonTokenStream(mgxqlLexer);
@@ -105,7 +104,7 @@ public class MgxqlSyntaxProcessor {
     }
 
     /**
-     * 解析mgxql表达式并执行语义校验
+     * 解析mgxql表达式并执行语法校验
      *
      * @param entityInfo          实体信息
      * @param methodInfo          方法信息
@@ -114,8 +113,7 @@ public class MgxqlSyntaxProcessor {
      * @param expression          mgxql表达式
      * @return 经过校验的MgxqlStatement模型
      */
-    public MgxqlStatement executeAndCheck(EntityInfo entityInfo, MethodInfo methodInfo, MethodParamInfo methodParamInfo,
-                                          ConditionOriginType conditionOriginType, String expression) {
+    public MgxqlStatement executeAndCheck(EntityInfo entityInfo, MethodInfo methodInfo, MethodParamInfo methodParamInfo, ConditionOriginType conditionOriginType, String expression) {
         MgxqlStatement statement = this.execute(entityInfo, methodInfo, methodParamInfo, conditionOriginType, expression);
         MgxqlCheckerChain checkerChain = new MgxqlCheckerChain();
         checkerChain.check(statement, entityInfo);

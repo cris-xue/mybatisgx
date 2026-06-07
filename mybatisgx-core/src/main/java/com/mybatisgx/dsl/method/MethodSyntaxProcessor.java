@@ -1,10 +1,10 @@
 package com.mybatisgx.dsl.method;
 
+import com.mybatisgx.dsl.method.model.MgxqlContext;
 import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.model.EntityInfo;
 import com.mybatisgx.model.MethodInfo;
 import com.mybatisgx.model.MethodParamInfo;
-import com.mybatisgx.dsl.method.model.MgxqlContext;
 import com.mybatisgx.model.handler.MethodSyntaxErrorListener;
 import com.mybatisgx.syntax.MethodNameLexer;
 import com.mybatisgx.syntax.MethodNameParser;
@@ -59,7 +59,8 @@ public class MethodSyntaxProcessor {
         throw new MybatisgxException("未知的方法类型：%s", methodName);
     }
 
-    public MgxqlContext execute(EntityInfo entityInfo, MethodInfo methodInfo, MethodParamInfo methodParamInfo, String methodName) {
+    public MgxqlContext execute(EntityInfo entityInfo, MethodInfo methodInfo, MethodParamInfo methodParamInfo) {
+        String methodName = methodInfo.getMethodName();
         CharStream charStream = CharStreams.fromString(methodName);
         MethodNameLexer methodNameLexer = new MethodNameLexer(charStream);
         CommonTokenStream tokens = new CommonTokenStream(methodNameLexer);

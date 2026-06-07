@@ -1,6 +1,7 @@
 package com.mybatisgx.dsl.method.model;
 
 import com.mybatisgx.model.SelectItemType;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.mapping.SqlCommandType;
 
 import java.util.ArrayList;
@@ -66,5 +67,17 @@ public class MgxqlContext {
 
     public void setLimitList(List<String> limitList) {
         this.limitList = limitList;
+    }
+
+    public String toMgxql() {
+        return String.format(
+                "%s %s %s %s %s %s",
+                sqlCommandType.name(),
+                selectItemType.name(),
+                from,
+                StringUtils.join(whereList, " "),
+                StringUtils.join(orderByList, " "),
+                StringUtils.join(limitList, " ")
+        );
     }
 }

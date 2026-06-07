@@ -5,6 +5,8 @@ import com.mybatisgx.annotation.*;
 import com.mybatisgx.api.MethodCommandType;
 import com.mybatisgx.context.EntityInfoContextHolder;
 import com.mybatisgx.dao.Dao;
+import com.mybatisgx.dsl.method.MethodSyntaxProcessor;
+import com.mybatisgx.dsl.method.model.MgxqlContext;
 import com.mybatisgx.dsl.mgxql.MgxqlStatementToMethodInfoConverter;
 import com.mybatisgx.dsl.mgxql.MgxqlSyntaxProcessor;
 import com.mybatisgx.dsl.mgxql.model.MgxqlStatement;
@@ -37,6 +39,7 @@ public class MethodInfoHandler {
     private ColumnInfoHandler columnInfoHandler = new ColumnInfoHandler();
     private TypeResolver typeResolver = new TypeResolver();
     private MybatisgxSyntaxProcessor mybatisgxSyntaxProcessor = new MybatisgxSyntaxProcessor();
+    private MethodSyntaxProcessor methodSyntaxProcessor = new MethodSyntaxProcessor();
     private MgxqlSyntaxProcessor mgxqlSyntaxProcessor = new MgxqlSyntaxProcessor();
     private MgxqlStatementToMethodInfoConverter mgxqlStatementToMethodInfoConverter = new MgxqlStatementToMethodInfoConverter();
     private EntityRelationTreeHandler entityRelationTreeHandler = new EntityRelationTreeHandler();
@@ -325,30 +328,48 @@ public class MethodInfoHandler {
         }
         EntityInfo entityInfo = methodInfo.getMapperInfo().getEntityInfo();
 
-        // 解析DELETE/UPDATE的Statement表达式（MGXQL路径）
-        if (methodInfo.getSqlCommandType() == SqlCommandType.DELETE || methodInfo.getSqlCommandType() == SqlCommandType.UPDATE) {
-            Statement statement = methodInfo.getMethod().getAnnotation(Statement.class);
-            if (statement != null) {
-                methodInfo.setStatementExpression(statement.value());
-                MgxqlStatement mgxqlStatement = this.mgxqlSyntaxProcessor.executeAndCheck(entityInfo, methodInfo, null, ConditionOriginType.STATEMENT_METHOD_NAME, methodInfo.getStatementExpression());
+        // 解析Statement表达式（MGXQL路径）
+        Statement statement = methodInfo.getMethod().getAnnotation(Statement.class);
+        if (statement != null) {
+            String mgxql = statement.value();
+            MgxqlStatement mgxqlStatement = this.mgxqlSyntaxProcessor.executeAndCheck(entityInfo, methodInfo, null, null, mgxql);
+            List<ConditionInfo> conditionInfoList = this.mgxqlStatementToMethodInfoConverter.convert(mgxqlStatement, ConditionOriginType.STATEMENT_METHOD_NAME);
+            methodInfo.setConditionInfoList(conditionInfoList);
+            return;
+        }
+
+        // 把实体字段转换成mgxql
+        if (methodInfo.getSqlCommandType() == SqlCommandType.SELECT) {
+            if (methodInfo.getEntityParamInfo() != null || methodInfo.getQueryEntityParamInfo() != null) {
+                String mgxql = this.entityToMgxql(methodInfo);
+                MgxqlStatement mgxqlStatement = this.mgxqlSyntaxProcessor.executeAndCheck(entityInfo, methodInfo, null, null, mgxql);
                 List<ConditionInfo> conditionInfoList = this.mgxqlStatementToMethodInfoConverter.convert(mgxqlStatement, ConditionOriginType.STATEMENT_METHOD_NAME);
                 methodInfo.setConditionInfoList(conditionInfoList);
                 return;
             }
         }
 
+        // 把方法名语法糖转成mgxql
+        MgxqlContext mgxqlContext = this.methodSyntaxProcessor.execute(entityInfo, methodInfo, null);
+        if (mgxqlContext != null) {
+            String mgxql = mgxqlContext.toMgxql();
+            MgxqlStatement mgxqlStatement = this.mgxqlSyntaxProcessor.executeAndCheck(entityInfo, methodInfo, null, null, mgxql);
+            List<ConditionInfo> conditionInfoList = this.mgxqlStatementToMethodInfoConverter.convert(mgxqlStatement, ConditionOriginType.STATEMENT_METHOD_NAME);
+            methodInfo.setConditionInfoList(conditionInfoList);
+        }
+
         // 解析Statement表达式
-        if (methodInfo.getSqlCommandType() == SqlCommandType.SELECT) {
-            Statement statement = methodInfo.getMethod().getAnnotation(Statement.class);
+        /*if (methodInfo.getSqlCommandType() == SqlCommandType.SELECT) {
+            // Statement statement = methodInfo.getMethod().getAnnotation(Statement.class);
             if (statement != null) {
                 methodInfo.setStatementExpression(statement.value());
                 this.mybatisgxSyntaxProcessor.execute(entityInfo, methodInfo, null, ConditionOriginType.STATEMENT_METHOD_NAME, methodInfo.getStatementExpression());
                 return;
             }
-        }
+        }*/
 
         // 解析查询实体生成的表达式，一个实体只允许定义一个查询实体
-        if (methodInfo.getSqlCommandType() == SqlCommandType.SELECT) {
+        /*if (methodInfo.getSqlCommandType() == SqlCommandType.SELECT) {
             if (methodInfo.getEntityParamInfo() != null && methodInfo.getQueryEntityParamInfo() == null) {
                 entityInfo = methodInfo.getEntityParamInfo().getEntityInfo();
             }
@@ -360,20 +381,27 @@ public class MethodInfoHandler {
                 this.mybatisgxSyntaxProcessor.execute(entityInfo, methodInfo, null, ConditionOriginType.ENTITY_FIELD, entityCondition);
                 return;
             }
-        }
+        }*/
 
         // 解析方法名
-        this.mybatisgxSyntaxProcessor.execute(entityInfo, methodInfo, null, ConditionOriginType.METHOD_NAME, methodInfo.getMethodName());
+        // this.mybatisgxSyntaxProcessor.execute(entityInfo, methodInfo, null, ConditionOriginType.METHOD_NAME, methodInfo.getMethodName());
     }
 
     /**
-     * 把实体字段转换成方法名
+     * 把实体字段转换成mgxql
      *
      * @param methodInfo
-     * @param entityInfo
      * @return
      */
-    private String getEntityCondition(MethodInfo methodInfo, EntityInfo entityInfo) {
+    private String entityToMgxql(MethodInfo methodInfo) {
+        EntityInfo entityInfo = null;
+        if (methodInfo.getEntityParamInfo() != null && methodInfo.getQueryEntityParamInfo() == null) {
+            entityInfo = methodInfo.getEntityParamInfo().getEntityInfo();
+        }
+        if (methodInfo.getEntityParamInfo() == null && methodInfo.getQueryEntityParamInfo() != null) {
+            entityInfo = methodInfo.getQueryEntityParamInfo().getEntityInfo();
+        }
+
         List<String> columnConditionList = new ArrayList<>();
         for (ColumnInfo columnInfo : entityInfo.getColumnInfoList()) {
             if (TypeUtils.typeEquals(columnInfo, RelationColumnInfo.class)) {
@@ -405,8 +433,9 @@ public class MethodInfoHandler {
             columnConditionList.add(javaColumnName);
         }
         StringBuilder stringBuilder = new StringBuilder(methodInfo.getSqlCommandType().name().toLowerCase())
-                .append("By")
-                .append(StringUtils.join(columnConditionList, "And"));
+                .append(String.format("select * from %s", entityInfo.getTableName()))
+                .append(" where ")
+                .append(StringUtils.join(columnConditionList, " and "));
         LOGGER.debug(stringBuilder.toString());
         return stringBuilder.toString();
     }

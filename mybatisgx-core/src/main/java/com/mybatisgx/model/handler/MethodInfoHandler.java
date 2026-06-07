@@ -330,7 +330,7 @@ public class MethodInfoHandler {
             Statement statement = methodInfo.getMethod().getAnnotation(Statement.class);
             if (statement != null) {
                 methodInfo.setStatementExpression(statement.value());
-                MgxqlStatement mgxqlStatement = this.mgxqlSyntaxProcessor.execute(entityInfo, methodInfo, null, ConditionOriginType.STATEMENT_METHOD_NAME, methodInfo.getStatementExpression());
+                MgxqlStatement mgxqlStatement = this.mgxqlSyntaxProcessor.executeAndCheck(entityInfo, methodInfo, null, ConditionOriginType.STATEMENT_METHOD_NAME, methodInfo.getStatementExpression());
                 List<ConditionInfo> conditionInfoList = this.mgxqlStatementToMethodInfoConverter.convert(mgxqlStatement, ConditionOriginType.STATEMENT_METHOD_NAME);
                 methodInfo.setConditionInfoList(conditionInfoList);
                 return;

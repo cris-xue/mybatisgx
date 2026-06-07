@@ -29,6 +29,8 @@ public class MgxqlSyntaxProcessor {
 
     private final List<MgxqlSyntaxHandler.SyntaxNodeHandler> handlers = Arrays.asList(
             new MgxqlSyntaxHandler.SelectStatementHandler(),
+            new MgxqlSyntaxHandler.DeleteStatementHandler(),
+            new MgxqlSyntaxHandler.UpdateStatementHandler(),
             new MgxqlSyntaxHandler.SelectItemHandler(),
             new MgxqlSyntaxHandler.SelectFromClauseHandler(),
             new MgxqlSyntaxHandler.WhereClauseHandler(),

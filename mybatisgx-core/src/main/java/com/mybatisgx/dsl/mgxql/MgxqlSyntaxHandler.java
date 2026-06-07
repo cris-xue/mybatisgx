@@ -93,6 +93,44 @@ public class MgxqlSyntaxHandler {
         }
     }
 
+    public static class DeleteStatementHandler implements SyntaxNodeHandler {
+
+        @Override
+        public int getOrder() {
+            return 0;
+        }
+
+        @Override
+        public boolean support(ParseTree node) {
+            return node instanceof MgxqlParser.Delete_statementContext;
+        }
+
+        @Override
+        public void handle(ParseTree node, ParserContext context) {
+            LOGGER.debug("处理mgxql delete语句: {}", node.getText());
+            context.getMgxqlStatement().setCommandType(SqlCommandType.DELETE);
+        }
+    }
+
+    public static class UpdateStatementHandler implements SyntaxNodeHandler {
+
+        @Override
+        public int getOrder() {
+            return 0;
+        }
+
+        @Override
+        public boolean support(ParseTree node) {
+            return node instanceof MgxqlParser.Update_statementContext;
+        }
+
+        @Override
+        public void handle(ParseTree node, ParserContext context) {
+            LOGGER.debug("处理mgxql update语句: {}", node.getText());
+            context.getMgxqlStatement().setCommandType(SqlCommandType.UPDATE);
+        }
+    }
+
     public static class SelectItemHandler implements SyntaxNodeHandler {
 
         @Override

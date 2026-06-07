@@ -5,6 +5,9 @@ import com.mybatisgx.annotation.*;
 import com.mybatisgx.api.MethodCommandType;
 import com.mybatisgx.context.EntityInfoContextHolder;
 import com.mybatisgx.dao.Dao;
+import com.mybatisgx.dsl.mgxql.MgxqlStatementToMethodInfoConverter;
+import com.mybatisgx.dsl.mgxql.MgxqlSyntaxProcessor;
+import com.mybatisgx.dsl.mgxql.model.MgxqlStatement;
 import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.model.*;
@@ -34,6 +37,8 @@ public class MethodInfoHandler {
     private ColumnInfoHandler columnInfoHandler = new ColumnInfoHandler();
     private TypeResolver typeResolver = new TypeResolver();
     private MybatisgxSyntaxProcessor mybatisgxSyntaxProcessor = new MybatisgxSyntaxProcessor();
+    private MgxqlSyntaxProcessor mgxqlSyntaxProcessor = new MgxqlSyntaxProcessor();
+    private MgxqlStatementToMethodInfoConverter mgxqlStatementToMethodInfoConverter = new MgxqlStatementToMethodInfoConverter();
     private EntityRelationTreeHandler entityRelationTreeHandler = new EntityRelationTreeHandler();
     private ResultMapInfoHandler resultMapInfoHandler = new ResultMapInfoHandler();
     private final MybatisgxConfiguration configuration;
@@ -319,6 +324,18 @@ public class MethodInfoHandler {
             return;
         }
         EntityInfo entityInfo = methodInfo.getMapperInfo().getEntityInfo();
+
+        // 解析DELETE/UPDATE的Statement表达式（MGXQL路径）
+        if (methodInfo.getSqlCommandType() == SqlCommandType.DELETE || methodInfo.getSqlCommandType() == SqlCommandType.UPDATE) {
+            Statement statement = methodInfo.getMethod().getAnnotation(Statement.class);
+            if (statement != null) {
+                methodInfo.setStatementExpression(statement.value());
+                MgxqlStatement mgxqlStatement = this.mgxqlSyntaxProcessor.execute(entityInfo, methodInfo, null, ConditionOriginType.STATEMENT_METHOD_NAME, methodInfo.getStatementExpression());
+                List<ConditionInfo> conditionInfoList = this.mgxqlStatementToMethodInfoConverter.convert(mgxqlStatement, ConditionOriginType.STATEMENT_METHOD_NAME);
+                methodInfo.setConditionInfoList(conditionInfoList);
+                return;
+            }
+        }
 
         // 解析Statement表达式
         if (methodInfo.getSqlCommandType() == SqlCommandType.SELECT) {

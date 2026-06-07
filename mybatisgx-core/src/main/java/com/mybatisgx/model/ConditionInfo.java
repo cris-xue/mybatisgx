@@ -63,6 +63,10 @@ public class ConditionInfo {
      * 条件值来源于方法参数或者方法参数实体，需要提前计算出公共取值路径，模板渲染的时候就不再需要多重逻辑判断
      */
     private List<String> paramValueCommonPathItemList;
+    /**
+     * 是否为可选条件（对应MGXQL的?前缀，等价于MyBatis if标签）
+     */
+    private Boolean optional = false;
 
     public ConditionInfo(Integer index, ConditionOriginType conditionOriginType) {
         this.index = index;
@@ -177,5 +181,13 @@ public class ConditionInfo {
 
     public void setParamValueCommonPathItemList(List<String> paramValueCommonPathItemList) {
         this.paramValueCommonPathItemList = paramValueCommonPathItemList;
+    }
+
+    public Boolean getOptional() {
+        return optional;
+    }
+
+    public void setOptional(Boolean optional) {
+        this.optional = optional;
     }
 }

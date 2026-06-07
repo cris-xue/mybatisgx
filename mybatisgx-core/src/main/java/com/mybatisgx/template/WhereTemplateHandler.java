@@ -73,18 +73,31 @@ public class WhereTemplateHandler {
             List<ConditionInfo> childConditionInfoList = conditionInfo.getConditionInfoList();
             if (ObjectUtils.isNotEmpty(childConditionInfoList)) {
                 // 处理分组的括号
-                whereElement.addText(String.format(" %s %s", conditionInfo.getLogicOperator(), conditionInfo.getLeftBracket()));
-                this.handleConditionGroup(methodInfo, whereElement, childConditionInfoList, factory);
-                whereElement.addText(conditionInfo.getRightBracket());
+                Element targetElement = this.wrapOptionalIf(whereElement, conditionInfo);
+                targetElement.addText(String.format(" %s %s", conditionInfo.getLogicOperator(), conditionInfo.getLeftBracket()));
+                this.handleConditionGroup(methodInfo, targetElement, childConditionInfoList, factory);
+                targetElement.addText(conditionInfo.getRightBracket());
             } else {
                 ColumnInfo columnInfo = conditionInfo.getColumnInfo();
                 LogicDelete logicDelete = columnInfo.getLogicDelete();
                 if (logicDelete != null) {
                     continue;
                 }
-                factory.process(methodInfo, conditionInfo, whereElement);
+                Element targetElement = this.wrapOptionalIf(whereElement, conditionInfo);
+                factory.process(methodInfo, conditionInfo, targetElement);
             }
         }
+    }
+
+    private Element wrapOptionalIf(Element whereElement, ConditionInfo conditionInfo) {
+        if (conditionInfo.getOptional() != null && conditionInfo.getOptional()) {
+            List<String> paramValueCommonPathItemList = conditionInfo.getParamValueCommonPathItemList();
+            if (ObjectUtils.isNotEmpty(paramValueCommonPathItemList)) {
+                String testExpression = MybatisXmlHelper.getTestExpression(paramValueCommonPathItemList);
+                return MybatisXmlHelper.buildIfElement(whereElement, testExpression);
+            }
+        }
+        return whereElement;
     }
 
     static class ConditionProcessorFactory {

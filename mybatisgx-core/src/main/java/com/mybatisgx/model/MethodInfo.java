@@ -70,7 +70,7 @@ public class MethodInfo {
     /**
      * 查询数量限制
      */
-    private SelectPageInfo selectPageInfo;
+    private MethodRowLimitInfo methodRowLimitInfo;
     /**
      * 是否存在条件
      */
@@ -205,12 +205,12 @@ public class MethodInfo {
         this.selectOrderByInfoList = selectOrderByInfoList;
     }
 
-    public SelectPageInfo getSelectPageInfo() {
-        return selectPageInfo;
+    public MethodRowLimitInfo getMethodRowLimitInfo() {
+        return methodRowLimitInfo;
     }
 
-    public void setSelectPageInfo(SelectPageInfo selectPageInfo) {
-        this.selectPageInfo = selectPageInfo;
+    public void setMethodRowLimitInfo(MethodRowLimitInfo methodRowLimitInfo) {
+        this.methodRowLimitInfo = methodRowLimitInfo;
     }
 
     public Boolean getExistCondition() {

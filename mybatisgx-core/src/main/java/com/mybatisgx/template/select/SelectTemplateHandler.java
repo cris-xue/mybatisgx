@@ -71,10 +71,10 @@ public class SelectTemplateHandler {
             selectXmlItemList.add(orderBySql);
         }
 
-        SelectPageInfo selectPageInfo = methodInfo.getSelectPageInfo();
-        if (ObjectUtils.isNotEmpty(selectPageInfo)) {
+        MethodRowLimitInfo methodRowLimitInfo = methodInfo.getMethodRowLimitInfo();
+        if (ObjectUtils.isNotEmpty(methodRowLimitInfo)) {
             LimitTemplateHandler limitTemplateHandler = MybatisgxObjectFactory.get(LimitTemplateHandler.class);
-            limitTemplateHandler.execute(selectXmlItemList, selectPageInfo);
+            limitTemplateHandler.execute(selectXmlItemList, methodRowLimitInfo);
         }
 
         for (Object selectSql : selectXmlItemList) {

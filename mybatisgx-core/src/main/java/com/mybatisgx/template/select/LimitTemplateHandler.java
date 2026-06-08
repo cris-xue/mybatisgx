@@ -1,11 +1,12 @@
 package com.mybatisgx.template.select;
 
+import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
-import com.mybatisgx.model.SelectPageInfo;
+import com.mybatisgx.model.MethodRowLimitInfo;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 分页模板处理器
@@ -14,61 +15,79 @@ import java.util.Map;
  */
 public class LimitTemplateHandler {
 
-    private static final Map<String, AbstractLimitHandler> LIMIT_OBJECT_MAP = new HashMap<>();
-    private MybatisgxConfiguration configuration;
+    private static final Map<String, MethodRowLimitHandler> METHOD_ROW_LIMIT_MAP = new ConcurrentHashMap<>();
+    private final MybatisgxConfiguration configuration;
+
+    static {
+        register("MySQL", new LimitTemplateHandler.MysqlMethodRowLimitHandler());
+        register("MariaDB", new LimitTemplateHandler.MysqlMethodRowLimitHandler());
+        register("OceanBase_MySQL", new LimitTemplateHandler.MysqlMethodRowLimitHandler());
+        register("SinoDB", new LimitTemplateHandler.MysqlMethodRowLimitHandler());
+
+        register("Oracle", new LimitTemplateHandler.OracleMethodRowLimitHandler());
+        register("Dameng", new LimitTemplateHandler.OracleMethodRowLimitHandler());
+        register("UXDB", new LimitTemplateHandler.OracleMethodRowLimitHandler());
+        register("OceanBase", new LimitTemplateHandler.OracleMethodRowLimitHandler());
+
+        register("PostgreSQL", new LimitTemplateHandler.PgsqlMethodRowLimitHandler());
+        register("GaussDB", new LimitTemplateHandler.PgsqlMethodRowLimitHandler());
+        register("Vastbase", new LimitTemplateHandler.PgsqlMethodRowLimitHandler());
+        register("Kingbase", new LimitTemplateHandler.PgsqlMethodRowLimitHandler());
+        register("GBase", new LimitTemplateHandler.PgsqlMethodRowLimitHandler());
+    }
 
     public LimitTemplateHandler(MybatisgxConfiguration configuration) {
         this.configuration = configuration;
-        LIMIT_OBJECT_MAP.put("MySQL", new MysqlLimitHandler());
-        LIMIT_OBJECT_MAP.put("Oracle", new OracleLimitHandler());
-        LIMIT_OBJECT_MAP.put("PostgreSQL", new PgsqlLimitHandler());
     }
 
-    public void execute(List<Object> selectXmlItemList, SelectPageInfo selectPageInfo) {
-        AbstractLimitHandler abstractLimitHandler = LIMIT_OBJECT_MAP.get(configuration.getDatabaseId());
-        abstractLimitHandler.execute(selectXmlItemList, selectPageInfo);
+    public void execute(List<Object> selectXmlItemList, MethodRowLimitInfo methodRowLimitInfo) {
+        String databaseId = this.configuration.getDatabaseId().toLowerCase();
+        MethodRowLimitHandler methodRowLimitHandler = METHOD_ROW_LIMIT_MAP.get(databaseId);
+        if (methodRowLimitHandler == null) {
+            throw new MybatisgxException("Unsupported databaseId '%s', please register MethodRowLimitHandler first.", databaseId);
+        }
+        methodRowLimitHandler.apply(selectXmlItemList, methodRowLimitInfo);
     }
 
-    public static abstract class AbstractLimitHandler {
-
-        abstract void execute(List<Object> selectXmlItemList, SelectPageInfo selectPageInfo);
-    }
-
-    public static class MysqlLimitHandler extends AbstractLimitHandler {
+    private static class MysqlMethodRowLimitHandler implements MethodRowLimitHandler {
 
         private static final String LIMIT_SQL_EXPRESSION = " limit %s, %s";
 
-        public void execute(List<Object> selectXmlItemList, SelectPageInfo selectPageInfo) {
-            Integer index = selectPageInfo.getIndex();
-            Integer size = selectPageInfo.getSize();
-            String limitSqlExpression = String.format(LIMIT_SQL_EXPRESSION, index * size, size);
+        public void apply(List<Object> selectXmlItemList, MethodRowLimitInfo methodRowLimitInfo) {
+            Integer offset = methodRowLimitInfo.getOffset();
+            Integer size = methodRowLimitInfo.getSize();
+            String limitSqlExpression = String.format(LIMIT_SQL_EXPRESSION, offset * size, size);
             selectXmlItemList.add(limitSqlExpression);
         }
     }
 
-    public static class OracleLimitHandler extends AbstractLimitHandler {
+    private static class OracleMethodRowLimitHandler implements MethodRowLimitHandler {
 
         private static final String LIMIT_SQL_EXPRESSION_START = "SELECT * FROM (SELECT t.*, ROWNUM AS rn FROM (";
         private static final String LIMIT_SQL_EXPRESSION_END = ") t WHERE ROWNUM <= %s) WHERE rn > %s";
 
-        public void execute(List<Object> selectXmlItemList, SelectPageInfo selectPageInfo) {
+        public void apply(List<Object> selectXmlItemList, MethodRowLimitInfo methodRowLimitInfo) {
             selectXmlItemList.add(0, LIMIT_SQL_EXPRESSION_START);
-            Integer index = selectPageInfo.getIndex();
-            Integer size = selectPageInfo.getSize();
-            String limitSqlExpressionEnd = String.format(LIMIT_SQL_EXPRESSION_END, (index + 1) * size, index * size);
+            Integer offset = methodRowLimitInfo.getOffset();
+            Integer size = methodRowLimitInfo.getSize();
+            String limitSqlExpressionEnd = String.format(LIMIT_SQL_EXPRESSION_END, (offset + 1) * size, offset * size);
             selectXmlItemList.add(limitSqlExpressionEnd);
         }
     }
 
-    public static class PgsqlLimitHandler extends AbstractLimitHandler {
+    private static class PgsqlMethodRowLimitHandler implements MethodRowLimitHandler {
 
         private static final String LIMIT_SQL_EXPRESSION = " limit %s OFFSET %s";
 
-        public void execute(List<Object> selectXmlItemList, SelectPageInfo selectPageInfo) {
-            Integer index = selectPageInfo.getIndex();
-            Integer size = selectPageInfo.getSize();
-            String limitSqlExpression = String.format(LIMIT_SQL_EXPRESSION, size, index * size);
+        public void apply(List<Object> selectXmlItemList, MethodRowLimitInfo methodRowLimitInfo) {
+            Integer offset = methodRowLimitInfo.getOffset();
+            Integer size = methodRowLimitInfo.getSize();
+            String limitSqlExpression = String.format(LIMIT_SQL_EXPRESSION, size, offset * size);
             selectXmlItemList.add(limitSqlExpression);
         }
+    }
+
+    public static void register(String databaseId, MethodRowLimitHandler methodRowLimitHandler) {
+        METHOD_ROW_LIMIT_MAP.put(databaseId.toLowerCase(), methodRowLimitHandler);
     }
 }

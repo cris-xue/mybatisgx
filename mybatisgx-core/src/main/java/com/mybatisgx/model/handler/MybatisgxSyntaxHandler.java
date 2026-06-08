@@ -138,8 +138,8 @@ public class MybatisgxSyntaxHandler {
             MethodNameParser.Limit_topContext limitTopContext = limitContext.limit_top();
             if (limitTopContext != null) {
                 String limitCount = StringUtils.remove(limitTopContext.getText(), "Top");
-                SelectPageInfo selectPageInfo = new SelectPageInfo(0, Integer.parseInt(limitCount));
-                methodInfo.setSelectPageInfo(selectPageInfo);
+                MethodRowLimitInfo methodRowLimitInfo = new MethodRowLimitInfo(0, Integer.parseInt(limitCount));
+                methodInfo.setMethodRowLimitInfo(methodRowLimitInfo);
             }
         }
     }

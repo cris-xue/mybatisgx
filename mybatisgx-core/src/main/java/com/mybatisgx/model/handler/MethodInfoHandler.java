@@ -46,9 +46,21 @@ public class MethodInfoHandler {
         List<Method> methodList = this.getDaoMethodList(interfaceClass);
         Map<String, MethodInfo> methodInfoMap = this.processMethod(methodList, mapperInfo);
         List<MethodInfo> methodInfoList = new ArrayList(20);
+        // 注册dao中的方法
         for (MethodInfo methodInfo : methodInfoMap.values()) {
             this.configuration.addMethodInfo(methodInfo);
             methodInfoList.add(methodInfo);
+        }
+        // 注册关联查询内嵌查询方法
+        for (ResultMapInfo resultMapInfo : mapperInfo.getResultMapInfoList()) {
+            ResultMapInfo.NestedSelect nestedSelect = resultMapInfo.getNestedSelect();
+            if (nestedSelect == null) {
+                continue;
+            }
+            MethodInfo methodInfo = new MethodInfo();
+            methodInfo.setMapperInfo(mapperInfo);
+            methodInfo.setMethodName(nestedSelect.getId());
+            this.configuration.addMethodInfo(methodInfo);
         }
         return methodInfoList;
     }

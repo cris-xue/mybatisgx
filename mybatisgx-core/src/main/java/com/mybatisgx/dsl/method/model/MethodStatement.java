@@ -1,6 +1,5 @@
 package com.mybatisgx.dsl.method.model;
 
-import com.mybatisgx.model.SelectItemType;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.mapping.SqlCommandType;
 

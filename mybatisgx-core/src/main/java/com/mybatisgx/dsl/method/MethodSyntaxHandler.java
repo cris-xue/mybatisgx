@@ -1,14 +1,11 @@
 package com.mybatisgx.dsl.method;
 
 import com.google.common.collect.Maps;
-import com.mybatisgx.dsl.method.model.ConditionTerm;
-import com.mybatisgx.dsl.method.model.MethodStatement;
-import com.mybatisgx.dsl.method.model.OrderBy;
-import com.mybatisgx.dsl.method.model.OrderByTerm;
+import com.mybatisgx.dsl.method.model.SelectItemType;
+import com.mybatisgx.dsl.method.model.*;
+import com.mybatisgx.dsl.method.syntax.MethodNameParser;
+import com.mybatisgx.dsl.method.syntax.MethodNameParserBaseVisitor;
 import com.mybatisgx.model.*;
-import com.mybatisgx.model.handler.MybatisgxSyntaxHandler;
-import com.mybatisgx.syntax.MethodNameParser;
-import com.mybatisgx.syntax.MethodNameParserBaseVisitor;
 import com.mybatisgx.utils.FieldNameUtils;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -28,7 +25,7 @@ import java.util.*;
  */
 public class MethodSyntaxHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MybatisgxSyntaxHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MethodSyntaxHandler.class);
 
     private static final Map<Class<?>, SqlCommandType> COMMAND_MAPPINGS = Maps.newHashMap();
 

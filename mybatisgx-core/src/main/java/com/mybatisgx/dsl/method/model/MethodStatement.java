@@ -7,7 +7,7 @@ import org.apache.ibatis.mapping.SqlCommandType;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MgxqlContext {
+public class MethodStatement {
 
     private SqlCommandType sqlCommandType;
 
@@ -17,7 +17,7 @@ public class MgxqlContext {
 
     private List<String> whereList = new ArrayList();
 
-    private List<String> orderByList = new ArrayList();
+    private OrderBy orderBy;
 
     private List<String> limitList = new ArrayList();
 
@@ -53,12 +53,12 @@ public class MgxqlContext {
         this.whereList = whereList;
     }
 
-    public List<String> getOrderByList() {
-        return orderByList;
+    public OrderBy getOrderBy() {
+        return orderBy;
     }
 
-    public void setOrderByList(List<String> orderByList) {
-        this.orderByList = orderByList;
+    public void setOrderBy(OrderBy orderBy) {
+        this.orderBy = orderBy;
     }
 
     public List<String> getLimitList() {
@@ -70,14 +70,34 @@ public class MgxqlContext {
     }
 
     public String toMgxql() {
-        return String.format(
-                "%s %s %s %s %s %s",
-                sqlCommandType.name(),
-                selectItemType.name(),
-                from,
-                StringUtils.join(whereList, " "),
-                StringUtils.join(orderByList, " "),
-                StringUtils.join(limitList, " ")
-        );
+        String mgxql = "";
+        if (sqlCommandType == SqlCommandType.UPDATE) {
+            mgxql = String.format(
+                    "%s %s %s %s %s",
+                    sqlCommandType.name().toLowerCase(),
+                    from,
+                    StringUtils.join(whereList, " ")
+            );
+        }
+        if (sqlCommandType == SqlCommandType.DELETE) {
+            mgxql = String.format(
+                    "%s %s %s %s %s",
+                    sqlCommandType.name().toLowerCase(),
+                    from,
+                    StringUtils.join(whereList, " ")
+            );
+        }
+        if (sqlCommandType == SqlCommandType.SELECT) {
+            mgxql = String.format(
+                    "%s %s %s %s %s %s",
+                    sqlCommandType.name().toLowerCase(),
+                    selectItemType.getValue(),
+                    from,
+                    StringUtils.join(whereList, " "),
+                    orderBy.toOrderBy(),
+                    StringUtils.join(limitList, " ")
+            );
+        }
+        return mgxql;
     }
 }

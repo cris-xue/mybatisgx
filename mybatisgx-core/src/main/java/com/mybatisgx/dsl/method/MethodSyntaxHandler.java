@@ -1,7 +1,10 @@
 package com.mybatisgx.dsl.method;
 
 import com.google.common.collect.Maps;
-import com.mybatisgx.dsl.method.model.MgxqlContext;
+import com.mybatisgx.dsl.method.model.ConditionTerm;
+import com.mybatisgx.dsl.method.model.MethodStatement;
+import com.mybatisgx.dsl.method.model.OrderBy;
+import com.mybatisgx.dsl.method.model.OrderByTerm;
 import com.mybatisgx.model.*;
 import com.mybatisgx.model.handler.MybatisgxSyntaxHandler;
 import com.mybatisgx.syntax.MethodNameParser;
@@ -84,13 +87,13 @@ public class MethodSyntaxHandler {
         @Override
         public void handle(ParseTree node, ParserContext context) {
             LOGGER.debug("处理查询: {}", node.getText());
-            MgxqlContext mgxqlContext = context.getMgxqlContext();
+            MethodStatement methodStatement = context.getMethodStatement();
             MethodNameParser.Select_item_clauseContext selectItemContext = (MethodNameParser.Select_item_clauseContext) node;
             if (selectItemContext.select_column() != null) {
-                mgxqlContext.setSelectItemType(SelectItemType.COLUMN);
+                methodStatement.setSelectItemType(SelectItemType.COLUMN);
             }
             if (selectItemContext.select_count() != null) {
-                mgxqlContext.setSelectItemType(SelectItemType.COUNT);
+                methodStatement.setSelectItemType(SelectItemType.COUNT);
             }
         }
     }
@@ -109,7 +112,7 @@ public class MethodSyntaxHandler {
 
         @Override
         public void handle(ParseTree node, ParserContext context) {
-            MgxqlContext mgxqlContext = context.getMgxqlContext();
+            MethodStatement methodStatement = context.getMethodStatement();
             SqlCommandType sqlCommandType = context.getMethodInfo().getSqlCommandType();
             if (sqlCommandType != SqlCommandType.SELECT) {
                 return;
@@ -117,7 +120,7 @@ public class MethodSyntaxHandler {
 
             MethodInfo methodInfo = context.getMethodInfo();
             Class<?> returnType = methodInfo.getMapperInfo().getEntityClass();
-            mgxqlContext.setFrom(String.format("from %s", returnType.getSimpleName()));
+            methodStatement.setFrom(String.format("from %s", returnType.getSimpleName()));
         }
     }
 
@@ -154,14 +157,14 @@ public class MethodSyntaxHandler {
         @Override
         public void handle(ParseTree node, ParserContext context) {
             LOGGER.debug("分页处理: {}", node.getText());
-            MgxqlContext mgxqlContext = context.getMgxqlContext();
+            MethodStatement methodStatement = context.getMethodStatement();
             MethodNameParser.LimitContext limitContext = (MethodNameParser.LimitContext) node;
 
             MethodNameParser.Limit_topContext limitTopContext = limitContext.limit_top();
             if (limitTopContext != null) {
                 String limitCount = StringUtils.remove(limitTopContext.getText(), "Top");
                 List<String> limitList = Arrays.asList("limit", limitCount);
-                mgxqlContext.setLimitList(limitList);
+                methodStatement.setLimitList(limitList);
             }
         }
     }
@@ -184,7 +187,7 @@ public class MethodSyntaxHandler {
             WhereClauseVisitor whereClauseVisitor = new WhereClauseVisitor(context);
             List<String> whereList = whereClauseVisitor.visit(node);
             whereList.add(0, "where");
-            context.getMgxqlContext().setWhereList(whereList);
+            context.getMethodStatement().setWhereList(whereList);
         }
     }
 
@@ -203,14 +206,21 @@ public class MethodSyntaxHandler {
         @Override
         public void handle(ParseTree node, ParserContext context) {
             LOGGER.debug("排序函数: {}", node.getText());
-            List<String> orderByList = new ArrayList<>();
-            orderByList.add("order by");
+
+            List<OrderByTerm> orderByTermList = new ArrayList<>();
             MethodNameParser.Order_by_clauseContext orderByClauseContext = (MethodNameParser.Order_by_clauseContext) node;
             for (MethodNameParser.Order_by_itemContext orderByItem : orderByClauseContext.order_by_item()) {
-                orderByList.add(orderByItem.field().getText());
-                orderByList.add(orderByItem.order_by_direction().getText());
+                OrderByTerm orderByTerm = new OrderByTerm();
+                orderByTerm.setFieldName(FieldNameUtils.upperCamelToLowerCamel(orderByItem.field().getText()));
+                orderByTerm.setDirection(FieldNameUtils.upperCamelToLowerCamel(orderByItem.order_by_direction().getText()));
+                orderByTermList.add(orderByTerm);
             }
-            context.getMgxqlContext().setOrderByList(orderByList);
+
+            OrderBy orderBy = new OrderBy();
+            orderBy.setStart("order by");
+            orderBy.setOrderByTermList(orderByTermList);
+
+            context.getMethodStatement().setOrderBy(orderBy);
         }
     }
 
@@ -256,9 +266,9 @@ public class MethodSyntaxHandler {
                     }
                     MethodNameParser.Field_comparison_opContext fieldComparisonOpContext = conditionTermContext.field_comparison_op();
                     if (fieldComparisonOpContext != null) {
-                        List<String> whereTermList = this.conditionTermParser.parse(fieldComparisonOpContext);
+                        String conditionTerm = this.conditionTermParser.parse(fieldComparisonOpContext);
                         this.setLogicOperator(whereList, logicOrContext, logicAndContext);
-                        whereList.addAll(whereTermList);
+                        whereList.add(conditionTerm);
                     }
                 }
                 if (parseTree instanceof MethodNameParser.Logic_andContext) {
@@ -301,21 +311,38 @@ public class MethodSyntaxHandler {
             this.strategies.put(MethodNameParser.Comparison_opContext.class, new ComparisonOperatorStrategyHandler());
             this.strategies.put(MethodNameParser.Comparison_op_notContext.class, new ComparisonNotOperatorStrategyHandler());
             this.strategies.put(MethodNameParser.Comparison_op_nullContext.class, new ComparisonNullOperatorStrategyHandler());
-
         }
 
-        public List<String> parse(MethodNameParser.Field_comparison_opContext ctx) {
+        public String parse(MethodNameParser.Field_comparison_opContext ctx) {
             LOGGER.debug("处理条件: {}", ctx.getText());
-            List<String> whereList = new ArrayList();
-            for (int i = 0; i < ctx.getChildCount(); i++) {
-                ParseTree child = ctx.getChild(i);
-                ConditionStrategy strategy = strategies.get(child.getClass());
-                if (strategy != null) {
-                    String whereName = strategy.apply(child, context);
-                    whereList.add(whereName);
-                }
+            ConditionTerm conditionTerm = new ConditionTerm();
+            this.parse(ctx.field(), conditionTerm);
+            this.parse(this.getComparisonOp(ctx), conditionTerm);
+            return conditionTerm.toConditionTerm();
+        }
+
+        private void parse(ParseTree ctx, ConditionTerm conditionTerm) {
+            Class<?> ComparisonOpClass = ctx != null ? ctx.getClass() : MethodNameParser.Comparison_opContext.class;
+            ConditionStrategy strategy = strategies.get(ComparisonOpClass);
+            if (strategy != null) {
+                strategy.apply(ctx, context, conditionTerm);
             }
-            return whereList;
+        }
+
+        private ParseTree getComparisonOp(MethodNameParser.Field_comparison_opContext ctx) {
+            MethodNameParser.Comparison_opContext comparisonOpContext = ctx.comparison_op();
+            MethodNameParser.Comparison_op_notContext comparisonOpNotContext = ctx.comparison_op_not();
+            MethodNameParser.Comparison_op_nullContext comparisonOpNullContext = ctx.comparison_op_null();
+            if (comparisonOpContext != null) {
+                return comparisonOpContext;
+            }
+            if (comparisonOpNotContext != null) {
+                return comparisonOpNotContext;
+            }
+            if (comparisonOpNullContext != null) {
+                return comparisonOpNullContext;
+            }
+            return null;
         }
     }
 
@@ -324,14 +351,16 @@ public class MethodSyntaxHandler {
      */
     public interface ConditionStrategy {
 
-        String apply(ParseTree node, ParserContext context);
+        void apply(ParseTree node, ParserContext context, ConditionTerm conditionTerm);
     }
 
     private static class FieldStrategyHandler implements ConditionStrategy {
 
         @Override
-        public String apply(ParseTree node, ParserContext context) {
-            return this.getFullTokenJavaColumn(node);
+        public void apply(ParseTree node, ParserContext context, ConditionTerm conditionTerm) {
+            String fieldName = this.getFullTokenJavaColumn(node);
+            conditionTerm.setFieldName(fieldName);
+            conditionTerm.setValue(String.format("%s%s", ":", fieldName));
         }
 
         private String getFullTokenJavaColumn(ParseTree node) {
@@ -353,24 +382,28 @@ public class MethodSyntaxHandler {
     private static class ComparisonOperatorStrategyHandler implements ConditionStrategy {
 
         @Override
-        public String apply(ParseTree node, ParserContext context) {
-            return node.getText();
+        public void apply(ParseTree node, ParserContext context, ConditionTerm conditionTerm) {
+            String token = node == null ? "" : node.getText();
+            ComparisonOperator comparisonOperator = ComparisonOperator.getComparisonOperator(token);
+            conditionTerm.setOperator(comparisonOperator.getValue());
         }
     }
 
     private static class ComparisonNotOperatorStrategyHandler implements ConditionStrategy {
 
         @Override
-        public String apply(ParseTree node, ParserContext context) {
-            return node.getText();
+        public void apply(ParseTree node, ParserContext context, ConditionTerm conditionTerm) {
+            ComparisonOperator comparisonOperator = ComparisonOperator.getComparisonOperator(node.getText());
+            conditionTerm.setOperator(comparisonOperator.getValue());
         }
     }
 
     private static class ComparisonNullOperatorStrategyHandler implements ConditionStrategy {
 
         @Override
-        public String apply(ParseTree node, ParserContext context) {
-            return node.getText();
+        public void apply(ParseTree node, ParserContext context, ConditionTerm conditionTerm) {
+            ComparisonOperator comparisonOperator = ComparisonOperator.getComparisonOperator(node.getText());
+            conditionTerm.setOperator(comparisonOperator.getValue());
         }
     }
 
@@ -379,7 +412,7 @@ public class MethodSyntaxHandler {
         private CommonTokenStream tokens;
         private ParseTree root;
         private EntityInfo entityInfo;
-        private MgxqlContext mgxqlContext;
+        private MethodStatement methodStatement;
         private MethodInfo methodInfo;
         private MethodParamInfo methodParamInfo;
         private ConditionOriginType conditionOriginType;
@@ -389,7 +422,7 @@ public class MethodSyntaxHandler {
                 CommonTokenStream tokens,
                 ParseTree root,
                 EntityInfo entityInfo,
-                MgxqlContext mgxqlContext,
+                MethodStatement methodStatement,
                 MethodInfo methodInfo,
                 MethodParamInfo methodParamInfo,
                 ConditionOriginType conditionOriginType,
@@ -398,7 +431,7 @@ public class MethodSyntaxHandler {
             this.tokens = tokens;
             this.root = root;
             this.entityInfo = entityInfo;
-            this.mgxqlContext = mgxqlContext;
+            this.methodStatement = methodStatement;
             this.methodInfo = methodInfo;
             this.methodParamInfo = methodParamInfo;
             this.conditionOriginType = conditionOriginType;
@@ -417,8 +450,8 @@ public class MethodSyntaxHandler {
             return entityInfo;
         }
 
-        public MgxqlContext getMgxqlContext() {
-            return mgxqlContext;
+        public MethodStatement getMethodStatement() {
+            return methodStatement;
         }
 
         public MethodInfo getMethodInfo() {

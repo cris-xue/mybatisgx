@@ -1,6 +1,6 @@
 package com.mybatisgx.dsl.method;
 
-import com.mybatisgx.dsl.method.model.MgxqlContext;
+import com.mybatisgx.dsl.method.model.MethodStatement;
 import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.model.EntityInfo;
 import com.mybatisgx.model.MethodInfo;
@@ -59,7 +59,7 @@ public class MethodSyntaxProcessor {
         throw new MybatisgxException("未知的方法类型：%s", methodName);
     }
 
-    public MgxqlContext execute(EntityInfo entityInfo, MethodInfo methodInfo, MethodParamInfo methodParamInfo) {
+    public MethodStatement execute(EntityInfo entityInfo, MethodInfo methodInfo, MethodParamInfo methodParamInfo) {
         String methodName = methodInfo.getMethodName();
         CharStream charStream = CharStreams.fromString(methodName);
         MethodNameLexer methodNameLexer = new MethodNameLexer(charStream);
@@ -68,19 +68,20 @@ public class MethodSyntaxProcessor {
         this.addErrorListeners(methodNameLexer, methodNameParser);
         ParseTree parseTree = methodNameParser.sql_statement();
 
-        MgxqlContext mgxqlContext = new MgxqlContext();
+        MethodStatement methodStatement = new MethodStatement();
+        methodStatement.setSqlCommandType(methodInfo.getSqlCommandType());
         MethodSyntaxHandler.ParserContext parserContext = new MethodSyntaxHandler.ParserContext(
                 tokens,
                 parseTree,
                 entityInfo,
-                mgxqlContext,
+                methodStatement,
                 methodInfo,
                 methodParamInfo,
                 null,
                 methodName
         );
         this.traverseSyntaxTree(parseTree, parserContext);
-        return mgxqlContext;
+        return methodStatement;
     }
 
     /**

@@ -1,13 +1,13 @@
 package com.mybatisgx.dsl.method;
 
 import com.mybatisgx.dsl.method.model.MethodStatement;
+import com.mybatisgx.dsl.method.syntax.MethodNameLexer;
+import com.mybatisgx.dsl.method.syntax.MethodNameParser;
 import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.model.EntityInfo;
 import com.mybatisgx.model.MethodInfo;
 import com.mybatisgx.model.MethodParamInfo;
 import com.mybatisgx.model.handler.MethodSyntaxErrorListener;
-import com.mybatisgx.syntax.MethodNameLexer;
-import com.mybatisgx.syntax.MethodNameParser;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;

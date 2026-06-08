@@ -72,7 +72,7 @@ public class MethodStatement {
         String mgxql = "";
         if (sqlCommandType == SqlCommandType.UPDATE) {
             mgxql = String.format(
-                    "%s %s %s %s %s",
+                    "%s %s %s",
                     sqlCommandType.name().toLowerCase(),
                     from,
                     StringUtils.join(whereList, " ")
@@ -80,20 +80,25 @@ public class MethodStatement {
         }
         if (sqlCommandType == SqlCommandType.DELETE) {
             mgxql = String.format(
-                    "%s %s %s %s %s",
+                    "%s %s %s",
                     sqlCommandType.name().toLowerCase(),
                     from,
                     StringUtils.join(whereList, " ")
             );
         }
         if (sqlCommandType == SqlCommandType.SELECT) {
+            String orderBySql = "";
+            if (orderBy != null) {
+                orderBySql = orderBy.toOrderBy();
+            }
+
             mgxql = String.format(
                     "%s %s %s %s %s %s",
                     sqlCommandType.name().toLowerCase(),
                     selectItemType.getValue(),
                     from,
                     StringUtils.join(whereList, " "),
-                    orderBy.toOrderBy(),
+                    orderBySql,
                     StringUtils.join(limitList, " ")
             );
         }

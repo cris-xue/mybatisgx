@@ -6,7 +6,7 @@ import com.mybatisgx.api.MethodCommandType;
 import com.mybatisgx.context.EntityInfoContextHolder;
 import com.mybatisgx.dao.Dao;
 import com.mybatisgx.dsl.method.MethodSyntaxProcessor;
-import com.mybatisgx.dsl.method.model.MgxqlContext;
+import com.mybatisgx.dsl.method.model.MethodStatement;
 import com.mybatisgx.dsl.mgxql.MgxqlStatementToMethodInfoConverter;
 import com.mybatisgx.dsl.mgxql.MgxqlSyntaxProcessor;
 import com.mybatisgx.dsl.mgxql.model.MgxqlStatement;
@@ -38,7 +38,7 @@ public class MethodInfoHandler {
 
     private ColumnInfoHandler columnInfoHandler = new ColumnInfoHandler();
     private TypeResolver typeResolver = new TypeResolver();
-    private MybatisgxSyntaxProcessor mybatisgxSyntaxProcessor = new MybatisgxSyntaxProcessor();
+    // private MybatisgxSyntaxProcessor mybatisgxSyntaxProcessor = new MybatisgxSyntaxProcessor();
     private MethodSyntaxProcessor methodSyntaxProcessor = new MethodSyntaxProcessor();
     private MgxqlSyntaxProcessor mgxqlSyntaxProcessor = new MgxqlSyntaxProcessor();
     private MgxqlStatementToMethodInfoConverter mgxqlStatementToMethodInfoConverter = new MgxqlStatementToMethodInfoConverter();
@@ -135,7 +135,7 @@ public class MethodInfoHandler {
     }
 
     private CommandTypeContext getCommandType(MapperInfo mapperInfo, String methodName) {
-        SqlCommandType sqlCommandType = this.mybatisgxSyntaxProcessor.getSqlCommandType(methodName);
+        SqlCommandType sqlCommandType = this.methodSyntaxProcessor.getSqlCommandType(methodName);
         MethodCommandType methodCommandType;
         if (sqlCommandType == SqlCommandType.DELETE && mapperInfo.getEntityInfo().getLogicDeleteColumnInfo() != null) {
             methodCommandType = MethodCommandType.LOGIC_DELETE;
@@ -350,9 +350,9 @@ public class MethodInfoHandler {
         }
 
         // 把方法名语法糖转成mgxql
-        MgxqlContext mgxqlContext = this.methodSyntaxProcessor.execute(entityInfo, methodInfo, null);
-        if (mgxqlContext != null) {
-            String mgxql = mgxqlContext.toMgxql();
+        MethodStatement methodStatement = this.methodSyntaxProcessor.execute(entityInfo, methodInfo, null);
+        if (methodStatement != null) {
+            String mgxql = methodStatement.toMgxql();
             MgxqlStatement mgxqlStatement = this.mgxqlSyntaxProcessor.executeAndCheck(entityInfo, methodInfo, null, null, mgxql);
             List<ConditionInfo> conditionInfoList = this.mgxqlStatementToMethodInfoConverter.convert(mgxqlStatement, ConditionOriginType.STATEMENT_METHOD_NAME);
             methodInfo.setConditionInfoList(conditionInfoList);
@@ -428,12 +428,12 @@ public class MethodInfoHandler {
                     );
                 }
                 javaColumnName = javaColumnName.replace(propertyName, "");
-                javaColumnName = String.format("%s%s%s%s", "$", propertyName, "$", javaColumnName);
+                javaColumnName = String.format("%s%s", propertyName, javaColumnName);
             }
             columnConditionList.add(javaColumnName);
         }
         StringBuilder stringBuilder = new StringBuilder(methodInfo.getSqlCommandType().name().toLowerCase())
-                .append(String.format("select * from %s", entityInfo.getTableName()))
+                .append(String.format("select * from %s", entityInfo.getClazzName()))
                 .append(" where ")
                 .append(StringUtils.join(columnConditionList, " and "));
         LOGGER.debug(stringBuilder.toString());

@@ -1,4 +1,4 @@
-package com.mybatisgx.model.handler.test;
+package com.mybatisgx.dsl.test;
 
 import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.model.ConditionInfo;
@@ -7,7 +7,7 @@ import com.mybatisgx.model.EntityInfo;
 import com.mybatisgx.model.MethodInfo;
 import com.mybatisgx.model.handler.EntityInfoHandler;
 import com.mybatisgx.model.handler.MybatisgxSyntaxProcessor;
-import com.mybatisgx.model.handler.test.entity.User;
+import com.mybatisgx.dsl.test.entity.User;
 import org.junit.Assert;
 import org.junit.Test;
 

@@ -1,7 +1,7 @@
-package com.mybatisgx.model.handler.test.dao;
+package com.mybatisgx.dsl.test.dao;
 
 import com.mybatisgx.dao.SelectDao;
-import com.mybatisgx.model.handler.test.entity.UserEntity;
+import com.mybatisgx.dsl.test.entity.UserEntity;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper

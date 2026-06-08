@@ -1,4 +1,4 @@
-package com.mybatisgx.model.handler.test;
+package com.mybatisgx.dsl.test;
 
 import com.mybatisgx.dsl.mgxql.MgxqlSyntaxProcessor;
 import com.mybatisgx.dsl.mgxql.model.*;
@@ -8,7 +8,7 @@ import com.mybatisgx.model.EntityInfo;
 import com.mybatisgx.model.LogicOperator;
 import com.mybatisgx.model.MethodInfo;
 import com.mybatisgx.model.handler.EntityInfoHandler;
-import com.mybatisgx.model.handler.test.entity.User;
+import com.mybatisgx.dsl.test.entity.User;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.mapping.SqlCommandType;
 import org.junit.Assert;
@@ -35,7 +35,7 @@ public class MgxqlAstHandlerTest {
         EntityInfo entityInfo = entityInfoHandler.execute(User.class);
         MethodInfo methodInfo = new MethodInfo();
         MgxqlSyntaxProcessor processor = this.buildProcessor();
-        return processor.execute(entityInfo, methodInfo, null, ConditionOriginType.METHOD_NAME, expression);
+        return processor.executeAndCheck(entityInfo, methodInfo, null, ConditionOriginType.METHOD_NAME, expression);
     }
 
     // ==================== SELECT * FROM 基础测试 ====================
@@ -793,5 +793,29 @@ public class MgxqlAstHandlerTest {
         List<OrderByItem> items = orderByClause.getItems();
         Assert.assertEquals(1, items.size());
         Assert.assertEquals("desc", items.get(0).getField().getFieldName());
+    }
+
+    // ==================== DELETE/UPDATE 命令类型测试 ====================
+
+    @Test
+    public void test120_deleteStatementCommandType() {
+        MgxqlStatement stmt = parseWithoutCheck("delete where id = :id");
+        Assert.assertEquals(SqlCommandType.DELETE, stmt.getCommandType());
+        WhereClause whereClause = stmt.getWhereClause();
+        Assert.assertNotNull(whereClause);
+        ConditionNode node = whereClause.getRootExpression().getNodes().get(0);
+        Assert.assertEquals("id", node.getFieldName());
+        Assert.assertEquals(ComparisonOperator.EQ, node.getOperator());
+    }
+
+    @Test
+    public void test121_updateStatementCommandType() {
+        MgxqlStatement stmt = parseWithoutCheck("update where name = :name");
+        Assert.assertEquals(SqlCommandType.UPDATE, stmt.getCommandType());
+        WhereClause whereClause = stmt.getWhereClause();
+        Assert.assertNotNull(whereClause);
+        ConditionNode node = whereClause.getRootExpression().getNodes().get(0);
+        Assert.assertEquals("name", node.getFieldName());
+        Assert.assertEquals(ComparisonOperator.EQ, node.getOperator());
     }
 }

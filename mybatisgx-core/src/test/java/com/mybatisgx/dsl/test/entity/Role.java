@@ -1,4 +1,4 @@
-package com.mybatisgx.model.handler.test.entity;
+package com.mybatisgx.dsl.test.entity;
 
 import com.mybatisgx.annotation.*;
 import com.mybatisgx.entity.BaseEntity;

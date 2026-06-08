@@ -1,4 +1,4 @@
-package com.mybatisgx.model.handler.test;
+package com.mybatisgx.dsl.test;
 
 import com.mybatisgx.model.handler.MybatisgxSyntaxProcessor;
 import org.apache.ibatis.mapping.SqlCommandType;

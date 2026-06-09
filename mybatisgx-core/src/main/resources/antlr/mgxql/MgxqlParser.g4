@@ -20,10 +20,12 @@ update_clause: UPDATE_ACTION ;
 // 查询语法：1、select * from User where name = :name and (age < :age or status = :status)
 // 查询语法：2、select id, name, inputTime from User where name = :name and (age < :age or status = :status)
 // 查询语法：3、select user.id, user.name, user.inputTime, role.name from User user left join Role role where user.name = :user.name and (user.age < :user.age or role.status = :role.status)
-// 查询语法：4、select count(id) from User where name = :name and (age < :age or status = :status)
-// 查询语法：5、select max(id) from User where name = :name and (age < :age or status = :status)
-// 查询语法：6、select min(id) from User where name = :name and (age < :age or status = :status)
-// 查询语法：7、select avg(age) from User where name = :name and (age < :age or status = :status)
+// 查询语法：4、select count(1) from User where name = :name and (age < :age or status = :status)
+// 查询语法：5、select count(*) from User where name = :name and (age < :age or status = :status)
+// 查询语法：6、select count(id) from User where name = :name and (age < :age or status = :status)
+// 查询语法：7、select max(id) from User where name = :name and (age < :age or status = :status)
+// 查询语法：8、select min(id) from User where name = :name and (age < :age or status = :status)
+// 查询语法：9、select avg(age) from User where name = :name and (age < :age or status = :status)
 select_statement: select_action select_item_clause select_from_clause where_clause? group_by_clause? having_clause? order_by_clause? limit_clause? ;
 select_item_clause: select_item (comma select_item)* ;
 select_item: select_column_all | select_column_custom | aggregate_function ;
@@ -33,15 +35,22 @@ select_column_custom: field_reference ;
 select_action: SELECT_ACTION ;
 select_asterisk: SELECT_ASTERISK ;
 
-// 聚合函数，count只支持count（field）
-aggregate_function: aggregate_function_name left_bracket aggregate_function_argument right_bracket ;
-aggregate_function_name: select_count | select_max | select_min | select_avg | select_sum ;
+// 聚合函数
+aggregate_function: aggregate_function_normal | aggregate_function_count ;
+
+// MAX、MIN、AVG、SUM，只支持字段参数
+aggregate_function_normal: aggregate_function_name left_bracket aggregate_function_argument right_bracket ;
+aggregate_function_name: select_max | select_min | select_avg | select_sum ;
 aggregate_function_argument: field_reference ;
-select_count: SELECT_COUNT ;
 select_max: SELECT_MAX ;
 select_min: SELECT_MIN ;
 select_avg: SELECT_AVG ;
 select_sum: SELECT_SUM ;
+
+// count聚合函数，需要支持count(*)、count(1)、count（field）
+aggregate_function_count: select_count left_bracket aggregate_function_count_argument right_bracket ;
+aggregate_function_count_argument: number | select_asterisk | field_reference ;
+select_count: SELECT_COUNT ;
 
 // from User user left join Role role on aaa.id = bbb.aaa_id
 select_from_clause: select_from select_primary_entity select_join_entity* ;

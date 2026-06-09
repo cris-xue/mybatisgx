@@ -158,6 +158,16 @@ public interface MgxqlParserListener extends ParseTreeListener {
 	 */
 	void exitAggregate_function(MgxqlParser.Aggregate_functionContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#aggregate_function_normal}.
+	 * @param ctx the parse tree
+	 */
+	void enterAggregate_function_normal(MgxqlParser.Aggregate_function_normalContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#aggregate_function_normal}.
+	 * @param ctx the parse tree
+	 */
+	void exitAggregate_function_normal(MgxqlParser.Aggregate_function_normalContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link MgxqlParser#aggregate_function_name}.
 	 * @param ctx the parse tree
 	 */
@@ -177,16 +187,6 @@ public interface MgxqlParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitAggregate_function_argument(MgxqlParser.Aggregate_function_argumentContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link MgxqlParser#select_count}.
-	 * @param ctx the parse tree
-	 */
-	void enterSelect_count(MgxqlParser.Select_countContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link MgxqlParser#select_count}.
-	 * @param ctx the parse tree
-	 */
-	void exitSelect_count(MgxqlParser.Select_countContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MgxqlParser#select_max}.
 	 * @param ctx the parse tree
@@ -227,6 +227,36 @@ public interface MgxqlParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitSelect_sum(MgxqlParser.Select_sumContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#aggregate_function_count}.
+	 * @param ctx the parse tree
+	 */
+	void enterAggregate_function_count(MgxqlParser.Aggregate_function_countContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#aggregate_function_count}.
+	 * @param ctx the parse tree
+	 */
+	void exitAggregate_function_count(MgxqlParser.Aggregate_function_countContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#aggregate_function_count_argument}.
+	 * @param ctx the parse tree
+	 */
+	void enterAggregate_function_count_argument(MgxqlParser.Aggregate_function_count_argumentContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#aggregate_function_count_argument}.
+	 * @param ctx the parse tree
+	 */
+	void exitAggregate_function_count_argument(MgxqlParser.Aggregate_function_count_argumentContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#select_count}.
+	 * @param ctx the parse tree
+	 */
+	void enterSelect_count(MgxqlParser.Select_countContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#select_count}.
+	 * @param ctx the parse tree
+	 */
+	void exitSelect_count(MgxqlParser.Select_countContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MgxqlParser#select_from_clause}.
 	 * @param ctx the parse tree

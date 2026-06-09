@@ -101,6 +101,12 @@ public interface MgxqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitAggregate_function(MgxqlParser.Aggregate_functionContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#aggregate_function_normal}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAggregate_function_normal(MgxqlParser.Aggregate_function_normalContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link MgxqlParser#aggregate_function_name}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -112,12 +118,6 @@ public interface MgxqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitAggregate_function_argument(MgxqlParser.Aggregate_function_argumentContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link MgxqlParser#select_count}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitSelect_count(MgxqlParser.Select_countContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MgxqlParser#select_max}.
 	 * @param ctx the parse tree
@@ -142,6 +142,24 @@ public interface MgxqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitSelect_sum(MgxqlParser.Select_sumContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#aggregate_function_count}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAggregate_function_count(MgxqlParser.Aggregate_function_countContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#aggregate_function_count_argument}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAggregate_function_count_argument(MgxqlParser.Aggregate_function_count_argumentContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#select_count}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSelect_count(MgxqlParser.Select_countContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MgxqlParser#select_from_clause}.
 	 * @param ctx the parse tree

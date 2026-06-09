@@ -197,6 +197,18 @@ public class MgxqlParserBaseListener implements MgxqlParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterAggregate_function_normal(MgxqlParser.Aggregate_function_normalContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitAggregate_function_normal(MgxqlParser.Aggregate_function_normalContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterAggregate_function_name(MgxqlParser.Aggregate_function_nameContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -216,18 +228,6 @@ public class MgxqlParserBaseListener implements MgxqlParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitAggregate_function_argument(MgxqlParser.Aggregate_function_argumentContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterSelect_count(MgxqlParser.Select_countContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitSelect_count(MgxqlParser.Select_countContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -276,6 +276,42 @@ public class MgxqlParserBaseListener implements MgxqlParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitSelect_sum(MgxqlParser.Select_sumContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterAggregate_function_count(MgxqlParser.Aggregate_function_countContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitAggregate_function_count(MgxqlParser.Aggregate_function_countContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterAggregate_function_count_argument(MgxqlParser.Aggregate_function_count_argumentContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitAggregate_function_count_argument(MgxqlParser.Aggregate_function_count_argumentContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterSelect_count(MgxqlParser.Select_countContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSelect_count(MgxqlParser.Select_countContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

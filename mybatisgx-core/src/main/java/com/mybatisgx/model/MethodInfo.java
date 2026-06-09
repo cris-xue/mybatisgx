@@ -30,6 +30,7 @@ public class MethodInfo {
     /**
      * sql动作，insert、delete、update、select
      */
+    @Deprecated
     private SqlCommandType sqlCommandType;
     /**
      * 方法动作，insert、delete、update、logic_delete、select
@@ -42,6 +43,7 @@ public class MethodInfo {
     /**
      * 语义表达式
      */
+    @Deprecated
     private String statementExpression;
     /**
      * 是否动态参数
@@ -62,22 +64,27 @@ public class MethodInfo {
     /**
      * 查询节点信息
      */
+    @Deprecated
     private SelectItemInfo selectItemInfo;
     /**
      * 查询排序信息
      */
+    @Deprecated
     private List<SelectOrderByInfo> selectOrderByInfoList;
     /**
      * 查询数量限制
      */
+    @Deprecated
     private MethodRowLimitInfo methodRowLimitInfo;
     /**
      * 是否存在条件
      */
+    @Deprecated
     private Boolean isExistCondition = false;
     /**
      * 方法名条件信息【修改、删除、查询都可以存在条件】
      */
+    @Deprecated
     private List<ConditionInfo> conditionInfoList = new ArrayList<>();
     /**
      * 方法操作实体，不参与生成条件
@@ -108,6 +115,10 @@ public class MethodInfo {
      * 结果集信息id
      */
     private String resultMapId;
+    /**
+     * mgxql信息
+     */
+    private MethodMgxqlInfo methodMgxqlInfo;
 
     public MapperInfo getMapperInfo() {
         return mapperInfo;

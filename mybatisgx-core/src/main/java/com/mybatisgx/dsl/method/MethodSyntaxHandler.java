@@ -1,13 +1,13 @@
 package com.mybatisgx.dsl.method;
 
 import com.google.common.collect.Maps;
-import com.mybatisgx.dsl.method.model.SelectItemType;
 import com.mybatisgx.dsl.method.model.*;
 import com.mybatisgx.dsl.method.syntax.MethodNameParser;
 import com.mybatisgx.dsl.method.syntax.MethodNameParserBaseVisitor;
-import com.mybatisgx.model.*;
+import com.mybatisgx.model.ComparisonOperator;
+import com.mybatisgx.model.LogicOperator;
+import com.mybatisgx.model.MethodInfo;
 import com.mybatisgx.utils.FieldNameUtils;
-import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.RuleNode;
 import org.apache.commons.lang3.StringUtils;
@@ -51,6 +51,27 @@ public class MethodSyntaxHandler {
         void handle(ParseTree node, ParserContext context);
     }
 
+    public static class ModifyStatementHandler implements SyntaxNodeHandler {
+
+        @Override
+        public int getOrder() {
+            return 0;
+        }
+
+        @Override
+        public boolean support(ParseTree node) {
+            return node instanceof MethodNameParser.Delete_statementContext || node instanceof MethodNameParser.Update_statementContext;
+        }
+
+        @Override
+        public void handle(ParseTree node, ParserContext context) {
+            ModifyStatement modifyStatement = context.getBaseStatement();
+            MethodInfo methodInfo = context.getMethodInfo();
+            Class<?> entityClass = methodInfo.getMapperInfo().getEntityClass();
+            modifyStatement.setEntity(entityClass.getSimpleName());
+        }
+    }
+
     public static class SelectStatementHandler implements SyntaxNodeHandler {
 
         @Override
@@ -65,7 +86,10 @@ public class MethodSyntaxHandler {
 
         @Override
         public void handle(ParseTree node, ParserContext context) {
-
+            QueryStatement queryStatement = context.getBaseStatement();
+            MethodInfo methodInfo = context.getMethodInfo();
+            Class<?> entityClass = methodInfo.getMapperInfo().getEntityClass();
+            queryStatement.setFrom(String.format("from %s", entityClass.getSimpleName()));
         }
     }
 
@@ -84,40 +108,14 @@ public class MethodSyntaxHandler {
         @Override
         public void handle(ParseTree node, ParserContext context) {
             LOGGER.debug("处理查询: {}", node.getText());
-            MethodStatement methodStatement = context.getMethodStatement();
+            QueryStatement queryStatement = context.getBaseStatement();
             MethodNameParser.Select_item_clauseContext selectItemContext = (MethodNameParser.Select_item_clauseContext) node;
             if (selectItemContext.select_column() != null) {
-                methodStatement.setSelectItemType(SelectItemType.COLUMN);
+                queryStatement.setSelectItemType(SelectItemType.COLUMN);
             }
             if (selectItemContext.select_count() != null) {
-                methodStatement.setSelectItemType(SelectItemType.COUNT);
+                queryStatement.setSelectItemType(SelectItemType.COUNT);
             }
-        }
-    }
-
-    public static class SelectFromHandler implements SyntaxNodeHandler {
-
-        @Override
-        public int getOrder() {
-            return 0;
-        }
-
-        @Override
-        public boolean support(ParseTree node) {
-            return node instanceof MethodNameParser.Select_statementContext;
-        }
-
-        @Override
-        public void handle(ParseTree node, ParserContext context) {
-            MethodStatement methodStatement = context.getMethodStatement();
-            SqlCommandType sqlCommandType = context.getMethodInfo().getSqlCommandType();
-            if (sqlCommandType != SqlCommandType.SELECT) {
-                return;
-            }
-
-            MethodInfo methodInfo = context.getMethodInfo();
-            Class<?> returnType = methodInfo.getMapperInfo().getEntityClass();
-            methodStatement.setFrom(String.format("from %s", returnType.getSimpleName()));
         }
     }
 
@@ -154,14 +152,14 @@ public class MethodSyntaxHandler {
         @Override
         public void handle(ParseTree node, ParserContext context) {
             LOGGER.debug("分页处理: {}", node.getText());
-            MethodStatement methodStatement = context.getMethodStatement();
+            QueryStatement queryStatement = context.getBaseStatement();
             MethodNameParser.LimitContext limitContext = (MethodNameParser.LimitContext) node;
 
             MethodNameParser.Limit_topContext limitTopContext = limitContext.limit_top();
             if (limitTopContext != null) {
                 String limitCount = StringUtils.remove(limitTopContext.getText(), "Top");
                 List<String> limitList = Arrays.asList("limit", limitCount);
-                methodStatement.setLimitList(limitList);
+                queryStatement.setLimitList(limitList);
             }
         }
     }
@@ -182,9 +180,12 @@ public class MethodSyntaxHandler {
         public void handle(ParseTree node, ParserContext context) {
             LOGGER.debug("处理where条件: {}", node.getText());
             WhereClauseVisitor whereClauseVisitor = new WhereClauseVisitor(context);
-            List<String> whereList = whereClauseVisitor.visit(node);
-            whereList.add(0, "where");
-            context.getMethodStatement().setWhereList(whereList);
+
+            List<ConditionTerm> conditionTermList = whereClauseVisitor.visit(node);
+            Condition condition = new Condition("where", conditionTermList);
+
+            BaseStatement baseStatement = context.getBaseStatement();
+            baseStatement.setCondition(condition);
         }
     }
 
@@ -217,11 +218,12 @@ public class MethodSyntaxHandler {
             orderBy.setStart("order by");
             orderBy.setOrderByTermList(orderByTermList);
 
-            context.getMethodStatement().setOrderBy(orderBy);
+            QueryStatement queryStatement = context.getBaseStatement();
+            queryStatement.setOrderBy(orderBy);
         }
     }
 
-    public static class WhereClauseVisitor extends MethodNameParserBaseVisitor<List<String>> {
+    public static class WhereClauseVisitor extends MethodNameParserBaseVisitor<List<ConditionTerm>> {
 
         private ConditionTermParser conditionTermParser;
 
@@ -230,9 +232,9 @@ public class MethodSyntaxHandler {
         }
 
         @Override
-        public List<String> visitCondition_expression(MethodNameParser.Condition_expressionContext ctx) {
+        public List<ConditionTerm> visitCondition_expression(MethodNameParser.Condition_expressionContext ctx) {
             LOGGER.debug("处理条件表达式: {}", ctx.getText());
-            List<String> whereList = new ArrayList();
+            List<ConditionTerm> conditionTermList = new ArrayList();
             MethodNameParser.Or_expressionContext orExpressionContext = ctx.or_expression();
             MethodNameParser.Logic_orContext logicOrContext = null;
             for (int i = 0; i < orExpressionContext.getChildCount(); i++) {
@@ -241,15 +243,15 @@ public class MethodSyntaxHandler {
                     logicOrContext = (MethodNameParser.Logic_orContext) parseTree;
                 }
                 if (parseTree instanceof MethodNameParser.And_expressionContext) {
-                    List<String> andWhereList = this.parseAndExpression((MethodNameParser.And_expressionContext) parseTree, logicOrContext);
-                    whereList.addAll(andWhereList);
+                    List<ConditionTerm> andConditionTermList = this.parseAndExpression((MethodNameParser.And_expressionContext) parseTree, logicOrContext);
+                    conditionTermList.addAll(andConditionTermList);
                 }
             }
-            return whereList;
+            return conditionTermList;
         }
 
-        private List<String> parseAndExpression(MethodNameParser.And_expressionContext andExpressionContext, MethodNameParser.Logic_orContext logicOrContext) {
-            List<String> whereList = new ArrayList();
+        private List<ConditionTerm> parseAndExpression(MethodNameParser.And_expressionContext andExpressionContext, MethodNameParser.Logic_orContext logicOrContext) {
+            List<ConditionTerm> conditionTermList = new ArrayList();
             MethodNameParser.Logic_andContext logicAndContext = null;
             for (int i = 0; i < andExpressionContext.getChildCount(); i++) {
                 ParseTree parseTree = andExpressionContext.getChild(i);
@@ -257,42 +259,42 @@ public class MethodSyntaxHandler {
                     MethodNameParser.Condition_termContext conditionTermContext = (MethodNameParser.Condition_termContext) parseTree;
                     MethodNameParser.Condition_expressionContext conditionExpressionContext = conditionTermContext.condition_expression();
                     if (conditionExpressionContext != null) {
-                        List<String> childWhereList = this.visitCondition_expression(conditionExpressionContext);
-                        this.setLogicOperator(childWhereList, logicOrContext, logicAndContext);
-                        whereList.addAll(childWhereList);
+                        List<ConditionTerm> childConditionTermList = this.visitCondition_expression(conditionExpressionContext);
+                        // this.setLogicOperator(childConditionTermList, logicOrContext, logicAndContext);
+                        conditionTermList.addAll(childConditionTermList);
                     }
                     MethodNameParser.Field_comparison_opContext fieldComparisonOpContext = conditionTermContext.field_comparison_op();
                     if (fieldComparisonOpContext != null) {
-                        String conditionTerm = this.conditionTermParser.parse(fieldComparisonOpContext);
-                        this.setLogicOperator(whereList, logicOrContext, logicAndContext);
-                        whereList.add(conditionTerm);
+                        ConditionTerm conditionTerm = this.conditionTermParser.parse(fieldComparisonOpContext);
+                        this.setLogicOperator(conditionTerm, logicOrContext, logicAndContext);
+                        conditionTermList.add(conditionTerm);
                     }
                 }
                 if (parseTree instanceof MethodNameParser.Logic_andContext) {
                     logicAndContext = (MethodNameParser.Logic_andContext) parseTree;
                 }
             }
-            return whereList;
+            return conditionTermList;
         }
 
-        private void setLogicOperator(List<String> whereList, MethodNameParser.Logic_orContext logicOpOrClauseContext, MethodNameParser.Logic_andContext logicOpAndClauseContext) {
+        private void setLogicOperator(ConditionTerm conditionTerm, MethodNameParser.Logic_orContext logicOpOrClauseContext, MethodNameParser.Logic_andContext logicOpAndClauseContext) {
             if (logicOpOrClauseContext != null) {
-                whereList.add(LogicOperator.OR.getValue());
+                conditionTerm.setLogicOperator(LogicOperator.OR);
             } else if (logicOpAndClauseContext != null) {
-                whereList.add(LogicOperator.AND.getValue());
+                conditionTerm.setLogicOperator(LogicOperator.AND);
             } else {
-                // 如果没有逻辑操作符，可能是第一个条件，保持默认值
+                conditionTerm.setLogicOperator(LogicOperator.NULL);
             }
         }
 
         @Override
-        public List<String> visitCondition_term(MethodNameParser.Condition_termContext ctx) {
+        public List<ConditionTerm> visitCondition_term(MethodNameParser.Condition_termContext ctx) {
             LOGGER.debug("处理条件单元: {}", ctx.getText());
             return super.visitCondition_term(ctx);
         }
 
         @Override
-        protected boolean shouldVisitNextChild(RuleNode node, List<String> currentResult) {
+        protected boolean shouldVisitNextChild(RuleNode node, List<ConditionTerm> currentResult) {
             return node instanceof MethodNameParser.Where_clauseContext && currentResult == null;
         }
     }
@@ -310,12 +312,12 @@ public class MethodSyntaxHandler {
             this.strategies.put(MethodNameParser.Comparison_op_nullContext.class, new ComparisonNullOperatorStrategyHandler());
         }
 
-        public String parse(MethodNameParser.Field_comparison_opContext ctx) {
+        public ConditionTerm parse(MethodNameParser.Field_comparison_opContext ctx) {
             LOGGER.debug("处理条件: {}", ctx.getText());
             ConditionTerm conditionTerm = new ConditionTerm();
             this.parse(ctx.field(), conditionTerm);
             this.parse(this.getComparisonOp(ctx), conditionTerm);
-            return conditionTerm.toConditionTerm();
+            return conditionTerm;
         }
 
         private void parse(ParseTree ctx, ConditionTerm conditionTerm) {
@@ -382,7 +384,7 @@ public class MethodSyntaxHandler {
         public void apply(ParseTree node, ParserContext context, ConditionTerm conditionTerm) {
             String token = node == null ? "" : node.getText();
             ComparisonOperator comparisonOperator = ComparisonOperator.getComparisonOperator(token);
-            conditionTerm.setOperator(comparisonOperator.getValue());
+            conditionTerm.setComparisonOperator(comparisonOperator);
         }
     }
 
@@ -391,7 +393,7 @@ public class MethodSyntaxHandler {
         @Override
         public void apply(ParseTree node, ParserContext context, ConditionTerm conditionTerm) {
             ComparisonOperator comparisonOperator = ComparisonOperator.getComparisonOperator(node.getText());
-            conditionTerm.setOperator(comparisonOperator.getValue());
+            conditionTerm.setComparisonOperator(comparisonOperator);
         }
     }
 
@@ -400,67 +402,29 @@ public class MethodSyntaxHandler {
         @Override
         public void apply(ParseTree node, ParserContext context, ConditionTerm conditionTerm) {
             ComparisonOperator comparisonOperator = ComparisonOperator.getComparisonOperator(node.getText());
-            conditionTerm.setOperator(comparisonOperator.getValue());
+            conditionTerm.setComparisonOperator(comparisonOperator);
         }
     }
 
     public static class ParserContext {
 
-        private CommonTokenStream tokens;
-        private ParseTree root;
-        private EntityInfo entityInfo;
-        private MethodStatement methodStatement;
+        private SqlCommandType sqlCommandType;
+        private BaseStatement baseStatement;
         private MethodInfo methodInfo;
-        private MethodParamInfo methodParamInfo;
-        private ConditionOriginType conditionOriginType;
         private String methodName;
 
-        public ParserContext(
-                CommonTokenStream tokens,
-                ParseTree root,
-                EntityInfo entityInfo,
-                MethodStatement methodStatement,
-                MethodInfo methodInfo,
-                MethodParamInfo methodParamInfo,
-                ConditionOriginType conditionOriginType,
-                String methodName
-        ) {
-            this.tokens = tokens;
-            this.root = root;
-            this.entityInfo = entityInfo;
-            this.methodStatement = methodStatement;
+        public ParserContext(BaseStatement baseStatement, MethodInfo methodInfo, String methodName) {
+            this.baseStatement = baseStatement;
             this.methodInfo = methodInfo;
-            this.methodParamInfo = methodParamInfo;
-            this.conditionOriginType = conditionOriginType;
             this.methodName = methodName;
         }
 
-        public CommonTokenStream getTokens() {
-            return tokens;
-        }
-
-        public ParseTree getRoot() {
-            return root;
-        }
-
-        public EntityInfo getEntityInfo() {
-            return entityInfo;
-        }
-
-        public MethodStatement getMethodStatement() {
-            return methodStatement;
+        public <T extends BaseStatement> T getBaseStatement() {
+            return (T) baseStatement;
         }
 
         public MethodInfo getMethodInfo() {
             return methodInfo;
-        }
-
-        public MethodParamInfo getMethodParamInfo() {
-            return methodParamInfo;
-        }
-
-        public ConditionOriginType getConditionOriginType() {
-            return conditionOriginType;
         }
 
         public String getMethodName() {

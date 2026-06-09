@@ -1,12 +1,12 @@
 package com.mybatisgx.dsl.method;
 
-import com.mybatisgx.dsl.method.model.MethodStatement;
+import com.mybatisgx.dsl.method.model.BaseStatement;
+import com.mybatisgx.dsl.method.model.ModifyStatement;
+import com.mybatisgx.dsl.method.model.QueryStatement;
 import com.mybatisgx.dsl.method.syntax.MethodNameLexer;
 import com.mybatisgx.dsl.method.syntax.MethodNameParser;
 import com.mybatisgx.exception.MybatisgxException;
-import com.mybatisgx.model.EntityInfo;
 import com.mybatisgx.model.MethodInfo;
-import com.mybatisgx.model.MethodParamInfo;
 import com.mybatisgx.model.handler.MethodSyntaxErrorListener;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -20,9 +20,9 @@ import java.util.stream.Collectors;
 public class MethodSyntaxProcessor {
 
     private final List<MethodSyntaxHandler.SyntaxNodeHandler> handlers = Arrays.asList(
-            // new MethodSyntaxHandler.SelectStatementHandler(),
+            new MethodSyntaxHandler.ModifyStatementHandler(),
+            new MethodSyntaxHandler.SelectStatementHandler(),
             new MethodSyntaxHandler.SelectItemHandler(),
-            new MethodSyntaxHandler.SelectFromHandler(),
             new MethodSyntaxHandler.BusinessSemanticHandler(),
             new MethodSyntaxHandler.LimitHandler(),
             new MethodSyntaxHandler.WhereClauseHandler(),
@@ -59,7 +59,7 @@ public class MethodSyntaxProcessor {
         throw new MybatisgxException("未知的方法类型：%s", methodName);
     }
 
-    public MethodStatement execute(EntityInfo entityInfo, MethodInfo methodInfo, MethodParamInfo methodParamInfo) {
+    public BaseStatement execute(MethodInfo methodInfo) {
         String methodName = methodInfo.getMethodName();
         CharStream charStream = CharStreams.fromString(methodName);
         MethodNameLexer methodNameLexer = new MethodNameLexer(charStream);
@@ -68,20 +68,17 @@ public class MethodSyntaxProcessor {
         this.addErrorListeners(methodNameLexer, methodNameParser);
         ParseTree parseTree = methodNameParser.sql_statement();
 
-        MethodStatement methodStatement = new MethodStatement();
-        methodStatement.setSqlCommandType(methodInfo.getSqlCommandType());
+        SqlCommandType sqlCommandType = methodInfo.getSqlCommandType();
+        BaseStatement baseStatement = sqlCommandType == SqlCommandType.SELECT ? new QueryStatement() : new ModifyStatement();
+        baseStatement.setSqlCommandType(sqlCommandType);
+
         MethodSyntaxHandler.ParserContext parserContext = new MethodSyntaxHandler.ParserContext(
-                tokens,
-                parseTree,
-                entityInfo,
-                methodStatement,
+                baseStatement,
                 methodInfo,
-                methodParamInfo,
-                null,
                 methodName
         );
         this.traverseSyntaxTree(parseTree, parserContext);
-        return methodStatement;
+        return baseStatement;
     }
 
     /**

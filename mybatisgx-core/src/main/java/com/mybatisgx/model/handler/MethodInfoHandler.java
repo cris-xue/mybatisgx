@@ -6,7 +6,7 @@ import com.mybatisgx.api.MethodCommandType;
 import com.mybatisgx.context.EntityInfoContextHolder;
 import com.mybatisgx.dao.Dao;
 import com.mybatisgx.dsl.method.MethodSyntaxProcessor;
-import com.mybatisgx.dsl.method.model.MethodStatement;
+import com.mybatisgx.dsl.method.model.BaseStatement;
 import com.mybatisgx.dsl.mgxql.MgxqlStatementToMethodInfoConverter;
 import com.mybatisgx.dsl.mgxql.MgxqlSyntaxProcessor;
 import com.mybatisgx.dsl.mgxql.model.MgxqlStatement;
@@ -362,9 +362,9 @@ public class MethodInfoHandler {
         }
 
         // 把方法名语法糖转成mgxql
-        MethodStatement methodStatement = this.methodSyntaxProcessor.execute(entityInfo, methodInfo, null);
-        if (methodStatement != null) {
-            String mgxql = methodStatement.toMgxql();
+        BaseStatement baseStatement = this.methodSyntaxProcessor.execute(methodInfo);
+        if (baseStatement != null) {
+            String mgxql = baseStatement.toMgxql();
             MgxqlStatement mgxqlStatement = this.mgxqlSyntaxProcessor.executeAndCheck(entityInfo, methodInfo, null, null, mgxql);
             List<ConditionInfo> conditionInfoList = this.mgxqlStatementToMethodInfoConverter.convert(mgxqlStatement, ConditionOriginType.STATEMENT_METHOD_NAME);
             methodInfo.setConditionInfoList(conditionInfoList);

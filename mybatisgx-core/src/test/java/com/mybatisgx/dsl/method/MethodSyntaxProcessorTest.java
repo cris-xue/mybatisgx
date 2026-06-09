@@ -1,6 +1,6 @@
 package com.mybatisgx.dsl.method;
 
-import com.mybatisgx.dsl.method.model.MethodStatement;
+import com.mybatisgx.dsl.method.model.BaseStatement;
 import com.mybatisgx.dsl.test.entity.User;
 import com.mybatisgx.model.EntityInfo;
 import com.mybatisgx.model.MapperInfo;
@@ -34,12 +34,8 @@ public class MethodSyntaxProcessorTest {
         methodInfo.setMapperInfo(mapperInfo);
         methodInfo.setMethodName(methodName);
 
-        MethodStatement methodStatement = processor.execute(
-                entityInfo,
-                methodInfo,
-                null
-        );
-        System.out.println(methodStatement.toMgxql());
+        BaseStatement baseStatement = processor.execute(methodInfo);
+        System.out.println(baseStatement.toMgxql());
     }
 
     @Test
@@ -59,12 +55,8 @@ public class MethodSyntaxProcessorTest {
         methodInfo.setMapperInfo(mapperInfo);
         methodInfo.setMethodName(methodName);
 
-        MethodStatement methodStatement = processor.execute(
-                entityInfo,
-                methodInfo,
-                null
-        );
-        System.out.println(methodStatement.toMgxql());
+        BaseStatement baseStatement = processor.execute(methodInfo);
+        System.out.println(baseStatement.toMgxql());
     }
 
     @Test
@@ -84,12 +76,29 @@ public class MethodSyntaxProcessorTest {
         methodInfo.setMapperInfo(mapperInfo);
         methodInfo.setMethodName(methodName);
 
-        MethodStatement methodStatement = processor.execute(
-                entityInfo,
-                methodInfo,
-                null
-        );
-        System.out.println(methodStatement.toMgxql());
+        BaseStatement baseStatement = processor.execute(methodInfo);
+        System.out.println(baseStatement.toMgxql());
+    }
+
+    @Test
+    public void testUpdate02() {
+        String methodName = "updateByIdAndStatus";
+
+        MethodSyntaxProcessor processor = this.buildProcessor();
+        SqlCommandType sqlCommandType = processor.getSqlCommandType(methodName);
+
+        EntityInfo entityInfo = entityInfoHandler.execute(User.class);
+        MapperInfo mapperInfo = new MapperInfo();
+        mapperInfo.setEntityClass(entityInfo.getClazz());
+        mapperInfo.setEntityInfo(entityInfo);
+
+        MethodInfo methodInfo = new MethodInfo();
+        methodInfo.setSqlCommandType(sqlCommandType);
+        methodInfo.setMapperInfo(mapperInfo);
+        methodInfo.setMethodName(methodName);
+
+        BaseStatement baseStatement = processor.execute(methodInfo);
+        System.out.println(baseStatement.toMgxql());
     }
 
     @Test
@@ -109,12 +118,8 @@ public class MethodSyntaxProcessorTest {
         methodInfo.setMapperInfo(mapperInfo);
         methodInfo.setMethodName(methodName);
 
-        MethodStatement methodStatement = processor.execute(
-                entityInfo,
-                methodInfo,
-                null
-        );
-        System.out.println(methodStatement.toMgxql());
+        BaseStatement baseStatement = processor.execute(methodInfo);
+        System.out.println(baseStatement.toMgxql());
     }
 
     @Test
@@ -133,11 +138,7 @@ public class MethodSyntaxProcessorTest {
         methodInfo.setMapperInfo(mapperInfo);
         methodInfo.setMethodName(methodName);
 
-        MethodStatement methodStatement = processor.execute(
-                null,
-                methodInfo,
-                null
-        );
-        System.out.println(methodStatement.toMgxql());
+        BaseStatement baseStatement = processor.execute(methodInfo);
+        System.out.println(baseStatement.toMgxql());
     }
 }

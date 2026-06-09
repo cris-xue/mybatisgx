@@ -1,5 +1,8 @@
 package com.mybatisgx.dsl.method.model;
 
+import com.mybatisgx.model.ComparisonOperator;
+import com.mybatisgx.model.LogicOperator;
+
 /**
  * 一句话描述
  * @author 薛承城
@@ -7,11 +10,21 @@ package com.mybatisgx.dsl.method.model;
  */
 public class ConditionTerm {
 
+    private LogicOperator logicOperator;
+
     private String fieldName;
 
-    private String operator;
+    private ComparisonOperator comparisonOperator;
 
     private String value;
+
+    public LogicOperator getLogicOperator() {
+        return logicOperator;
+    }
+
+    public void setLogicOperator(LogicOperator logicOperator) {
+        this.logicOperator = logicOperator;
+    }
 
     public String getFieldName() {
         return fieldName;
@@ -21,12 +34,12 @@ public class ConditionTerm {
         this.fieldName = fieldName;
     }
 
-    public String getOperator() {
-        return operator;
+    public ComparisonOperator getComparisonOperator() {
+        return comparisonOperator;
     }
 
-    public void setOperator(String operator) {
-        this.operator = operator;
+    public void setComparisonOperator(ComparisonOperator comparisonOperator) {
+        this.comparisonOperator = comparisonOperator;
     }
 
     public String getValue() {
@@ -38,6 +51,6 @@ public class ConditionTerm {
     }
 
     public String toConditionTerm() {
-        return String.format("%s %s %s", fieldName, operator, value);
+        return String.format("%s %s %s %s", logicOperator.getValue(), fieldName, comparisonOperator.getValue(), value);
     }
 }

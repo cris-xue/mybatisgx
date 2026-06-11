@@ -8,7 +8,7 @@ package com.mybatisgx.dsl.method.model;
 public enum SelectItemType {
 
     COLUMN("column", "*"),
-    COUNT("count", "*");
+    COUNT("count", "count(*)");
 
     private String key;
     private String value;

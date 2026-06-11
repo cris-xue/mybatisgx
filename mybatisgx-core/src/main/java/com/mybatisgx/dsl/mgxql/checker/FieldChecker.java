@@ -27,8 +27,10 @@ public class FieldChecker implements MgxqlChecker {
                 if (selectItem.getType() == SelectItemType.COLUMN && selectItem.getFieldName() != null) {
                     this.checkFieldExistence(selectItem.getEntityAlias(), selectItem.getFieldName(), "SELECT", context);
                 }
-                // 聚合函数参数字段校验
-                if (selectItem.getAggregateFieldRef() != null) {
+                // 聚合函数参数字段校验（COUNT的"*"和"1"是约定值，不是真实字段引用，跳过校验）
+                if (selectItem.getAggregateFieldRef() != null
+                        && !(selectItem.getType() == SelectItemType.COUNT
+                        && isCountConventionValue(selectItem.getAggregateFieldRef().getFieldName()))) {
                     FieldReference fieldRef = selectItem.getAggregateFieldRef();
                     this.checkFieldExistence(fieldRef.getEntityAlias(), fieldRef.getFieldName(), "SELECT", context);
                 }
@@ -60,7 +62,12 @@ public class FieldChecker implements MgxqlChecker {
         if (statement.getHavingClause() != null && statement.getHavingClause().getConditions() != null) {
             for (HavingCondition condition : statement.getHavingClause().getConditions()) {
                 if (condition.getAggregateFunction() != null && condition.getAggregateFunction().getAggregateFieldRef() != null) {
-                    FieldReference fieldRef = condition.getAggregateFunction().getAggregateFieldRef();
+                    SelectItem aggItem = condition.getAggregateFunction();
+                    if (aggItem.getType() == SelectItemType.COUNT
+                            && isCountConventionValue(aggItem.getAggregateFieldRef().getFieldName())) {
+                        continue;
+                    }
+                    FieldReference fieldRef = aggItem.getAggregateFieldRef();
                     this.checkFieldExistence(fieldRef.getEntityAlias(), fieldRef.getFieldName(), "HAVING", context);
                 }
             }
@@ -82,6 +89,10 @@ public class FieldChecker implements MgxqlChecker {
                 this.checkFieldExistence(node.getFieldAlias(), node.getFieldName(), "WHERE", context);
             }
         }
+    }
+
+    private static boolean isCountConventionValue(String fieldName) {
+        return "*".equals(fieldName) || "1".equals(fieldName);
     }
 
     /**

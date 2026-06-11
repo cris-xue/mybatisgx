@@ -34,8 +34,10 @@ public class FieldAliasChecker implements MgxqlSyntaxChecker {
                     checkFieldAlias(selectItem.getEntityAlias(), selectItem.getFieldName(),
                             "SELECT", hasMultipleEntities, isDeleteOrUpdate, context);
                 }
-                // 聚合函数参数字段
-                if (selectItem.getAggregateFieldRef() != null) {
+                // 聚合函数参数字段（COUNT的"*"和"1"是约定值，不是真实字段引用，跳过校验）
+                if (selectItem.getAggregateFieldRef() != null
+                        && !(selectItem.getType() == SelectItemType.COUNT
+                        && isCountConventionValue(selectItem.getAggregateFieldRef().getFieldName()))) {
                     FieldReference fieldRef = selectItem.getAggregateFieldRef();
                     checkFieldAlias(fieldRef.getEntityAlias(), fieldRef.getFieldName(),
                             "SELECT", hasMultipleEntities, isDeleteOrUpdate, context);
@@ -71,7 +73,12 @@ public class FieldAliasChecker implements MgxqlSyntaxChecker {
         if (statement.getHavingClause() != null && statement.getHavingClause().getConditions() != null) {
             for (HavingCondition condition : statement.getHavingClause().getConditions()) {
                 if (condition.getAggregateFunction() != null && condition.getAggregateFunction().getAggregateFieldRef() != null) {
-                    FieldReference fieldRef = condition.getAggregateFunction().getAggregateFieldRef();
+                    SelectItem aggItem = condition.getAggregateFunction();
+                    if (aggItem.getType() == SelectItemType.COUNT
+                            && isCountConventionValue(aggItem.getAggregateFieldRef().getFieldName())) {
+                        continue;
+                    }
+                    FieldReference fieldRef = aggItem.getAggregateFieldRef();
                     checkFieldAlias(fieldRef.getEntityAlias(), fieldRef.getFieldName(),
                             "HAVING", hasMultipleEntities, isDeleteOrUpdate, context);
                 }
@@ -93,6 +100,10 @@ public class FieldAliasChecker implements MgxqlSyntaxChecker {
                         "WHERE", hasMultipleEntities, isDeleteOrUpdate, context);
             }
         }
+    }
+
+    private static boolean isCountConventionValue(String fieldName) {
+        return "*".equals(fieldName) || "1".equals(fieldName);
     }
 
     private void checkFieldAlias(String entityAlias, String fieldName, String clauseName,

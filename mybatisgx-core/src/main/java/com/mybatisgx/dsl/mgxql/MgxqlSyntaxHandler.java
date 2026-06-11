@@ -173,22 +173,39 @@ public class MgxqlSyntaxHandler {
         }
 
         private void parseAggregateFunction(SelectItem item, MgxqlParser.Aggregate_functionContext aggregateFunction) {
-            MgxqlParser.Aggregate_function_nameContext funcNameCtx = aggregateFunction.aggregate_function_name();
-            MgxqlParser.Aggregate_function_argumentContext funcArgCtx = aggregateFunction.aggregate_function_argument();
-            FieldReference fieldRef = parseFieldReference(funcArgCtx.field_reference());
+            MgxqlParser.Aggregate_function_normalContext normalCtx = aggregateFunction.aggregate_function_normal();
+            if (normalCtx != null) {
+                MgxqlParser.Aggregate_function_nameContext funcNameCtx = normalCtx.aggregate_function_name();
+                MgxqlParser.Aggregate_function_argumentContext funcArgCtx = normalCtx.aggregate_function_argument();
+                FieldReference fieldRef = parseFieldReference(funcArgCtx.field_reference());
 
-            if (funcNameCtx.select_count() != null) {
-                item.setType(SelectItemType.COUNT);
-            } else if (funcNameCtx.select_max() != null) {
-                item.setType(SelectItemType.MAX);
-            } else if (funcNameCtx.select_min() != null) {
-                item.setType(SelectItemType.MIN);
-            } else if (funcNameCtx.select_avg() != null) {
-                item.setType(SelectItemType.AVG);
-            } else if (funcNameCtx.select_sum() != null) {
-                item.setType(SelectItemType.SUM);
+                if (funcNameCtx.select_max() != null) {
+                    item.setType(SelectItemType.MAX);
+                } else if (funcNameCtx.select_min() != null) {
+                    item.setType(SelectItemType.MIN);
+                } else if (funcNameCtx.select_avg() != null) {
+                    item.setType(SelectItemType.AVG);
+                } else if (funcNameCtx.select_sum() != null) {
+                    item.setType(SelectItemType.SUM);
+                }
+                item.setAggregateFieldRef(fieldRef);
+                return;
             }
-            item.setAggregateFieldRef(fieldRef);
+
+            MgxqlParser.Aggregate_function_countContext countCtx = aggregateFunction.aggregate_function_count();
+            if (countCtx != null) {
+                item.setType(SelectItemType.COUNT);
+                MgxqlParser.Aggregate_function_count_argumentContext countArgCtx = countCtx.aggregate_function_count_argument();
+                FieldReference fieldRef = new FieldReference();
+                if (countArgCtx.number() != null) {
+                    fieldRef.setFieldName(countArgCtx.number().getText());
+                } else if (countArgCtx.select_asterisk() != null) {
+                    fieldRef.setFieldName("*");
+                } else if (countArgCtx.field_reference() != null) {
+                    fieldRef = parseFieldReference(countArgCtx.field_reference());
+                }
+                item.setAggregateFieldRef(fieldRef);
+            }
         }
     }
 

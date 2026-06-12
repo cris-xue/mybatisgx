@@ -40,6 +40,18 @@ public class MethodMgxqlInfo {
      * 方法名条件信息【修改、删除、查询都可以存在条件】
      */
     private List<ConditionInfo> conditionInfoList = new ArrayList<>();
+    /**
+     * FROM 子句信息
+     */
+    private FromInfo fromInfo;
+    /**
+     * GROUP BY 字段列表
+     */
+    private List<GroupByFieldInfo> groupByInfoList;
+    /**
+     * HAVING 条件列表
+     */
+    private List<HavingInfo> havingInfoList;
 
     public MgxqlSourceType getMgxqlSourceType() {
         return mgxqlSourceType;
@@ -95,5 +107,29 @@ public class MethodMgxqlInfo {
 
     public void setConditionInfoList(List<ConditionInfo> conditionInfoList) {
         this.conditionInfoList = conditionInfoList;
+    }
+
+    public FromInfo getFromInfo() {
+        return fromInfo;
+    }
+
+    public void setFromInfo(FromInfo fromInfo) {
+        this.fromInfo = fromInfo;
+    }
+
+    public List<GroupByFieldInfo> getGroupByInfoList() {
+        return groupByInfoList;
+    }
+
+    public void setGroupByInfoList(List<GroupByFieldInfo> groupByInfoList) {
+        this.groupByInfoList = groupByInfoList;
+    }
+
+    public List<HavingInfo> getHavingInfoList() {
+        return havingInfoList;
+    }
+
+    public void setHavingInfoList(List<HavingInfo> havingInfoList) {
+        this.havingInfoList = havingInfoList;
     }
 }

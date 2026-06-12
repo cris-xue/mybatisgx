@@ -36,4 +36,16 @@ public class EntityRefInfoTest {
         Assert.assertEquals("role", join.getOnRightAlias());
         Assert.assertTrue(join instanceof EntityRefInfo);
     }
+
+    @Test
+    public void test04_fromInfoWithPrimaryAndJoins() {
+        FromInfo fromInfo = new FromInfo();
+        fromInfo.setPrimaryEntity(new EntityRefInfo("User", "user"));
+        java.util.List<JoinInfo> joins = new java.util.ArrayList<>();
+        joins.add(new JoinInfo("Role", "role", com.mybatisgx.dsl.mgxql.model.JoinType.LEFT, "user", "role"));
+        fromInfo.setJoins(joins);
+        Assert.assertEquals("User", fromInfo.getPrimaryEntity().getEntityName());
+        Assert.assertEquals(1, fromInfo.getJoins().size());
+        Assert.assertEquals("Role", fromInfo.getJoins().get(0).getEntityName());
+    }
 }

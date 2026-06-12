@@ -18,6 +18,7 @@ public class MgxqlStatementToMethodInfoConverterTest {
     private MgxqlSyntaxProcessor processor;
     private MgxqlStatementToMethodInfoConverter converter;
     private EntityInfo entityInfo;
+    private String lastDsl;
 
     @Before
     public void setUp() {
@@ -28,11 +29,13 @@ public class MgxqlStatementToMethodInfoConverterTest {
     }
 
     private MgxqlStatement parse(String expression) {
+        this.lastDsl = expression;
         return processor.executeAndCheck(entityInfo, new MethodInfo(), null, ConditionOriginType.STATEMENT_METHOD_NAME, expression);
     }
 
     private List<ConditionInfo> convert(MgxqlStatement stmt) {
-        return converter.convert(stmt, ConditionOriginType.STATEMENT_METHOD_NAME);
+        MethodMgxqlInfo mgxqlInfo = converter.convert(stmt, com.mybatisgx.model.MgxqlSourceType.METHOD_NAME, lastDsl, stmt.getCommandType());
+        return mgxqlInfo.getConditionInfoList();
     }
 
     @Test
@@ -127,5 +130,11 @@ public class MgxqlStatementToMethodInfoConverterTest {
         Assert.assertEquals(1, list.size());
         Assert.assertEquals(ComparisonOperator.IN, list.get(0).getComparisonOperator());
         Assert.assertEquals(ComparisonOperator.NOT, list.get(0).getComparisonNotOperator());
+    }
+
+    @Test(expected = com.mybatisgx.exception.MybatisgxException.class)
+    public void test10_commandTypeMismatchThrows() {
+        MgxqlStatement stmt = parse("delete where name = :name");
+        converter.convert(stmt, com.mybatisgx.model.MgxqlSourceType.METHOD_NAME, lastDsl, org.apache.ibatis.mapping.SqlCommandType.SELECT);
     }
 }

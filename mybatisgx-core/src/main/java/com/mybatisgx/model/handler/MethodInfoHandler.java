@@ -345,8 +345,8 @@ public class MethodInfoHandler {
         if (statement != null) {
             String mgxql = statement.value();
             MgxqlStatement mgxqlStatement = this.mgxqlSyntaxProcessor.executeAndCheck(entityInfo, methodInfo, null, null, mgxql);
-            List<ConditionInfo> conditionInfoList = this.mgxqlStatementToMethodInfoConverter.convert(mgxqlStatement, ConditionOriginType.STATEMENT_METHOD_NAME);
-            methodInfo.setConditionInfoList(conditionInfoList);
+            MethodMgxqlInfo mgxqlInfo = this.mgxqlStatementToMethodInfoConverter.convert(mgxqlStatement, MgxqlSourceType.MANUAL, mgxql, methodInfo.getSqlCommandType());
+            methodInfo.setMethodMgxqlInfo(mgxqlInfo);
             return;
         }
 
@@ -355,8 +355,8 @@ public class MethodInfoHandler {
             if (methodInfo.getEntityParamInfo() != null || methodInfo.getQueryEntityParamInfo() != null) {
                 String mgxql = this.entityToMgxql(methodInfo);
                 MgxqlStatement mgxqlStatement = this.mgxqlSyntaxProcessor.executeAndCheck(entityInfo, methodInfo, null, null, mgxql);
-                List<ConditionInfo> conditionInfoList = this.mgxqlStatementToMethodInfoConverter.convert(mgxqlStatement, ConditionOriginType.STATEMENT_METHOD_NAME);
-                methodInfo.setConditionInfoList(conditionInfoList);
+                MethodMgxqlInfo mgxqlInfo = this.mgxqlStatementToMethodInfoConverter.convert(mgxqlStatement, MgxqlSourceType.QUERY_ENTITY, mgxql, methodInfo.getSqlCommandType());
+                methodInfo.setMethodMgxqlInfo(mgxqlInfo);
                 return;
             }
         }
@@ -366,8 +366,8 @@ public class MethodInfoHandler {
         if (baseStatement != null) {
             String mgxql = baseStatement.toMgxql();
             MgxqlStatement mgxqlStatement = this.mgxqlSyntaxProcessor.executeAndCheck(entityInfo, methodInfo, null, null, mgxql);
-            List<ConditionInfo> conditionInfoList = this.mgxqlStatementToMethodInfoConverter.convert(mgxqlStatement, ConditionOriginType.STATEMENT_METHOD_NAME);
-            methodInfo.setConditionInfoList(conditionInfoList);
+            MethodMgxqlInfo mgxqlInfo = this.mgxqlStatementToMethodInfoConverter.convert(mgxqlStatement, MgxqlSourceType.METHOD_NAME, mgxql, methodInfo.getSqlCommandType());
+            methodInfo.setMethodMgxqlInfo(mgxqlInfo);
         }
 
         // 解析Statement表达式

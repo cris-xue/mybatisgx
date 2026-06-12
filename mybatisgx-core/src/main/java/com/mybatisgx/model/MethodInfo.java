@@ -337,20 +337,5 @@ public class MethodInfo {
 
     public void setMethodMgxqlInfo(MethodMgxqlInfo methodMgxqlInfo) {
         this.methodMgxqlInfo = methodMgxqlInfo;
-        if (methodMgxqlInfo != null) {
-            if (methodMgxqlInfo.getConditionInfoList() != null) {
-                this.conditionInfoList = methodMgxqlInfo.getConditionInfoList();
-                this.isExistCondition = !methodMgxqlInfo.getConditionInfoList().isEmpty();
-            }
-            if (methodMgxqlInfo.getSelectItemInfo() != null) {
-                this.selectItemInfo = methodMgxqlInfo.getSelectItemInfo();
-            }
-            if (methodMgxqlInfo.getSelectOrderByInfoList() != null) {
-                this.selectOrderByInfoList = methodMgxqlInfo.getSelectOrderByInfoList();
-            }
-            if (methodMgxqlInfo.getMethodRowLimitInfo() != null) {
-                this.methodRowLimitInfo = methodMgxqlInfo.getMethodRowLimitInfo();
-            }
-        }
     }
 }

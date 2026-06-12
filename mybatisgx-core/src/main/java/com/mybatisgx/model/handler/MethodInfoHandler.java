@@ -132,9 +132,10 @@ public class MethodInfoHandler {
             // 条件解析
             this.methodConditionParse(methodInfo);
 
-            SelectItemInfo selectItemInfo = methodInfo.getSelectItemInfo();
+            MethodMgxqlInfo methodMgxqlInfo = methodInfo.getMethodMgxqlInfo();
             if (methodInfo.getSqlCommandType() == SqlCommandType.SELECT
-                    && selectItemInfo.getSelectItemType() == SelectItemType.COLUMN) {
+                    && methodMgxqlInfo != null
+                    && methodMgxqlInfo.getSelectItemInfo().getSelectItemType() == SelectItemType.COLUMN) {
                 this.entityRelationTreeHandler.execute(mapperInfo, methodInfo);
                 String resultMapId = resultMapInfoHandler.execute(mapperInfo, methodInfo);
                 methodInfo.setResultMapId(resultMapId);

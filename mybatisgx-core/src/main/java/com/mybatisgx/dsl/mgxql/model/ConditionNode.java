@@ -1,8 +1,5 @@
 package com.mybatisgx.dsl.mgxql.model;
 
-import com.mybatisgx.model.ComparisonOperator;
-import com.mybatisgx.model.LogicOperator;
-
 import java.util.List;
 
 /**

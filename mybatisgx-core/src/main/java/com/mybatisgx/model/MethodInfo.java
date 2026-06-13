@@ -1,6 +1,7 @@
 package com.mybatisgx.model;
 
 import com.mybatisgx.api.MethodCommandType;
+import com.mybatisgx.dsl.mgxql.model.MgxqlStatement;
 import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.executor.page.Pageable;
 import org.apache.commons.lang3.ObjectUtils;
@@ -118,7 +119,7 @@ public class MethodInfo {
     /**
      * mgxql信息
      */
-    private MethodMgxqlInfo methodMgxqlInfo;
+    private MgxqlStatement mgxqlStatement;
 
     public MapperInfo getMapperInfo() {
         return mapperInfo;
@@ -331,11 +332,11 @@ public class MethodInfo {
         this.resultMapId = resultMapId;
     }
 
-    public MethodMgxqlInfo getMethodMgxqlInfo() {
-        return methodMgxqlInfo;
+    public MgxqlStatement getMgxqlStatement() {
+        return mgxqlStatement;
     }
 
-    public void setMethodMgxqlInfo(MethodMgxqlInfo methodMgxqlInfo) {
-        this.methodMgxqlInfo = methodMgxqlInfo;
+    public void setMgxqlStatement(MgxqlStatement mgxqlStatement) {
+        this.mgxqlStatement = mgxqlStatement;
     }
 }

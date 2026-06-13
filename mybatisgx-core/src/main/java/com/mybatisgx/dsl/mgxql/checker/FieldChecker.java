@@ -14,7 +14,7 @@ import com.mybatisgx.model.EntityInfo;
  * @author 薛承城
  * @date 2025/11/17 10:19
  */
-public abstract class FieldChecker implements MgxqlChecker {
+public abstract class FieldChecker implements MgxqlSemanticChecker {
 
     @Override
     public int getOrder() {

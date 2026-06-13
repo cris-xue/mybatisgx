@@ -15,7 +15,7 @@ import com.mybatisgx.model.EntityInfo;
  * @author 薛承城
  * @date 2025/11/17 10:19
  */
-public class OperatorTypeChecker implements MgxqlChecker {
+public class OperatorTypeChecker implements MgxqlSemanticChecker {
 
     @Override
     public int getOrder() {

@@ -18,9 +18,9 @@ import java.util.stream.Collectors;
  */
 public class MgxqlCheckerChain {
 
-    private final List<MgxqlChecker> selectCheckers;
+    private final List<MgxqlSemanticChecker> selectCheckers;
 
-    private final List<MgxqlChecker> dmlCheckers;
+    private final List<MgxqlSemanticChecker> dmlCheckers;
 
     private final MgxqlSyntaxCheckerChain syntaxCheckerChain;
 
@@ -54,15 +54,15 @@ public class MgxqlCheckerChain {
         CheckerContext context = new CheckerContext(entityInfo);
 
         SqlCommandType commandType = statement.getCommandType();
-        List<MgxqlChecker> activeCheckers = (commandType == SqlCommandType.DELETE || commandType == SqlCommandType.UPDATE)
+        List<MgxqlSemanticChecker> activeCheckers = (commandType == SqlCommandType.DELETE || commandType == SqlCommandType.UPDATE)
                 ? this.dmlCheckers : this.selectCheckers;
 
         // 按order排序执行
-        List<MgxqlChecker> sortedCheckers = activeCheckers.stream()
-                .sorted(Comparator.comparingInt(MgxqlChecker::getOrder))
+        List<MgxqlSemanticChecker> sortedCheckers = activeCheckers.stream()
+                .sorted(Comparator.comparingInt(MgxqlSemanticChecker::getOrder))
                 .collect(Collectors.toList());
 
-        for (MgxqlChecker checker : sortedCheckers) {
+        for (MgxqlSemanticChecker checker : sortedCheckers) {
             if (checker.support(statement)) {
                 checker.check(statement, context);
             }

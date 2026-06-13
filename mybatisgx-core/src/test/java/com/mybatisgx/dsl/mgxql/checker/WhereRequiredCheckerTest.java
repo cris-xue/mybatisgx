@@ -1,14 +1,12 @@
 package com.mybatisgx.dsl.mgxql.checker;
 
 import com.mybatisgx.dsl.mgxql.model.*;
-import com.mybatisgx.exception.MybatisgxException;
-import com.mybatisgx.model.LogicOperator;
+import org.apache.ibatis.mapping.SqlCommandType;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
-import org.apache.ibatis.mapping.SqlCommandType;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class WhereRequiredCheckerTest {

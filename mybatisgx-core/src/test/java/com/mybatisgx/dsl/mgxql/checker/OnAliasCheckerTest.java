@@ -33,7 +33,7 @@ public class OnAliasCheckerTest {
 
     @Test
     public void test02_onLeftIsCurrentJoinAlias() {
-        MgxqlStatement stmt = new MgxqlStatement();
+        SelectStatement stmt = new SelectStatement();
         FromClause fromClause = new FromClause();
         fromClause.setPrimaryEntity(new FromEntity("User", "user"));
         JoinEntity join = new JoinEntity("Role", "role", JoinType.LEFT);
@@ -60,7 +60,7 @@ public class OnAliasCheckerTest {
 
     @Test
     public void test03_onLeftUndefinedAlias() {
-        MgxqlStatement stmt = new MgxqlStatement();
+        SelectStatement stmt = new SelectStatement();
         FromClause fromClause = new FromClause();
         fromClause.setPrimaryEntity(new FromEntity("User", "user"));
         JoinEntity join = new JoinEntity("Role", "role", JoinType.LEFT);
@@ -87,7 +87,7 @@ public class OnAliasCheckerTest {
 
     @Test
     public void test04_onRightNotCurrentJoinAlias() {
-        MgxqlStatement stmt = new MgxqlStatement();
+        SelectStatement stmt = new SelectStatement();
         FromClause fromClause = new FromClause();
         fromClause.setPrimaryEntity(new FromEntity("User", "user"));
         JoinEntity join = new JoinEntity("Role", "role", JoinType.LEFT);
@@ -114,7 +114,7 @@ public class OnAliasCheckerTest {
 
     @Test
     public void test05_chainedJoinOnPreviousEntity() {
-        MgxqlStatement stmt = new MgxqlStatement();
+        SelectStatement stmt = new SelectStatement();
         FromClause fromClause = new FromClause();
         fromClause.setPrimaryEntity(new FromEntity("A", "a"));
 
@@ -142,7 +142,7 @@ public class OnAliasCheckerTest {
 
     @Test
     public void test06_chainedJoinOnPrimaryEntity() {
-        MgxqlStatement stmt = new MgxqlStatement();
+        SelectStatement stmt = new SelectStatement();
         FromClause fromClause = new FromClause();
         fromClause.setPrimaryEntity(new FromEntity("A", "a"));
 
@@ -169,7 +169,7 @@ public class OnAliasCheckerTest {
     }
 
     private MgxqlStatement buildMultiJoin() {
-        MgxqlStatement stmt = new MgxqlStatement();
+        SelectStatement stmt = new SelectStatement();
         FromClause fromClause = new FromClause();
         fromClause.setPrimaryEntity(new FromEntity("User", "user"));
         JoinEntity join = new JoinEntity("Role", "role", JoinType.LEFT);

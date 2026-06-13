@@ -15,11 +15,13 @@ public interface MgxqlChecker {
      */
     int getOrder();
 
+    boolean support(MgxqlStatement mgxqlStatement);
+
     /**
      * 执行语义校验
      *
-     * @param statement MGXQL语句模型
-     * @param context   校验上下文
+     * @param mgxqlStatement MGXQL语句模型
+     * @param context        校验上下文
      */
-    void check(MgxqlStatement statement, CheckerContext context);
+    void check(MgxqlStatement mgxqlStatement, CheckerContext context);
 }

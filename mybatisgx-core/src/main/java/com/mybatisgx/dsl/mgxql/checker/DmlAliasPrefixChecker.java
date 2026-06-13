@@ -3,6 +3,7 @@ package com.mybatisgx.dsl.mgxql.checker;
 import com.mybatisgx.dsl.mgxql.model.ConditionExpression;
 import com.mybatisgx.dsl.mgxql.model.ConditionNode;
 import com.mybatisgx.dsl.mgxql.model.MgxqlStatement;
+import com.mybatisgx.dsl.mgxql.model.ModifyStatement;
 import org.apache.ibatis.mapping.SqlCommandType;
 
 /**
@@ -18,6 +19,11 @@ public class DmlAliasPrefixChecker implements MgxqlSyntaxChecker {
     @Override
     public int getOrder() {
         return 1;
+    }
+
+    @Override
+    public boolean support(MgxqlStatement mgxqlStatement) {
+        return mgxqlStatement instanceof ModifyStatement;
     }
 
     @Override
@@ -39,8 +45,7 @@ public class DmlAliasPrefixChecker implements MgxqlSyntaxChecker {
             if (node.isNested()) {
                 this.checkConditionExpression(node.getSubExpression(), context);
             } else if (node.getFieldAlias() != null && !node.getFieldAlias().isEmpty()) {
-                context.addError(String.format(
-                        "DELETE/UPDATE 语句中不允许使用实体别名前缀 '%s'", node.getFieldAlias()));
+                context.addError(String.format("DELETE/UPDATE 语句中不允许使用实体别名前缀 '%s'", node.getFieldAlias()));
             }
         }
     }

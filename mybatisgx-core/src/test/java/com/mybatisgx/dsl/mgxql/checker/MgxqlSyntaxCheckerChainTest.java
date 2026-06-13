@@ -2,7 +2,6 @@ package com.mybatisgx.dsl.mgxql.checker;
 
 import com.mybatisgx.dsl.mgxql.model.*;
 import com.mybatisgx.exception.MybatisgxException;
-import com.mybatisgx.model.LogicOperator;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
@@ -27,7 +26,7 @@ public class MgxqlSyntaxCheckerChainTest {
 
     @Test
     public void test01_validSingleEntityNoAlias() {
-        MgxqlStatement stmt = new MgxqlStatement();
+        SelectStatement stmt = new SelectStatement();
         stmt.setCommandType(org.apache.ibatis.mapping.SqlCommandType.SELECT);
         SelectItem item = new SelectItem();
         item.setType(SelectItemType.COLUMN_ALL);
@@ -51,7 +50,7 @@ public class MgxqlSyntaxCheckerChainTest {
 
     @Test(expected = MybatisgxException.class)
     public void test03_multiEntityMissingAlias() {
-        MgxqlStatement stmt = new MgxqlStatement();
+        SelectStatement stmt = new SelectStatement();
         stmt.setCommandType(org.apache.ibatis.mapping.SqlCommandType.SELECT);
         SelectItem item = new SelectItem();
         item.setType(SelectItemType.COLUMN_ALL);
@@ -69,7 +68,7 @@ public class MgxqlSyntaxCheckerChainTest {
 
     @Test(expected = MybatisgxException.class)
     public void test04_multiEntityBareField() {
-        MgxqlStatement stmt = new MgxqlStatement();
+        SelectStatement stmt = new SelectStatement();
         stmt.setCommandType(org.apache.ibatis.mapping.SqlCommandType.SELECT);
         SelectItem item = new SelectItem();
         item.setType(SelectItemType.COLUMN);
@@ -83,7 +82,7 @@ public class MgxqlSyntaxCheckerChainTest {
 
     @Test
     public void test05_syntaxCheckFailsWithCorrectMessage() {
-        MgxqlStatement stmt = new MgxqlStatement();
+        SelectStatement stmt = new SelectStatement();
         stmt.setCommandType(org.apache.ibatis.mapping.SqlCommandType.SELECT);
         SelectItem item = new SelectItem();
         item.setType(SelectItemType.COLUMN);
@@ -100,7 +99,7 @@ public class MgxqlSyntaxCheckerChainTest {
     }
 
     private MgxqlStatement buildValidMultiEntityStmt() {
-        MgxqlStatement stmt = new MgxqlStatement();
+        SelectStatement stmt = new SelectStatement();
         stmt.setCommandType(org.apache.ibatis.mapping.SqlCommandType.SELECT);
         SelectItem item = new SelectItem();
         item.setType(SelectItemType.COLUMN);
@@ -171,7 +170,7 @@ public class MgxqlSyntaxCheckerChainTest {
         }
     }
 
-    private void setMultiEntityFrom(MgxqlStatement stmt) {
+    private void setMultiEntityFrom(SelectStatement stmt) {
         FromClause fromClause = new FromClause();
         fromClause.setPrimaryEntity(new FromEntity("User", "user"));
         JoinEntity join = new JoinEntity("Role", "role", JoinType.LEFT);

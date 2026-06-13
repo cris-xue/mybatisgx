@@ -25,7 +25,7 @@ public class SelectStarCheckerTest {
 
     @Test
     public void test01_multiEntityBareStar() {
-        MgxqlStatement stmt = new MgxqlStatement();
+        SelectStatement stmt = new SelectStatement();
         SelectItem item = new SelectItem();
         item.setType(SelectItemType.COLUMN_ALL);
         item.setFieldName("*");
@@ -40,7 +40,7 @@ public class SelectStarCheckerTest {
 
     @Test
     public void test02_multiEntityAliasStar() {
-        MgxqlStatement stmt = new MgxqlStatement();
+        SelectStatement stmt = new SelectStatement();
         SelectItem item = new SelectItem();
         item.setType(SelectItemType.COLUMN_ALL);
         item.setEntityAlias("user");
@@ -55,7 +55,7 @@ public class SelectStarCheckerTest {
 
     @Test
     public void test03_singleEntityBareStar() {
-        MgxqlStatement stmt = new MgxqlStatement();
+        SelectStatement stmt = new SelectStatement();
         SelectItem item = new SelectItem();
         item.setType(SelectItemType.COLUMN_ALL);
         item.setFieldName("*");
@@ -70,7 +70,7 @@ public class SelectStarCheckerTest {
         Assert.assertFalse(context.hasErrors());
     }
 
-    private void setMultiEntityFrom(MgxqlStatement stmt) {
+    private void setMultiEntityFrom(SelectStatement stmt) {
         FromClause fromClause = new FromClause();
         fromClause.setPrimaryEntity(new FromEntity("User", "user"));
         fromClause.addJoinEntity(new JoinEntity("Role", "role", JoinType.LEFT));

@@ -27,7 +27,7 @@ public class AliasRequirementCheckerTest {
 
     @Test
     public void test01_multiEntityPrimaryNoAlias() {
-        MgxqlStatement stmt = new MgxqlStatement();
+        SelectStatement stmt = new SelectStatement();
         FromClause fromClause = new FromClause();
         fromClause.setPrimaryEntity(new FromEntity("User", null));
         fromClause.addJoinEntity(new JoinEntity("Role", "role", JoinType.LEFT));
@@ -44,7 +44,7 @@ public class AliasRequirementCheckerTest {
 
     @Test
     public void test02_multiEntityJoinNoAlias() {
-        MgxqlStatement stmt = new MgxqlStatement();
+        SelectStatement stmt = new SelectStatement();
         FromClause fromClause = new FromClause();
         fromClause.setPrimaryEntity(new FromEntity("User", "user"));
         fromClause.addJoinEntity(new JoinEntity("Role", null, JoinType.LEFT));
@@ -61,7 +61,7 @@ public class AliasRequirementCheckerTest {
 
     @Test
     public void test03_multiEntityAllHaveAliases() {
-        MgxqlStatement stmt = new MgxqlStatement();
+        SelectStatement stmt = new SelectStatement();
         FromClause fromClause = new FromClause();
         fromClause.setPrimaryEntity(new FromEntity("User", "user"));
         fromClause.addJoinEntity(new JoinEntity("Role", "role", JoinType.LEFT));
@@ -78,7 +78,7 @@ public class AliasRequirementCheckerTest {
 
     @Test
     public void test04_singleEntityNoAlias() {
-        MgxqlStatement stmt = new MgxqlStatement();
+        SelectStatement stmt = new SelectStatement();
         FromClause fromClause = new FromClause();
         fromClause.setPrimaryEntity(new FromEntity("User", null));
         stmt.setFromClause(fromClause);
@@ -92,7 +92,7 @@ public class AliasRequirementCheckerTest {
 
     @Test
     public void test05_duplicateAlias() {
-        MgxqlStatement stmt = new MgxqlStatement();
+        SelectStatement stmt = new SelectStatement();
         FromClause fromClause = new FromClause();
         fromClause.setPrimaryEntity(new FromEntity("User", "user"));
         fromClause.addJoinEntity(new JoinEntity("Role", "user", JoinType.LEFT));

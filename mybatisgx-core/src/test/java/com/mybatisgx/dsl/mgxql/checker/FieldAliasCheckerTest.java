@@ -52,7 +52,7 @@ public class FieldAliasCheckerTest {
 
     @Test
     public void test03_multiEntityOrderByBareField() {
-        MgxqlStatement stmt = buildCleanMultiEntityStmt();
+        SelectStatement stmt = buildCleanMultiEntityStmt();
         OrderByClause orderBy = new OrderByClause();
         orderBy.addItem(new OrderByItem(new FieldReference(null, "name"), null));
         stmt.setOrderByClause(orderBy);
@@ -70,7 +70,7 @@ public class FieldAliasCheckerTest {
 
     @Test
     public void test04_multiEntityGroupByBareField() {
-        MgxqlStatement stmt = buildCleanMultiEntityStmt();
+        SelectStatement stmt = buildCleanMultiEntityStmt();
         GroupByClause groupBy = new GroupByClause();
         groupBy.addField(new FieldReference(null, "status"));
         stmt.setGroupByClause(groupBy);
@@ -88,7 +88,7 @@ public class FieldAliasCheckerTest {
 
     @Test
     public void test05_multiEntityAggregateBareField() {
-        MgxqlStatement stmt = new MgxqlStatement();
+        SelectStatement stmt = new SelectStatement();
         stmt.setCommandType(SqlCommandType.SELECT);
         SelectItem aggItem = new SelectItem();
         aggItem.setType(SelectItemType.COUNT);
@@ -104,7 +104,7 @@ public class FieldAliasCheckerTest {
 
     @Test
     public void test06_multiEntityHavingBareField() {
-        MgxqlStatement stmt = buildCleanMultiEntityStmt();
+        SelectStatement stmt = buildCleanMultiEntityStmt();
 
         HavingClause havingClause = new HavingClause();
         HavingCondition condition = new HavingCondition();
@@ -128,7 +128,7 @@ public class FieldAliasCheckerTest {
 
     @Test
     public void test07_aliasNotExist() {
-        MgxqlStatement stmt = new MgxqlStatement();
+        SelectStatement stmt = new SelectStatement();
         stmt.setCommandType(SqlCommandType.SELECT);
         SelectItem item = new SelectItem();
         item.setType(SelectItemType.COLUMN);
@@ -171,7 +171,7 @@ public class FieldAliasCheckerTest {
 
     @Test
     public void test09_singleEntityBareFieldAllowed() {
-        MgxqlStatement stmt = new MgxqlStatement();
+        SelectStatement stmt = new SelectStatement();
         stmt.setCommandType(SqlCommandType.SELECT);
         SelectItem item = new SelectItem();
         item.setType(SelectItemType.COLUMN);
@@ -190,7 +190,7 @@ public class FieldAliasCheckerTest {
 
     @Test
     public void test10_singleEntityWithAliasBareFieldAllowed() {
-        MgxqlStatement stmt = new MgxqlStatement();
+        SelectStatement stmt = new SelectStatement();
         stmt.setCommandType(SqlCommandType.SELECT);
         SelectItem item = new SelectItem();
         item.setType(SelectItemType.COLUMN);
@@ -210,7 +210,7 @@ public class FieldAliasCheckerTest {
 
     @Test
     public void test11_multiEntityWithAliasPrefixNoError() {
-        MgxqlStatement stmt = new MgxqlStatement();
+        SelectStatement stmt = new SelectStatement();
         stmt.setCommandType(SqlCommandType.SELECT);
         SelectItem item = new SelectItem();
         item.setType(SelectItemType.COLUMN);
@@ -225,7 +225,7 @@ public class FieldAliasCheckerTest {
     }
 
     private MgxqlStatement buildMultiEntitySelect() {
-        MgxqlStatement stmt = new MgxqlStatement();
+        SelectStatement stmt = new SelectStatement();
         stmt.setCommandType(SqlCommandType.SELECT);
         SelectItem item = new SelectItem();
         item.setType(SelectItemType.COLUMN);
@@ -235,8 +235,8 @@ public class FieldAliasCheckerTest {
         return stmt;
     }
 
-    private MgxqlStatement buildCleanMultiEntityStmt() {
-        MgxqlStatement stmt = new MgxqlStatement();
+    private SelectStatement buildCleanMultiEntityStmt() {
+        SelectStatement stmt = new SelectStatement();
         stmt.setCommandType(SqlCommandType.SELECT);
         SelectItem item = new SelectItem();
         item.setType(SelectItemType.COLUMN);
@@ -247,7 +247,7 @@ public class FieldAliasCheckerTest {
         return stmt;
     }
 
-    private void setMultiEntityFrom(MgxqlStatement stmt) {
+    private void setMultiEntityFrom(SelectStatement stmt) {
         FromClause fromClause = new FromClause();
         fromClause.setPrimaryEntity(new FromEntity("User", "user"));
         fromClause.addJoinEntity(new JoinEntity("Role", "role", JoinType.LEFT));

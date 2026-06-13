@@ -3,7 +3,6 @@ package com.mybatisgx.dsl.mgxql.checker;
 import com.mybatisgx.dsl.mgxql.model.*;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -23,12 +22,18 @@ public class AliasRequirementChecker implements MgxqlSyntaxChecker {
     }
 
     @Override
-    public void check(MgxqlStatement statement, SyntaxCheckerContext context) {
+    public boolean support(MgxqlStatement mgxqlStatement) {
+        return mgxqlStatement instanceof SelectStatement;
+    }
+
+    @Override
+    public void check(MgxqlStatement mgxqlStatement, SyntaxCheckerContext context) {
         if (!context.isHasMultipleEntities()) {
             return;
         }
 
-        FromClause fromClause = statement.getFromClause();
+        SelectStatement selectStatement = (SelectStatement) mgxqlStatement;
+        FromClause fromClause = selectStatement.getFromClause();
         if (fromClause == null) {
             return;
         }

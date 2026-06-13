@@ -21,14 +21,21 @@ public class FieldAliasChecker implements MgxqlSyntaxChecker {
     }
 
     @Override
-    public void check(MgxqlStatement statement, SyntaxCheckerContext context) {
-        boolean isDeleteOrUpdate = statement.getCommandType() == SqlCommandType.DELETE
-                || statement.getCommandType() == SqlCommandType.UPDATE;
+    public boolean support(MgxqlStatement mgxqlStatement) {
+        return mgxqlStatement instanceof SelectStatement;
+    }
+
+    @Override
+    public void check(MgxqlStatement mgxqlStatement, SyntaxCheckerContext context) {
+        SelectStatement selectStatement = (SelectStatement) mgxqlStatement;
+
+        boolean isDeleteOrUpdate = selectStatement.getCommandType() == SqlCommandType.DELETE
+                || selectStatement.getCommandType() == SqlCommandType.UPDATE;
         boolean hasMultipleEntities = context.isHasMultipleEntities();
 
         // 校验SELECT字段
-        if (statement.getSelectItems() != null) {
-            for (SelectItem selectItem : statement.getSelectItems()) {
+        if (selectStatement.getSelectItems() != null) {
+            for (SelectItem selectItem : selectStatement.getSelectItems()) {
                 // 普通字段列
                 if (selectItem.getType() == SelectItemType.COLUMN) {
                     checkFieldAlias(selectItem.getEntityAlias(), selectItem.getFieldName(),
@@ -46,14 +53,14 @@ public class FieldAliasChecker implements MgxqlSyntaxChecker {
         }
 
         // 校验WHERE条件字段
-        if (statement.getWhereClause() != null && statement.getWhereClause().getRootExpression() != null) {
-            checkConditionExpressionFields(statement.getWhereClause().getRootExpression(),
+        if (selectStatement.getWhereClause() != null && selectStatement.getWhereClause().getRootExpression() != null) {
+            checkConditionExpressionFields(selectStatement.getWhereClause().getRootExpression(),
                     hasMultipleEntities, isDeleteOrUpdate, context);
         }
 
         // 校验ORDER BY字段
-        if (statement.getOrderByClause() != null) {
-            for (OrderByItem item : statement.getOrderByClause().getItems()) {
+        if (selectStatement.getOrderByClause() != null) {
+            for (OrderByItem item : selectStatement.getOrderByClause().getItems()) {
                 if (item.getField() != null) {
                     checkFieldAlias(item.getField().getEntityAlias(), item.getField().getFieldName(),
                             "ORDER BY", hasMultipleEntities, isDeleteOrUpdate, context);
@@ -62,16 +69,16 @@ public class FieldAliasChecker implements MgxqlSyntaxChecker {
         }
 
         // 校验GROUP BY字段
-        if (statement.getGroupByClause() != null) {
-            for (FieldReference fieldRef : statement.getGroupByClause().getFields()) {
+        if (selectStatement.getGroupByClause() != null) {
+            for (FieldReference fieldRef : selectStatement.getGroupByClause().getFields()) {
                 checkFieldAlias(fieldRef.getEntityAlias(), fieldRef.getFieldName(),
                         "GROUP BY", hasMultipleEntities, isDeleteOrUpdate, context);
             }
         }
 
         // 校验HAVING聚合函数参数字段
-        if (statement.getHavingClause() != null && statement.getHavingClause().getConditions() != null) {
-            for (HavingCondition condition : statement.getHavingClause().getConditions()) {
+        if (selectStatement.getHavingClause() != null && selectStatement.getHavingClause().getConditions() != null) {
+            for (HavingCondition condition : selectStatement.getHavingClause().getConditions()) {
                 if (condition.getAggregateFunction() != null && condition.getAggregateFunction().getAggregateFieldRef() != null) {
                     SelectItem aggItem = condition.getAggregateFunction();
                     if (aggItem.getType() == SelectItemType.COUNT
@@ -87,8 +94,8 @@ public class FieldAliasChecker implements MgxqlSyntaxChecker {
     }
 
     private void checkConditionExpressionFields(ConditionExpression expression,
-                                                 boolean hasMultipleEntities, boolean isDeleteOrUpdate,
-                                                 SyntaxCheckerContext context) {
+                                                boolean hasMultipleEntities, boolean isDeleteOrUpdate,
+                                                SyntaxCheckerContext context) {
         if (expression == null || expression.getNodes() == null) {
             return;
         }
@@ -107,8 +114,8 @@ public class FieldAliasChecker implements MgxqlSyntaxChecker {
     }
 
     private void checkFieldAlias(String entityAlias, String fieldName, String clauseName,
-                                  boolean hasMultipleEntities, boolean isDeleteOrUpdate,
-                                  SyntaxCheckerContext context) {
+                                 boolean hasMultipleEntities, boolean isDeleteOrUpdate,
+                                 SyntaxCheckerContext context) {
         // R5: DELETE/UPDATE中不允许使用别名前缀
         if (isDeleteOrUpdate && entityAlias != null && !entityAlias.isEmpty()) {
             context.addError(String.format("DELETE/UPDATE语句中不允许使用实体别名前缀 '%s'", entityAlias));

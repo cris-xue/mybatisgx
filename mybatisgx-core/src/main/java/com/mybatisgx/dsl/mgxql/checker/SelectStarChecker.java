@@ -1,6 +1,9 @@
 package com.mybatisgx.dsl.mgxql.checker;
 
-import com.mybatisgx.dsl.mgxql.model.*;
+import com.mybatisgx.dsl.mgxql.model.MgxqlStatement;
+import com.mybatisgx.dsl.mgxql.model.SelectItem;
+import com.mybatisgx.dsl.mgxql.model.SelectItemType;
+import com.mybatisgx.dsl.mgxql.model.SelectStatement;
 
 /**
  * SELECT星号校验器
@@ -18,16 +21,22 @@ public class SelectStarChecker implements MgxqlSyntaxChecker {
     }
 
     @Override
-    public void check(MgxqlStatement statement, SyntaxCheckerContext context) {
+    public boolean support(MgxqlStatement mgxqlStatement) {
+        return mgxqlStatement instanceof SelectStatement;
+    }
+
+    @Override
+    public void check(MgxqlStatement mgxqlStatement, SyntaxCheckerContext context) {
         if (!context.isHasMultipleEntities()) {
             return;
         }
 
-        if (statement.getSelectItems() == null) {
+        SelectStatement selectStatement = (SelectStatement) mgxqlStatement;
+        if (selectStatement.getSelectItems() == null) {
             return;
         }
 
-        for (SelectItem selectItem : statement.getSelectItems()) {
+        for (SelectItem selectItem : selectStatement.getSelectItems()) {
             if (selectItem.getType() == SelectItemType.COLUMN_ALL) {
                 // 裸 select * (无alias前缀)
                 if (selectItem.getEntityAlias() == null || selectItem.getEntityAlias().isEmpty()) {

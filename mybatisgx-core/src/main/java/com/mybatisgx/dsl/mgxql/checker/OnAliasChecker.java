@@ -1,9 +1,11 @@
 package com.mybatisgx.dsl.mgxql.checker;
 
-import com.mybatisgx.dsl.mgxql.model.*;
+import com.mybatisgx.dsl.mgxql.model.FromEntity;
+import com.mybatisgx.dsl.mgxql.model.JoinEntity;
+import com.mybatisgx.dsl.mgxql.model.MgxqlStatement;
+import com.mybatisgx.dsl.mgxql.model.SelectStatement;
 
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -23,18 +25,24 @@ public class OnAliasChecker implements MgxqlSyntaxChecker {
     }
 
     @Override
-    public void check(MgxqlStatement statement, SyntaxCheckerContext context) {
-        if (statement.getFromClause() == null || statement.getFromClause().getJoinEntities() == null) {
+    public boolean support(MgxqlStatement mgxqlStatement) {
+        return mgxqlStatement instanceof SelectStatement;
+    }
+
+    @Override
+    public void check(MgxqlStatement mgxqlStatement, SyntaxCheckerContext context) {
+        SelectStatement selectStatement = (SelectStatement) mgxqlStatement;
+        if (selectStatement.getFromClause() == null || selectStatement.getFromClause().getJoinEntities() == null) {
             return;
         }
 
         Set<String> previousAliases = new LinkedHashSet<>();
-        FromEntity primaryEntity = statement.getFromClause().getPrimaryEntity();
+        FromEntity primaryEntity = selectStatement.getFromClause().getPrimaryEntity();
         if (primaryEntity != null && primaryEntity.getAlias() != null) {
             previousAliases.add(primaryEntity.getAlias());
         }
 
-        for (JoinEntity joinEntity : statement.getFromClause().getJoinEntities()) {
+        for (JoinEntity joinEntity : selectStatement.getFromClause().getJoinEntities()) {
             String onLeftAlias = joinEntity.getOnLeftAlias();
             String onRightAlias = joinEntity.getOnRightAlias();
 

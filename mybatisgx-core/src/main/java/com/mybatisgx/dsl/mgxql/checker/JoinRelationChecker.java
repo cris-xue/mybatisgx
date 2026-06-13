@@ -1,6 +1,9 @@
 package com.mybatisgx.dsl.mgxql.checker;
 
-import com.mybatisgx.dsl.mgxql.model.*;
+import com.mybatisgx.dsl.mgxql.model.FromClause;
+import com.mybatisgx.dsl.mgxql.model.JoinEntity;
+import com.mybatisgx.dsl.mgxql.model.MgxqlStatement;
+import com.mybatisgx.dsl.mgxql.model.SelectStatement;
 import com.mybatisgx.model.EntityInfo;
 import com.mybatisgx.model.RelationColumnInfo;
 
@@ -22,8 +25,15 @@ public class JoinRelationChecker implements MgxqlChecker {
     }
 
     @Override
-    public void check(MgxqlStatement statement, CheckerContext context) {
-        FromClause fromClause = statement.getFromClause();
+    public boolean support(MgxqlStatement mgxqlStatement) {
+        return mgxqlStatement instanceof SelectStatement;
+    }
+
+    @Override
+    public void check(MgxqlStatement mgxqlStatement, CheckerContext context) {
+        SelectStatement selectStatement = (SelectStatement) mgxqlStatement;
+
+        FromClause fromClause = selectStatement.getFromClause();
         if (fromClause == null || fromClause.getJoinEntities() == null || fromClause.getJoinEntities().isEmpty()) {
             return;
         }

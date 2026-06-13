@@ -1,5 +1,6 @@
 package com.mybatisgx.dsl.method;
 
+import com.mybatisgx.dsl.DslSyntaxErrorListener;
 import com.mybatisgx.dsl.method.model.BaseStatement;
 import com.mybatisgx.dsl.method.model.ModifyStatement;
 import com.mybatisgx.dsl.method.model.QueryStatement;
@@ -7,7 +8,6 @@ import com.mybatisgx.dsl.method.syntax.MethodNameLexer;
 import com.mybatisgx.dsl.method.syntax.MethodNameParser;
 import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.model.MethodInfo;
-import com.mybatisgx.model.handler.MethodSyntaxErrorListener;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -60,7 +60,10 @@ public class MethodSyntaxProcessor {
     }
 
     public BaseStatement execute(MethodInfo methodInfo) {
-        String methodName = methodInfo.getMethodName();
+        return this.execute(methodInfo, methodInfo.getMethodName());
+    }
+
+    public BaseStatement execute(MethodInfo methodInfo, String methodName) {
         CharStream charStream = CharStreams.fromString(methodName);
         MethodNameLexer methodNameLexer = new MethodNameLexer(charStream);
         CommonTokenStream tokens = new CommonTokenStream(methodNameLexer);
@@ -90,9 +93,9 @@ public class MethodSyntaxProcessor {
     private void addErrorListeners(MethodNameLexer methodNameLexer, MethodNameParser methodNameParser) {
         methodNameLexer.removeErrorListeners();
         methodNameParser.removeErrorListeners();
-        MethodSyntaxErrorListener methodSyntaxErrorListener = new MethodSyntaxErrorListener();
-        methodNameLexer.addErrorListener(methodSyntaxErrorListener);
-        methodNameParser.addErrorListener(methodSyntaxErrorListener);
+        DslSyntaxErrorListener dslSyntaxErrorListener = new DslSyntaxErrorListener();
+        methodNameLexer.addErrorListener(dslSyntaxErrorListener);
+        methodNameParser.addErrorListener(dslSyntaxErrorListener);
     }
 
     private void traverseSyntaxTree(ParseTree node, MethodSyntaxHandler.ParserContext context) {

@@ -12,5 +12,7 @@ public interface MgxqlSyntaxChecker {
 
     int getOrder();
 
-    void check(MgxqlStatement statement, SyntaxCheckerContext context);
+    boolean support(MgxqlStatement mgxqlStatement);
+
+    void check(MgxqlStatement mgxqlStatement, SyntaxCheckerContext context);
 }

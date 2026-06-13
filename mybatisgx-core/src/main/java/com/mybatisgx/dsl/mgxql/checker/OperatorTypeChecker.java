@@ -1,8 +1,10 @@
 package com.mybatisgx.dsl.mgxql.checker;
 
-import com.mybatisgx.dsl.mgxql.model.*;
+import com.mybatisgx.dsl.mgxql.model.ComparisonOperator;
+import com.mybatisgx.dsl.mgxql.model.ConditionExpression;
+import com.mybatisgx.dsl.mgxql.model.ConditionNode;
+import com.mybatisgx.dsl.mgxql.model.MgxqlStatement;
 import com.mybatisgx.model.ColumnInfo;
-import com.mybatisgx.model.ComparisonOperator;
 import com.mybatisgx.model.EntityInfo;
 
 /**
@@ -18,6 +20,11 @@ public class OperatorTypeChecker implements MgxqlChecker {
     @Override
     public int getOrder() {
         return 3;
+    }
+
+    @Override
+    public boolean support(MgxqlStatement mgxqlStatement) {
+        return true;
     }
 
     @Override

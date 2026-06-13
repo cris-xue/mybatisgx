@@ -27,13 +27,14 @@ public class MgxqlCheckerChain {
     public MgxqlCheckerChain() {
         this.selectCheckers = Arrays.asList(
                 new EntityChecker(),
-                new FieldChecker(),
+                new SelectFieldChecker(),
                 new JoinRelationChecker(),
-                new OperatorTypeChecker()
+                new OperatorTypeChecker(),
+                new WhereFieldChecker()
         );
         this.dmlCheckers = Arrays.asList(
                 new EntityChecker(),
-                new FieldChecker(),
+                new WhereFieldChecker(),
                 new OperatorTypeChecker()
         );
         this.syntaxCheckerChain = new MgxqlSyntaxCheckerChain();
@@ -42,8 +43,8 @@ public class MgxqlCheckerChain {
     /**
      * 执行校验器，根据commandType选择校验链
      *
-     * @param statement    MGXQL语句模型
-     * @param entityInfo   主实体信息
+     * @param statement  MGXQL语句模型
+     * @param entityInfo 主实体信息
      * @throws MybatisgxException 当存在校验错误时抛出
      */
     public void check(MgxqlStatement statement, EntityInfo entityInfo) {
@@ -62,7 +63,9 @@ public class MgxqlCheckerChain {
                 .collect(Collectors.toList());
 
         for (MgxqlChecker checker : sortedCheckers) {
-            checker.check(statement, context);
+            if (checker.support(statement)) {
+                checker.check(statement, context);
+            }
         }
 
         // 收集所有错误后统一抛出

@@ -20,8 +20,15 @@ public class EntityChecker implements MgxqlChecker {
     }
 
     @Override
-    public void check(MgxqlStatement statement, CheckerContext context) {
-        FromClause fromClause = statement.getFromClause();
+    public boolean support(MgxqlStatement mgxqlStatement) {
+        return mgxqlStatement instanceof SelectStatement;
+    }
+
+    @Override
+    public void check(MgxqlStatement mgxqlStatement, CheckerContext context) {
+        SelectStatement selectStatement = (SelectStatement) mgxqlStatement;
+
+        FromClause fromClause = selectStatement.getFromClause();
         if (fromClause == null) {
             // DELETE/UPDATE 语句无 FromClause，直接确认主实体可用
             if (context.getPrimaryEntityInfo() == null) {

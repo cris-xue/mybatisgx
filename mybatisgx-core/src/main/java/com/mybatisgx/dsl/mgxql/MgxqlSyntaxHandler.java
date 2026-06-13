@@ -1,12 +1,9 @@
 package com.mybatisgx.dsl.mgxql;
 
 import com.google.common.collect.Maps;
-import com.mybatisgx.dsl.mgxql.model.SelectItemType;
 import com.mybatisgx.dsl.mgxql.model.*;
 import com.mybatisgx.dsl.mgxql.syntax.MgxqlParser;
 import com.mybatisgx.dsl.mgxql.syntax.MgxqlParserBaseVisitor;
-import com.mybatisgx.model.*;
-import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.RuleNode;
 import org.apache.ibatis.mapping.SqlCommandType;
@@ -146,7 +143,7 @@ public class MgxqlSyntaxHandler {
         @Override
         public void handle(ParseTree node, ParserContext context) {
             LOGGER.debug("处理mgxql查询项: {}", node.getText());
-            MgxqlStatement statement = context.getMgxqlStatement();
+            SelectStatement statement = context.getMgxqlStatement();
             MgxqlParser.Select_item_clauseContext selectItemClauseContext = (MgxqlParser.Select_item_clauseContext) node;
 
             for (MgxqlParser.Select_itemContext selectItem : selectItemClauseContext.select_item()) {
@@ -209,6 +206,29 @@ public class MgxqlSyntaxHandler {
         }
     }
 
+    public static class ModifyEntityClauseHandler implements SyntaxNodeHandler {
+
+        @Override
+        public int getOrder() {
+            return 2;
+        }
+
+        @Override
+        public boolean support(ParseTree node) {
+            return node instanceof MgxqlParser.Modify_entityContext;
+        }
+
+        @Override
+        public void handle(ParseTree node, ParserContext context) {
+            LOGGER.debug("处理mgxql modify entity子句: {}", node.getText());
+            ModifyStatement statement = context.getMgxqlStatement();
+            MgxqlParser.Modify_entityContext modifyEntityContext = (MgxqlParser.Modify_entityContext) node;
+            ModifyEntity modifyEntity = new ModifyEntity();
+            modifyEntity.setEntityName(modifyEntityContext.getText());
+            statement.setModifyEntity(modifyEntity);
+        }
+    }
+
     public static class SelectFromClauseHandler implements SyntaxNodeHandler {
 
         @Override
@@ -224,7 +244,7 @@ public class MgxqlSyntaxHandler {
         @Override
         public void handle(ParseTree node, ParserContext context) {
             LOGGER.debug("处理mgxql from子句: {}", node.getText());
-            MgxqlStatement statement = context.getMgxqlStatement();
+            SelectStatement statement = context.getMgxqlStatement();
             MgxqlParser.Select_from_clauseContext fromClauseCtx = (MgxqlParser.Select_from_clauseContext) node;
 
             FromClause fromClause = new FromClause();
@@ -292,7 +312,7 @@ public class MgxqlSyntaxHandler {
         @Override
         public void handle(ParseTree node, ParserContext context) {
             LOGGER.debug("处理mgxql排序: {}", node.getText());
-            MgxqlStatement statement = context.getMgxqlStatement();
+            SelectStatement statement = context.getMgxqlStatement();
             MgxqlParser.Order_by_clauseContext orderByClauseCtx = (MgxqlParser.Order_by_clauseContext) node;
 
             OrderByClause orderByClause = new OrderByClause();
@@ -320,7 +340,7 @@ public class MgxqlSyntaxHandler {
         @Override
         public void handle(ParseTree node, ParserContext context) {
             LOGGER.debug("处理mgxql分页: {}", node.getText());
-            MgxqlStatement statement = context.getMgxqlStatement();
+            SelectStatement statement = context.getMgxqlStatement();
             MgxqlParser.Limit_clauseContext limitCtx = (MgxqlParser.Limit_clauseContext) node;
 
             int offset = Integer.parseInt(limitCtx.offset().getText());
@@ -344,7 +364,7 @@ public class MgxqlSyntaxHandler {
         @Override
         public void handle(ParseTree node, ParserContext context) {
             LOGGER.debug("处理mgxql group by: {}", node.getText());
-            MgxqlStatement statement = context.getMgxqlStatement();
+            SelectStatement statement = context.getMgxqlStatement();
             MgxqlParser.Group_by_clauseContext groupByCtx = (MgxqlParser.Group_by_clauseContext) node;
 
             GroupByClause groupByClause = new GroupByClause();
@@ -371,7 +391,7 @@ public class MgxqlSyntaxHandler {
         @Override
         public void handle(ParseTree node, ParserContext context) {
             LOGGER.debug("处理mgxql having: {}", node.getText());
-            MgxqlStatement statement = context.getMgxqlStatement();
+            SelectStatement statement = context.getMgxqlStatement();
             MgxqlParser.Having_clauseContext havingCtx = (MgxqlParser.Having_clauseContext) node;
 
             HavingClause havingClause = new HavingClause();
@@ -582,53 +602,14 @@ public class MgxqlSyntaxHandler {
      */
     public static class ParserContext {
 
-        private CommonTokenStream tokens;
-        private ParseTree root;
-        private EntityInfo entityInfo;
-        private MethodInfo methodInfo;
-        private MethodParamInfo methodParamInfo;
         private ConditionOriginType conditionOriginType;
         private String statementExpression;
         private MgxqlStatement mgxqlStatement;
 
-        public ParserContext(
-                CommonTokenStream tokens,
-                ParseTree root,
-                EntityInfo entityInfo,
-                MethodInfo methodInfo,
-                MethodParamInfo methodParamInfo,
-                ConditionOriginType conditionOriginType,
-                String statementExpression,
-                MgxqlStatement mgxqlStatement
-        ) {
-            this.tokens = tokens;
-            this.root = root;
-            this.entityInfo = entityInfo;
-            this.methodInfo = methodInfo;
-            this.methodParamInfo = methodParamInfo;
+        public ParserContext(ConditionOriginType conditionOriginType, String statementExpression, MgxqlStatement mgxqlStatement) {
             this.conditionOriginType = conditionOriginType;
             this.statementExpression = statementExpression;
             this.mgxqlStatement = mgxqlStatement;
-        }
-
-        public CommonTokenStream getTokens() {
-            return tokens;
-        }
-
-        public ParseTree getRoot() {
-            return root;
-        }
-
-        public EntityInfo getEntityInfo() {
-            return entityInfo;
-        }
-
-        public MethodInfo getMethodInfo() {
-            return methodInfo;
-        }
-
-        public MethodParamInfo getMethodParamInfo() {
-            return methodParamInfo;
         }
 
         public ConditionOriginType getConditionOriginType() {
@@ -639,8 +620,8 @@ public class MgxqlSyntaxHandler {
             return statementExpression;
         }
 
-        public MgxqlStatement getMgxqlStatement() {
-            return mgxqlStatement;
+        public <T extends MgxqlStatement> T getMgxqlStatement() {
+            return (T) mgxqlStatement;
         }
     }
 }

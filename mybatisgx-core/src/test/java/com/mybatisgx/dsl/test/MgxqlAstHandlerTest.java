@@ -2,13 +2,11 @@ package com.mybatisgx.dsl.test;
 
 import com.mybatisgx.dsl.mgxql.MgxqlSyntaxProcessor;
 import com.mybatisgx.dsl.mgxql.model.*;
-import com.mybatisgx.model.ComparisonOperator;
-import com.mybatisgx.model.ConditionOriginType;
+import com.mybatisgx.dsl.test.entity.User;
 import com.mybatisgx.model.EntityInfo;
 import com.mybatisgx.model.LogicOperator;
 import com.mybatisgx.model.MethodInfo;
 import com.mybatisgx.model.handler.EntityInfoHandler;
-import com.mybatisgx.dsl.test.entity.User;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.mapping.SqlCommandType;
 import org.junit.Assert;
@@ -46,7 +44,7 @@ public class MgxqlAstHandlerTest {
         EntityInfo entityInfo = entityInfoHandler.execute(User.class);
         MethodInfo methodInfo = new MethodInfo();
         MgxqlSyntaxProcessor processor = this.buildProcessor();
-        MgxqlStatement mgxqlStatement = processor.executeAndCheck(
+        SelectStatement mgxqlStatement = (SelectStatement) processor.executeAndCheck(
                 entityInfo,
                 methodInfo,
                 null,
@@ -298,7 +296,7 @@ public class MgxqlAstHandlerTest {
     @Test
     public void test030_selectAll() {
         // 测试select *
-        MgxqlStatement stmt = parse("select * from User");
+        SelectStatement stmt = (SelectStatement) parse("select * from User");
         List<SelectItem> items = stmt.getSelectItems();
         Assert.assertEquals(1, items.size());
         Assert.assertEquals(SelectItemType.COLUMN_ALL, items.get(0).getType());
@@ -307,7 +305,7 @@ public class MgxqlAstHandlerTest {
     @Test
     public void test031_selectSpecificColumns() {
         // 测试select指定列
-        MgxqlStatement stmt = parse("select id, name, age from User");
+        SelectStatement stmt = (SelectStatement) parse("select id, name, age from User");
         List<SelectItem> items = stmt.getSelectItems();
         Assert.assertEquals(3, items.size());
         Assert.assertEquals(SelectItemType.COLUMN, items.get(0).getType());
@@ -321,7 +319,7 @@ public class MgxqlAstHandlerTest {
     @Test
     public void test032_selectWithAlias() {
         // 测试select带别名
-        MgxqlStatement stmt = parse("select user.id, user.name from User user");
+        SelectStatement stmt = (SelectStatement) parse("select user.id, user.name from User user");
         List<SelectItem> items = stmt.getSelectItems();
         Assert.assertEquals(2, items.size());
         Assert.assertEquals(SelectItemType.COLUMN, items.get(0).getType());
@@ -334,7 +332,7 @@ public class MgxqlAstHandlerTest {
     @Test
     public void test033_selectCountField() {
         // 测试count(id)
-        MgxqlStatement stmt = parse("select count(id) from User");
+        SelectStatement stmt = (SelectStatement) parse("select count(id) from User");
         List<SelectItem> items = stmt.getSelectItems();
         Assert.assertEquals(1, items.size());
         Assert.assertEquals(SelectItemType.COUNT, items.get(0).getType());
@@ -344,7 +342,7 @@ public class MgxqlAstHandlerTest {
     @Test
     public void test034_selectSum() {
         // 测试sum(age)
-        MgxqlStatement stmt = parse("select sum(age) from User");
+        SelectStatement stmt = (SelectStatement) parse("select sum(age) from User");
         List<SelectItem> items = stmt.getSelectItems();
         Assert.assertEquals(1, items.size());
         Assert.assertEquals(SelectItemType.SUM, items.get(0).getType());
@@ -354,7 +352,7 @@ public class MgxqlAstHandlerTest {
     @Test
     public void test035_selectCountName() {
         // 测试count(name)
-        MgxqlStatement stmt = parse("select count(name) from User");
+        SelectStatement stmt = (SelectStatement) parse("select count(name) from User");
         List<SelectItem> items = stmt.getSelectItems();
         Assert.assertEquals(1, items.size());
         Assert.assertEquals(SelectItemType.COUNT, items.get(0).getType());
@@ -364,7 +362,7 @@ public class MgxqlAstHandlerTest {
     @Test
     public void test036_selectMax() {
         // 测试max(id)
-        MgxqlStatement stmt = parse("select max(id) from User");
+        SelectStatement stmt = (SelectStatement) parse("select max(id) from User");
         List<SelectItem> items = stmt.getSelectItems();
         Assert.assertEquals(1, items.size());
         Assert.assertEquals(SelectItemType.MAX, items.get(0).getType());
@@ -374,7 +372,7 @@ public class MgxqlAstHandlerTest {
     @Test
     public void test037_selectMin() {
         // 测试min(id)
-        MgxqlStatement stmt = parse("select min(id) from User");
+        SelectStatement stmt = (SelectStatement) parse("select min(id) from User");
         List<SelectItem> items = stmt.getSelectItems();
         Assert.assertEquals(1, items.size());
         Assert.assertEquals(SelectItemType.MIN, items.get(0).getType());
@@ -384,7 +382,7 @@ public class MgxqlAstHandlerTest {
     @Test
     public void test038_selectAvg() {
         // 测试avg(age)
-        MgxqlStatement stmt = parse("select avg(age) from User");
+        SelectStatement stmt = (SelectStatement) parse("select avg(age) from User");
         List<SelectItem> items = stmt.getSelectItems();
         Assert.assertEquals(1, items.size());
         Assert.assertEquals(SelectItemType.AVG, items.get(0).getType());
@@ -396,7 +394,7 @@ public class MgxqlAstHandlerTest {
     @Test
     public void test040_fromWithoutAlias() {
         // 测试from不带别名
-        MgxqlStatement stmt = parse("select * from User");
+        SelectStatement stmt = (SelectStatement) parse("select * from User");
         FromClause fromClause = stmt.getFromClause();
         Assert.assertNotNull(fromClause);
         Assert.assertEquals("User", fromClause.getPrimaryEntity().getEntityName());
@@ -406,7 +404,7 @@ public class MgxqlAstHandlerTest {
     @Test
     public void test041_fromWithAlias() {
         // 测试from带别名
-        MgxqlStatement stmt = parse("select * from User user");
+        SelectStatement stmt = (SelectStatement) parse("select * from User user");
         FromClause fromClause = stmt.getFromClause();
         Assert.assertNotNull(fromClause);
         Assert.assertEquals("User", fromClause.getPrimaryEntity().getEntityName());
@@ -416,7 +414,7 @@ public class MgxqlAstHandlerTest {
     @Test
     public void test042_leftJoin() {
         // 测试left join
-        MgxqlStatement stmt = parseWithoutCheck("select * from User user left join Role role on user = role where user.name = :name");
+        SelectStatement stmt = (SelectStatement) parseWithoutCheck("select * from User user left join Role role on user = role where user.name = :name");
         FromClause fromClause = stmt.getFromClause();
         Assert.assertNotNull(fromClause);
         Assert.assertEquals("User", fromClause.getPrimaryEntity().getEntityName());
@@ -433,7 +431,7 @@ public class MgxqlAstHandlerTest {
     @Test
     public void test043_multipleLeftJoins() {
         // 测试多个left join
-        MgxqlStatement stmt = parseWithoutCheck("select * from User user left join Role role on user = role left join Menu menu on role = menu");
+        SelectStatement stmt = (SelectStatement) parseWithoutCheck("select * from User user left join Role role on user = role left join Menu menu on role = menu");
         FromClause fromClause = stmt.getFromClause();
         Assert.assertEquals(2, fromClause.getJoinEntities().size());
         Assert.assertEquals("Role", fromClause.getJoinEntities().get(0).getEntityName());
@@ -447,7 +445,7 @@ public class MgxqlAstHandlerTest {
     @Test
     public void test050_orderByAsc() {
         // 测试order by默认升序
-        MgxqlStatement stmt = parse("select * from User order by name");
+        SelectStatement stmt = (SelectStatement) parse("select * from User order by name");
         OrderByClause orderByClause = stmt.getOrderByClause();
         Assert.assertNotNull(orderByClause);
         List<OrderByItem> items = orderByClause.getItems();
@@ -459,7 +457,7 @@ public class MgxqlAstHandlerTest {
     @Test
     public void test051_orderByDesc() {
         // 测试order by降序
-        MgxqlStatement stmt = parse("select * from User order by age desc");
+        SelectStatement stmt = (SelectStatement) parse("select * from User order by age desc");
         OrderByClause orderByClause = stmt.getOrderByClause();
         Assert.assertNotNull(orderByClause);
         List<OrderByItem> items = orderByClause.getItems();
@@ -471,7 +469,7 @@ public class MgxqlAstHandlerTest {
     @Test
     public void test052_orderByMultipleFields() {
         // 测试order by多字段
-        MgxqlStatement stmt = parse("select * from User order by name asc, age desc");
+        SelectStatement stmt = (SelectStatement) parse("select * from User order by name asc, age desc");
         OrderByClause orderByClause = stmt.getOrderByClause();
         Assert.assertNotNull(orderByClause);
         List<OrderByItem> items = orderByClause.getItems();
@@ -485,7 +483,7 @@ public class MgxqlAstHandlerTest {
     @Test
     public void test053_orderByWithAlias() {
         // 测试order by带别名
-        MgxqlStatement stmt = parse("select * from User user order by user.name desc");
+        SelectStatement stmt = (SelectStatement) parse("select * from User user order by user.name desc");
         OrderByClause orderByClause = stmt.getOrderByClause();
         OrderByItem item = orderByClause.getItems().get(0);
         Assert.assertEquals("user", item.getField().getEntityAlias());
@@ -498,7 +496,7 @@ public class MgxqlAstHandlerTest {
     @Test
     public void test060_groupBySingleField() {
         // 测试group by单字段
-        MgxqlStatement stmt = parse("select * from User group by status");
+        SelectStatement stmt = (SelectStatement) parse("select * from User group by status");
         GroupByClause groupByClause = stmt.getGroupByClause();
         Assert.assertNotNull(groupByClause);
         Assert.assertEquals(1, groupByClause.getFields().size());
@@ -508,7 +506,7 @@ public class MgxqlAstHandlerTest {
     @Test
     public void test061_groupByMultipleFields() {
         // 测试group by多字段
-        MgxqlStatement stmt = parse("select * from User group by status, age");
+        SelectStatement stmt = (SelectStatement) parse("select * from User group by status, age");
         GroupByClause groupByClause = stmt.getGroupByClause();
         Assert.assertNotNull(groupByClause);
         Assert.assertEquals(2, groupByClause.getFields().size());
@@ -519,7 +517,7 @@ public class MgxqlAstHandlerTest {
     @Test
     public void test062_groupByWithAlias() {
         // 测试group by带别名
-        MgxqlStatement stmt = parse("select * from User user group by user.status");
+        SelectStatement stmt = (SelectStatement) parse("select * from User user group by user.status");
         GroupByClause groupByClause = stmt.getGroupByClause();
         Assert.assertNotNull(groupByClause);
         FieldReference field = groupByClause.getFields().get(0);
@@ -532,7 +530,7 @@ public class MgxqlAstHandlerTest {
     @Test
     public void test070_havingWithMax() {
         // 测试having max(age) > :age
-        MgxqlStatement stmt = parse("select * from User group by status having max(age) > :age");
+        SelectStatement stmt = (SelectStatement) parse("select * from User group by status having max(age) > :age");
         HavingClause havingClause = stmt.getHavingClause();
         Assert.assertNotNull(havingClause);
         Assert.assertEquals(1, havingClause.getConditions().size());
@@ -546,7 +544,7 @@ public class MgxqlAstHandlerTest {
     @Test
     public void test071_havingWithCount() {
         // 测试having count(id) > :`count`（count为关键字，需用反引号转义）
-        MgxqlStatement stmt = parse("select * from User group by status having count(id) > :`count`");
+        SelectStatement stmt = (SelectStatement) parse("select * from User group by status having count(id) > :`count`");
         HavingClause havingClause = stmt.getHavingClause();
         Assert.assertNotNull(havingClause);
         HavingCondition condition = havingClause.getConditions().get(0);
@@ -558,7 +556,7 @@ public class MgxqlAstHandlerTest {
     @Test
     public void test072_havingWithMin() {
         // 测试having min(id) < :minId
-        MgxqlStatement stmt = parse("select * from User group by status having min(id) < :minId");
+        SelectStatement stmt = (SelectStatement) parse("select * from User group by status having min(id) < :minId");
         HavingClause havingClause = stmt.getHavingClause();
         HavingCondition condition = havingClause.getConditions().get(0);
         Assert.assertEquals(SelectItemType.MIN, condition.getAggregateFunction().getType());
@@ -571,7 +569,7 @@ public class MgxqlAstHandlerTest {
     @Test
     public void test080_limitWithOffsetAndSize() {
         // 测试limit offset, size
-        MgxqlStatement stmt = parse("select * from User limit 0, 10");
+        SelectStatement stmt = (SelectStatement) parse("select * from User limit 0, 10");
         LimitClause limitClause = stmt.getLimitClause();
         Assert.assertNotNull(limitClause);
         Assert.assertEquals(0, limitClause.getOffset());
@@ -581,7 +579,7 @@ public class MgxqlAstHandlerTest {
     @Test
     public void test081_limitWithNonZeroOffset() {
         // 测试limit非零偏移
-        MgxqlStatement stmt = parse("select * from User limit 20, 10");
+        SelectStatement stmt = (SelectStatement) parse("select * from User limit 20, 10");
         LimitClause limitClause = stmt.getLimitClause();
         Assert.assertNotNull(limitClause);
         Assert.assertEquals(20, limitClause.getOffset());
@@ -602,13 +600,13 @@ public class MgxqlAstHandlerTest {
     @Test
     public void test100_fullQueryWithAllClauses() {
         // 测试包含所有子句的完整查询
-        MgxqlStatement stmt = parseWithoutCheck(
+        SelectStatement stmt = (SelectStatement) parseWithoutCheck(
                 "select user.name, user.age from User user left join Role role on user = role " +
-                "where user.name = :name and user.age > :age " +
-                "group by user.status " +
-                "having max(user.age) > :maxAge " +
-                "order by user.age desc " +
-                "limit 0, 10");
+                        "where user.name = :name and user.age > :age " +
+                        "group by user.status " +
+                        "having max(user.age) > :maxAge " +
+                        "order by user.age desc " +
+                        "limit 0, 10");
         // 验证select items
         Assert.assertEquals(2, stmt.getSelectItems().size());
         Assert.assertEquals("name", stmt.getSelectItems().get(0).getFieldName());
@@ -638,7 +636,7 @@ public class MgxqlAstHandlerTest {
     @Test
     public void test101_selectWithWhereAndOrderBy() {
         // 测试where + order by组合
-        MgxqlStatement stmt = parse("select * from User where name = :name order by age desc");
+        SelectStatement stmt = (SelectStatement) parse("select * from User where name = :name order by age desc");
         Assert.assertNotNull(stmt.getWhereClause());
         Assert.assertNotNull(stmt.getOrderByClause());
         Assert.assertNull(stmt.getGroupByClause());
@@ -648,7 +646,7 @@ public class MgxqlAstHandlerTest {
     @Test
     public void test102_selectWithWhereAndLimit() {
         // 测试where + limit组合
-        MgxqlStatement stmt = parse("select * from User where status = :status limit 0, 20");
+        SelectStatement stmt = (SelectStatement) parse("select * from User where status = :status limit 0, 20");
         Assert.assertNotNull(stmt.getWhereClause());
         Assert.assertNull(stmt.getOrderByClause());
         Assert.assertNotNull(stmt.getLimitClause());
@@ -659,7 +657,7 @@ public class MgxqlAstHandlerTest {
     @Test
     public void test103_aggregateWithGroupByAndHaving() {
         // 测试聚合函数 + group by + having组合
-        MgxqlStatement stmt = parse("select count(id) from User group by status having count(id) > :minCount");
+        SelectStatement stmt = (SelectStatement) parse("select count(id) from User group by status having count(id) > :minCount");
         Assert.assertEquals(1, stmt.getSelectItems().size());
         Assert.assertEquals(SelectItemType.COUNT, stmt.getSelectItems().get(0).getType());
         Assert.assertNotNull(stmt.getGroupByClause());
@@ -671,7 +669,7 @@ public class MgxqlAstHandlerTest {
         // 测试join + 带别名的where条件
         MgxqlStatement stmt = parseWithoutCheck(
                 "select user.id, user.name, role.name from User user left join Role role on user = role " +
-                "where user.name = :user.name and role.status = :role.status");
+                        "where user.name = :user.name and role.status = :role.status");
         WhereClause whereClause = stmt.getWhereClause();
         List<ConditionNode> nodes = whereClause.getRootExpression().getNodes();
         Assert.assertEquals(2, nodes.size());
@@ -705,7 +703,7 @@ public class MgxqlAstHandlerTest {
     @Test
     public void test106_havingNumberLiteral() {
         // 测试HAVING数字字面量
-        MgxqlStatement stmt = parse("select count(id) from User group by status having count(id) > 10");
+        SelectStatement stmt = (SelectStatement) parse("select count(id) from User group by status having count(id) > 10");
         HavingCondition condition = stmt.getHavingClause().getConditions().get(0);
         Assert.assertEquals(SelectItemType.COUNT, condition.getAggregateFunction().getType());
         Assert.assertEquals(ComparisonOperator.GT, condition.getOperator());
@@ -758,7 +756,7 @@ public class MgxqlAstHandlerTest {
     @Test
     public void test112_quotedFieldName() {
         // 测试反引号字段名（desc为关键字）
-        MgxqlStatement stmt = parseWithoutCheck("select `desc` from User");
+        SelectStatement stmt = (SelectStatement) parseWithoutCheck("select `desc` from User");
         List<SelectItem> items = stmt.getSelectItems();
         Assert.assertEquals(1, items.size());
         Assert.assertEquals(SelectItemType.COLUMN, items.get(0).getType());
@@ -777,7 +775,7 @@ public class MgxqlAstHandlerTest {
     @Test
     public void test114_groupByQuotedField() {
         // 测试GROUP BY中使用反引号字段（desc为关键字）
-        MgxqlStatement stmt = parseWithoutCheck("select `desc` from User group by `desc`");
+        SelectStatement stmt = (SelectStatement) parseWithoutCheck("select `desc` from User group by `desc`");
         GroupByClause groupByClause = stmt.getGroupByClause();
         Assert.assertNotNull(groupByClause);
         Assert.assertEquals(1, groupByClause.getFields().size());
@@ -787,7 +785,7 @@ public class MgxqlAstHandlerTest {
     @Test
     public void test115_orderByQuotedField() {
         // 测试ORDER BY中使用反引号字段（desc为关键字）
-        MgxqlStatement stmt = parseWithoutCheck("select * from User order by `desc`");
+        SelectStatement stmt = (SelectStatement) parseWithoutCheck("select * from User order by `desc`");
         OrderByClause orderByClause = stmt.getOrderByClause();
         Assert.assertNotNull(orderByClause);
         List<OrderByItem> items = orderByClause.getItems();

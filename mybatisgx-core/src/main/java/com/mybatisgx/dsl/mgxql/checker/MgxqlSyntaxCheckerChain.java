@@ -1,6 +1,9 @@
 package com.mybatisgx.dsl.mgxql.checker;
 
-import com.mybatisgx.dsl.mgxql.model.*;
+import com.mybatisgx.dsl.mgxql.model.FromEntity;
+import com.mybatisgx.dsl.mgxql.model.JoinEntity;
+import com.mybatisgx.dsl.mgxql.model.MgxqlStatement;
+import com.mybatisgx.dsl.mgxql.model.SelectStatement;
 import com.mybatisgx.exception.MybatisgxException;
 import org.apache.ibatis.mapping.SqlCommandType;
 
@@ -48,17 +51,19 @@ public class MgxqlSyntaxCheckerChain {
         }
     }
 
-    private void checkSelect(MgxqlStatement statement) {
+    private void checkSelect(MgxqlStatement mgxqlStatement) {
+        SelectStatement selectStatement = (SelectStatement) mgxqlStatement;
+
         SyntaxCheckerContext context = new SyntaxCheckerContext();
-        context.setHasMultipleEntities(isMultipleEntities(statement));
-        collectDefinedAliases(statement, context);
+        context.setHasMultipleEntities(isMultipleEntities(selectStatement));
+        collectDefinedAliases(selectStatement, context);
 
         List<MgxqlSyntaxChecker> sortedCheckers = this.selectCheckers.stream()
                 .sorted(Comparator.comparingInt(MgxqlSyntaxChecker::getOrder))
                 .collect(java.util.stream.Collectors.toList());
 
         for (MgxqlSyntaxChecker checker : sortedCheckers) {
-            checker.check(statement, context);
+            checker.check(selectStatement, context);
         }
 
         if (context.hasErrors()) {
@@ -84,7 +89,7 @@ public class MgxqlSyntaxCheckerChain {
         }
     }
 
-    private boolean isMultipleEntities(MgxqlStatement statement) {
+    private boolean isMultipleEntities(SelectStatement statement) {
         if (statement.getFromClause() == null) {
             return false;
         }
@@ -92,7 +97,7 @@ public class MgxqlSyntaxCheckerChain {
         return joinEntities != null && !joinEntities.isEmpty();
     }
 
-    private void collectDefinedAliases(MgxqlStatement statement, SyntaxCheckerContext context) {
+    private void collectDefinedAliases(SelectStatement statement, SyntaxCheckerContext context) {
         if (statement.getFromClause() == null) {
             return;
         }

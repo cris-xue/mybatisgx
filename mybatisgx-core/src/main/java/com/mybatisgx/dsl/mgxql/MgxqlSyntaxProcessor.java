@@ -1,15 +1,17 @@
 package com.mybatisgx.dsl.mgxql;
 
+import com.mybatisgx.dsl.DslSyntaxErrorListener;
 import com.mybatisgx.dsl.mgxql.checker.MgxqlCheckerChain;
+import com.mybatisgx.dsl.mgxql.model.ConditionOriginType;
 import com.mybatisgx.dsl.mgxql.model.MgxqlStatement;
+import com.mybatisgx.dsl.mgxql.model.ModifyStatement;
+import com.mybatisgx.dsl.mgxql.model.SelectStatement;
 import com.mybatisgx.dsl.mgxql.syntax.MgxqlLexer;
 import com.mybatisgx.dsl.mgxql.syntax.MgxqlParser;
 import com.mybatisgx.exception.MybatisgxException;
-import com.mybatisgx.model.ConditionOriginType;
 import com.mybatisgx.model.EntityInfo;
 import com.mybatisgx.model.MethodInfo;
 import com.mybatisgx.model.MethodParamInfo;
-import com.mybatisgx.model.handler.MethodSyntaxErrorListener;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -28,9 +30,10 @@ import java.util.stream.Collectors;
 public class MgxqlSyntaxProcessor {
 
     private final List<MgxqlSyntaxHandler.SyntaxNodeHandler> handlers = Arrays.asList(
-            new MgxqlSyntaxHandler.SelectStatementHandler(),
             new MgxqlSyntaxHandler.DeleteStatementHandler(),
             new MgxqlSyntaxHandler.UpdateStatementHandler(),
+            new MgxqlSyntaxHandler.SelectStatementHandler(),
+            new MgxqlSyntaxHandler.ModifyEntityClauseHandler(),
             new MgxqlSyntaxHandler.SelectItemHandler(),
             new MgxqlSyntaxHandler.SelectFromClauseHandler(),
             new MgxqlSyntaxHandler.WhereClauseHandler(),
@@ -88,13 +91,8 @@ public class MgxqlSyntaxProcessor {
         this.addErrorListeners(mgxqlLexer, mgxqlParser);
         ParseTree parseTree = mgxqlParser.sql_statement();
 
-        MgxqlStatement mgxqlStatement = new MgxqlStatement();
+        MgxqlStatement mgxqlStatement = methodInfo.getSqlCommandType() == SqlCommandType.SELECT ? new SelectStatement() : new ModifyStatement();
         MgxqlSyntaxHandler.ParserContext parserContext = new MgxqlSyntaxHandler.ParserContext(
-                tokens,
-                parseTree,
-                entityInfo,
-                methodInfo,
-                methodParamInfo,
                 conditionOriginType,
                 expression,
                 mgxqlStatement
@@ -114,10 +112,11 @@ public class MgxqlSyntaxProcessor {
      * @return 经过校验的MgxqlStatement模型
      */
     public MgxqlStatement executeAndCheck(EntityInfo entityInfo, MethodInfo methodInfo, MethodParamInfo methodParamInfo, ConditionOriginType conditionOriginType, String expression) {
-        MgxqlStatement statement = this.execute(entityInfo, methodInfo, methodParamInfo, conditionOriginType, expression);
+        MgxqlStatement mgxqlStatement = this.execute(entityInfo, methodInfo, methodParamInfo, conditionOriginType, expression);
+        mgxqlStatement.setDsl(expression);
         MgxqlCheckerChain checkerChain = new MgxqlCheckerChain();
-        checkerChain.check(statement, entityInfo);
-        return statement;
+        checkerChain.check(mgxqlStatement, entityInfo);
+        return mgxqlStatement;
     }
 
     /**
@@ -129,9 +128,9 @@ public class MgxqlSyntaxProcessor {
     private void addErrorListeners(MgxqlLexer mgxqlLexer, MgxqlParser mgxqlParser) {
         mgxqlLexer.removeErrorListeners();
         mgxqlParser.removeErrorListeners();
-        MethodSyntaxErrorListener methodSyntaxErrorListener = new MethodSyntaxErrorListener();
-        mgxqlLexer.addErrorListener(methodSyntaxErrorListener);
-        mgxqlParser.addErrorListener(methodSyntaxErrorListener);
+        DslSyntaxErrorListener dslSyntaxErrorListener = new DslSyntaxErrorListener();
+        mgxqlLexer.addErrorListener(dslSyntaxErrorListener);
+        mgxqlParser.addErrorListener(dslSyntaxErrorListener);
     }
 
     /**

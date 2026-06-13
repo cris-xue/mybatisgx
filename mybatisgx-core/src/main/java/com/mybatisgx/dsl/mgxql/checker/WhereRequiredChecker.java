@@ -17,6 +17,11 @@ public class WhereRequiredChecker implements MgxqlSyntaxChecker {
     }
 
     @Override
+    public boolean support(MgxqlStatement statement) {
+        return true;
+    }
+
+    @Override
     public void check(MgxqlStatement statement, SyntaxCheckerContext context) {
         SqlCommandType commandType = statement.getCommandType();
         if (commandType != SqlCommandType.DELETE && commandType != SqlCommandType.UPDATE) {

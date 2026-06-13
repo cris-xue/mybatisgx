@@ -1,5 +1,8 @@
 package com.mybatisgx.dsl.mgxql.model;
 
+import com.mybatisgx.model.ColumnInfo;
+import com.mybatisgx.model.MethodParamInfo;
+
 import java.util.List;
 
 /**
@@ -64,6 +67,16 @@ public class ConditionNode {
      * 嵌套子表达式（括号内的表达式）
      */
     private ConditionExpression subExpression;
+
+    /**
+     * 编译期绑定：对应数据库字段信息（列名、jdbcType 等）
+     */
+    private ColumnInfo columnInfo;
+
+    /**
+     * 编译期绑定：对应方法参数信息（参数路径、类型等）
+     */
+    private MethodParamInfo methodParamInfo;
 
     public LogicOperator getLogicOperator() {
         return logicOperator;
@@ -151,6 +164,22 @@ public class ConditionNode {
 
     public void setConditionValue(Integer conditionValue) {
         this.conditionValue = conditionValue;
+    }
+
+    public ColumnInfo getColumnInfo() {
+        return columnInfo;
+    }
+
+    public void setColumnInfo(ColumnInfo columnInfo) {
+        this.columnInfo = columnInfo;
+    }
+
+    public MethodParamInfo getMethodParamInfo() {
+        return methodParamInfo;
+    }
+
+    public void setMethodParamInfo(MethodParamInfo methodParamInfo) {
+        this.methodParamInfo = methodParamInfo;
     }
 
     /**

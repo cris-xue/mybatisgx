@@ -43,6 +43,8 @@ public class MgxqlSyntaxProcessor {
             new MgxqlSyntaxHandler.HavingHandler()
     );
 
+    private final MgxqlCheckerChain mgxqlCheckerChain = new MgxqlCheckerChain();
+
     private final static Map<String, SqlCommandType> SQL_COMMAND_TYPE_MAP = new HashMap<>();
 
     static {
@@ -114,8 +116,7 @@ public class MgxqlSyntaxProcessor {
     public MgxqlStatement executeAndCheck(EntityInfo entityInfo, MethodInfo methodInfo, MethodParamInfo methodParamInfo, ConditionOriginType conditionOriginType, String expression) {
         MgxqlStatement mgxqlStatement = this.execute(entityInfo, methodInfo, methodParamInfo, conditionOriginType, expression);
         mgxqlStatement.setDsl(expression);
-        MgxqlCheckerChain checkerChain = new MgxqlCheckerChain();
-        checkerChain.check(mgxqlStatement, entityInfo);
+        mgxqlCheckerChain.check(mgxqlStatement, entityInfo);
         return mgxqlStatement;
     }
 

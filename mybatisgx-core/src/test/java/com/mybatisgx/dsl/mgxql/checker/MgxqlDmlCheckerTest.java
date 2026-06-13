@@ -41,7 +41,7 @@ public class MgxqlDmlCheckerTest {
     @Test
     public void test01_deleteNoFromClauseWithEntity_shouldPass() {
         EntityInfo entityInfo = getUserEntityInfo();
-        MgxqlCheckerChain chain = new MgxqlCheckerChain();
+        MgxqlSemanticCheckerChain chain = new MgxqlSemanticCheckerChain();
         MgxqlStatement stmt = new MgxqlStatement();
         stmt.setCommandType(SqlCommandType.DELETE);
         WhereClause whereClause = new WhereClause(new ConditionExpression(LogicOperator.NULL));
@@ -55,7 +55,7 @@ public class MgxqlDmlCheckerTest {
 
     @Test
     public void test02_deleteNoFromClauseWithoutEntity_shouldError() {
-        MgxqlCheckerChain chain = new MgxqlCheckerChain();
+        MgxqlSemanticCheckerChain chain = new MgxqlSemanticCheckerChain();
         MgxqlStatement stmt = new MgxqlStatement();
         stmt.setCommandType(SqlCommandType.DELETE);
         WhereClause whereClause = new WhereClause(new ConditionExpression(LogicOperator.NULL));
@@ -79,7 +79,7 @@ public class MgxqlDmlCheckerTest {
         MgxqlStatement stmt = processor.executeAndCheck(
                 entityInfo, new MethodInfo(), null, ConditionOriginType.METHOD_NAME,
                 "delete where nonExistentField = :val");
-        MgxqlCheckerChain chain = new MgxqlCheckerChain();
+        MgxqlSemanticCheckerChain chain = new MgxqlSemanticCheckerChain();
         try {
             chain.check(stmt, entityInfo);
             Assert.fail("Expected MybatisgxException");
@@ -95,7 +95,7 @@ public class MgxqlDmlCheckerTest {
         MgxqlStatement stmt = processor.executeAndCheck(
                 entityInfo, new MethodInfo(), null, ConditionOriginType.METHOD_NAME,
                 "delete where age like :age");
-        MgxqlCheckerChain chain = new MgxqlCheckerChain();
+        MgxqlSemanticCheckerChain chain = new MgxqlSemanticCheckerChain();
         try {
             chain.check(stmt, entityInfo);
             Assert.fail("Expected MybatisgxException");
@@ -111,7 +111,7 @@ public class MgxqlDmlCheckerTest {
         MgxqlStatement stmt = processor.executeAndCheck(
                 entityInfo, new MethodInfo(), null, ConditionOriginType.METHOD_NAME,
                 "delete");
-        MgxqlCheckerChain chain = new MgxqlCheckerChain();
+        MgxqlSemanticCheckerChain chain = new MgxqlSemanticCheckerChain();
         try {
             chain.check(stmt, entityInfo);
             Assert.fail("Expected MybatisgxException");
@@ -127,7 +127,7 @@ public class MgxqlDmlCheckerTest {
         MgxqlStatement stmt = processor.executeAndCheck(
                 entityInfo, new MethodInfo(), null, ConditionOriginType.METHOD_NAME,
                 "delete where name = :name");
-        MgxqlCheckerChain chain = new MgxqlCheckerChain();
+        MgxqlSemanticCheckerChain chain = new MgxqlSemanticCheckerChain();
         chain.check(stmt, entityInfo);
     }
 
@@ -137,7 +137,7 @@ public class MgxqlDmlCheckerTest {
         MgxqlStatement stmt = processor.executeAndCheck(
                 entityInfo, new MethodInfo(), null, ConditionOriginType.METHOD_NAME,
                 "delete where user.name = :name");
-        MgxqlCheckerChain chain = new MgxqlCheckerChain();
+        MgxqlSemanticCheckerChain chain = new MgxqlSemanticCheckerChain();
         try {
             chain.check(stmt, entityInfo);
             Assert.fail("Expected MybatisgxException");
@@ -154,7 +154,7 @@ public class MgxqlDmlCheckerTest {
         MgxqlStatement stmt = processor.executeAndCheck(
                 entityInfo, new MethodInfo(), null, ConditionOriginType.METHOD_NAME,
                 "update where nonExistentField = :val");
-        MgxqlCheckerChain chain = new MgxqlCheckerChain();
+        MgxqlSemanticCheckerChain chain = new MgxqlSemanticCheckerChain();
         try {
             chain.check(stmt, entityInfo);
             Assert.fail("Expected MybatisgxException");
@@ -170,7 +170,7 @@ public class MgxqlDmlCheckerTest {
         MgxqlStatement stmt = processor.executeAndCheck(
                 entityInfo, new MethodInfo(), null, ConditionOriginType.METHOD_NAME,
                 "update where age like :age");
-        MgxqlCheckerChain chain = new MgxqlCheckerChain();
+        MgxqlSemanticCheckerChain chain = new MgxqlSemanticCheckerChain();
         try {
             chain.check(stmt, entityInfo);
             Assert.fail("Expected MybatisgxException");
@@ -186,7 +186,7 @@ public class MgxqlDmlCheckerTest {
         MgxqlStatement stmt = processor.executeAndCheck(
                 entityInfo, new MethodInfo(), null, ConditionOriginType.METHOD_NAME,
                 "update");
-        MgxqlCheckerChain chain = new MgxqlCheckerChain();
+        MgxqlSemanticCheckerChain chain = new MgxqlSemanticCheckerChain();
         try {
             chain.check(stmt, entityInfo);
             Assert.fail("Expected MybatisgxException");
@@ -202,7 +202,7 @@ public class MgxqlDmlCheckerTest {
         MgxqlStatement stmt = processor.executeAndCheck(
                 entityInfo, new MethodInfo(), null, ConditionOriginType.METHOD_NAME,
                 "update where name = :name");
-        MgxqlCheckerChain chain = new MgxqlCheckerChain();
+        MgxqlSemanticCheckerChain chain = new MgxqlSemanticCheckerChain();
         chain.check(stmt, entityInfo);
     }
 
@@ -212,7 +212,7 @@ public class MgxqlDmlCheckerTest {
         MgxqlStatement stmt = processor.executeAndCheck(
                 entityInfo, new MethodInfo(), null, ConditionOriginType.METHOD_NAME,
                 "update where user.name = :name");
-        MgxqlCheckerChain chain = new MgxqlCheckerChain();
+        MgxqlSemanticCheckerChain chain = new MgxqlSemanticCheckerChain();
         try {
             chain.check(stmt, entityInfo);
             Assert.fail("Expected MybatisgxException");
@@ -232,7 +232,7 @@ public class MgxqlDmlCheckerTest {
         MgxqlStatement stmt = processor.executeAndCheck(
                 entityInfo, new MethodInfo(), null, ConditionOriginType.METHOD_NAME,
                 "delete where name = :name");
-        MgxqlCheckerChain chain = new MgxqlCheckerChain();
+        MgxqlSemanticCheckerChain chain = new MgxqlSemanticCheckerChain();
         chain.check(stmt, entityInfo);
         // 如果走到 JoinRelationChecker，由于 fromClause 为 null 不会报错
         // 但通过代码分支确保不会走到

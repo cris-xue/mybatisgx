@@ -3,12 +3,6 @@ package com.mybatisgx.dsl.mgxql.checker;
 import com.mybatisgx.dsl.mgxql.model.MgxqlStatement;
 import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.model.EntityInfo;
-import org.apache.ibatis.mapping.SqlCommandType;
-
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * MGXQL校验器链，按顺序执行所有校验器，收集全部错误后统一抛出异常
@@ -18,60 +12,25 @@ import java.util.stream.Collectors;
  */
 public class MgxqlCheckerChain {
 
-    private final List<MgxqlSemanticChecker> selectCheckers;
-
-    private final List<MgxqlSemanticChecker> dmlCheckers;
-
-    private final MgxqlSyntaxCheckerChain syntaxCheckerChain;
+    private final MgxqlSyntaxCheckerChain mgxqlSyntaxCheckerChain;
+    private final MgxqlSemanticCheckerChain mgxqlSemanticCheckerChain;
 
     public MgxqlCheckerChain() {
-        this.selectCheckers = Arrays.asList(
-                new EntityChecker(),
-                new SelectFieldChecker(),
-                new JoinRelationChecker(),
-                new OperatorTypeChecker(),
-                new WhereFieldChecker()
-        );
-        this.dmlCheckers = Arrays.asList(
-                new EntityChecker(),
-                new WhereFieldChecker(),
-                new OperatorTypeChecker()
-        );
-        this.syntaxCheckerChain = new MgxqlSyntaxCheckerChain();
+        this.mgxqlSyntaxCheckerChain = new MgxqlSyntaxCheckerChain();
+        this.mgxqlSemanticCheckerChain = new MgxqlSemanticCheckerChain();
     }
 
     /**
      * 执行校验器，根据commandType选择校验链
      *
-     * @param statement  MGXQL语句模型
-     * @param entityInfo 主实体信息
+     * @param mgxqlStatement MGXQL语句模型
+     * @param entityInfo     主实体信息
      * @throws MybatisgxException 当存在校验错误时抛出
      */
-    public void check(MgxqlStatement statement, EntityInfo entityInfo) {
+    public void check(MgxqlStatement mgxqlStatement, EntityInfo entityInfo) {
         // 先执行语法校验，语法校验失败时直接抛出异常，不继续执行语义校验
-        this.syntaxCheckerChain.check(statement);
-
-        CheckerContext context = new CheckerContext(entityInfo);
-
-        SqlCommandType commandType = statement.getCommandType();
-        List<MgxqlSemanticChecker> activeCheckers = (commandType == SqlCommandType.DELETE || commandType == SqlCommandType.UPDATE)
-                ? this.dmlCheckers : this.selectCheckers;
-
-        // 按order排序执行
-        List<MgxqlSemanticChecker> sortedCheckers = activeCheckers.stream()
-                .sorted(Comparator.comparingInt(MgxqlSemanticChecker::getOrder))
-                .collect(Collectors.toList());
-
-        for (MgxqlSemanticChecker checker : sortedCheckers) {
-            if (checker.support(statement)) {
-                checker.check(statement, context);
-            }
-        }
-
-        // 收集所有错误后统一抛出
-        if (context.hasErrors()) {
-            String errorMessage = String.join("; ", context.getErrors());
-            throw new MybatisgxException("MGXQL语义校验失败: %s", errorMessage);
-        }
+        this.mgxqlSyntaxCheckerChain.check(mgxqlStatement);
+        // 语义校验
+        this.mgxqlSemanticCheckerChain.check(mgxqlStatement, entityInfo);
     }
 }

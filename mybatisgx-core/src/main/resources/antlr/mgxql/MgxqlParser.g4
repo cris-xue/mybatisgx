@@ -11,11 +11,13 @@ sql_statement: (insert_statement | delete_statement | update_statement | select_
 insert_statement: insert_clause ;
 insert_clause: INSERT_ACTION ;
 
-delete_statement: delete_clause where_clause ;
+delete_statement: delete_clause modify_entity where_clause ;
 delete_clause: DELETE_ACTION ;
 
-update_statement: update_clause where_clause ;
+update_statement: update_clause modify_entity where_clause ;
 update_clause: UPDATE_ACTION ;
+
+modify_entity: entity_name ;
 
 // 查询语法：1、select * from User where name = :name and (age < :age or status = :status)
 // 查询语法：2、select id, name, inputTime from User where name = :name and (age < :age or status = :status)

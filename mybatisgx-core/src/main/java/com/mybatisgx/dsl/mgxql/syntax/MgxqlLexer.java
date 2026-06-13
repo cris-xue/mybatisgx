@@ -1,4 +1,4 @@
-// Generated from F:/owner_project/mybatisgx-ai_conding/mybatisgx/mybatisgx-core/src/main/resources/antlr/mgxql/MgxqlLexer.g4 by ANTLR 4.13.2
+// Generated from E:/project/owner_project/mybatisgx-ai_coding/mybatisgx/mybatisgx-core/src/main/resources/antlr/mgxql/MgxqlLexer.g4 by ANTLR 4.13.2
 package com.mybatisgx.dsl.mgxql.syntax;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;

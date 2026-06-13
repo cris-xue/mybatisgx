@@ -1,4 +1,4 @@
-// Generated from F:/owner_project/mybatisgx-ai_conding/mybatisgx/mybatisgx-core/src/main/resources/antlr/mgxql/MgxqlParser.g4 by ANTLR 4.13.2
+// Generated from E:/project/owner_project/mybatisgx-ai_coding/mybatisgx/mybatisgx-core/src/main/resources/antlr/mgxql/MgxqlParser.g4 by ANTLR 4.13.2
 package com.mybatisgx.dsl.mgxql.syntax;
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 
@@ -61,6 +61,13 @@ public class MgxqlParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
 	@Override public T visitUpdate_clause(MgxqlParser.Update_clauseContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitModify_entity(MgxqlParser.Modify_entityContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *

@@ -1,6 +1,9 @@
 package com.mybatisgx.template.select;
 
 import com.mybatisgx.context.MybatisgxObjectFactory;
+import com.mybatisgx.dsl.mgxql.model.SelectItem;
+import com.mybatisgx.dsl.mgxql.model.SelectItemType;
+import com.mybatisgx.dsl.mgxql.model.SelectStatement;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.model.*;
 import com.mybatisgx.template.WhereTemplateHandler;
@@ -46,7 +49,10 @@ public class SelectTemplateHandler {
 
         List<Object> selectXmlItemList = new ArrayList();
         MapperInfo mapperInfo = methodInfo.getMapperInfo();
-        SelectItemInfo selectItemInfo = methodInfo.getSelectItemInfo();
+
+        this.selectItem(methodInfo, selectElement, selectXmlItemList);
+
+        /*SelectItemInfo selectItemInfo = methodInfo.getSelectItemInfo();
         if (selectItemInfo.getSelectItemType() == SelectItemType.COLUMN) {
             selectElement.addAttribute("resultMap", methodInfo.getResultMapId());
             Class<?> methodReturnType = methodInfo.getMethodReturnInfo().getType();
@@ -58,7 +64,7 @@ public class SelectTemplateHandler {
             selectElement.addAttribute("resultType", methodInfo.getMethodReturnInfo().getTypeName());
             PlainSelect plainSelect = selectCountSqlTemplateHandler.buildSelectSql(mapperInfo.getEntityInfo());
             selectXmlItemList.add(plainSelect.toString());
-        }
+        }*/
 
         Element whereElement = whereTemplateHandler.execute(mapperInfo.getEntityInfo(), methodInfo);
         if (whereElement != null) {
@@ -92,5 +98,31 @@ public class SelectTemplateHandler {
         }
 
         return document.asXML();
+    }
+
+    private void selectItem(MethodInfo methodInfo, Element selectElement, List<Object> selectXmlItemList) {
+        MapperInfo mapperInfo = methodInfo.getMapperInfo();
+        SelectStatement selectStatement = (SelectStatement) methodInfo.getMgxqlStatement();
+        for (SelectItem selectItem : selectStatement.getSelectItems()) {
+            if (selectItem.getType() == SelectItemType.COLUMN_ALL) {
+                selectElement.addAttribute("resultMap", methodInfo.getResultMapId());
+                Class<?> methodReturnType = methodInfo.getMethodReturnInfo().getType();
+                ColumnEntityRelation columnEntityRelation = mapperInfo.getEntityRelationTree(methodReturnType);
+                PlainSelect plainSelect = selectColumnSqlTemplateHandler.buildSimpleSelectSql(columnEntityRelation);
+                selectXmlItemList.add(plainSelect.toString());
+            }
+            if (selectItem.getType() == SelectItemType.COLUMN) {
+                selectElement.addAttribute("resultMap", methodInfo.getResultMapId());
+                Class<?> methodReturnType = methodInfo.getMethodReturnInfo().getType();
+                ColumnEntityRelation columnEntityRelation = mapperInfo.getEntityRelationTree(methodReturnType);
+                PlainSelect plainSelect = selectColumnSqlTemplateHandler.buildSimpleSelectSql(columnEntityRelation);
+                selectXmlItemList.add(plainSelect.toString());
+            }
+            if (selectItem.getType() == SelectItemType.COUNT) {
+                selectElement.addAttribute("resultType", methodInfo.getMethodReturnInfo().getTypeName());
+                PlainSelect plainSelect = selectCountSqlTemplateHandler.buildSelectSql(mapperInfo.getEntityInfo());
+                selectXmlItemList.add(plainSelect.toString());
+            }
+        }
     }
 }

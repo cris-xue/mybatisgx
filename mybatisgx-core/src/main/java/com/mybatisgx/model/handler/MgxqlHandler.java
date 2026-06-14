@@ -1,0 +1,274 @@
+package com.mybatisgx.model.handler;
+
+import com.google.common.collect.Lists;
+import com.mybatisgx.annotation.Property;
+import com.mybatisgx.annotation.Statement;
+import com.mybatisgx.dsl.method.MethodSyntaxProcessor;
+import com.mybatisgx.dsl.method.model.BaseStatement;
+import com.mybatisgx.dsl.mgxql.MgxqlSyntaxProcessor;
+import com.mybatisgx.dsl.mgxql.model.MgxqlStatement;
+import com.mybatisgx.dsl.mgxql.model.SelectItem;
+import com.mybatisgx.dsl.mgxql.model.SelectItemType;
+import com.mybatisgx.dsl.mgxql.model.SelectStatement;
+import com.mybatisgx.exception.MybatisgxException;
+import com.mybatisgx.model.*;
+import com.mybatisgx.utils.FieldNameUtils;
+import com.mybatisgx.utils.TypeUtils;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.mapping.SqlCommandType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * mgx查询语言处理器
+ *
+ * @author：薛承城
+ */
+public class MgxqlHandler {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MgxqlHandler.class);
+
+    private MethodSyntaxProcessor methodSyntaxProcessor = new MethodSyntaxProcessor();
+    private MgxqlSyntaxProcessor mgxqlSyntaxProcessor = new MgxqlSyntaxProcessor();
+    private EntityRelationTreeHandler entityRelationTreeHandler = new EntityRelationTreeHandler();
+    private ResultMapInfoHandler resultMapInfoHandler = new ResultMapInfoHandler();
+
+    public void execute(MapperInfo mapperInfo) {
+        for (MethodInfo methodInfo : mapperInfo.getMethodInfoList()) {
+            this.methodConditionParse(methodInfo);
+
+            // 查询方法的结果集处理
+            MgxqlStatement mgxqlStatement = methodInfo.getMgxqlStatement();
+            if (mgxqlStatement.getCommandType() == SqlCommandType.SELECT) {
+                SelectStatement selectStatement = (SelectStatement) mgxqlStatement;
+                for (SelectItem selectItem : selectStatement.getSelectItems()) {
+                    if (selectItem.getType() == SelectItemType.COLUMN_ALL) {
+                        this.entityRelationTreeHandler.execute(mapperInfo, methodInfo);
+                        String resultMapId = resultMapInfoHandler.execute(mapperInfo, methodInfo);
+                        methodInfo.setResultMapId(resultMapId);
+                    }
+                }
+            }
+
+            this.bindConditionParam(mapperInfo, methodInfo, methodInfo.getConditionInfoList());
+        }
+    }
+
+    /**
+     * 条件实体只有非SimpleDao、SelectDao、CurdDao方法才会处理，SelectDao只有findOne、findList、findPage会特殊处理。
+     * 查询实体作为条件支持查询、修改、删除。
+     * 解析优先级：Statement > 实体条件 > 方法名
+     *
+     * @param methodInfo
+     */
+    public void methodConditionParse(MethodInfo methodInfo) {
+        if (methodInfo.getSqlCommandType() == SqlCommandType.INSERT) {
+            return;
+        }
+        EntityInfo entityInfo = methodInfo.getMapperInfo().getEntityInfo();
+
+        // 解析Statement表达式（MGXQL路径）
+        Statement statement = methodInfo.getMethod().getAnnotation(Statement.class);
+        if (statement != null) {
+            String mgxql = statement.value();
+            MgxqlStatement mgxqlStatement = this.mgxqlSyntaxProcessor.executeAndCheck(entityInfo, methodInfo, null, null, mgxql);
+            methodInfo.setMgxqlStatement(mgxqlStatement);
+            return;
+        }
+
+        // 把实体字段转换成mgxql
+        if (methodInfo.getSqlCommandType() == SqlCommandType.SELECT) {
+            if (methodInfo.getEntityParamInfo() != null || methodInfo.getQueryEntityParamInfo() != null) {
+                String methodName = this.entityToMethodName(methodInfo);
+                this.methodNameParse(entityInfo, methodInfo, methodName);
+                return;
+            }
+        }
+
+        // 把方法名语法糖转成mgxql
+        this.methodNameParse(entityInfo, methodInfo);
+    }
+
+    private void methodNameParse(EntityInfo entityInfo, MethodInfo methodInfo) {
+        // 把方法名语法糖转成mgxql
+        this.methodNameParse(entityInfo, methodInfo, methodInfo.getMethodName());
+    }
+
+    private void methodNameParse(EntityInfo entityInfo, MethodInfo methodInfo, String methodName) {
+        // 把方法名语法糖转成mgxql
+        BaseStatement baseStatement = this.methodSyntaxProcessor.execute(methodInfo, methodName);
+        if (baseStatement != null) {
+            String mgxql = baseStatement.toMgxql();
+            MgxqlStatement mgxqlStatement = this.mgxqlSyntaxProcessor.executeAndCheck(entityInfo, methodInfo, null, null, mgxql);
+            methodInfo.setMgxqlStatement(mgxqlStatement);
+        }
+    }
+
+    /**
+     * 把实体字段转换成mgxql
+     *
+     * @param methodInfo
+     * @return
+     */
+    private String entityToMethodName(MethodInfo methodInfo) {
+        EntityInfo entityInfo = null;
+        if (methodInfo.getEntityParamInfo() != null && methodInfo.getQueryEntityParamInfo() == null) {
+            entityInfo = methodInfo.getEntityParamInfo().getEntityInfo();
+        }
+        if (methodInfo.getEntityParamInfo() == null && methodInfo.getQueryEntityParamInfo() != null) {
+            entityInfo = methodInfo.getQueryEntityParamInfo().getEntityInfo();
+        }
+
+        List<String> columnConditionList = new ArrayList<>();
+        for (ColumnInfo columnInfo : entityInfo.getColumnInfoList()) {
+            if (TypeUtils.typeEquals(columnInfo, RelationColumnInfo.class)) {
+                RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
+                if (relationColumnInfo.getRelationType() == RelationType.MANY_TO_MANY) {
+                    continue;
+                }
+                if (relationColumnInfo.getMappedByRelationColumnInfo() != null) {
+                    continue;
+                }
+            }
+            String javaColumnName = columnInfo.getJavaColumnName();
+            javaColumnName = FieldNameUtils.lowerCamelToUpperCamel(javaColumnName);
+            Property property = columnInfo.getProperty();
+            if (property != null) {
+                String propertyName = property.name();
+                propertyName = FieldNameUtils.lowerCamelToUpperCamel(propertyName);
+                if (!javaColumnName.startsWith(propertyName)) {
+                    throw new MybatisgxException(
+                            "查询字段 '%s' 的 @Property(name=\"%s\") 配置非法：字段名必须以 '%s' 为前缀，否则会导致方法名 DSL 解析歧义。",
+                            columnInfo.getJavaColumnName(),
+                            property.name(),
+                            property.name()
+                    );
+                }
+                javaColumnName = javaColumnName.replace(propertyName, "");
+                javaColumnName = String.format("%s%s", propertyName, javaColumnName);
+            }
+            columnConditionList.add(javaColumnName);
+        }
+        StringBuilder stringBuilder = new StringBuilder()
+                .append("findBy")
+                .append(StringUtils.join(columnConditionList, "And"));
+        LOGGER.debug(stringBuilder.toString());
+        return stringBuilder.toString();
+    }
+
+    /**
+     * 绑定和条件和参数
+     *
+     * @param methodInfo
+     * @param conditionInfoList
+     */
+    private void bindConditionParam(MapperInfo mapperInfo, MethodInfo methodInfo, List<ConditionInfo> conditionInfoList) {
+        if (methodInfo.getSqlCommandType() == SqlCommandType.INSERT) {
+            return;
+        }
+        if (ObjectUtils.isEmpty(conditionInfoList)) {
+            if (methodInfo.getSqlCommandType() == SqlCommandType.DELETE || methodInfo.getSqlCommandType() == SqlCommandType.UPDATE) {
+                throw new MybatisgxException("%s.%s方法禁止无条件执行！", mapperInfo.getNamespace(), methodInfo.getMethodName());
+            }
+            LOGGER.warn("{}.{}方法无查询条件，可能触发全表扫描", mapperInfo.getNamespace(), methodInfo.getMethodName());
+            return;
+        }
+        for (ConditionInfo conditionInfo : conditionInfoList) {
+            List<ConditionInfo> childConditionInfoList = conditionInfo.getConditionInfoList();
+            if (ObjectUtils.isNotEmpty(childConditionInfoList)) {
+                this.bindConditionParam(mapperInfo, methodInfo, childConditionInfoList);
+            } else {
+                if (conditionInfo.getComparisonOperator().isNullComparisonOperator()) {
+                    continue;
+                }
+                // 处理查询条件和参数之间的关系，查询条件和参数之间是1对1关系，不要设计一对多关系，后续绑定参数很难处理
+                // 条件优先级是    方法简单参数有@Param注解(id条件支持复合类型) > 方法简单参数有@Param注解全小写(id条件支持复合类型) > 实体字段 > 方法简单参数无@Param注解
+                String conditionColumnName = conditionInfo.getColumnName();
+                MethodParamInfo methodParamInfo = this.getSimpleTypeConditionParam(methodInfo, conditionInfo, conditionColumnName);
+                if (methodParamInfo == null) {
+                    methodParamInfo = this.getSimpleTypeConditionParam(methodInfo, conditionInfo, conditionColumnName.toLowerCase());
+                }
+                if (methodParamInfo == null) {
+                    MethodParamInfo entityParamInfo = methodInfo.getEntityParamInfo();
+                    if (entityParamInfo != null) {
+                        methodParamInfo = this.getEntityTypeConditionParam(methodInfo, conditionInfo, entityParamInfo);
+                    }
+                    MethodParamInfo queryEntityParamInfo = methodInfo.getQueryEntityParamInfo();
+                    if (queryEntityParamInfo != null) {
+                        methodParamInfo = this.getEntityTypeConditionParam(methodInfo, conditionInfo, queryEntityParamInfo);
+                    }
+                }
+                if (methodParamInfo == null) {
+                    String argName = String.format("arg%1$s", conditionInfo.getIndex());
+                    methodParamInfo = this.getSimpleTypeConditionParam(methodInfo, conditionInfo, argName);
+                }
+                // 校验条件是否可以关联到参数，如果无法关联，后续执行数据库操作会报错
+                if (methodParamInfo == null) {
+                    throw new MybatisgxException("%s方法条件没有对应的参数", methodInfo.getMethodName());
+                }
+                conditionInfo.setMethodParamInfo(methodParamInfo);
+            }
+        }
+    }
+
+    private MethodParamInfo getEntityTypeConditionParam(MethodInfo methodInfo, ConditionInfo conditionInfo, MethodParamInfo entityParamInfo) {
+        // 如果存在条件实体，则把条件实体字段转换成参数名称
+        String conditionColumnName = conditionInfo.getColumnName();
+        ColumnInfo columnInfo = entityParamInfo.getEntityInfo().getColumnInfo(conditionColumnName);
+        if (columnInfo == null) {
+            return null;
+        }
+
+        MethodParamInfo methodParamInfo = new MethodParamInfo();
+        methodParamInfo.setTypeCategory(columnInfo.getTypeCategory());
+        methodParamInfo.setType(columnInfo.getJavaType());
+        methodParamInfo.setCollectionType(columnInfo.getCollectionType());
+        List<ColumnInfo> composites = columnInfo.getComposites();
+        if (ObjectUtils.isNotEmpty(composites)) {
+            methodParamInfo.setColumnInfoList(composites);
+        }
+
+        int paramCount = methodInfo.getMethodParamInfoList().size();
+        Param param = entityParamInfo.getParam();
+        List<String> paramValueCommonPathItemList = new ArrayList<>();
+        if (paramCount == 1 && param == null) {
+            // mybatis在[单参数、复合类型、无注解]情况下为了获取参数方便，不会对参数进行包装，所以不会生成argx这种参数
+            paramValueCommonPathItemList.add(columnInfo.getJavaColumnName());
+        } else {
+            if (methodInfo.getBatch()) {
+                // 批量操作条件
+                paramValueCommonPathItemList.add(entityParamInfo.getBatchItemName());
+                paramValueCommonPathItemList.add(columnInfo.getJavaColumnName());
+            } else {
+                paramValueCommonPathItemList.add(entityParamInfo.getArgName());
+                paramValueCommonPathItemList.add(columnInfo.getJavaColumnName());
+            }
+        }
+        methodParamInfo.setArgValueCommonPathItemList(paramValueCommonPathItemList);
+        methodParamInfo.setWrapper(true);
+        return methodParamInfo;
+    }
+
+    private MethodParamInfo getSimpleTypeConditionParam(MethodInfo methodInfo, ConditionInfo conditionInfo, String paramName) {
+        // 采用3种方式获取参数：conditionName -> conditionName.toLowerCase() -> argx：【userName -> username -> arg0】
+        MethodParamInfo methodParamInfo = methodInfo.getMethodParamInfo(paramName);
+        // 校验条件是否可以关联到参数，如果无法关联，后续执行数据库操作会报错
+        if (methodParamInfo == null) {
+            return null;
+        }
+        if (methodParamInfo.getTypeCategory() == TypeCategory.OBJECT && TypeUtils.typeEquals(conditionInfo.getColumnInfo(), ColumnInfo.class)) {
+            throw new MybatisgxException("%s查询条件不能关联到复杂类型参数%s", methodInfo.getMethodName(), methodParamInfo.getArgName());
+        }
+        if (methodInfo.getBatch()) {
+            // 简单类型批量操作需要重写参数节点   【int deleteBatchById(@BatchData List<ID> ids, @BatchSize int batchSize);】
+            List<String> argValueCommonPathItemList = Lists.newArrayList(methodParamInfo.getBatchItemName());
+            methodParamInfo.setArgValueCommonPathItemList(argValueCommonPathItemList);
+        }
+        return methodParamInfo;
+    }
+}

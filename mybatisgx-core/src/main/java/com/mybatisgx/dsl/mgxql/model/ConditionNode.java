@@ -17,66 +17,58 @@ public class ConditionNode {
      * 与前一节点的逻辑关系（AND/OR/NULL）
      */
     private LogicOperator logicOperator = LogicOperator.NULL;
-
     /**
      * 是否为可选条件（对应 ? 前缀，等价于 MyBatis if 标签）
      */
     private boolean optional;
-
     /**
      * 左括号
      */
     private String leftBracket;
-
     /**
      * 右括号
      */
     private String rightBracket;
-
     /**
      * 左侧实体别名（如 user，可选）
      */
     private String fieldAlias;
-
     /**
      * 左侧字段名（如 name）
      */
     private String fieldName;
-
     /**
      * NOT修饰符（用于 not in、not like 等）
      */
     private ComparisonOperator notOperator;
-
     /**
      * 比较运算符（=、<、>、like、in、is null 等）
      */
     private ComparisonOperator operator;
-
     /**
      * 右侧参数值路径（如 [name] 或 [role, menu, name]）
      */
     private List<String> paramValuePath;
-
     /**
      * 右侧数字字面量值（如 where age > 18 中的 18）
      */
     private Integer conditionValue;
-
     /**
      * 嵌套子表达式（括号内的表达式）
      */
     private ConditionExpression subExpression;
-
     /**
      * 编译期绑定：对应数据库字段信息（列名、jdbcType 等）
      */
     private ColumnInfo columnInfo;
-
     /**
      * 编译期绑定：对应方法参数信息（参数路径、类型等）
      */
     private MethodParamInfo methodParamInfo;
+    /**
+     * 查询条件在方法名中的位置，如findById、findByName，起始位置从0开始
+     */
+    private int index = -1;
 
     public LogicOperator getLogicOperator() {
         return logicOperator;
@@ -180,6 +172,14 @@ public class ConditionNode {
 
     public void setMethodParamInfo(MethodParamInfo methodParamInfo) {
         this.methodParamInfo = methodParamInfo;
+    }
+
+    public int getIndex() {
+        return index;
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
     }
 
     /**

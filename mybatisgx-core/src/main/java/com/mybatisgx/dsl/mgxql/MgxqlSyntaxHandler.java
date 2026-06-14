@@ -417,8 +417,7 @@ public class MgxqlSyntaxHandler {
                     new SelectItemHandler().parseAggregateFunction(aggItem, comparisonCtx.aggregate_function());
                     condition.setAggregateFunction(aggItem);
                     // 解析运算符
-                    condition.setOperator(MGXQL_OPERATOR_MAP.getOrDefault(
-                            comparisonCtx.relational_op().getText(), ComparisonOperator.EQ));
+                    condition.setOperator(MGXQL_OPERATOR_MAP.getOrDefault(comparisonCtx.relational_op().getText(), ComparisonOperator.EQ));
                     // 解析比较值
                     MgxqlParser.Having_valueContext havingValueCtx = comparisonCtx.having_value();
                     if (havingValueCtx.parameter_reference() != null) {

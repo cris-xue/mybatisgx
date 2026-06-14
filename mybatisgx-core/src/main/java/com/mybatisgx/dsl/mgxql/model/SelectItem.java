@@ -1,7 +1,5 @@
 package com.mybatisgx.dsl.mgxql.model;
 
-import java.util.List;
-
 /**
  * MGXQL查询项模型
  *
@@ -11,27 +9,51 @@ import java.util.List;
 public class SelectItem {
 
     /**
-     * 实体名，如 User
+     * 查询项类型：COLUMN_ALL, COLUMN, COUNT, MAX, MIN, AVG
      */
-    private String entityName;
+    private SelectItemType type;
     /**
-     *
+     * 实体别名，如 user（可选）
      */
-    private List<SelectItemTerm> selectItemTerms;
+    private String entityAlias;
+    /**
+     * 字段名或 *
+     */
+    private String fieldName;
+    /**
+     * 聚合函数参数字段引用，如 count(user.id) 中的 FieldReference(entityAlias="user", fieldName="id")
+     */
+    private FieldReference aggregateFieldRef;
 
-    public String getEntityName() {
-        return entityName;
+    public SelectItemType getType() {
+        return type;
     }
 
-    public void setEntityName(String entityName) {
-        this.entityName = entityName;
+    public void setType(SelectItemType type) {
+        this.type = type;
     }
 
-    public List<SelectItemTerm> getSelectItemTerms() {
-        return selectItemTerms;
+    public String getEntityAlias() {
+        return entityAlias;
     }
 
-    public void setSelectItemTerms(List<SelectItemTerm> selectItemTerms) {
-        this.selectItemTerms = selectItemTerms;
+    public void setEntityAlias(String entityAlias) {
+        this.entityAlias = entityAlias;
+    }
+
+    public String getFieldName() {
+        return fieldName;
+    }
+
+    public void setFieldName(String fieldName) {
+        this.fieldName = fieldName;
+    }
+
+    public FieldReference getAggregateFieldRef() {
+        return aggregateFieldRef;
+    }
+
+    public void setAggregateFieldRef(FieldReference aggregateFieldRef) {
+        this.aggregateFieldRef = aggregateFieldRef;
     }
 }

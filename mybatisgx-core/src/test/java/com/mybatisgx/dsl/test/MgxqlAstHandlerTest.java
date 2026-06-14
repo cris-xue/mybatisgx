@@ -816,4 +816,34 @@ public class MgxqlAstHandlerTest {
         Assert.assertEquals("name", node.getFieldName());
         Assert.assertEquals(ComparisonOperator.EQ, node.getOperator());
     }
+
+    // ==================== ConditionNode.index 测试 ====================
+
+    @Test
+    public void test130_conditionIndexMultiParam() {
+        // 多条件无 @Param 注解，index 按条件顺序递增
+        EntityInfo entityInfo = entityInfoHandler.execute(User.class);
+        MethodInfo methodInfo = new MethodInfo();
+        methodInfo.setSqlCommandType(SqlCommandType.SELECT);
+        MgxqlStatement stmt = buildProcessor().executeAndCheck(entityInfo, methodInfo, null, ConditionOriginType.METHOD_NAME, "select * from User where name = :name and age = :age");
+        ConditionExpression expr = stmt.getWhereClause().getRootExpression();
+        ConditionNode nameNode = expr.getNodes().get(0);
+        ConditionNode ageNode = expr.getNodes().get(1);
+        Assert.assertEquals(0, nameNode.getIndex());
+        Assert.assertEquals(1, ageNode.getIndex());
+    }
+
+    @Test
+    public void test131_conditionIndexIsNullNotConsumeSlot() {
+        // IS NULL 不消耗 index 槽位，后续 parameter_reference 条件从 0 开始
+        EntityInfo entityInfo = entityInfoHandler.execute(User.class);
+        MethodInfo methodInfo = new MethodInfo();
+        methodInfo.setSqlCommandType(SqlCommandType.SELECT);
+        MgxqlStatement stmt = buildProcessor().executeAndCheck(entityInfo, methodInfo, null, ConditionOriginType.METHOD_NAME, "select * from User where name is null and age = :age");
+        ConditionExpression expr = stmt.getWhereClause().getRootExpression();
+        ConditionNode isNullNode = expr.getNodes().get(0);
+        ConditionNode ageNode = expr.getNodes().get(1);
+        Assert.assertEquals(-1, isNullNode.getIndex());
+        Assert.assertEquals(0, ageNode.getIndex());
+    }
 }

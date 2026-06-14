@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * mgxql语法处理器，负责将ANTLR语法树转换为MgxqlStatement模型
@@ -468,6 +469,7 @@ public class MgxqlSyntaxHandler {
      */
     public static class WhereClauseVisitor extends MgxqlParserBaseVisitor<ConditionExpression> {
 
+        private AtomicInteger conditionIndex = new AtomicInteger(0);
         private ParserContext context;
 
         public WhereClauseVisitor(ParserContext context) {
@@ -577,6 +579,7 @@ public class MgxqlSyntaxHandler {
                 MgxqlParser.Condition_valueContext condValueCtx = paramCtx.condition_value();
                 if (condValueCtx.parameter_reference() != null) {
                     node.setParamValuePath(parseParameterReference(condValueCtx.parameter_reference()));
+                    node.setIndex(conditionIndex.getAndIncrement());
                 } else if (condValueCtx.number() != null) {
                     node.setConditionValue(Integer.parseInt(condValueCtx.number().getText()));
                 }

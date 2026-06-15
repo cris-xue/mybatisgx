@@ -44,8 +44,8 @@ public class MgxqlDmlCheckerTest {
         MgxqlSemanticCheckerChain chain = new MgxqlSemanticCheckerChain();
         MgxqlStatement stmt = new MgxqlStatement();
         stmt.setCommandType(SqlCommandType.DELETE);
-        WhereClause whereClause = new WhereClause(new ConditionExpression(LogicOperator.NULL));
-        ConditionNode node = new ConditionNode();
+        WhereClause whereClause = new WhereClause(new WhereExpression(LogicOperator.NULL));
+        WhereConditionNode node = new WhereConditionNode();
         node.setFieldName("id");
         whereClause.getRootExpression().addNode(node);
         stmt.setWhereClause(whereClause);
@@ -58,8 +58,8 @@ public class MgxqlDmlCheckerTest {
         MgxqlSemanticCheckerChain chain = new MgxqlSemanticCheckerChain();
         MgxqlStatement stmt = new MgxqlStatement();
         stmt.setCommandType(SqlCommandType.DELETE);
-        WhereClause whereClause = new WhereClause(new ConditionExpression(LogicOperator.NULL));
-        ConditionNode node = new ConditionNode();
+        WhereClause whereClause = new WhereClause(new WhereExpression(LogicOperator.NULL));
+        WhereConditionNode node = new WhereConditionNode();
         node.setFieldName("id");
         whereClause.getRootExpression().addNode(node);
         stmt.setWhereClause(whereClause);
@@ -77,7 +77,7 @@ public class MgxqlDmlCheckerTest {
     public void test10_deleteFieldNotExists_shouldError() {
         EntityInfo entityInfo = getUserEntityInfo();
         MgxqlStatement stmt = processor.executeAndCheck(
-                entityInfo, new MethodInfo(), null, ConditionOriginType.METHOD_NAME,
+                entityInfo, new MethodInfo(), null, MgxqlSourceType.METHOD_NAME,
                 "delete where nonExistentField = :val");
         MgxqlSemanticCheckerChain chain = new MgxqlSemanticCheckerChain();
         try {
@@ -93,7 +93,7 @@ public class MgxqlDmlCheckerTest {
     public void test11_deleteOperatorTypeMismatch_shouldError() {
         EntityInfo entityInfo = getUserEntityInfo();
         MgxqlStatement stmt = processor.executeAndCheck(
-                entityInfo, new MethodInfo(), null, ConditionOriginType.METHOD_NAME,
+                entityInfo, new MethodInfo(), null, MgxqlSourceType.METHOD_NAME,
                 "delete where age like :age");
         MgxqlSemanticCheckerChain chain = new MgxqlSemanticCheckerChain();
         try {
@@ -109,7 +109,7 @@ public class MgxqlDmlCheckerTest {
     public void test12_deleteNoWhere_shouldError() {
         EntityInfo entityInfo = getUserEntityInfo();
         MgxqlStatement stmt = processor.executeAndCheck(
-                entityInfo, new MethodInfo(), null, ConditionOriginType.METHOD_NAME,
+                entityInfo, new MethodInfo(), null, MgxqlSourceType.METHOD_NAME,
                 "delete");
         MgxqlSemanticCheckerChain chain = new MgxqlSemanticCheckerChain();
         try {
@@ -125,7 +125,7 @@ public class MgxqlDmlCheckerTest {
     public void test13_deleteValid_shouldPass() {
         EntityInfo entityInfo = getUserEntityInfo();
         MgxqlStatement stmt = processor.executeAndCheck(
-                entityInfo, new MethodInfo(), null, ConditionOriginType.METHOD_NAME,
+                entityInfo, new MethodInfo(), null, MgxqlSourceType.METHOD_NAME,
                 "delete where name = :name");
         MgxqlSemanticCheckerChain chain = new MgxqlSemanticCheckerChain();
         chain.check(stmt, entityInfo);
@@ -135,7 +135,7 @@ public class MgxqlDmlCheckerTest {
     public void test14_deleteWithAliasPrefix_shouldError() {
         EntityInfo entityInfo = getUserEntityInfo();
         MgxqlStatement stmt = processor.executeAndCheck(
-                entityInfo, new MethodInfo(), null, ConditionOriginType.METHOD_NAME,
+                entityInfo, new MethodInfo(), null, MgxqlSourceType.METHOD_NAME,
                 "delete where user.name = :name");
         MgxqlSemanticCheckerChain chain = new MgxqlSemanticCheckerChain();
         try {
@@ -152,7 +152,7 @@ public class MgxqlDmlCheckerTest {
     public void test20_updateFieldNotExists_shouldError() {
         EntityInfo entityInfo = getUserEntityInfo();
         MgxqlStatement stmt = processor.executeAndCheck(
-                entityInfo, new MethodInfo(), null, ConditionOriginType.METHOD_NAME,
+                entityInfo, new MethodInfo(), null, MgxqlSourceType.METHOD_NAME,
                 "update where nonExistentField = :val");
         MgxqlSemanticCheckerChain chain = new MgxqlSemanticCheckerChain();
         try {
@@ -168,7 +168,7 @@ public class MgxqlDmlCheckerTest {
     public void test21_updateOperatorTypeMismatch_shouldError() {
         EntityInfo entityInfo = getUserEntityInfo();
         MgxqlStatement stmt = processor.executeAndCheck(
-                entityInfo, new MethodInfo(), null, ConditionOriginType.METHOD_NAME,
+                entityInfo, new MethodInfo(), null, MgxqlSourceType.METHOD_NAME,
                 "update where age like :age");
         MgxqlSemanticCheckerChain chain = new MgxqlSemanticCheckerChain();
         try {
@@ -184,7 +184,7 @@ public class MgxqlDmlCheckerTest {
     public void test22_updateNoWhere_shouldError() {
         EntityInfo entityInfo = getUserEntityInfo();
         MgxqlStatement stmt = processor.executeAndCheck(
-                entityInfo, new MethodInfo(), null, ConditionOriginType.METHOD_NAME,
+                entityInfo, new MethodInfo(), null, MgxqlSourceType.METHOD_NAME,
                 "update");
         MgxqlSemanticCheckerChain chain = new MgxqlSemanticCheckerChain();
         try {
@@ -200,7 +200,7 @@ public class MgxqlDmlCheckerTest {
     public void test23_updateValid_shouldPass() {
         EntityInfo entityInfo = getUserEntityInfo();
         MgxqlStatement stmt = processor.executeAndCheck(
-                entityInfo, new MethodInfo(), null, ConditionOriginType.METHOD_NAME,
+                entityInfo, new MethodInfo(), null, MgxqlSourceType.METHOD_NAME,
                 "update where name = :name");
         MgxqlSemanticCheckerChain chain = new MgxqlSemanticCheckerChain();
         chain.check(stmt, entityInfo);
@@ -210,7 +210,7 @@ public class MgxqlDmlCheckerTest {
     public void test24_updateWithAliasPrefix_shouldError() {
         EntityInfo entityInfo = getUserEntityInfo();
         MgxqlStatement stmt = processor.executeAndCheck(
-                entityInfo, new MethodInfo(), null, ConditionOriginType.METHOD_NAME,
+                entityInfo, new MethodInfo(), null, MgxqlSourceType.METHOD_NAME,
                 "update where user.name = :name");
         MgxqlSemanticCheckerChain chain = new MgxqlSemanticCheckerChain();
         try {
@@ -230,7 +230,7 @@ public class MgxqlDmlCheckerTest {
         // 但关键是：DELETE 语句没有 FromClause/JoinEntity，如果走了 JoinRelationChecker 也不会误报
         EntityInfo entityInfo = getUserEntityInfo();
         MgxqlStatement stmt = processor.executeAndCheck(
-                entityInfo, new MethodInfo(), null, ConditionOriginType.METHOD_NAME,
+                entityInfo, new MethodInfo(), null, MgxqlSourceType.METHOD_NAME,
                 "delete where name = :name");
         MgxqlSemanticCheckerChain chain = new MgxqlSemanticCheckerChain();
         chain.check(stmt, entityInfo);

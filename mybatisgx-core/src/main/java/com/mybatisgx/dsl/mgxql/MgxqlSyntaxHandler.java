@@ -293,7 +293,7 @@ public class MgxqlSyntaxHandler {
             LOGGER.debug("处理mgxql where条件: {}", node.getText());
             MgxqlStatement statement = context.getMgxqlStatement();
             WhereClauseVisitor whereClauseVisitor = new WhereClauseVisitor(context);
-            ConditionExpression rootExpression = whereClauseVisitor.visit(node);
+            WhereExpression rootExpression = whereClauseVisitor.visit(node);
             statement.setWhereClause(new WhereClause(rootExpression));
         }
     }
@@ -467,7 +467,7 @@ public class MgxqlSyntaxHandler {
     /**
      * WHERE子句访问器，构建ConditionExpression树形结构
      */
-    public static class WhereClauseVisitor extends MgxqlParserBaseVisitor<ConditionExpression> {
+    public static class WhereClauseVisitor extends MgxqlParserBaseVisitor<WhereExpression> {
 
         private AtomicInteger conditionIndex = new AtomicInteger(0);
         private ParserContext context;
@@ -477,9 +477,9 @@ public class MgxqlSyntaxHandler {
         }
 
         @Override
-        public ConditionExpression visitCondition_or_expression(MgxqlParser.Condition_or_expressionContext ctx) {
+        public WhereExpression visitCondition_or_expression(MgxqlParser.Condition_or_expressionContext ctx) {
             LOGGER.debug("处理mgxql条件表达式: {}", ctx.getText());
-            ConditionExpression expression = new ConditionExpression(LogicOperator.NULL);
+            WhereExpression expression = new WhereExpression(LogicOperator.NULL);
             LogicOperator currentOrOp = null;
 
             for (int i = 0; i < ctx.getChildCount(); i++) {
@@ -489,15 +489,15 @@ public class MgxqlSyntaxHandler {
                     expression.setLogicOperator(LogicOperator.OR);
                 }
                 if (child instanceof MgxqlParser.Condition_and_expressionContext) {
-                    List<ConditionNode> andNodes = parseAndExpression((MgxqlParser.Condition_and_expressionContext) child);
+                    List<WhereConditionNode> andNodes = parseAndExpression((MgxqlParser.Condition_and_expressionContext) child);
                     if (currentOrOp != null && !expression.getNodes().isEmpty()) {
-                        for (ConditionNode node : andNodes) {
+                        for (WhereConditionNode node : andNodes) {
                             node.setLogicOperator(currentOrOp);
                             expression.addNode(node);
                         }
                         currentOrOp = null;
                     } else {
-                        for (ConditionNode node : andNodes) {
+                        for (WhereConditionNode node : andNodes) {
                             expression.addNode(node);
                         }
                     }
@@ -506,8 +506,8 @@ public class MgxqlSyntaxHandler {
             return expression;
         }
 
-        private List<ConditionNode> parseAndExpression(MgxqlParser.Condition_and_expressionContext andExprCtx) {
-            List<ConditionNode> nodes = new ArrayList<>();
+        private List<WhereConditionNode> parseAndExpression(MgxqlParser.Condition_and_expressionContext andExprCtx) {
+            List<WhereConditionNode> nodes = new ArrayList<>();
             LogicOperator currentAndOp = null;
 
             for (int i = 0; i < andExprCtx.getChildCount(); i++) {
@@ -517,7 +517,7 @@ public class MgxqlSyntaxHandler {
                 }
                 if (child instanceof MgxqlParser.Condition_termContext) {
                     MgxqlParser.Condition_termContext termCtx = (MgxqlParser.Condition_termContext) child;
-                    ConditionNode node = parseConditionTerm(termCtx);
+                    WhereConditionNode node = parseConditionTerm(termCtx);
                     if (currentAndOp != null) {
                         node.setLogicOperator(currentAndOp);
                         currentAndOp = null;
@@ -528,8 +528,8 @@ public class MgxqlSyntaxHandler {
             return nodes;
         }
 
-        private ConditionNode parseConditionTerm(MgxqlParser.Condition_termContext termCtx) {
-            ConditionNode node = new ConditionNode();
+        private WhereConditionNode parseConditionTerm(MgxqlParser.Condition_termContext termCtx) {
+            WhereConditionNode node = new WhereConditionNode();
 
             // 检查是否是括号表达式
             MgxqlParser.Condition_or_expressionContext subExprCtx = termCtx.condition_or_expression();
@@ -548,7 +548,7 @@ public class MgxqlSyntaxHandler {
             return node;
         }
 
-        private void parseConditionComparison(ConditionNode node, MgxqlParser.Condition_comparisonContext compCtx) {
+        private void parseConditionComparison(WhereConditionNode node, MgxqlParser.Condition_comparisonContext compCtx) {
             // 解析 ? 前缀（可选条件）
             node.setOptional(compCtx.question_mark() != null);
 
@@ -594,7 +594,7 @@ public class MgxqlSyntaxHandler {
         }
 
         @Override
-        protected boolean shouldVisitNextChild(RuleNode node, ConditionExpression currentResult) {
+        protected boolean shouldVisitNextChild(RuleNode node, WhereExpression currentResult) {
             return node instanceof MgxqlParser.Where_clauseContext && currentResult == null;
         }
     }

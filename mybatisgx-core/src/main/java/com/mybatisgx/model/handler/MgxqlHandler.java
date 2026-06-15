@@ -55,7 +55,7 @@ public class MgxqlHandler {
             }
 
             MgxqlStatement mgxqlStatement = methodInfo.getMgxqlStatement();
-            ConditionExpression conditionExpression = mgxqlStatement != null ? mgxqlStatement.getWhereClause().getRootExpression() : null;
+            WhereExpression conditionExpression = mgxqlStatement != null ? mgxqlStatement.getWhereClause().getRootExpression() : null;
             this.bindConditionParam(mapperInfo, methodInfo, conditionExpression);
         }
     }
@@ -168,7 +168,7 @@ public class MgxqlHandler {
      * @param methodInfo
      * @param conditionExpression
      */
-    private void bindConditionParam(MapperInfo mapperInfo, MethodInfo methodInfo, ConditionExpression conditionExpression) {
+    private void bindConditionParam(MapperInfo mapperInfo, MethodInfo methodInfo, WhereExpression conditionExpression) {
         if (methodInfo.getSqlCommandType() == SqlCommandType.INSERT) {
             return;
         }
@@ -180,8 +180,8 @@ public class MgxqlHandler {
             LOGGER.warn("{}.{}方法无查询条件，可能触发全表扫描", mapperInfo.getNamespace(), methodInfo.getMethodName());
             return;
         }
-        for (ConditionNode conditionNode : conditionExpression.getNodes()) {
-            ConditionExpression subExpression = conditionNode.getSubExpression();
+        for (WhereConditionNode conditionNode : conditionExpression.getNodes()) {
+            WhereExpression subExpression = conditionNode.getSubExpression();
             if (subExpression != null) {
                 this.bindConditionParam(mapperInfo, methodInfo, subExpression);
             } else {
@@ -219,7 +219,7 @@ public class MgxqlHandler {
         }
     }
 
-    private MethodParamInfo getEntityTypeConditionParam(MethodInfo methodInfo, ConditionNode conditionNode, MethodParamInfo entityParamInfo) {
+    private MethodParamInfo getEntityTypeConditionParam(MethodInfo methodInfo, WhereConditionNode conditionNode, MethodParamInfo entityParamInfo) {
         // 如果存在条件实体，则把条件实体字段转换成参数名称
         // String conditionColumnName = conditionInfo.getColumnName();
         String paramValuePath = StringUtils.join(conditionNode.getParamValuePath(), ".");
@@ -258,7 +258,7 @@ public class MgxqlHandler {
         return methodParamInfo;
     }
 
-    private MethodParamInfo getSimpleTypeConditionParam(MethodInfo methodInfo, ConditionNode conditionNode, String paramName) {
+    private MethodParamInfo getSimpleTypeConditionParam(MethodInfo methodInfo, WhereConditionNode conditionNode, String paramName) {
         // 采用3种方式获取参数：conditionName -> conditionName.toLowerCase() -> argx：【userName -> username -> arg0】
         MethodParamInfo methodParamInfo = methodInfo.getMethodParamInfo(paramName);
         // 校验条件是否可以关联到参数，如果无法关联，后续执行数据库操作会报错

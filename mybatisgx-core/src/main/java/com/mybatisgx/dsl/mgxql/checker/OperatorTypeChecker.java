@@ -1,8 +1,8 @@
 package com.mybatisgx.dsl.mgxql.checker;
 
 import com.mybatisgx.dsl.mgxql.model.ComparisonOperator;
-import com.mybatisgx.dsl.mgxql.model.ConditionExpression;
-import com.mybatisgx.dsl.mgxql.model.ConditionNode;
+import com.mybatisgx.dsl.mgxql.model.WhereExpression;
+import com.mybatisgx.dsl.mgxql.model.WhereConditionNode;
 import com.mybatisgx.dsl.mgxql.model.MgxqlStatement;
 import com.mybatisgx.model.ColumnInfo;
 import com.mybatisgx.model.EntityInfo;
@@ -35,11 +35,11 @@ public class OperatorTypeChecker implements MgxqlSemanticChecker {
         this.checkConditionExpression(statement.getWhereClause().getRootExpression(), context);
     }
 
-    private void checkConditionExpression(ConditionExpression expression, CheckerContext context) {
+    private void checkConditionExpression(WhereExpression expression, CheckerContext context) {
         if (expression == null || expression.getNodes() == null) {
             return;
         }
-        for (ConditionNode node : expression.getNodes()) {
+        for (WhereConditionNode node : expression.getNodes()) {
             if (node.isNested()) {
                 this.checkConditionExpression(node.getSubExpression(), context);
             } else if (node.getFieldName() != null && node.getOperator() != null) {
@@ -51,7 +51,7 @@ public class OperatorTypeChecker implements MgxqlSemanticChecker {
     /**
      * 校验运算符与字段类型的兼容性
      */
-    private void checkOperatorTypeCompatibility(ConditionNode node, CheckerContext context) {
+    private void checkOperatorTypeCompatibility(WhereConditionNode node, CheckerContext context) {
         EntityInfo entityInfo = this.resolveEntityInfo(node.getFieldAlias(), context);
         if (entityInfo == null) {
             return;

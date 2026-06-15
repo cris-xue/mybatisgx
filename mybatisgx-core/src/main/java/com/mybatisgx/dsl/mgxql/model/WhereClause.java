@@ -11,20 +11,20 @@ public class WhereClause {
     /**
      * 根表达式（OR层）
      */
-    private ConditionExpression rootExpression;
+    private WhereExpression rootExpression;
 
     public WhereClause() {
     }
 
-    public WhereClause(ConditionExpression rootExpression) {
+    public WhereClause(WhereExpression rootExpression) {
         this.rootExpression = rootExpression;
     }
 
-    public ConditionExpression getRootExpression() {
+    public WhereExpression getRootExpression() {
         return rootExpression;
     }
 
-    public void setRootExpression(ConditionExpression rootExpression) {
+    public void setRootExpression(WhereExpression rootExpression) {
         this.rootExpression = rootExpression;
     }
 }

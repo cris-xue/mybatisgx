@@ -114,8 +114,8 @@ public class MgxqlSyntaxCheckerChainTest {
     public void test06_deleteShouldNotTriggerSelectCheckers() {
         MgxqlStatement stmt = new MgxqlStatement();
         stmt.setCommandType(org.apache.ibatis.mapping.SqlCommandType.DELETE);
-        WhereClause whereClause = new WhereClause(new ConditionExpression(LogicOperator.NULL));
-        ConditionNode node = new ConditionNode();
+        WhereClause whereClause = new WhereClause(new WhereExpression(LogicOperator.NULL));
+        WhereConditionNode node = new WhereConditionNode();
         node.setFieldName("id");
         whereClause.getRootExpression().addNode(node);
         stmt.setWhereClause(whereClause);
@@ -128,8 +128,8 @@ public class MgxqlSyntaxCheckerChainTest {
     public void test07_updateShouldNotTriggerSelectCheckers() {
         MgxqlStatement stmt = new MgxqlStatement();
         stmt.setCommandType(org.apache.ibatis.mapping.SqlCommandType.UPDATE);
-        WhereClause whereClause = new WhereClause(new ConditionExpression(LogicOperator.NULL));
-        ConditionNode node = new ConditionNode();
+        WhereClause whereClause = new WhereClause(new WhereExpression(LogicOperator.NULL));
+        WhereConditionNode node = new WhereConditionNode();
         node.setFieldName("name");
         whereClause.getRootExpression().addNode(node);
         stmt.setWhereClause(whereClause);
@@ -155,8 +155,8 @@ public class MgxqlSyntaxCheckerChainTest {
     public void test09_deleteWithAliasPrefixShouldFail() {
         MgxqlStatement stmt = new MgxqlStatement();
         stmt.setCommandType(org.apache.ibatis.mapping.SqlCommandType.DELETE);
-        WhereClause whereClause = new WhereClause(new ConditionExpression(LogicOperator.NULL));
-        ConditionNode node = new ConditionNode();
+        WhereClause whereClause = new WhereClause(new WhereExpression(LogicOperator.NULL));
+        WhereConditionNode node = new WhereConditionNode();
         node.setFieldAlias("user");
         node.setFieldName("id");
         whereClause.getRootExpression().addNode(node);

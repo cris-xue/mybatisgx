@@ -1,7 +1,7 @@
 package com.mybatisgx.dsl.mgxql.checker;
 
-import com.mybatisgx.dsl.mgxql.model.ConditionExpression;
-import com.mybatisgx.dsl.mgxql.model.ConditionNode;
+import com.mybatisgx.dsl.mgxql.model.WhereExpression;
+import com.mybatisgx.dsl.mgxql.model.WhereConditionNode;
 import com.mybatisgx.dsl.mgxql.model.MgxqlStatement;
 import com.mybatisgx.model.ColumnInfo;
 import com.mybatisgx.model.EntityInfo;
@@ -32,11 +32,11 @@ public abstract class FieldChecker implements MgxqlSemanticChecker {
     /**
      * 递归校验条件表达式中的字段
      */
-    protected void checkConditionExpressionFields(ConditionExpression expression, CheckerContext context) {
+    protected void checkConditionExpressionFields(WhereExpression expression, CheckerContext context) {
         if (expression == null || expression.getNodes() == null) {
             return;
         }
-        for (ConditionNode node : expression.getNodes()) {
+        for (WhereConditionNode node : expression.getNodes()) {
             if (node.isNested()) {
                 // 递归检查嵌套表达式
                 this.checkConditionExpressionFields(node.getSubExpression(), context);

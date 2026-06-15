@@ -93,13 +93,13 @@ public class FieldAliasChecker implements MgxqlSyntaxChecker {
         }
     }
 
-    private void checkConditionExpressionFields(ConditionExpression expression,
+    private void checkConditionExpressionFields(WhereExpression expression,
                                                 boolean hasMultipleEntities, boolean isDeleteOrUpdate,
                                                 SyntaxCheckerContext context) {
         if (expression == null || expression.getNodes() == null) {
             return;
         }
-        for (ConditionNode node : expression.getNodes()) {
+        for (WhereConditionNode node : expression.getNodes()) {
             if (node.isNested()) {
                 checkConditionExpressionFields(node.getSubExpression(), hasMultipleEntities, isDeleteOrUpdate, context);
             } else if (node.getFieldName() != null) {

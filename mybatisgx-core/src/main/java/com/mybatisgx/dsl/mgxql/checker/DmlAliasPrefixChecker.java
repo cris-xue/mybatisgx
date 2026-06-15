@@ -1,7 +1,7 @@
 package com.mybatisgx.dsl.mgxql.checker;
 
-import com.mybatisgx.dsl.mgxql.model.ConditionExpression;
-import com.mybatisgx.dsl.mgxql.model.ConditionNode;
+import com.mybatisgx.dsl.mgxql.model.WhereExpression;
+import com.mybatisgx.dsl.mgxql.model.WhereConditionNode;
 import com.mybatisgx.dsl.mgxql.model.MgxqlStatement;
 import com.mybatisgx.dsl.mgxql.model.ModifyStatement;
 import org.apache.ibatis.mapping.SqlCommandType;
@@ -37,11 +37,11 @@ public class DmlAliasPrefixChecker implements MgxqlSyntaxChecker {
         }
     }
 
-    private void checkConditionExpression(ConditionExpression expression, SyntaxCheckerContext context) {
+    private void checkConditionExpression(WhereExpression expression, SyntaxCheckerContext context) {
         if (expression == null || expression.getNodes() == null) {
             return;
         }
-        for (ConditionNode node : expression.getNodes()) {
+        for (WhereConditionNode node : expression.getNodes()) {
             if (node.isNested()) {
                 this.checkConditionExpression(node.getSubExpression(), context);
             } else if (node.getFieldAlias() != null && !node.getFieldAlias().isEmpty()) {

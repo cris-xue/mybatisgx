@@ -42,8 +42,8 @@ public class WhereRequiredCheckerTest {
     public void test03_deleteWithWhere_shouldPass() {
         MgxqlStatement stmt = new MgxqlStatement();
         stmt.setCommandType(SqlCommandType.DELETE);
-        WhereClause whereClause = new WhereClause(new ConditionExpression(LogicOperator.NULL));
-        ConditionNode node = new ConditionNode();
+        WhereClause whereClause = new WhereClause(new WhereExpression(LogicOperator.NULL));
+        WhereConditionNode node = new WhereConditionNode();
         node.setFieldName("id");
         whereClause.getRootExpression().addNode(node);
         stmt.setWhereClause(whereClause);

@@ -28,8 +28,8 @@ public class FieldAliasCheckerTest {
     public void test01_multiEntityWhereBareField() {
         MgxqlStatement stmt = buildMultiEntitySelect();
         WhereClause whereClause = new WhereClause();
-        ConditionExpression expr = new ConditionExpression();
-        ConditionNode node = new ConditionNode();
+        WhereExpression expr = new WhereExpression();
+        WhereConditionNode node = new WhereConditionNode();
         node.setFieldName("id");
         node.setFieldAlias(null);
         expr.addNode(node);
@@ -154,8 +154,8 @@ public class FieldAliasCheckerTest {
         MgxqlStatement stmt = new MgxqlStatement();
         stmt.setCommandType(SqlCommandType.DELETE);
         WhereClause whereClause = new WhereClause();
-        ConditionExpression expr = new ConditionExpression();
-        ConditionNode node = new ConditionNode();
+        WhereExpression expr = new WhereExpression();
+        WhereConditionNode node = new WhereConditionNode();
         node.setFieldAlias("user");
         node.setFieldName("id");
         expr.addNode(node);

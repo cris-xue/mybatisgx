@@ -11,6 +11,10 @@ import org.apache.ibatis.mapping.SqlCommandType;
 public class MgxqlStatement {
 
     /**
+     * mgxql来源
+     */
+    private MgxqlSourceType mgxqlSourceType;
+    /**
      * SQL命令类型：SELECT/INSERT/DELETE/UPDATE
      */
     private SqlCommandType commandType;
@@ -22,6 +26,14 @@ public class MgxqlStatement {
      * 语义表达式
      */
     private String dsl;
+
+    public MgxqlSourceType getMgxqlSourceType() {
+        return mgxqlSourceType;
+    }
+
+    public void setMgxqlSourceType(MgxqlSourceType mgxqlSourceType) {
+        this.mgxqlSourceType = mgxqlSourceType;
+    }
 
     public SqlCommandType getCommandType() {
         return commandType;

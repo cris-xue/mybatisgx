@@ -32,6 +32,11 @@ public class SelectStatement extends MgxqlStatement {
     private HavingClause havingClause;
 
     /**
+     * HAVING表达式（树形结构，替代 havingClause）
+     */
+    private HavingExpression havingExpression;
+
+    /**
      * ORDER BY子句
      */
     private OrderByClause orderByClause;
@@ -75,6 +80,14 @@ public class SelectStatement extends MgxqlStatement {
 
     public void setHavingClause(HavingClause havingClause) {
         this.havingClause = havingClause;
+    }
+
+    public HavingExpression getHavingExpression() {
+        return havingExpression;
+    }
+
+    public void setHavingExpression(HavingExpression havingExpression) {
+        this.havingExpression = havingExpression;
     }
 
     public OrderByClause getOrderByClause() {

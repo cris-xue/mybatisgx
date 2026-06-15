@@ -1,12 +1,16 @@
 package com.mybatisgx.template.select;
 
 import com.mybatisgx.context.MybatisgxObjectFactory;
+import com.mybatisgx.dsl.mgxql.model.HavingExpression;
 import com.mybatisgx.dsl.mgxql.model.SelectItem;
 import com.mybatisgx.dsl.mgxql.model.SelectItemType;
 import com.mybatisgx.dsl.mgxql.model.SelectStatement;
+import com.mybatisgx.dsl.mgxql.model.WhereClause;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.model.*;
 import com.mybatisgx.template.WhereTemplateHandler;
+import com.mybatisgx.template.MgxqlWhereTemplateHandler;
+import com.mybatisgx.template.HavingTemplateHandler;
 import com.mybatisgx.template.XmlCompiler;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import org.apache.commons.lang3.ObjectUtils;
@@ -32,6 +36,8 @@ public class SelectTemplateHandler {
     private SelectColumnSqlTemplateHandler selectColumnSqlTemplateHandler = new SelectColumnSqlTemplateHandler();
     private SelectCountSqlTemplateHandler selectCountSqlTemplateHandler = new SelectCountSqlTemplateHandler();
     private WhereTemplateHandler whereTemplateHandler = new WhereTemplateHandler();
+    private MgxqlWhereTemplateHandler mgxqlWhereTemplateHandler = new MgxqlWhereTemplateHandler();
+    private HavingTemplateHandler havingTemplateHandler = new HavingTemplateHandler();
     private OrderByTemplateHandler orderByTemplateHandler = new OrderByTemplateHandler();
 
     public SelectTemplateHandler(MybatisgxConfiguration configuration) {
@@ -67,8 +73,25 @@ public class SelectTemplateHandler {
         }*/
 
         Element whereElement = whereTemplateHandler.execute(mapperInfo.getEntityInfo(), methodInfo);
+        if (whereElement == null && methodInfo.getMgxqlStatement() != null) {
+            WhereClause whereClause = methodInfo.getMgxqlStatement().getWhereClause();
+            if (whereClause != null) {
+                whereElement = mgxqlWhereTemplateHandler.execute(methodInfo, whereClause.getRootExpression());
+            }
+        }
         if (whereElement != null) {
             selectXmlItemList.add(whereElement);
+        }
+
+        // HAVING 子句渲染
+        if (methodInfo.getMgxqlStatement() instanceof SelectStatement) {
+            HavingExpression havingExpression = ((SelectStatement) methodInfo.getMgxqlStatement()).getHavingExpression();
+            if (havingExpression != null) {
+                String havingSql = havingTemplateHandler.execute(havingExpression);
+                if (!havingSql.isEmpty()) {
+                    selectXmlItemList.add(havingSql);
+                }
+            }
         }
 
         List<SelectOrderByInfo> selectOrderByInfoList = methodInfo.getSelectOrderByInfoList();

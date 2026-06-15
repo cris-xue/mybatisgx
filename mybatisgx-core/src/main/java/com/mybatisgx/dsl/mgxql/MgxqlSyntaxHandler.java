@@ -2,6 +2,7 @@ package com.mybatisgx.dsl.mgxql;
 
 import com.google.common.collect.Maps;
 import com.mybatisgx.dsl.mgxql.model.*;
+import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.dsl.mgxql.syntax.MgxqlParser;
 import com.mybatisgx.dsl.mgxql.syntax.MgxqlParserBaseVisitor;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -395,40 +396,113 @@ public class MgxqlSyntaxHandler {
             SelectStatement statement = context.getMgxqlStatement();
             MgxqlParser.Having_clauseContext havingCtx = (MgxqlParser.Having_clauseContext) node;
 
-            HavingClause havingClause = new HavingClause();
             MgxqlParser.Having_or_expressionContext havingOrExpr = havingCtx.having_or_expression();
-            parseHavingOrExpression(havingOrExpr, havingClause);
-
-            statement.setHavingClause(havingClause);
+            HavingExpression expression = parseHavingOrExpression(havingOrExpr);
+            statement.setHavingExpression(expression);
         }
 
-        private void parseHavingOrExpression(MgxqlParser.Having_or_expressionContext ctx, HavingClause havingClause) {
-            for (MgxqlParser.Having_and_expressionContext andExpr : ctx.having_and_expression()) {
-                parseHavingAndExpression(andExpr, havingClause);
-            }
-        }
+        private HavingExpression parseHavingOrExpression(MgxqlParser.Having_or_expressionContext ctx) {
+            HavingExpression expression = new HavingExpression(LogicOperator.NULL);
+            LogicOperator currentOrOp = null;
 
-        private void parseHavingAndExpression(MgxqlParser.Having_and_expressionContext ctx, HavingClause havingClause) {
-            for (MgxqlParser.Having_termContext term : ctx.having_term()) {
-                MgxqlParser.Having_comparisonContext comparisonCtx = term.having_comparison();
-                if (comparisonCtx != null) {
-                    HavingCondition condition = new HavingCondition();
-                    // 解析聚合函数
-                    SelectItem aggItem = new SelectItem();
-                    new SelectItemHandler().parseAggregateFunction(aggItem, comparisonCtx.aggregate_function());
-                    condition.setAggregateFunction(aggItem);
-                    // 解析运算符
-                    condition.setOperator(MGXQL_OPERATOR_MAP.getOrDefault(comparisonCtx.relational_op().getText(), ComparisonOperator.EQ));
-                    // 解析比较值
-                    MgxqlParser.Having_valueContext havingValueCtx = comparisonCtx.having_value();
-                    if (havingValueCtx.parameter_reference() != null) {
-                        condition.setParamValuePath(parseParameterReference(havingValueCtx.parameter_reference()));
-                    } else if (havingValueCtx.number() != null) {
-                        condition.setHavingValue(Integer.parseInt(havingValueCtx.number().getText()));
+            for (int i = 0; i < ctx.getChildCount(); i++) {
+                ParseTree child = ctx.getChild(i);
+                if (child instanceof MgxqlParser.Logic_orContext) {
+                    currentOrOp = LogicOperator.OR;
+                    expression.setLogicOperator(LogicOperator.OR);
+                }
+                if (child instanceof MgxqlParser.Having_and_expressionContext) {
+                    List<HavingConditionNode> andNodes = parseHavingAndExpression((MgxqlParser.Having_and_expressionContext) child);
+                    if (currentOrOp != null && !expression.getNodes().isEmpty()) {
+                        for (HavingConditionNode node : andNodes) {
+                            node.setLogicOperator(currentOrOp);
+                            expression.addNode(node);
+                        }
+                        currentOrOp = null;
+                    } else {
+                        for (HavingConditionNode node : andNodes) {
+                            expression.addNode(node);
+                        }
                     }
-                    havingClause.addCondition(condition);
                 }
             }
+            return expression;
+        }
+
+        private List<HavingConditionNode> parseHavingAndExpression(MgxqlParser.Having_and_expressionContext ctx) {
+            List<HavingConditionNode> nodes = new ArrayList<>();
+            LogicOperator currentAndOp = null;
+
+            for (int i = 0; i < ctx.getChildCount(); i++) {
+                ParseTree child = ctx.getChild(i);
+                if (child instanceof MgxqlParser.Logic_andContext) {
+                    currentAndOp = LogicOperator.AND;
+                }
+                if (child instanceof MgxqlParser.Having_termContext) {
+                    HavingConditionNode node = parseHavingTerm((MgxqlParser.Having_termContext) child);
+                    if (currentAndOp != null) {
+                        node.setLogicOperator(currentAndOp);
+                        currentAndOp = null;
+                    }
+                    nodes.add(node);
+                }
+            }
+            return nodes;
+        }
+
+        private HavingConditionNode parseHavingTerm(MgxqlParser.Having_termContext termCtx) {
+            HavingConditionNode node = new HavingConditionNode();
+
+            MgxqlParser.Having_or_expressionContext subExprCtx = termCtx.having_or_expression();
+            if (subExprCtx != null) {
+                node.setSubExpression(this.parseHavingOrExpression(subExprCtx));
+                return node;
+            }
+
+            MgxqlParser.Having_comparisonContext comparisonCtx = termCtx.having_comparison();
+            if (comparisonCtx != null) {
+                parseHavingComparison(node, comparisonCtx);
+            }
+            return node;
+        }
+
+        private void parseHavingComparison(HavingConditionNode node, MgxqlParser.Having_comparisonContext compCtx) {
+            SelectItem aggItem = new SelectItem();
+            new SelectItemHandler().parseAggregateFunction(aggItem, compCtx.aggregate_function());
+            node.setLeftSide(buildAggregateExpression(aggItem));
+
+            node.setOperator(MGXQL_OPERATOR_MAP.getOrDefault(compCtx.relational_op().getText(), ComparisonOperator.EQ));
+
+            MgxqlParser.Having_valueContext havingValueCtx = compCtx.having_value();
+            if (havingValueCtx.parameter_reference() != null) {
+                node.setParamValuePath(parseParameterReference(havingValueCtx.parameter_reference()));
+            } else if (havingValueCtx.number() != null) {
+                node.setLiteralValue(Integer.parseInt(havingValueCtx.number().getText()));
+            }
+        }
+
+        private com.mybatisgx.dsl.mgxql.model.expression.HavingAggregateExpression buildAggregateExpression(SelectItem aggItem) {
+            AggregateFunction function;
+            switch (aggItem.getType()) {
+                case COUNT: function = AggregateFunction.COUNT; break;
+                case MAX: function = AggregateFunction.MAX; break;
+                case MIN: function = AggregateFunction.MIN; break;
+                case AVG: function = AggregateFunction.AVG; break;
+                case SUM: function = AggregateFunction.SUM; break;
+                default: throw new MybatisgxException("不支持的聚合函数类型: " + aggItem.getType());
+            }
+            String argument = null;
+            if (aggItem.getAggregateFieldRef() != null) {
+                FieldReference fieldRef = aggItem.getAggregateFieldRef();
+                if (fieldRef.getEntityAlias() != null) {
+                    argument = fieldRef.getEntityAlias() + "." + fieldRef.getFieldName();
+                } else {
+                    argument = fieldRef.getFieldName();
+                }
+            } else if ("*".equals(aggItem.getFieldName())) {
+                argument = "*";
+            }
+            return new com.mybatisgx.dsl.mgxql.model.expression.HavingAggregateExpression(function, argument);
         }
     }
 

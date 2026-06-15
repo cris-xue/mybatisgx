@@ -8,6 +8,7 @@ import com.mybatisgx.dsl.method.MethodSyntaxProcessor;
 import com.mybatisgx.dsl.method.model.BaseStatement;
 import com.mybatisgx.dsl.mgxql.MgxqlSyntaxProcessor;
 import com.mybatisgx.dsl.mgxql.model.*;
+import com.mybatisgx.dsl.mgxql.model.expression.ConditionColumnExpression;
 import com.mybatisgx.dsl.mgxql.model.MgxqlSourceType;
 import com.mybatisgx.dsl.mgxql.model.SelectItemType;
 import com.mybatisgx.exception.MybatisgxException;
@@ -57,6 +58,13 @@ public class MgxqlHandler {
             MgxqlStatement mgxqlStatement = methodInfo.getMgxqlStatement();
             WhereExpression conditionExpression = mgxqlStatement != null ? mgxqlStatement.getWhereClause().getRootExpression() : null;
             this.bindConditionParam(mapperInfo, methodInfo, conditionExpression);
+
+            if (mgxqlStatement instanceof SelectStatement) {
+                HavingExpression havingExpression = ((SelectStatement) mgxqlStatement).getHavingExpression();
+                if (havingExpression != null) {
+                    this.bindHavingParam(methodInfo, havingExpression);
+                }
+            }
         }
     }
 
@@ -186,6 +194,17 @@ public class MgxqlHandler {
                 this.bindConditionParam(mapperInfo, methodInfo, subExpression);
             } else {
                 if (conditionNode.getOperator().isNullComparisonOperator()) {
+                    BoundParam boundParam = new BoundParam(ParamKind.NULL_TYPE);
+                    boundParam.setOperator(conditionNode.getOperator());
+                    boundParam.setNotOperator(conditionNode.getNotOperator());
+                    if (conditionNode.getColumnInfo() != null) {
+                        BoundParamEntry entry = new BoundParamEntry();
+                        entry.setSqlExpression(new ConditionColumnExpression(
+                                conditionNode.getColumnInfo().getDbColumnName(),
+                                conditionNode.getColumnInfo().getTypeHandler()));
+                        boundParam.addEntry(entry);
+                    }
+                    conditionNode.setBoundParam(boundParam);
                     continue;
                 }
                 // 处理查询条件和参数之间的关系，查询条件和参数之间是1对1关系，不要设计一对多关系，后续绑定参数很难处理
@@ -215,6 +234,7 @@ public class MgxqlHandler {
                     throw new MybatisgxException("%s方法条件没有对应的参数", methodInfo.getMethodName());
                 }
                 conditionNode.setMethodParamInfo(methodParamInfo);
+                conditionNode.setBoundParam(this.buildBoundParam(conditionNode, methodParamInfo));
             }
         }
     }
@@ -274,5 +294,95 @@ public class MgxqlHandler {
             methodParamInfo.setArgValueCommonPathItemList(argValueCommonPathItemList);
         }
         return methodParamInfo;
+    }
+
+    /**
+     * 根据条件节点和已解析的方法参数信息构建统一绑定结果
+     */
+    private BoundParam buildBoundParam(WhereConditionNode conditionNode, MethodParamInfo methodParamInfo) {
+        BoundParam boundParam = new BoundParam();
+        boundParam.setOperator(conditionNode.getOperator());
+        boundParam.setNotOperator(conditionNode.getNotOperator());
+
+        ColumnInfo columnInfo = conditionNode.getColumnInfo();
+        List<ColumnInfo> composites = methodParamInfo.getColumnInfoList();
+        List<String> prefixPath = methodParamInfo.getArgValueCommonPathItemList();
+
+        if (ObjectUtils.isNotEmpty(composites)) {
+            boundParam.setKind(ParamKind.COMPOSITE);
+            for (int i = 0; i < composites.size(); i++) {
+                ColumnInfo composite = composites.get(i);
+                BoundParamEntry entry = new BoundParamEntry();
+                entry.setSqlExpression(new ConditionColumnExpression(
+                        composite.getDbColumnName(), composite.getTypeHandler()));
+                List<String> fullPath = new ArrayList<>(prefixPath);
+                fullPath.add(composite.getJavaColumnName());
+                entry.setParamPath(fullPath);
+                if (i > 0) {
+                    entry.setLogicOperator(com.mybatisgx.dsl.mgxql.model.LogicOperator.AND);
+                }
+                boundParam.addEntry(entry);
+            }
+        } else {
+            boundParam.setKind(ParamKind.SIMPLE);
+            BoundParamEntry entry = new BoundParamEntry();
+            if (columnInfo != null) {
+                entry.setSqlExpression(new ConditionColumnExpression(
+                        columnInfo.getDbColumnName(), columnInfo.getTypeHandler()));
+                entry.setTypeHandler(columnInfo.getTypeHandler());
+            }
+            entry.setParamPath(prefixPath != null ? new ArrayList<>(prefixPath) : new ArrayList<>());
+            boundParam.addEntry(entry);
+        }
+
+        com.mybatisgx.dsl.mgxql.model.ComparisonOperator operator = conditionNode.getOperator();
+        if (operator == com.mybatisgx.dsl.mgxql.model.ComparisonOperator.IN || operator == com.mybatisgx.dsl.mgxql.model.ComparisonOperator.BETWEEN) {
+            CollectionInfo collectionInfo = new CollectionInfo();
+            collectionInfo.setItemName("item");
+            boundParam.setCollectionInfo(collectionInfo);
+        }
+
+        return boundParam;
+    }
+
+    /**
+     * 绑定HAVING条件的参数
+     */
+    private void bindHavingParam(MethodInfo methodInfo, HavingExpression expression) {
+        if (expression == null || expression.getNodes() == null) {
+            return;
+        }
+        for (HavingConditionNode node : expression.getNodes()) {
+            if (node.isNested()) {
+                this.bindHavingParam(methodInfo, node.getSubExpression());
+                continue;
+            }
+            if (node.getParamValuePath() == null) {
+                BoundParam boundParam = new BoundParam(ParamKind.SIMPLE);
+                boundParam.setOperator(node.getOperator());
+                BoundParamEntry entry = new BoundParamEntry();
+                entry.setSqlExpression(node.getLeftSide());
+                entry.setLiteralValue(node.getLiteralValue());
+                boundParam.addEntry(entry);
+                node.setBoundParam(boundParam);
+                continue;
+            }
+            String paramName = StringUtils.join(node.getParamValuePath(), ".");
+            MethodParamInfo methodParamInfo = methodInfo.getMethodParamInfo(paramName);
+            if (methodParamInfo == null) {
+                methodParamInfo = methodInfo.getMethodParamInfo(paramName.toLowerCase());
+            }
+            if (methodParamInfo == null) {
+                throw new MybatisgxException("HAVING条件参数 '%s' 没有对应的方法参数", paramName);
+            }
+            BoundParam boundParam = new BoundParam(ParamKind.SIMPLE);
+            boundParam.setOperator(node.getOperator());
+            BoundParamEntry entry = new BoundParamEntry();
+            entry.setSqlExpression(node.getLeftSide());
+            List<String> paramPath = methodParamInfo.getArgValueCommonPathItemList();
+            entry.setParamPath(paramPath != null ? new ArrayList<>(paramPath) : new ArrayList<>(node.getParamValuePath()));
+            boundParam.addEntry(entry);
+            node.setBoundParam(boundParam);
+        }
     }
 }

@@ -10,6 +10,7 @@ import java.util.List;
  * @author 薛承城
  * @date 2026/6/9 13:58
  */
+@Deprecated
 public class MethodMgxqlInfo {
 
     /**

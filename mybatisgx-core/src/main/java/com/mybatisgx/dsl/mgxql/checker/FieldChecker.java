@@ -38,12 +38,36 @@ public abstract class FieldChecker implements MgxqlSemanticChecker {
         }
         for (WhereConditionNode node : expression.getNodes()) {
             if (node.isNested()) {
-                // 递归检查嵌套表达式
                 this.checkConditionExpressionFields(node.getSubExpression(), context);
             } else if (node.getFieldName() != null) {
-                this.checkFieldExistence(node.getFieldAlias(), node.getFieldName(), "WHERE", context);
+                this.resolveAndSetColumnInfo(node, context);
             }
         }
+    }
+
+    /**
+     * 解析字段对应的 ColumnInfo 并设置到条件节点上
+     */
+    protected void resolveAndSetColumnInfo(WhereConditionNode node, CheckerContext context) {
+        EntityInfo entityInfo;
+        if (node.getFieldAlias() != null && !node.getFieldAlias().isEmpty()) {
+            entityInfo = context.getEntityInfoByAlias(node.getFieldAlias());
+            if (entityInfo == null) {
+                return;
+            }
+        } else {
+            entityInfo = context.getPrimaryEntityInfo();
+            if (entityInfo == null) {
+                return;
+            }
+        }
+
+        ColumnInfo columnInfo = entityInfo.getColumnInfo(node.getFieldName());
+        if (columnInfo == null) {
+            context.addError(String.format("WHERE 子句中字段 '%s' 在实体 '%s' 中不存在", node.getFieldName(), entityInfo.getClazz().getSimpleName()));
+            return;
+        }
+        node.setColumnInfo(columnInfo);
     }
 
     /**

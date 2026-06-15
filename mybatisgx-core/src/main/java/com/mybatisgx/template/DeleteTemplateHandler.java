@@ -2,6 +2,7 @@ package com.mybatisgx.template;
 
 import com.mybatisgx.annotation.LogicDelete;
 import com.mybatisgx.annotation.LogicDeleteId;
+import com.mybatisgx.dsl.mgxql.model.WhereClause;
 import com.mybatisgx.model.ColumnInfo;
 import com.mybatisgx.model.EntityInfo;
 import com.mybatisgx.model.LogicDeleteIdColumnInfo;
@@ -27,6 +28,7 @@ public class DeleteTemplateHandler {
     private static final Logger logger = LoggerFactory.getLogger(DeleteTemplateHandler.class);
 
     private WhereTemplateHandler whereTemplateHandler = new WhereTemplateHandler();
+    private MgxqlWhereTemplateHandler mgxqlWhereTemplateHandler = new MgxqlWhereTemplateHandler();
 
     public String execute(MethodInfo methodInfo) {
         return buildDeleteXNode(methodInfo);
@@ -45,6 +47,12 @@ public class DeleteTemplateHandler {
         mapperElement.add(deleteElement);
 
         Element whereElement = whereTemplateHandler.execute(entityInfo, methodInfo);
+        if (whereElement == null && methodInfo.getMgxqlStatement() != null) {
+            WhereClause whereClause = methodInfo.getMgxqlStatement().getWhereClause();
+            if (whereClause != null) {
+                whereElement = mgxqlWhereTemplateHandler.execute(methodInfo, whereClause.getRootExpression());
+            }
+        }
         deleteElement.add(whereElement);
         if (!methodInfo.getDynamic()) {
             XmlCompiler.where(whereElement);

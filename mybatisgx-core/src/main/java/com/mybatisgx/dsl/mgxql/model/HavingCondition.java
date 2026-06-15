@@ -8,6 +8,7 @@ import java.util.List;
  * @author 薛承城
  * @date 2025/11/17 10:19
  */
+@Deprecated
 public class HavingCondition {
 
     /**

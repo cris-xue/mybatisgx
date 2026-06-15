@@ -8,6 +8,7 @@ import java.util.List;
  * @author 薛承城
  * @date 2026/6/12
  */
+@Deprecated
 public class HavingInfo {
 
     private AggregateFunctionInfo aggregateFunction;

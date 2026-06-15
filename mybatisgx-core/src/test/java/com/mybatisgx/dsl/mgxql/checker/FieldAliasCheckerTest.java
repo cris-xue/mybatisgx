@@ -106,14 +106,12 @@ public class FieldAliasCheckerTest {
     public void test06_multiEntityHavingBareField() {
         SelectStatement stmt = buildCleanMultiEntityStmt();
 
-        HavingClause havingClause = new HavingClause();
-        HavingCondition condition = new HavingCondition();
-        SelectItem aggFunc = new SelectItem();
-        aggFunc.setType(SelectItemType.MAX);
-        aggFunc.setAggregateFieldRef(new FieldReference(null, "age"));
-        condition.setAggregateFunction(aggFunc);
-        havingClause.addCondition(condition);
-        stmt.setHavingClause(havingClause);
+        HavingExpression havingExpression = new HavingExpression(LogicOperator.NULL);
+        HavingConditionNode node = new HavingConditionNode();
+        node.setLeftSide(new com.mybatisgx.dsl.mgxql.model.expression.HavingAggregateExpression(
+                AggregateFunction.MAX, "age"));
+        havingExpression.addNode(node);
+        stmt.setHavingExpression(havingExpression);
 
         SyntaxCheckerContext context = buildMultiEntityContext();
         checker.check(stmt, context);

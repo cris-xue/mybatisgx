@@ -9,6 +9,7 @@ import com.mybatisgx.dsl.mgxql.model.SelectItemType;
  * @author 薛承城
  * @date 2026/6/12
  */
+@Deprecated
 public class AggregateFunctionInfo {
 
     private SelectItemType type;

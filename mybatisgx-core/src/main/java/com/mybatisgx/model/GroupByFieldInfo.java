@@ -6,6 +6,7 @@ package com.mybatisgx.model;
  * @author 薛承城
  * @date 2026/6/12
  */
+@Deprecated
 public class GroupByFieldInfo {
 
     private String entityAlias;

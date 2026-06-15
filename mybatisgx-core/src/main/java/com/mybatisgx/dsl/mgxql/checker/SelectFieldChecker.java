@@ -59,17 +59,33 @@ public class SelectFieldChecker extends FieldChecker {
         }
 
         // 校验HAVING聚合函数参数字段
-        if (selectStatement.getHavingClause() != null && selectStatement.getHavingClause().getConditions() != null) {
-            for (HavingCondition condition : selectStatement.getHavingClause().getConditions()) {
-                if (condition.getAggregateFunction() != null && condition.getAggregateFunction().getAggregateFieldRef() != null) {
-                    SelectItem aggItem = condition.getAggregateFunction();
-                    if (aggItem.getType() == SelectItemType.COUNT
-                            && isCountConventionValue(aggItem.getAggregateFieldRef().getFieldName())) {
-                        continue;
-                    }
-                    FieldReference fieldRef = aggItem.getAggregateFieldRef();
-                    this.checkFieldExistence(fieldRef.getEntityAlias(), fieldRef.getFieldName(), "HAVING", context);
+        if (selectStatement.getHavingExpression() != null) {
+            this.checkHavingExpressionFields(selectStatement.getHavingExpression(), context);
+        }
+    }
+
+    private void checkHavingExpressionFields(HavingExpression expression, CheckerContext context) {
+        if (expression == null || expression.getNodes() == null) {
+            return;
+        }
+        for (HavingConditionNode node : expression.getNodes()) {
+            if (node.isNested()) {
+                this.checkHavingExpressionFields(node.getSubExpression(), context);
+            } else if (node.getLeftSide() instanceof com.mybatisgx.dsl.mgxql.model.expression.HavingAggregateExpression) {
+                com.mybatisgx.dsl.mgxql.model.expression.HavingAggregateExpression aggExpr =
+                        (com.mybatisgx.dsl.mgxql.model.expression.HavingAggregateExpression) node.getLeftSide();
+                String argument = aggExpr.getArgument();
+                if (argument == null || isCountConventionValue(argument)) {
+                    continue;
                 }
+                String entityAlias = null;
+                String fieldName = argument;
+                int dotIndex = argument.indexOf('.');
+                if (dotIndex > 0) {
+                    entityAlias = argument.substring(0, dotIndex);
+                    fieldName = argument.substring(dotIndex + 1);
+                }
+                this.checkFieldExistence(entityAlias, fieldName, "HAVING", context);
             }
         }
     }

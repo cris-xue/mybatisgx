@@ -8,6 +8,7 @@ import com.mybatisgx.dsl.method.MethodSyntaxProcessor;
 import com.mybatisgx.dsl.method.model.BaseStatement;
 import com.mybatisgx.dsl.mgxql.MgxqlSyntaxProcessor;
 import com.mybatisgx.dsl.mgxql.model.*;
+import com.mybatisgx.dsl.mgxql.model.MgxqlSourceType;
 import com.mybatisgx.dsl.mgxql.model.SelectItemType;
 import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.model.*;
@@ -76,7 +77,7 @@ public class MgxqlHandler {
         Statement statement = methodInfo.getMethod().getAnnotation(Statement.class);
         if (statement != null) {
             String mgxql = statement.value();
-            MgxqlStatement mgxqlStatement = this.mgxqlSyntaxProcessor.executeAndCheck(entityInfo, methodInfo, null, null, mgxql);
+            MgxqlStatement mgxqlStatement = this.mgxqlSyntaxProcessor.executeAndCheck(entityInfo, methodInfo, null, MgxqlSourceType.MANUAL, mgxql);
             methodInfo.setMgxqlStatement(mgxqlStatement);
             return;
         }
@@ -85,26 +86,26 @@ public class MgxqlHandler {
         if (methodInfo.getSqlCommandType() == SqlCommandType.SELECT) {
             if (methodInfo.getEntityParamInfo() != null || methodInfo.getQueryEntityParamInfo() != null) {
                 String methodName = this.entityToMethodName(methodInfo);
-                this.methodNameParse(entityInfo, methodInfo, methodName);
+                this.methodNameParse(entityInfo, methodInfo, MgxqlSourceType.ENTITY, methodName);
                 return;
             }
         }
 
         // 把方法名语法糖转成mgxql
-        this.methodNameParse(entityInfo, methodInfo);
+        this.methodNameParse(entityInfo, methodInfo, MgxqlSourceType.METHOD_NAME);
     }
 
-    private void methodNameParse(EntityInfo entityInfo, MethodInfo methodInfo) {
+    private void methodNameParse(EntityInfo entityInfo, MethodInfo methodInfo, MgxqlSourceType mgxqlSourceType) {
         // 把方法名语法糖转成mgxql
-        this.methodNameParse(entityInfo, methodInfo, methodInfo.getMethodName());
+        this.methodNameParse(entityInfo, methodInfo, mgxqlSourceType, methodInfo.getMethodName());
     }
 
-    private void methodNameParse(EntityInfo entityInfo, MethodInfo methodInfo, String methodName) {
+    private void methodNameParse(EntityInfo entityInfo, MethodInfo methodInfo, MgxqlSourceType mgxqlSourceType, String methodName) {
         // 把方法名语法糖转成mgxql
         BaseStatement baseStatement = this.methodSyntaxProcessor.execute(methodInfo, methodName);
         if (baseStatement != null) {
             String mgxql = baseStatement.toMgxql();
-            MgxqlStatement mgxqlStatement = this.mgxqlSyntaxProcessor.executeAndCheck(entityInfo, methodInfo, null, null, mgxql);
+            MgxqlStatement mgxqlStatement = this.mgxqlSyntaxProcessor.executeAndCheck(entityInfo, methodInfo, null, mgxqlSourceType, mgxql);
             methodInfo.setMgxqlStatement(mgxqlStatement);
         }
     }
@@ -264,9 +265,9 @@ public class MgxqlHandler {
         if (methodParamInfo == null) {
             return null;
         }
-        /*if (methodParamInfo.getTypeCategory() == TypeCategory.OBJECT && TypeUtils.typeEquals(conditionInfo.getColumnInfo(), ColumnInfo.class)) {
+        if (methodParamInfo.getTypeCategory() == TypeCategory.OBJECT && TypeUtils.typeEquals(conditionNode.getColumnInfo(), ColumnInfo.class)) {
             throw new MybatisgxException("%s查询条件不能关联到复杂类型参数%s", methodInfo.getMethodName(), methodParamInfo.getArgName());
-        }*/
+        }
         if (methodInfo.getBatch()) {
             // 简单类型批量操作需要重写参数节点   【int deleteBatchById(@BatchData List<ID> ids, @BatchSize int batchSize);】
             List<String> argValueCommonPathItemList = Lists.newArrayList(methodParamInfo.getBatchItemName());

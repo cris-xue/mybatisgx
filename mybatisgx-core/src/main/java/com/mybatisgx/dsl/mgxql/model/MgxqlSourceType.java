@@ -2,6 +2,7 @@ package com.mybatisgx.dsl.mgxql.model;
 
 /**
  * 描述
+ *
  * @author：薛承城
  */
 public enum MgxqlSourceType {
@@ -11,9 +12,9 @@ public enum MgxqlSourceType {
      */
     METHOD_NAME,
     /**
-     * 查询实体
+     * 实体
      */
-    QUERY_ENTITY,
+    ENTITY,
     /**
      * 用户手写
      */

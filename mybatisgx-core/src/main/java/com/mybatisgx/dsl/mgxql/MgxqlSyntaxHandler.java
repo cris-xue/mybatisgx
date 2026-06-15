@@ -604,22 +604,10 @@ public class MgxqlSyntaxHandler {
      */
     public static class ParserContext {
 
-        private ConditionOriginType conditionOriginType;
-        private String statementExpression;
         private MgxqlStatement mgxqlStatement;
 
-        public ParserContext(ConditionOriginType conditionOriginType, String statementExpression, MgxqlStatement mgxqlStatement) {
-            this.conditionOriginType = conditionOriginType;
-            this.statementExpression = statementExpression;
+        public ParserContext(MgxqlStatement mgxqlStatement) {
             this.mgxqlStatement = mgxqlStatement;
-        }
-
-        public ConditionOriginType getConditionOriginType() {
-            return conditionOriginType;
-        }
-
-        public String getStatementExpression() {
-            return statementExpression;
         }
 
         public <T extends MgxqlStatement> T getMgxqlStatement() {

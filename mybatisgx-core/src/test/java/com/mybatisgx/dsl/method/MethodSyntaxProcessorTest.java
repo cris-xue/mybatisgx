@@ -141,4 +141,76 @@ public class MethodSyntaxProcessorTest {
         BaseStatement baseStatement = processor.execute(methodInfo);
         System.out.println(baseStatement.toMgxql());
     }
+
+    @Test
+    public void testSelectIsNotNull01() {
+        String methodName = "findByNameIsNotNull";
+
+        MethodSyntaxProcessor processor = this.buildProcessor();
+        SqlCommandType sqlCommandType = processor.getSqlCommandType(methodName);
+
+        EntityInfo entityInfo = entityInfoHandler.execute(User.class);
+        MapperInfo mapperInfo = new MapperInfo();
+        mapperInfo.setEntityClass(entityInfo.getClazz());
+        mapperInfo.setEntityInfo(entityInfo);
+
+        MethodInfo methodInfo = new MethodInfo();
+        methodInfo.setSqlCommandType(sqlCommandType);
+        methodInfo.setMapperInfo(mapperInfo);
+        methodInfo.setMethodName(methodName);
+
+        BaseStatement baseStatement = processor.execute(methodInfo);
+        String mgxql = baseStatement.toMgxql();
+        System.out.println(mgxql);
+        org.junit.Assert.assertFalse("MGXQL must not contain :name after is not null", mgxql.contains(":name"));
+        org.junit.Assert.assertTrue("MGXQL must contain 'name is not null'", mgxql.contains("name is not null"));
+    }
+
+    @Test
+    public void testSelectIsNull01() {
+        String methodName = "findByStatusIsNull";
+
+        MethodSyntaxProcessor processor = this.buildProcessor();
+        SqlCommandType sqlCommandType = processor.getSqlCommandType(methodName);
+
+        EntityInfo entityInfo = entityInfoHandler.execute(User.class);
+        MapperInfo mapperInfo = new MapperInfo();
+        mapperInfo.setEntityClass(entityInfo.getClazz());
+        mapperInfo.setEntityInfo(entityInfo);
+
+        MethodInfo methodInfo = new MethodInfo();
+        methodInfo.setSqlCommandType(sqlCommandType);
+        methodInfo.setMapperInfo(mapperInfo);
+        methodInfo.setMethodName(methodName);
+
+        BaseStatement baseStatement = processor.execute(methodInfo);
+        String mgxql = baseStatement.toMgxql();
+        System.out.println(mgxql);
+        org.junit.Assert.assertFalse("MGXQL must not contain :status after is null", mgxql.contains(":status"));
+        org.junit.Assert.assertTrue("MGXQL must contain 'status is null'", mgxql.contains("status is null"));
+    }
+
+    @Test
+    public void testSelectNotNull01() {
+        String methodName = "findByEmailNotNull";
+
+        MethodSyntaxProcessor processor = this.buildProcessor();
+        SqlCommandType sqlCommandType = processor.getSqlCommandType(methodName);
+
+        EntityInfo entityInfo = entityInfoHandler.execute(User.class);
+        MapperInfo mapperInfo = new MapperInfo();
+        mapperInfo.setEntityClass(entityInfo.getClazz());
+        mapperInfo.setEntityInfo(entityInfo);
+
+        MethodInfo methodInfo = new MethodInfo();
+        methodInfo.setSqlCommandType(sqlCommandType);
+        methodInfo.setMapperInfo(mapperInfo);
+        methodInfo.setMethodName(methodName);
+
+        BaseStatement baseStatement = processor.execute(methodInfo);
+        String mgxql = baseStatement.toMgxql();
+        System.out.println(mgxql);
+        org.junit.Assert.assertFalse("MGXQL must not contain :email after is not null", mgxql.contains(":email"));
+        org.junit.Assert.assertTrue("MGXQL must contain 'email is not null'", mgxql.contains("email is not null"));
+    }
 }

@@ -51,6 +51,9 @@ public class ConditionTerm {
     }
 
     public String toConditionTerm() {
+        if (comparisonOperator != null && comparisonOperator.isNullComparisonOperator()) {
+            return String.format("%s %s %s", logicOperator.getValue(), fieldName, comparisonOperator.getValue());
+        }
         return String.format("%s %s %s %s", logicOperator.getValue(), fieldName, comparisonOperator.getValue(), value);
     }
 }

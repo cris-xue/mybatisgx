@@ -128,7 +128,7 @@ public class MethodInfoHandler {
             methodInfo.setValueProcessor(isValueProcessor);
 
             // 条件解析
-            this.methodConditionParse(methodInfo);
+            // this.methodConditionParse(methodInfo);
 
             // TODO 处理结果集和绑定条件参数应该从方法处理中挪出去
             /*MgxqlStatement mgxqlStatement = methodInfo.getMgxqlStatement();

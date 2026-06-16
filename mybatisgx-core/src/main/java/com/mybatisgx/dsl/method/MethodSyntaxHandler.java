@@ -157,8 +157,9 @@ public class MethodSyntaxHandler {
 
             MethodNameParser.Limit_topContext limitTopContext = limitContext.limit_top();
             if (limitTopContext != null) {
-                String limitCount = StringUtils.remove(limitTopContext.getText(), "Top");
-                List<String> limitList = Arrays.asList("limit", limitCount);
+                String offset = "0";
+                String size = StringUtils.remove(limitTopContext.getText(), "Top");
+                List<String> limitList = Arrays.asList("limit", String.format("%s,%s", offset, size));
                 queryStatement.setLimitList(limitList);
             }
         }

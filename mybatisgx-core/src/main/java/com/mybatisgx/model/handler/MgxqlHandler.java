@@ -7,10 +7,10 @@ import com.mybatisgx.api.MethodCommandType;
 import com.mybatisgx.dsl.method.MethodSyntaxProcessor;
 import com.mybatisgx.dsl.method.model.BaseStatement;
 import com.mybatisgx.dsl.mgxql.MgxqlSyntaxProcessor;
-import com.mybatisgx.dsl.mgxql.model.*;
-import com.mybatisgx.dsl.mgxql.model.expression.ConditionColumnExpression;
 import com.mybatisgx.dsl.mgxql.model.MgxqlSourceType;
 import com.mybatisgx.dsl.mgxql.model.SelectItemType;
+import com.mybatisgx.dsl.mgxql.model.*;
+import com.mybatisgx.dsl.mgxql.model.expression.ConditionColumnExpression;
 import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.model.*;
 import com.mybatisgx.utils.FieldNameUtils;
@@ -56,7 +56,7 @@ public class MgxqlHandler {
             }
 
             MgxqlStatement mgxqlStatement = methodInfo.getMgxqlStatement();
-            WhereExpression conditionExpression = mgxqlStatement != null ? mgxqlStatement.getWhereClause().getRootExpression() : null;
+            WhereExpression conditionExpression = mgxqlStatement != null && mgxqlStatement.getWhereClause() != null ? mgxqlStatement.getWhereClause().getRootExpression() : null;
             this.bindConditionParam(mapperInfo, methodInfo, conditionExpression);
 
             if (mgxqlStatement instanceof SelectStatement) {

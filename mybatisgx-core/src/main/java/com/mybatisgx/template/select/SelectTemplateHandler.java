@@ -72,15 +72,13 @@ public class SelectTemplateHandler {
             selectXmlItemList.add(plainSelect.toString());
         }*/
 
-        Element whereElement = whereTemplateHandler.execute(mapperInfo.getEntityInfo(), methodInfo);
-        if (whereElement == null && methodInfo.getMgxqlStatement() != null) {
+        Element whereElement = null;
+        if (methodInfo.getMgxqlStatement() != null) {
             WhereClause whereClause = methodInfo.getMgxqlStatement().getWhereClause();
             if (whereClause != null) {
-                whereElement = mgxqlWhereTemplateHandler.execute(methodInfo, whereClause.getRootExpression());
+                whereElement = mgxqlWhereTemplateHandler.execute(mapperInfo.getEntityInfo(), methodInfo, whereClause.getRootExpression());
+                selectXmlItemList.add(whereElement);
             }
-        }
-        if (whereElement != null) {
-            selectXmlItemList.add(whereElement);
         }
 
         // HAVING 子句渲染

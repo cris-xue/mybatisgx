@@ -1,9 +1,13 @@
 package com.mybatisgx.template;
 
+import com.mybatisgx.annotation.LogicDelete;
 import com.mybatisgx.dsl.mgxql.model.*;
 import com.mybatisgx.dsl.mgxql.model.expression.SqlExpression;
 import com.mybatisgx.model.ColumnInfo;
+import com.mybatisgx.model.EntityInfo;
 import com.mybatisgx.model.MethodInfo;
+import com.mybatisgx.model.MethodParamInfo;
+import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.DocumentHelper;
@@ -20,13 +24,48 @@ import java.util.List;
  */
 public class MgxqlWhereTemplateHandler {
 
-    public Element execute(MethodInfo methodInfo, WhereExpression rootExpression) {
+    public Element execute(EntityInfo entityInfo, MethodInfo methodInfo, WhereExpression rootExpression) {
         if (rootExpression == null || ObjectUtils.isEmpty(rootExpression.getNodes())) {
             return null;
         }
         Element whereElement = DocumentHelper.createElement("where");
         this.renderExpression(whereElement, rootExpression, methodInfo.getDynamic());
+        this.addOptimisticLockCondition(entityInfo, methodInfo, whereElement);
+        this.addLogicDeleteCondition(entityInfo, whereElement);
         return whereElement;
+    }
+
+    private void addOptimisticLockCondition(EntityInfo entityInfo, MethodInfo methodInfo, Element whereElement) {
+        if (entityInfo == null) {
+            return;
+        }
+        ColumnInfo versionColumnInfo = entityInfo.getVersionColumnInfo();
+        if (versionColumnInfo == null) {
+            return;
+        }
+        if (methodInfo.getSqlCommandType() != SqlCommandType.UPDATE) {
+            return;
+        }
+        MethodParamInfo entityParamInfo = methodInfo.getEntityParamInfo();
+        List<String> argValueCommonPathItemList = new ArrayList<>();
+        if (methodInfo.getBatch()) {
+            argValueCommonPathItemList.add(entityParamInfo.getBatchItemName());
+        }
+        argValueCommonPathItemList.add(versionColumnInfo.getJavaColumnName());
+        String valueExpression = StringUtils.join(argValueCommonPathItemList, ".");
+        whereElement.addText(String.format(" and %s = #{%s}", versionColumnInfo.getDbColumnName(), valueExpression));
+    }
+
+    private void addLogicDeleteCondition(EntityInfo entityInfo, Element whereElement) {
+        if (entityInfo == null) {
+            return;
+        }
+        ColumnInfo logicDeleteColumnInfo = entityInfo.getLogicDeleteColumnInfo();
+        if (logicDeleteColumnInfo == null) {
+            return;
+        }
+        LogicDelete logicDelete = logicDeleteColumnInfo.getLogicDelete();
+        whereElement.addText(String.format(" and %s = '%s'", logicDeleteColumnInfo.getDbColumnName(), logicDelete.show()));
     }
 
     private void renderExpression(Element parentElement, WhereExpression expression, Boolean dynamic) {

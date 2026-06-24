@@ -128,11 +128,11 @@ public class UpdateTemplateHandler {
         }
 
         private void setWhere(Element updateElement, EntityInfo entityInfo, MethodInfo methodInfo) {
-            Element whereElement = whereTemplateHandler.execute(entityInfo, methodInfo);
-            if (whereElement == null && methodInfo.getMgxqlStatement() != null) {
+            Element whereElement = null;
+            if (methodInfo.getMgxqlStatement() != null) {
                 WhereClause whereClause = methodInfo.getMgxqlStatement().getWhereClause();
                 if (whereClause != null) {
-                    whereElement = mgxqlWhereTemplateHandler.execute(methodInfo, whereClause.getRootExpression());
+                    whereElement = mgxqlWhereTemplateHandler.execute(entityInfo, methodInfo, whereClause.getRootExpression());
                 }
             }
             updateElement.add(whereElement);

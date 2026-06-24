@@ -46,11 +46,11 @@ public class DeleteTemplateHandler {
         Element deleteElement = this.getDeleteElement(entityInfo, methodInfo);
         mapperElement.add(deleteElement);
 
-        Element whereElement = whereTemplateHandler.execute(entityInfo, methodInfo);
-        if (whereElement == null && methodInfo.getMgxqlStatement() != null) {
+        Element whereElement = null;
+        if (methodInfo.getMgxqlStatement() != null) {
             WhereClause whereClause = methodInfo.getMgxqlStatement().getWhereClause();
             if (whereClause != null) {
-                whereElement = mgxqlWhereTemplateHandler.execute(methodInfo, whereClause.getRootExpression());
+                whereElement = mgxqlWhereTemplateHandler.execute(entityInfo, methodInfo, whereClause.getRootExpression());
             }
         }
         deleteElement.add(whereElement);

@@ -378,7 +378,7 @@ public class WhereTemplateHandler {
         }
 
         private String getBindKey(List<String> pathItemList) {
-            return StringUtils.join(pathItemList, "_");
+            return "_like_" + StringUtils.join(pathItemList, "_");
         }
 
         private String getBindValuePath(List<String> pathItemList) {

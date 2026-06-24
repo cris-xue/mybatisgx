@@ -91,8 +91,12 @@ public class MgxqlWhereTemplateHandler {
     }
 
     private Element wrapOptionalIf(Element parentElement, WhereConditionNode node, Boolean dynamic) {
-        if (node.isOptional() && dynamic) {
+        if (node.isOptional() || dynamic) {
             BoundParam boundParam = node.getBoundParam();
+            if (boundParam != null && boundParam.getOperator() != null
+                    && boundParam.getOperator().isNullComparisonOperator()) {
+                return parentElement;
+            }
             if (boundParam != null && ObjectUtils.isNotEmpty(boundParam.getEntries())) {
                 List<String> paramPath = boundParam.getEntries().get(0).getParamPath();
                 if (ObjectUtils.isNotEmpty(paramPath)) {
@@ -168,7 +172,7 @@ public class MgxqlWhereTemplateHandler {
         String columnSql = entry.getSqlExpression() != null ? entry.getSqlExpression().toSql() : "";
         String notStr = boundParam.getNotOperator() != null ? " " + boundParam.getNotOperator().getValue() : "";
 
-        String bindKey = StringUtils.join(entry.getParamPath(), "_");
+        String bindKey = "_like_" + StringUtils.join(entry.getParamPath(), "_");
         String bindValuePath = StringUtils.join(entry.getParamPath(), ".");
         String likeExpression = this.buildLikeExpression(boundParam.getOperator(), bindValuePath);
         Element bindElement = MybatisXmlHelper.buildBindElement(bindKey, likeExpression);

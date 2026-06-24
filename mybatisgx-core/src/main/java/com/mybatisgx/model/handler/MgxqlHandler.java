@@ -207,27 +207,14 @@ public class MgxqlHandler {
                     conditionNode.setBoundParam(boundParam);
                     continue;
                 }
-                // 处理查询条件和参数之间的关系，查询条件和参数之间是1对1关系，不要设计一对多关系，后续绑定参数很难处理
-                // 条件优先级是    方法简单参数有@Param注解(id条件支持复合类型) > 方法简单参数有@Param注解全小写(id条件支持复合类型) > 实体字段 > 方法简单参数无@Param注解
                 String paramValuePath = StringUtils.join(conditionNode.getParamValuePath(), ".");
-                // String conditionColumnName = conditionInfo.getColumnName();
-                MethodParamInfo methodParamInfo = this.getSimpleTypeConditionParam(methodInfo, conditionNode, paramValuePath);
-                if (methodParamInfo == null) {
-                    methodParamInfo = this.getSimpleTypeConditionParam(methodInfo, conditionNode, paramValuePath.toLowerCase());
-                }
-                if (methodParamInfo == null) {
-                    MethodParamInfo entityParamInfo = methodInfo.getEntityParamInfo();
-                    if (entityParamInfo != null) {
-                        methodParamInfo = this.getEntityTypeConditionParam(methodInfo, conditionNode, entityParamInfo);
-                    }
-                    MethodParamInfo queryEntityParamInfo = methodInfo.getQueryEntityParamInfo();
-                    if (queryEntityParamInfo != null) {
-                        methodParamInfo = this.getEntityTypeConditionParam(methodInfo, conditionNode, queryEntityParamInfo);
-                    }
-                }
-                if (methodParamInfo == null) {
-                    String argName = String.format("arg%1$s", conditionNode.getIndex());
-                    methodParamInfo = this.getSimpleTypeConditionParam(methodInfo, conditionNode, argName);
+                MethodParamInfo methodParamInfo;
+                MgxqlSourceType sourceType = methodInfo.getMgxqlStatement() != null
+                        ? methodInfo.getMgxqlStatement().getMgxqlSourceType() : null;
+                if (sourceType == MgxqlSourceType.ENTITY) {
+                    methodParamInfo = this.bindEntitySourceParam(methodInfo, conditionNode, paramValuePath);
+                } else {
+                    methodParamInfo = this.bindDefaultParam(methodInfo, conditionNode, paramValuePath);
                 }
                 // 校验条件是否可以关联到参数，如果无法关联，后续执行数据库操作会报错
                 if (methodParamInfo == null) {
@@ -239,20 +226,76 @@ public class MgxqlHandler {
         }
     }
 
+    /**
+     * ENTITY 来源：paramValuePath 是查询实体字段名（如 idBetween, nameLike），
+     * 优先在查询实体中精确匹配，其次在操作实体中匹配
+     */
+    private MethodParamInfo bindEntitySourceParam(MethodInfo methodInfo, WhereConditionNode conditionNode, String paramValuePath) {
+        MethodParamInfo methodParamInfo = null;
+        MethodParamInfo queryEntityParamInfo = methodInfo.getQueryEntityParamInfo();
+        if (queryEntityParamInfo != null) {
+            methodParamInfo = this.getEntityTypeConditionParam(methodInfo, conditionNode, queryEntityParamInfo);
+        }
+        if (methodParamInfo == null) {
+            MethodParamInfo entityParamInfo = methodInfo.getEntityParamInfo();
+            if (entityParamInfo != null) {
+                methodParamInfo = this.getEntityTypeConditionParam(methodInfo, conditionNode, entityParamInfo);
+            }
+        }
+        return methodParamInfo;
+    }
+
+    /**
+     * METHOD_NAME / MANUAL 来源：按现有优先级链匹配
+     * @Param注解 → 小写形式 → 实体字段 → argN
+     */
+    private MethodParamInfo bindDefaultParam(MethodInfo methodInfo, WhereConditionNode conditionNode, String paramValuePath) {
+        MethodParamInfo methodParamInfo = this.getSimpleTypeConditionParam(methodInfo, conditionNode, paramValuePath);
+        if (methodParamInfo == null) {
+            methodParamInfo = this.getSimpleTypeConditionParam(methodInfo, conditionNode, paramValuePath.toLowerCase());
+        }
+        if (methodParamInfo == null) {
+            MethodParamInfo entityParamInfo = methodInfo.getEntityParamInfo();
+            if (entityParamInfo != null) {
+                methodParamInfo = this.getEntityTypeConditionParam(methodInfo, conditionNode, entityParamInfo);
+            }
+            MethodParamInfo queryEntityParamInfo = methodInfo.getQueryEntityParamInfo();
+            if (queryEntityParamInfo != null) {
+                methodParamInfo = this.getEntityTypeConditionParam(methodInfo, conditionNode, queryEntityParamInfo);
+            }
+        }
+        if (methodParamInfo == null) {
+            String argName = String.format("arg%1$s", conditionNode.getIndex());
+            methodParamInfo = this.getSimpleTypeConditionParam(methodInfo, conditionNode, argName);
+        }
+        return methodParamInfo;
+    }
+
     private MethodParamInfo getEntityTypeConditionParam(MethodInfo methodInfo, WhereConditionNode conditionNode, MethodParamInfo entityParamInfo) {
-        // 如果存在条件实体，则把条件实体字段转换成参数名称
-        // String conditionColumnName = conditionInfo.getColumnName();
         String paramValuePath = StringUtils.join(conditionNode.getParamValuePath(), ".");
-        ColumnInfo columnInfo = entityParamInfo.getEntityInfo().getColumnInfo(paramValuePath);
-        if (columnInfo == null) {
+        ColumnInfo baseColumnInfo = entityParamInfo.getEntityInfo().getColumnInfo(paramValuePath);
+        if (baseColumnInfo == null) {
             return null;
         }
 
+        String paramFieldName = baseColumnInfo.getJavaColumnName();
+        com.mybatisgx.dsl.mgxql.model.ComparisonOperator operator = conditionNode.getOperator();
+        if (operator != null && !operator.isNullComparisonOperator()) {
+            String suffix = getQueryEntityFieldSuffix(operator);
+            if (suffix != null) {
+                String queryEntityFieldName = paramValuePath + suffix;
+                ColumnInfo queryEntityField = entityParamInfo.getEntityInfo().getColumnInfo(queryEntityFieldName);
+                if (queryEntityField != null) {
+                    paramFieldName = queryEntityField.getJavaColumnName();
+                }
+            }
+        }
+
         MethodParamInfo methodParamInfo = new MethodParamInfo();
-        methodParamInfo.setTypeCategory(columnInfo.getTypeCategory());
-        methodParamInfo.setType(columnInfo.getJavaType());
-        methodParamInfo.setCollectionType(columnInfo.getCollectionType());
-        List<ColumnInfo> composites = columnInfo.getComposites();
+        methodParamInfo.setTypeCategory(baseColumnInfo.getTypeCategory());
+        methodParamInfo.setType(baseColumnInfo.getJavaType());
+        methodParamInfo.setCollectionType(baseColumnInfo.getCollectionType());
+        List<ColumnInfo> composites = baseColumnInfo.getComposites();
         if (ObjectUtils.isNotEmpty(composites)) {
             methodParamInfo.setColumnInfoList(composites);
         }
@@ -261,21 +304,49 @@ public class MgxqlHandler {
         Param param = entityParamInfo.getParam();
         List<String> paramValueCommonPathItemList = new ArrayList<>();
         if (paramCount == 1 && param == null) {
-            // mybatis在[单参数、复合类型、无注解]情况下为了获取参数方便，不会对参数进行包装，所以不会生成argx这种参数
-            paramValueCommonPathItemList.add(columnInfo.getJavaColumnName());
+            paramValueCommonPathItemList.add(paramFieldName);
         } else {
             if (methodInfo.getBatch()) {
-                // 批量操作条件
                 paramValueCommonPathItemList.add(entityParamInfo.getBatchItemName());
-                paramValueCommonPathItemList.add(columnInfo.getJavaColumnName());
+                paramValueCommonPathItemList.add(paramFieldName);
             } else {
                 paramValueCommonPathItemList.add(entityParamInfo.getArgName());
-                paramValueCommonPathItemList.add(columnInfo.getJavaColumnName());
+                paramValueCommonPathItemList.add(paramFieldName);
             }
         }
         methodParamInfo.setArgValueCommonPathItemList(paramValueCommonPathItemList);
         methodParamInfo.setWrapper(true);
         return methodParamInfo;
+    }
+
+    private String getQueryEntityFieldSuffix(com.mybatisgx.dsl.mgxql.model.ComparisonOperator operator) {
+        switch (operator) {
+            case BETWEEN:
+                return "Between";
+            case IN:
+                return "In";
+            case LIKE:
+                return "Like";
+            case STARTING_WITH:
+                return "StartingWith";
+            case ENDING_WITH:
+                return "EndingWith";
+            case EQ:
+            case EQUAL:
+                return "Eq";
+            case NOT:
+                return "Not";
+            case LT:
+                return "Lt";
+            case LT_EQ:
+                return "Lteq";
+            case GT:
+                return "Gt";
+            case GT_EQ:
+                return "Gteq";
+            default:
+                return null;
+        }
     }
 
     private MethodParamInfo getSimpleTypeConditionParam(MethodInfo methodInfo, WhereConditionNode conditionNode, String paramName) {

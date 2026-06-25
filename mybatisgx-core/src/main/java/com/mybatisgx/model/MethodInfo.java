@@ -63,11 +63,6 @@ public class MethodInfo {
      */
     private BatchParamInfo batchParamInfo;
     /**
-     * 查询节点信息
-     */
-    @Deprecated
-    private SelectItemInfo selectItemInfo;
-    /**
      * 查询排序信息
      */
     @Deprecated
@@ -199,14 +194,6 @@ public class MethodInfo {
 
     public void setBatchParamInfo(BatchParamInfo batchParamInfo) {
         this.batchParamInfo = batchParamInfo;
-    }
-
-    public SelectItemInfo getSelectItemInfo() {
-        return selectItemInfo;
-    }
-
-    public void setSelectItemInfo(SelectItemInfo selectItemInfo) {
-        this.selectItemInfo = selectItemInfo;
     }
 
     public List<SelectOrderByInfo> getSelectOrderByInfoList() {

@@ -158,8 +158,8 @@ public class MgxqlHandler {
                             property.name()
                     );
                 }
-                javaColumnName = javaColumnName.replace(propertyName, "");
-                javaColumnName = String.format("%s%s", propertyName, javaColumnName);
+                String comOp = javaColumnName.replace(propertyName, "");
+                javaColumnName = String.format("%s%s%s%s", "$", propertyName, "$", comOp);
             }
             columnConditionList.add(javaColumnName);
         }

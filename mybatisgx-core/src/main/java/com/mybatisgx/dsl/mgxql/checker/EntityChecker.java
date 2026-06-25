@@ -21,19 +21,21 @@ public class EntityChecker implements MgxqlSemanticChecker {
 
     @Override
     public boolean support(MgxqlStatement mgxqlStatement) {
-        return mgxqlStatement instanceof SelectStatement;
+        return true;
     }
 
     @Override
     public void check(MgxqlStatement mgxqlStatement, CheckerContext context) {
-        SelectStatement selectStatement = (SelectStatement) mgxqlStatement;
+        if (mgxqlStatement instanceof SelectStatement) {
+            checkSelectEntity((SelectStatement) mgxqlStatement, context);
+        } else {
+            checkDmlEntity(context);
+        }
+    }
 
+    private void checkSelectEntity(SelectStatement selectStatement, CheckerContext context) {
         FromClause fromClause = selectStatement.getFromClause();
         if (fromClause == null) {
-            // DELETE/UPDATE 语句无 FromClause，直接确认主实体可用
-            if (context.getPrimaryEntityInfo() == null) {
-                context.addError("DELETE/UPDATE 语句缺少实体信息");
-            }
             return;
         }
 
@@ -54,6 +56,12 @@ public class EntityChecker implements MgxqlSemanticChecker {
                     context.registerAlias(joinEntity.getAlias(), entityInfo);
                 }
             }
+        }
+    }
+
+    private void checkDmlEntity(CheckerContext context) {
+        if (context.getPrimaryEntityInfo() == null) {
+            context.addError("DELETE/UPDATE 语句缺少实体信息");
         }
     }
 

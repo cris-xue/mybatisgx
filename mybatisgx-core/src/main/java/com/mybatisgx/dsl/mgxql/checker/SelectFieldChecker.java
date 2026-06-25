@@ -42,19 +42,19 @@ public class SelectFieldChecker extends FieldChecker {
             }
         }
 
-        // 校验ORDER BY字段
+        // 校验并绑定ORDER BY字段
         if (selectStatement.getOrderByClause() != null) {
             for (OrderByItem item : selectStatement.getOrderByClause().getItems()) {
                 if (item.getField() != null) {
-                    this.checkFieldExistence(item.getField().getEntityAlias(), item.getField().getFieldName(), "ORDER BY", context);
+                    this.resolveAndSetFieldReferenceColumnInfo(item.getField(), "ORDER BY", context);
                 }
             }
         }
 
-        // 校验GROUP BY字段
+        // 校验并绑定GROUP BY字段
         if (selectStatement.getGroupByClause() != null) {
             for (FieldReference fieldRef : selectStatement.getGroupByClause().getFields()) {
-                this.checkFieldExistence(fieldRef.getEntityAlias(), fieldRef.getFieldName(), "GROUP BY", context);
+                this.resolveAndSetFieldReferenceColumnInfo(fieldRef, "GROUP BY", context);
             }
         }
 

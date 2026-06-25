@@ -1,5 +1,7 @@
 package com.mybatisgx.dsl.mgxql.model;
 
+import com.mybatisgx.model.ColumnInfo;
+
 /**
  * MGXQL字段引用模型，用于 ORDER BY / GROUP BY 等子句
  *
@@ -17,6 +19,11 @@ public class FieldReference {
      * 字段名，如 name
      */
     private String fieldName;
+
+    /**
+     * 语义校验阶段绑定的列元数据
+     */
+    private ColumnInfo columnInfo;
 
     public FieldReference() {
     }
@@ -40,6 +47,14 @@ public class FieldReference {
 
     public void setFieldName(String fieldName) {
         this.fieldName = fieldName;
+    }
+
+    public ColumnInfo getColumnInfo() {
+        return columnInfo;
+    }
+
+    public void setColumnInfo(ColumnInfo columnInfo) {
+        this.columnInfo = columnInfo;
     }
 
     /**

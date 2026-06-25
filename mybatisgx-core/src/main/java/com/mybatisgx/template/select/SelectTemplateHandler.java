@@ -7,6 +7,8 @@ import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.model.*;
 import com.mybatisgx.template.WhereTemplateHandler;
 import com.mybatisgx.template.MgxqlWhereTemplateHandler;
+import com.mybatisgx.template.MgxqlOrderByTemplateHandler;
+import com.mybatisgx.template.MgxqlGroupByTemplateHandler;
 import com.mybatisgx.template.HavingTemplateHandler;
 import com.mybatisgx.template.XmlCompiler;
 import net.sf.jsqlparser.statement.select.PlainSelect;
@@ -36,6 +38,8 @@ public class SelectTemplateHandler {
     private MgxqlWhereTemplateHandler mgxqlWhereTemplateHandler = new MgxqlWhereTemplateHandler();
     private HavingTemplateHandler havingTemplateHandler = new HavingTemplateHandler();
     private OrderByTemplateHandler orderByTemplateHandler = new OrderByTemplateHandler();
+    private MgxqlOrderByTemplateHandler mgxqlOrderByTemplateHandler = new MgxqlOrderByTemplateHandler();
+    private MgxqlGroupByTemplateHandler mgxqlGroupByTemplateHandler = new MgxqlGroupByTemplateHandler();
 
     public SelectTemplateHandler(MybatisgxConfiguration configuration) {
     }
@@ -79,6 +83,15 @@ public class SelectTemplateHandler {
             }
         }
 
+        // GROUP BY 子句渲染
+        if (mgxqlStatement instanceof SelectStatement) {
+            GroupByClause groupByClause = ((SelectStatement) mgxqlStatement).getGroupByClause();
+            if (groupByClause != null) {
+                String groupBySql = mgxqlGroupByTemplateHandler.execute(groupByClause);
+                selectXmlItemList.add(groupBySql);
+            }
+        }
+
         // HAVING 子句渲染
         if (mgxqlStatement instanceof SelectStatement) {
             HavingExpression havingExpression = ((SelectStatement) mgxqlStatement).getHavingExpression();
@@ -90,6 +103,25 @@ public class SelectTemplateHandler {
             }
         }
 
+        // ORDER BY 子句渲染（MGXQL）
+        if (mgxqlStatement instanceof SelectStatement) {
+            OrderByClause orderByClause = ((SelectStatement) mgxqlStatement).getOrderByClause();
+            if (orderByClause != null) {
+                String orderBySql = mgxqlOrderByTemplateHandler.execute(orderByClause);
+                selectXmlItemList.add(orderBySql);
+            }
+        }
+
+        // LIMIT 子句渲染（MGXQL）
+        if (mgxqlStatement instanceof SelectStatement) {
+            LimitClause limitClause = ((SelectStatement) mgxqlStatement).getLimitClause();
+            if (limitClause != null) {
+                LimitTemplateHandler limitTemplateHandler = MybatisgxObjectFactory.get(LimitTemplateHandler.class);
+                limitTemplateHandler.execute(selectXmlItemList, limitClause);
+            }
+        }
+
+        /* 旧注解驱动 ORDER BY / LIMIT 渲染（已停用，迁移到 MGXQL）
         List<SelectOrderByInfo> selectOrderByInfoList = methodInfo.getSelectOrderByInfoList();
         if (ObjectUtils.isNotEmpty(selectOrderByInfoList)) {
             String orderBySql = orderByTemplateHandler.execute(selectOrderByInfoList);
@@ -101,6 +133,7 @@ public class SelectTemplateHandler {
             LimitTemplateHandler limitTemplateHandler = MybatisgxObjectFactory.get(LimitTemplateHandler.class);
             limitTemplateHandler.execute(selectXmlItemList, methodRowLimitInfo);
         }
+        */
 
         for (Object selectSql : selectXmlItemList) {
             if (selectSql instanceof Element) {

@@ -3,6 +3,7 @@ package com.mybatisgx.dsl.mgxql.checker;
 import com.mybatisgx.dsl.mgxql.model.WhereExpression;
 import com.mybatisgx.dsl.mgxql.model.WhereConditionNode;
 import com.mybatisgx.dsl.mgxql.model.MgxqlStatement;
+import com.mybatisgx.dsl.mgxql.model.FieldReference;
 import com.mybatisgx.model.ColumnInfo;
 import com.mybatisgx.model.EntityInfo;
 
@@ -93,5 +94,30 @@ public abstract class FieldChecker implements MgxqlSemanticChecker {
         if (columnInfo == null) {
             context.addError(String.format("%s 子句中字段 '%s' 在实体 '%s' 中不存在", clauseName, fieldName, entityInfo.getClazz().getSimpleName()));
         }
+    }
+
+    /**
+     * 解析 FieldReference 对应的 ColumnInfo 并绑定到字段引用上（校验 + 绑定）
+     */
+    protected void resolveAndSetFieldReferenceColumnInfo(FieldReference fieldRef, String clauseName, CheckerContext context) {
+        EntityInfo entityInfo;
+        if (fieldRef.getEntityAlias() != null && !fieldRef.getEntityAlias().isEmpty()) {
+            entityInfo = context.getEntityInfoByAlias(fieldRef.getEntityAlias());
+            if (entityInfo == null) {
+                return;
+            }
+        } else {
+            entityInfo = context.getPrimaryEntityInfo();
+            if (entityInfo == null) {
+                return;
+            }
+        }
+
+        ColumnInfo columnInfo = entityInfo.getColumnInfo(fieldRef.getFieldName());
+        if (columnInfo == null) {
+            context.addError(String.format("%s 子句中字段 '%s' 在实体 '%s' 中不存在", clauseName, fieldRef.getFieldName(), entityInfo.getClazz().getSimpleName()));
+            return;
+        }
+        fieldRef.setColumnInfo(columnInfo);
     }
 }

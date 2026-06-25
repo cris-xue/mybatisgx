@@ -1,5 +1,6 @@
 package com.mybatisgx.template.select;
 
+import com.mybatisgx.dsl.mgxql.model.LimitClause;
 import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.model.MethodRowLimitInfo;
@@ -47,6 +48,14 @@ public class LimitTemplateHandler {
             throw new MybatisgxException("Unsupported databaseId '%s', please register MethodRowLimitHandler first.", databaseId);
         }
         methodRowLimitHandler.apply(selectXmlItemList, methodRowLimitInfo);
+    }
+
+    /**
+     * 从 MGXQL LimitClause 渲染分页 SQL，复用已有方言逻辑
+     */
+    public void execute(List<Object> selectXmlItemList, LimitClause limitClause) {
+        MethodRowLimitInfo methodRowLimitInfo = new MethodRowLimitInfo(limitClause.getOffset(), limitClause.getSize());
+        this.execute(selectXmlItemList, methodRowLimitInfo);
     }
 
     private static class MysqlMethodRowLimitHandler implements MethodRowLimitHandler {

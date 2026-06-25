@@ -9,10 +9,10 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface StatementRoutingDao extends SimpleDao<StatementRoutingEntity, StatementRoutingEntity, Long> {
 
-    @Statement("delete where name = :name")
+    @Statement("delete StatementRoutingEntity where name = :name")
     void deleteByName(@Param("name") String name);
 
-    @Statement("update where name = :name")
+    @Statement("update StatementRoutingEntity where name = :name")
     int updateByName(@Param("name") String name, StatementRoutingEntity entity);
 
     void deleteByNameAndAge(@Param("name") String name, @Param("age") Integer age);

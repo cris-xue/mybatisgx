@@ -34,9 +34,22 @@ public class User extends BaseEntity<Long> {
     @Version
     private Integer version;
 
+    private String desc;
+
+    private String having;
+
     @ManyToMany(mappedBy = "userList", fetch = FetchType.LAZY)
     @Fetch
     private List<Role> roleList;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "test_user_menu",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "menu_id")
+    )
+    @Fetch
+    private List<Menu> menuList;
 
     public String getRoleIds() {
         return roleIds;
@@ -118,11 +131,35 @@ public class User extends BaseEntity<Long> {
         this.version = version;
     }
 
+    public String getDesc() {
+        return desc;
+    }
+
+    public void setDesc(String desc) {
+        this.desc = desc;
+    }
+
+    public String getHaving() {
+        return having;
+    }
+
+    public void setHaving(String having) {
+        this.having = having;
+    }
+
     public List<Role> getRoleList() {
         return roleList;
     }
 
     public void setRoleList(List<Role> roleList) {
         this.roleList = roleList;
+    }
+
+    public List<Menu> getMenuList() {
+        return menuList;
+    }
+
+    public void setMenuList(List<Menu> menuList) {
+        this.menuList = menuList;
     }
 }

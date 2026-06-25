@@ -14,6 +14,8 @@ public class Role extends BaseEntity<Long> {
 
     private String name;
 
+    private Integer status;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "test_user_role",
@@ -37,6 +39,14 @@ public class Role extends BaseEntity<Long> {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
     }
 
     public List<User> getUserList() {

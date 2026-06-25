@@ -1,15 +1,20 @@
 package com.mybatisgx.dsl.test;
 
+import com.mybatisgx.context.EntityInfoContextHolder;
 import com.mybatisgx.dsl.mgxql.MgxqlSyntaxProcessor;
 import com.mybatisgx.dsl.mgxql.model.*;
+import com.mybatisgx.dsl.mgxql.model.expression.HavingAggregateExpression;
+import com.mybatisgx.dsl.test.entity.Menu;
+import com.mybatisgx.dsl.test.entity.Role;
 import com.mybatisgx.dsl.test.entity.User;
 import com.mybatisgx.model.EntityInfo;
-import com.mybatisgx.model.LogicOperator;
 import com.mybatisgx.model.MethodInfo;
 import com.mybatisgx.model.handler.EntityInfoHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.mapping.SqlCommandType;
+import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.List;
@@ -17,6 +22,19 @@ import java.util.List;
 public class MgxqlAstHandlerTest {
 
     private EntityInfoHandler entityInfoHandler = new EntityInfoHandler();
+
+    @BeforeClass
+    public static void setUpEntities() {
+        EntityInfoHandler handler = new EntityInfoHandler();
+        EntityInfoContextHolder.set(User.class, handler.execute(User.class));
+        EntityInfoContextHolder.set(Role.class, handler.execute(Role.class));
+        EntityInfoContextHolder.set(Menu.class, handler.execute(Menu.class));
+    }
+
+    @AfterClass
+    public static void tearDownEntities() {
+        EntityInfoContextHolder.remove();
+    }
 
     private MgxqlSyntaxProcessor buildProcessor() {
         return new MgxqlSyntaxProcessor();
@@ -26,6 +44,7 @@ public class MgxqlAstHandlerTest {
         EntityInfo entityInfo = entityInfoHandler.execute(User.class);
         MethodInfo methodInfo = new MethodInfo();
         MgxqlSyntaxProcessor processor = this.buildProcessor();
+        methodInfo.setSqlCommandType(processor.getSqlCommandType(expression));
         return processor.executeAndCheck(entityInfo, methodInfo, null, MgxqlSourceType.METHOD_NAME, expression);
     }
 
@@ -33,6 +52,7 @@ public class MgxqlAstHandlerTest {
         EntityInfo entityInfo = entityInfoHandler.execute(User.class);
         MethodInfo methodInfo = new MethodInfo();
         MgxqlSyntaxProcessor processor = this.buildProcessor();
+        methodInfo.setSqlCommandType(processor.getSqlCommandType(expression));
         return processor.executeAndCheck(entityInfo, methodInfo, null, MgxqlSourceType.METHOD_NAME, expression);
     }
 
@@ -43,6 +63,7 @@ public class MgxqlAstHandlerTest {
         // 测试方法名中只有条件
         EntityInfo entityInfo = entityInfoHandler.execute(User.class);
         MethodInfo methodInfo = new MethodInfo();
+        methodInfo.setSqlCommandType(SqlCommandType.SELECT);
         MgxqlSyntaxProcessor processor = this.buildProcessor();
         SelectStatement mgxqlStatement = (SelectStatement) processor.executeAndCheck(
                 entityInfo,
@@ -67,6 +88,7 @@ public class MgxqlAstHandlerTest {
         // 测试方法名中只有条件
         EntityInfo entityInfo = entityInfoHandler.execute(User.class);
         MethodInfo methodInfo = new MethodInfo();
+        methodInfo.setSqlCommandType(SqlCommandType.SELECT);
         MgxqlSyntaxProcessor processor = this.buildProcessor();
         MgxqlStatement mgxqlStatement = processor.executeAndCheck(
                 entityInfo,
@@ -414,7 +436,7 @@ public class MgxqlAstHandlerTest {
     @Test
     public void test042_leftJoin() {
         // 测试left join
-        SelectStatement stmt = (SelectStatement) parseWithoutCheck("select * from User user left join Role role on user = role where user.name = :name");
+        SelectStatement stmt = (SelectStatement) parseWithoutCheck("select user.* from User user left join Role role on user = role where user.name = :name");
         FromClause fromClause = stmt.getFromClause();
         Assert.assertNotNull(fromClause);
         Assert.assertEquals("User", fromClause.getPrimaryEntity().getEntityName());
@@ -431,7 +453,7 @@ public class MgxqlAstHandlerTest {
     @Test
     public void test043_multipleLeftJoins() {
         // 测试多个left join
-        SelectStatement stmt = (SelectStatement) parseWithoutCheck("select * from User user left join Role role on user = role left join Menu menu on role = menu");
+        SelectStatement stmt = (SelectStatement) parseWithoutCheck("select user.*, role.* from User user left join Role role on user = role left join Menu menu on role = menu");
         FromClause fromClause = stmt.getFromClause();
         Assert.assertEquals(2, fromClause.getJoinEntities().size());
         Assert.assertEquals("Role", fromClause.getJoinEntities().get(0).getEntityName());
@@ -531,37 +553,40 @@ public class MgxqlAstHandlerTest {
     public void test070_havingWithMax() {
         // 测试having max(age) > :age
         SelectStatement stmt = (SelectStatement) parse("select * from User group by status having max(age) > :age");
-        HavingClause havingClause = stmt.getHavingClause();
-        Assert.assertNotNull(havingClause);
-        Assert.assertEquals(1, havingClause.getConditions().size());
-        HavingCondition condition = havingClause.getConditions().get(0);
-        Assert.assertEquals(SelectItemType.MAX, condition.getAggregateFunction().getType());
-        Assert.assertEquals("age", condition.getAggregateFunction().getAggregateFieldRef().getFieldName());
-        Assert.assertEquals(ComparisonOperator.GT, condition.getOperator());
-        Assert.assertEquals("age", condition.getParamValuePath().get(0));
+        HavingExpression havingExpr = stmt.getHavingExpression();
+        Assert.assertNotNull(havingExpr);
+        Assert.assertEquals(1, havingExpr.getNodes().size());
+        HavingConditionNode node = havingExpr.getNodes().get(0);
+        HavingAggregateExpression aggExpr = (HavingAggregateExpression) node.getLeftSide();
+        Assert.assertEquals(AggregateFunction.MAX, aggExpr.getFunction());
+        Assert.assertEquals("age", aggExpr.getArgument());
+        Assert.assertEquals(ComparisonOperator.GT, node.getOperator());
+        Assert.assertEquals("age", node.getParamValuePath().get(0));
     }
 
     @Test
     public void test071_havingWithCount() {
         // 测试having count(id) > :`count`（count为关键字，需用反引号转义）
         SelectStatement stmt = (SelectStatement) parse("select * from User group by status having count(id) > :`count`");
-        HavingClause havingClause = stmt.getHavingClause();
-        Assert.assertNotNull(havingClause);
-        HavingCondition condition = havingClause.getConditions().get(0);
-        Assert.assertEquals(SelectItemType.COUNT, condition.getAggregateFunction().getType());
-        Assert.assertEquals("id", condition.getAggregateFunction().getAggregateFieldRef().getFieldName());
-        Assert.assertEquals("count", condition.getParamValuePath().get(0));
+        HavingExpression havingExpr = stmt.getHavingExpression();
+        Assert.assertNotNull(havingExpr);
+        HavingConditionNode node = havingExpr.getNodes().get(0);
+        HavingAggregateExpression aggExpr = (HavingAggregateExpression) node.getLeftSide();
+        Assert.assertEquals(AggregateFunction.COUNT, aggExpr.getFunction());
+        Assert.assertEquals("id", aggExpr.getArgument());
+        Assert.assertEquals("count", node.getParamValuePath().get(0));
     }
 
     @Test
     public void test072_havingWithMin() {
         // 测试having min(id) < :minId
         SelectStatement stmt = (SelectStatement) parse("select * from User group by status having min(id) < :minId");
-        HavingClause havingClause = stmt.getHavingClause();
-        HavingCondition condition = havingClause.getConditions().get(0);
-        Assert.assertEquals(SelectItemType.MIN, condition.getAggregateFunction().getType());
-        Assert.assertEquals("id", condition.getAggregateFunction().getAggregateFieldRef().getFieldName());
-        Assert.assertEquals(ComparisonOperator.LT, condition.getOperator());
+        HavingExpression havingExpr = stmt.getHavingExpression();
+        HavingConditionNode node = havingExpr.getNodes().get(0);
+        HavingAggregateExpression aggExpr = (HavingAggregateExpression) node.getLeftSide();
+        Assert.assertEquals(AggregateFunction.MIN, aggExpr.getFunction());
+        Assert.assertEquals("id", aggExpr.getArgument());
+        Assert.assertEquals(ComparisonOperator.LT, node.getOperator());
     }
 
     // ==================== LIMIT 测试 ====================
@@ -621,8 +646,8 @@ public class MgxqlAstHandlerTest {
         Assert.assertNotNull(stmt.getGroupByClause());
         Assert.assertEquals("status", stmt.getGroupByClause().getFields().get(0).getFieldName());
         // 验证having
-        Assert.assertNotNull(stmt.getHavingClause());
-        Assert.assertEquals(1, stmt.getHavingClause().getConditions().size());
+        Assert.assertNotNull(stmt.getHavingExpression());
+        Assert.assertEquals(1, stmt.getHavingExpression().getNodes().size());
         // 验证order by
         Assert.assertNotNull(stmt.getOrderByClause());
         Assert.assertEquals("age", stmt.getOrderByClause().getItems().get(0).getField().getFieldName());
@@ -661,7 +686,7 @@ public class MgxqlAstHandlerTest {
         Assert.assertEquals(1, stmt.getSelectItems().size());
         Assert.assertEquals(SelectItemType.COUNT, stmt.getSelectItems().get(0).getType());
         Assert.assertNotNull(stmt.getGroupByClause());
-        Assert.assertNotNull(stmt.getHavingClause());
+        Assert.assertNotNull(stmt.getHavingExpression());
     }
 
     @Test
@@ -704,11 +729,12 @@ public class MgxqlAstHandlerTest {
     public void test106_havingNumberLiteral() {
         // 测试HAVING数字字面量
         SelectStatement stmt = (SelectStatement) parse("select count(id) from User group by status having count(id) > 10");
-        HavingCondition condition = stmt.getHavingClause().getConditions().get(0);
-        Assert.assertEquals(SelectItemType.COUNT, condition.getAggregateFunction().getType());
-        Assert.assertEquals(ComparisonOperator.GT, condition.getOperator());
-        Assert.assertEquals(Integer.valueOf(10), condition.getHavingValue());
-        Assert.assertNull(condition.getParamValuePath());
+        HavingConditionNode node = stmt.getHavingExpression().getNodes().get(0);
+        HavingAggregateExpression aggExpr = (HavingAggregateExpression) node.getLeftSide();
+        Assert.assertEquals(AggregateFunction.COUNT, aggExpr.getFunction());
+        Assert.assertEquals(ComparisonOperator.GT, node.getOperator());
+        Assert.assertEquals(Integer.valueOf(10), node.getLiteralValue());
+        Assert.assertNull(node.getParamValuePath());
     }
 
     // ==================== ? 前缀可选条件测试 ====================
@@ -797,7 +823,7 @@ public class MgxqlAstHandlerTest {
 
     @Test
     public void test120_deleteStatementCommandType() {
-        MgxqlStatement stmt = parseWithoutCheck("delete where id = :id");
+        MgxqlStatement stmt = parseWithoutCheck("delete User where id = :id");
         Assert.assertEquals(SqlCommandType.DELETE, stmt.getCommandType());
         WhereClause whereClause = stmt.getWhereClause();
         Assert.assertNotNull(whereClause);
@@ -808,7 +834,7 @@ public class MgxqlAstHandlerTest {
 
     @Test
     public void test121_updateStatementCommandType() {
-        MgxqlStatement stmt = parseWithoutCheck("update where name = :name");
+        MgxqlStatement stmt = parseWithoutCheck("update User where name = :name");
         Assert.assertEquals(SqlCommandType.UPDATE, stmt.getCommandType());
         WhereClause whereClause = stmt.getWhereClause();
         Assert.assertNotNull(whereClause);

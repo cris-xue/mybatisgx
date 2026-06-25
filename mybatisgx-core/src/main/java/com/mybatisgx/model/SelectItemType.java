@@ -5,6 +5,7 @@ package com.mybatisgx.model;
  * @author 薛承城
  * @date 2025/11/20 18:12
  */
+@Deprecated
 public enum SelectItemType {
 
     COLUMN("column", "*"),

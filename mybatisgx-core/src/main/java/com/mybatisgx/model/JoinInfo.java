@@ -8,6 +8,7 @@ import com.mybatisgx.dsl.mgxql.model.JoinType;
  * @author 薛承城
  * @date 2026/6/12
  */
+@Deprecated
 public class JoinInfo extends EntityRefInfo {
 
     private JoinType joinType;

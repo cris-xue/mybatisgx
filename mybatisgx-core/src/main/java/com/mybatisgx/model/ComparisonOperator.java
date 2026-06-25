@@ -5,6 +5,7 @@ package com.mybatisgx.model;
  * @author 薛承城
  * @date 2025/11/27 11:59
  */
+@Deprecated
 public enum ComparisonOperator {
 
     LT("Lt", "<"),

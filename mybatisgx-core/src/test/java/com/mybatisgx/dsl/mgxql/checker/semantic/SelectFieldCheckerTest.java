@@ -4,6 +4,7 @@ import com.mybatisgx.dsl.mgxql.checker.CheckerContext;
 import com.mybatisgx.dsl.mgxql.checker.SelectFieldChecker;
 import com.mybatisgx.dsl.mgxql.model.*;
 import com.mybatisgx.dsl.test.entity.User;
+import com.mybatisgx.model.ColumnInfo;
 import com.mybatisgx.model.EntityInfo;
 import com.mybatisgx.model.handler.EntityInfoHandler;
 import org.apache.ibatis.mapping.SqlCommandType;
@@ -107,5 +108,51 @@ public class SelectFieldCheckerTest {
 
         checker.check(stmt, context);
         Assert.assertFalse(context.hasErrors());
+    }
+
+    @Test
+    public void test06_orderByFieldBindsColumnInfo_shouldPass() {
+        SelectStatement stmt = buildSelectStmt();
+        OrderByClause orderBy = new OrderByClause();
+        orderBy.addItem(new OrderByItem(new FieldReference(null, "name"), "desc"));
+        stmt.setOrderByClause(orderBy);
+
+        checker.check(stmt, context);
+        Assert.assertFalse(context.hasErrors());
+        ColumnInfo boundColumnInfo = stmt.getOrderByClause().getItems().get(0).getField().getColumnInfo();
+        Assert.assertNotNull("ORDER BY 字段应绑定 columnInfo", boundColumnInfo);
+        Assert.assertEquals(userEntityInfo.getColumnInfo("name").getDbColumnName(), boundColumnInfo.getDbColumnName());
+    }
+
+    @Test
+    public void test07_groupByFieldBindsColumnInfo_shouldPass() {
+        SelectStatement stmt = buildSelectStmt();
+        GroupByClause groupBy = new GroupByClause();
+        groupBy.addField(new FieldReference(null, "age"));
+        stmt.setGroupByClause(groupBy);
+
+        checker.check(stmt, context);
+        Assert.assertFalse(context.hasErrors());
+        ColumnInfo boundColumnInfo = stmt.getGroupByClause().getFields().get(0).getColumnInfo();
+        Assert.assertNotNull("GROUP BY 字段应绑定 columnInfo", boundColumnInfo);
+        Assert.assertEquals(userEntityInfo.getColumnInfo("age").getDbColumnName(), boundColumnInfo.getDbColumnName());
+    }
+
+    @Test
+    public void test08_orderByFieldNotExists_shouldError() {
+        SelectStatement stmt = buildSelectStmt();
+        OrderByClause orderBy = new OrderByClause();
+        orderBy.addItem(new OrderByItem(new FieldReference(null, "nonExistentField"), null));
+        stmt.setOrderByClause(orderBy);
+
+        checker.check(stmt, context);
+        Assert.assertTrue(context.hasErrors());
+        boolean hasError = false;
+        for (String error : context.getErrors()) {
+            if (error.contains("ORDER BY") && error.contains("nonExistentField")) {
+                hasError = true;
+            }
+        }
+        Assert.assertTrue(hasError);
     }
 }

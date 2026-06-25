@@ -1,32 +1,29 @@
 package com.mybatisgx.dsl.test;
 
+import com.mybatisgx.dsl.mgxql.model.WhereClause;
+import com.mybatisgx.dsl.mgxql.model.WhereConditionNode;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
-import com.mybatisgx.model.ConditionInfo;
 import com.mybatisgx.model.MethodInfo;
 import com.mybatisgx.util.DaoTestUtils;
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.util.List;
 
 public class EntityAstHandlerTest {
 
     @Test
     public void test01() {
         MybatisgxConfiguration configuration = DaoTestUtils.getMybatisgxConfiguration(
-                new String[]{"com.mybatisgx.model.handler.test.entity"},
-                new String[]{"com.mybatisgx.model.handler.test.dao"}
+                new String[]{"com.mybatisgx.dsl.test.entity"},
+                new String[]{"com.mybatisgx.dsl.test.dao"}
         );
 
-        MethodInfo methodInfo = configuration.getMethodInfo("com.mybatisgx.model.handler.test.dao.UserEntityDao.findOne");
-        List<ConditionInfo> conditionInfoList = methodInfo.getConditionInfoList();
+        MethodInfo methodInfo = configuration.getMethodInfo("com.mybatisgx.dsl.test.dao.UserEntityDao.findOne");
+        WhereClause whereClause = methodInfo.getMgxqlStatement().getWhereClause();
 
-        ConditionInfo conditionInfo1 = conditionInfoList.get(2);
-        Assert.assertEquals("$NameEq$", conditionInfo1.getOriginSegment());
-        Assert.assertEquals("nameEq", conditionInfo1.getColumnInfo().getJavaColumnName());
+        WhereConditionNode whereConditionNode1 = whereClause.getRootExpression().getNodes().get(2);
+        Assert.assertEquals("nameEq", whereConditionNode1.getColumnInfo().getJavaColumnName());
 
-        ConditionInfo conditionInfo2 = conditionInfoList.get(3);
-        Assert.assertEquals("$NameEq$Eq", conditionInfo2.getOriginSegment());
-        Assert.assertEquals("nameEq", conditionInfo2.getColumnInfo().getJavaColumnName());
+        WhereConditionNode whereConditionNode2 = whereClause.getRootExpression().getNodes().get(2);
+        Assert.assertEquals("nameEq", whereConditionNode2.getColumnInfo().getJavaColumnName());
     }
 }

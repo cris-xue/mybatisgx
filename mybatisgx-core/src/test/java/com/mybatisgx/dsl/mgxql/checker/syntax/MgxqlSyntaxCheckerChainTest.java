@@ -1,5 +1,6 @@
-package com.mybatisgx.dsl.mgxql.checker;
+package com.mybatisgx.dsl.mgxql.checker.syntax;
 
+import com.mybatisgx.dsl.mgxql.checker.MgxqlSyntaxCheckerChain;
 import com.mybatisgx.dsl.mgxql.model.*;
 import com.mybatisgx.exception.MybatisgxException;
 import org.junit.Assert;

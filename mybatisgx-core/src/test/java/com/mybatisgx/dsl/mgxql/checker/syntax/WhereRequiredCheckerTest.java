@@ -1,5 +1,7 @@
-package com.mybatisgx.dsl.mgxql.checker;
+package com.mybatisgx.dsl.mgxql.checker.syntax;
 
+import com.mybatisgx.dsl.mgxql.checker.SyntaxCheckerContext;
+import com.mybatisgx.dsl.mgxql.checker.WhereRequiredChecker;
 import com.mybatisgx.dsl.mgxql.model.*;
 import org.apache.ibatis.mapping.SqlCommandType;
 import org.junit.Assert;

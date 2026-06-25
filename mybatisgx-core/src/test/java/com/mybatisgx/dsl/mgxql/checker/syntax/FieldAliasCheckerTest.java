@@ -1,5 +1,7 @@
-package com.mybatisgx.dsl.mgxql.checker;
+package com.mybatisgx.dsl.mgxql.checker.syntax;
 
+import com.mybatisgx.dsl.mgxql.checker.FieldAliasChecker;
+import com.mybatisgx.dsl.mgxql.checker.SyntaxCheckerContext;
 import com.mybatisgx.dsl.mgxql.model.*;
 import org.apache.ibatis.mapping.SqlCommandType;
 import org.junit.Assert;
@@ -145,26 +147,6 @@ public class FieldAliasCheckerTest {
             }
         }
         Assert.assertTrue(hasAliasError);
-    }
-
-    @Test
-    public void test08_deleteWithAlias() {
-        MgxqlStatement stmt = new MgxqlStatement();
-        stmt.setCommandType(SqlCommandType.DELETE);
-        WhereClause whereClause = new WhereClause();
-        WhereExpression expr = new WhereExpression();
-        WhereConditionNode node = new WhereConditionNode();
-        node.setFieldAlias("user");
-        node.setFieldName("id");
-        expr.addNode(node);
-        whereClause.setRootExpression(expr);
-        stmt.setWhereClause(whereClause);
-
-        SyntaxCheckerContext context = new SyntaxCheckerContext();
-        context.setHasMultipleEntities(false);
-        checker.check(stmt, context);
-        Assert.assertTrue(context.hasErrors());
-        Assert.assertTrue(context.getErrors().get(0).contains("DELETE/UPDATE"));
     }
 
     @Test

@@ -1,6 +1,8 @@
-package com.mybatisgx.dsl.mgxql.checker;
+package com.mybatisgx.dsl.mgxql.checker.semantic;
 
 import com.mybatisgx.dsl.mgxql.MgxqlSyntaxProcessor;
+import com.mybatisgx.dsl.mgxql.checker.MgxqlSemanticCheckerChain;
+import com.mybatisgx.dsl.mgxql.checker.MgxqlSyntaxCheckerChain;
 import com.mybatisgx.dsl.mgxql.model.*;
 import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.model.EntityInfo;
@@ -76,12 +78,10 @@ public class MgxqlDmlCheckerTest {
     @Test
     public void test10_deleteFieldNotExists_shouldError() {
         EntityInfo entityInfo = getUserEntityInfo();
-        MgxqlStatement stmt = processor.executeAndCheck(
-                entityInfo, new MethodInfo(), null, MgxqlSourceType.METHOD_NAME,
-                "delete where nonExistentField = :val");
-        MgxqlSemanticCheckerChain chain = new MgxqlSemanticCheckerChain();
         try {
-            chain.check(stmt, entityInfo);
+            processor.executeAndCheck(
+                    entityInfo, new MethodInfo(), null, MgxqlSourceType.METHOD_NAME,
+                    "delete User where nonExistentField = :val");
             Assert.fail("Expected MybatisgxException");
         } catch (MybatisgxException e) {
             Assert.assertTrue(e.getMessage().contains("语义校验失败"));
@@ -92,12 +92,10 @@ public class MgxqlDmlCheckerTest {
     @Test
     public void test11_deleteOperatorTypeMismatch_shouldError() {
         EntityInfo entityInfo = getUserEntityInfo();
-        MgxqlStatement stmt = processor.executeAndCheck(
-                entityInfo, new MethodInfo(), null, MgxqlSourceType.METHOD_NAME,
-                "delete where age like :age");
-        MgxqlSemanticCheckerChain chain = new MgxqlSemanticCheckerChain();
         try {
-            chain.check(stmt, entityInfo);
+            processor.executeAndCheck(
+                    entityInfo, new MethodInfo(), null, MgxqlSourceType.METHOD_NAME,
+                    "delete User where age like :age");
             Assert.fail("Expected MybatisgxException");
         } catch (MybatisgxException e) {
             Assert.assertTrue(e.getMessage().contains("语义校验失败"));
@@ -107,13 +105,11 @@ public class MgxqlDmlCheckerTest {
 
     @Test
     public void test12_deleteNoWhere_shouldError() {
-        EntityInfo entityInfo = getUserEntityInfo();
-        MgxqlStatement stmt = processor.executeAndCheck(
-                entityInfo, new MethodInfo(), null, MgxqlSourceType.METHOD_NAME,
-                "delete");
-        MgxqlSemanticCheckerChain chain = new MgxqlSemanticCheckerChain();
+        MgxqlStatement stmt = new ModifyStatement();
+        stmt.setCommandType(SqlCommandType.DELETE);
+        MgxqlSyntaxCheckerChain chain = new MgxqlSyntaxCheckerChain();
         try {
-            chain.check(stmt, entityInfo);
+            chain.check(stmt);
             Assert.fail("Expected MybatisgxException");
         } catch (MybatisgxException e) {
             Assert.assertTrue(e.getMessage().contains("语法校验失败"));
@@ -124,22 +120,18 @@ public class MgxqlDmlCheckerTest {
     @Test
     public void test13_deleteValid_shouldPass() {
         EntityInfo entityInfo = getUserEntityInfo();
-        MgxqlStatement stmt = processor.executeAndCheck(
+        processor.executeAndCheck(
                 entityInfo, new MethodInfo(), null, MgxqlSourceType.METHOD_NAME,
-                "delete where name = :name");
-        MgxqlSemanticCheckerChain chain = new MgxqlSemanticCheckerChain();
-        chain.check(stmt, entityInfo);
+                "delete User where name = :name");
     }
 
     @Test
     public void test14_deleteWithAliasPrefix_shouldError() {
         EntityInfo entityInfo = getUserEntityInfo();
-        MgxqlStatement stmt = processor.executeAndCheck(
-                entityInfo, new MethodInfo(), null, MgxqlSourceType.METHOD_NAME,
-                "delete where user.name = :name");
-        MgxqlSemanticCheckerChain chain = new MgxqlSemanticCheckerChain();
         try {
-            chain.check(stmt, entityInfo);
+            processor.executeAndCheck(
+                    entityInfo, new MethodInfo(), null, MgxqlSourceType.METHOD_NAME,
+                    "delete User where user.name = :name");
             Assert.fail("Expected MybatisgxException");
         } catch (MybatisgxException e) {
             Assert.assertTrue(e.getMessage().contains("别名前缀"));
@@ -151,12 +143,10 @@ public class MgxqlDmlCheckerTest {
     @Test
     public void test20_updateFieldNotExists_shouldError() {
         EntityInfo entityInfo = getUserEntityInfo();
-        MgxqlStatement stmt = processor.executeAndCheck(
-                entityInfo, new MethodInfo(), null, MgxqlSourceType.METHOD_NAME,
-                "update where nonExistentField = :val");
-        MgxqlSemanticCheckerChain chain = new MgxqlSemanticCheckerChain();
         try {
-            chain.check(stmt, entityInfo);
+            processor.executeAndCheck(
+                    entityInfo, new MethodInfo(), null, MgxqlSourceType.METHOD_NAME,
+                    "update User where nonExistentField = :val");
             Assert.fail("Expected MybatisgxException");
         } catch (MybatisgxException e) {
             Assert.assertTrue(e.getMessage().contains("语义校验失败"));
@@ -167,12 +157,10 @@ public class MgxqlDmlCheckerTest {
     @Test
     public void test21_updateOperatorTypeMismatch_shouldError() {
         EntityInfo entityInfo = getUserEntityInfo();
-        MgxqlStatement stmt = processor.executeAndCheck(
-                entityInfo, new MethodInfo(), null, MgxqlSourceType.METHOD_NAME,
-                "update where age like :age");
-        MgxqlSemanticCheckerChain chain = new MgxqlSemanticCheckerChain();
         try {
-            chain.check(stmt, entityInfo);
+            processor.executeAndCheck(
+                    entityInfo, new MethodInfo(), null, MgxqlSourceType.METHOD_NAME,
+                    "update User where age like :age");
             Assert.fail("Expected MybatisgxException");
         } catch (MybatisgxException e) {
             Assert.assertTrue(e.getMessage().contains("语义校验失败"));
@@ -182,13 +170,11 @@ public class MgxqlDmlCheckerTest {
 
     @Test
     public void test22_updateNoWhere_shouldError() {
-        EntityInfo entityInfo = getUserEntityInfo();
-        MgxqlStatement stmt = processor.executeAndCheck(
-                entityInfo, new MethodInfo(), null, MgxqlSourceType.METHOD_NAME,
-                "update");
-        MgxqlSemanticCheckerChain chain = new MgxqlSemanticCheckerChain();
+        MgxqlStatement stmt = new ModifyStatement();
+        stmt.setCommandType(SqlCommandType.UPDATE);
+        MgxqlSyntaxCheckerChain chain = new MgxqlSyntaxCheckerChain();
         try {
-            chain.check(stmt, entityInfo);
+            chain.check(stmt);
             Assert.fail("Expected MybatisgxException");
         } catch (MybatisgxException e) {
             Assert.assertTrue(e.getMessage().contains("语法校验失败"));
@@ -199,22 +185,18 @@ public class MgxqlDmlCheckerTest {
     @Test
     public void test23_updateValid_shouldPass() {
         EntityInfo entityInfo = getUserEntityInfo();
-        MgxqlStatement stmt = processor.executeAndCheck(
+        processor.executeAndCheck(
                 entityInfo, new MethodInfo(), null, MgxqlSourceType.METHOD_NAME,
-                "update where name = :name");
-        MgxqlSemanticCheckerChain chain = new MgxqlSemanticCheckerChain();
-        chain.check(stmt, entityInfo);
+                "update User where name = :name");
     }
 
     @Test
     public void test24_updateWithAliasPrefix_shouldError() {
         EntityInfo entityInfo = getUserEntityInfo();
-        MgxqlStatement stmt = processor.executeAndCheck(
-                entityInfo, new MethodInfo(), null, MgxqlSourceType.METHOD_NAME,
-                "update where user.name = :name");
-        MgxqlSemanticCheckerChain chain = new MgxqlSemanticCheckerChain();
         try {
-            chain.check(stmt, entityInfo);
+            processor.executeAndCheck(
+                    entityInfo, new MethodInfo(), null, MgxqlSourceType.METHOD_NAME,
+                    "update User where user.name = :name");
             Assert.fail("Expected MybatisgxException");
         } catch (MybatisgxException e) {
             Assert.assertTrue(e.getMessage().contains("别名前缀"));
@@ -225,16 +207,9 @@ public class MgxqlDmlCheckerTest {
 
     @Test
     public void test30_deleteShouldNotExecuteJoinRelationChecker() {
-        // DELETE 语句应走精简校验链，不执行 JoinRelationChecker
-        // 构造一个没有 Join 的 DELETE 语句，如果走了 JoinRelationChecker 也不会出错
-        // 但关键是：DELETE 语句没有 FromClause/JoinEntity，如果走了 JoinRelationChecker 也不会误报
         EntityInfo entityInfo = getUserEntityInfo();
-        MgxqlStatement stmt = processor.executeAndCheck(
+        processor.executeAndCheck(
                 entityInfo, new MethodInfo(), null, MgxqlSourceType.METHOD_NAME,
-                "delete where name = :name");
-        MgxqlSemanticCheckerChain chain = new MgxqlSemanticCheckerChain();
-        chain.check(stmt, entityInfo);
-        // 如果走到 JoinRelationChecker，由于 fromClause 为 null 不会报错
-        // 但通过代码分支确保不会走到
+                "delete User where name = :name");
     }
 }

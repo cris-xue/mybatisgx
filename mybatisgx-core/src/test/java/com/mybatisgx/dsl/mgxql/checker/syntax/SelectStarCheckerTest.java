@@ -1,5 +1,7 @@
-package com.mybatisgx.dsl.mgxql.checker;
+package com.mybatisgx.dsl.mgxql.checker.syntax;
 
+import com.mybatisgx.dsl.mgxql.checker.SelectStarChecker;
+import com.mybatisgx.dsl.mgxql.checker.SyntaxCheckerContext;
 import com.mybatisgx.dsl.mgxql.model.*;
 import org.junit.Assert;
 import org.junit.Before;

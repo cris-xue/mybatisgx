@@ -1,11 +1,8 @@
 package com.mybatisgx.template.select;
 
 import com.mybatisgx.context.MybatisgxObjectFactory;
-import com.mybatisgx.dsl.mgxql.model.HavingExpression;
-import com.mybatisgx.dsl.mgxql.model.SelectItem;
+import com.mybatisgx.dsl.mgxql.model.*;
 import com.mybatisgx.dsl.mgxql.model.SelectItemType;
-import com.mybatisgx.dsl.mgxql.model.SelectStatement;
-import com.mybatisgx.dsl.mgxql.model.WhereClause;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.model.*;
 import com.mybatisgx.template.WhereTemplateHandler;
@@ -72,9 +69,10 @@ public class SelectTemplateHandler {
             selectXmlItemList.add(plainSelect.toString());
         }*/
 
+        MgxqlStatement mgxqlStatement = methodInfo.getMgxqlStatement();
         Element whereElement = null;
-        if (methodInfo.getMgxqlStatement() != null) {
-            WhereClause whereClause = methodInfo.getMgxqlStatement().getWhereClause();
+        if (mgxqlStatement != null) {
+            WhereClause whereClause = mgxqlStatement.getWhereClause();
             if (whereClause != null) {
                 whereElement = mgxqlWhereTemplateHandler.execute(mapperInfo.getEntityInfo(), methodInfo, whereClause.getRootExpression());
                 selectXmlItemList.add(whereElement);
@@ -82,8 +80,8 @@ public class SelectTemplateHandler {
         }
 
         // HAVING 子句渲染
-        if (methodInfo.getMgxqlStatement() instanceof SelectStatement) {
-            HavingExpression havingExpression = ((SelectStatement) methodInfo.getMgxqlStatement()).getHavingExpression();
+        if (mgxqlStatement instanceof SelectStatement) {
+            HavingExpression havingExpression = ((SelectStatement) mgxqlStatement).getHavingExpression();
             if (havingExpression != null) {
                 String havingSql = havingTemplateHandler.execute(havingExpression);
                 if (!havingSql.isEmpty()) {

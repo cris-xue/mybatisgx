@@ -55,7 +55,7 @@ public class WhereTemplateHandlerOptionalTest {
 
         ColumnInfo columnInfo = entityInfo.getColumnInfo(columnName);
 
-        ConditionInfo conditionInfo = new ConditionInfo(0, ConditionOriginType.STATEMENT_METHOD_NAME);
+        ConditionInfo conditionInfo = new ConditionInfo(0);
         conditionInfo.setColumnName(columnName);
         conditionInfo.setComparisonOperator(ComparisonOperator.EQ);
         conditionInfo.setColumnInfo(columnInfo);

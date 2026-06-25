@@ -36,10 +36,6 @@ public class ConditionInfo {
      */
     private ComparisonOperator comparisonOperator = ComparisonOperator.EQ;
     /**
-     * 条件来源
-     */
-    private ConditionOriginType conditionOriginType;
-    /**
      * 条件绑定的参数信息
      */
     private MethodParamInfo methodParamInfo;
@@ -68,15 +64,8 @@ public class ConditionInfo {
      */
     private Boolean optional = false;
 
-    public ConditionInfo(Integer index, ConditionOriginType conditionOriginType) {
+    public ConditionInfo(Integer index) {
         this.index = index;
-        this.conditionOriginType = conditionOriginType;
-    }
-
-    public ConditionInfo(Integer index, ConditionOriginType conditionOriginType, MethodParamInfo methodParamInfo) {
-        this.index = index;
-        this.conditionOriginType = conditionOriginType;
-        this.methodParamInfo = methodParamInfo;
     }
 
     public Integer getIndex() {
@@ -125,14 +114,6 @@ public class ConditionInfo {
 
     public void setComparisonOperator(ComparisonOperator comparisonOperator) {
         this.comparisonOperator = comparisonOperator;
-    }
-
-    public ConditionOriginType getConditionOriginType() {
-        return conditionOriginType;
-    }
-
-    public void setConditionOriginType(ConditionOriginType conditionOriginType) {
-        this.conditionOriginType = conditionOriginType;
     }
 
     public MethodParamInfo getMethodParamInfo() {

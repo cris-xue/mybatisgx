@@ -1,5 +1,7 @@
 package com.mybatisgx.executor.page;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,15 +56,23 @@ public class Pageable {
         this.sorts.add(new Sort(column, order));
     }
 
-    public class Sort {
+    public String getOrderBy() {
+        List<String> orderByItemList = new ArrayList<>();
+        for (Sort sort : sorts) {
+            orderByItemList.add(String.format("%s %s", sort.getColumn(), sort.getDirection()));
+        }
+        return StringUtils.join(orderByItemList, ",");
+    }
+
+    public static class Sort {
 
         private String column;
 
-        private String order;
+        private String direction;
 
-        public Sort(String column, String order) {
+        public Sort(String column, String direction) {
             this.column = column;
-            this.order = order;
+            this.direction = direction;
         }
 
         public String getColumn() {
@@ -73,12 +83,12 @@ public class Pageable {
             this.column = column;
         }
 
-        public String getOrder() {
-            return order;
+        public String getDirection() {
+            return direction;
         }
 
-        public void setOrder(String order) {
-            this.order = order;
+        public void setDirection(String direction) {
+            this.direction = direction;
         }
     }
 }

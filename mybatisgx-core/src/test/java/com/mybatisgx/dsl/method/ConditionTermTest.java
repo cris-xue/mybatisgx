@@ -1,8 +1,8 @@
 package com.mybatisgx.dsl.method;
 
 import com.mybatisgx.dsl.method.model.ConditionTerm;
-import com.mybatisgx.model.ComparisonOperator;
-import com.mybatisgx.model.LogicOperator;
+import com.mybatisgx.dsl.mgxql.model.ComparisonOperator;
+import com.mybatisgx.dsl.mgxql.model.LogicOperator;
 import org.junit.Assert;
 import org.junit.Test;
 

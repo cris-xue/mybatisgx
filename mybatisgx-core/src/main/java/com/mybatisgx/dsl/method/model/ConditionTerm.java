@@ -1,7 +1,7 @@
 package com.mybatisgx.dsl.method.model;
 
-import com.mybatisgx.model.ComparisonOperator;
-import com.mybatisgx.model.LogicOperator;
+import com.mybatisgx.dsl.mgxql.model.ComparisonOperator;
+import com.mybatisgx.dsl.mgxql.model.LogicOperator;
 
 /**
  * 一句话描述

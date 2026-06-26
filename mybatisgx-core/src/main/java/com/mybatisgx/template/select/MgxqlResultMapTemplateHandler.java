@@ -136,12 +136,8 @@ public class MgxqlResultMapTemplateHandler {
     private void addRelationResultMapElement(Element resultMapElement, ResultMapInfo resultMapInfo) {
         for (ResultMapInfo composite : resultMapInfo.getComposites()) {
             // 是否存在独立的 resultMap，如果存在，为子查询，如果不存在，则为join关联查询
-            if (composite.getNestedSelect() != null) {
-                this.subSelect(resultMapElement, composite);
-            } else {
-                Element resultMapRelationElement = this.joinSelect(resultMapElement, composite);
-                this.addRelationResultMapElement(resultMapRelationElement, composite);
-            }
+            Element resultMapRelationElement = this.joinSelect(resultMapElement, composite);
+            this.addRelationResultMapElement(resultMapRelationElement, composite);
         }
     }
 

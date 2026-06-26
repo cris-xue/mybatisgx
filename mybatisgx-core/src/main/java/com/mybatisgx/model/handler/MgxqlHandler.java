@@ -8,8 +8,6 @@ import com.mybatisgx.api.MethodCommandType;
 import com.mybatisgx.dsl.method.MethodSyntaxProcessor;
 import com.mybatisgx.dsl.method.model.BaseStatement;
 import com.mybatisgx.dsl.mgxql.MgxqlSyntaxProcessor;
-import com.mybatisgx.dsl.mgxql.model.MgxqlSourceType;
-import com.mybatisgx.dsl.mgxql.model.SelectItemType;
 import com.mybatisgx.dsl.mgxql.model.*;
 import com.mybatisgx.dsl.mgxql.model.expression.ConditionColumnExpression;
 import com.mybatisgx.exception.MybatisgxException;
@@ -39,6 +37,7 @@ public class MgxqlHandler {
     private MgxqlSyntaxProcessor mgxqlSyntaxProcessor = new MgxqlSyntaxProcessor();
     private EntityRelationTreeHandler entityRelationTreeHandler = new EntityRelationTreeHandler();
     private ResultMapInfoHandler resultMapInfoHandler = new ResultMapInfoHandler();
+    private MgxqlResultMapInfoHandler mgxqlResultMapInfoHandler = new MgxqlResultMapInfoHandler();
 
     public void execute(MapperInfo mapperInfo) {
         for (MethodInfo methodInfo : mapperInfo.getMethodInfoList()) {
@@ -47,12 +46,14 @@ public class MgxqlHandler {
             // 查询方法的结果集处理
             if (methodInfo.getMethodCommandType() == MethodCommandType.SELECT) {
                 SelectStatement selectStatement = (SelectStatement) methodInfo.getMgxqlStatement();
-                for (SelectItem selectItem : selectStatement.getSelectItems()) {
-                    if (selectItem.getType() == SelectItemType.COLUMN_ALL) {
-                        this.entityRelationTreeHandler.execute(mapperInfo, methodInfo);
-                        String resultMapId = resultMapInfoHandler.execute(mapperInfo, methodInfo);
-                        methodInfo.setResultMapId(resultMapId);
-                    }
+                List<JoinEntity> joinEntityList = selectStatement.getFromClause().getJoinEntities();
+                this.entityRelationTreeHandler.execute(mapperInfo, methodInfo);
+                if (ObjectUtils.isEmpty(joinEntityList)) {
+                    String resultMapId = resultMapInfoHandler.execute(mapperInfo, methodInfo);
+                    methodInfo.setResultMapId(resultMapId);
+                } else {
+                    String resultMapId = mgxqlResultMapInfoHandler.execute(mapperInfo, methodInfo);
+                    methodInfo.setResultMapId(resultMapId);
                 }
             }
 

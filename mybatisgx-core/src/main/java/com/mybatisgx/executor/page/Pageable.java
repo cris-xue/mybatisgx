@@ -17,14 +17,21 @@ public class Pageable {
 
     private List<Sort> sorts = new ArrayList();
 
-    public Pageable(Integer pageNo, Integer pageSize) {
+    private Pageable(Integer pageNo, Integer pageSize, List<Sort> sorts) {
         this.pageNo = pageNo;
         this.pageSize = pageSize;
     }
 
-    public void of(Integer pageNo, Integer pageSize) {
-        this.pageNo = pageNo;
-        this.pageSize = pageSize;
+    public static Pageable of(Integer pageNo, Integer pageSize) {
+        return new Pageable(pageNo, pageSize, null);
+    }
+
+    public static Pageable of(Integer pageNo, Integer pageSize, List<Sort> sorts) {
+        return new Pageable(pageNo, pageSize, sorts);
+    }
+
+    public static Pageable of(List<Sort> sorts) {
+        return new Pageable(null, null, sorts);
     }
 
     public Integer getPageNo() {

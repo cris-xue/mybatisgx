@@ -204,9 +204,7 @@ public class MgxqlHandler {
                     boundParam.setNotOperator(conditionNode.getNotOperator());
                     if (conditionNode.getColumnInfo() != null) {
                         BoundParamEntry entry = new BoundParamEntry();
-                        entry.setSqlExpression(new ConditionColumnExpression(
-                                conditionNode.getColumnInfo().getDbColumnName(),
-                                conditionNode.getColumnInfo().getTypeHandler()));
+                        entry.setSqlExpression(new ConditionColumnExpression(conditionNode.getColumnInfo().getDbColumnName(), conditionNode.getColumnInfo().getTypeHandler()));
                         boundParam.addEntry(entry);
                     }
                     conditionNode.setBoundParam(boundParam);
@@ -214,8 +212,7 @@ public class MgxqlHandler {
                 }
                 String paramValuePath = StringUtils.join(conditionNode.getParamValuePath(), ".");
                 MethodParamInfo methodParamInfo;
-                MgxqlSourceType sourceType = methodInfo.getMgxqlStatement() != null
-                        ? methodInfo.getMgxqlStatement().getMgxqlSourceType() : null;
+                MgxqlSourceType sourceType = methodInfo.getMgxqlStatement() != null ? methodInfo.getMgxqlStatement().getMgxqlSourceType() : null;
                 if (sourceType == MgxqlSourceType.ENTITY) {
                     methodParamInfo = this.bindEntitySourceParam(methodInfo, conditionNode, paramValuePath);
                 } else {
@@ -392,8 +389,7 @@ public class MgxqlHandler {
             for (int i = 0; i < composites.size(); i++) {
                 ColumnInfo composite = composites.get(i);
                 BoundParamEntry entry = new BoundParamEntry();
-                entry.setSqlExpression(new ConditionColumnExpression(
-                        composite.getDbColumnName(), composite.getTypeHandler()));
+                entry.setSqlExpression(new ConditionColumnExpression(composite.getDbColumnName(), composite.getTypeHandler()));
                 List<String> fullPath = new ArrayList<>(prefixPath);
                 fullPath.add(composite.getJavaColumnName());
                 entry.setParamPath(fullPath);
@@ -406,8 +402,7 @@ public class MgxqlHandler {
             boundParam.setKind(ParamKind.SIMPLE);
             BoundParamEntry entry = new BoundParamEntry();
             if (columnInfo != null) {
-                entry.setSqlExpression(new ConditionColumnExpression(
-                        columnInfo.getDbColumnName(), columnInfo.getTypeHandler()));
+                entry.setSqlExpression(new ConditionColumnExpression(columnInfo.getDbColumnName(), columnInfo.getTypeHandler()));
                 entry.setTypeHandler(columnInfo.getTypeHandler());
             }
             entry.setParamPath(prefixPath != null ? new ArrayList<>(prefixPath) : new ArrayList<>());

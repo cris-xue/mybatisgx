@@ -9,4 +9,6 @@ import org.apache.ibatis.annotations.Mapper;
 public interface UpdateBothDao extends CurdDao<ValidatorUser, Long> {
 
     int updateByName(ValidatorUser user, ValidatorUserQuery query);
+
+    int updateByNameLike(ValidatorUser user, ValidatorUserQuery query);
 }

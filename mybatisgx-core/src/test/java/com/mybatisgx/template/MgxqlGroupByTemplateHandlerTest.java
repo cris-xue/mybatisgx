@@ -3,6 +3,7 @@ package com.mybatisgx.template;
 import com.mybatisgx.dsl.mgxql.model.FieldReference;
 import com.mybatisgx.dsl.mgxql.model.GroupByClause;
 import com.mybatisgx.model.ColumnInfo;
+import com.mybatisgx.template.select.MgxqlGroupByTemplateHandler;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.FixMethodOrder;

@@ -1,4 +1,4 @@
-package com.mybatisgx.template;
+package com.mybatisgx.template.select;
 
 import com.mybatisgx.dsl.mgxql.model.OrderByClause;
 import com.mybatisgx.dsl.mgxql.model.OrderByItem;

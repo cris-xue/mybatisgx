@@ -4,6 +4,7 @@ import com.mybatisgx.dsl.mgxql.model.FieldReference;
 import com.mybatisgx.dsl.mgxql.model.OrderByClause;
 import com.mybatisgx.dsl.mgxql.model.OrderByItem;
 import com.mybatisgx.model.ColumnInfo;
+import com.mybatisgx.template.select.MgxqlOrderByTemplateHandler;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.FixMethodOrder;

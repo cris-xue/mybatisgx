@@ -1,12 +1,8 @@
-package com.mybatisgx.template;
+package com.mybatisgx.template.select;
 
 import com.mybatisgx.dsl.mgxql.model.*;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.dom4j.DocumentHelper;
-import org.dom4j.Element;
-
-import java.util.List;
 
 /**
  * HAVING 条件模板处理器，从 HavingExpression 树渲染 MyBatis XML

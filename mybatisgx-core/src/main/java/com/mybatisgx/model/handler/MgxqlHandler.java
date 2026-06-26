@@ -2,6 +2,7 @@ package com.mybatisgx.model.handler;
 
 import com.google.common.collect.Lists;
 import com.mybatisgx.annotation.Property;
+import com.mybatisgx.annotation.QueryColumn;
 import com.mybatisgx.annotation.Statement;
 import com.mybatisgx.api.MethodCommandType;
 import com.mybatisgx.dsl.method.MethodSyntaxProcessor;
@@ -135,6 +136,10 @@ public class MgxqlHandler {
 
         List<String> columnConditionList = new ArrayList<>();
         for (ColumnInfo columnInfo : entityInfo.getColumnInfoList()) {
+            QueryColumn queryColumn = columnInfo.getQueryColumn();
+            if (queryColumn != null && queryColumn.ignore()) {
+                continue;
+            }
             if (TypeUtils.typeEquals(columnInfo, RelationColumnInfo.class)) {
                 RelationColumnInfo relationColumnInfo = (RelationColumnInfo) columnInfo;
                 if (relationColumnInfo.getRelationType() == RelationType.MANY_TO_MANY) {

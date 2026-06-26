@@ -105,6 +105,10 @@ public class ColumnInfo {
      */
     private Transient nonPersistent;
     /**
+     * 查询字段注解
+     */
+    private QueryColumn queryColumn;
+    /**
      * 是否是乐观锁字段
      */
     private Version version;
@@ -305,6 +309,14 @@ public class ColumnInfo {
 
     public void setNonPersistent(Transient nonPersistent) {
         this.nonPersistent = nonPersistent;
+    }
+
+    public QueryColumn getQueryColumn() {
+        return queryColumn;
+    }
+
+    public void setQueryColumn(QueryColumn queryColumn) {
+        this.queryColumn = queryColumn;
     }
 
     public Version getVersion() {

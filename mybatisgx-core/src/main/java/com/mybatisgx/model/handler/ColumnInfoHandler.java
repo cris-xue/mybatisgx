@@ -55,6 +55,7 @@ public class ColumnInfoHandler {
             columnInfo.setDbColumnName(tableColumnName);
 
             columnInfo.setProperty(field.getAnnotation(Property.class));
+            columnInfo.setQueryColumn(field.getAnnotation(QueryColumn.class));
             columnInfo.setVersion(field.getAnnotation(Version.class));
             columnInfo.setLogicDelete(field.getAnnotation(LogicDelete.class));
 

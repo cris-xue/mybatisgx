@@ -211,13 +211,7 @@ public class MgxqlHandler {
                     continue;
                 }
                 String paramValuePath = StringUtils.join(conditionNode.getParamValuePath(), ".");
-                MethodParamInfo methodParamInfo;
-                MgxqlSourceType sourceType = methodInfo.getMgxqlStatement() != null ? methodInfo.getMgxqlStatement().getMgxqlSourceType() : null;
-                if (sourceType == MgxqlSourceType.ENTITY) {
-                    methodParamInfo = this.bindEntitySourceParam(methodInfo, conditionNode, paramValuePath);
-                } else {
-                    methodParamInfo = this.bindDefaultParam(methodInfo, conditionNode, paramValuePath);
-                }
+                MethodParamInfo methodParamInfo = this.bindParam(methodInfo, conditionNode, paramValuePath);
                 // 校验条件是否可以关联到参数，如果无法关联，后续执行数据库操作会报错
                 if (methodParamInfo == null) {
                     throw new MybatisgxException("%s方法条件没有对应的参数", methodInfo.getMethodName());
@@ -229,51 +223,48 @@ public class MgxqlHandler {
     }
 
     /**
-     * ENTITY 来源：paramValuePath 是查询实体字段名（如 idBetween, nameLike），
-     * 优先在查询实体中精确匹配，其次在操作实体中匹配
+     * 统一参数绑定优先级链：
+     * ① 方法简单参数有 @Param 注解(paramValuePath, id 条件支持复合类型) —— 仅非 ENTITY 来源
+     * ② 方法简单参数有 @Param 注解(paramValuePath 全小写)              —— 仅非 ENTITY 来源
+     * ③ 实体字段：queryEntity 优先(含后缀解析) → entity，首个命中即 early return —— 所有来源统一
+     * ④ 方法简单参数无 @Param 注解(arg{index})
+     * <p>①② 仅对非 ENTITY 来源生效：ENTITY 条件派生自 query 实体字段，paramValuePath 为基础字段名，
+     *    @Param 按基础名匹配会与后缀解析冲突（如 idIn 误绑 @Param("id") 而非 query.idIn）。
+     * <p>③ 内 queryEntity 优先于 entity：query 实体是 entity 字段超集，
+     * 且 UPDATE 双参数时 queryEntity 为 WHERE 条件源、entity 为 SET 值源。
      */
-    private MethodParamInfo bindEntitySourceParam(MethodInfo methodInfo, WhereConditionNode conditionNode, String paramValuePath) {
-        MethodParamInfo methodParamInfo = null;
+    private MethodParamInfo bindParam(MethodInfo methodInfo, WhereConditionNode conditionNode, String paramValuePath) {
+        MgxqlSourceType sourceType = methodInfo.getMgxqlStatement() != null ? methodInfo.getMgxqlStatement().getMgxqlSourceType() : null;
+        // ①② @Param 仅对非 ENTITY 来源生效：ENTITY 条件派生自 query 实体字段，paramValuePath 为基础字段名，
+        //    @Param 按基础名匹配会与后缀解析冲突（如 idIn 误绑 @Param("id") 而非 query.idIn）。
+        if (sourceType != MgxqlSourceType.ENTITY) {
+            MethodParamInfo methodParamInfo = this.getSimpleTypeConditionParam(methodInfo, conditionNode, paramValuePath);
+            if (methodParamInfo != null) {
+                return methodParamInfo;
+            }
+            methodParamInfo = this.getSimpleTypeConditionParam(methodInfo, conditionNode, paramValuePath.toLowerCase());
+            if (methodParamInfo != null) {
+                return methodParamInfo;
+            }
+        }
+        // ③ 实体字段：queryEntity 优先(含后缀解析) → entity，首个命中即 early return
         MethodParamInfo queryEntityParamInfo = methodInfo.getQueryEntityParamInfo();
         if (queryEntityParamInfo != null) {
-            methodParamInfo = this.getEntityTypeConditionParam(methodInfo, conditionNode, queryEntityParamInfo);
-        }
-        if (methodParamInfo == null) {
-            MethodParamInfo entityParamInfo = methodInfo.getEntityParamInfo();
-            if (entityParamInfo != null) {
-                methodParamInfo = this.getEntityTypeConditionParam(methodInfo, conditionNode, entityParamInfo);
+            MethodParamInfo methodParamInfo = this.getEntityTypeConditionParam(methodInfo, conditionNode, queryEntityParamInfo);
+            if (methodParamInfo != null) {
+                return methodParamInfo;
             }
         }
-        return methodParamInfo;
-    }
-
-    /**
-     * 处理查询条件和参数之间的关系，查询条件和参数之间是1对1关系，不要设计一对多关系，后续绑定参数很难处理
-     * 条件优先级是    方法简单参数有@Param注解(id条件支持复合类型) > 方法简单参数有@Param注解全小写(id条件支持复合类型) > 实体字段 > 方法简单参数无@Param注解
-     *
-     * METHOD_NAME / MANUAL 来源：按现有优先级链匹配
-     * @Param注解 → 小写形式 → 实体字段 → argN
-     */
-    private MethodParamInfo bindDefaultParam(MethodInfo methodInfo, WhereConditionNode conditionNode, String paramValuePath) {
-        MethodParamInfo methodParamInfo = this.getSimpleTypeConditionParam(methodInfo, conditionNode, paramValuePath);
-        if (methodParamInfo == null) {
-            methodParamInfo = this.getSimpleTypeConditionParam(methodInfo, conditionNode, paramValuePath.toLowerCase());
-        }
-        if (methodParamInfo == null) {
-            MethodParamInfo entityParamInfo = methodInfo.getEntityParamInfo();
-            if (entityParamInfo != null) {
-                methodParamInfo = this.getEntityTypeConditionParam(methodInfo, conditionNode, entityParamInfo);
-            }
-            MethodParamInfo queryEntityParamInfo = methodInfo.getQueryEntityParamInfo();
-            if (queryEntityParamInfo != null) {
-                methodParamInfo = this.getEntityTypeConditionParam(methodInfo, conditionNode, queryEntityParamInfo);
+        MethodParamInfo entityParamInfo = methodInfo.getEntityParamInfo();
+        if (entityParamInfo != null) {
+            MethodParamInfo methodParamInfo = this.getEntityTypeConditionParam(methodInfo, conditionNode, entityParamInfo);
+            if (methodParamInfo != null) {
+                return methodParamInfo;
             }
         }
-        if (methodParamInfo == null) {
-            String argName = String.format("arg%1$s", conditionNode.getIndex());
-            methodParamInfo = this.getSimpleTypeConditionParam(methodInfo, conditionNode, argName);
-        }
-        return methodParamInfo;
+        // ④ 方法简单参数无 @Param 注解(arg{index})
+        String argName = String.format("arg%1$s", conditionNode.getIndex());
+        return this.getSimpleTypeConditionParam(methodInfo, conditionNode, argName);
     }
 
     private MethodParamInfo getEntityTypeConditionParam(MethodInfo methodInfo, WhereConditionNode conditionNode, MethodParamInfo entityParamInfo) {

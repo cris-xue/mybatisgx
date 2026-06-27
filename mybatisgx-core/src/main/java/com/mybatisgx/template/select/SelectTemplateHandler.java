@@ -29,6 +29,7 @@ public class SelectTemplateHandler {
     private static final Logger logger = LoggerFactory.getLogger(SelectTemplateHandler.class);
 
     private SelectColumnSqlTemplateHandler selectColumnSqlTemplateHandler = new SelectColumnSqlTemplateHandler();
+    private MgxqlSelectColumnTemplateHandler mgxqlSelectColumnTemplateHandler = new MgxqlSelectColumnTemplateHandler();
     private SelectCountSqlTemplateHandler selectCountSqlTemplateHandler = new SelectCountSqlTemplateHandler();
     private WhereTemplateHandler whereTemplateHandler = new WhereTemplateHandler();
     private MgxqlWhereTemplateHandler mgxqlWhereTemplateHandler = new MgxqlWhereTemplateHandler();
@@ -54,20 +55,6 @@ public class SelectTemplateHandler {
         MapperInfo mapperInfo = methodInfo.getMapperInfo();
 
         this.selectItem(methodInfo, selectElement, selectXmlItemList);
-
-        /*SelectItemInfo selectItemInfo = methodInfo.getSelectItemInfo();
-        if (selectItemInfo.getSelectItemType() == SelectItemType.COLUMN) {
-            selectElement.addAttribute("resultMap", methodInfo.getResultMapId());
-            Class<?> methodReturnType = methodInfo.getMethodReturnInfo().getType();
-            ColumnEntityRelation columnEntityRelation = mapperInfo.getEntityRelationTree(methodReturnType);
-            PlainSelect plainSelect = selectColumnSqlTemplateHandler.buildSimpleSelectSql(columnEntityRelation);
-            selectXmlItemList.add(plainSelect.toString());
-        }
-        if (selectItemInfo.getSelectItemType() == SelectItemType.COUNT) {
-            selectElement.addAttribute("resultType", methodInfo.getMethodReturnInfo().getTypeName());
-            PlainSelect plainSelect = selectCountSqlTemplateHandler.buildSelectSql(mapperInfo.getEntityInfo());
-            selectXmlItemList.add(plainSelect.toString());
-        }*/
 
         MgxqlStatement mgxqlStatement = methodInfo.getMgxqlStatement();
         Element whereElement = null;
@@ -151,6 +138,21 @@ public class SelectTemplateHandler {
     private void selectItem(MethodInfo methodInfo, Element selectElement, List<Object> selectXmlItemList) {
         MapperInfo mapperInfo = methodInfo.getMapperInfo();
         SelectStatement selectStatement = (SelectStatement) methodInfo.getMgxqlStatement();
+        FromClause fromClause = selectStatement.getFromClause();
+        if (fromClause != null) {
+            // MGXQL 路径：按 FromClause 渲染 FROM/JOIN/ON，按 SelectItem 投影渲染列
+            Class<?> methodReturnType = methodInfo.getMethodReturnInfo().getType();
+            ColumnEntityRelation rootRelation = mapperInfo.getEntityRelationTree(methodReturnType);
+            PlainSelect plainSelect = mgxqlSelectColumnTemplateHandler.buildSelectSql(selectStatement, rootRelation);
+            selectXmlItemList.add(plainSelect.toString());
+            if (mgxqlSelectColumnTemplateHandler.hasAggregate(selectStatement)) {
+                selectElement.addAttribute("resultType", methodInfo.getMethodReturnInfo().getTypeName());
+            } else {
+                selectElement.addAttribute("resultMap", methodInfo.getResultMapId());
+            }
+            return;
+        }
+        // 回退：无 FromClause 时按注解 EntityRelationTree 全展开
         for (SelectItem selectItem : selectStatement.getSelectItems()) {
             if (selectItem.getType() == SelectItemType.COLUMN_ALL) {
                 selectElement.addAttribute("resultMap", methodInfo.getResultMapId());

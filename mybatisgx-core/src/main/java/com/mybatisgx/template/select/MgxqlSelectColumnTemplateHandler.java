@@ -1,18 +1,8 @@
 package com.mybatisgx.template.select;
 
-import com.mybatisgx.dsl.mgxql.model.FieldReference;
-import com.mybatisgx.dsl.mgxql.model.FromClause;
-import com.mybatisgx.dsl.mgxql.model.FromEntity;
-import com.mybatisgx.dsl.mgxql.model.JoinEntity;
-import com.mybatisgx.dsl.mgxql.model.JoinType;
 import com.mybatisgx.dsl.mgxql.model.SelectItemType;
-import com.mybatisgx.dsl.mgxql.model.SelectStatement;
-import com.mybatisgx.model.ColumnEntityRelation;
-import com.mybatisgx.model.ColumnInfo;
-import com.mybatisgx.model.EntityInfo;
-import com.mybatisgx.model.ForeignKeyInfo;
-import com.mybatisgx.model.RelationColumnInfo;
-import com.mybatisgx.model.RelationType;
+import com.mybatisgx.dsl.mgxql.model.*;
+import com.mybatisgx.model.*;
 import com.mybatisgx.template.MybatisgxSqlBuilder;
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.Expression;
@@ -21,21 +11,14 @@ import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
-import net.sf.jsqlparser.statement.select.AllColumns;
-import net.sf.jsqlparser.statement.select.Join;
-import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.SelectItem;
-import net.sf.jsqlparser.statement.select.TableFunction;
+import net.sf.jsqlparser.statement.select.*;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * MGXQL 专用查询列渲染处理器。
@@ -251,7 +234,7 @@ public class MgxqlSelectColumnTemplateHandler {
      */
     @SuppressWarnings("unchecked")
     private void addColumnAllSelectItems(PlainSelect plainSelect, com.mybatisgx.dsl.mgxql.model.SelectItem selectItem,
-                                          Map<String, ColumnEntityRelation> aliasMap, ColumnEntityRelation rootRelation) {
+                                         Map<String, ColumnEntityRelation> aliasMap, ColumnEntityRelation rootRelation) {
         String entityAlias = selectItem.getEntityAlias();
         ColumnEntityRelation node;
         if (StringUtils.isBlank(entityAlias)) {
@@ -293,7 +276,7 @@ public class MgxqlSelectColumnTemplateHandler {
             columnAlias = tableAlias + "_" + dbAlias;
         }
         Table table = new Table(tableAlias);
-        SelectItem<Column> item = new SelectItem<Column>();
+        SelectItem<Column> item = new SelectItem<>();
         item.withExpression(new Column(table, columnInfo.getDbColumnName()));
         item.setAlias(new Alias(columnAlias));
         plainSelect.addSelectItems(item);
@@ -388,7 +371,7 @@ public class MgxqlSelectColumnTemplateHandler {
      * </code>
      */
     private void buildManyToManyJoin(PlainSelect plainSelect, ColumnEntityRelation rightTreeNode,
-                                      String leftTableAlias, String rightTableAlias) {
+                                     String leftTableAlias, String rightTableAlias) {
         String middleTableName = rightTreeNode.getMiddleTableName();
         String entityTableName = rightTreeNode.getTableName();
 
@@ -424,8 +407,7 @@ public class MgxqlSelectColumnTemplateHandler {
      * ON 条件由 relationColumnInfo 的外键自动推导，复刻
      * {@link SelectColumnSqlTemplateHandler} 的 isMappedBy 分支方向。
      */
-    private void buildOnExpression(Join join, RelationColumnInfo relationColumnInfo,
-                                   String leftTableAlias, String rightTableAlias) {
+    private void buildOnExpression(Join join, RelationColumnInfo relationColumnInfo, String leftTableAlias, String rightTableAlias) {
         RelationColumnInfo mappedByRelation = relationColumnInfo.getMappedByRelationColumnInfo();
         boolean isMappedBy = mappedByRelation != null;
         List<ForeignKeyInfo> fkList = isMappedBy
@@ -461,9 +443,8 @@ public class MgxqlSelectColumnTemplateHandler {
         join.addOnExpression(expression);
     }
 
-    private void buildEntityTableOnMiddleTable(String entityTableNameAlias, String middleTableName,
-                                               List<ForeignKeyInfo> foreignKeyColumnInfoList, Join join) {
-        List<Expression> onExpressionList = new ArrayList<Expression>();
+    private void buildEntityTableOnMiddleTable(String entityTableNameAlias, String middleTableName, List<ForeignKeyInfo> foreignKeyColumnInfoList, Join join) {
+        List<Expression> onExpressionList = new ArrayList<>();
         for (ForeignKeyInfo foreignKeyInfo : foreignKeyColumnInfoList) {
             ColumnInfo foreignKeyColumnInfo = foreignKeyInfo.getColumnInfo();
             ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();
@@ -474,9 +455,8 @@ public class MgxqlSelectColumnTemplateHandler {
         join.addOnExpression(this.combineAnd(onExpressionList));
     }
 
-    private void buildMiddleTableOnEntityTable(String middleTableName, String entityTableNameAlias,
-                                              List<ForeignKeyInfo> foreignKeyColumnInfoList, Join join) {
-        List<Expression> onExpressionList = new ArrayList<Expression>();
+    private void buildMiddleTableOnEntityTable(String middleTableName, String entityTableNameAlias, List<ForeignKeyInfo> foreignKeyColumnInfoList, Join join) {
+        List<Expression> onExpressionList = new ArrayList<>();
         for (ForeignKeyInfo foreignKeyInfo : foreignKeyColumnInfoList) {
             ColumnInfo foreignKeyColumnInfo = foreignKeyInfo.getColumnInfo();
             ColumnInfo referencedColumnInfo = foreignKeyInfo.getReferencedColumnInfo();

@@ -31,10 +31,8 @@ public class SelectTemplateHandler {
     private SelectColumnSqlTemplateHandler selectColumnSqlTemplateHandler = new SelectColumnSqlTemplateHandler();
     private MgxqlSelectColumnTemplateHandler mgxqlSelectColumnTemplateHandler = new MgxqlSelectColumnTemplateHandler();
     private SelectCountSqlTemplateHandler selectCountSqlTemplateHandler = new SelectCountSqlTemplateHandler();
-    private WhereTemplateHandler whereTemplateHandler = new WhereTemplateHandler();
     private MgxqlWhereTemplateHandler mgxqlWhereTemplateHandler = new MgxqlWhereTemplateHandler();
     private HavingTemplateHandler havingTemplateHandler = new HavingTemplateHandler();
-    private OrderByTemplateHandler orderByTemplateHandler = new OrderByTemplateHandler();
     private MgxqlOrderByTemplateHandler mgxqlOrderByTemplateHandler = new MgxqlOrderByTemplateHandler();
     private MgxqlGroupByTemplateHandler mgxqlGroupByTemplateHandler = new MgxqlGroupByTemplateHandler();
 

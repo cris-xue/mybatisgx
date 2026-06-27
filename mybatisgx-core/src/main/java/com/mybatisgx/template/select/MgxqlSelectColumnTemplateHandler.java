@@ -165,11 +165,11 @@ public class MgxqlSelectColumnTemplateHandler {
             String funcName = selectItem.getType().getValue();
             Function function = new Function();
             function.setName(funcName);
-            FieldReference fieldRef = selectItem.getAggregateFieldRef();
-            if (fieldRef != null && fieldRef.getColumnInfo() != null) {
-                String tableAlias = this.ctx.resolveTableAlias(fieldRef.getEntityAlias());
-                Column col = new Column(new Table(tableAlias), fieldRef.getColumnInfo().getDbColumnName());
-                function.setParameters(new ExpressionList(Arrays.asList((Expression) col)));
+            FieldReference fieldReference = selectItem.getAggregateFieldRef();
+            if (fieldReference != null && fieldReference.getColumnInfo() != null) {
+                String tableAlias = this.ctx.resolveTableAlias(fieldReference.getEntityAlias());
+                Column column = new Column(new Table(tableAlias), fieldReference.getColumnInfo().getDbColumnName());
+                function.setParameters(new ExpressionList(Arrays.asList((Expression) column)));
             } else {
                 function.setParameters(new ExpressionList(Arrays.asList((Expression) new AllColumns())));
             }

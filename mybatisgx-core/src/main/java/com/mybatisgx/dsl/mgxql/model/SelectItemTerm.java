@@ -6,6 +6,7 @@ package com.mybatisgx.dsl.mgxql.model;
  * @author 薛承城
  * @date 2025/11/17 10:19
  */
+@Deprecated
 public class SelectItemTerm {
 
     /**

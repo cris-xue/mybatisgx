@@ -453,7 +453,7 @@ public class MgxqlAstHandlerTest {
     @Test
     public void test043_multipleLeftJoins() {
         // 测试多个left join
-        SelectStatement stmt = (SelectStatement) parseWithoutCheck("select user.*, role.* from User user left join Role role on user = role left join Menu menu on role = menu");
+        SelectStatement stmt = (SelectStatement) parseWithoutCheck("select user.*, role.* from User user left join Role role on user = role left join Menu menu on user = menu");
         FromClause fromClause = stmt.getFromClause();
         Assert.assertEquals(2, fromClause.getJoinEntities().size());
         Assert.assertEquals("Role", fromClause.getJoinEntities().get(0).getEntityName());

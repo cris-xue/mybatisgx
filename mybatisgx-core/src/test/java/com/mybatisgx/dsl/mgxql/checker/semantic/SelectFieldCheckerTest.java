@@ -155,4 +155,45 @@ public class SelectFieldCheckerTest {
         }
         Assert.assertTrue(hasError);
     }
+
+    @Test
+    public void test09_selectStarWithJoin_shouldError() {
+        SelectStatement stmt = buildSelectStmt();
+        stmt.getFromClause().addJoinEntity(new JoinEntity("Role", "role", JoinType.LEFT));
+        SelectItem starItem = new SelectItem();
+        starItem.setType(SelectItemType.COLUMN_ALL);
+        stmt.addSelectItem(starItem);
+
+        checker.check(stmt, context);
+        Assert.assertTrue(context.hasErrors());
+        boolean hasError = false;
+        for (String error : context.getErrors()) {
+            if (error.contains("SELECT * 不合法")) {
+                hasError = true;
+            }
+        }
+        Assert.assertTrue("存在 JOIN 时 SELECT * 应报错", hasError);
+    }
+
+    @Test
+    public void test10_aggregateWithColumnCoexistence_shouldError() {
+        SelectStatement stmt = buildSelectStmt();
+        SelectItem columnItem = new SelectItem();
+        columnItem.setType(SelectItemType.COLUMN);
+        columnItem.setFieldName("name");
+        stmt.addSelectItem(columnItem);
+        SelectItem aggregateItem = new SelectItem();
+        aggregateItem.setType(SelectItemType.COUNT);
+        aggregateItem.setAggregateFieldRef(new FieldReference(null, "id"));
+        stmt.addSelectItem(aggregateItem);
+
+        checker.check(stmt, context);
+        boolean hasError = false;
+        for (String error : context.getErrors()) {
+            if (error.contains("聚合函数与普通查询字段不可共存")) {
+                hasError = true;
+            }
+        }
+        Assert.assertTrue("聚合与普通字段共存应报错", hasError);
+    }
 }

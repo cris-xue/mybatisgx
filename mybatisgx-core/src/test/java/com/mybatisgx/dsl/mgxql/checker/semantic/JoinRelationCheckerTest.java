@@ -41,7 +41,10 @@ public class JoinRelationCheckerTest {
         stmt.setCommandType(SqlCommandType.SELECT);
         FromClause fromClause = new FromClause();
         fromClause.setPrimaryEntity(new FromEntity(primaryEntity, primaryAlias));
-        fromClause.addJoinEntity(new JoinEntity(joinEntity, joinAlias, JoinType.LEFT));
+        JoinEntity join = new JoinEntity(joinEntity, joinAlias, JoinType.LEFT);
+        join.setOnLeftAlias(primaryAlias);
+        join.setOnRightAlias(joinAlias);
+        fromClause.addJoinEntity(join);
         stmt.setFromClause(fromClause);
         return stmt;
     }
@@ -64,6 +67,7 @@ public class JoinRelationCheckerTest {
         SelectStatement stmt = buildSelectWithJoin("User", "user", "Role", "role");
 
         CheckerContext context = new CheckerContext(userEntityInfo);
+        context.registerAlias("user", userEntityInfo);
         context.registerAlias("role", roleEntityInfo);
         checker.check(stmt, context);
         Assert.assertFalse(context.hasErrors());
@@ -84,7 +88,8 @@ public class JoinRelationCheckerTest {
         SelectStatement stmt = buildSelectWithJoin("User", "user", "User", "user2");
 
         CheckerContext context = new CheckerContext(userEntityInfo);
-        // 注册 user2 别名指向 User 自身（User 与 User 无关联关系）
+        // 注册 user/user2 别名均指向 User 自身（User 与 User 无关联关系）
+        context.registerAlias("user", userEntityInfo);
         context.registerAlias("user2", userEntityInfo);
         checker.check(stmt, context);
         Assert.assertTrue(context.hasErrors());

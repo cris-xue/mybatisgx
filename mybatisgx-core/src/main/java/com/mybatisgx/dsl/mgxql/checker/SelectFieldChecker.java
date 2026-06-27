@@ -26,18 +26,26 @@ public class SelectFieldChecker extends FieldChecker {
     public void check(MgxqlStatement mgxqlStatement, CheckerContext context) {
         SelectStatement selectStatement = (SelectStatement) mgxqlStatement;
 
-        // 校验SELECT字段
+        // 校验规则：聚合与普通字段不可共存
+        this.checkAggregateCoexistence(selectStatement, context);
+        // 校验规则：select * 仅在非 join 场景合法
+        this.checkSelectStarWithJoin(selectStatement, context);
+
+        // 校验并绑定 SELECT 字段
         if (selectStatement.getSelectItems() != null) {
             for (SelectItem selectItem : selectStatement.getSelectItems()) {
                 if (selectItem.getType() == SelectItemType.COLUMN && selectItem.getFieldName() != null) {
-                    this.checkFieldExistence(selectItem.getEntityAlias(), selectItem.getFieldName(), "SELECT", context);
+                    com.mybatisgx.model.ColumnInfo columnInfo = this.resolveColumnInfo(selectItem.getEntityAlias(), selectItem.getFieldName(), "SELECT", context);
+                    if (columnInfo != null) {
+                        selectItem.setColumnInfo(columnInfo);
+                    }
                 }
-                // 聚合函数参数字段校验（COUNT的"*"和"1"是约定值，不是真实字段引用，跳过校验）
+                // 聚合函数参数字段校验与绑定（COUNT的"*"和"1"是约定值，跳过）
                 if (selectItem.getAggregateFieldRef() != null
                         && !(selectItem.getType() == SelectItemType.COUNT
                         && isCountConventionValue(selectItem.getAggregateFieldRef().getFieldName()))) {
                     FieldReference fieldRef = selectItem.getAggregateFieldRef();
-                    this.checkFieldExistence(fieldRef.getEntityAlias(), fieldRef.getFieldName(), "SELECT", context);
+                    this.resolveAndSetFieldReferenceColumnInfo(fieldRef, "SELECT", context);
                 }
             }
         }
@@ -92,5 +100,45 @@ public class SelectFieldChecker extends FieldChecker {
 
     private static boolean isCountConventionValue(String fieldName) {
         return "*".equals(fieldName) || "1".equals(fieldName);
+    }
+
+    /**
+     * 校验聚合函数与普通查询字段不可共存
+     */
+    private void checkAggregateCoexistence(SelectStatement selectStatement, CheckerContext context) {
+        if (selectStatement.getSelectItems() == null) {
+            return;
+        }
+        boolean hasAggregate = false;
+        boolean hasColumn = false;
+        for (SelectItem selectItem : selectStatement.getSelectItems()) {
+            if (selectItem.getType() == SelectItemType.COLUMN || selectItem.getType() == SelectItemType.COLUMN_ALL) {
+                hasColumn = true;
+            } else {
+                hasAggregate = true;
+            }
+        }
+        if (hasAggregate && hasColumn) {
+            context.addError("聚合函数与普通查询字段不可共存于同一 SELECT 子句");
+        }
+    }
+
+    /**
+     * 校验 select *（无 entityAlias）仅在非 join 场景合法
+     */
+    private void checkSelectStarWithJoin(SelectStatement selectStatement, CheckerContext context) {
+        FromClause fromClause = selectStatement.getFromClause();
+        if (fromClause == null || fromClause.getJoinEntities() == null || fromClause.getJoinEntities().isEmpty()) {
+            return;
+        }
+        if (selectStatement.getSelectItems() == null) {
+            return;
+        }
+        for (SelectItem selectItem : selectStatement.getSelectItems()) {
+            if (selectItem.getType() == SelectItemType.COLUMN_ALL
+                    && (selectItem.getEntityAlias() == null || selectItem.getEntityAlias().isEmpty())) {
+                context.addError("存在 JOIN 时 SELECT * 不合法，请使用 'select 实体别名.*' 明确实体归属");
+            }
+        }
     }
 }

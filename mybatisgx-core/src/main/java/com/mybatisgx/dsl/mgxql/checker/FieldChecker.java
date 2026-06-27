@@ -75,25 +75,34 @@ public abstract class FieldChecker implements MgxqlSemanticChecker {
      * 校验字段是否存在于对应实体中
      */
     protected void checkFieldExistence(String entityAlias, String fieldName, String clauseName, CheckerContext context) {
+        this.resolveColumnInfo(entityAlias, fieldName, clauseName, context);
+    }
+
+    /**
+     * 解析字段对应的 ColumnInfo 并返回（含校验报错）。按 entityAlias 从 CheckerContext 取 EntityInfo，无别名时用主实体
+     */
+    protected ColumnInfo resolveColumnInfo(String entityAlias, String fieldName, String clauseName, CheckerContext context) {
         EntityInfo entityInfo;
         if (entityAlias != null && !entityAlias.isEmpty()) {
             entityInfo = context.getEntityInfoByAlias(entityAlias);
             if (entityInfo == null) {
                 // 别名未找到实体，跳过（由EntityChecker报告错误）
-                return;
+                return null;
             }
         } else {
             // 没有别名时使用主实体
             entityInfo = context.getPrimaryEntityInfo();
             if (entityInfo == null) {
-                return;
+                return null;
             }
         }
 
         ColumnInfo columnInfo = entityInfo.getColumnInfo(fieldName);
         if (columnInfo == null) {
             context.addError(String.format("%s 子句中字段 '%s' 在实体 '%s' 中不存在", clauseName, fieldName, entityInfo.getClazz().getSimpleName()));
+            return null;
         }
+        return columnInfo;
     }
 
     /**

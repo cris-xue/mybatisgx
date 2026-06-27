@@ -43,8 +43,11 @@ public class EntityChecker implements MgxqlSemanticChecker {
         FromEntity primaryEntity = fromClause.getPrimaryEntity();
         if (primaryEntity != null) {
             EntityInfo entityInfo = this.resolveEntityInfo(primaryEntity.getEntityName(), context);
-            if (entityInfo != null && primaryEntity.getAlias() != null) {
-                context.registerAlias(primaryEntity.getAlias(), entityInfo);
+            if (entityInfo != null) {
+                primaryEntity.setEntityInfo(entityInfo);
+                if (primaryEntity.getAlias() != null) {
+                    context.registerAlias(primaryEntity.getAlias(), entityInfo);
+                }
             }
         }
 
@@ -52,8 +55,11 @@ public class EntityChecker implements MgxqlSemanticChecker {
         if (fromClause.getJoinEntities() != null) {
             for (JoinEntity joinEntity : fromClause.getJoinEntities()) {
                 EntityInfo entityInfo = this.resolveEntityInfo(joinEntity.getEntityName(), context);
-                if (entityInfo != null && joinEntity.getAlias() != null) {
-                    context.registerAlias(joinEntity.getAlias(), entityInfo);
+                if (entityInfo != null) {
+                    joinEntity.setEntityInfo(entityInfo);
+                    if (joinEntity.getAlias() != null) {
+                        context.registerAlias(joinEntity.getAlias(), entityInfo);
+                    }
                 }
             }
         }

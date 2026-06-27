@@ -46,14 +46,17 @@ public class MgxqlHandler {
             // 查询方法的结果集处理
             if (methodInfo.getMethodCommandType() == MethodCommandType.SELECT) {
                 SelectStatement selectStatement = (SelectStatement) methodInfo.getMgxqlStatement();
-                List<JoinEntity> joinEntityList = selectStatement.getFromClause().getJoinEntities();
-                this.entityRelationTreeHandler.execute(mapperInfo, methodInfo);
-                if (ObjectUtils.isEmpty(joinEntityList)) {
-                    String resultMapId = resultMapInfoHandler.execute(mapperInfo, methodInfo);
-                    methodInfo.setResultMapId(resultMapId);
-                } else {
-                    String resultMapId = mgxqlResultMapInfoHandler.execute(mapperInfo, methodInfo);
-                    methodInfo.setResultMapId(resultMapId);
+                List<SelectItem> selectItemList = selectStatement.getSelectItems();
+                if (!(selectItemList.size() == 1 && selectItemList.get(0).getType().hasAggregateFunction())) {
+                    List<JoinEntity> joinEntityList = selectStatement.getFromClause().getJoinEntities();
+                    this.entityRelationTreeHandler.execute(mapperInfo, methodInfo);
+                    if (ObjectUtils.isEmpty(joinEntityList)) {
+                        String resultMapId = resultMapInfoHandler.execute(mapperInfo, methodInfo);
+                        methodInfo.setResultMapId(resultMapId);
+                    } else {
+                        String resultMapId = mgxqlResultMapInfoHandler.execute(mapperInfo, methodInfo);
+                        methodInfo.setResultMapId(resultMapId);
+                    }
                 }
             }
 

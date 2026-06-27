@@ -35,5 +35,12 @@ public enum SelectItemType {
     /**
      * sum聚合函数
      */
-    SUM
+    SUM;
+
+    public boolean hasAggregateFunction() {
+        if (this.name().equals(SelectItemType.COLUMN_ALL.name()) || this.name().equals(SelectItemType.COLUMN.name())) {
+            return false;
+        }
+        return true;
+    }
 }

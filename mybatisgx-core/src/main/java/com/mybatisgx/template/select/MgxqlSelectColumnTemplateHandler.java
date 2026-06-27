@@ -165,7 +165,7 @@ public class MgxqlSelectColumnTemplateHandler {
             String funcName = selectItem.getType().getValue();
             Function function = new Function();
             function.setName(funcName);
-            FieldReference fieldReference = selectItem.getAggregateFieldRef();
+            FieldReference fieldReference = selectItem.getFieldRef();
             if (fieldReference != null && fieldReference.getColumnInfo() != null) {
                 String tableAlias = this.ctx.resolveTableAlias(fieldReference.getEntityAlias());
                 Column column = new Column(new Table(tableAlias), fieldReference.getColumnInfo().getDbColumnName());

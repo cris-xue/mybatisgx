@@ -34,19 +34,20 @@ public class SelectFieldChecker extends FieldChecker {
         // 校验并绑定 SELECT 字段
         if (selectStatement.getSelectItems() != null) {
             for (SelectItem selectItem : selectStatement.getSelectItems()) {
-                if (selectItem.getType() == SelectItemType.COLUMN && selectItem.getFieldName() != null) {
-                    com.mybatisgx.model.ColumnInfo columnInfo = this.resolveColumnInfo(selectItem.getEntityAlias(), selectItem.getFieldName(), "SELECT", context);
-                    if (columnInfo != null) {
-                        selectItem.setColumnInfo(columnInfo);
-                    }
+                FieldReference fieldRef = selectItem.getFieldRef();
+                if (fieldRef == null) {
+                    continue;
                 }
-                // 聚合函数参数字段校验与绑定（COUNT的"*"和"1"是约定值，跳过）
-                if (selectItem.getAggregateFieldRef() != null
-                        && !(selectItem.getType() == SelectItemType.COUNT
-                        && isCountConventionValue(selectItem.getAggregateFieldRef().getFieldName()))) {
-                    FieldReference fieldRef = selectItem.getAggregateFieldRef();
-                    this.resolveAndSetFieldReferenceColumnInfo(fieldRef, "SELECT", context);
+                // COLUMN_ALL 不绑定 ColumnInfo（通过 entityAlias 关联 FromEntity.entityInfo 展开全部列）
+                if (selectItem.getType() == SelectItemType.COLUMN_ALL) {
+                    continue;
                 }
+                // COUNT 的 "*" 和 "1" 是约定值，跳过字段校验与绑定
+                if (selectItem.getType() == SelectItemType.COUNT
+                        && isCountConventionValue(fieldRef.getFieldName())) {
+                    continue;
+                }
+                this.resolveAndSetFieldReferenceColumnInfo(fieldRef, "SELECT", context);
             }
         }
 

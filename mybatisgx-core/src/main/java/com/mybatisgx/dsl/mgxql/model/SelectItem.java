@@ -15,21 +15,10 @@ public class SelectItem {
      */
     private SelectItemType type;
     /**
-     * 实体别名，如 user（可选）
+     * 字段引用，统一表达三种态：
+     * COLUMN 存解析出的字段引用；聚合存聚合参数字段引用；COLUMN_ALL 存 FieldReference(alias, "*")
      */
-    private String entityAlias;
-    /**
-     * 字段名或 *
-     */
-    private String fieldName;
-    /**
-     * 聚合函数参数字段引用，如 count(user.id) 中的 FieldReference(entityAlias="user", fieldName="id")
-     */
-    private FieldReference aggregateFieldRef;
-    /**
-     * 语义校验阶段绑定的列元数据，COLUMN 类型 SELECT 渲染直接读取 dbColumnName
-     */
-    private ColumnInfo columnInfo;
+    private FieldReference fieldRef;
 
     public SelectItemType getType() {
         return type;
@@ -39,35 +28,32 @@ public class SelectItem {
         this.type = type;
     }
 
+    public FieldReference getFieldRef() {
+        return fieldRef;
+    }
+
+    public void setFieldRef(FieldReference fieldRef) {
+        this.fieldRef = fieldRef;
+    }
+
+    /**
+     * 委托 fieldRef.getEntityAlias()，便于调用方沿用旧访问方式
+     */
     public String getEntityAlias() {
-        return entityAlias;
+        return fieldRef != null ? fieldRef.getEntityAlias() : null;
     }
 
-    public void setEntityAlias(String entityAlias) {
-        this.entityAlias = entityAlias;
-    }
-
+    /**
+     * 委托 fieldRef.getFieldName()，便于调用方沿用旧访问方式
+     */
     public String getFieldName() {
-        return fieldName;
+        return fieldRef != null ? fieldRef.getFieldName() : null;
     }
 
-    public void setFieldName(String fieldName) {
-        this.fieldName = fieldName;
-    }
-
-    public FieldReference getAggregateFieldRef() {
-        return aggregateFieldRef;
-    }
-
-    public void setAggregateFieldRef(FieldReference aggregateFieldRef) {
-        this.aggregateFieldRef = aggregateFieldRef;
-    }
-
+    /**
+     * 委托 fieldRef.getColumnInfo()，便于调用方沿用旧访问方式
+     */
     public ColumnInfo getColumnInfo() {
-        return columnInfo;
-    }
-
-    public void setColumnInfo(ColumnInfo columnInfo) {
-        this.columnInfo = columnInfo;
+        return fieldRef != null ? fieldRef.getColumnInfo() : null;
     }
 }

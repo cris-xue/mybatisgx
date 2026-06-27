@@ -42,10 +42,11 @@ public class FieldAliasChecker implements MgxqlSyntaxChecker {
                             "SELECT", hasMultipleEntities, isDeleteOrUpdate, context);
                 }
                 // 聚合函数参数字段（COUNT的"*"和"1"是约定值，不是真实字段引用，跳过校验）
-                if (selectItem.getAggregateFieldRef() != null
+                if (selectItem.getType() != null && selectItem.getType().hasAggregateFunction()
+                        && selectItem.getFieldRef() != null
                         && !(selectItem.getType() == SelectItemType.COUNT
-                        && isCountConventionValue(selectItem.getAggregateFieldRef().getFieldName()))) {
-                    FieldReference fieldRef = selectItem.getAggregateFieldRef();
+                        && isCountConventionValue(selectItem.getFieldRef().getFieldName()))) {
+                    FieldReference fieldRef = selectItem.getFieldRef();
                     checkFieldAlias(fieldRef.getEntityAlias(), fieldRef.getFieldName(),
                             "SELECT", hasMultipleEntities, isDeleteOrUpdate, context);
                 }

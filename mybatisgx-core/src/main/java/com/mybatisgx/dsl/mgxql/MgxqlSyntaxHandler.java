@@ -153,16 +153,14 @@ public class MgxqlSyntaxHandler {
                 if (selectItem.select_column_all() != null) {
                     item.setType(SelectItemType.COLUMN_ALL);
                     MgxqlParser.Select_column_allContext columnAll = selectItem.select_column_all();
-                    if (columnAll.entity_name_alias() != null) {
-                        item.setEntityAlias(stripBackticks(columnAll.entity_name_alias().getText()));
-                    }
-                    item.setFieldName("*");
+                    String allAlias = columnAll.entity_name_alias() != null
+                            ? stripBackticks(columnAll.entity_name_alias().getText()) : null;
+                    item.setFieldRef(new FieldReference(allAlias, "*"));
                 } else if (selectItem.select_column_custom() != null) {
                     item.setType(SelectItemType.COLUMN);
                     MgxqlParser.Select_column_customContext columnCustom = selectItem.select_column_custom();
                     FieldReference fieldRef = parseFieldReference(columnCustom.field_reference());
-                    item.setEntityAlias(fieldRef.getEntityAlias());
-                    item.setFieldName(fieldRef.getFieldName());
+                    item.setFieldRef(fieldRef);
                 } else if (selectItem.aggregate_function() != null) {
                     MgxqlParser.Aggregate_functionContext aggregateFunction = selectItem.aggregate_function();
                     parseAggregateFunction(item, aggregateFunction);
@@ -187,7 +185,7 @@ public class MgxqlSyntaxHandler {
                 } else if (funcNameCtx.select_sum() != null) {
                     item.setType(SelectItemType.SUM);
                 }
-                item.setAggregateFieldRef(fieldRef);
+                item.setFieldRef(fieldRef);
                 return;
             }
 
@@ -203,7 +201,7 @@ public class MgxqlSyntaxHandler {
                 } else if (countArgCtx.field_reference() != null) {
                     fieldRef = parseFieldReference(countArgCtx.field_reference());
                 }
-                item.setAggregateFieldRef(fieldRef);
+                item.setFieldRef(fieldRef);
             }
         }
     }
@@ -492,15 +490,13 @@ public class MgxqlSyntaxHandler {
                 default: throw new MybatisgxException("不支持的聚合函数类型: " + aggItem.getType());
             }
             String argument = null;
-            if (aggItem.getAggregateFieldRef() != null) {
-                FieldReference fieldRef = aggItem.getAggregateFieldRef();
+            FieldReference fieldRef = aggItem.getFieldRef();
+            if (fieldRef != null) {
                 if (fieldRef.getEntityAlias() != null) {
                     argument = fieldRef.getEntityAlias() + "." + fieldRef.getFieldName();
                 } else {
                     argument = fieldRef.getFieldName();
                 }
-            } else if ("*".equals(aggItem.getFieldName())) {
-                argument = "*";
             }
             return new com.mybatisgx.dsl.mgxql.model.expression.HavingAggregateExpression(function, argument);
         }

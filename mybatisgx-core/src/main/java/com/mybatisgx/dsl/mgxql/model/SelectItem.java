@@ -1,5 +1,7 @@
 package com.mybatisgx.dsl.mgxql.model;
 
+import com.mybatisgx.model.ColumnInfo;
+
 /**
  * MGXQL查询项模型
  *
@@ -24,6 +26,10 @@ public class SelectItem {
      * 聚合函数参数字段引用，如 count(user.id) 中的 FieldReference(entityAlias="user", fieldName="id")
      */
     private FieldReference aggregateFieldRef;
+    /**
+     * 语义校验阶段绑定的列元数据，COLUMN 类型 SELECT 渲染直接读取 dbColumnName
+     */
+    private ColumnInfo columnInfo;
 
     public SelectItemType getType() {
         return type;
@@ -55,5 +61,13 @@ public class SelectItem {
 
     public void setAggregateFieldRef(FieldReference aggregateFieldRef) {
         this.aggregateFieldRef = aggregateFieldRef;
+    }
+
+    public ColumnInfo getColumnInfo() {
+        return columnInfo;
+    }
+
+    public void setColumnInfo(ColumnInfo columnInfo) {
+        this.columnInfo = columnInfo;
     }
 }

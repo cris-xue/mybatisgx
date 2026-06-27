@@ -1,5 +1,7 @@
 package com.mybatisgx.dsl.mgxql.model;
 
+import com.mybatisgx.model.RelationColumnInfo;
+
 /**
  * MGXQL JOIN实体模型
  *
@@ -16,6 +18,10 @@ public class JoinEntity extends FromEntity {
     private String onLeftAlias;
 
     private String onRightAlias;
+    /**
+     * 语义校验阶段绑定的关联关系元数据，ON 条件由其外键信息自动推导
+     */
+    private RelationColumnInfo relationColumnInfo;
 
     public JoinEntity() {
     }
@@ -47,5 +53,13 @@ public class JoinEntity extends FromEntity {
 
     public void setOnRightAlias(String onRightAlias) {
         this.onRightAlias = onRightAlias;
+    }
+
+    public RelationColumnInfo getRelationColumnInfo() {
+        return relationColumnInfo;
+    }
+
+    public void setRelationColumnInfo(RelationColumnInfo relationColumnInfo) {
+        this.relationColumnInfo = relationColumnInfo;
     }
 }

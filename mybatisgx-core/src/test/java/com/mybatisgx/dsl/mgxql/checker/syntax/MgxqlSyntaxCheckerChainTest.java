@@ -31,7 +31,7 @@ public class MgxqlSyntaxCheckerChainTest {
         stmt.setCommandType(org.apache.ibatis.mapping.SqlCommandType.SELECT);
         SelectItem item = new SelectItem();
         item.setType(SelectItemType.COLUMN_ALL);
-        item.setFieldName("*");
+        item.setFieldRef(new FieldReference(null, "*"));
         stmt.addSelectItem(item);
         FromClause fromClause = new FromClause();
         fromClause.setPrimaryEntity(new FromEntity("User", null));
@@ -55,8 +55,7 @@ public class MgxqlSyntaxCheckerChainTest {
         stmt.setCommandType(org.apache.ibatis.mapping.SqlCommandType.SELECT);
         SelectItem item = new SelectItem();
         item.setType(SelectItemType.COLUMN_ALL);
-        item.setEntityAlias("user");
-        item.setFieldName("*");
+        item.setFieldRef(new FieldReference("user", "*"));
         stmt.addSelectItem(item);
         FromClause fromClause = new FromClause();
         fromClause.setPrimaryEntity(new FromEntity("User", "user"));
@@ -73,7 +72,7 @@ public class MgxqlSyntaxCheckerChainTest {
         stmt.setCommandType(org.apache.ibatis.mapping.SqlCommandType.SELECT);
         SelectItem item = new SelectItem();
         item.setType(SelectItemType.COLUMN);
-        item.setFieldName("id");
+        item.setFieldRef(new FieldReference(null, "id"));
         stmt.addSelectItem(item);
         setMultiEntityFrom(stmt);
 
@@ -87,7 +86,7 @@ public class MgxqlSyntaxCheckerChainTest {
         stmt.setCommandType(org.apache.ibatis.mapping.SqlCommandType.SELECT);
         SelectItem item = new SelectItem();
         item.setType(SelectItemType.COLUMN);
-        item.setFieldName("id");
+        item.setFieldRef(new FieldReference(null, "id"));
         stmt.addSelectItem(item);
         setMultiEntityFrom(stmt);
 
@@ -104,8 +103,7 @@ public class MgxqlSyntaxCheckerChainTest {
         stmt.setCommandType(org.apache.ibatis.mapping.SqlCommandType.SELECT);
         SelectItem item = new SelectItem();
         item.setType(SelectItemType.COLUMN);
-        item.setEntityAlias("user");
-        item.setFieldName("id");
+        item.setFieldRef(new FieldReference("user", "id"));
         stmt.addSelectItem(item);
         setMultiEntityFrom(stmt);
         return stmt;

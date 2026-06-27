@@ -358,7 +358,7 @@ public class MgxqlAstHandlerTest {
         List<SelectItem> items = stmt.getSelectItems();
         Assert.assertEquals(1, items.size());
         Assert.assertEquals(SelectItemType.COUNT, items.get(0).getType());
-        Assert.assertEquals("id", items.get(0).getAggregateFieldRef().getFieldName());
+        Assert.assertEquals("id", items.get(0).getFieldRef().getFieldName());
     }
 
     @Test
@@ -368,7 +368,7 @@ public class MgxqlAstHandlerTest {
         List<SelectItem> items = stmt.getSelectItems();
         Assert.assertEquals(1, items.size());
         Assert.assertEquals(SelectItemType.SUM, items.get(0).getType());
-        Assert.assertEquals("age", items.get(0).getAggregateFieldRef().getFieldName());
+        Assert.assertEquals("age", items.get(0).getFieldRef().getFieldName());
     }
 
     @Test
@@ -378,7 +378,7 @@ public class MgxqlAstHandlerTest {
         List<SelectItem> items = stmt.getSelectItems();
         Assert.assertEquals(1, items.size());
         Assert.assertEquals(SelectItemType.COUNT, items.get(0).getType());
-        Assert.assertEquals("name", items.get(0).getAggregateFieldRef().getFieldName());
+        Assert.assertEquals("name", items.get(0).getFieldRef().getFieldName());
     }
 
     @Test
@@ -388,7 +388,7 @@ public class MgxqlAstHandlerTest {
         List<SelectItem> items = stmt.getSelectItems();
         Assert.assertEquals(1, items.size());
         Assert.assertEquals(SelectItemType.MAX, items.get(0).getType());
-        Assert.assertEquals("id", items.get(0).getAggregateFieldRef().getFieldName());
+        Assert.assertEquals("id", items.get(0).getFieldRef().getFieldName());
     }
 
     @Test
@@ -398,7 +398,7 @@ public class MgxqlAstHandlerTest {
         List<SelectItem> items = stmt.getSelectItems();
         Assert.assertEquals(1, items.size());
         Assert.assertEquals(SelectItemType.MIN, items.get(0).getType());
-        Assert.assertEquals("id", items.get(0).getAggregateFieldRef().getFieldName());
+        Assert.assertEquals("id", items.get(0).getFieldRef().getFieldName());
     }
 
     @Test
@@ -408,7 +408,7 @@ public class MgxqlAstHandlerTest {
         List<SelectItem> items = stmt.getSelectItems();
         Assert.assertEquals(1, items.size());
         Assert.assertEquals(SelectItemType.AVG, items.get(0).getType());
-        Assert.assertEquals("age", items.get(0).getAggregateFieldRef().getFieldName());
+        Assert.assertEquals("age", items.get(0).getFieldRef().getFieldName());
     }
 
     // ==================== FROM + JOIN 测试 ====================

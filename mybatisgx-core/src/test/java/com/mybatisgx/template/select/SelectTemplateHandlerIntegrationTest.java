@@ -49,7 +49,7 @@ public class SelectTemplateHandlerIntegrationTest {
         stmt.setCommandType(SqlCommandType.SELECT);
         SelectItem countItem = new SelectItem();
         countItem.setType(SelectItemType.COUNT);
-        countItem.setFieldName("*");
+        countItem.setFieldRef(new FieldReference(null, "*"));
         stmt.addSelectItem(countItem);
         return stmt;
     }

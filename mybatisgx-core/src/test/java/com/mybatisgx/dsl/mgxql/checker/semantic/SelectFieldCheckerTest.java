@@ -49,7 +49,7 @@ public class SelectFieldCheckerTest {
         SelectStatement stmt = buildSelectStmt();
         SelectItem item = new SelectItem();
         item.setType(SelectItemType.COLUMN);
-        item.setFieldName("name");
+        item.setFieldRef(new FieldReference(null, "name"));
         stmt.addSelectItem(item);
 
         checker.check(stmt, context);
@@ -61,7 +61,7 @@ public class SelectFieldCheckerTest {
         SelectStatement stmt = buildSelectStmt();
         SelectItem item = new SelectItem();
         item.setType(SelectItemType.COLUMN);
-        item.setFieldName("nonExistentField");
+        item.setFieldRef(new FieldReference(null, "nonExistentField"));
         stmt.addSelectItem(item);
 
         checker.check(stmt, context);
@@ -103,7 +103,7 @@ public class SelectFieldCheckerTest {
         SelectStatement stmt = buildSelectStmt();
         SelectItem aggItem = new SelectItem();
         aggItem.setType(SelectItemType.MAX);
-        aggItem.setAggregateFieldRef(new FieldReference(null, "age"));
+        aggItem.setFieldRef(new FieldReference(null, "age"));
         stmt.addSelectItem(aggItem);
 
         checker.check(stmt, context);
@@ -180,11 +180,11 @@ public class SelectFieldCheckerTest {
         SelectStatement stmt = buildSelectStmt();
         SelectItem columnItem = new SelectItem();
         columnItem.setType(SelectItemType.COLUMN);
-        columnItem.setFieldName("name");
+        columnItem.setFieldRef(new FieldReference(null, "name"));
         stmt.addSelectItem(columnItem);
         SelectItem aggregateItem = new SelectItem();
         aggregateItem.setType(SelectItemType.COUNT);
-        aggregateItem.setAggregateFieldRef(new FieldReference(null, "id"));
+        aggregateItem.setFieldRef(new FieldReference(null, "id"));
         stmt.addSelectItem(aggregateItem);
 
         checker.check(stmt, context);

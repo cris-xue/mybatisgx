@@ -30,7 +30,7 @@ public class SelectStarCheckerTest {
         SelectStatement stmt = new SelectStatement();
         SelectItem item = new SelectItem();
         item.setType(SelectItemType.COLUMN_ALL);
-        item.setFieldName("*");
+        item.setFieldRef(new FieldReference(null, "*"));
         stmt.addSelectItem(item);
         setMultiEntityFrom(stmt);
 
@@ -45,8 +45,7 @@ public class SelectStarCheckerTest {
         SelectStatement stmt = new SelectStatement();
         SelectItem item = new SelectItem();
         item.setType(SelectItemType.COLUMN_ALL);
-        item.setEntityAlias("user");
-        item.setFieldName("*");
+        item.setFieldRef(new FieldReference("user", "*"));
         stmt.addSelectItem(item);
         setMultiEntityFrom(stmt);
 
@@ -60,7 +59,7 @@ public class SelectStarCheckerTest {
         SelectStatement stmt = new SelectStatement();
         SelectItem item = new SelectItem();
         item.setType(SelectItemType.COLUMN_ALL);
-        item.setFieldName("*");
+        item.setFieldRef(new FieldReference(null, "*"));
         stmt.addSelectItem(item);
         FromClause fromClause = new FromClause();
         fromClause.setPrimaryEntity(new FromEntity("User", null));

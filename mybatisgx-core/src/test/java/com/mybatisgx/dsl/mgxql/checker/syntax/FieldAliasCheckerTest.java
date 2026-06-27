@@ -94,7 +94,7 @@ public class FieldAliasCheckerTest {
         stmt.setCommandType(SqlCommandType.SELECT);
         SelectItem aggItem = new SelectItem();
         aggItem.setType(SelectItemType.COUNT);
-        aggItem.setAggregateFieldRef(new FieldReference(null, "id"));
+        aggItem.setFieldRef(new FieldReference(null, "id"));
         stmt.addSelectItem(aggItem);
         setMultiEntityFrom(stmt);
 
@@ -132,8 +132,7 @@ public class FieldAliasCheckerTest {
         stmt.setCommandType(SqlCommandType.SELECT);
         SelectItem item = new SelectItem();
         item.setType(SelectItemType.COLUMN);
-        item.setEntityAlias("dept");
-        item.setFieldName("id");
+        item.setFieldRef(new FieldReference("dept", "id"));
         stmt.addSelectItem(item);
         setMultiEntityFrom(stmt);
 
@@ -155,7 +154,7 @@ public class FieldAliasCheckerTest {
         stmt.setCommandType(SqlCommandType.SELECT);
         SelectItem item = new SelectItem();
         item.setType(SelectItemType.COLUMN);
-        item.setFieldName("id");
+        item.setFieldRef(new FieldReference(null, "id"));
         stmt.addSelectItem(item);
 
         FromClause fromClause = new FromClause();
@@ -174,7 +173,7 @@ public class FieldAliasCheckerTest {
         stmt.setCommandType(SqlCommandType.SELECT);
         SelectItem item = new SelectItem();
         item.setType(SelectItemType.COLUMN);
-        item.setFieldName("id");
+        item.setFieldRef(new FieldReference(null, "id"));
         stmt.addSelectItem(item);
 
         FromClause fromClause = new FromClause();
@@ -194,8 +193,7 @@ public class FieldAliasCheckerTest {
         stmt.setCommandType(SqlCommandType.SELECT);
         SelectItem item = new SelectItem();
         item.setType(SelectItemType.COLUMN);
-        item.setEntityAlias("user");
-        item.setFieldName("id");
+        item.setFieldRef(new FieldReference("user", "id"));
         stmt.addSelectItem(item);
         setMultiEntityFrom(stmt);
 
@@ -209,7 +207,7 @@ public class FieldAliasCheckerTest {
         stmt.setCommandType(SqlCommandType.SELECT);
         SelectItem item = new SelectItem();
         item.setType(SelectItemType.COLUMN);
-        item.setFieldName("id");
+        item.setFieldRef(new FieldReference(null, "id"));
         stmt.addSelectItem(item);
         setMultiEntityFrom(stmt);
         return stmt;
@@ -220,8 +218,7 @@ public class FieldAliasCheckerTest {
         stmt.setCommandType(SqlCommandType.SELECT);
         SelectItem item = new SelectItem();
         item.setType(SelectItemType.COLUMN);
-        item.setEntityAlias("user");
-        item.setFieldName("id");
+        item.setFieldRef(new FieldReference("user", "id"));
         stmt.addSelectItem(item);
         setMultiEntityFrom(stmt);
         return stmt;

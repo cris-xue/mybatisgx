@@ -35,14 +35,9 @@ public class WhereConditionNode {
     private String rightBracket;
 
     /**
-     * 左侧实体别名（如 user，可选）
+     * 字段引用，统一表达左侧实体别名与字段名；columnInfo 由校验端经 resolveAndSetFieldReferenceColumnInfo 写回 fieldRef.columnInfo。可空（嵌套括号节点无字段引用）
      */
-    private String fieldAlias;
-
-    /**
-     * 左侧字段名（如 name）
-     */
-    private String fieldName;
+    private FieldReference fieldRef;
 
     /**
      * NOT修饰符（用于 not in、not like 等）
@@ -68,11 +63,6 @@ public class WhereConditionNode {
      * 嵌套子表达式（括号内的表达式）
      */
     private WhereExpression subExpression;
-
-    /**
-     * 编译期绑定：对应数据库字段信息（列名、jdbcType 等）
-     */
-    private ColumnInfo columnInfo;
 
     /**
      * 编译期绑定：对应方法参数信息（参数路径、类型等）
@@ -118,20 +108,33 @@ public class WhereConditionNode {
         this.rightBracket = rightBracket;
     }
 
+    public FieldReference getFieldRef() {
+        return fieldRef;
+    }
+
+    public void setFieldRef(FieldReference fieldRef) {
+        this.fieldRef = fieldRef;
+    }
+
+    /**
+     * 委托 fieldRef.getEntityAlias()，便于调用方沿用旧访问方式
+     */
     public String getFieldAlias() {
-        return fieldAlias;
+        return fieldRef != null ? fieldRef.getEntityAlias() : null;
     }
 
-    public void setFieldAlias(String fieldAlias) {
-        this.fieldAlias = fieldAlias;
-    }
-
+    /**
+     * 委托 fieldRef.getFieldName()，便于调用方沿用旧访问方式
+     */
     public String getFieldName() {
-        return fieldName;
+        return fieldRef != null ? fieldRef.getFieldName() : null;
     }
 
-    public void setFieldName(String fieldName) {
-        this.fieldName = fieldName;
+    /**
+     * 委托 fieldRef.getColumnInfo()，便于调用方沿用旧访问方式
+     */
+    public ColumnInfo getColumnInfo() {
+        return fieldRef != null ? fieldRef.getColumnInfo() : null;
     }
 
     public ComparisonOperator getNotOperator() {
@@ -180,14 +183,6 @@ public class WhereConditionNode {
 
     public void setConditionValue(Integer conditionValue) {
         this.conditionValue = conditionValue;
-    }
-
-    public ColumnInfo getColumnInfo() {
-        return columnInfo;
-    }
-
-    public void setColumnInfo(ColumnInfo columnInfo) {
-        this.columnInfo = columnInfo;
     }
 
     public MethodParamInfo getMethodParamInfo() {

@@ -624,8 +624,7 @@ public class MgxqlSyntaxHandler {
 
             // 解析左侧字段引用
             FieldReference fieldRef = parseFieldReference(compCtx.field_reference());
-            node.setFieldAlias(fieldRef.getEntityAlias());
-            node.setFieldName(fieldRef.getFieldName());
+            node.setFieldRef(fieldRef);
 
             // 解析运算符和参数
             MgxqlParser.Condition_comparison_paramContext paramCtx = compCtx.condition_comparison_param();

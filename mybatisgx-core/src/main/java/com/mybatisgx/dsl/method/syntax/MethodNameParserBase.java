@@ -1,6 +1,5 @@
 package com.mybatisgx.dsl.method.syntax;
 
-import com.mybatisgx.syntax.MethodNameLexer;
 import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenStream;
@@ -16,8 +15,8 @@ public abstract class MethodNameParserBase extends Parser {
      */
     protected boolean isBusinessSemanticEnd() {
         int nextToken = _input.LA(1);
-        return nextToken == com.mybatisgx.syntax.MethodNameLexer.LIMIT_TOP
-                || nextToken == com.mybatisgx.syntax.MethodNameLexer.BY
+        return nextToken == MethodNameLexer.LIMIT_TOP
+                || nextToken == MethodNameLexer.BY
                 || nextToken == MethodNameLexer.ORDER_BY
                 || nextToken == Token.EOF;
     }

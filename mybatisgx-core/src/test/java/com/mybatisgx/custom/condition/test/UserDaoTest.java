@@ -219,8 +219,7 @@ public class UserDaoTest {
 
     @Test
     public void testFindPage002() {
-        List<Pageable.Sort> sorts = Arrays.asList(new Pageable.Sort("id", "desc"));
-        List<User> users = userDao.findSort(new UserQuery(), sorts);
+        List<User> users = userDao.findSort(new UserQuery(), Pageable.of(Pageable.of("id", "desc")).getSorts());
         Assert.assertNotNull(users);
     }
 

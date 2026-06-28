@@ -1,5 +1,6 @@
 package com.mybatisgx.executor.page;
 
+import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -17,11 +18,12 @@ public class Pageable {
 
     private Integer pageSize;
 
-    private List<Sort> sorts = new ArrayList();
+    private List<Sort> sorts;
 
     private Pageable(Integer pageNo, Integer pageSize, List<Sort> sorts) {
         this.pageNo = pageNo;
         this.pageSize = pageSize;
+        this.sorts = sorts;
     }
 
     public static Pageable of(Integer pageNo, Integer pageSize) {
@@ -34,6 +36,14 @@ public class Pageable {
 
     public static Pageable of(List<Sort> sorts) {
         return new Pageable(null, null, sorts);
+    }
+
+    public static Sort of(String column, String direction) {
+        return new Sort(column, direction);
+    }
+
+    public static Pageable of(Sort... sort) {
+        return new Pageable(null, null, Lists.newArrayList(sort));
     }
 
     public Integer getPageNo() {

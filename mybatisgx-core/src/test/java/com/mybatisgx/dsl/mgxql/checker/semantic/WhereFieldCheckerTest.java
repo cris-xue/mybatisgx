@@ -38,7 +38,7 @@ public class WhereFieldCheckerTest {
         stmt.setCommandType(SqlCommandType.SELECT);
         WhereClause whereClause = new WhereClause(new WhereExpression(LogicOperator.NULL));
         WhereConditionNode node = new WhereConditionNode();
-        node.setFieldName("name");
+        node.setFieldRef(new FieldReference(null, "name"));
         whereClause.getRootExpression().addNode(node);
         stmt.setWhereClause(whereClause);
 
@@ -54,7 +54,7 @@ public class WhereFieldCheckerTest {
         stmt.setCommandType(SqlCommandType.SELECT);
         WhereClause whereClause = new WhereClause(new WhereExpression(LogicOperator.NULL));
         WhereConditionNode node = new WhereConditionNode();
-        node.setFieldName("nonExistentField");
+        node.setFieldRef(new FieldReference(null, "nonExistentField"));
         whereClause.getRootExpression().addNode(node);
         stmt.setWhereClause(whereClause);
 
@@ -70,7 +70,7 @@ public class WhereFieldCheckerTest {
         stmt.setCommandType(SqlCommandType.DELETE);
         WhereClause whereClause = new WhereClause(new WhereExpression(LogicOperator.NULL));
         WhereConditionNode node = new WhereConditionNode();
-        node.setFieldName("name");
+        node.setFieldRef(new FieldReference(null, "name"));
         whereClause.getRootExpression().addNode(node);
         stmt.setWhereClause(whereClause);
 
@@ -85,12 +85,12 @@ public class WhereFieldCheckerTest {
         stmt.setCommandType(SqlCommandType.SELECT);
         WhereExpression rootExpr = new WhereExpression(LogicOperator.AND);
         WhereConditionNode normalNode = new WhereConditionNode();
-        normalNode.setFieldName("name");
+        normalNode.setFieldRef(new FieldReference(null, "name"));
         rootExpr.addNode(normalNode);
 
         WhereExpression nestedExpr = new WhereExpression(LogicOperator.NULL);
         WhereConditionNode nestedNode = new WhereConditionNode();
-        nestedNode.setFieldName("nonExistentField");
+        nestedNode.setFieldRef(new FieldReference(null, "nonExistentField"));
         nestedExpr.addNode(nestedNode);
 
         WhereConditionNode nestedWrapper = new WhereConditionNode();

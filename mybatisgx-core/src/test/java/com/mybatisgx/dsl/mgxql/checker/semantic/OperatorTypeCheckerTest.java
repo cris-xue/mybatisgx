@@ -37,7 +37,7 @@ public class OperatorTypeCheckerTest {
         stmt.setCommandType(SqlCommandType.SELECT);
         WhereClause whereClause = new WhereClause(new WhereExpression(LogicOperator.NULL));
         WhereConditionNode node = new WhereConditionNode();
-        node.setFieldName(fieldName);
+        node.setFieldRef(new FieldReference(null, fieldName));
         node.setOperator(operator);
         whereClause.getRootExpression().addNode(node);
         stmt.setWhereClause(whereClause);

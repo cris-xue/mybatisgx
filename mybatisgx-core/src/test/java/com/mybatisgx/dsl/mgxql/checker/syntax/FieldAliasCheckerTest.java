@@ -32,8 +32,7 @@ public class FieldAliasCheckerTest {
         WhereClause whereClause = new WhereClause();
         WhereExpression expr = new WhereExpression();
         WhereConditionNode node = new WhereConditionNode();
-        node.setFieldName("id");
-        node.setFieldAlias(null);
+        node.setFieldRef(new FieldReference(null, "id"));
         expr.addNode(node);
         whereClause.setRootExpression(expr);
         stmt.setWhereClause(whereClause);

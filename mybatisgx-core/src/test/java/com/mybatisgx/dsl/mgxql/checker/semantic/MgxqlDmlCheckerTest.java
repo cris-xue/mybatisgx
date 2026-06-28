@@ -48,7 +48,7 @@ public class MgxqlDmlCheckerTest {
         stmt.setCommandType(SqlCommandType.DELETE);
         WhereClause whereClause = new WhereClause(new WhereExpression(LogicOperator.NULL));
         WhereConditionNode node = new WhereConditionNode();
-        node.setFieldName("id");
+        node.setFieldRef(new FieldReference(null, "id"));
         whereClause.getRootExpression().addNode(node);
         stmt.setWhereClause(whereClause);
         // EntityChecker 在无 FromClause 时确认 primaryEntityInfo 可用
@@ -62,7 +62,7 @@ public class MgxqlDmlCheckerTest {
         stmt.setCommandType(SqlCommandType.DELETE);
         WhereClause whereClause = new WhereClause(new WhereExpression(LogicOperator.NULL));
         WhereConditionNode node = new WhereConditionNode();
-        node.setFieldName("id");
+        node.setFieldRef(new FieldReference(null, "id"));
         whereClause.getRootExpression().addNode(node);
         stmt.setWhereClause(whereClause);
         try {

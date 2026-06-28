@@ -46,7 +46,7 @@ public class WhereRequiredCheckerTest {
         stmt.setCommandType(SqlCommandType.DELETE);
         WhereClause whereClause = new WhereClause(new WhereExpression(LogicOperator.NULL));
         WhereConditionNode node = new WhereConditionNode();
-        node.setFieldName("id");
+        node.setFieldRef(new FieldReference(null, "id"));
         whereClause.getRootExpression().addNode(node);
         stmt.setWhereClause(whereClause);
         SyntaxCheckerContext context = new SyntaxCheckerContext();

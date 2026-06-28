@@ -292,7 +292,7 @@ public class MgxqlWhereTemplateHandlerTest {
 
     private WhereConditionNode buildSimpleCondition(String fieldName, String opStr, List<String> paramPath, boolean optional) {
         WhereConditionNode node = new WhereConditionNode();
-        node.setFieldName(fieldName);
+        node.setFieldRef(new FieldReference(null, fieldName));
         node.setOptional(optional);
 
         ComparisonOperator operator = ComparisonOperator.EQ;
@@ -315,7 +315,7 @@ public class MgxqlWhereTemplateHandlerTest {
 
     private WhereConditionNode buildNullCondition(String fieldName, ComparisonOperator operator) {
         WhereConditionNode node = new WhereConditionNode();
-        node.setFieldName(fieldName);
+        node.setFieldRef(new FieldReference(null, fieldName));
         node.setOptional(false);
 
         BoundParam boundParam = new BoundParam(ParamKind.NULL_TYPE);
@@ -331,7 +331,7 @@ public class MgxqlWhereTemplateHandlerTest {
 
     private WhereConditionNode buildLikeCondition(String fieldName, List<String> paramPath, ComparisonOperator operator, boolean optional) {
         WhereConditionNode node = new WhereConditionNode();
-        node.setFieldName(fieldName);
+        node.setFieldRef(new FieldReference(null, fieldName));
         node.setOptional(optional);
 
         BoundParam boundParam = new BoundParam();

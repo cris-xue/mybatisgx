@@ -67,21 +67,21 @@ public class MybatisgxRoutingExecutor implements Executor {
                     : delegate.query(ms, parameter, rowBounds, resultHandler, cacheKey, boundSql);
         }
 
-        Pageable pageable = this.getPageable(parameter, pageParamInfo);
-        com.github.pagehelper.Page pagehelperPage = null;
-        if (pageable.getPageNo() != null && pageable.getPageSize() != null) {
-            pagehelperPage = PageHelper.startPage(pageable.getPageNo(), pageable.getPageSize());
-        }
-        if (ObjectUtils.isNotEmpty(pageable.getSorts())) {
-            PageHelper.orderBy(pageable.getOrderBy());
-        }
+        try {
+            Pageable pageable = this.getPageable(parameter, pageParamInfo);
+            com.github.pagehelper.Page pagehelperPage = PageHelper.startPage(pageable.getPageNo(), pageable.getPageSize());
+            if (ObjectUtils.isNotEmpty(pageable.getSorts())) {
+                PageHelper.orderBy(pageable.getOrderBy());
+            }
 
-        List<Object> list = cacheKey == null && boundSql == null
-                ? delegate.query(ms, parameter, rowBounds, resultHandler)
-                : delegate.query(ms, parameter, rowBounds, resultHandler, cacheKey, boundSql);
+            List<Object> list = cacheKey == null && boundSql == null
+                    ? delegate.query(ms, parameter, rowBounds, resultHandler)
+                    : delegate.query(ms, parameter, rowBounds, resultHandler, cacheKey, boundSql);
 
-        Page page = new Page(pagehelperPage != null ? pagehelperPage.getTotal() : 0L, list);
-        return (List<E>) Collections.singletonList(page);
+            return (List<E>) Collections.singletonList(new Page(pagehelperPage.getTotal(), list));
+        } finally {
+            PageHelper.clearPage();
+        }
     }
 
     private Pageable getPageable(Object parameter, MethodParamInfo pageParamInfo) {

@@ -26,16 +26,16 @@ public class Pageable {
         this.sorts = sorts;
     }
 
-    public static Pageable of(Integer pageNo, Integer pageSize) {
+    public static Pageable of(int pageNo, int pageSize) {
         return new Pageable(pageNo, pageSize, null);
     }
 
-    public static Pageable of(Integer pageNo, Integer pageSize, List<Sort> sorts) {
+    public static Pageable of(int pageNo, int pageSize, List<Sort> sorts) {
         return new Pageable(pageNo, pageSize, sorts);
     }
 
     public static Pageable of(List<Sort> sorts) {
-        return new Pageable(null, null, sorts);
+        return new Pageable(1, Integer.MAX_VALUE, sorts);
     }
 
     public static Sort of(String column, String direction) {
@@ -43,7 +43,7 @@ public class Pageable {
     }
 
     public static Pageable of(Sort... sort) {
-        return new Pageable(null, null, Lists.newArrayList(sort));
+        return new Pageable(1, Integer.MAX_VALUE, Lists.newArrayList(sort));
     }
 
     public Integer getPageNo() {

@@ -46,6 +46,10 @@ public class Pageable {
         return new Pageable(1, Integer.MAX_VALUE, Lists.newArrayList(sort));
     }
 
+    public static Pageable of(int pageNo, int pageSize, Sort... sort) {
+        return new Pageable(pageNo, pageSize, Lists.newArrayList(sort));
+    }
+
     public Integer getPageNo() {
         return pageNo;
     }

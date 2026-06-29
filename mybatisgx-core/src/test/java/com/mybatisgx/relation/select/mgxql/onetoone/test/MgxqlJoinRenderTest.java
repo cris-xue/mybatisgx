@@ -35,13 +35,14 @@ public class MgxqlJoinRenderTest {
                 new String[]{"com.mybatisgx.relation.select.simple_simple_id.onetoone.entity"},
                 new String[]{"com.mybatisgx.relation.select.mgxql.onetoone.dao"}
         );
-        mapperInfo = configuration.getMethodInfo(DAO_NAMESPACE + ".findJoinList").getMapperInfo();
+        mapperInfo = configuration.getMethodInfo(DAO_NAMESPACE + ".findJoinList1").getMapperInfo();
     }
 
     private String renderSql(String methodName) {
         MethodInfo methodInfo = configuration.getMethodInfo(DAO_NAMESPACE + "." + methodName);
         SelectStatement selectStatement = (SelectStatement) methodInfo.getMgxqlStatement();
-        ColumnEntityRelation rootRelation = mapperInfo.getEntityRelationTree(User.class);
+        Class<?> returnType = methodInfo.getMethodReturnInfo().getType();
+        ColumnEntityRelation rootRelation = mapperInfo.getEntityRelationTree(returnType);
         MgxqlSelectColumnTemplateHandler handler = new MgxqlSelectColumnTemplateHandler();
         PlainSelect plainSelect = handler.buildSelectSql(selectStatement, rootRelation);
         return plainSelect.toString();
@@ -49,7 +50,7 @@ public class MgxqlJoinRenderTest {
 
     @Test
     public void test01_fourLayerJoinRender() {
-        String sql = renderSql("findJoinList");
+        String sql = renderSql("findJoinList1");
         Assert.assertTrue("应包含主表 FROM simple_oto_user_simple", sql.contains("simple_oto_user_simple"));
         Assert.assertTrue("应 LEFT JOIN UserDetail", sql.contains("LEFT JOIN simple_oto_user_detail_simple"));
         Assert.assertTrue("应 LEFT JOIN UserDetailItem1", sql.contains("LEFT JOIN simple_oto_user_detail_item1_simple"));
@@ -79,7 +80,7 @@ public class MgxqlJoinRenderTest {
 
     @Test
     public void test04_bindingsNonNull() {
-        MethodInfo methodInfo = configuration.getMethodInfo(DAO_NAMESPACE + ".findJoinList");
+        MethodInfo methodInfo = configuration.getMethodInfo(DAO_NAMESPACE + ".findJoinList1");
         SelectStatement selectStatement = (SelectStatement) methodInfo.getMgxqlStatement();
         Assert.assertNotNull("主实体应绑定 entityInfo",
                 selectStatement.getFromClause().getPrimaryEntity().getEntityInfo());
@@ -92,5 +93,45 @@ public class MgxqlJoinRenderTest {
         SelectStatement projectionStmt = (SelectStatement) projection.getMgxqlStatement();
         Assert.assertNotNull("COLUMN 投影应绑定 columnInfo",
                 projectionStmt.getSelectItems().get(0).getColumnInfo());
+    }
+
+    @Test
+    public void test05_returnTypeNotFromPrimary() {
+        String sql = renderSql("findJoinList4");
+        Assert.assertTrue("FROM 应为 User 表 simple_oto_user_simple", sql.contains("FROM simple_oto_user_simple"));
+        Assert.assertTrue("FROM 应使用用户别名 u", sql.contains("simple_oto_user_simple AS u"));
+        Assert.assertTrue("LEFT JOIN 应为 UserDetail 表 simple_oto_user_detail_simple",
+                sql.contains("LEFT JOIN simple_oto_user_detail_simple"));
+        Assert.assertTrue("JOIN 应使用用户别名 ud", sql.contains("simple_oto_user_detail_simple AS ud"));
+        Assert.assertFalse("FROM 和 JOIN 别名不应相同",
+                sql.matches("(?s).*FROM simple_oto_user_simple AS ud.*LEFT JOIN simple_oto_user_detail_simple AS ud.*"));
+        String onPart = sql.substring(sql.indexOf("ON"));
+        Assert.assertTrue("ON 条件应包含别名 u.", onPart.contains("u."));
+        Assert.assertTrue("ON 条件应包含别名 ud.", onPart.contains("ud."));
+    }
+
+    @Test
+    public void test06_columnAllTableAliasMatchesFrom() {
+        String sql = renderSql("findJoinList1");
+        int fromIndex = sql.toUpperCase().indexOf(" FROM ");
+        Assert.assertTrue("应存在 FROM", fromIndex > 0);
+        String selectPart = sql.substring(0, fromIndex);
+        Assert.assertTrue("SELECT 列应使用用户别名 u. 作为表前缀", selectPart.contains("u."));
+        Assert.assertFalse("SELECT 列不应使用树别名 simple_oto_user_simple 作为表前缀",
+                selectPart.matches("(?s).*simple_oto_user_simple\\..*"));
+        Assert.assertTrue("FROM 应使用用户别名 u", sql.contains("simple_oto_user_simple AS u"));
+        Assert.assertTrue("LEFT JOIN 应使用用户别名 ud",
+                sql.contains("simple_oto_user_detail_simple AS ud"));
+    }
+
+    @Test
+    public void test07_columnProjectionTableAlias() {
+        String sql = renderSql("findProjectionList");
+        int fromIndex = sql.toUpperCase().indexOf(" FROM ");
+        Assert.assertTrue("应存在 FROM", fromIndex > 0);
+        String selectPart = sql.substring(0, fromIndex);
+        Assert.assertTrue("SELECT 列应使用用户别名 u.code", selectPart.contains("u.code"));
+        Assert.assertFalse("SELECT 列不应使用树别名作为表前缀",
+                selectPart.matches("(?s).*simple_oto_user_simple\\.code.*"));
     }
 }

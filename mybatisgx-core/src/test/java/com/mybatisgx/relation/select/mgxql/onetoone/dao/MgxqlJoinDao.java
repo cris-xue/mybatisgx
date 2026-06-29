@@ -2,7 +2,9 @@ package com.mybatisgx.relation.select.mgxql.onetoone.dao;
 
 import com.mybatisgx.annotation.Statement;
 import com.mybatisgx.dao.SimpleDao;
+import com.mybatisgx.relation.select.mgxql.onetoone.dto.UserProjection;
 import com.mybatisgx.relation.select.simple_simple_id.onetoone.entity.User;
+import com.mybatisgx.relation.select.simple_simple_id.onetoone.entity.UserDetail;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -17,7 +19,19 @@ import java.util.List;
 public interface MgxqlJoinDao extends SimpleDao<User, User, Long> {
 
     @Statement("select u.* from User u left join UserDetail ud on u = ud left join UserDetailItem1 i1 on ud = i1 left join UserDetailItem2 i2 on i1 = i2")
-    List<User> findJoinList();
+    List<User> findJoinList1();
+
+    @Statement("select u.* from User u left join UserDetail ud on u = ud")
+    List<User> findJoinList2();
+
+    @Statement("select ud.* from User u left join UserDetail ud on u = ud")
+    List<User> findJoinList3();
+
+    @Statement("select ud.* from User u left join UserDetail ud on u = ud")
+    List<UserDetail> findJoinList4();
+
+    @Statement("select ud.* from User u left join UserDetail ud on u = ud")
+    List<UserProjection> findJoinList5();
 
     @Statement("select u.code from User u left join UserDetail ud on u = ud")
     List<User> findProjectionList();

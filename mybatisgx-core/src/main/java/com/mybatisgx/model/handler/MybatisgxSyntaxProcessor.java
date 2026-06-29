@@ -58,6 +58,9 @@ public class MybatisgxSyntaxProcessor {
     }
 
     public void execute(EntityInfo entityInfo, MethodInfo methodInfo, MethodParamInfo methodParamInfo, ConditionOriginType conditionOriginType, String methodName) {
+        // 预处理：自动转义有歧义的字段名
+        methodName = MethodNamePreprocessor.escape(entityInfo, methodName);
+
         CharStream charStream = CharStreams.fromString(methodName);
         MethodNameLexer methodNameLexer = new MethodNameLexer(charStream);
         CommonTokenStream tokens = new CommonTokenStream(methodNameLexer);

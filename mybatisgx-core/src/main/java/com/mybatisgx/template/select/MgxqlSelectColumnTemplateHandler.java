@@ -110,7 +110,6 @@ public class MgxqlSelectColumnTemplateHandler {
          * COLUMN_ALL 投影：复用 {@link SelectColumnSqlTemplateHandler#buildSimpleSelectSql}
          * 的列展开逻辑（含 id 复合列、外键列），保证与 result map 列集一致，仅取其 select items。
          */
-        @SuppressWarnings("unchecked")
         private void addColumnAllSelectItems(PlainSelect plainSelect, com.mybatisgx.dsl.mgxql.model.SelectItem selectItem) {
             String entityAlias = selectItem.getEntityAlias();
             ColumnEntityRelation node;
@@ -127,6 +126,13 @@ public class MgxqlSelectColumnTemplateHandler {
             PlainSelect temp = this.selectColumnSqlTemplateHandler.buildSimpleSelectSql(node);
             List<SelectItem<?>> selectItemList = temp.getSelectItems();
             if (ObjectUtils.isNotEmpty(selectItemList)) {
+                String userAlias = StringUtils.isNotBlank(entityAlias) ? entityAlias : this.ctx.getMainTableAlias();
+                for (SelectItem<?> item : selectItemList) {
+                    Expression expr = item.getExpression();
+                    if (expr instanceof Column) {
+                        ((Column) expr).setTable(new Table(userAlias));
+                    }
+                }
                 plainSelect.addSelectItems(selectItemList);
             }
         }
@@ -368,33 +374,21 @@ public class MgxqlSelectColumnTemplateHandler {
         static AliasContext build(SelectStatement selectStatement, ColumnEntityRelation rootRelation) {
             FromClause fromClause = selectStatement.getFromClause();
             Map<String, ColumnEntityRelation> aliasMap;
-            String mainTableName;
-            String mainTableAlias;
             if (rootRelation != null) {
                 aliasMap = buildAliasTreeNodeMap(fromClause, rootRelation);
-                mainTableName = rootRelation.getTableName();
-                mainTableAlias = rootRelation.getTableNameAlias();
             } else {
-                // 无注解树（聚合等场景未构建树）：以主实体 entityInfo + 用户别名兜底
                 aliasMap = buildAliasMapNoTree(fromClause);
-                FromEntity primaryEntity = fromClause.getPrimaryEntity();
-                mainTableName = (primaryEntity != null && primaryEntity.getEntityInfo() != null) ? primaryEntity.getEntityInfo().getTableName() : null;
-                mainTableAlias = (primaryEntity != null) ? primaryEntity.getAlias() : null;
             }
+            FromEntity primaryEntity = fromClause != null ? fromClause.getPrimaryEntity() : null;
+            String mainTableName = (primaryEntity != null && primaryEntity.getEntityInfo() != null) ? primaryEntity.getEntityInfo().getTableName() : null;
+            String mainTableAlias = (primaryEntity != null) ? primaryEntity.getAlias() : null;
             return new AliasContext(aliasMap, mainTableName, mainTableAlias, rootRelation);
         }
 
         /**
-         * 解析渲染使用的表别名：树节点存在用注解 tableNameAlias，否则回退 MGXQL 用户别名。
+         * 返回 MGXQL 用户声明的表别名。树节点的 tableNameAlias 仅用于 result map 列别名，不出现在 SQL 表引用中。
          */
         String resolveTableAlias(String alias) {
-            if (StringUtils.isBlank(alias)) {
-                return alias;
-            }
-            ColumnEntityRelation node = this.aliasMap.get(alias);
-            if (node != null && StringUtils.isNotBlank(node.getTableNameAlias())) {
-                return node.getTableNameAlias();
-            }
             return alias;
         }
 
@@ -417,9 +411,10 @@ public class MgxqlSelectColumnTemplateHandler {
         /**
          * 建立 MGXQL 用户别名 → 注解树节点 映射。
          * <p>
-         * 主实体映射到树根；各 JOIN 实体沿 onLeftAlias 找到左实体树节点，在其 composites 中
-         * 按 relationColumnInfo 身份（优先）或 entityInfo.clazz 匹配对应子节点。匹配不到时
-         * 保留 null（渲染回退到用户别名，该实体不在 result map 中）。
+         * 主实体按 entityInfo.clazz 在关系树中查找匹配节点；各 JOIN 实体沿 onLeftAlias
+         * 找到左实体树节点，在其 composites 中按 relationColumnInfo 身份（优先）或
+         * entityInfo.clazz 匹配对应子节点。匹配不到时保留 null（渲染回退到用户别名，
+         * 该实体不在 result map 中）。
          */
         private static Map<String, ColumnEntityRelation> buildAliasTreeNodeMap(FromClause fromClause, ColumnEntityRelation rootRelation) {
             Map<String, ColumnEntityRelation> aliasMap = new LinkedHashMap<>();
@@ -428,7 +423,11 @@ public class MgxqlSelectColumnTemplateHandler {
             }
             FromEntity primaryEntity = fromClause.getPrimaryEntity();
             if (primaryEntity != null && StringUtils.isNotBlank(primaryEntity.getAlias())) {
-                aliasMap.put(primaryEntity.getAlias(), rootRelation);
+                ColumnEntityRelation primaryNode = null;
+                if (primaryEntity.getEntityInfo() != null) {
+                    primaryNode = findTreeNodeByClazz(rootRelation, primaryEntity.getEntityInfo().getClazz());
+                }
+                aliasMap.put(primaryEntity.getAlias(), primaryNode);
             }
             if (fromClause.getJoinEntities() == null) {
                 return aliasMap;
@@ -474,7 +473,6 @@ public class MgxqlSelectColumnTemplateHandler {
             return aliasMap;
         }
 
-        @SuppressWarnings("unchecked")
         private static ColumnEntityRelation findChildTreeNode(ColumnEntityRelation leftNode, JoinEntity joinEntity) {
             if (leftNode == null || leftNode.getComposites() == null) {
                 return null;
@@ -502,7 +500,6 @@ public class MgxqlSelectColumnTemplateHandler {
             return null;
         }
 
-        @SuppressWarnings("unchecked")
         private static ColumnEntityRelation findTreeNodeByClazz(ColumnEntityRelation node, Class<?> clazz) {
             if (node == null || clazz == null) {
                 return null;

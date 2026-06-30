@@ -101,12 +101,6 @@ public interface MgxqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitSelect_asterisk(MgxqlParser.Select_asteriskContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MgxqlParser#select_item_alias}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitSelect_item_alias(MgxqlParser.Select_item_aliasContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link MgxqlParser#aggregate_function}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -502,12 +496,6 @@ public interface MgxqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitParameter_reference(MgxqlParser.Parameter_referenceContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link MgxqlParser#alias}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitAlias(MgxqlParser.AliasContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MgxqlParser#entity_name}.
 	 * @param ctx the parse tree

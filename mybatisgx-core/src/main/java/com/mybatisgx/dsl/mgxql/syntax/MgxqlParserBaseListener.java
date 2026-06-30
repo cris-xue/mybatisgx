@@ -197,18 +197,6 @@ public class MgxqlParserBaseListener implements MgxqlParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterSelect_item_alias(MgxqlParser.Select_item_aliasContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitSelect_item_alias(MgxqlParser.Select_item_aliasContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterAggregate_function(MgxqlParser.Aggregate_functionContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -996,18 +984,6 @@ public class MgxqlParserBaseListener implements MgxqlParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitParameter_reference(MgxqlParser.Parameter_referenceContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterAlias(MgxqlParser.AliasContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitAlias(MgxqlParser.AliasContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

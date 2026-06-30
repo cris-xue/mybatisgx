@@ -1,4 +1,4 @@
-// Generated from E:/project/owner_project/mybatisgx-ai_coding/mybatisgx/mybatisgx-core/src/main/resources/antlr/mgxql/MgxqlParser.g4 by ANTLR 4.13.2
+// Generated from F:/owner_project/mybatisgx-ai_conding/mybatisgx/mybatisgx-core/src/main/resources/antlr/mgxql/MgxqlParser.g4 by ANTLR 4.13.2
 package com.mybatisgx.dsl.mgxql.syntax;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
@@ -158,6 +158,16 @@ public interface MgxqlParserListener extends ParseTreeListener {
 	 */
 	void exitSelect_asterisk(MgxqlParser.Select_asteriskContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#select_item_alias}.
+	 * @param ctx the parse tree
+	 */
+	void enterSelect_item_alias(MgxqlParser.Select_item_aliasContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#select_item_alias}.
+	 * @param ctx the parse tree
+	 */
+	void exitSelect_item_alias(MgxqlParser.Select_item_aliasContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link MgxqlParser#aggregate_function}.
 	 * @param ctx the parse tree
 	 */
@@ -167,16 +177,6 @@ public interface MgxqlParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitAggregate_function(MgxqlParser.Aggregate_functionContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link MgxqlParser#aggregate_function_normal}.
-	 * @param ctx the parse tree
-	 */
-	void enterAggregate_function_normal(MgxqlParser.Aggregate_function_normalContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link MgxqlParser#aggregate_function_normal}.
-	 * @param ctx the parse tree
-	 */
-	void exitAggregate_function_normal(MgxqlParser.Aggregate_function_normalContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MgxqlParser#aggregate_function_name}.
 	 * @param ctx the parse tree
@@ -237,26 +237,6 @@ public interface MgxqlParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitSelect_sum(MgxqlParser.Select_sumContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link MgxqlParser#aggregate_function_count}.
-	 * @param ctx the parse tree
-	 */
-	void enterAggregate_function_count(MgxqlParser.Aggregate_function_countContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link MgxqlParser#aggregate_function_count}.
-	 * @param ctx the parse tree
-	 */
-	void exitAggregate_function_count(MgxqlParser.Aggregate_function_countContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link MgxqlParser#aggregate_function_count_argument}.
-	 * @param ctx the parse tree
-	 */
-	void enterAggregate_function_count_argument(MgxqlParser.Aggregate_function_count_argumentContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link MgxqlParser#aggregate_function_count_argument}.
-	 * @param ctx the parse tree
-	 */
-	void exitAggregate_function_count_argument(MgxqlParser.Aggregate_function_count_argumentContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MgxqlParser#select_count}.
 	 * @param ctx the parse tree
@@ -847,6 +827,16 @@ public interface MgxqlParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitParameter_reference(MgxqlParser.Parameter_referenceContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#alias}.
+	 * @param ctx the parse tree
+	 */
+	void enterAlias(MgxqlParser.AliasContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#alias}.
+	 * @param ctx the parse tree
+	 */
+	void exitAlias(MgxqlParser.AliasContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MgxqlParser#entity_name}.
 	 * @param ctx the parse tree

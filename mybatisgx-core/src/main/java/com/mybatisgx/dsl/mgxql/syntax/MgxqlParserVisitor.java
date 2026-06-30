@@ -1,4 +1,4 @@
-// Generated from E:/project/owner_project/mybatisgx-ai_coding/mybatisgx/mybatisgx-core/src/main/resources/antlr/mgxql/MgxqlParser.g4 by ANTLR 4.13.2
+// Generated from F:/owner_project/mybatisgx-ai_conding/mybatisgx/mybatisgx-core/src/main/resources/antlr/mgxql/MgxqlParser.g4 by ANTLR 4.13.2
 package com.mybatisgx.dsl.mgxql.syntax;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
@@ -101,17 +101,17 @@ public interface MgxqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitSelect_asterisk(MgxqlParser.Select_asteriskContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#select_item_alias}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSelect_item_alias(MgxqlParser.Select_item_aliasContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link MgxqlParser#aggregate_function}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitAggregate_function(MgxqlParser.Aggregate_functionContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link MgxqlParser#aggregate_function_normal}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitAggregate_function_normal(MgxqlParser.Aggregate_function_normalContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MgxqlParser#aggregate_function_name}.
 	 * @param ctx the parse tree
@@ -148,18 +148,6 @@ public interface MgxqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitSelect_sum(MgxqlParser.Select_sumContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link MgxqlParser#aggregate_function_count}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitAggregate_function_count(MgxqlParser.Aggregate_function_countContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link MgxqlParser#aggregate_function_count_argument}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitAggregate_function_count_argument(MgxqlParser.Aggregate_function_count_argumentContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MgxqlParser#select_count}.
 	 * @param ctx the parse tree
@@ -514,6 +502,12 @@ public interface MgxqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitParameter_reference(MgxqlParser.Parameter_referenceContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#alias}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAlias(MgxqlParser.AliasContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MgxqlParser#entity_name}.
 	 * @param ctx the parse tree

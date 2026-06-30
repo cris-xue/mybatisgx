@@ -1,4 +1,4 @@
-// Generated from E:/project/owner_project/mybatisgx-ai_coding/mybatisgx/mybatisgx-core/src/main/resources/antlr/mgxql/MgxqlParser.g4 by ANTLR 4.13.2
+// Generated from F:/owner_project/mybatisgx-ai_conding/mybatisgx/mybatisgx-core/src/main/resources/antlr/mgxql/MgxqlParser.g4 by ANTLR 4.13.2
 package com.mybatisgx.dsl.mgxql.syntax;
 
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -197,6 +197,18 @@ public class MgxqlParserBaseListener implements MgxqlParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterSelect_item_alias(MgxqlParser.Select_item_aliasContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSelect_item_alias(MgxqlParser.Select_item_aliasContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterAggregate_function(MgxqlParser.Aggregate_functionContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -204,18 +216,6 @@ public class MgxqlParserBaseListener implements MgxqlParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitAggregate_function(MgxqlParser.Aggregate_functionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterAggregate_function_normal(MgxqlParser.Aggregate_function_normalContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitAggregate_function_normal(MgxqlParser.Aggregate_function_normalContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -288,30 +288,6 @@ public class MgxqlParserBaseListener implements MgxqlParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitSelect_sum(MgxqlParser.Select_sumContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterAggregate_function_count(MgxqlParser.Aggregate_function_countContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitAggregate_function_count(MgxqlParser.Aggregate_function_countContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterAggregate_function_count_argument(MgxqlParser.Aggregate_function_count_argumentContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitAggregate_function_count_argument(MgxqlParser.Aggregate_function_count_argumentContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1020,6 +996,18 @@ public class MgxqlParserBaseListener implements MgxqlParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitParameter_reference(MgxqlParser.Parameter_referenceContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterAlias(MgxqlParser.AliasContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitAlias(MgxqlParser.AliasContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

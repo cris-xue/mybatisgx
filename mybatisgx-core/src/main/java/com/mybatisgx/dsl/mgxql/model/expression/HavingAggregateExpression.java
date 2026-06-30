@@ -1,5 +1,6 @@
 package com.mybatisgx.dsl.mgxql.model.expression;
 
+import com.mybatisgx.dsl.mgxql.model.AggregateArgumentKind;
 import com.mybatisgx.dsl.mgxql.model.AggregateFunction;
 
 /**
@@ -15,6 +16,11 @@ public class HavingAggregateExpression extends HavingSqlExpression {
     private final String argument;
 
     private final String typeHandler;
+
+    /**
+     * 聚合函数参数类型：FIELD/NUMBER/ASTERISK；与 SelectItem.argumentKind 语义一致
+     */
+    private AggregateArgumentKind argumentKind;
 
     public HavingAggregateExpression(AggregateFunction function, String argument, String typeHandler) {
         this.function = function;
@@ -42,5 +48,13 @@ public class HavingAggregateExpression extends HavingSqlExpression {
 
     public String getTypeHandler() {
         return typeHandler;
+    }
+
+    public AggregateArgumentKind getArgumentKind() {
+        return argumentKind;
+    }
+
+    public void setArgumentKind(AggregateArgumentKind argumentKind) {
+        this.argumentKind = argumentKind;
     }
 }

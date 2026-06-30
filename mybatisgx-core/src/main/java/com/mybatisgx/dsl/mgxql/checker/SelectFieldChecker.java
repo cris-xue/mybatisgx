@@ -28,8 +28,6 @@ public class SelectFieldChecker extends FieldChecker {
 
         // 校验规则：聚合与普通字段不可共存
         this.checkAggregateCoexistence(selectStatement, context);
-        // 校验规则：select * 仅在非 join 场景合法
-        this.checkSelectStarWithJoin(selectStatement, context);
 
         // 校验并绑定 SELECT 字段
         if (selectStatement.getSelectItems() != null) {
@@ -42,9 +40,8 @@ public class SelectFieldChecker extends FieldChecker {
                 if (selectItem.getType() == SelectItemType.COLUMN_ALL) {
                     continue;
                 }
-                // COUNT 的 "*" 和 "1" 是约定值，跳过字段校验与绑定
-                if (selectItem.getType() == SelectItemType.COUNT
-                        && isCountConventionValue(fieldRef.getFieldName())) {
+                // 聚合参数为 ASTERISK/NUMBER 时非真实字段，跳过字段校验与绑定
+                if (isAggregateConventionValue(selectItem.getArgumentKind())) {
                     continue;
                 }
                 this.resolveAndSetFieldReferenceColumnInfo(fieldRef, "SELECT", context);
@@ -84,7 +81,7 @@ public class SelectFieldChecker extends FieldChecker {
                 com.mybatisgx.dsl.mgxql.model.expression.HavingAggregateExpression aggExpr =
                         (com.mybatisgx.dsl.mgxql.model.expression.HavingAggregateExpression) node.getLeftSide();
                 String argument = aggExpr.getArgument();
-                if (argument == null || isCountConventionValue(argument)) {
+                if (argument == null || isAggregateConventionValue(aggExpr.getArgumentKind())) {
                     continue;
                 }
                 String entityAlias = null;
@@ -99,8 +96,8 @@ public class SelectFieldChecker extends FieldChecker {
         }
     }
 
-    private static boolean isCountConventionValue(String fieldName) {
-        return "*".equals(fieldName) || "1".equals(fieldName);
+    private static boolean isAggregateConventionValue(AggregateArgumentKind kind) {
+        return kind == AggregateArgumentKind.ASTERISK || kind == AggregateArgumentKind.NUMBER;
     }
 
     /**
@@ -121,25 +118,6 @@ public class SelectFieldChecker extends FieldChecker {
         }
         if (hasAggregate && hasColumn) {
             context.addError("聚合函数与普通查询字段不可共存于同一 SELECT 子句");
-        }
-    }
-
-    /**
-     * 校验 select *（无 entityAlias）仅在非 join 场景合法
-     */
-    private void checkSelectStarWithJoin(SelectStatement selectStatement, CheckerContext context) {
-        FromClause fromClause = selectStatement.getFromClause();
-        if (fromClause == null || fromClause.getJoinEntities() == null || fromClause.getJoinEntities().isEmpty()) {
-            return;
-        }
-        if (selectStatement.getSelectItems() == null) {
-            return;
-        }
-        for (SelectItem selectItem : selectStatement.getSelectItems()) {
-            if (selectItem.getType() == SelectItemType.COLUMN_ALL
-                    && (selectItem.getEntityAlias() == null || selectItem.getEntityAlias().isEmpty())) {
-                context.addError("存在 JOIN 时 SELECT * 不合法，请使用 'select 实体别名.*' 明确实体归属");
-            }
         }
     }
 }

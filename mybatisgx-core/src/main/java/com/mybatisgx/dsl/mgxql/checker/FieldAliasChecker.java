@@ -41,11 +41,10 @@ public class FieldAliasChecker implements MgxqlSyntaxChecker {
                     checkFieldAlias(selectItem.getEntityAlias(), selectItem.getFieldName(),
                             "SELECT", hasMultipleEntities, isDeleteOrUpdate, context);
                 }
-                // 聚合函数参数字段（COUNT的"*"和"1"是约定值，不是真实字段引用，跳过校验）
+                // 聚合参数为 ASTERISK/NUMBER 时非真实字段引用，跳过别名校验
                 if (selectItem.getType() != null && selectItem.getType().hasAggregateFunction()
                         && selectItem.getFieldRef() != null
-                        && !(selectItem.getType() == SelectItemType.COUNT
-                        && isCountConventionValue(selectItem.getFieldRef().getFieldName()))) {
+                        && !isAggregateConventionValue(selectItem.getArgumentKind())) {
                     FieldReference fieldRef = selectItem.getFieldRef();
                     checkFieldAlias(fieldRef.getEntityAlias(), fieldRef.getFieldName(),
                             "SELECT", hasMultipleEntities, isDeleteOrUpdate, context);
@@ -95,7 +94,7 @@ public class FieldAliasChecker implements MgxqlSyntaxChecker {
                 com.mybatisgx.dsl.mgxql.model.expression.HavingAggregateExpression aggExpr =
                         (com.mybatisgx.dsl.mgxql.model.expression.HavingAggregateExpression) node.getLeftSide();
                 String argument = aggExpr.getArgument();
-                if (argument == null || isCountConventionValue(argument)) {
+                if (argument == null || isAggregateConventionValue(aggExpr.getArgumentKind())) {
                     continue;
                 }
                 String entityAlias = null;
@@ -126,8 +125,8 @@ public class FieldAliasChecker implements MgxqlSyntaxChecker {
         }
     }
 
-    private static boolean isCountConventionValue(String fieldName) {
-        return "*".equals(fieldName) || "1".equals(fieldName);
+    private static boolean isAggregateConventionValue(AggregateArgumentKind kind) {
+        return kind == AggregateArgumentKind.ASTERISK || kind == AggregateArgumentKind.NUMBER;
     }
 
     private void checkFieldAlias(String entityAlias, String fieldName, String clauseName,

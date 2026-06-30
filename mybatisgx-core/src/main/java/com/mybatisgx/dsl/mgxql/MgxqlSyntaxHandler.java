@@ -165,42 +165,54 @@ public class MgxqlSyntaxHandler {
                     MgxqlParser.Aggregate_functionContext aggregateFunction = selectItem.aggregate_function();
                     parseAggregateFunction(item, aggregateFunction);
                 }
+                MgxqlParser.Select_item_aliasContext aliasCtx = selectItem.select_item_alias();
+                if (aliasCtx != null) {
+                    item.setAlias(parseSelectItemAlias(aliasCtx));
+                }
                 statement.addSelectItem(item);
             }
         }
 
-        private void parseAggregateFunction(SelectItem item, MgxqlParser.Aggregate_functionContext aggregateFunction) {
-            MgxqlParser.Aggregate_function_normalContext normalCtx = aggregateFunction.aggregate_function_normal();
-            if (normalCtx != null) {
-                MgxqlParser.Aggregate_function_nameContext funcNameCtx = normalCtx.aggregate_function_name();
-                MgxqlParser.Aggregate_function_argumentContext funcArgCtx = normalCtx.aggregate_function_argument();
-                FieldReference fieldRef = parseFieldReference(funcArgCtx.field_reference());
+        /**
+         * 解析 select_item_alias 为 AS 级联路径，如 as role.menu.name → ["role","menu","name"]
+         */
+        private static List<String> parseSelectItemAlias(MgxqlParser.Select_item_aliasContext aliasCtx) {
+            List<String> path = new ArrayList<>();
+            for (MgxqlParser.Entity_name_aliasContext segCtx : aliasCtx.entity_name_alias()) {
+                path.add(stripBackticks(segCtx.getText()));
+            }
+            path.add(stripBackticks(aliasCtx.field_name().getText()));
+            return path;
+        }
 
-                if (funcNameCtx.select_max() != null) {
-                    item.setType(SelectItemType.MAX);
-                } else if (funcNameCtx.select_min() != null) {
-                    item.setType(SelectItemType.MIN);
-                } else if (funcNameCtx.select_avg() != null) {
-                    item.setType(SelectItemType.AVG);
-                } else if (funcNameCtx.select_sum() != null) {
-                    item.setType(SelectItemType.SUM);
-                }
-                item.setFieldRef(fieldRef);
-                return;
+        private void parseAggregateFunction(SelectItem item, MgxqlParser.Aggregate_functionContext aggregateFunction) {
+            MgxqlParser.Aggregate_function_nameContext funcNameCtx = aggregateFunction.aggregate_function_name();
+            MgxqlParser.Aggregate_function_argumentContext funcArgCtx = aggregateFunction.aggregate_function_argument();
+
+            if (funcNameCtx.select_max() != null) {
+                item.setType(SelectItemType.MAX);
+            } else if (funcNameCtx.select_min() != null) {
+                item.setType(SelectItemType.MIN);
+            } else if (funcNameCtx.select_avg() != null) {
+                item.setType(SelectItemType.AVG);
+            } else if (funcNameCtx.select_sum() != null) {
+                item.setType(SelectItemType.SUM);
+            } else if (funcNameCtx.select_count() != null) {
+                item.setType(SelectItemType.COUNT);
             }
 
-            MgxqlParser.Aggregate_function_countContext countCtx = aggregateFunction.aggregate_function_count();
-            if (countCtx != null) {
-                item.setType(SelectItemType.COUNT);
-                MgxqlParser.Aggregate_function_count_argumentContext countArgCtx = countCtx.aggregate_function_count_argument();
+            if (funcArgCtx.field_reference() != null) {
+                item.setArgumentKind(AggregateArgumentKind.FIELD);
+                item.setFieldRef(parseFieldReference(funcArgCtx.field_reference()));
+            } else if (funcArgCtx.number() != null) {
+                item.setArgumentKind(AggregateArgumentKind.NUMBER);
                 FieldReference fieldRef = new FieldReference();
-                if (countArgCtx.number() != null) {
-                    fieldRef.setFieldName(countArgCtx.number().getText());
-                } else if (countArgCtx.select_asterisk() != null) {
-                    fieldRef.setFieldName("*");
-                } else if (countArgCtx.field_reference() != null) {
-                    fieldRef = parseFieldReference(countArgCtx.field_reference());
-                }
+                fieldRef.setFieldName(funcArgCtx.number().getText());
+                item.setFieldRef(fieldRef);
+            } else if (funcArgCtx.select_asterisk() != null) {
+                item.setArgumentKind(AggregateArgumentKind.ASTERISK);
+                FieldReference fieldRef = new FieldReference();
+                fieldRef.setFieldName("*");
                 item.setFieldRef(fieldRef);
             }
         }
@@ -498,7 +510,10 @@ public class MgxqlSyntaxHandler {
                     argument = fieldRef.getFieldName();
                 }
             }
-            return new com.mybatisgx.dsl.mgxql.model.expression.HavingAggregateExpression(function, argument);
+            com.mybatisgx.dsl.mgxql.model.expression.HavingAggregateExpression expression =
+                    new com.mybatisgx.dsl.mgxql.model.expression.HavingAggregateExpression(function, argument);
+            expression.setArgumentKind(aggItem.getArgumentKind());
+            return expression;
         }
     }
 

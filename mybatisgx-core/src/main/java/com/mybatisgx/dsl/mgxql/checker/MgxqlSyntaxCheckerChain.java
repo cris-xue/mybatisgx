@@ -26,9 +26,9 @@ public class MgxqlSyntaxCheckerChain {
     public MgxqlSyntaxCheckerChain() {
         this.selectCheckers = Arrays.asList(
                 new AliasRequirementChecker(),
+                new AggregateArgumentChecker(),
                 new FieldAliasChecker(),
-                new OnAliasChecker(),
-                new SelectStarChecker()
+                new OnAliasChecker()
         );
         this.dmlCheckers = Arrays.asList(
                 new WhereRequiredChecker(),

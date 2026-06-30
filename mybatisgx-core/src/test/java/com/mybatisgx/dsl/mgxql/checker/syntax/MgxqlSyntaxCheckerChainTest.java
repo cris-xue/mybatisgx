@@ -119,7 +119,7 @@ public class MgxqlSyntaxCheckerChainTest {
         whereClause.getRootExpression().addNode(node);
         stmt.setWhereClause(whereClause);
 
-        // DELETE 走DML校验链，不触发SelectStarChecker等SELECT专属校验
+        // DELETE 走DML校验链，不触发AggregateArgumentChecker等SELECT专属校验
         chain.check(stmt);
     }
 

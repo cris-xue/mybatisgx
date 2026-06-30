@@ -157,7 +157,7 @@ public class SelectFieldCheckerTest {
     }
 
     @Test
-    public void test09_selectStarWithJoin_shouldError() {
+    public void test09_selectStarWithJoin_shouldPass() {
         SelectStatement stmt = buildSelectStmt();
         stmt.getFromClause().addJoinEntity(new JoinEntity("Role", "role", JoinType.LEFT));
         SelectItem starItem = new SelectItem();
@@ -165,14 +165,7 @@ public class SelectFieldCheckerTest {
         stmt.addSelectItem(starItem);
 
         checker.check(stmt, context);
-        Assert.assertTrue(context.hasErrors());
-        boolean hasError = false;
-        for (String error : context.getErrors()) {
-            if (error.contains("SELECT * 不合法")) {
-                hasError = true;
-            }
-        }
-        Assert.assertTrue("存在 JOIN 时 SELECT * 应报错", hasError);
+        Assert.assertFalse("多实体 JOIN 时 SELECT * 不再报错", context.hasErrors());
     }
 
     @Test

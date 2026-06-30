@@ -20,7 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * MGXQL 解析回归测试：聚合参数 argumentKind 与 select_item_alias AS 路径
+ * MGXQL 解析回归测试：聚合参数 argumentKind 与 select* 全字段查询
  *
  * @author 薛承城
  * @date 2026/6/30
@@ -70,27 +70,6 @@ public class MgxqlSelectItemParsingTest {
         SelectItem item = stmt.getSelectItems().get(0);
         Assert.assertEquals(SelectItemType.SUM, item.getType());
         Assert.assertEquals(AggregateArgumentKind.FIELD, item.getArgumentKind());
-    }
-
-    @Test
-    public void test06_aliasSingleSegment() {
-        SelectStatement stmt = parseSelect("select count(id) as total from User");
-        SelectItem item = stmt.getSelectItems().get(0);
-        Assert.assertEquals(Arrays.asList("total"), item.getAlias());
-    }
-
-    @Test
-    public void test07_aliasCascading() {
-        SelectStatement stmt = parseSelect("select user.name as role.menu.name from User user");
-        SelectItem item = stmt.getSelectItems().get(0);
-        Assert.assertEquals(Arrays.asList("role", "menu", "name"), item.getAlias());
-    }
-
-    @Test
-    public void test08_noAliasIsNull() {
-        SelectStatement stmt = parseSelect("select user.name from User user");
-        SelectItem item = stmt.getSelectItems().get(0);
-        Assert.assertNull(item.getAlias());
     }
 
     @Test

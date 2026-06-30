@@ -208,7 +208,7 @@ public class MgxqlHandler {
                     boundParam.setNotOperator(conditionNode.getNotOperator());
                     if (conditionNode.getColumnInfo() != null) {
                         BoundParamEntry entry = new BoundParamEntry();
-                        entry.setSqlExpression(new ConditionColumnExpression(conditionNode.getColumnInfo().getDbColumnName(), conditionNode.getColumnInfo().getTypeHandler()));
+                        entry.setSqlExpression(new ConditionColumnExpression(conditionNode.getColumnInfo().getDbColumnName(), conditionNode.getColumnInfo().getTypeHandler(), conditionNode.getFieldAlias()));
                         boundParam.addEntry(entry);
                     }
                     conditionNode.setBoundParam(boundParam);
@@ -384,7 +384,7 @@ public class MgxqlHandler {
             for (int i = 0; i < composites.size(); i++) {
                 ColumnInfo composite = composites.get(i);
                 BoundParamEntry entry = new BoundParamEntry();
-                entry.setSqlExpression(new ConditionColumnExpression(composite.getDbColumnName(), composite.getTypeHandler()));
+                entry.setSqlExpression(new ConditionColumnExpression(composite.getDbColumnName(), composite.getTypeHandler(), conditionNode.getFieldAlias()));
                 List<String> fullPath = new ArrayList<>(prefixPath);
                 fullPath.add(composite.getJavaColumnName());
                 entry.setParamPath(fullPath);
@@ -397,7 +397,7 @@ public class MgxqlHandler {
             boundParam.setKind(ParamKind.SIMPLE);
             BoundParamEntry entry = new BoundParamEntry();
             if (columnInfo != null) {
-                entry.setSqlExpression(new ConditionColumnExpression(columnInfo.getDbColumnName(), columnInfo.getTypeHandler()));
+                entry.setSqlExpression(new ConditionColumnExpression(columnInfo.getDbColumnName(), columnInfo.getTypeHandler(), conditionNode.getFieldAlias()));
                 entry.setTypeHandler(columnInfo.getTypeHandler());
             }
             entry.setParamPath(prefixPath != null ? new ArrayList<>(prefixPath) : new ArrayList<>());

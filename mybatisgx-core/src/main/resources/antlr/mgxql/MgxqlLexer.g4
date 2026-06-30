@@ -12,6 +12,8 @@ SELECT_MIN: 'min' ;
 SELECT_AVG: 'avg' ;
 SELECT_SUM: 'sum' ;
 
+AS: 'as' ;
+
 FROM: 'from' ;
 LEFT: 'left' ;
 JOIN: 'join' ;

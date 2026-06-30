@@ -165,24 +165,8 @@ public class MgxqlSyntaxHandler {
                     MgxqlParser.Aggregate_functionContext aggregateFunction = selectItem.aggregate_function();
                     parseAggregateFunction(item, aggregateFunction);
                 }
-                MgxqlParser.Select_item_aliasContext aliasCtx = selectItem.select_item_alias();
-                if (aliasCtx != null) {
-                    item.setAlias(parseSelectItemAlias(aliasCtx));
-                }
                 statement.addSelectItem(item);
             }
-        }
-
-        /**
-         * 解析 select_item_alias 为 AS 级联路径，如 as role.menu.name → ["role","menu","name"]
-         */
-        private static List<String> parseSelectItemAlias(MgxqlParser.Select_item_aliasContext aliasCtx) {
-            List<String> path = new ArrayList<>();
-            for (MgxqlParser.Entity_name_aliasContext segCtx : aliasCtx.entity_name_alias()) {
-                path.add(stripBackticks(segCtx.getText()));
-            }
-            path.add(stripBackticks(aliasCtx.field_name().getText()));
-            return path;
         }
 
         private void parseAggregateFunction(SelectItem item, MgxqlParser.Aggregate_functionContext aggregateFunction) {

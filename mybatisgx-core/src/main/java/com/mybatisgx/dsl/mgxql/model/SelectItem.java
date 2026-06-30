@@ -2,8 +2,6 @@ package com.mybatisgx.dsl.mgxql.model;
 
 import com.mybatisgx.model.ColumnInfo;
 
-import java.util.List;
-
 /**
  * MGXQL查询项模型
  *
@@ -25,10 +23,6 @@ public class SelectItem {
      * 聚合函数参数类型：FIELD/NUMBER/ASTERISK；COLUMN 与 COLUMN_ALL 为 null
      */
     private AggregateArgumentKind argumentKind;
-    /**
-     * select_item_alias 解析出的 AS 级联路径，如 ["role","menu","name"]；无 AS 时为 null
-     */
-    private List<String> alias;
 
     public SelectItemType getType() {
         return type;
@@ -73,13 +67,5 @@ public class SelectItem {
 
     public void setArgumentKind(AggregateArgumentKind argumentKind) {
         this.argumentKind = argumentKind;
-    }
-
-    public List<String> getAlias() {
-        return alias;
-    }
-
-    public void setAlias(List<String> alias) {
-        this.alias = alias;
     }
 }

@@ -30,14 +30,12 @@ modify_entity: entity_name ;
 // 查询语法：9、select avg(age) from User where name = :name and (age < :age or status = :status)
 select_statement: select_action select_item_clause select_from_clause where_clause? group_by_clause? having_clause? order_by_clause? limit_clause? ;
 select_item_clause: select_item (comma select_item)* ;
-select_item: (select_column_all | select_column_custom | aggregate_function) select_item_alias? ;
+select_item: select_column_all | select_column_custom | aggregate_function ;
 
 select_column_all: select_asterisk | entity_name_alias dot select_asterisk ;
 select_column_custom: field_reference ;
 select_action: SELECT_ACTION ;
 select_asterisk: SELECT_ASTERISK ;
-// 查询字段列表，name、role.name、role.menu.name   支持嵌套属性链
-select_item_alias: alias (entity_name_alias dot)* field_name ;
 
 // 聚合函数【MAX、MIN、AVG、SUM、COUNT】，支持字段参数 func（field）、只有count支持count(*)、count(1)
 aggregate_function: aggregate_function_name left_bracket aggregate_function_argument right_bracket ;
@@ -148,8 +146,6 @@ order_by_direction: ORDER_BY_DIRECTION ;
 field_reference: field_name | entity_name_alias dot field_name ;
 // 参数引用（对应查询实体和@Param）。:name   :表示从根节点开始取值
 parameter_reference: param_colon field_name (dot field_name)* ;
-
-alias: AS ;
 
 entity_name: UPPER_NAME ;
 entity_name_alias: LOWER_NAME | QUOTED_NAME ;

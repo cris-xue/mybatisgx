@@ -39,21 +39,14 @@ select_asterisk: SELECT_ASTERISK ;
 // 查询字段列表，name、role.name、role.menu.name   支持嵌套属性链
 select_item_alias: alias (entity_name_alias dot)* field_name ;
 
-// 聚合函数
-aggregate_function: aggregate_function_normal | aggregate_function_count ;
-
-// MAX、MIN、AVG、SUM，只支持字段参数
-aggregate_function_normal: aggregate_function_name left_bracket aggregate_function_argument right_bracket ;
-aggregate_function_name: select_max | select_min | select_avg | select_sum ;
-aggregate_function_argument: field_reference ;
+// 聚合函数【MAX、MIN、AVG、SUM、COUNT】，支持字段参数 func（field）、只有count支持count(*)、count(1)
+aggregate_function: aggregate_function_name left_bracket aggregate_function_argument right_bracket ;
+aggregate_function_name: select_max | select_min | select_avg | select_sum | select_count ;
+aggregate_function_argument: field_reference | number | select_asterisk ;
 select_max: SELECT_MAX ;
 select_min: SELECT_MIN ;
 select_avg: SELECT_AVG ;
 select_sum: SELECT_SUM ;
-
-// count聚合函数，需要支持count(*)、count(1)、count（field）
-aggregate_function_count: select_count left_bracket aggregate_function_count_argument right_bracket ;
-aggregate_function_count_argument: number | select_asterisk | field_reference ;
 select_count: SELECT_COUNT ;
 
 // from User user left join Role role on aaa.id = bbb.aaa_id

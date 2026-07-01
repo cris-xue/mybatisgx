@@ -40,8 +40,10 @@ public class EntityRelationTreeHandler {
             // 创建投影实体关系树
             List<ColumnInfo> entityColumnInfoList = new ArrayList<>();
             for (ColumnInfo columnInfo : methodReturnInfo.getColumnInfoList()) {
-                ColumnInfo entityColumnInfo = mapperInfo.getEntityInfo().getDbColumnInfo(columnInfo.getDbColumnName());
-                entityColumnInfoList.add(entityColumnInfo);
+                ColumnInfo entityColumnInfo = mapperInfo.getEntityInfo().getColumnInfo(columnInfo.getJavaColumnName());
+                if (entityColumnInfo != null) {
+                    entityColumnInfoList.add(entityColumnInfo);
+                }
             }
 
             EntityInfo projectionEntityInfo = new EntityInfo.Builder()

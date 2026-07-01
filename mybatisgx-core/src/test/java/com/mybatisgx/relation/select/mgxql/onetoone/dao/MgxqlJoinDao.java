@@ -38,4 +38,7 @@ public interface MgxqlJoinDao extends SimpleDao<User, User, Long> {
 
     @Statement("select count(u.id) from User u")
     long countAll();
+
+    @Statement("select * from User u left join UserDetail ud on u = ud")
+    List<User> findJoinStarTwoEntity();
 }

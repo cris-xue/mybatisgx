@@ -99,4 +99,26 @@ public class SqlExpressionTest {
         Assert.assertEquals("avg", AggregateFunction.AVG.getSqlKeyword());
         Assert.assertEquals("sum", AggregateFunction.SUM.getSqlKeyword());
     }
+
+    @Test
+    public void test13_conditionColumnExpressionWithTableAlias() {
+        ConditionColumnExpression expr = new ConditionColumnExpression("name", null, "user");
+        Assert.assertEquals("user.name", expr.toSql());
+        Assert.assertEquals("user", expr.getTableAlias());
+    }
+
+    @Test
+    public void test14_conditionColumnExpressionWithTableAliasAndTypeHandler() {
+        ConditionColumnExpression expr = new ConditionColumnExpression("status", "com.example.StatusHandler", "u");
+        Assert.assertEquals("u.status", expr.toSql());
+        Assert.assertEquals("com.example.StatusHandler", expr.getTypeHandler());
+        Assert.assertEquals("u", expr.getTableAlias());
+    }
+
+    @Test
+    public void test15_conditionColumnExpressionNullTableAliasReturnsBareColumn() {
+        ConditionColumnExpression expr = new ConditionColumnExpression("user_name", "com.example.Handler", null);
+        Assert.assertEquals("user_name", expr.toSql());
+        Assert.assertNull(expr.getTableAlias());
+    }
 }

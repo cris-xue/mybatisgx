@@ -134,4 +134,24 @@ public class MgxqlJoinRenderTest {
         Assert.assertFalse("SELECT 列不应使用树别名作为表前缀",
                 selectPart.matches("(?s).*simple_oto_user_simple\\.code.*"));
     }
+
+    @Test
+    public void test08_selectStarJoinExpandsAllEntities() {
+        String sql = renderSql("findJoinStarTwoEntity");
+        int fromIndex = sql.toUpperCase().indexOf(" FROM ");
+        Assert.assertTrue("应存在 FROM", fromIndex > 0);
+        String selectPart = sql.substring(0, fromIndex);
+        Assert.assertTrue("select * 应展开主实体 User 列（u. 前缀）", selectPart.contains("u."));
+        Assert.assertTrue("select * 应展开 JOIN 实体 UserDetail 列（ud. 前缀）", selectPart.contains("ud."));
+    }
+
+    @Test
+    public void test09_selectAliasStarExpandsOnlySpecifiedEntity() {
+        String sql = renderSql("findJoinList2");
+        int fromIndex = sql.toUpperCase().indexOf(" FROM ");
+        Assert.assertTrue("应存在 FROM", fromIndex > 0);
+        String selectPart = sql.substring(0, fromIndex);
+        Assert.assertTrue("select u.* 应展开 User 列", selectPart.contains("u."));
+        Assert.assertFalse("select u.* 不应展开 UserDetail 列", selectPart.contains("ud."));
+    }
 }

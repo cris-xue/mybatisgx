@@ -1,6 +1,7 @@
 package com.mybatisgx.executor.page;
 
 import com.google.common.collect.Lists;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -71,6 +72,9 @@ public class Pageable {
     }
 
     public String getOrderBy() {
+        if (ObjectUtils.isEmpty(sorts)) {
+            return null;
+        }
         List<String> orderByItemList = new ArrayList<>();
         for (Sort sort : sorts) {
             orderByItemList.add(String.format("%s %s", sort.getColumn(), sort.getDirection()));

@@ -52,8 +52,9 @@ public class MgxqlSelectColumnTemplateHandler {
      */
     public PlainSelect buildSelectSql(SelectStatement selectStatement, ColumnEntityRelation rootRelation) {
         AliasContext ctx = AliasContext.build(selectStatement, rootRelation);
+        FromAliasContext fromAliasCtx = FromAliasContext.build(selectStatement.getFromClause());
         PlainSelect plainSelect = new PlainSelect();
-        new SelectItemsRenderer(ctx, this.selectColumnSqlTemplateHandler).render(plainSelect, selectStatement);
+        new SelectItemsRenderer(ctx, fromAliasCtx, this.selectColumnSqlTemplateHandler).render(plainSelect, selectStatement);
         new FromRenderer(ctx).render(plainSelect);
         new JoinRenderer(ctx).render(plainSelect, selectStatement.getFromClause());
         return plainSelect;
@@ -80,10 +81,12 @@ public class MgxqlSelectColumnTemplateHandler {
     private static class SelectItemsRenderer {
 
         private final AliasContext ctx;
+        private final FromAliasContext fromAliasCtx;
         private final SelectColumnSqlTemplateHandler selectColumnSqlTemplateHandler;
 
-        SelectItemsRenderer(AliasContext ctx, SelectColumnSqlTemplateHandler selectColumnSqlTemplateHandler) {
+        SelectItemsRenderer(AliasContext ctx, FromAliasContext fromAliasCtx, SelectColumnSqlTemplateHandler selectColumnSqlTemplateHandler) {
             this.ctx = ctx;
+            this.fromAliasCtx = fromAliasCtx;
             this.selectColumnSqlTemplateHandler = selectColumnSqlTemplateHandler;
         }
 
@@ -107,67 +110,47 @@ public class MgxqlSelectColumnTemplateHandler {
         }
 
         /**
-         * COLUMN_ALL 投影：复用 {@link SelectColumnSqlTemplateHandler#buildSimpleSelectSql}
-         * 的列展开逻辑（含 id 复合列、外键列），保证与 result map 列集一致，仅取其 select items。
+         * COLUMN_ALL 投影：基于 FROM 实体 {@link EntityInfo} 展开，不依赖投影树节点。
+         * <p>
+         * select alias.* → 查找别名为 alias 的 FROM 实体，展开其全部字段；
+         * select * → 遍历 FROM/JOIN 所有实体，逐个展开全部字段。
          */
         private void addColumnAllSelectItems(PlainSelect plainSelect, com.mybatisgx.dsl.mgxql.model.SelectItem selectItem) {
             String entityAlias = selectItem.getEntityAlias();
             if (StringUtils.isNotBlank(entityAlias)) {
-                // select alias.*：仅展开指定实体
-                ColumnEntityRelation node = this.ctx.getNode(entityAlias);
-                if (node == null) {
-                    plainSelect.addSelectItems(new AllColumns());
-                    return;
+                // select alias.*：基于 FROM 实体展开
+                FromEntity fromEntity = this.fromAliasCtx.getFromEntity(entityAlias);
+                if (fromEntity != null && fromEntity.getEntityInfo() != null) {
+                    ColumnEntityRelation tempRelation = new ColumnEntityRelation<>();
+                    tempRelation.setEntityInfo(fromEntity.getEntityInfo());
+                    tempRelation.setTableNameAlias(entityAlias);
+                    this.expandEntityColumns(plainSelect, tempRelation, entityAlias);
                 }
-                this.expandEntityColumns(plainSelect, node, entityAlias);
                 return;
             }
             // select *：遍历 fromClause 全部实体（主 + JOIN）
-            FromClause fromClause = this.ctx.getFromClause();
+            FromClause fromClause = this.fromAliasCtx.getFromClause();
             if (fromClause == null) {
-                ColumnEntityRelation root = this.ctx.getRootRelation();
-                if (root != null) {
-                    this.expandEntityColumns(plainSelect, root, this.ctx.getMainTableAlias());
-                } else {
-                    plainSelect.addSelectItems(new AllColumns());
-                }
                 return;
             }
             FromEntity primaryEntity = fromClause.getPrimaryEntity();
-            if (primaryEntity != null) {
-                this.expandFromEntity(plainSelect, primaryEntity, true);
+            if (primaryEntity != null && primaryEntity.getEntityInfo() != null) {
+                String alias = StringUtils.isNotBlank(primaryEntity.getAlias()) ? primaryEntity.getAlias() : this.ctx.getMainTableAlias();
+                ColumnEntityRelation tempRelation = new ColumnEntityRelation<>();
+                tempRelation.setEntityInfo(primaryEntity.getEntityInfo());
+                tempRelation.setTableNameAlias(alias);
+                this.expandEntityColumns(plainSelect, tempRelation, alias);
             }
             if (fromClause.getJoinEntities() != null) {
                 for (JoinEntity joinEntity : fromClause.getJoinEntities()) {
-                    this.expandFromEntity(plainSelect, joinEntity, false);
+                    if (joinEntity.getEntityInfo() != null) {
+                        String alias = StringUtils.isNotBlank(joinEntity.getAlias()) ? joinEntity.getAlias() : this.ctx.resolveTableAlias(joinEntity.getAlias());
+                        ColumnEntityRelation tempRelation = new ColumnEntityRelation<>();
+                        tempRelation.setEntityInfo(joinEntity.getEntityInfo());
+                        tempRelation.setTableNameAlias(alias);
+                        this.expandEntityColumns(plainSelect, tempRelation, alias);
+                    }
                 }
-            }
-        }
-
-        /**
-         * 展开单个 FROM 实体的全部列。有注解关系树节点时沿用树节点（保持 result map 列别名对齐）；
-         * 无树节点时从 FromEntity.entityInfo 构造临时关系节点展开。主实体无别名时回退树根以兼容单表默认查询。
-         */
-        private void expandFromEntity(PlainSelect plainSelect, FromEntity fromEntity, boolean isPrimary) {
-            String alias = fromEntity.getAlias();
-            ColumnEntityRelation node = this.ctx.getNode(alias);
-            if (node != null) {
-                String tablePrefix = StringUtils.isNotBlank(alias) ? alias : this.ctx.getMainTableAlias();
-                this.expandEntityColumns(plainSelect, node, tablePrefix);
-                return;
-            }
-            if (isPrimary && StringUtils.isBlank(alias)) {
-                ColumnEntityRelation root = this.ctx.getRootRelation();
-                if (root != null) {
-                    this.expandEntityColumns(plainSelect, root, this.ctx.getMainTableAlias());
-                }
-                return;
-            }
-            if (fromEntity.getEntityInfo() != null) {
-                ColumnEntityRelation tempRelation = new ColumnEntityRelation<>();
-                tempRelation.setEntityInfo(fromEntity.getEntityInfo());
-                tempRelation.setTableNameAlias(alias);
-                this.expandEntityColumns(plainSelect, tempRelation, alias);
             }
         }
 
@@ -190,7 +173,8 @@ public class MgxqlSelectColumnTemplateHandler {
         }
 
         /**
-         * COLUMN 投影：发 {@code tableNameAlias.dbColumnName AS tableNameAlias_dbColumnNameAlias}，
+         * COLUMN 投影：基于 FROM 实体 {@link EntityInfo} 获取 {@link ColumnInfo}，
+         * 发 {@code tableAlias.dbColumnName AS tableAlias_dbColumnNameAlias}，
          * 别名经 {@link ColumnInfo#getTableColumnNameAlias(ColumnEntityRelation)} 与 result map 对齐。
          */
         private void addColumnSelectItem(PlainSelect plainSelect, com.mybatisgx.dsl.mgxql.model.SelectItem selectItem) {
@@ -199,11 +183,15 @@ public class MgxqlSelectColumnTemplateHandler {
                 return;
             }
             String entityAlias = selectItem.getEntityAlias();
-            ColumnEntityRelation treeNode = this.ctx.getNode(entityAlias);
+            FromEntity fromEntity = this.fromAliasCtx.getFromEntity(entityAlias);
             String tableAlias = this.ctx.resolveTableAlias(entityAlias);
             String columnAlias;
-            if (treeNode != null) {
-                columnAlias = columnInfo.getTableColumnNameAlias(treeNode);
+            if (fromEntity != null && fromEntity.getEntityInfo() != null) {
+                // 用 FROM 实体的 EntityInfo 构造临时节点生成列别名
+                ColumnEntityRelation tempRelation = new ColumnEntityRelation<>();
+                tempRelation.setEntityInfo(fromEntity.getEntityInfo());
+                tempRelation.setTableNameAlias(tableAlias);
+                columnAlias = columnInfo.getTableColumnNameAlias(tempRelation);
             } else {
                 String dbAlias = StringUtils.isNotBlank(columnInfo.getDbColumnNameAlias()) ? columnInfo.getDbColumnNameAlias() : columnInfo.getDbColumnName();
                 columnAlias = tableAlias + "_" + dbAlias;
@@ -401,6 +389,50 @@ public class MgxqlSelectColumnTemplateHandler {
                 }
             }
             return expression;
+        }
+    }
+
+    /**
+     * FROM 实体别名上下文：仅负责 MGXQL 别名 → {@link FromEntity}/{@link JoinEntity} 的映射，
+     * 用于 SELECT 列展开时直接获取 FROM 实体的 {@link EntityInfo}。
+     * <p>
+     * 与 {@link AliasContext}（服务于 JOIN/ON 渲染）职责分离：SELECT 列展开不依赖投影树节点匹配。
+     */
+    private static class FromAliasContext {
+
+        private final Map<String, FromEntity> fromEntityMap;
+        private final FromClause fromClause;
+
+        private FromAliasContext(Map<String, FromEntity> fromEntityMap, FromClause fromClause) {
+            this.fromEntityMap = fromEntityMap;
+            this.fromClause = fromClause;
+        }
+
+        static FromAliasContext build(FromClause fromClause) {
+            Map<String, FromEntity> map = new LinkedHashMap<>();
+            if (fromClause == null) {
+                return new FromAliasContext(map, fromClause);
+            }
+            FromEntity primaryEntity = fromClause.getPrimaryEntity();
+            if (primaryEntity != null && StringUtils.isNotBlank(primaryEntity.getAlias())) {
+                map.put(primaryEntity.getAlias(), primaryEntity);
+            }
+            if (fromClause.getJoinEntities() != null) {
+                for (JoinEntity joinEntity : fromClause.getJoinEntities()) {
+                    if (StringUtils.isNotBlank(joinEntity.getAlias())) {
+                        map.put(joinEntity.getAlias(), joinEntity);
+                    }
+                }
+            }
+            return new FromAliasContext(map, fromClause);
+        }
+
+        FromEntity getFromEntity(String alias) {
+            return this.fromEntityMap.get(alias);
+        }
+
+        FromClause getFromClause() {
+            return this.fromClause;
         }
     }
 

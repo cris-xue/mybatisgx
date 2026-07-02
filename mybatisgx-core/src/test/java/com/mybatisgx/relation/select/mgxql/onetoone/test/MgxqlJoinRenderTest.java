@@ -3,6 +3,8 @@ package com.mybatisgx.relation.select.mgxql.onetoone.test;
 import com.mybatisgx.dsl.mgxql.model.SelectStatement;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.model.ColumnEntityRelation;
+import com.mybatisgx.model.ColumnInfo;
+import com.mybatisgx.model.EntityInfo;
 import com.mybatisgx.model.MapperInfo;
 import com.mybatisgx.model.MethodInfo;
 import com.mybatisgx.relation.select.simple_simple_id.onetoone.entity.User;
@@ -153,5 +155,63 @@ public class MgxqlJoinRenderTest {
         String selectPart = sql.substring(0, fromIndex);
         Assert.assertTrue("select u.* 应展开 User 列", selectPart.contains("u."));
         Assert.assertFalse("select u.* 不应展开 UserDetail 列", selectPart.contains("ud."));
+    }
+
+    /**
+     * 投影 DTO + select * 四层 JOIN：应展开所有实体列，不输出裸 *
+     */
+    @Test
+    public void test10_projectionSelectStarExpandsAllEntities() {
+        String sql = renderSql("findSkipLevelProjectionSelectStar");
+        int fromIndex = sql.toUpperCase().indexOf(" FROM ");
+        Assert.assertTrue("应存在 FROM", fromIndex > 0);
+        String selectPart = sql.substring(0, fromIndex);
+        Assert.assertFalse("select * 不应输出裸 *", selectPart.trim().equals("SELECT *"));
+        Assert.assertTrue("select * 应展开主实体 User 列（u. 前缀）", selectPart.contains("u."));
+        Assert.assertTrue("select * 应展开 JOIN 实体 UserDetail 列（ud. 前缀）", selectPart.contains("ud."));
+        Assert.assertTrue("select * 应展开 JOIN 实体 UserDetailItem1 列（i1. 前缀）", selectPart.contains("i1."));
+        Assert.assertTrue("select * 应展开 JOIN 实体 UserDetailItem2 列（i2. 前缀）", selectPart.contains("i2."));
+    }
+
+    /**
+     * 投影 DTO + select u.* 四层 JOIN：应仅展开 User 列，不输出裸 *
+     */
+    @Test
+    public void test11_projectionSelectAliasStarExpandsOnlyUser() {
+        String sql = renderSql("findSkipLevelProjectionSelectAliasStar");
+        int fromIndex = sql.toUpperCase().indexOf(" FROM ");
+        Assert.assertTrue("应存在 FROM", fromIndex > 0);
+        String selectPart = sql.substring(0, fromIndex);
+        Assert.assertFalse("select u.* 不应输出裸 *", selectPart.trim().equals("SELECT *"));
+        Assert.assertTrue("select u.* 应展开 User 列（u. 前缀）", selectPart.contains("u."));
+        Assert.assertFalse("select u.* 不应展开 UserDetail 列（ud. 前缀）", selectPart.contains("ud."));
+    }
+
+    /**
+     * 投影 DTO 场景下 SELECT 列别名与 ResultMap column 属性对齐：
+     * SELECT 中每个 AS 后的别名后缀（dbColumnNameAlias 部分）与投影树 EntityInfo 的 ColumnInfo.dbColumnNameAlias 一致。
+     */
+    @Test
+    public void test12_projectionColumnAliasAlignsWithResultMap() {
+        MethodInfo methodInfo = configuration.getMethodInfo(DAO_NAMESPACE + ".findSkipLevelProjectionSelectAliasStar");
+        SelectStatement selectStatement = (SelectStatement) methodInfo.getMgxqlStatement();
+        Class<?> returnType = methodInfo.getMethodReturnInfo().getType();
+        ColumnEntityRelation rootRelation = mapperInfo.getEntityRelationTree(returnType);
+
+        MgxqlSelectColumnTemplateHandler handler = new MgxqlSelectColumnTemplateHandler();
+        PlainSelect plainSelect = handler.buildSelectSql(selectStatement, rootRelation);
+        String sql = plainSelect.toString();
+
+        // 从投影树根节点获取 EntityInfo，验证 SELECT 中包含其列的 dbColumnNameAlias
+        EntityInfo rootEntityInfo = rootRelation.getEntityInfo();
+        Assert.assertNotNull("投影树根节点 entityInfo 不应为 null", rootEntityInfo);
+
+        for (ColumnInfo columnInfo : rootEntityInfo.getTableColumnInfoList()) {
+            String dbColumnNameAlias = columnInfo.getDbColumnNameAlias();
+            if (dbColumnNameAlias != null) {
+                Assert.assertTrue("SELECT 应包含列别名后缀 " + dbColumnNameAlias,
+                        sql.contains(dbColumnNameAlias));
+            }
+        }
     }
 }

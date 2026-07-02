@@ -63,4 +63,12 @@ public interface MgxqlJoinDao extends SimpleDao<User, User, Long> {
     // 字段名不匹配投影（unknownRelation 字段在路径链中不存在）
     @Statement("select u.* from User u left join UserDetail ud on u = ud left join UserDetailItem1 i1 on ud = i1 left join UserDetailItem2 i2 on i1 = i2")
     List<UserUnknownFieldProjection> findUnknownFieldProjection();
+
+    // 跳层投影 + select * 四层 JOIN 展开
+    @Statement("select * from User u left join UserDetail ud on u = ud left join UserDetailItem1 i1 on ud = i1 left join UserDetailItem2 i2 on i1 = i2")
+    List<UserSkipProjection> findSkipLevelProjectionSelectStar();
+
+    // 跳层投影 + select u.* 展开
+    @Statement("select u.* from User u left join UserDetail ud on u = ud left join UserDetailItem1 i1 on ud = i1 left join UserDetailItem2 i2 on i1 = i2")
+    List<UserSkipProjection> findSkipLevelProjectionSelectAliasStar();
 }

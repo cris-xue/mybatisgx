@@ -1,5 +1,7 @@
 package com.mybatisgx.dsl.mgxql.model;
 
+import com.mybatisgx.model.EntityRelationTree;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,6 +42,10 @@ public class SelectStatement extends MgxqlStatement {
      * LIMIT子句
      */
     private LimitClause limitClause;
+    /**
+     * mgxql完整的实体关系树
+     */
+    private EntityRelationTree mgxqlEntityRelationTree;
 
     public List<SelectItem> getSelectItems() {
         return selectItems;
@@ -91,5 +97,13 @@ public class SelectStatement extends MgxqlStatement {
 
     public void setLimitClause(LimitClause limitClause) {
         this.limitClause = limitClause;
+    }
+
+    public EntityRelationTree getMgxqlEntityRelationTree() {
+        return mgxqlEntityRelationTree;
+    }
+
+    public void setMgxqlEntityRelationTree(EntityRelationTree mgxqlEntityRelationTree) {
+        this.mgxqlEntityRelationTree = mgxqlEntityRelationTree;
     }
 }

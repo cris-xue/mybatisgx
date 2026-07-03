@@ -1,5 +1,6 @@
 package com.mybatisgx.model.handler;
 
+import com.mybatisgx.annotation.Entity;
 import com.mybatisgx.annotation.JoinTable;
 import com.mybatisgx.annotation.ManyToMany;
 import com.mybatisgx.context.EntityInfoContextHolder;
@@ -50,10 +51,16 @@ public class EntityRelationTreeHandler {
         }
         selectStatement.setMgxqlEntityRelationTree(entityRelationTree);
 
+        // 处理返回非根实体的情况，例如：UserDao中的方法返回Role
         MethodReturnInfo methodReturnInfo = methodInfo.getMethodReturnInfo();
-        Class<?> resultClass = methodReturnInfo.getType();
-        EntityInfo resultEntityInfo = EntityInfoContextHolder.get(resultClass);
-        if (resultEntityInfo == null) {
+        Entity entity = methodReturnInfo.getType().getAnnotation(Entity.class);
+        if (entity != null && methodReturnInfo.getType() != entityRelationTree.getEntityClazz()) {
+            EntityRelationTree childEntityRelationTree = this.findByEntityClass(entityRelationTree, methodReturnInfo.getType());
+            mapperInfo.addEntityRelationTree(childEntityRelationTree);
+        }
+
+        // 处理返回dto投影的情况
+        if (entity == null) {
             EntityProjection entityProjection = new EntityProjection();
             EntityRelationTree entityProjectionRelationTree = entityProjection.execute(mapperInfo, methodInfo, entityRelationTree);
             mapperInfo.addEntityRelationTree(entityProjectionRelationTree);
@@ -71,6 +78,17 @@ public class EntityRelationTreeHandler {
             EntityRelationTree entityRelationTree = this.buildEntityRelationTree(null, entityInfo, entityRelationDependencyTree, 1, 1);
             mapperInfo.addEntityRelationTree(entityRelationTree);
         }*/
+    }
+
+    private EntityRelationTree findByEntityClass(EntityRelationTree entityRelationTree, Class<?> clazz) {
+        List<EntityRelationTree> composites = entityRelationTree.getComposites();
+        for (EntityRelationTree composite : composites) {
+            if (clazz != composite.getEntityClazz()) {
+                return this.findByEntityClass(composite, clazz);
+            }
+            return composite;
+        }
+        return null;
     }
 
     private static class EntityProjection {

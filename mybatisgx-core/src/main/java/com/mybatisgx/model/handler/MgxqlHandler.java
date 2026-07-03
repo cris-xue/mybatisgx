@@ -48,13 +48,13 @@ public class MgxqlHandler {
                 SelectStatement selectStatement = (SelectStatement) methodInfo.getMgxqlStatement();
                 List<SelectItem> selectItemList = selectStatement.getSelectItems();
                 if (!(selectItemList.size() == 1 && selectItemList.get(0).getType().hasAggregateFunction())) {
-                    List<JoinEntity> joinEntityList = selectStatement.getFromClause().getJoinEntities();
+                    MgxqlSourceType mgxqlSourceType = selectStatement.getMgxqlSourceType();
                     this.entityRelationTreeHandler.execute(mapperInfo, methodInfo);
-                    if (ObjectUtils.isEmpty(joinEntityList)) {
-                        String resultMapId = resultMapInfoHandler.execute(mapperInfo, methodInfo);
+                    if (mgxqlSourceType == MgxqlSourceType.MANUAL) {
+                        String resultMapId = mgxqlResultMapInfoHandler.execute(mapperInfo, methodInfo);
                         methodInfo.setResultMapId(resultMapId);
                     } else {
-                        String resultMapId = mgxqlResultMapInfoHandler.execute(mapperInfo, methodInfo);
+                        String resultMapId = resultMapInfoHandler.execute(mapperInfo, methodInfo);
                         methodInfo.setResultMapId(resultMapId);
                     }
                 }

@@ -95,7 +95,7 @@ public class MgxqlResultMapInfoHandler extends ResultMapInfoHandler {
                         return StringUtils.join(Arrays.asList(clazzName, resultMapInfo.getLevel(), resultMapInfo.getIndex()), "_");
                     })
                     .collect(Collectors.toList());
-            return StringUtils.join(classNameList, "_mgxql_join_") + "_ResultMap";
+            return "manual_" + StringUtils.join(classNameList, "_mgxql_join_") + "_ResultMap";
         }
     }
 }

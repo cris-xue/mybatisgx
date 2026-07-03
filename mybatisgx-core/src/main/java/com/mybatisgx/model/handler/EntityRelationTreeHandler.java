@@ -47,8 +47,8 @@ public class EntityRelationTreeHandler {
             EntityRelationDependencyTree entityRelationDependencyTree = EntityRelationDependencyTree.build(null, entityInfo.getClazz());
             entityRelationTree = this.buildEntityRelationTree(null, entityInfo, entityRelationDependencyTree, 1, 1);
             mapperInfo.addEntityRelationTree(entityRelationTree);
-            selectStatement.setMgxqlEntityRelationTree(entityRelationTree);
         }
+        selectStatement.setMgxqlEntityRelationTree(entityRelationTree);
 
         MethodReturnInfo methodReturnInfo = methodInfo.getMethodReturnInfo();
         Class<?> resultClass = methodReturnInfo.getType();
@@ -56,7 +56,6 @@ public class EntityRelationTreeHandler {
         if (resultEntityInfo == null) {
             EntityProjection entityProjection = new EntityProjection();
             EntityRelationTree entityProjectionRelationTree = entityProjection.execute(mapperInfo, methodInfo, entityRelationTree);
-            selectStatement.setMgxqlEntityRelationTree(entityRelationTree);
             mapperInfo.addEntityRelationTree(entityProjectionRelationTree);
         }
 
@@ -89,7 +88,7 @@ public class EntityRelationTreeHandler {
             if (ObjectUtils.isNotEmpty(pathChain)) {
                 // MGXQL 路径：递归构建多层投影树
                 EntityInfo rootEntityInfo = pathChain.get(0).entityInfo;
-                EntityRelationTree entityRelationTree = this.buildProjectionEntityRelationTree(resultClass, rootEntityInfo, null, pathChain, 0, 1, 1);
+                EntityRelationTree entityRelationTree = this.buildProjectionEntityRelationTree(resultClass, rootEntityInfo, null, pathChain, 0, mgxqlEntityRelationTree, mgxqlEntityRelationTree);
                 return entityRelationTree;
             } else {
                 // 非 MGXQL 路径：保留现有扁平构建逻辑
@@ -155,16 +154,16 @@ public class EntityRelationTreeHandler {
         /**
          * 递归构建多层投影实体关系树
          *
-         * @param projectionClass  投影 DTO 类
-         * @param currentEntityInfo 当前路径链上匹配到的实体
-         * @param relationColInfo  关系字段（根节点为 null）
-         * @param pathChain        完整路径链
-         * @param pathIndex        当前在路径链上的位置
-         * @param level            层级
-         * @param index            索引
+         * @param projectionClass       投影 DTO 类
+         * @param currentEntityInfo     当前路径链上匹配到的实体
+         * @param relationColInfo       关系字段（根节点为 null）
+         * @param pathChain             完整路径链
+         * @param pathIndex             当前在路径链上的位置
+         * @param mgxqlEntityRelationTree 完整实体关系树（全量）
+         * @param currentFullTreeNode   当前对应的完整树节点，用于获取 level/index/tableNameAlias/middleEntityInfo
          * @return 实体关系树节点
          */
-        private EntityRelationTree buildProjectionEntityRelationTree(Class<?> projectionClass, EntityInfo currentEntityInfo, RelationColumnInfo relationColInfo, List<JoinPathNode> pathChain, int pathIndex, int level, int index) {
+        private EntityRelationTree buildProjectionEntityRelationTree(Class<?> projectionClass, EntityInfo currentEntityInfo, RelationColumnInfo relationColInfo, List<JoinPathNode> pathChain, int pathIndex, EntityRelationTree mgxqlEntityRelationTree, EntityRelationTree currentFullTreeNode) {
             // 获取投影 DTO 的 ColumnInfo 列表
             List<ColumnInfo> dtoColumnInfoList = columnInfoHandler.getColumnInfoList(projectionClass, currentEntityInfo.getTypeParameterMap());
             List<ColumnInfo> replacedColumnInfoList = new ArrayList<>();
@@ -200,32 +199,100 @@ public class EntityRelationTreeHandler {
             entityProjectionInfo.setEntityClass(currentEntityInfo.getClazz());
             columnMapHandler.process(entityProjectionInfo);
 
-            // 构建 EntityRelationTree 节点
+            // 从完整树节点获取 level/index/tableNameAlias/middleEntityInfo
+            int level = currentFullTreeNode != null ? currentFullTreeNode.getLevel() : 1;
+            int index = currentFullTreeNode != null ? currentFullTreeNode.getIndex() : 1;
             String tableNameAlias = tableColumnNameAlias.process(level, index, entityProjectionInfo);
+
+            // 构建 EntityRelationTree 节点
             EntityRelationTree entityRelationTree = new EntityRelationTree();
             entityRelationTree.setLevel(level);
             entityRelationTree.setIndex(index);
             entityRelationTree.setTableNameAlias(tableNameAlias);
             entityRelationTree.setColumnInfo(relationColInfo);
-            entityRelationTree.setMiddleEntityInfo(null);
+            entityRelationTree.setMiddleEntityInfo(currentFullTreeNode != null ? currentFullTreeNode.getMiddleEntityInfo() : null);
             entityRelationTree.setEntityInfo(entityProjectionInfo);
 
             // 对关系字段递归调用
-            int childIndex = 1;
             for (CompositeFieldEntry entry : compositeFields) {
                 MatchResult matchResult = entry.matchResult;
                 Class<?> nestedDtoClass = entry.dtoColumnInfo.getJavaType();
                 EntityInfo targetEntityInfo = pathChain.get(matchResult.pathIndex).entityInfo;
+                // 从完整树中查找匹配的子节点
+                EntityRelationTree childFullTreeNode = this.findChildInFullTree(mgxqlEntityRelationTree, matchResult.relationColumnInfo);
                 EntityRelationTree subTree = this.buildProjectionEntityRelationTree(
                         nestedDtoClass, targetEntityInfo, matchResult.relationColumnInfo,
-                        pathChain, matchResult.pathIndex, level + 1, childIndex);
+                        pathChain, matchResult.pathIndex, mgxqlEntityRelationTree, childFullTreeNode);
                 if (subTree != null) {
                     entityRelationTree.addComposites(subTree);
-                    childIndex++;
                 }
             }
 
             return entityRelationTree;
+        }
+
+        /**
+         * 在完整实体关系树中查找匹配的子节点
+         * <p>
+         * 优先按 relationColumnInfo 身份匹配（同一对象引用），身份匹配失败时按 javaColumnName 回退匹配
+         *
+         * @param fullTreeRoot       完整实体关系树根节点
+         * @param relationColumnInfo 关系字段
+         * @return 匹配到的完整树节点，未找到返回 null
+         */
+        private EntityRelationTree findChildInFullTree(EntityRelationTree fullTreeRoot, RelationColumnInfo relationColumnInfo) {
+            if (fullTreeRoot == null || relationColumnInfo == null) {
+                return null;
+            }
+            // 优先身份匹配
+            EntityRelationTree found = this.findChildByRelationIdentity(fullTreeRoot, relationColumnInfo);
+            if (found != null) {
+                return found;
+            }
+            // 回退：按 javaColumnName 匹配
+            return this.findChildByRelationName(fullTreeRoot, relationColumnInfo.getJavaColumnName());
+        }
+
+        /**
+         * 递归搜索完整树中 columnInfo 与指定 relationColumnInfo 为同一对象引用的节点
+         */
+        private EntityRelationTree findChildByRelationIdentity(EntityRelationTree node, RelationColumnInfo relationColumnInfo) {
+            if (node == null) {
+                return null;
+            }
+            if (node.getColumnInfo() == relationColumnInfo) {
+                return node;
+            }
+            if (node.getComposites() != null) {
+                for (EntityRelationTree child : node.getComposites()) {
+                    EntityRelationTree found = this.findChildByRelationIdentity(child, relationColumnInfo);
+                    if (found != null) {
+                        return found;
+                    }
+                }
+            }
+            return null;
+        }
+
+        /**
+         * 递归搜索完整树中 columnInfo.javaColumnName 与指定字段名匹配的节点
+         */
+        private EntityRelationTree findChildByRelationName(EntityRelationTree node, String javaColumnName) {
+            if (node == null || javaColumnName == null) {
+                return null;
+            }
+            if (node.getColumnInfo() != null && javaColumnName.equals(node.getColumnInfo().getJavaColumnName())) {
+                return node;
+            }
+            if (node.getComposites() != null) {
+                for (EntityRelationTree child : node.getComposites()) {
+                    EntityRelationTree found = this.findChildByRelationName(child, javaColumnName);
+                    if (found != null) {
+                        return found;
+                    }
+                }
+            }
+            return null;
         }
 
         /**

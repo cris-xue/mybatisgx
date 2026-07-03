@@ -121,7 +121,8 @@ public class ProjectionMultiLevelTreeTest {
     }
 
     /**
-     * test04: 跳层匹配（UserSkipProjection 直接包含 userDetailItem2，跳过 UserDetailItem1）
+     * test04: 跳层匹配（UserSkipProjection 直接包含 userDetailItem2，跳过 UserDetail 和 UserDetailItem1）
+     * 投影树 level/index 从完整实体关系树获取，保持与完整树一致
      */
     @Test
     public void test04_skipLevelProjection() {
@@ -135,7 +136,7 @@ public class ProjectionMultiLevelTreeTest {
         Assert.assertEquals("根节点 entityInfo 的 clazz 应为 UserSkipProjection", UserSkipProjection.class, tree.getEntityInfo().getClazz());
 
         EntityRelationTree item2Tree = tree.getComposites().get(0);
-        Assert.assertEquals("UserDetailItem2 节点层级应为 2", 2, item2Tree.getLevel());
+        Assert.assertEquals("UserDetailItem2 节点层级应为 4（与完整树一致，跳层不影响 level）", 4, item2Tree.getLevel());
         Assert.assertEquals("UserDetailItem2 节点 entityInfo 的 clazz 应为 UserDetailItem2Projection", UserDetailItem2Projection.class, item2Tree.getEntityInfo().getClazz());
         Assert.assertNotNull("UserDetailItem2 节点的 columnInfo 不应为 null", item2Tree.getColumnInfo());
         Assert.assertEquals("columnInfo 的 javaColumnName 应为 userDetailItem2", "userDetailItem2", item2Tree.getColumnInfo().getJavaColumnName());

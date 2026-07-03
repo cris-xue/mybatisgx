@@ -48,11 +48,14 @@ public class MgxqlSelectColumnTemplateHandler {
      * 构建 MGXQL 查询 SQL。
      *
      * @param selectStatement MGXQL SELECT 语句（fromClause 必须存在）
-     * @param rootRelation     返回类型对应的注解实体关系树根节点
+     * @param rootRelation     返回类型对应的投影实体关系树根节点（用于 ResultMap）
      * @return 渲染完成的 PlainSelect
      */
     public PlainSelect buildSelectSql(SelectStatement selectStatement, ColumnEntityRelation rootRelation) {
-        AliasContext aliasContext = AliasContext.build(selectStatement, rootRelation);
+        // AliasContext 使用完整实体关系树构建别名映射，确保所有 JOIN 实体都能找到对应节点
+        ColumnEntityRelation fullTree = selectStatement.getMgxqlEntityRelationTree() != null
+                ? selectStatement.getMgxqlEntityRelationTree() : rootRelation;
+        AliasContext aliasContext = AliasContext.build(selectStatement, fullTree);
         FromAliasContext fromAliasCtx = FromAliasContext.build(selectStatement.getFromClause());
         PlainSelect plainSelect = new PlainSelect();
         new SelectItemsRenderer(aliasContext, fromAliasCtx, this.selectColumnSqlTemplateHandler).render(plainSelect, selectStatement);
@@ -124,7 +127,8 @@ public class MgxqlSelectColumnTemplateHandler {
                 if (fromEntity != null && fromEntity.getEntityInfo() != null) {
                     ColumnEntityRelation tempRelation = new ColumnEntityRelation<>();
                     tempRelation.setEntityInfo(fromEntity.getEntityInfo());
-                    tempRelation.setTableNameAlias(this.aliasContext.getNode(entityAlias).getTableNameAlias());
+                    ColumnEntityRelation treeNode = this.aliasContext.getNode(entityAlias);
+                    tempRelation.setTableNameAlias(treeNode != null ? treeNode.getTableNameAlias() : fromEntity.getAlias());
                     this.expandEntityColumns(plainSelect, tempRelation, entityAlias);
                 }
                 return;
@@ -139,7 +143,8 @@ public class MgxqlSelectColumnTemplateHandler {
                 String alias = StringUtils.isNotBlank(primaryEntity.getAlias()) ? primaryEntity.getAlias() : this.aliasContext.getMainTableAlias();
                 ColumnEntityRelation tempRelation = new ColumnEntityRelation<>();
                 tempRelation.setEntityInfo(primaryEntity.getEntityInfo());
-                tempRelation.setTableNameAlias(this.aliasContext.getNode(alias).getTableNameAlias());
+                ColumnEntityRelation primaryTreeNode = this.aliasContext.getNode(alias);
+                tempRelation.setTableNameAlias(primaryTreeNode != null ? primaryTreeNode.getTableNameAlias() : alias);
                 this.expandEntityColumns(plainSelect, tempRelation, alias);
             }
             if (fromClause.getJoinEntities() != null) {
@@ -148,7 +153,8 @@ public class MgxqlSelectColumnTemplateHandler {
                         String alias = StringUtils.isNotBlank(joinEntity.getAlias()) ? joinEntity.getAlias() : this.aliasContext.resolveTableAlias(joinEntity.getAlias());
                         ColumnEntityRelation tempRelation = new ColumnEntityRelation<>();
                         tempRelation.setEntityInfo(joinEntity.getEntityInfo());
-                        tempRelation.setTableNameAlias(this.aliasContext.getNode(alias).getTableNameAlias());
+                        ColumnEntityRelation joinTreeNode = this.aliasContext.getNode(alias);
+                        tempRelation.setTableNameAlias(joinTreeNode != null ? joinTreeNode.getTableNameAlias() : alias);
                         this.expandEntityColumns(plainSelect, tempRelation, alias);
                     }
                 }
@@ -191,7 +197,8 @@ public class MgxqlSelectColumnTemplateHandler {
                 // 用 FROM 实体的 EntityInfo 构造临时节点生成列别名
                 ColumnEntityRelation tempRelation = new ColumnEntityRelation<>();
                 tempRelation.setEntityInfo(fromEntity.getEntityInfo());
-                tempRelation.setTableNameAlias(this.aliasContext.getNode(entityAlias).getTableNameAlias());
+                ColumnEntityRelation colTreeNode = this.aliasContext.getNode(entityAlias);
+                tempRelation.setTableNameAlias(colTreeNode != null ? colTreeNode.getTableNameAlias() : tableAlias);
                 columnAlias = columnInfo.getTableColumnNameAlias(tempRelation);
             } else {
                 String dbAlias = StringUtils.isNotBlank(columnInfo.getDbColumnNameAlias()) ? columnInfo.getDbColumnNameAlias() : columnInfo.getDbColumnName();

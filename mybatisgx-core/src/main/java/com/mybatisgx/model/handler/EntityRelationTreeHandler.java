@@ -38,18 +38,59 @@ public class EntityRelationTreeHandler {
             return;
         }
 
+        SelectStatement selectStatement = (SelectStatement) methodInfo.getMgxqlStatement();
+        EntityInfo entityInfo = selectStatement.getFromClause().getPrimaryEntity().getEntityInfo();
+
+        // 1、创建实体关系树   2、解决循环引用问题
+        EntityRelationTree entityRelationTree = mapperInfo.getEntityRelationTree(entityInfo.getClazz());
+        if (entityRelationTree == null) {
+            EntityRelationDependencyTree entityRelationDependencyTree = EntityRelationDependencyTree.build(null, entityInfo.getClazz());
+            entityRelationTree = this.buildEntityRelationTree(null, entityInfo, entityRelationDependencyTree, 1, 1);
+            mapperInfo.addEntityRelationTree(entityRelationTree);
+            selectStatement.setMgxqlEntityRelationTree(entityRelationTree);
+        }
+
         MethodReturnInfo methodReturnInfo = methodInfo.getMethodReturnInfo();
+        Class<?> resultClass = methodReturnInfo.getType();
+        EntityInfo resultEntityInfo = EntityInfoContextHolder.get(resultClass);
+        if (resultEntityInfo == null) {
+            EntityProjection entityProjection = new EntityProjection();
+            EntityRelationTree entityProjectionRelationTree = entityProjection.execute(mapperInfo, methodInfo, entityRelationTree);
+            selectStatement.setMgxqlEntityRelationTree(entityRelationTree);
+            mapperInfo.addEntityRelationTree(entityProjectionRelationTree);
+        }
+
+        /*MethodReturnInfo methodReturnInfo = methodInfo.getMethodReturnInfo();
         Class<?> resultClass = methodReturnInfo.getType();
         EntityInfo entityInfo = EntityInfoContextHolder.get(resultClass);
         if (entityInfo == null) {
-            // 创建投影实体关系树
+            EntityProjection entityProjection = new EntityProjection();
+            entityProjection.execute(mapperInfo, methodInfo);
+        } else {
+            // 1、创建实体关系树   2、解决循环引用问题
+            EntityRelationDependencyTree entityRelationDependencyTree = EntityRelationDependencyTree.build(null, resultClass);
+            EntityRelationTree entityRelationTree = this.buildEntityRelationTree(null, entityInfo, entityRelationDependencyTree, 1, 1);
+            mapperInfo.addEntityRelationTree(entityRelationTree);
+        }*/
+    }
+
+    private static class EntityProjection {
+
+        /**
+         * 创建投影实体关系树
+         * @param mapperInfo
+         * @param methodInfo
+         */
+        public EntityRelationTree execute(MapperInfo mapperInfo, MethodInfo methodInfo, EntityRelationTree mgxqlEntityRelationTree) {
+            MethodReturnInfo methodReturnInfo = methodInfo.getMethodReturnInfo();
+            Class<?> resultClass = methodReturnInfo.getType();
+
             List<JoinPathNode> pathChain = this.buildJoinPathChain(methodInfo);
             if (ObjectUtils.isNotEmpty(pathChain)) {
                 // MGXQL 路径：递归构建多层投影树
                 EntityInfo rootEntityInfo = pathChain.get(0).entityInfo;
-                EntityRelationTree entityRelationTree = this.buildProjectionEntityRelationTree(
-                        resultClass, rootEntityInfo, null, pathChain, 0, 1, 1);
-                mapperInfo.addEntityRelationTree(entityRelationTree);
+                EntityRelationTree entityRelationTree = this.buildProjectionEntityRelationTree(resultClass, rootEntityInfo, null, pathChain, 0, 1, 1);
+                return entityRelationTree;
             } else {
                 // 非 MGXQL 路径：保留现有扁平构建逻辑
                 List<ColumnInfo> entityColumnInfoList = new ArrayList<>();
@@ -60,26 +101,228 @@ public class EntityRelationTreeHandler {
                     }
                 }
 
-                EntityInfo projectionEntityInfo = new EntityInfo.Builder()
+                EntityProjectionInfo entityProjectionInfo = (EntityProjectionInfo) EntityInfo.Builder.of(new EntityProjectionInfo())
                         .setClazz(resultClass)
                         .setTableName(mapperInfo.getTableName())
                         .setColumnInfoList(entityColumnInfoList)
                         .build();
-                this.columnMapHandler.process(projectionEntityInfo);
+                entityProjectionInfo.setEntityClass(mapperInfo.getEntityInfo().getClazz());
+                columnMapHandler.process(entityProjectionInfo);
 
-                String tableNameAlias = this.tableColumnNameAlias.process(1, 1, projectionEntityInfo);
+                String tableNameAlias = tableColumnNameAlias.process(1, 1, entityProjectionInfo);
                 EntityRelationTree entityRelationTree = new EntityRelationTree();
                 entityRelationTree.setTableNameAlias(tableNameAlias);
                 entityRelationTree.setLevel(1);
                 entityRelationTree.setIndex(1);
-                entityRelationTree.setEntityInfo(projectionEntityInfo);
-                mapperInfo.addEntityRelationTree(entityRelationTree);
+                entityRelationTree.setEntityInfo(entityProjectionInfo);
+
+                return entityRelationTree;
             }
-        } else {
-            // 1、创建实体关系树   2、解决循环引用问题
-            EntityRelationDependencyTree entityRelationDependencyTree = EntityRelationDependencyTree.build(null, resultClass);
-            EntityRelationTree entityRelationTree = this.buildEntityRelationTree(null, entityInfo, entityRelationDependencyTree, 1, 1);
-            mapperInfo.addEntityRelationTree(entityRelationTree);
+        }
+
+        /**
+         * 从 MethodInfo 的 MGXQL SelectStatement 构建路径链
+         *
+         * @param methodInfo 方法信息
+         * @return 路径链，若非 SelectStatement 则返回空列表
+         */
+        private List<JoinPathNode> buildJoinPathChain(MethodInfo methodInfo) {
+            MgxqlStatement mgxqlStatement = methodInfo.getMgxqlStatement();
+            if (!(mgxqlStatement instanceof SelectStatement)) {
+                return Collections.emptyList();
+            }
+            SelectStatement selectStatement = (SelectStatement) mgxqlStatement;
+            if (selectStatement.getFromClause() == null) {
+                return Collections.emptyList();
+            }
+            List<JoinPathNode> pathChain = new ArrayList<>();
+            // 首节点：主实体，relationColumnInfo 为 null
+            FromEntity primaryEntity = selectStatement.getFromClause().getPrimaryEntity();
+            if (primaryEntity == null || primaryEntity.getEntityInfo() == null) {
+                return Collections.emptyList();
+            }
+            pathChain.add(new JoinPathNode(primaryEntity.getEntityInfo(), null));
+            // 遍历 JOIN 实体，每个节点的 relationColumnInfo 取自 JoinEntity
+            List<JoinEntity> joinEntities = selectStatement.getFromClause().getJoinEntities();
+            for (JoinEntity joinEntity : joinEntities) {
+                if (joinEntity.getEntityInfo() != null) {
+                    pathChain.add(new JoinPathNode(joinEntity.getEntityInfo(), joinEntity.getRelationColumnInfo()));
+                }
+            }
+            return pathChain;
+        }
+
+        /**
+         * 递归构建多层投影实体关系树
+         *
+         * @param projectionClass  投影 DTO 类
+         * @param currentEntityInfo 当前路径链上匹配到的实体
+         * @param relationColInfo  关系字段（根节点为 null）
+         * @param pathChain        完整路径链
+         * @param pathIndex        当前在路径链上的位置
+         * @param level            层级
+         * @param index            索引
+         * @return 实体关系树节点
+         */
+        private EntityRelationTree buildProjectionEntityRelationTree(Class<?> projectionClass, EntityInfo currentEntityInfo, RelationColumnInfo relationColInfo, List<JoinPathNode> pathChain, int pathIndex, int level, int index) {
+            // 获取投影 DTO 的 ColumnInfo 列表
+            List<ColumnInfo> dtoColumnInfoList = columnInfoHandler.getColumnInfoList(projectionClass, currentEntityInfo.getTypeParameterMap());
+            List<ColumnInfo> replacedColumnInfoList = new ArrayList<>();
+            List<CompositeFieldEntry> compositeFields = new ArrayList<>();
+
+            for (ColumnInfo dtoColumnInfo : dtoColumnInfoList) {
+                String javaColumnName = dtoColumnInfo.getJavaColumnName();
+                // 普通字段匹配：在当前实体上查找
+                ColumnInfo entityColumnInfo = currentEntityInfo.getColumnInfo(javaColumnName);
+                if (entityColumnInfo != null && !(entityColumnInfo instanceof RelationColumnInfo)) {
+                    replacedColumnInfoList.add(entityColumnInfo);
+                    continue;
+                }
+                // 复合字段处理：匹配失败且为复合类型时，沿路径链搜索
+                if (this.isCompositeField(dtoColumnInfo)) {
+                    MatchResult matchResult = this.searchDownPath(pathChain, javaColumnName, pathIndex);
+                    if (matchResult != null) {
+                        compositeFields.add(new CompositeFieldEntry(dtoColumnInfo, matchResult));
+                    } else {
+                        LOGGER.debug("投影 DTO {} 的复合字段 {} 在路径链中未匹配，已忽略", projectionClass.getSimpleName(), javaColumnName);
+                    }
+                } else {
+                    LOGGER.debug("投影 DTO {} 的字段 {} 在实体 {} 上未匹配，已忽略", projectionClass.getSimpleName(), javaColumnName, currentEntityInfo.getClazzName());
+                }
+            }
+
+            // 构建合成 EntityInfo
+            EntityProjectionInfo entityProjectionInfo = (EntityProjectionInfo) EntityInfo.Builder.of(new EntityProjectionInfo())
+                    .setClazz(projectionClass)
+                    .setTableName(currentEntityInfo.getTableName())
+                    .setColumnInfoList(replacedColumnInfoList)
+                    .build();
+            entityProjectionInfo.setEntityClass(currentEntityInfo.getClazz());
+            columnMapHandler.process(entityProjectionInfo);
+
+            // 构建 EntityRelationTree 节点
+            String tableNameAlias = tableColumnNameAlias.process(level, index, entityProjectionInfo);
+            EntityRelationTree entityRelationTree = new EntityRelationTree();
+            entityRelationTree.setLevel(level);
+            entityRelationTree.setIndex(index);
+            entityRelationTree.setTableNameAlias(tableNameAlias);
+            entityRelationTree.setColumnInfo(relationColInfo);
+            entityRelationTree.setMiddleEntityInfo(null);
+            entityRelationTree.setEntityInfo(entityProjectionInfo);
+
+            // 对关系字段递归调用
+            int childIndex = 1;
+            for (CompositeFieldEntry entry : compositeFields) {
+                MatchResult matchResult = entry.matchResult;
+                Class<?> nestedDtoClass = entry.dtoColumnInfo.getJavaType();
+                EntityInfo targetEntityInfo = pathChain.get(matchResult.pathIndex).entityInfo;
+                EntityRelationTree subTree = this.buildProjectionEntityRelationTree(
+                        nestedDtoClass, targetEntityInfo, matchResult.relationColumnInfo,
+                        pathChain, matchResult.pathIndex, level + 1, childIndex);
+                if (subTree != null) {
+                    entityRelationTree.addComposites(subTree);
+                    childIndex++;
+                }
+            }
+
+            return entityRelationTree;
+        }
+
+        /**
+         * 判断字段是否为复合类型（非基本类型、非包装类、非 String、非集合、非 Map、非 Number/Date 等标准类型）
+         *
+         * @param columnInfo 字段信息
+         * @return true 表示为复合类型
+         */
+        private boolean isCompositeField(ColumnInfo columnInfo) {
+            Class<?> javaType = columnInfo.getJavaType();
+            if (javaType == null) {
+                return false;
+            }
+            // 基本类型 / 包装类 / String / Number / Date / java.time
+            if (javaType.isPrimitive() || Number.class.isAssignableFrom(javaType)
+                    || CharSequence.class.isAssignableFrom(javaType) || Boolean.class == javaType
+                    || Date.class.isAssignableFrom(javaType) || javaType.getName().startsWith("java.time")) {
+                return false;
+            }
+            // 枚举
+            if (javaType.isEnum()) {
+                return false;
+            }
+            // 集合 / Map / 数组
+            if (Collection.class.isAssignableFrom(javaType) || Map.class.isAssignableFrom(javaType) || javaType.isArray()) {
+                return false;
+            }
+            return true;
+        }
+
+        /**
+         * 沿路径链从 startIndex 开始搜索关系字段
+         *
+         * @param pathChain  路径链
+         * @param fieldName  字段名
+         * @param startIndex 起始索引
+         * @return 匹配结果，未找到返回 null
+         */
+        private MatchResult searchDownPath(List<JoinPathNode> pathChain, String fieldName, int startIndex) {
+            for (int i = startIndex; i < pathChain.size(); i++) {
+                EntityInfo entityInfo = pathChain.get(i).entityInfo;
+                List<RelationColumnInfo> relationColumnInfoList = entityInfo.getRelationColumnInfoList();
+                for (RelationColumnInfo relationColumnInfo : relationColumnInfoList) {
+                    if (fieldName.equals(relationColumnInfo.getJavaColumnName())) {
+                        // 验证目标实体在路径链的下一节点存在且类型匹配
+                        if (i + 1 < pathChain.size()) {
+                            Class<?> targetEntityClass = relationColumnInfo.getJavaType();
+                            Class<?> nextNodeEntityClass = pathChain.get(i + 1).entityInfo.getClazz();
+                            if (targetEntityClass != null && targetEntityClass.equals(nextNodeEntityClass)) {
+                                return new MatchResult(entityInfo, relationColumnInfo, i + 1);
+                            }
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
+        /**
+         * 路径链节点，持有实体信息和到下一节点的关联关系
+         */
+        private static class JoinPathNode {
+            final EntityInfo entityInfo;
+            final RelationColumnInfo relationColumnInfo;
+
+            JoinPathNode(EntityInfo entityInfo, RelationColumnInfo relationColumnInfo) {
+                this.entityInfo = entityInfo;
+                this.relationColumnInfo = relationColumnInfo;
+            }
+        }
+
+        /**
+         * 沿路径链搜索的匹配结果
+         */
+        private static class MatchResult {
+            final EntityInfo sourceEntityInfo;
+            final RelationColumnInfo relationColumnInfo;
+            final int pathIndex;
+
+            MatchResult(EntityInfo sourceEntityInfo, RelationColumnInfo relationColumnInfo, int pathIndex) {
+                this.sourceEntityInfo = sourceEntityInfo;
+                this.relationColumnInfo = relationColumnInfo;
+                this.pathIndex = pathIndex;
+            }
+        }
+
+        /**
+         * 复合字段条目，记录 DTO 字段信息和匹配结果
+         */
+        private static class CompositeFieldEntry {
+            final ColumnInfo dtoColumnInfo;
+            final MatchResult matchResult;
+
+            CompositeFieldEntry(ColumnInfo dtoColumnInfo, MatchResult matchResult) {
+                this.dtoColumnInfo = dtoColumnInfo;
+                this.matchResult = matchResult;
+            }
         }
     }
 
@@ -119,170 +362,6 @@ public class EntityRelationTreeHandler {
                 entityRelationTree.addComposites(subEntityRelationTree);
             }
         }
-        return entityRelationTree;
-    }
-
-    /**
-     * 从 MethodInfo 的 MGXQL SelectStatement 构建路径链
-     *
-     * @param methodInfo 方法信息
-     * @return 路径链，若非 SelectStatement 则返回空列表
-     */
-    private List<JoinPathNode> buildJoinPathChain(MethodInfo methodInfo) {
-        MgxqlStatement mgxqlStatement = methodInfo.getMgxqlStatement();
-        if (!(mgxqlStatement instanceof SelectStatement)) {
-            return Collections.emptyList();
-        }
-        SelectStatement selectStatement = (SelectStatement) mgxqlStatement;
-        if (selectStatement.getFromClause() == null) {
-            return Collections.emptyList();
-        }
-        List<JoinPathNode> pathChain = new ArrayList<>();
-        // 首节点：主实体，relationColumnInfo 为 null
-        FromEntity primaryEntity = selectStatement.getFromClause().getPrimaryEntity();
-        if (primaryEntity == null || primaryEntity.getEntityInfo() == null) {
-            return Collections.emptyList();
-        }
-        pathChain.add(new JoinPathNode(primaryEntity.getEntityInfo(), null));
-        // 遍历 JOIN 实体，每个节点的 relationColumnInfo 取自 JoinEntity
-        List<JoinEntity> joinEntities = selectStatement.getFromClause().getJoinEntities();
-        for (JoinEntity joinEntity : joinEntities) {
-            if (joinEntity.getEntityInfo() != null) {
-                pathChain.add(new JoinPathNode(joinEntity.getEntityInfo(), joinEntity.getRelationColumnInfo()));
-            }
-        }
-        return pathChain;
-    }
-
-    /**
-     * 判断字段是否为复合类型（非基本类型、非包装类、非 String、非集合、非 Map、非 Number/Date 等标准类型）
-     *
-     * @param columnInfo 字段信息
-     * @return true 表示为复合类型
-     */
-    private boolean isCompositeField(ColumnInfo columnInfo) {
-        Class<?> javaType = columnInfo.getJavaType();
-        if (javaType == null) {
-            return false;
-        }
-        // 基本类型 / 包装类 / String / Number / Date / java.time
-        if (javaType.isPrimitive() || Number.class.isAssignableFrom(javaType)
-                || CharSequence.class.isAssignableFrom(javaType) || Boolean.class == javaType
-                || Date.class.isAssignableFrom(javaType) || javaType.getName().startsWith("java.time")) {
-            return false;
-        }
-        // 枚举
-        if (javaType.isEnum()) {
-            return false;
-        }
-        // 集合 / Map / 数组
-        if (Collection.class.isAssignableFrom(javaType) || Map.class.isAssignableFrom(javaType) || javaType.isArray()) {
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * 沿路径链从 startIndex 开始搜索关系字段
-     *
-     * @param pathChain  路径链
-     * @param fieldName  字段名
-     * @param startIndex 起始索引
-     * @return 匹配结果，未找到返回 null
-     */
-    private MatchResult searchDownPath(List<JoinPathNode> pathChain, String fieldName, int startIndex) {
-        for (int i = startIndex; i < pathChain.size(); i++) {
-            EntityInfo entityInfo = pathChain.get(i).entityInfo;
-            List<RelationColumnInfo> relationColumnInfoList = entityInfo.getRelationColumnInfoList();
-            for (RelationColumnInfo relationColumnInfo : relationColumnInfoList) {
-                if (fieldName.equals(relationColumnInfo.getJavaColumnName())) {
-                    // 验证目标实体在路径链的下一节点存在且类型匹配
-                    if (i + 1 < pathChain.size()) {
-                        Class<?> targetEntityClass = relationColumnInfo.getJavaType();
-                        Class<?> nextNodeEntityClass = pathChain.get(i + 1).entityInfo.getClazz();
-                        if (targetEntityClass != null && targetEntityClass.equals(nextNodeEntityClass)) {
-                            return new MatchResult(entityInfo, relationColumnInfo, i + 1);
-                        }
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
-     * 递归构建多层投影实体关系树
-     *
-     * @param projectionClass  投影 DTO 类
-     * @param currentEntityInfo 当前路径链上匹配到的实体
-     * @param relationColInfo  关系字段（根节点为 null）
-     * @param pathChain        完整路径链
-     * @param pathIndex        当前在路径链上的位置
-     * @param level            层级
-     * @param index            索引
-     * @return 实体关系树节点
-     */
-    private EntityRelationTree buildProjectionEntityRelationTree(Class<?> projectionClass, EntityInfo currentEntityInfo,
-            RelationColumnInfo relationColInfo, List<JoinPathNode> pathChain, int pathIndex, int level, int index) {
-        // 获取投影 DTO 的 ColumnInfo 列表
-        List<ColumnInfo> dtoColumnInfoList = columnInfoHandler.getColumnInfoList(projectionClass, currentEntityInfo.getTypeParameterMap());
-        List<ColumnInfo> replacedColumnInfoList = new ArrayList<>();
-        List<CompositeFieldEntry> compositeFields = new ArrayList<>();
-
-        for (ColumnInfo dtoColumnInfo : dtoColumnInfoList) {
-            String javaColumnName = dtoColumnInfo.getJavaColumnName();
-            // 普通字段匹配：在当前实体上查找
-            ColumnInfo entityColumnInfo = currentEntityInfo.getColumnInfo(javaColumnName);
-            if (entityColumnInfo != null && !(entityColumnInfo instanceof RelationColumnInfo)) {
-                replacedColumnInfoList.add(entityColumnInfo);
-                continue;
-            }
-            // 复合字段处理：匹配失败且为复合类型时，沿路径链搜索
-            if (this.isCompositeField(dtoColumnInfo)) {
-                MatchResult matchResult = this.searchDownPath(pathChain, javaColumnName, pathIndex);
-                if (matchResult != null) {
-                    compositeFields.add(new CompositeFieldEntry(dtoColumnInfo, matchResult));
-                } else {
-                    LOGGER.debug("投影 DTO {} 的复合字段 {} 在路径链中未匹配，已忽略", projectionClass.getSimpleName(), javaColumnName);
-                }
-            } else {
-                LOGGER.debug("投影 DTO {} 的字段 {} 在实体 {} 上未匹配，已忽略", projectionClass.getSimpleName(), javaColumnName, currentEntityInfo.getClazzName());
-            }
-        }
-
-        // 构建合成 EntityInfo
-        EntityInfo projectionEntityInfo = new EntityInfo.Builder()
-                .setClazz(projectionClass)
-                .setTableName(currentEntityInfo.getTableName())
-                .setColumnInfoList(replacedColumnInfoList)
-                .build();
-        this.columnMapHandler.process(projectionEntityInfo);
-
-        // 构建 EntityRelationTree 节点
-        String tableNameAlias = this.tableColumnNameAlias.process(level, index, projectionEntityInfo);
-        EntityRelationTree entityRelationTree = new EntityRelationTree();
-        entityRelationTree.setLevel(level);
-        entityRelationTree.setIndex(index);
-        entityRelationTree.setTableNameAlias(tableNameAlias);
-        entityRelationTree.setColumnInfo(relationColInfo);
-        entityRelationTree.setMiddleEntityInfo(null);
-        entityRelationTree.setEntityInfo(projectionEntityInfo);
-
-        // 对关系字段递归调用
-        int childIndex = 1;
-        for (CompositeFieldEntry entry : compositeFields) {
-            MatchResult matchResult = entry.matchResult;
-            Class<?> nestedDtoClass = entry.dtoColumnInfo.getJavaType();
-            EntityInfo targetEntityInfo = pathChain.get(matchResult.pathIndex).entityInfo;
-            EntityRelationTree subTree = this.buildProjectionEntityRelationTree(
-                    nestedDtoClass, targetEntityInfo, matchResult.relationColumnInfo,
-                    pathChain, matchResult.pathIndex, level + 1, childIndex);
-            if (subTree != null) {
-                entityRelationTree.addComposites(subTree);
-                childIndex++;
-            }
-        }
-
         return entityRelationTree;
     }
 
@@ -410,47 +489,6 @@ public class EntityRelationTreeHandler {
         private String buildTableColumnNameAlias(String name, int columnIndex) {
             int randomIndex = RandomUtils.nextInt(0, 9);
             return String.format("%s_%s_%s", columnIndex, randomIndex, name);
-        }
-    }
-
-    /**
-     * 路径链节点，持有实体信息和到下一节点的关联关系
-     */
-    private static class JoinPathNode {
-        final EntityInfo entityInfo;
-        final RelationColumnInfo relationColumnInfo;
-
-        JoinPathNode(EntityInfo entityInfo, RelationColumnInfo relationColumnInfo) {
-            this.entityInfo = entityInfo;
-            this.relationColumnInfo = relationColumnInfo;
-        }
-    }
-
-    /**
-     * 沿路径链搜索的匹配结果
-     */
-    private static class MatchResult {
-        final EntityInfo sourceEntityInfo;
-        final RelationColumnInfo relationColumnInfo;
-        final int pathIndex;
-
-        MatchResult(EntityInfo sourceEntityInfo, RelationColumnInfo relationColumnInfo, int pathIndex) {
-            this.sourceEntityInfo = sourceEntityInfo;
-            this.relationColumnInfo = relationColumnInfo;
-            this.pathIndex = pathIndex;
-        }
-    }
-
-    /**
-     * 复合字段条目，记录 DTO 字段信息和匹配结果
-     */
-    private static class CompositeFieldEntry {
-        final ColumnInfo dtoColumnInfo;
-        final MatchResult matchResult;
-
-        CompositeFieldEntry(ColumnInfo dtoColumnInfo, MatchResult matchResult) {
-            this.dtoColumnInfo = dtoColumnInfo;
-            this.matchResult = matchResult;
         }
     }
 

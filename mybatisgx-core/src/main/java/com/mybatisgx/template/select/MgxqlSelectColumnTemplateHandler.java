@@ -4,6 +4,7 @@ import com.mybatisgx.dsl.mgxql.model.SelectItemType;
 import com.mybatisgx.dsl.mgxql.model.*;
 import com.mybatisgx.model.*;
 import com.mybatisgx.template.MybatisgxSqlBuilder;
+import com.mybatisgx.utils.TypeUtils;
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
@@ -51,12 +52,12 @@ public class MgxqlSelectColumnTemplateHandler {
      * @return 渲染完成的 PlainSelect
      */
     public PlainSelect buildSelectSql(SelectStatement selectStatement, ColumnEntityRelation rootRelation) {
-        AliasContext ctx = AliasContext.build(selectStatement, rootRelation);
+        AliasContext aliasContext = AliasContext.build(selectStatement, rootRelation);
         FromAliasContext fromAliasCtx = FromAliasContext.build(selectStatement.getFromClause());
         PlainSelect plainSelect = new PlainSelect();
-        new SelectItemsRenderer(ctx, fromAliasCtx, this.selectColumnSqlTemplateHandler).render(plainSelect, selectStatement);
-        new FromRenderer(ctx).render(plainSelect);
-        new JoinRenderer(ctx).render(plainSelect, selectStatement.getFromClause());
+        new SelectItemsRenderer(aliasContext, fromAliasCtx, this.selectColumnSqlTemplateHandler).render(plainSelect, selectStatement);
+        new FromRenderer(aliasContext).render(plainSelect);
+        new JoinRenderer(aliasContext).render(plainSelect, selectStatement.getFromClause());
         return plainSelect;
     }
 
@@ -80,12 +81,12 @@ public class MgxqlSelectColumnTemplateHandler {
      */
     private static class SelectItemsRenderer {
 
-        private final AliasContext ctx;
+        private final AliasContext aliasContext;
         private final FromAliasContext fromAliasCtx;
         private final SelectColumnSqlTemplateHandler selectColumnSqlTemplateHandler;
 
-        SelectItemsRenderer(AliasContext ctx, FromAliasContext fromAliasCtx, SelectColumnSqlTemplateHandler selectColumnSqlTemplateHandler) {
-            this.ctx = ctx;
+        SelectItemsRenderer(AliasContext aliasContext, FromAliasContext fromAliasCtx, SelectColumnSqlTemplateHandler selectColumnSqlTemplateHandler) {
+            this.aliasContext = aliasContext;
             this.fromAliasCtx = fromAliasCtx;
             this.selectColumnSqlTemplateHandler = selectColumnSqlTemplateHandler;
         }
@@ -123,7 +124,7 @@ public class MgxqlSelectColumnTemplateHandler {
                 if (fromEntity != null && fromEntity.getEntityInfo() != null) {
                     ColumnEntityRelation tempRelation = new ColumnEntityRelation<>();
                     tempRelation.setEntityInfo(fromEntity.getEntityInfo());
-                    tempRelation.setTableNameAlias(entityAlias);
+                    tempRelation.setTableNameAlias(this.aliasContext.getNode(entityAlias).getTableNameAlias());
                     this.expandEntityColumns(plainSelect, tempRelation, entityAlias);
                 }
                 return;
@@ -135,19 +136,19 @@ public class MgxqlSelectColumnTemplateHandler {
             }
             FromEntity primaryEntity = fromClause.getPrimaryEntity();
             if (primaryEntity != null && primaryEntity.getEntityInfo() != null) {
-                String alias = StringUtils.isNotBlank(primaryEntity.getAlias()) ? primaryEntity.getAlias() : this.ctx.getMainTableAlias();
+                String alias = StringUtils.isNotBlank(primaryEntity.getAlias()) ? primaryEntity.getAlias() : this.aliasContext.getMainTableAlias();
                 ColumnEntityRelation tempRelation = new ColumnEntityRelation<>();
                 tempRelation.setEntityInfo(primaryEntity.getEntityInfo());
-                tempRelation.setTableNameAlias(alias);
+                tempRelation.setTableNameAlias(this.aliasContext.getNode(alias).getTableNameAlias());
                 this.expandEntityColumns(plainSelect, tempRelation, alias);
             }
             if (fromClause.getJoinEntities() != null) {
                 for (JoinEntity joinEntity : fromClause.getJoinEntities()) {
                     if (joinEntity.getEntityInfo() != null) {
-                        String alias = StringUtils.isNotBlank(joinEntity.getAlias()) ? joinEntity.getAlias() : this.ctx.resolveTableAlias(joinEntity.getAlias());
+                        String alias = StringUtils.isNotBlank(joinEntity.getAlias()) ? joinEntity.getAlias() : this.aliasContext.resolveTableAlias(joinEntity.getAlias());
                         ColumnEntityRelation tempRelation = new ColumnEntityRelation<>();
                         tempRelation.setEntityInfo(joinEntity.getEntityInfo());
-                        tempRelation.setTableNameAlias(alias);
+                        tempRelation.setTableNameAlias(this.aliasContext.getNode(alias).getTableNameAlias());
                         this.expandEntityColumns(plainSelect, tempRelation, alias);
                     }
                 }
@@ -184,13 +185,13 @@ public class MgxqlSelectColumnTemplateHandler {
             }
             String entityAlias = selectItem.getEntityAlias();
             FromEntity fromEntity = this.fromAliasCtx.getFromEntity(entityAlias);
-            String tableAlias = this.ctx.resolveTableAlias(entityAlias);
+            String tableAlias = this.aliasContext.resolveTableAlias(entityAlias);
             String columnAlias;
             if (fromEntity != null && fromEntity.getEntityInfo() != null) {
                 // 用 FROM 实体的 EntityInfo 构造临时节点生成列别名
                 ColumnEntityRelation tempRelation = new ColumnEntityRelation<>();
                 tempRelation.setEntityInfo(fromEntity.getEntityInfo());
-                tempRelation.setTableNameAlias(tableAlias);
+                tempRelation.setTableNameAlias(this.aliasContext.getNode(entityAlias).getTableNameAlias());
                 columnAlias = columnInfo.getTableColumnNameAlias(tempRelation);
             } else {
                 String dbAlias = StringUtils.isNotBlank(columnInfo.getDbColumnNameAlias()) ? columnInfo.getDbColumnNameAlias() : columnInfo.getDbColumnName();
@@ -213,7 +214,7 @@ public class MgxqlSelectColumnTemplateHandler {
             function.setName(funcName);
             FieldReference fieldReference = selectItem.getFieldRef();
             if (fieldReference != null && fieldReference.getColumnInfo() != null) {
-                String tableAlias = this.ctx.resolveTableAlias(fieldReference.getEntityAlias());
+                String tableAlias = this.aliasContext.resolveTableAlias(fieldReference.getEntityAlias());
                 Column column = new Column(new Table(tableAlias), fieldReference.getColumnInfo().getDbColumnName());
                 function.setParameters(new ExpressionList(Arrays.asList((Expression) column)));
             } else {
@@ -582,7 +583,14 @@ public class MgxqlSelectColumnTemplateHandler {
                 Class<?> joinClazz = joinEntity.getEntityInfo().getClazz();
                 for (Object child : leftNode.getComposites()) {
                     ColumnEntityRelation childNode = (ColumnEntityRelation) child;
-                    if (childNode.getEntityInfo() != null && joinClazz.equals(childNode.getEntityInfo().getClazz())) {
+                    Class<?> entityClass;
+                    if (childNode.getEntityInfo() != null && TypeUtils.typeEquals(childNode.getEntityInfo(), EntityProjectionInfo.class)) {
+                        EntityProjectionInfo entityProjectionInfo = (EntityProjectionInfo) childNode.getEntityInfo();
+                        entityClass = entityProjectionInfo.getEntityClass();
+                    } else {
+                        entityClass = childNode.getEntityInfo().getClazz();
+                    }
+                    if (childNode.getEntityInfo() != null && joinClazz.equals(entityClass)) {
                         return childNode;
                     }
                 }
@@ -594,7 +602,14 @@ public class MgxqlSelectColumnTemplateHandler {
             if (node == null || clazz == null) {
                 return null;
             }
-            if (node.getEntityInfo() != null && clazz.equals(node.getEntityInfo().getClazz())) {
+            Class<?> entityClass;
+            if (node.getEntityInfo() != null && TypeUtils.typeEquals(node.getEntityInfo(), EntityProjectionInfo.class)) {
+                EntityProjectionInfo entityProjectionInfo = (EntityProjectionInfo) node.getEntityInfo();
+                entityClass = entityProjectionInfo.getEntityClass();
+            } else {
+                entityClass = node.getEntityInfo().getClazz();
+            }
+            if (node.getEntityInfo() != null && clazz.equals(entityClass)) {
                 return node;
             }
             if (node.getComposites() != null) {

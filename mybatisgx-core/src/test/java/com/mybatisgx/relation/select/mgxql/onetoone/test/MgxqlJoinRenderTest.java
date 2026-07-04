@@ -2,12 +2,7 @@ package com.mybatisgx.relation.select.mgxql.onetoone.test;
 
 import com.mybatisgx.dsl.mgxql.model.SelectStatement;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
-import com.mybatisgx.model.ColumnEntityRelation;
-import com.mybatisgx.model.ColumnInfo;
-import com.mybatisgx.model.EntityInfo;
-import com.mybatisgx.model.MapperInfo;
-import com.mybatisgx.model.MethodInfo;
-import com.mybatisgx.relation.select.simple_simple_id.onetoone.entity.User;
+import com.mybatisgx.model.*;
 import com.mybatisgx.template.select.MgxqlSelectColumnTemplateHandler;
 import com.mybatisgx.util.DaoTestUtils;
 import net.sf.jsqlparser.statement.select.PlainSelect;
@@ -101,15 +96,15 @@ public class MgxqlJoinRenderTest {
     public void test05_returnTypeNotFromPrimary() {
         String sql = renderSql("findJoinList4");
         Assert.assertTrue("FROM 应为 User 表 simple_oto_user_simple", sql.contains("FROM simple_oto_user_simple"));
-        Assert.assertTrue("FROM 应使用用户别名 u", sql.contains("simple_oto_user_simple AS u"));
+        Assert.assertTrue("FROM 应使用用户别名 simple_oto_user_simple_1_1", sql.contains("simple_oto_user_simple AS simple_oto_user_simple_1_1"));
         Assert.assertTrue("LEFT JOIN 应为 UserDetail 表 simple_oto_user_detail_simple",
                 sql.contains("LEFT JOIN simple_oto_user_detail_simple"));
-        Assert.assertTrue("JOIN 应使用用户别名 ud", sql.contains("simple_oto_user_detail_simple AS ud"));
+        Assert.assertTrue("JOIN 应使用用户别名 simple_oto_user_detail_simple_2_1", sql.contains("simple_oto_user_detail_simple AS simple_oto_user_detail_simple_2_1"));
         Assert.assertFalse("FROM 和 JOIN 别名不应相同",
                 sql.matches("(?s).*FROM simple_oto_user_simple AS ud.*LEFT JOIN simple_oto_user_detail_simple AS ud.*"));
         String onPart = sql.substring(sql.indexOf("ON"));
-        Assert.assertTrue("ON 条件应包含别名 u.", onPart.contains("u."));
-        Assert.assertTrue("ON 条件应包含别名 ud.", onPart.contains("ud."));
+        Assert.assertTrue("ON 条件应包含别名 simple_oto_user_simple_1_1.", onPart.contains("simple_oto_user_simple_1_1."));
+        Assert.assertTrue("ON 条件应包含别名 simple_oto_user_detail_simple_2_1.", onPart.contains("simple_oto_user_detail_simple_2_1."));
     }
 
     @Test
@@ -121,9 +116,9 @@ public class MgxqlJoinRenderTest {
         Assert.assertTrue("SELECT 列应使用用户别名 u. 作为表前缀", selectPart.contains("u."));
         Assert.assertFalse("SELECT 列不应使用树别名 simple_oto_user_simple 作为表前缀",
                 selectPart.matches("(?s).*simple_oto_user_simple\\..*"));
-        Assert.assertTrue("FROM 应使用用户别名 u", sql.contains("simple_oto_user_simple AS u"));
-        Assert.assertTrue("LEFT JOIN 应使用用户别名 ud",
-                sql.contains("simple_oto_user_detail_simple AS ud"));
+        Assert.assertTrue("FROM 应使用用户别名 simple_oto_user_simple_1_1", sql.contains("simple_oto_user_simple AS simple_oto_user_simple_1_1"));
+        Assert.assertTrue("LEFT JOIN 应使用用户别名 simple_oto_user_detail_simple_2_1",
+                sql.contains("simple_oto_user_detail_simple AS simple_oto_user_detail_simple_2_1"));
     }
 
     @Test
@@ -132,7 +127,7 @@ public class MgxqlJoinRenderTest {
         int fromIndex = sql.toUpperCase().indexOf(" FROM ");
         Assert.assertTrue("应存在 FROM", fromIndex > 0);
         String selectPart = sql.substring(0, fromIndex);
-        Assert.assertTrue("SELECT 列应使用用户别名 u.code", selectPart.contains("u.code"));
+        Assert.assertTrue("SELECT 列应使用用户别名 simple_oto_user_simple_1_1.code", selectPart.contains("simple_oto_user_simple_1_1.code"));
         Assert.assertFalse("SELECT 列不应使用树别名作为表前缀",
                 selectPart.matches("(?s).*simple_oto_user_simple\\.code.*"));
     }
@@ -143,8 +138,8 @@ public class MgxqlJoinRenderTest {
         int fromIndex = sql.toUpperCase().indexOf(" FROM ");
         Assert.assertTrue("应存在 FROM", fromIndex > 0);
         String selectPart = sql.substring(0, fromIndex);
-        Assert.assertTrue("select * 应展开主实体 User 列（u. 前缀）", selectPart.contains("u."));
-        Assert.assertTrue("select * 应展开 JOIN 实体 UserDetail 列（ud. 前缀）", selectPart.contains("ud."));
+        Assert.assertTrue("select * 应展开主实体 User 列（simple_oto_user_simple_1_1. 前缀）", selectPart.contains("simple_oto_user_simple_1_1."));
+        Assert.assertTrue("select * 应展开 JOIN 实体 UserDetail 列（simple_oto_user_detail_simple_2_1. 前缀）", selectPart.contains("simple_oto_user_detail_simple_2_1."));
     }
 
     @Test
@@ -167,10 +162,10 @@ public class MgxqlJoinRenderTest {
         Assert.assertTrue("应存在 FROM", fromIndex > 0);
         String selectPart = sql.substring(0, fromIndex);
         Assert.assertFalse("select * 不应输出裸 *", selectPart.trim().equals("SELECT *"));
-        Assert.assertTrue("select * 应展开主实体 User 列（u. 前缀）", selectPart.contains("u."));
-        Assert.assertTrue("select * 应展开 JOIN 实体 UserDetail 列（ud. 前缀）", selectPart.contains("ud."));
-        Assert.assertTrue("select * 应展开 JOIN 实体 UserDetailItem1 列（i1. 前缀）", selectPart.contains("i1."));
-        Assert.assertTrue("select * 应展开 JOIN 实体 UserDetailItem2 列（i2. 前缀）", selectPart.contains("i2."));
+        Assert.assertTrue("select * 应展开主实体 User 列（simple_oto_user_simple_1_1. 前缀）", selectPart.contains("simple_oto_user_simple_1_1."));
+        Assert.assertTrue("select * 应展开 JOIN 实体 UserDetail 列（simple_oto_user_detail_simple_2_1. 前缀）", selectPart.contains("simple_oto_user_detail_simple_2_1."));
+        Assert.assertTrue("select * 应展开 JOIN 实体 UserDetailItem1 列（simple_oto_user_detail_item1_simple_3_2. 前缀）", selectPart.contains("simple_oto_user_detail_item1_simple_3_2."));
+        Assert.assertTrue("select * 应展开 JOIN 实体 UserDetailItem2 列（simple_oto_user_detail_item2_simple_4_2. 前缀）", selectPart.contains("simple_oto_user_detail_item2_simple_4_2."));
     }
 
     /**

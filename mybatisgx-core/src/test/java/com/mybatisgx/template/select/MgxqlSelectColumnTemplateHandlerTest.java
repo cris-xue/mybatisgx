@@ -6,7 +6,6 @@ import com.mybatisgx.model.ColumnEntityRelation;
 import com.mybatisgx.model.EntityInfo;
 import com.mybatisgx.model.MapperInfo;
 import com.mybatisgx.model.MethodInfo;
-import com.mybatisgx.relation.select.mgxql.manytomany.dao.MgxqlManyToManyJoinDao;
 import com.mybatisgx.util.DaoTestUtils;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import org.junit.Assert;
@@ -70,8 +69,8 @@ public class MgxqlSelectColumnTemplateHandlerTest {
     public void test01_selectStarJoinExpandsAllEntities() {
         String sql = renderSql("findJoinStarManyToMany");
         String selectPart = getSelectPart(sql);
-        Assert.assertTrue("select * 应展开主实体 User 列（u. 前缀）", selectPart.contains("u."));
-        Assert.assertTrue("select * 应展开 JOIN 实体 Role 列（r. 前缀）", selectPart.contains("r."));
+        Assert.assertTrue("select * 应展开主实体 User 列（simple_oto_user_simple_1_1. 前缀）", selectPart.contains("simple_mtm_user_simple_1_1."));
+        Assert.assertTrue("select * 应展开 JOIN 实体 Role 列（simple_mtm_role_simple_2_1. 前缀）", selectPart.contains("simple_mtm_role_simple_2_1."));
     }
 
     /**
@@ -133,8 +132,8 @@ public class MgxqlSelectColumnTemplateHandlerTest {
     public void test04_selectStarManyToManySkipsMiddleTable() {
         String sql = renderSql("findJoinStarManyToMany");
         String selectPart = getSelectPart(sql);
-        Assert.assertTrue("多对多应展开主实体 User 列（u. 前缀）", selectPart.contains("u."));
-        Assert.assertTrue("多对多应展开 JOIN 实体 Role 列（r. 前缀）", selectPart.contains("r."));
+        Assert.assertTrue("多对多应展开主实体 User 列（simple_mtm_user_simple_1_1. 前缀）", selectPart.contains("simple_mtm_user_simple_1_1."));
+        Assert.assertTrue("多对多应展开 JOIN 实体 Role 列（simple_mtm_role_simple_2_1. 前缀）", selectPart.contains("simple_mtm_role_simple_2_1."));
         Assert.assertFalse("多对多不应展开中间表列（user_role 前缀）", selectPart.contains("user_role"));
     }
 
@@ -152,7 +151,7 @@ public class MgxqlSelectColumnTemplateHandlerTest {
         PlainSelect plainSelect = handler.buildSelectSql(selectStatement, rootRelation);
         String sql = plainSelect.toString();
         Assert.assertTrue("应包含主表 FROM", sql.contains("simple_mtm_user_simple"));
-        Assert.assertTrue("SELECT 列应有表前缀 u.", sql.contains("u."));
+        Assert.assertTrue("SELECT 列应有表前缀 simple_mtm_user_simple_1_1.", sql.contains("simple_mtm_user_simple_1_1."));
     }
 
     /**

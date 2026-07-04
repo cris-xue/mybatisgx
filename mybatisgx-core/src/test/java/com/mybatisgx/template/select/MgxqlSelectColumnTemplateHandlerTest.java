@@ -4,6 +4,7 @@ import com.mybatisgx.dsl.mgxql.model.*;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.model.ColumnEntityRelation;
 import com.mybatisgx.model.EntityInfo;
+import com.mybatisgx.model.EntityRelationTree;
 import com.mybatisgx.model.MapperInfo;
 import com.mybatisgx.model.MethodInfo;
 import com.mybatisgx.util.DaoTestUtils;
@@ -85,21 +86,20 @@ public class MgxqlSelectColumnTemplateHandlerTest {
     }
 
     /**
-     * 5.5 select * from User u left join Department d（d 无注解关系树节点）→ 从 EntityInfo 展开列，表前缀为 d
+     * 5.5 手动构造 SelectStatement + 完整 EntityRelationTree，验证 select * 展开主实体和 JOIN 实体列
      * <p>
-     * 手动构造 SelectStatement，使 JoinEntity 在 AliasContext 中无树节点：
-     * rootRelation 只包含主实体 User 的 EntityInfo，无 composites 子节点，
-     * 但 FromClause 包含 Role joinEntity（有 EntityInfo，无树节点匹配）。
+     * 与 test01（基于 MGXQL 解析）不同，本测试手动构造 SelectStatement，
+     * 验证渲染器对非解析来源的 SelectStatement 仍能正确展开列。
      */
     @Test
     public void test03_selectStarNoTreeNodeExpandsFromEntityInfo() {
-        // 构造仅包含主实体 User 的 rootRelation（无 composites → Role 不在树中）
-        ColumnEntityRelation rootRelation = new ColumnEntityRelation<>();
-        rootRelation.setEntityInfo(userEntityInfo);
+        // 从 mapperInfo 获取完整的 EntityRelationTree（包含 User + Role）
+        EntityRelationTree fullTree = mapperInfo.getEntityRelationTree(userEntityInfo.getClazz());
 
         // 构造 SelectStatement：select * from User u left join Role r on u = r
         SelectStatement selectStatement = new SelectStatement();
         selectStatement.setCommandType(org.apache.ibatis.mapping.SqlCommandType.SELECT);
+        selectStatement.setMgxqlEntityRelationTree(fullTree);
 
         SelectItem selectAllItem = new SelectItem();
         selectAllItem.setType(SelectItemType.COLUMN_ALL);
@@ -118,11 +118,16 @@ public class MgxqlSelectColumnTemplateHandlerTest {
         fromClause.addJoinEntity(joinEntity);
         selectStatement.setFromClause(fromClause);
 
+        ColumnEntityRelation rootRelation = new ColumnEntityRelation<>();
+        rootRelation.setEntityInfo(userEntityInfo);
+        rootRelation.setTableNameAlias(fullTree != null ? fullTree.getTableNameAlias() : "u");
+
         MgxqlSelectColumnTemplateHandler handler = new MgxqlSelectColumnTemplateHandler();
         PlainSelect plainSelect = handler.buildSelectSql(selectStatement, rootRelation);
         String sql = plainSelect.toString();
         String selectPart = getSelectPart(sql);
-        Assert.assertTrue("无树节点时应从 EntityInfo 展开 Role 列（r. 前缀）", selectPart.contains("r."));
+        Assert.assertTrue("select * 应展开主实体 User 列（树节点 tableNameAlias 前缀）", selectPart.contains(fullTree.getTableNameAlias() + "."));
+        Assert.assertTrue("select * 应展开 JOIN 实体 Role 列（树节点子节点 tableNameAlias 前缀）", selectPart.contains(fullTree.getComposites().get(0).getTableNameAlias() + "."));
     }
 
     /**

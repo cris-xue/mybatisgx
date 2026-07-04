@@ -1,12 +1,12 @@
-package com.mybatisgx.model.handler.test;
+package com.mybatisgx.dsl.test;
 
+import com.mybatisgx.dsl.test.entity.User;
 import com.mybatisgx.model.EntityInfo;
 import com.mybatisgx.model.handler.EntityInfoHandler;
-import com.mybatisgx.model.handler.MethodNamePreprocessor;
+import com.mybatisgx.dsl.method.MethodNamePreprocessor;
 import com.mybatisgx.model.handler.test.entity.PreprocessorAmbiguousEntity;
 import com.mybatisgx.model.handler.test.entity.PreprocessorLockAndEntity;
 import com.mybatisgx.model.handler.test.entity.PreprocessorNameLikeEntity;
-import com.mybatisgx.model.handler.test.entity.User;
 import org.junit.Assert;
 import org.junit.Test;
 

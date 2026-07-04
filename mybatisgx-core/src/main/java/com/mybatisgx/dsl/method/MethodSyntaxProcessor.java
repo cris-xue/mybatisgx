@@ -9,7 +9,6 @@ import com.mybatisgx.dsl.method.syntax.MethodNameParser;
 import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.model.EntityInfo;
 import com.mybatisgx.model.MethodInfo;
-import com.mybatisgx.model.handler.MethodNamePreprocessor;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;

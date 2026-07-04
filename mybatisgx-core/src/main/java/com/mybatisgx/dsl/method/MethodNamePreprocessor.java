@@ -1,4 +1,4 @@
-package com.mybatisgx.model.handler;
+package com.mybatisgx.dsl.method;
 
 import com.mybatisgx.model.ColumnInfo;
 import com.mybatisgx.model.EntityInfo;

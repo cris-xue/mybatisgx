@@ -11,6 +11,7 @@ import com.mybatisgx.model.MapperInfo;
 import com.mybatisgx.model.MapperTemplateInfo;
 import com.mybatisgx.model.handler.EntityInfoHandler;
 import com.mybatisgx.model.handler.MapperInfoHandler;
+import com.mybatisgx.model.handler.MgxqlHandler;
 import com.mybatisgx.template.StatementTemplateHandler;
 import com.mybatisgx.template.select.RelationSelectTemplateHandler;
 import com.mybatisgx.template.select.ResultMapTemplateHandler;
@@ -52,8 +53,9 @@ public class MybatisgxContextLoader {
     private static final ResourcePatternResolver RESOURCE_PATTERN_RESOLVER = new PathMatchingResourcePatternResolver();
     private static final MetadataReaderFactory METADATA_READER_FACTORY = new CachingMetadataReaderFactory();
 
-    private static final EntityInfoHandler entityInfoHandler = new EntityInfoHandler();
-    private static final MapperInfoHandler mapperInfoHandler = new MapperInfoHandler();
+    private final EntityInfoHandler entityInfoHandler = new EntityInfoHandler();
+    private final MapperInfoHandler mapperInfoHandler = new MapperInfoHandler();
+    private final MgxqlHandler mgxqlHandler = new MgxqlHandler();
     private String[] entityBasePackages;
     private String[] daoBasePackages;
     private List<Resource> repositoryResourceList;
@@ -90,6 +92,7 @@ public class MybatisgxContextLoader {
         }
 
         this.processDao(totalResourceList);
+        this.processMgxql();
         this.processTemplate();
 
         this.registerMapperTemplate(configuration);
@@ -168,6 +171,13 @@ public class MybatisgxContextLoader {
     public void removeDaoInfo() {
         MapperInfoContextHolder.remove();
         MapperTemplateContextHolder.remove();
+    }
+
+    private void processMgxql() {
+        List<MapperInfo> mapperInfoList = MapperInfoContextHolder.getMapperInfoList();
+        for (MapperInfo mapperInfo : mapperInfoList) {
+            mgxqlHandler.execute(mapperInfo);
+        }
     }
 
     public void processTemplate() {

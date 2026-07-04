@@ -164,7 +164,15 @@ public class EntityInfo {
         private EntityInfo entityInfo;
 
         public Builder() {
-            this.entityInfo = new EntityInfo();
+            this(new EntityInfo());
+        }
+
+        public Builder(EntityInfo entityInfo) {
+            this.entityInfo = entityInfo;
+        }
+
+        public static Builder of(EntityInfo entityInfo) {
+            return new Builder(entityInfo);
         }
 
         public Builder setTableName(String tableName) {

@@ -19,6 +19,11 @@ public interface SelectDao<ENTITY, QUERY_ENTITY> extends Dao {
     @Dynamic
     List<ENTITY> findList(QUERY_ENTITY entity);
 
+    default List<ENTITY> findSort(QUERY_ENTITY entity, List<Pageable.Sort> sorts) {
+        Page<ENTITY> page = this.findPage(entity, Pageable.of(sorts));
+        return page.getList();
+    }
+
     @Dynamic
     Page<ENTITY> findPage(QUERY_ENTITY entity, Pageable pageable);
 }

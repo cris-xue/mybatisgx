@@ -1,0 +1,70 @@
+package com.mybatisgx.dsl.mgxql.checker;
+
+import com.mybatisgx.dsl.mgxql.model.MgxqlStatement;
+import com.mybatisgx.exception.MybatisgxException;
+import com.mybatisgx.model.EntityInfo;
+import org.apache.ibatis.mapping.SqlCommandType;
+
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+
+/**
+ * MGXQL校验器链，按顺序执行所有校验器，收集全部错误后统一抛出异常
+ *
+ * @author 薛承城
+ * @date 2025/11/17 10:19
+ */
+public class MgxqlSemanticCheckerChain {
+
+    private final List<MgxqlSemanticChecker> selectCheckers;
+    private final List<MgxqlSemanticChecker> dmlCheckers;
+
+    public MgxqlSemanticCheckerChain() {
+        this.selectCheckers = Arrays.asList(
+                new EntityChecker(),
+                new SelectFieldChecker(),
+                new JoinRelationChecker(),
+                new OperatorTypeChecker(),
+                new WhereFieldChecker()
+        );
+        this.dmlCheckers = Arrays.asList(
+                new EntityChecker(),
+                new WhereFieldChecker(),
+                new OperatorTypeChecker()
+        );
+    }
+
+    /**
+     * 执行校验器，根据commandType选择校验链
+     *
+     * @param statement  MGXQL语句模型
+     * @param entityInfo 主实体信息
+     * @throws MybatisgxException 当存在校验错误时抛出
+     */
+    public void check(MgxqlStatement statement, EntityInfo entityInfo) {
+        CheckerContext context = new CheckerContext(entityInfo);
+
+        SqlCommandType commandType = statement.getCommandType();
+        List<MgxqlSemanticChecker> activeCheckers = (commandType == SqlCommandType.DELETE || commandType == SqlCommandType.UPDATE)
+                ? this.dmlCheckers : this.selectCheckers;
+
+        // 按order排序执行
+        List<MgxqlSemanticChecker> sortedCheckers = activeCheckers.stream()
+                .sorted(Comparator.comparingInt(MgxqlSemanticChecker::getOrder))
+                .collect(Collectors.toList());
+
+        for (MgxqlSemanticChecker checker : sortedCheckers) {
+            if (checker.support(statement)) {
+                checker.check(statement, context);
+            }
+        }
+
+        // 收集所有错误后统一抛出
+        if (context.hasErrors()) {
+            String errorMessage = String.join("; ", context.getErrors());
+            throw new MybatisgxException("MGXQL语义校验失败: %s", errorMessage);
+        }
+    }
+}

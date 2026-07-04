@@ -6,6 +6,7 @@ import com.mybatisgx.executor.page.Page;
 import com.mybatisgx.executor.page.Pageable;
 import com.mybatisgx.model.MethodInfo;
 import com.mybatisgx.model.MethodParamInfo;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.executor.BatchResult;
@@ -66,15 +67,21 @@ public class MybatisgxRoutingExecutor implements Executor {
                     : delegate.query(ms, parameter, rowBounds, resultHandler, cacheKey, boundSql);
         }
 
-        Pageable pageable = this.getPageable(parameter, pageParamInfo);
-        com.github.pagehelper.Page pagehelperPage = PageHelper.startPage(pageable.getPageNo(), pageable.getPageSize());
+        try {
+            Pageable pageable = this.getPageable(parameter, pageParamInfo);
+            com.github.pagehelper.Page pagehelperPage = PageHelper.startPage(pageable.getPageNo(), pageable.getPageSize());
+            if (ObjectUtils.isNotEmpty(pageable.getSorts())) {
+                PageHelper.orderBy(pageable.getOrderBy());
+            }
 
-        List<Object> list = cacheKey == null && boundSql == null
-                ? delegate.query(ms, parameter, rowBounds, resultHandler)
-                : delegate.query(ms, parameter, rowBounds, resultHandler, cacheKey, boundSql);
+            List<Object> list = cacheKey == null && boundSql == null
+                    ? delegate.query(ms, parameter, rowBounds, resultHandler)
+                    : delegate.query(ms, parameter, rowBounds, resultHandler, cacheKey, boundSql);
 
-        Page<Object> page = new Page(pagehelperPage.getTotal(), list);
-        return (List<E>) Collections.singletonList(page);
+            return (List<E>) Collections.singletonList(new Page(pagehelperPage.getTotal(), list));
+        } finally {
+            PageHelper.clearPage();
+        }
     }
 
     private Pageable getPageable(Object parameter, MethodParamInfo pageParamInfo) {

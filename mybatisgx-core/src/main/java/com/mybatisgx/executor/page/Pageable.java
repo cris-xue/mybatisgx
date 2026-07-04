@@ -1,5 +1,9 @@
 package com.mybatisgx.executor.page;
 
+import com.google.common.collect.Lists;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,16 +19,36 @@ public class Pageable {
 
     private Integer pageSize;
 
-    private List<Sort> sorts = new ArrayList();
+    private List<Sort> sorts;
 
-    public Pageable(Integer pageNo, Integer pageSize) {
+    private Pageable(Integer pageNo, Integer pageSize, List<Sort> sorts) {
         this.pageNo = pageNo;
         this.pageSize = pageSize;
+        this.sorts = sorts;
     }
 
-    public void of(Integer pageNo, Integer pageSize) {
-        this.pageNo = pageNo;
-        this.pageSize = pageSize;
+    public static Pageable of(int pageNo, int pageSize) {
+        return new Pageable(pageNo, pageSize, null);
+    }
+
+    public static Pageable of(int pageNo, int pageSize, List<Sort> sorts) {
+        return new Pageable(pageNo, pageSize, sorts);
+    }
+
+    public static Pageable of(List<Sort> sorts) {
+        return new Pageable(1, Integer.MAX_VALUE, sorts);
+    }
+
+    public static Sort of(String column, String direction) {
+        return new Sort(column, direction);
+    }
+
+    public static Pageable of(Sort... sort) {
+        return new Pageable(1, Integer.MAX_VALUE, Lists.newArrayList(sort));
+    }
+
+    public static Pageable of(int pageNo, int pageSize, Sort... sort) {
+        return new Pageable(pageNo, pageSize, Lists.newArrayList(sort));
     }
 
     public Integer getPageNo() {
@@ -47,15 +71,26 @@ public class Pageable {
         this.sorts.add(new Sort(column, order));
     }
 
-    public class Sort {
+    public String getOrderBy() {
+        if (ObjectUtils.isEmpty(sorts)) {
+            return null;
+        }
+        List<String> orderByItemList = new ArrayList<>();
+        for (Sort sort : sorts) {
+            orderByItemList.add(String.format("%s %s", sort.getColumn(), sort.getDirection()));
+        }
+        return StringUtils.join(orderByItemList, ",");
+    }
+
+    public static class Sort {
 
         private String column;
 
-        private String order;
+        private String direction;
 
-        public Sort(String column, String order) {
+        public Sort(String column, String direction) {
             this.column = column;
-            this.order = order;
+            this.direction = direction;
         }
 
         public String getColumn() {
@@ -66,12 +101,12 @@ public class Pageable {
             this.column = column;
         }
 
-        public String getOrder() {
-            return order;
+        public String getDirection() {
+            return direction;
         }
 
-        public void setOrder(String order) {
-            this.order = order;
+        public void setDirection(String direction) {
+            this.direction = direction;
         }
     }
 }

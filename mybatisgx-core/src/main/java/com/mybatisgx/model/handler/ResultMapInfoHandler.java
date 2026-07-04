@@ -69,7 +69,7 @@ public class ResultMapInfoHandler {
                         return StringUtils.join(Arrays.asList(clazzName, resultMapInfo.getLevel(), resultMapInfo.getIndex()), "_");
                     })
                     .collect(Collectors.toList());
-            return StringUtils.join(classNameList, "_join_") + "_ResultMap";
+            return "auto_" + StringUtils.join(classNameList, "_join_") + "_ResultMap";
         }
 
         protected String getNestedSelectId(List<ResultMapInfo> resultMapInfoList) {
@@ -235,7 +235,7 @@ public class ResultMapInfoHandler {
      * @author ccxuef
      * @date 2025/9/30 14:59
      */
-    private static class ResultMapContext {
+    public static class ResultMapContext {
 
         private ResultMapInfo resultMapInfo;
 

@@ -167,8 +167,8 @@
 	</licenses>
 
 	<scm>
-		<connection>scm:git:git://github.com/cris-xue/mybatisgx.git</connection>
-		<developerConnection>scm:git:ssh://github.com/cris-xue/mybatisgx.git</developerConnection>
+		<connection>scm:git:https://github.com/cris-xue/mybatisgx.git</connection>
+		<developerConnection>scm:git:https://github.com/cris-xue/mybatisgx.git</developerConnection>
 		<url>https://github.com/cris-xue/mybatisgx</url>
 		<tag>HEAD</tag>
 	</scm>

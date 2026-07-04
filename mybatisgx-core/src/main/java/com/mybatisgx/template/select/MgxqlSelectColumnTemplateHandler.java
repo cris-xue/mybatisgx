@@ -2,6 +2,7 @@ package com.mybatisgx.template.select;
 
 import com.mybatisgx.dsl.mgxql.model.SelectItemType;
 import com.mybatisgx.dsl.mgxql.model.*;
+import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.model.*;
 import com.mybatisgx.template.MybatisgxSqlBuilder;
 import com.mybatisgx.utils.TypeUtils;
@@ -285,26 +286,25 @@ public class MgxqlSelectColumnTemplateHandler {
             for (JoinEntity joinEntity : fromClause.getJoinEntities()) {
                 RelationColumnInfo relationColumnInfo = joinEntity.getRelationColumnInfo();
                 String rightEntityKey = String.format("%s%s", joinEntity.getEntityName(), joinEntity.getAlias());
-                String rightTableAlias = this.aliasContext.getNode(rightEntityKey).getTableNameAlias();
+                ColumnEntityRelation rightColumnEntityRelation = this.aliasContext.getNode(rightEntityKey);
+                String rightTableAlias = rightColumnEntityRelation.getTableNameAlias();
 
-                ColumnEntityRelation rightTreeNode = this.aliasContext.getNode(joinEntity.getAlias());
                 FromEntity leftEntity = this.fromAliasCtx.getFromEntity(joinEntity.getOnLeftAlias());
                 String leftEntityKey = String.format("%s%s", leftEntity.getEntityName(), leftEntity.getAlias());
-                String leftTableAlias = this.aliasContext.getNode(leftEntityKey).getTableNameAlias();
+                ColumnEntityRelation leftColumnEntityRelation = this.aliasContext.getNode(leftEntityKey);
+                String leftTableAlias = leftColumnEntityRelation.getTableNameAlias();
 
-                if (relationColumnInfo != null && relationColumnInfo.getRelationType() == RelationType.MANY_TO_MANY && rightTreeNode != null) {
+                if (relationColumnInfo != null && relationColumnInfo.getRelationType() == RelationType.MANY_TO_MANY) {
                     // 多对多：自动补充中间表 + 实体表两次 join
-                    this.buildManyToManyJoin(plainSelect, rightTreeNode, leftTableAlias, rightTableAlias);
+                    this.buildManyToManyJoin(plainSelect, rightColumnEntityRelation, leftTableAlias, rightTableAlias);
                 } else if (relationColumnInfo != null) {
                     // 一对一 / 一对多 / 多对一
-                    String rightTableName = joinEntity.getEntityInfo() != null ? joinEntity.getEntityInfo().getTableName() : rightTreeNode.getTableName();
+                    String rightTableName = rightColumnEntityRelation.getTableName();
                     Join join = this.buildLeftJoin(rightTableName, rightTableAlias);
                     this.buildOnExpression(join, relationColumnInfo, leftTableAlias, rightTableAlias);
                     plainSelect.addJoins(join);
                 } else {
-                    // 无绑定关系（校验阶段应已报错），仅发裸 join 容错
-                    String rightTableName = joinEntity.getEntityInfo() != null ? joinEntity.getEntityInfo().getTableName() : null;
-                    plainSelect.addJoins(this.buildLeftJoin(rightTableName, rightTableAlias));
+                    throw new MybatisgxException("不存在的关联关系");
                 }
             }
         }

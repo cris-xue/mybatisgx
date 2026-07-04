@@ -7,7 +7,9 @@ import com.mybatisgx.dsl.method.model.QueryStatement;
 import com.mybatisgx.dsl.method.syntax.MethodNameLexer;
 import com.mybatisgx.dsl.method.syntax.MethodNameParser;
 import com.mybatisgx.exception.MybatisgxException;
+import com.mybatisgx.model.EntityInfo;
 import com.mybatisgx.model.MethodInfo;
+import com.mybatisgx.model.handler.MethodNamePreprocessor;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -64,6 +66,10 @@ public class MethodSyntaxProcessor {
     }
 
     public BaseStatement execute(MethodInfo methodInfo, String methodName) {
+        // 预处理：自动转义有歧义的字段名
+        EntityInfo entityInfo = methodInfo.getMapperInfo().getEntityInfo();
+        methodName = MethodNamePreprocessor.escape(entityInfo, methodName);
+
         CharStream charStream = CharStreams.fromString(methodName);
         MethodNameLexer methodNameLexer = new MethodNameLexer(charStream);
         CommonTokenStream tokens = new CommonTokenStream(methodNameLexer);

@@ -73,7 +73,6 @@ public class StatementRoutingTest {
         MgxqlStatement mgxqlStatement = methodInfo.getMgxqlStatement();
         Assert.assertNotNull(mgxqlStatement);
         Assert.assertEquals(MgxqlSourceType.METHOD_NAME, mgxqlStatement.getMgxqlSourceType());
-        Assert.assertNull(methodInfo.getStatementExpression());
         Assert.assertNotNull(mgxqlStatement.getWhereClause());
         WhereExpression rootExpr = mgxqlStatement.getWhereClause().getRootExpression();
         Assert.assertNotNull(rootExpr);

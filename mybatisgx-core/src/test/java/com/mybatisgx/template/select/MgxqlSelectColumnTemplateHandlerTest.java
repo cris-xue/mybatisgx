@@ -2,11 +2,7 @@ package com.mybatisgx.template.select;
 
 import com.mybatisgx.dsl.mgxql.model.*;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
-import com.mybatisgx.model.ColumnEntityRelation;
-import com.mybatisgx.model.EntityInfo;
-import com.mybatisgx.model.EntityRelationTree;
-import com.mybatisgx.model.MapperInfo;
-import com.mybatisgx.model.MethodInfo;
+import com.mybatisgx.model.*;
 import com.mybatisgx.util.DaoTestUtils;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import org.junit.Assert;
@@ -53,7 +49,7 @@ public class MgxqlSelectColumnTemplateHandlerTest {
         Class<?> returnType = methodInfo.getMethodReturnInfo().getType();
         ColumnEntityRelation rootRelation = mapperInfo.getEntityRelationTree(returnType);
         MgxqlSelectColumnTemplateHandler handler = new MgxqlSelectColumnTemplateHandler();
-        PlainSelect plainSelect = handler.buildSelectSql(selectStatement, rootRelation);
+        PlainSelect plainSelect = handler.buildSelectSql(selectStatement);
         return plainSelect.toString();
     }
 
@@ -115,15 +111,12 @@ public class MgxqlSelectColumnTemplateHandlerTest {
         joinEntity.setEntityInfo(roleEntityInfo);
         joinEntity.setOnLeftAlias("u");
         joinEntity.setOnRightAlias("r");
+        joinEntity.setRelationColumnInfo((RelationColumnInfo) userEntityInfo.getColumnInfo("roleList"));
         fromClause.addJoinEntity(joinEntity);
         selectStatement.setFromClause(fromClause);
 
-        ColumnEntityRelation rootRelation = new ColumnEntityRelation<>();
-        rootRelation.setEntityInfo(userEntityInfo);
-        rootRelation.setTableNameAlias(fullTree != null ? fullTree.getTableNameAlias() : "u");
-
         MgxqlSelectColumnTemplateHandler handler = new MgxqlSelectColumnTemplateHandler();
-        PlainSelect plainSelect = handler.buildSelectSql(selectStatement, rootRelation);
+        PlainSelect plainSelect = handler.buildSelectSql(selectStatement);
         String sql = plainSelect.toString();
         String selectPart = getSelectPart(sql);
         Assert.assertTrue("select * 应展开主实体 User 列（树节点 tableNameAlias 前缀）", selectPart.contains(fullTree.getTableNameAlias() + "."));
@@ -153,7 +146,7 @@ public class MgxqlSelectColumnTemplateHandlerTest {
         ColumnEntityRelation rootRelation = mapperInfo.getEntityRelationTree(returnType);
 
         MgxqlSelectColumnTemplateHandler handler = new MgxqlSelectColumnTemplateHandler();
-        PlainSelect plainSelect = handler.buildSelectSql(selectStatement, rootRelation);
+        PlainSelect plainSelect = handler.buildSelectSql(selectStatement);
         String sql = plainSelect.toString();
         Assert.assertTrue("应包含主表 FROM", sql.contains("simple_mtm_user_simple"));
         Assert.assertTrue("SELECT 列应有表前缀 simple_mtm_user_simple_1_1.", sql.contains("simple_mtm_user_simple_1_1."));

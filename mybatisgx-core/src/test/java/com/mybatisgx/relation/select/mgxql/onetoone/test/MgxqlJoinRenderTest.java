@@ -38,10 +38,8 @@ public class MgxqlJoinRenderTest {
     private String renderSql(String methodName) {
         MethodInfo methodInfo = configuration.getMethodInfo(DAO_NAMESPACE + "." + methodName);
         SelectStatement selectStatement = (SelectStatement) methodInfo.getMgxqlStatement();
-        Class<?> returnType = methodInfo.getMethodReturnInfo().getType();
-        ColumnEntityRelation rootRelation = mapperInfo.getEntityRelationTree(returnType);
         MgxqlSelectColumnTemplateHandler handler = new MgxqlSelectColumnTemplateHandler();
-        PlainSelect plainSelect = handler.buildSelectSql(selectStatement, rootRelation);
+        PlainSelect plainSelect = handler.buildSelectSql(selectStatement);
         return plainSelect.toString();
     }
 
@@ -194,7 +192,7 @@ public class MgxqlJoinRenderTest {
         ColumnEntityRelation rootRelation = mapperInfo.getEntityRelationTree(returnType);
 
         MgxqlSelectColumnTemplateHandler handler = new MgxqlSelectColumnTemplateHandler();
-        PlainSelect plainSelect = handler.buildSelectSql(selectStatement, rootRelation);
+        PlainSelect plainSelect = handler.buildSelectSql(selectStatement);
         String sql = plainSelect.toString();
 
         // 从投影树根节点获取 EntityInfo，验证 SELECT 中包含其列的 dbColumnNameAlias

@@ -60,7 +60,7 @@ public interface UserDao extends SimpleDao<User, UserQuery, Long> {
 
     List<User> findByNameIsNullAndNameIsNotNullAndNameNotNull();
 
-    @Statement("findByIdAnd(NameLikeOrNameIn)")
+    @Statement("select * from User where id = :id and(name like :name or name in :nameList)")
     List<User> findCustomSql(Long id, String name, List<String> nameList);
 
     Page<User> findCustomPage1(Pageable pageable);

@@ -1,0 +1,109 @@
+package com.mybatisgx.dsl.mgxql.model;
+
+import com.mybatisgx.model.EntityRelationTree;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * MGXQL语句模型，作为语法解析的中间表示，最终会转换成MyBatis XML
+ *
+ * @author 薛承城
+ * @date 2025/11/17 10:19
+ */
+public class SelectStatement extends MgxqlStatement {
+
+    /**
+     * 查询项列表
+     */
+    private List<SelectItem> selectItems = new ArrayList<>();
+
+    /**
+     * FROM子句
+     */
+    private FromClause fromClause;
+
+    /**
+     * GROUP BY子句
+     */
+    private GroupByClause groupByClause;
+
+    /**
+     * HAVING表达式（树形结构，替代 havingClause）
+     */
+    private HavingExpression havingExpression;
+
+    /**
+     * ORDER BY子句
+     */
+    private OrderByClause orderByClause;
+
+    /**
+     * LIMIT子句
+     */
+    private LimitClause limitClause;
+    /**
+     * mgxql完整的实体关系树
+     */
+    private EntityRelationTree mgxqlEntityRelationTree;
+
+    public List<SelectItem> getSelectItems() {
+        return selectItems;
+    }
+
+    public void setSelectItems(List<SelectItem> selectItems) {
+        this.selectItems = selectItems;
+    }
+
+    public void addSelectItem(SelectItem selectItem) {
+        this.selectItems.add(selectItem);
+    }
+
+    public FromClause getFromClause() {
+        return fromClause;
+    }
+
+    public void setFromClause(FromClause fromClause) {
+        this.fromClause = fromClause;
+    }
+
+    public GroupByClause getGroupByClause() {
+        return groupByClause;
+    }
+
+    public void setGroupByClause(GroupByClause groupByClause) {
+        this.groupByClause = groupByClause;
+    }
+
+    public HavingExpression getHavingExpression() {
+        return havingExpression;
+    }
+
+    public void setHavingExpression(HavingExpression havingExpression) {
+        this.havingExpression = havingExpression;
+    }
+
+    public OrderByClause getOrderByClause() {
+        return orderByClause;
+    }
+
+    public void setOrderByClause(OrderByClause orderByClause) {
+        this.orderByClause = orderByClause;
+    }
+
+    public LimitClause getLimitClause() {
+        return limitClause;
+    }
+
+    public void setLimitClause(LimitClause limitClause) {
+        this.limitClause = limitClause;
+    }
+
+    public EntityRelationTree getMgxqlEntityRelationTree() {
+        return mgxqlEntityRelationTree;
+    }
+
+    public void setMgxqlEntityRelationTree(EntityRelationTree mgxqlEntityRelationTree) {
+        this.mgxqlEntityRelationTree = mgxqlEntityRelationTree;
+    }
+}

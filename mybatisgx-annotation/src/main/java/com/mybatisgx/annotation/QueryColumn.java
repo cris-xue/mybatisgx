@@ -13,8 +13,14 @@ import java.lang.annotation.*;
 public @interface QueryColumn {
 
     /**
-     * 查询字段比较运算符
+     * apt根据填写的比较操作符，在查询实体中生成对应字段的查询字段,
      * @return
      */
-    QueryColumnComparisonOperator[] value();
+    QueryColumnComparisonOperator[] operator() default {};
+
+    /**
+     * 忽略该字段：不作为自动查询条件生成，仅作为手写方法（@Statement / mapper.xml）的参数载体。
+     * @return
+     */
+    boolean ignore() default false;
 }

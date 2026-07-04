@@ -1,0 +1,24 @@
+mybatis:
+  label: mybatis
+  permalink: /mybatis
+  description: mybatis tag description
+
+mybatis-plus:
+  label: mybatis-plus
+  permalink: /mybatis-plus
+  description: mybatis-plus tag description
+
+jpa:
+  label: jpa
+  permalink: /jpa
+  description: jpa tag description
+
+orm:
+  label: orm
+  permalink: /orm
+  description: orm tag description
+
+架构:
+  label: 架构
+  permalink: /架构
+  description: 架构 tag description

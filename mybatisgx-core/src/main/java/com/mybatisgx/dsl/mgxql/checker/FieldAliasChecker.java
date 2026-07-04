@@ -1,0 +1,153 @@
+package com.mybatisgx.dsl.mgxql.checker;
+
+import com.mybatisgx.dsl.mgxql.model.*;
+import org.apache.ibatis.mapping.SqlCommandType;
+
+/**
+ * 字段别名校验器
+ * <p>
+ * R3: 多实体时字段引用必须带别名前缀（禁止裸字段）
+ * R4: 任何场景，引用的别名必须存在于FROM定义
+ * R5: DELETE/UPDATE中不允许使用别名前缀
+ *
+ * @author 薛承城
+ * @date 2025/11/17 10:19
+ */
+public class FieldAliasChecker implements MgxqlSyntaxChecker {
+
+    @Override
+    public int getOrder() {
+        return 1;
+    }
+
+    @Override
+    public boolean support(MgxqlStatement mgxqlStatement) {
+        return mgxqlStatement instanceof SelectStatement;
+    }
+
+    @Override
+    public void check(MgxqlStatement mgxqlStatement, SyntaxCheckerContext context) {
+        SelectStatement selectStatement = (SelectStatement) mgxqlStatement;
+
+        boolean isDeleteOrUpdate = selectStatement.getCommandType() == SqlCommandType.DELETE
+                || selectStatement.getCommandType() == SqlCommandType.UPDATE;
+        boolean hasMultipleEntities = context.isHasMultipleEntities();
+
+        // 校验SELECT字段
+        if (selectStatement.getSelectItems() != null) {
+            for (SelectItem selectItem : selectStatement.getSelectItems()) {
+                // 普通字段列
+                if (selectItem.getType() == SelectItemType.COLUMN) {
+                    checkFieldAlias(selectItem.getEntityAlias(), selectItem.getFieldName(),
+                            "SELECT", hasMultipleEntities, isDeleteOrUpdate, context);
+                }
+                // 聚合参数为 ASTERISK/NUMBER 时非真实字段引用，跳过别名校验
+                if (selectItem.getType() != null && selectItem.getType().hasAggregateFunction()
+                        && selectItem.getFieldRef() != null
+                        && !isAggregateConventionValue(selectItem.getArgumentKind())) {
+                    FieldReference fieldRef = selectItem.getFieldRef();
+                    checkFieldAlias(fieldRef.getEntityAlias(), fieldRef.getFieldName(),
+                            "SELECT", hasMultipleEntities, isDeleteOrUpdate, context);
+                }
+            }
+        }
+
+        // 校验WHERE条件字段
+        if (selectStatement.getWhereClause() != null && selectStatement.getWhereClause().getRootExpression() != null) {
+            checkConditionExpressionFields(selectStatement.getWhereClause().getRootExpression(),
+                    hasMultipleEntities, isDeleteOrUpdate, context);
+        }
+
+        // 校验ORDER BY字段
+        if (selectStatement.getOrderByClause() != null) {
+            for (OrderByItem item : selectStatement.getOrderByClause().getItems()) {
+                if (item.getField() != null) {
+                    checkFieldAlias(item.getField().getEntityAlias(), item.getField().getFieldName(),
+                            "ORDER BY", hasMultipleEntities, isDeleteOrUpdate, context);
+                }
+            }
+        }
+
+        // 校验GROUP BY字段
+        if (selectStatement.getGroupByClause() != null) {
+            for (FieldReference fieldRef : selectStatement.getGroupByClause().getFields()) {
+                checkFieldAlias(fieldRef.getEntityAlias(), fieldRef.getFieldName(),
+                        "GROUP BY", hasMultipleEntities, isDeleteOrUpdate, context);
+            }
+        }
+
+        // 校验HAVING聚合函数参数字段
+        if (selectStatement.getHavingExpression() != null) {
+            this.checkHavingAliasFields(selectStatement.getHavingExpression(), hasMultipleEntities, isDeleteOrUpdate, context);
+        }
+    }
+
+    private void checkHavingAliasFields(HavingExpression expression, boolean hasMultipleEntities,
+                                         boolean isDeleteOrUpdate, SyntaxCheckerContext context) {
+        if (expression == null || expression.getNodes() == null) {
+            return;
+        }
+        for (HavingConditionNode node : expression.getNodes()) {
+            if (node.isNested()) {
+                this.checkHavingAliasFields(node.getSubExpression(), hasMultipleEntities, isDeleteOrUpdate, context);
+            } else if (node.getLeftSide() instanceof com.mybatisgx.dsl.mgxql.model.expression.HavingAggregateExpression) {
+                com.mybatisgx.dsl.mgxql.model.expression.HavingAggregateExpression aggExpr =
+                        (com.mybatisgx.dsl.mgxql.model.expression.HavingAggregateExpression) node.getLeftSide();
+                String argument = aggExpr.getArgument();
+                if (argument == null || isAggregateConventionValue(aggExpr.getArgumentKind())) {
+                    continue;
+                }
+                String entityAlias = null;
+                String fieldName = argument;
+                int dotIndex = argument.indexOf('.');
+                if (dotIndex > 0) {
+                    entityAlias = argument.substring(0, dotIndex);
+                    fieldName = argument.substring(dotIndex + 1);
+                }
+                checkFieldAlias(entityAlias, fieldName, "HAVING", hasMultipleEntities, isDeleteOrUpdate, context);
+            }
+        }
+    }
+
+    private void checkConditionExpressionFields(WhereExpression expression,
+                                                boolean hasMultipleEntities, boolean isDeleteOrUpdate,
+                                                SyntaxCheckerContext context) {
+        if (expression == null || expression.getNodes() == null) {
+            return;
+        }
+        for (WhereConditionNode node : expression.getNodes()) {
+            if (node.isNested()) {
+                checkConditionExpressionFields(node.getSubExpression(), hasMultipleEntities, isDeleteOrUpdate, context);
+            } else if (node.getFieldName() != null) {
+                checkFieldAlias(node.getFieldAlias(), node.getFieldName(),
+                        "WHERE", hasMultipleEntities, isDeleteOrUpdate, context);
+            }
+        }
+    }
+
+    private static boolean isAggregateConventionValue(AggregateArgumentKind kind) {
+        return kind == AggregateArgumentKind.ASTERISK || kind == AggregateArgumentKind.NUMBER;
+    }
+
+    private void checkFieldAlias(String entityAlias, String fieldName, String clauseName,
+                                 boolean hasMultipleEntities, boolean isDeleteOrUpdate,
+                                 SyntaxCheckerContext context) {
+        // R5: DELETE/UPDATE中不允许使用别名前缀
+        if (isDeleteOrUpdate && entityAlias != null && !entityAlias.isEmpty()) {
+            context.addError(String.format("DELETE/UPDATE语句中不允许使用实体别名前缀 '%s'", entityAlias));
+            return;
+        }
+
+        if (entityAlias != null && !entityAlias.isEmpty()) {
+            // R4: 引用的别名必须存在于FROM定义
+            if (!context.isAliasDefined(entityAlias)) {
+                context.addError(String.format("%s子句中别名 '%s' 未在FROM子句中定义", clauseName, entityAlias));
+            }
+        } else {
+            // R3: 多实体时裸字段不允许
+            if (hasMultipleEntities) {
+                context.addError(String.format("%s子句中字段 '%s' 缺少实体别名前缀", clauseName, fieldName));
+            }
+        }
+    }
+}

@@ -1,7 +1,5 @@
 package com.mybatisgx.template.select;
 
-import com.mybatisgx.model.MethodRowLimitInfo;
-
 import java.util.List;
 
 /**

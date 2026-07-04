@@ -168,6 +168,8 @@
 				<configuration>
 					<excludes>
 						<exclude>com/mybatisgx/syntax/*</exclude>
+						<exclude>com/mybatisgx/dsl/method/syntax/*</exclude>
+						<exclude>com/mybatisgx/dsl/mgxql/syntax/*</exclude>
 					</excludes>
 				</configuration>
 				<executions>

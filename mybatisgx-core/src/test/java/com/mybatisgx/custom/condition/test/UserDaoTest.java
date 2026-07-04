@@ -212,10 +212,15 @@ public class UserDaoTest {
     }
 
     @Test
-    public void testFindPage() {
-        Pageable pageable = new Pageable(1, 10);
-        Page<User> page2 = userDao.findPage(new UserQuery(), pageable);
-        Assert.assertNotNull(page2);
+    public void testFindPage001() {
+        Page<User> page1 = userDao.findPage(new UserQuery(), Pageable.of(1, 10));
+        Assert.assertNotNull(page1);
+    }
+
+    @Test
+    public void testFindPage002() {
+        List<User> users = userDao.findSort(new UserQuery(), Pageable.of(Pageable.of("id", "desc")).getSorts());
+        Assert.assertNotNull(users);
     }
 
     @Test
@@ -223,7 +228,7 @@ public class UserDaoTest {
         FixtureGenerator fixtureGenerator = new FixtureGenerator();
         fixtureGenerator.configure().ignoreCyclicReferences();
         UserQuery user = fixtureGenerator.createRandomized(UserQuery.class);
-        Pageable pageable = new Pageable(1, 10);
+        Pageable pageable = Pageable.of(1, 10);
         userDao.findPage(user, pageable);
     }
 
@@ -289,7 +294,7 @@ public class UserDaoTest {
 
     @Test
     public void testCustomPageQuery() {
-        userDao.findCustomPage1(new Pageable(1, 10));
-        userDao.findCustomPage2(new UserQuery(), new Pageable(1, 10));
+        userDao.findCustomPage1(Pageable.of(1, 10));
+        userDao.findCustomPage2(new UserQuery(), Pageable.of(1, 10));
     }
 }

@@ -29,10 +29,4 @@ public @interface Statement {
      * @return
      */
     String value();
-
-    /**
-     * 语言类型
-     * @return
-     */
-    StatementLanguage language() default StatementLanguage.METHOD;
 }

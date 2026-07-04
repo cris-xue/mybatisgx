@@ -1,13 +1,12 @@
 package com.mybatisgx.model;
 
 import com.mybatisgx.api.MethodCommandType;
+import com.mybatisgx.dsl.mgxql.model.MgxqlStatement;
 import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.executor.page.Pageable;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.ibatis.mapping.SqlCommandType;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +29,7 @@ public class MethodInfo {
     /**
      * sql动作，insert、delete、update、select
      */
+    @Deprecated
     private SqlCommandType sqlCommandType;
     /**
      * 方法动作，insert、delete、update、logic_delete、select
@@ -39,10 +39,6 @@ public class MethodInfo {
      * 方法名
      */
     private String methodName;
-    /**
-     * 语义表达式
-     */
-    private String statementExpression;
     /**
      * 是否动态参数
      */
@@ -59,26 +55,6 @@ public class MethodInfo {
      * 批量参数信息
      */
     private BatchParamInfo batchParamInfo;
-    /**
-     * 查询节点信息
-     */
-    private SelectItemInfo selectItemInfo;
-    /**
-     * 查询排序信息
-     */
-    private List<SelectOrderByInfo> selectOrderByInfoList;
-    /**
-     * 查询数量限制
-     */
-    private MethodRowLimitInfo methodRowLimitInfo;
-    /**
-     * 是否存在条件
-     */
-    private Boolean isExistCondition = false;
-    /**
-     * 方法名条件信息【修改、删除、查询都可以存在条件】
-     */
-    private List<ConditionInfo> conditionInfoList = new ArrayList<>();
     /**
      * 方法操作实体，不参与生成条件
      */
@@ -108,6 +84,10 @@ public class MethodInfo {
      * 结果集信息id
      */
     private String resultMapId;
+    /**
+     * mgxql信息
+     */
+    private MgxqlStatement mgxqlStatement;
 
     public MapperInfo getMapperInfo() {
         return mapperInfo;
@@ -149,14 +129,6 @@ public class MethodInfo {
         this.methodName = methodName;
     }
 
-    public String getStatementExpression() {
-        return statementExpression;
-    }
-
-    public void setStatementExpression(String statementExpression) {
-        this.statementExpression = statementExpression;
-    }
-
     public Boolean getDynamic() {
         return isDynamic;
     }
@@ -187,49 +159,6 @@ public class MethodInfo {
 
     public void setBatchParamInfo(BatchParamInfo batchParamInfo) {
         this.batchParamInfo = batchParamInfo;
-    }
-
-    public SelectItemInfo getSelectItemInfo() {
-        return selectItemInfo;
-    }
-
-    public void setSelectItemInfo(SelectItemInfo selectItemInfo) {
-        this.selectItemInfo = selectItemInfo;
-    }
-
-    public List<SelectOrderByInfo> getSelectOrderByInfoList() {
-        return selectOrderByInfoList;
-    }
-
-    public void setSelectOrderByInfoList(List<SelectOrderByInfo> selectOrderByInfoList) {
-        this.selectOrderByInfoList = selectOrderByInfoList;
-    }
-
-    public MethodRowLimitInfo getMethodRowLimitInfo() {
-        return methodRowLimitInfo;
-    }
-
-    public void setMethodRowLimitInfo(MethodRowLimitInfo methodRowLimitInfo) {
-        this.methodRowLimitInfo = methodRowLimitInfo;
-    }
-
-    public Boolean getExistCondition() {
-        return isExistCondition;
-    }
-
-    public void setExistCondition(Boolean existCondition) {
-        isExistCondition = existCondition;
-    }
-
-    public List<ConditionInfo> getConditionInfoList() {
-        return conditionInfoList;
-    }
-
-    public void setConditionInfoList(List<ConditionInfo> conditionInfoList) {
-        this.conditionInfoList = conditionInfoList;
-        if (ObjectUtils.isNotEmpty(conditionInfoList)) {
-            this.isExistCondition = true;
-        }
     }
 
     public MethodParamInfo getEntityParamInfo() {
@@ -318,5 +247,13 @@ public class MethodInfo {
 
     public void setResultMapId(String resultMapId) {
         this.resultMapId = resultMapId;
+    }
+
+    public MgxqlStatement getMgxqlStatement() {
+        return mgxqlStatement;
+    }
+
+    public void setMgxqlStatement(MgxqlStatement mgxqlStatement) {
+        this.mgxqlStatement = mgxqlStatement;
     }
 }

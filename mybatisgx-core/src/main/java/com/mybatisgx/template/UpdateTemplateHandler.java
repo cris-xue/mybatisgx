@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.mybatisgx.annotation.LogicDelete;
 import com.mybatisgx.annotation.Version;
 import com.mybatisgx.context.EntityInfoContextHolder;
+import com.mybatisgx.dsl.mgxql.model.WhereClause;
 import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.model.*;
 import com.mybatisgx.utils.TypeUtils;
@@ -57,7 +58,7 @@ public class UpdateTemplateHandler {
 
     private static abstract class AbstractUpdateHandler {
 
-        protected WhereTemplateHandler whereTemplateHandler = new WhereTemplateHandler();
+        protected MgxqlWhereTemplateHandler mgxqlWhereTemplateHandler = new MgxqlWhereTemplateHandler();
 
         public void setValue(MethodInfo methodInfo, Element setTrimElement) {
             MethodParamInfo entityParamInfo = methodInfo.getEntityParamInfo();
@@ -126,7 +127,13 @@ public class UpdateTemplateHandler {
         }
 
         private void setWhere(Element updateElement, EntityInfo entityInfo, MethodInfo methodInfo) {
-            Element whereElement = whereTemplateHandler.execute(entityInfo, methodInfo);
+            Element whereElement = null;
+            if (methodInfo.getMgxqlStatement() != null) {
+                WhereClause whereClause = methodInfo.getMgxqlStatement().getWhereClause();
+                if (whereClause != null) {
+                    whereElement = mgxqlWhereTemplateHandler.execute(entityInfo, methodInfo, whereClause.getRootExpression());
+                }
+            }
             updateElement.add(whereElement);
             if (!methodInfo.getDynamic()) {
                 XmlCompiler.where(whereElement);

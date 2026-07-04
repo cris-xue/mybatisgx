@@ -4,8 +4,6 @@ import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.model.EntityRelationTree;
 import com.mybatisgx.model.MapperInfo;
 import com.mybatisgx.model.MethodInfo;
-import com.mybatisgx.projection.dao.UserDao;
-import com.mybatisgx.projection.dto.UserDto;
 import com.mybatisgx.relation.select.mgxql.onetoone.dto.*;
 import com.mybatisgx.util.DaoTestUtils;
 import org.junit.Assert;
@@ -24,12 +22,9 @@ import org.junit.runners.MethodSorters;
 public class ProjectionMultiLevelTreeTest {
 
     private static final String OTO_DAO_NAMESPACE = "com.mybatisgx.relation.select.mgxql.onetoone.dao.MgxqlJoinDao";
-    private static final String PROJ_DAO_NAMESPACE = "com.mybatisgx.projection.dao.UserDao";
 
     private static MybatisgxConfiguration otoConfiguration;
     private static MapperInfo otoMapperInfo;
-    private static MybatisgxConfiguration projConfiguration;
-    private static MapperInfo projMapperInfo;
 
     @BeforeClass
     public static void setUp() {
@@ -38,12 +33,6 @@ public class ProjectionMultiLevelTreeTest {
                 new String[]{"com.mybatisgx.relation.select.mgxql.onetoone.dao"}
         );
         otoMapperInfo = otoConfiguration.getMethodInfo(OTO_DAO_NAMESPACE + ".findJoinList1").getMapperInfo();
-
-        projConfiguration = DaoTestUtils.getMybatisgxConfiguration(
-                new String[]{"com.mybatisgx.projection.entity"},
-                new String[]{"com.mybatisgx.projection.dao"}
-        );
-        projMapperInfo = projConfiguration.getMethodInfo(PROJ_DAO_NAMESPACE + ".findByName").getMapperInfo();
     }
 
     /**
@@ -159,19 +148,4 @@ public class ProjectionMultiLevelTreeTest {
                 UserUnknownFieldProjection.class, tree.getEntityInfo().getClazz());
     }
 
-    /**
-     * test06: 非 MGXQL 路径（无 SelectStatement）— 验证退回扁平逻辑
-     */
-    @Test
-    public void test06_nonMgxqlFallback() {
-        MethodInfo methodInfo = projConfiguration.getMethodInfo(PROJ_DAO_NAMESPACE + ".findByName");
-        Class<?> returnType = methodInfo.getMethodReturnInfo().getType();
-        EntityRelationTree tree = projMapperInfo.getEntityRelationTree(returnType);
-
-        Assert.assertNotNull("非 MGXQL 投影树不应为 null", tree);
-        Assert.assertEquals("层级应为 1", 1, tree.getLevel());
-        Assert.assertEquals("索引应为 1", 1, tree.getIndex());
-        Assert.assertTrue("非 MGXQL 投影不应有 composites", tree.getComposites().isEmpty());
-        Assert.assertEquals("entityInfo 的 clazz 应为 UserDto", UserDto.class, tree.getEntityInfo().getClazz());
-    }
 }

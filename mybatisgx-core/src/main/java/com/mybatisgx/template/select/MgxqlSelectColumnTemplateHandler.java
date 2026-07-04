@@ -124,10 +124,12 @@ public class MgxqlSelectColumnTemplateHandler {
                 // select alias.*：基于 FROM 实体展开
                 FromEntity fromEntity = this.fromAliasCtx.getFromEntity(entityAlias);
                 if (fromEntity != null && fromEntity.getEntityInfo() != null) {
+                    String entityKey = String.format("%s%s", fromEntity.getEntityName(), fromEntity.getAlias());
+                    ColumnEntityRelation treeNode = this.aliasContext.getNode(entityKey);
+
                     ColumnEntityRelation tempRelation = new ColumnEntityRelation<>();
                     tempRelation.setEntityInfo(fromEntity.getEntityInfo());
-                    ColumnEntityRelation treeNode = this.aliasContext.getNode(entityAlias);
-                    tempRelation.setTableNameAlias(treeNode != null ? treeNode.getTableNameAlias() : fromEntity.getAlias());
+                    tempRelation.setTableNameAlias(treeNode.getTableNameAlias());
                     this.expandEntityColumns(plainSelect, tempRelation, entityAlias);
                 }
                 return;

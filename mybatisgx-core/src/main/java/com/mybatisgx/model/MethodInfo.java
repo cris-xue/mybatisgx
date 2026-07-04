@@ -63,16 +63,6 @@ public class MethodInfo {
      */
     private BatchParamInfo batchParamInfo;
     /**
-     * 查询排序信息
-     */
-    @Deprecated
-    private List<SelectOrderByInfo> selectOrderByInfoList;
-    /**
-     * 查询数量限制
-     */
-    @Deprecated
-    private MethodRowLimitInfo methodRowLimitInfo;
-    /**
      * 是否存在条件
      */
     @Deprecated
@@ -194,22 +184,6 @@ public class MethodInfo {
 
     public void setBatchParamInfo(BatchParamInfo batchParamInfo) {
         this.batchParamInfo = batchParamInfo;
-    }
-
-    public List<SelectOrderByInfo> getSelectOrderByInfoList() {
-        return selectOrderByInfoList;
-    }
-
-    public void setSelectOrderByInfoList(List<SelectOrderByInfo> selectOrderByInfoList) {
-        this.selectOrderByInfoList = selectOrderByInfoList;
-    }
-
-    public MethodRowLimitInfo getMethodRowLimitInfo() {
-        return methodRowLimitInfo;
-    }
-
-    public void setMethodRowLimitInfo(MethodRowLimitInfo methodRowLimitInfo) {
-        this.methodRowLimitInfo = methodRowLimitInfo;
     }
 
     public Boolean getExistCondition() {

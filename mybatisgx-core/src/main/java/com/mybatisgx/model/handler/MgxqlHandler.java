@@ -45,11 +45,12 @@ public class MgxqlHandler {
 
             // 查询方法的结果集处理
             if (methodInfo.getMethodCommandType() == MethodCommandType.SELECT) {
+                this.entityRelationTreeHandler.execute(mapperInfo, methodInfo);
+
                 SelectStatement selectStatement = (SelectStatement) methodInfo.getMgxqlStatement();
                 List<SelectItem> selectItemList = selectStatement.getSelectItems();
                 if (!(selectItemList.size() == 1 && selectItemList.get(0).getType().hasAggregateFunction())) {
                     MgxqlSourceType mgxqlSourceType = selectStatement.getMgxqlSourceType();
-                    this.entityRelationTreeHandler.execute(mapperInfo, methodInfo);
                     if (mgxqlSourceType == MgxqlSourceType.MANUAL) {
                         String resultMapId = mgxqlResultMapInfoHandler.execute(mapperInfo, methodInfo);
                         methodInfo.setResultMapId(resultMapId);

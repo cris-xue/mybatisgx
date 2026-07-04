@@ -60,7 +60,7 @@ public class EntityRelationTreeHandler {
         }
 
         // 处理返回dto投影的情况
-        if (entity == null) {
+        if (entity == null && methodReturnInfo.getClassCategory() != TypeCategory.SIMPLE) {
             EntityProjection entityProjection = new EntityProjection();
             EntityRelationTree entityProjectionRelationTree = entityProjection.execute(mapperInfo, methodInfo, entityRelationTree);
             mapperInfo.addEntityRelationTree(entityProjectionRelationTree);

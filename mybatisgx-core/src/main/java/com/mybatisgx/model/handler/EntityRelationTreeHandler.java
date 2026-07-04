@@ -65,19 +65,6 @@ public class EntityRelationTreeHandler {
             EntityRelationTree entityProjectionRelationTree = entityProjection.execute(mapperInfo, methodInfo, entityRelationTree);
             mapperInfo.addEntityRelationTree(entityProjectionRelationTree);
         }
-
-        /*MethodReturnInfo methodReturnInfo = methodInfo.getMethodReturnInfo();
-        Class<?> resultClass = methodReturnInfo.getType();
-        EntityInfo entityInfo = EntityInfoContextHolder.get(resultClass);
-        if (entityInfo == null) {
-            EntityProjection entityProjection = new EntityProjection();
-            entityProjection.execute(mapperInfo, methodInfo);
-        } else {
-            // 1、创建实体关系树   2、解决循环引用问题
-            EntityRelationDependencyTree entityRelationDependencyTree = EntityRelationDependencyTree.build(null, resultClass);
-            EntityRelationTree entityRelationTree = this.buildEntityRelationTree(null, entityInfo, entityRelationDependencyTree, 1, 1);
-            mapperInfo.addEntityRelationTree(entityRelationTree);
-        }*/
     }
 
     private EntityRelationTree findByEntityClass(EntityRelationTree entityRelationTree, Class<?> clazz) {

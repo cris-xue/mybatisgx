@@ -1,6 +1,5 @@
 package com.mybatisgx.template.select;
 
-import com.mybatisgx.dsl.mgxql.model.SelectItemType;
 import com.mybatisgx.dsl.mgxql.model.*;
 import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.model.*;
@@ -49,10 +48,9 @@ public class MgxqlSelectColumnTemplateHandler {
      * 构建 MGXQL 查询 SQL。
      *
      * @param selectStatement MGXQL SELECT 语句（fromClause 必须存在）
-     * @param rootRelation     返回类型对应的投影实体关系树根节点（用于 ResultMap）
      * @return 渲染完成的 PlainSelect
      */
-    public PlainSelect buildSelectSql(SelectStatement selectStatement, ColumnEntityRelation rootRelation) {
+    public PlainSelect buildSelectSql(SelectStatement selectStatement) {
         // AliasContext 使用完整实体关系树构建别名映射，确保所有 JOIN 实体都能找到对应节点
         ColumnEntityRelation fullTree = selectStatement.getMgxqlEntityRelationTree();
         AliasContext aliasContext = AliasContext.build(selectStatement, fullTree);

@@ -2,9 +2,10 @@ package com.mybatisgx.template.select;
 
 import com.mybatisgx.context.MybatisgxObjectFactory;
 import com.mybatisgx.dsl.mgxql.model.*;
-import com.mybatisgx.dsl.mgxql.model.SelectItemType;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
-import com.mybatisgx.model.*;
+import com.mybatisgx.model.ColumnEntityRelation;
+import com.mybatisgx.model.MapperInfo;
+import com.mybatisgx.model.MethodInfo;
 import com.mybatisgx.template.MgxqlWhereTemplateHandler;
 import com.mybatisgx.template.XmlCompiler;
 import net.sf.jsqlparser.statement.select.PlainSelect;
@@ -101,20 +102,6 @@ public class SelectTemplateHandler {
             }
         }
 
-        /* 旧注解驱动 ORDER BY / LIMIT 渲染（已停用，迁移到 MGXQL）
-        List<SelectOrderByInfo> selectOrderByInfoList = methodInfo.getSelectOrderByInfoList();
-        if (ObjectUtils.isNotEmpty(selectOrderByInfoList)) {
-            String orderBySql = orderByTemplateHandler.execute(selectOrderByInfoList);
-            selectXmlItemList.add(orderBySql);
-        }
-
-        MethodRowLimitInfo methodRowLimitInfo = methodInfo.getMethodRowLimitInfo();
-        if (ObjectUtils.isNotEmpty(methodRowLimitInfo)) {
-            LimitTemplateHandler limitTemplateHandler = MybatisgxObjectFactory.get(LimitTemplateHandler.class);
-            limitTemplateHandler.execute(selectXmlItemList, methodRowLimitInfo);
-        }
-        */
-
         for (Object selectSql : selectXmlItemList) {
             if (selectSql instanceof Element) {
                 selectElement.add((Element) selectSql);
@@ -138,9 +125,7 @@ public class SelectTemplateHandler {
         FromClause fromClause = selectStatement.getFromClause();
         if (fromClause != null) {
             // MGXQL 路径：按 FromClause 渲染 FROM/JOIN/ON，按 SelectItem 投影渲染列
-            Class<?> methodReturnType = methodInfo.getMethodReturnInfo().getType();
-            ColumnEntityRelation rootRelation = mapperInfo.getEntityRelationTree(methodReturnType);
-            PlainSelect plainSelect = mgxqlSelectColumnTemplateHandler.buildSelectSql(selectStatement, rootRelation);
+            PlainSelect plainSelect = mgxqlSelectColumnTemplateHandler.buildSelectSql(selectStatement);
             selectXmlItemList.add(plainSelect.toString());
             if (mgxqlSelectColumnTemplateHandler.hasAggregate(selectStatement)) {
                 selectElement.addAttribute("resultType", methodInfo.getMethodReturnInfo().getTypeName());

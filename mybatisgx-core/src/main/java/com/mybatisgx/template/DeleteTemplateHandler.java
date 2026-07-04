@@ -27,7 +27,6 @@ public class DeleteTemplateHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(DeleteTemplateHandler.class);
 
-    private WhereTemplateHandler whereTemplateHandler = new WhereTemplateHandler();
     private MgxqlWhereTemplateHandler mgxqlWhereTemplateHandler = new MgxqlWhereTemplateHandler();
 
     public String execute(MethodInfo methodInfo) {

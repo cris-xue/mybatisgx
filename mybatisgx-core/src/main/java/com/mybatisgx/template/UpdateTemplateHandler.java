@@ -58,7 +58,6 @@ public class UpdateTemplateHandler {
 
     private static abstract class AbstractUpdateHandler {
 
-        protected WhereTemplateHandler whereTemplateHandler = new WhereTemplateHandler();
         protected MgxqlWhereTemplateHandler mgxqlWhereTemplateHandler = new MgxqlWhereTemplateHandler();
 
         public void setValue(MethodInfo methodInfo, Element setTrimElement) {

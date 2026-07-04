@@ -4,11 +4,9 @@ import com.mybatisgx.api.MethodCommandType;
 import com.mybatisgx.dsl.mgxql.model.MgxqlStatement;
 import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.executor.page.Pageable;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.ibatis.mapping.SqlCommandType;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,11 +40,6 @@ public class MethodInfo {
      */
     private String methodName;
     /**
-     * 语义表达式
-     */
-    @Deprecated
-    private String statementExpression;
-    /**
      * 是否动态参数
      */
     private Boolean isDynamic = false;
@@ -62,16 +55,6 @@ public class MethodInfo {
      * 批量参数信息
      */
     private BatchParamInfo batchParamInfo;
-    /**
-     * 是否存在条件
-     */
-    @Deprecated
-    private Boolean isExistCondition = false;
-    /**
-     * 方法名条件信息【修改、删除、查询都可以存在条件】
-     */
-    @Deprecated
-    private List<ConditionInfo> conditionInfoList = new ArrayList<>();
     /**
      * 方法操作实体，不参与生成条件
      */
@@ -146,14 +129,6 @@ public class MethodInfo {
         this.methodName = methodName;
     }
 
-    public String getStatementExpression() {
-        return statementExpression;
-    }
-
-    public void setStatementExpression(String statementExpression) {
-        this.statementExpression = statementExpression;
-    }
-
     public Boolean getDynamic() {
         return isDynamic;
     }
@@ -184,25 +159,6 @@ public class MethodInfo {
 
     public void setBatchParamInfo(BatchParamInfo batchParamInfo) {
         this.batchParamInfo = batchParamInfo;
-    }
-
-    public Boolean getExistCondition() {
-        return isExistCondition;
-    }
-
-    public void setExistCondition(Boolean existCondition) {
-        isExistCondition = existCondition;
-    }
-
-    public List<ConditionInfo> getConditionInfoList() {
-        return conditionInfoList;
-    }
-
-    public void setConditionInfoList(List<ConditionInfo> conditionInfoList) {
-        this.conditionInfoList = conditionInfoList;
-        if (ObjectUtils.isNotEmpty(conditionInfoList)) {
-            this.isExistCondition = true;
-        }
     }
 
     public MethodParamInfo getEntityParamInfo() {

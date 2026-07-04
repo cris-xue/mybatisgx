@@ -5,7 +5,6 @@ import com.mybatisgx.dsl.mgxql.model.*;
 import com.mybatisgx.dsl.mgxql.model.SelectItemType;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.model.*;
-import com.mybatisgx.template.WhereTemplateHandler;
 import com.mybatisgx.template.MgxqlWhereTemplateHandler;
 import com.mybatisgx.template.XmlCompiler;
 import net.sf.jsqlparser.statement.select.PlainSelect;

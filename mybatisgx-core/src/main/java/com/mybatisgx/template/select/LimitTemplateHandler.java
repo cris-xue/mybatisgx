@@ -3,7 +3,6 @@ package com.mybatisgx.template.select;
 import com.mybatisgx.dsl.mgxql.model.LimitClause;
 import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
-import com.mybatisgx.model.MethodRowLimitInfo;
 
 import java.util.List;
 import java.util.Map;

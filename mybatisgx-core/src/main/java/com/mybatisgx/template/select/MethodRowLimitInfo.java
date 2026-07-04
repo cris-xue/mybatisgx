@@ -1,11 +1,10 @@
-package com.mybatisgx.model;
+package com.mybatisgx.template.select;
 
 /**
  * 方法名分页信息
  * @author 薛承城
  * @date 2025/11/20 12:22
  */
-@Deprecated
 public class MethodRowLimitInfo {
 
     /**

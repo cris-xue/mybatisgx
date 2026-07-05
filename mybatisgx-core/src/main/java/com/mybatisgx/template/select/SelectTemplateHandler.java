@@ -52,6 +52,13 @@ public class SelectTemplateHandler {
 
         SelectStatement selectStatement = (SelectStatement) methodInfo.getMgxqlStatement();
 
+        // 设置返回结果集或者返回类型
+        if (mgxqlSelectColumnTemplateHandler.hasAggregate(selectStatement)) {
+            selectElement.addAttribute("resultType", methodInfo.getMethodReturnInfo().getTypeName());
+        } else {
+            selectElement.addAttribute("resultMap", methodInfo.getResultMapId());
+        }
+
         // 构建上下文参数
         ColumnEntityRelation fullTree = selectStatement.getMgxqlEntityRelationTree();
         AliasContext aliasContext = AliasContext.build(selectStatement, fullTree);
@@ -63,11 +70,6 @@ public class SelectTemplateHandler {
             // MGXQL 路径：按 FromClause 渲染 FROM/JOIN/ON，按 SelectItem 投影渲染列
             PlainSelect plainSelect = mgxqlSelectColumnTemplateHandler.buildSelectSql(selectStatement, fromAliasContext, aliasContext);
             selectXmlItemList.add(plainSelect.toString());
-            if (mgxqlSelectColumnTemplateHandler.hasAggregate(selectStatement)) {
-                selectElement.addAttribute("resultType", methodInfo.getMethodReturnInfo().getTypeName());
-            } else {
-                selectElement.addAttribute("resultMap", methodInfo.getResultMapId());
-            }
         }
 
         // 构建查询条件

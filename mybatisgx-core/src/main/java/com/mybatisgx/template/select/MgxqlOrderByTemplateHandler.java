@@ -38,7 +38,7 @@ public class MgxqlOrderByTemplateHandler {
             if (item.getField().getEntityAlias() != null && !item.getField().getEntityAlias().isEmpty()) {
                 String tableAlias = item.getField().getEntityAlias();
                 if (this.aliasContext != null) {
-                    tableAlias = this.aliasContext.resolveDbTableAlias(tableAlias);
+                    tableAlias = this.aliasContext.resolveTableAlias(tableAlias);
                 }
                 columnName = tableAlias + "." + columnName;
             }

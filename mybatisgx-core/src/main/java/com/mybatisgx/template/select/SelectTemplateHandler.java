@@ -62,13 +62,12 @@ public class SelectTemplateHandler {
         // 构建上下文参数
         ColumnEntityRelation fullTree = selectStatement.getMgxqlEntityRelationTree();
         AliasContext aliasContext = AliasContext.build(selectStatement, fullTree);
-        FromAliasContext fromAliasContext = FromAliasContext.build(selectStatement.getFromClause());
 
         // 构建 from join
         FromClause fromClause = selectStatement.getFromClause();
         if (fromClause != null) {
             // MGXQL 路径：按 FromClause 渲染 FROM/JOIN/ON，按 SelectItem 投影渲染列
-            PlainSelect plainSelect = mgxqlSelectColumnTemplateHandler.buildSelectSql(selectStatement, fromAliasContext, aliasContext);
+            PlainSelect plainSelect = mgxqlSelectColumnTemplateHandler.buildSelectSql(selectStatement, aliasContext);
             selectXmlItemList.add(plainSelect.toString());
         }
 
@@ -77,7 +76,7 @@ public class SelectTemplateHandler {
         if (selectStatement != null) {
             WhereClause whereClause = selectStatement.getWhereClause();
             if (whereClause != null) {
-                whereElement = mgxqlWhereTemplateHandler.execute(mapperInfo.getEntityInfo(), methodInfo, whereClause.getRootExpression(), fromAliasContext, aliasContext);
+                whereElement = mgxqlWhereTemplateHandler.execute(mapperInfo.getEntityInfo(), methodInfo, whereClause.getRootExpression(), aliasContext);
                 selectXmlItemList.add(whereElement);
             }
         }

@@ -10,7 +10,6 @@ import com.mybatisgx.model.EntityInfo;
 import com.mybatisgx.model.MethodInfo;
 import com.mybatisgx.model.MethodParamInfo;
 import com.mybatisgx.template.select.AliasContext;
-import com.mybatisgx.template.select.FromAliasContext;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.mapping.SqlCommandType;
@@ -28,15 +27,13 @@ import java.util.List;
  */
 public class MgxqlWhereTemplateHandler {
 
-    private FromAliasContext fromAliasContext;
     private AliasContext aliasContext;
 
     public Element execute(EntityInfo entityInfo, MethodInfo methodInfo, WhereExpression rootExpression) {
-        return this.execute(entityInfo, methodInfo, rootExpression, null, null);
+        return this.execute(entityInfo, methodInfo, rootExpression, null);
     }
 
-    public Element execute(EntityInfo entityInfo, MethodInfo methodInfo, WhereExpression rootExpression, FromAliasContext fromAliasContext, AliasContext aliasContext) {
-        this.fromAliasContext = fromAliasContext;
+    public Element execute(EntityInfo entityInfo, MethodInfo methodInfo, WhereExpression rootExpression, AliasContext aliasContext) {
         this.aliasContext = aliasContext;
         if (rootExpression == null || ObjectUtils.isEmpty(rootExpression.getNodes())) {
             return null;
@@ -263,10 +260,10 @@ public class MgxqlWhereTemplateHandler {
     }
 
     /**
-     * 解析 SQL 表达式中的 MGXQL 别名为数据库真实表别名。
+     * 解析 SQL 表达式中的 MGXQL 别名为 SQL 表别名。
      * <p>
      * aliasContext 为 null 时（UPDATE/DELETE 场景）直接调用 toSql()；
-     * ConditionColumnExpression 时通过 resolveDbTableAlias 解析 tableAlias；
+     * ConditionColumnExpression 时通过 resolveTableAlias 解析 tableAlias；
      * ConditionCompositeExpression 时遍历子列逐个解析；其他类型兜底调用 toSql()。
      */
     private String resolveColumnSql(SqlExpression expr) {
@@ -280,7 +277,7 @@ public class MgxqlWhereTemplateHandler {
             ConditionColumnExpression col = (ConditionColumnExpression) expr;
             String mgxqlAlias = col.getTableAlias();
             if (StringUtils.isNotBlank(mgxqlAlias)) {
-                String dbAlias = this.aliasContext.resolveDbTableAlias(mgxqlAlias);
+                String dbAlias = this.aliasContext.resolveTableAlias(mgxqlAlias);
                 return dbAlias + "." + col.getDbColumnName();
             }
             return col.getDbColumnName();
@@ -295,7 +292,7 @@ public class MgxqlWhereTemplateHandler {
                 ConditionColumnExpression col = composite.getColumns().get(i);
                 String mgxqlAlias = col.getTableAlias();
                 if (StringUtils.isNotBlank(mgxqlAlias)) {
-                    String dbAlias = this.aliasContext.resolveDbTableAlias(mgxqlAlias);
+                    String dbAlias = this.aliasContext.resolveTableAlias(mgxqlAlias);
                     sb.append(dbAlias).append(".").append(col.getDbColumnName());
                 } else {
                     sb.append(col.getDbColumnName());

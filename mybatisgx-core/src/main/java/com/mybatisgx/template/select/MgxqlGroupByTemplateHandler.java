@@ -38,7 +38,7 @@ public class MgxqlGroupByTemplateHandler {
             if (fieldRef.getEntityAlias() != null && !fieldRef.getEntityAlias().isEmpty()) {
                 String tableAlias = fieldRef.getEntityAlias();
                 if (this.aliasContext != null) {
-                    tableAlias = this.aliasContext.resolveDbTableAlias(tableAlias);
+                    tableAlias = this.aliasContext.resolveTableAlias(tableAlias);
                 }
                 columnName = tableAlias + "." + columnName;
             }

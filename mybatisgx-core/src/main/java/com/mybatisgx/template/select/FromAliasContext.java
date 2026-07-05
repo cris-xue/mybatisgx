@@ -25,7 +25,7 @@ public class FromAliasContext {
         this.fromClause = fromClause;
     }
 
-    static FromAliasContext build(FromClause fromClause) {
+    public static FromAliasContext build(FromClause fromClause) {
         Map<String, FromEntity> map = new LinkedHashMap<>();
         if (fromClause == null) {
             return new FromAliasContext(map, fromClause);
@@ -44,11 +44,11 @@ public class FromAliasContext {
         return new FromAliasContext(map, fromClause);
     }
 
-    FromEntity getFromEntity(String alias) {
+    public FromEntity getFromEntity(String alias) {
         return this.fromEntityMap.get(alias);
     }
 
-    FromClause getFromClause() {
+    public FromClause getFromClause() {
         return this.fromClause;
     }
 }

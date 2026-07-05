@@ -34,7 +34,7 @@ public class AliasContext {
         this.fromClause = fromClause;
     }
 
-    static AliasContext build(SelectStatement selectStatement, ColumnEntityRelation rootRelation) {
+    public static AliasContext build(SelectStatement selectStatement, ColumnEntityRelation rootRelation) {
         FromClause fromClause = selectStatement.getFromClause();
         Map<String, ColumnEntityRelation> aliasMap;
         if (rootRelation != null) {
@@ -51,19 +51,19 @@ public class AliasContext {
     /**
      * 返回 MGXQL 用户声明的表别名。树节点的 tableNameAlias 仅用于 result map 列别名，不出现在 SQL 表引用中。
      */
-    String resolveTableAlias(String alias) {
+    public String resolveTableAlias(String alias) {
         return alias;
     }
 
-    ColumnEntityRelation getNode(String alias) {
+    public ColumnEntityRelation getNode(String alias) {
         return this.aliasMap.get(alias);
     }
 
-    String getMainTableName() {
+    public String getMainTableName() {
         return this.mainTableName;
     }
 
-    String getMainTableAlias() {
+    public String getMainTableAlias() {
         return this.mainTableAlias;
     }
 

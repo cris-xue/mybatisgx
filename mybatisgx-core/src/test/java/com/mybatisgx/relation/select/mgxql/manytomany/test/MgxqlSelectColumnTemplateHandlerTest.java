@@ -3,9 +3,12 @@ package com.mybatisgx.relation.select.mgxql.manytomany.test;
 import com.mybatisgx.dsl.mgxql.model.*;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.model.*;
+import com.mybatisgx.template.select.AliasContext;
+import com.mybatisgx.template.select.FromAliasContext;
 import com.mybatisgx.template.select.MgxqlSelectColumnTemplateHandler;
 import com.mybatisgx.util.DaoTestUtils;
 import net.sf.jsqlparser.statement.select.PlainSelect;
+import org.apache.ibatis.mapping.SqlCommandType;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
@@ -49,8 +52,10 @@ public class MgxqlSelectColumnTemplateHandlerTest {
         SelectStatement selectStatement = (SelectStatement) methodInfo.getMgxqlStatement();
         Class<?> returnType = methodInfo.getMethodReturnInfo().getType();
         ColumnEntityRelation rootRelation = mapperInfo.getEntityRelationTree(returnType);
+        AliasContext aliasContext = AliasContext.build(selectStatement, rootRelation);
+        FromAliasContext fromAliasContext = FromAliasContext.build(selectStatement.getFromClause());
         MgxqlSelectColumnTemplateHandler handler = new MgxqlSelectColumnTemplateHandler();
-        PlainSelect plainSelect = handler.buildSelectSql(selectStatement);
+        PlainSelect plainSelect = handler.buildSelectSql(selectStatement, fromAliasContext, aliasContext);
         return plainSelect.toString();
     }
 
@@ -95,7 +100,7 @@ public class MgxqlSelectColumnTemplateHandlerTest {
 
         // 构造 SelectStatement：select * from User u left join Role r on u = r
         SelectStatement selectStatement = new SelectStatement();
-        selectStatement.setCommandType(org.apache.ibatis.mapping.SqlCommandType.SELECT);
+        selectStatement.setCommandType(SqlCommandType.SELECT);
         selectStatement.setMgxqlEntityRelationTree(fullTree);
 
         SelectItem selectAllItem = new SelectItem();
@@ -116,8 +121,11 @@ public class MgxqlSelectColumnTemplateHandlerTest {
         fromClause.addJoinEntity(joinEntity);
         selectStatement.setFromClause(fromClause);
 
+        AliasContext aliasContext = AliasContext.build(selectStatement, fullTree);
+        FromAliasContext fromAliasContext = FromAliasContext.build(selectStatement.getFromClause());
+
         MgxqlSelectColumnTemplateHandler handler = new MgxqlSelectColumnTemplateHandler();
-        PlainSelect plainSelect = handler.buildSelectSql(selectStatement);
+        PlainSelect plainSelect = handler.buildSelectSql(selectStatement, fromAliasContext, aliasContext);
         String sql = plainSelect.toString();
         String selectPart = getSelectPart(sql);
         Assert.assertTrue("select * 应展开主实体 User 列（树节点 tableNameAlias 前缀）", selectPart.contains(fullTree.getTableNameAlias() + "."));
@@ -146,8 +154,11 @@ public class MgxqlSelectColumnTemplateHandlerTest {
         Class<?> returnType = methodInfo.getMethodReturnInfo().getType();
         ColumnEntityRelation rootRelation = mapperInfo.getEntityRelationTree(returnType);
 
+        AliasContext aliasContext = AliasContext.build(selectStatement, rootRelation);
+        FromAliasContext fromAliasContext = FromAliasContext.build(selectStatement.getFromClause());
+
         MgxqlSelectColumnTemplateHandler handler = new MgxqlSelectColumnTemplateHandler();
-        PlainSelect plainSelect = handler.buildSelectSql(selectStatement);
+        PlainSelect plainSelect = handler.buildSelectSql(selectStatement, fromAliasContext, aliasContext);
         String sql = plainSelect.toString();
         Assert.assertTrue("应包含主表 FROM", sql.contains("simple_mtm_user_simple"));
         Assert.assertTrue("SELECT 列应有表前缀 simple_mtm_user_simple_1_1.", sql.contains("simple_mtm_user_simple_1_1."));

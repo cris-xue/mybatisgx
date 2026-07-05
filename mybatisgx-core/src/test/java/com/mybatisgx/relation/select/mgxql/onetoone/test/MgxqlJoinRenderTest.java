@@ -3,6 +3,8 @@ package com.mybatisgx.relation.select.mgxql.onetoone.test;
 import com.mybatisgx.dsl.mgxql.model.SelectStatement;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.model.*;
+import com.mybatisgx.template.select.AliasContext;
+import com.mybatisgx.template.select.FromAliasContext;
 import com.mybatisgx.template.select.MgxqlSelectColumnTemplateHandler;
 import com.mybatisgx.util.DaoTestUtils;
 import net.sf.jsqlparser.statement.select.PlainSelect;
@@ -38,8 +40,12 @@ public class MgxqlJoinRenderTest {
     private String renderSql(String methodName) {
         MethodInfo methodInfo = configuration.getMethodInfo(DAO_NAMESPACE + "." + methodName);
         SelectStatement selectStatement = (SelectStatement) methodInfo.getMgxqlStatement();
+
+        AliasContext aliasContext = AliasContext.build(selectStatement, selectStatement.getMgxqlEntityRelationTree());
+        FromAliasContext fromAliasContext = FromAliasContext.build(selectStatement.getFromClause());
+
         MgxqlSelectColumnTemplateHandler handler = new MgxqlSelectColumnTemplateHandler();
-        PlainSelect plainSelect = handler.buildSelectSql(selectStatement);
+        PlainSelect plainSelect = handler.buildSelectSql(selectStatement, fromAliasContext, aliasContext);
         return plainSelect.toString();
     }
 
@@ -191,8 +197,11 @@ public class MgxqlJoinRenderTest {
         Class<?> returnType = methodInfo.getMethodReturnInfo().getType();
         ColumnEntityRelation rootRelation = mapperInfo.getEntityRelationTree(returnType);
 
+        AliasContext aliasContext = AliasContext.build(selectStatement, selectStatement.getMgxqlEntityRelationTree());
+        FromAliasContext fromAliasContext = FromAliasContext.build(selectStatement.getFromClause());
+
         MgxqlSelectColumnTemplateHandler handler = new MgxqlSelectColumnTemplateHandler();
-        PlainSelect plainSelect = handler.buildSelectSql(selectStatement);
+        PlainSelect plainSelect = handler.buildSelectSql(selectStatement, fromAliasContext, aliasContext);
         String sql = plainSelect.toString();
 
         // 从投影树根节点获取 EntityInfo，验证 SELECT 中包含其列的 dbColumnNameAlias

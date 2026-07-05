@@ -6,6 +6,8 @@ import com.mybatisgx.model.ColumnInfo;
 import com.mybatisgx.model.EntityInfo;
 import com.mybatisgx.model.MethodInfo;
 import com.mybatisgx.model.MethodParamInfo;
+import com.mybatisgx.template.select.AliasContext;
+import com.mybatisgx.template.select.FromAliasContext;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.mapping.SqlCommandType;
@@ -23,7 +25,16 @@ import java.util.List;
  */
 public class MgxqlWhereTemplateHandler {
 
+    private FromAliasContext fromAliasContext;
+    private AliasContext aliasContext;
+
     public Element execute(EntityInfo entityInfo, MethodInfo methodInfo, WhereExpression rootExpression) {
+        return this.execute(entityInfo, methodInfo, rootExpression, null, null);
+    }
+
+    public Element execute(EntityInfo entityInfo, MethodInfo methodInfo, WhereExpression rootExpression, FromAliasContext fromAliasContext, AliasContext aliasContext) {
+        this.fromAliasContext = fromAliasContext;
+        this.aliasContext = aliasContext;
         if (rootExpression == null || ObjectUtils.isEmpty(rootExpression.getNodes())) {
             return null;
         }
@@ -83,7 +94,7 @@ public class MgxqlWhereTemplateHandler {
 
     private void renderNestedNode(Element parentElement, WhereConditionNode node, Boolean dynamic) {
         WhereExpression subExpression = node.getSubExpression();
-        com.mybatisgx.dsl.mgxql.model.LogicOperator logicOp = node.getLogicOperator();
+        LogicOperator logicOp = node.getLogicOperator();
         String logicStr = logicOp != null ? logicOp.getValue() : "";
         parentElement.addText(String.format(" %s (", logicStr));
         this.renderExpression(parentElement, subExpression, dynamic);
@@ -144,7 +155,7 @@ public class MgxqlWhereTemplateHandler {
     }
 
     private void renderNullCondition(Element parentElement, WhereConditionNode node, BoundParam boundParam) {
-        com.mybatisgx.dsl.mgxql.model.LogicOperator logicOp = node.getLogicOperator();
+        LogicOperator logicOp = node.getLogicOperator();
         String logicStr = logicOp != null ? logicOp.getValue() : "";
         ComparisonOperator operator = boundParam.getOperator();
         String columnSql = this.getColumnSql(boundParam);
@@ -154,8 +165,8 @@ public class MgxqlWhereTemplateHandler {
     private void renderCommonCondition(Element parentElement, WhereConditionNode node, BoundParam boundParam) {
         List<BoundParamEntry> entries = boundParam.getEntries();
         for (BoundParamEntry entry : entries) {
-            com.mybatisgx.dsl.mgxql.model.LogicOperator logicOp = entry.getLogicOperator();
-            if (logicOp == null || logicOp == com.mybatisgx.dsl.mgxql.model.LogicOperator.NULL) {
+            LogicOperator logicOp = entry.getLogicOperator();
+            if (logicOp == null || logicOp == LogicOperator.NULL) {
                 logicOp = node.getLogicOperator();
             }
             String logicStr = logicOp != null ? logicOp.getValue() : "";
@@ -189,7 +200,7 @@ public class MgxqlWhereTemplateHandler {
             return;
         }
         BoundParamEntry entry = entries.get(0);
-        com.mybatisgx.dsl.mgxql.model.LogicOperator logicOp = node.getLogicOperator();
+        LogicOperator logicOp = node.getLogicOperator();
         String logicStr = logicOp != null ? logicOp.getValue() : "";
         String columnSql = entry.getSqlExpression() != null ? entry.getSqlExpression().toSql() : "";
         String path = StringUtils.join(entry.getParamPath(), ".");
@@ -202,7 +213,7 @@ public class MgxqlWhereTemplateHandler {
             return;
         }
         BoundParamEntry entry = entries.get(0);
-        com.mybatisgx.dsl.mgxql.model.LogicOperator logicOp = node.getLogicOperator();
+        LogicOperator logicOp = node.getLogicOperator();
         String logicStr = logicOp != null ? logicOp.getValue() : "";
         String columnSql = entry.getSqlExpression() != null ? entry.getSqlExpression().toSql() : "";
         String notStr = boundParam.getNotOperator() != null ? " " + boundParam.getNotOperator().getValue() : "";

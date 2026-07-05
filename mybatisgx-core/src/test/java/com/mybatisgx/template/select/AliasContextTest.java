@@ -78,7 +78,7 @@ public class AliasContextTest {
     @Test
     public void test04_resolveTableAlias_nullParam() {
         AliasContext aliasContext = AliasContext.build(selectStatement, rootRelation);
-        Assert.assertNull(aliasContext.resolveTableAlias(null));
+        Assert.assertNull(aliasContext.resolveTableAlias((String) null));
     }
 
     @Test
@@ -121,6 +121,56 @@ public class AliasContextTest {
     public void test09_getFromEntity_unknownAlias() {
         AliasContext aliasContext = AliasContext.build(selectStatement, rootRelation);
         Assert.assertNull(aliasContext.getFromEntity("unknown"));
+    }
+
+    // ===== resolveTableAlias(FromEntity) 重载测试 =====
+
+    @Test
+    public void test10_resolveTableAliasFromEntity_withAlias() {
+        AliasContext aliasContext = AliasContext.build(selectStatement, rootRelation);
+        FromEntity primaryEntity = aliasContext.getFromEntity("u");
+        Assert.assertNotNull(primaryEntity);
+        Assert.assertEquals("user_1_1", aliasContext.resolveTableAlias(primaryEntity));
+        FromEntity joinEntity = aliasContext.getFromEntity("r");
+        Assert.assertNotNull(joinEntity);
+        Assert.assertEquals("role_2_1", aliasContext.resolveTableAlias(joinEntity));
+    }
+
+    @Test
+    public void test11_resolveTableAliasFromEntity_noAliasUsesEntityName() {
+        // 构造一个无 alias 的 FromEntity，应使用 entityName 作为 key
+        SelectStatement stmt = new SelectStatement();
+        FromClause fromClause = new FromClause();
+        FromEntity entity = new FromEntity();
+        entity.setEntityName("User");
+        // 不设置 alias
+        EntityInfo userEntityInfo = new EntityInfo.Builder().setTableName("t_user").setClazz(User.class).build();
+        entity.setEntityInfo(userEntityInfo);
+        fromClause.setPrimaryEntity(entity);
+        stmt.setFromClause(fromClause);
+
+        ColumnEntityRelation root = new ColumnEntityRelation();
+        root.setEntityInfo(userEntityInfo);
+        root.setTableNameAlias("user_1_1");
+
+        AliasContext aliasContext = AliasContext.build(stmt, root);
+        // 无 alias 时 resolveKey 返回 entityName "User"
+        Assert.assertEquals("user_1_1", aliasContext.resolveTableAlias(entity));
+    }
+
+    @Test
+    public void test12_resolveTableAliasFromEntity_nullParam() {
+        AliasContext aliasContext = AliasContext.build(selectStatement, rootRelation);
+        Assert.assertNull(aliasContext.resolveTableAlias((FromEntity) null));
+    }
+
+    @Test
+    public void test13_resolveTableAliasFromEntity_noTreeFallback() {
+        AliasContext aliasContext = AliasContext.build(selectStatement, null);
+        FromEntity primaryEntity = aliasContext.getFromEntity("u");
+        Assert.assertNotNull(primaryEntity);
+        // 无树节点时回退返回原始别名
+        Assert.assertEquals("u", aliasContext.resolveTableAlias(primaryEntity));
     }
 
     private static class User {}

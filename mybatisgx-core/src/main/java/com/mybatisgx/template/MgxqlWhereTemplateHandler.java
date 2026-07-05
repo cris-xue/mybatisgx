@@ -2,14 +2,13 @@ package com.mybatisgx.template;
 
 import com.mybatisgx.annotation.LogicDelete;
 import com.mybatisgx.dsl.mgxql.model.*;
-import com.mybatisgx.dsl.mgxql.model.expression.SqlExpression;
 import com.mybatisgx.model.ColumnInfo;
 import com.mybatisgx.model.EntityInfo;
 import com.mybatisgx.model.MethodInfo;
 import com.mybatisgx.model.MethodParamInfo;
-import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.ibatis.mapping.SqlCommandType;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 
@@ -110,18 +109,16 @@ public class MgxqlWhereTemplateHandler {
             return;
         }
 
-        com.mybatisgx.dsl.mgxql.model.ComparisonOperator operator = boundParam.getOperator();
-        if (operator == com.mybatisgx.dsl.mgxql.model.ComparisonOperator.IN) {
+        ComparisonOperator operator = boundParam.getOperator();
+        if (operator == ComparisonOperator.IN) {
             this.renderInCondition(targetElement, node, boundParam);
             return;
         }
-        if (operator == com.mybatisgx.dsl.mgxql.model.ComparisonOperator.BETWEEN) {
+        if (operator == ComparisonOperator.BETWEEN) {
             this.renderBetweenCondition(targetElement, node, boundParam);
             return;
         }
-        if (operator == com.mybatisgx.dsl.mgxql.model.ComparisonOperator.LIKE
-                || operator == com.mybatisgx.dsl.mgxql.model.ComparisonOperator.STARTING_WITH
-                || operator == com.mybatisgx.dsl.mgxql.model.ComparisonOperator.ENDING_WITH) {
+        if (operator == ComparisonOperator.LIKE || operator == ComparisonOperator.STARTING_WITH || operator == ComparisonOperator.ENDING_WITH) {
             this.renderLikeCondition(targetElement, node, boundParam);
             return;
         }
@@ -132,8 +129,7 @@ public class MgxqlWhereTemplateHandler {
     private Element wrapOptionalIf(Element parentElement, WhereConditionNode node, Boolean dynamic) {
         if (node.isOptional() || dynamic) {
             BoundParam boundParam = node.getBoundParam();
-            if (boundParam != null && boundParam.getOperator() != null
-                    && boundParam.getOperator().isNullComparisonOperator()) {
+            if (boundParam != null && boundParam.getOperator() != null && boundParam.getOperator().isNullComparisonOperator()) {
                 return parentElement;
             }
             if (boundParam != null && ObjectUtils.isNotEmpty(boundParam.getEntries())) {
@@ -150,7 +146,7 @@ public class MgxqlWhereTemplateHandler {
     private void renderNullCondition(Element parentElement, WhereConditionNode node, BoundParam boundParam) {
         com.mybatisgx.dsl.mgxql.model.LogicOperator logicOp = node.getLogicOperator();
         String logicStr = logicOp != null ? logicOp.getValue() : "";
-        com.mybatisgx.dsl.mgxql.model.ComparisonOperator operator = boundParam.getOperator();
+        ComparisonOperator operator = boundParam.getOperator();
         String columnSql = this.getColumnSql(boundParam);
         parentElement.addText(String.format(" %s %s %s", logicStr, columnSql, operator.getValue()));
     }
@@ -219,11 +215,11 @@ public class MgxqlWhereTemplateHandler {
         parentElement.addText(String.format(" %s %s%s like #{%s}", logicStr, columnSql, notStr, bindKey));
     }
 
-    private String buildLikeExpression(com.mybatisgx.dsl.mgxql.model.ComparisonOperator operator, String bindValuePath) {
-        if (operator == com.mybatisgx.dsl.mgxql.model.ComparisonOperator.STARTING_WITH) {
+    private String buildLikeExpression(ComparisonOperator operator, String bindValuePath) {
+        if (operator == ComparisonOperator.STARTING_WITH) {
             return "'%'+" + bindValuePath;
         }
-        if (operator == com.mybatisgx.dsl.mgxql.model.ComparisonOperator.ENDING_WITH) {
+        if (operator == ComparisonOperator.ENDING_WITH) {
             return bindValuePath + "+'%'";
         }
         return "'%'+" + bindValuePath + "+'%'";

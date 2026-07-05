@@ -86,7 +86,7 @@ public class SelectTemplateHandler {
         if (selectStatement instanceof SelectStatement) {
             GroupByClause groupByClause = selectStatement.getGroupByClause();
             if (groupByClause != null) {
-                String groupBySql = mgxqlGroupByTemplateHandler.execute(groupByClause);
+                String groupBySql = mgxqlGroupByTemplateHandler.execute(groupByClause, aliasContext);
                 selectXmlItemList.add(groupBySql);
             }
         }
@@ -106,7 +106,7 @@ public class SelectTemplateHandler {
         if (selectStatement instanceof SelectStatement) {
             OrderByClause orderByClause = selectStatement.getOrderByClause();
             if (orderByClause != null) {
-                String orderBySql = mgxqlOrderByTemplateHandler.execute(orderByClause);
+                String orderBySql = mgxqlOrderByTemplateHandler.execute(orderByClause, aliasContext);
                 selectXmlItemList.add(orderBySql);
             }
         }

@@ -21,13 +21,15 @@ import java.util.Map;
 public class AliasContext {
 
     private final Map<String, ColumnEntityRelation> aliasMap;
+    private final Map<String, ColumnEntityRelation> pureAliasMap;
     private final String mainTableName;
     private final String mainTableAlias;
     private final ColumnEntityRelation rootRelation;
     private final FromClause fromClause;
 
-    private AliasContext(Map<String, ColumnEntityRelation> aliasMap, String mainTableName, String mainTableAlias, ColumnEntityRelation rootRelation, FromClause fromClause) {
+    private AliasContext(Map<String, ColumnEntityRelation> aliasMap, Map<String, ColumnEntityRelation> pureAliasMap, String mainTableName, String mainTableAlias, ColumnEntityRelation rootRelation, FromClause fromClause) {
         this.aliasMap = aliasMap;
+        this.pureAliasMap = pureAliasMap;
         this.mainTableName = mainTableName;
         this.mainTableAlias = mainTableAlias;
         this.rootRelation = rootRelation;
@@ -37,15 +39,16 @@ public class AliasContext {
     public static AliasContext build(SelectStatement selectStatement, ColumnEntityRelation rootRelation) {
         FromClause fromClause = selectStatement.getFromClause();
         Map<String, ColumnEntityRelation> aliasMap;
+        Map<String, ColumnEntityRelation> pureAliasMap = new LinkedHashMap<>();
         if (rootRelation != null) {
-            aliasMap = buildAliasTreeNodeMap(fromClause, rootRelation);
+            aliasMap = buildAliasTreeNodeMap(fromClause, rootRelation, pureAliasMap);
         } else {
-            aliasMap = buildAliasMapNoTree(fromClause);
+            aliasMap = buildAliasMapNoTree(fromClause, pureAliasMap);
         }
         FromEntity primaryEntity = fromClause != null ? fromClause.getPrimaryEntity() : null;
         String mainTableName = (primaryEntity != null && primaryEntity.getEntityInfo() != null) ? primaryEntity.getEntityInfo().getTableName() : null;
         String mainTableAlias = (primaryEntity != null) ? primaryEntity.getAlias() : null;
-        return new AliasContext(aliasMap, mainTableName, mainTableAlias, rootRelation, fromClause);
+        return new AliasContext(aliasMap, pureAliasMap, mainTableName, mainTableAlias, rootRelation, fromClause);
     }
 
     /**
@@ -53,6 +56,26 @@ public class AliasContext {
      */
     public String resolveTableAlias(String alias) {
         return alias;
+    }
+
+    /**
+     * 将 MGXQL 用户别名解析为数据库真实表别名（tableNameAlias）。
+     * <p>
+     * 从 pureAliasMap 查找对应树节点，若节点非 null 且 tableNameAlias 非空则返回 tableNameAlias，
+     * 否则回退返回原始 mgxqlAlias。参数为 null 时返回 null。
+     *
+     * @param mgxqlAlias MGXQL 用户声明的纯别名（如 "u"、"r"）
+     * @return 数据库真实表别名（如 "user_1_1"），查不到时回退返回原始别名
+     */
+    public String resolveDbTableAlias(String mgxqlAlias) {
+        if (mgxqlAlias == null) {
+            return null;
+        }
+        ColumnEntityRelation node = this.pureAliasMap.get(mgxqlAlias);
+        if (node != null && StringUtils.isNotBlank(node.getTableNameAlias())) {
+            return node.getTableNameAlias();
+        }
+        return mgxqlAlias;
     }
 
     public ColumnEntityRelation getNode(String alias) {
@@ -83,7 +106,7 @@ public class AliasContext {
      * entityInfo.clazz 匹配对应子节点。匹配不到时保留 null（渲染回退到用户别名，
      * 该实体不在 result map 中）。
      */
-    private static Map<String, ColumnEntityRelation> buildAliasTreeNodeMap(FromClause fromClause, ColumnEntityRelation rootRelation) {
+    private static Map<String, ColumnEntityRelation> buildAliasTreeNodeMap(FromClause fromClause, ColumnEntityRelation rootRelation, Map<String, ColumnEntityRelation> pureAliasMap) {
         Map<String, ColumnEntityRelation> aliasMap = new LinkedHashMap<>();
         if (fromClause == null) {
             return aliasMap;
@@ -96,6 +119,9 @@ public class AliasContext {
             }
             String entityKey = String.format("%s%s", primaryEntity.getEntityName(), primaryEntity.getAlias());
             aliasMap.put(entityKey, primaryNode);
+            if (StringUtils.isNotBlank(primaryEntity.getAlias())) {
+                pureAliasMap.put(primaryEntity.getAlias(), primaryNode);
+            }
         }
         if (fromClause.getJoinEntities() == null) {
             return aliasMap;
@@ -115,6 +141,7 @@ public class AliasContext {
             }
             String entityKey = String.format("%s%s", joinEntity.getEntityName(), joinEntity.getAlias());
             aliasMap.put(entityKey, rightNode);
+            pureAliasMap.put(joinEntity.getAlias(), rightNode);
         }
         return aliasMap;
     }
@@ -123,7 +150,7 @@ public class AliasContext {
      * 无注解树场景（聚合等）的别名映射：所有别名映射到 null，
      * {@link #resolveTableAlias} 回退到 MGXQL 用户别名。
      */
-    private static Map<String, ColumnEntityRelation> buildAliasMapNoTree(FromClause fromClause) {
+    private static Map<String, ColumnEntityRelation> buildAliasMapNoTree(FromClause fromClause, Map<String, ColumnEntityRelation> pureAliasMap) {
         Map<String, ColumnEntityRelation> aliasMap = new LinkedHashMap<>();
         if (fromClause == null) {
             return aliasMap;
@@ -131,11 +158,13 @@ public class AliasContext {
         FromEntity primaryEntity = fromClause.getPrimaryEntity();
         if (primaryEntity != null && StringUtils.isNotBlank(primaryEntity.getAlias())) {
             aliasMap.put(primaryEntity.getAlias(), null);
+            pureAliasMap.put(primaryEntity.getAlias(), null);
         }
         if (fromClause.getJoinEntities() != null) {
             for (JoinEntity joinEntity : fromClause.getJoinEntities()) {
                 if (StringUtils.isNotBlank(joinEntity.getAlias())) {
                     aliasMap.put(joinEntity.getAlias(), null);
+                    pureAliasMap.put(joinEntity.getAlias(), null);
                 }
             }
         }

@@ -2,6 +2,9 @@ package com.mybatisgx.template;
 
 import com.mybatisgx.annotation.LogicDelete;
 import com.mybatisgx.dsl.mgxql.model.*;
+import com.mybatisgx.dsl.mgxql.model.expression.ConditionColumnExpression;
+import com.mybatisgx.dsl.mgxql.model.expression.ConditionCompositeExpression;
+import com.mybatisgx.dsl.mgxql.model.expression.SqlExpression;
 import com.mybatisgx.model.ColumnInfo;
 import com.mybatisgx.model.EntityInfo;
 import com.mybatisgx.model.MethodInfo;
@@ -170,7 +173,7 @@ public class MgxqlWhereTemplateHandler {
                 logicOp = node.getLogicOperator();
             }
             String logicStr = logicOp != null ? logicOp.getValue() : "";
-            String columnSql = entry.getSqlExpression() != null ? entry.getSqlExpression().toSql() : "";
+            String columnSql = this.resolveColumnSql(entry.getSqlExpression());
             String operatorStr = boundParam.getOperator().getValue();
             String notStr = boundParam.getNotOperator() != null ? " " + boundParam.getNotOperator().getValue() : "";
             String paramExpr = this.buildParamExpression(entry);
@@ -186,7 +189,7 @@ public class MgxqlWhereTemplateHandler {
         BoundParamEntry entry = entries.get(0);
         com.mybatisgx.dsl.mgxql.model.LogicOperator logicOp = node.getLogicOperator();
         String logicStr = logicOp != null ? logicOp.getValue() : "";
-        String columnSql = entry.getSqlExpression() != null ? entry.getSqlExpression().toSql() : "";
+        String columnSql = this.resolveColumnSql(entry.getSqlExpression());
         String notStr = boundParam.getNotOperator() != null ? " " + boundParam.getNotOperator().getValue() : "";
         String collectionPath = StringUtils.join(entry.getParamPath(), ".");
         parentElement.addText(String.format(" %s %s%s in", logicStr, columnSql, notStr));
@@ -202,7 +205,7 @@ public class MgxqlWhereTemplateHandler {
         BoundParamEntry entry = entries.get(0);
         LogicOperator logicOp = node.getLogicOperator();
         String logicStr = logicOp != null ? logicOp.getValue() : "";
-        String columnSql = entry.getSqlExpression() != null ? entry.getSqlExpression().toSql() : "";
+        String columnSql = this.resolveColumnSql(entry.getSqlExpression());
         String path = StringUtils.join(entry.getParamPath(), ".");
         parentElement.addText(String.format(" %s %s between #{%s[0]} and #{%s[1]}", logicStr, columnSql, path, path));
     }
@@ -215,7 +218,7 @@ public class MgxqlWhereTemplateHandler {
         BoundParamEntry entry = entries.get(0);
         LogicOperator logicOp = node.getLogicOperator();
         String logicStr = logicOp != null ? logicOp.getValue() : "";
-        String columnSql = entry.getSqlExpression() != null ? entry.getSqlExpression().toSql() : "";
+        String columnSql = this.resolveColumnSql(entry.getSqlExpression());
         String notStr = boundParam.getNotOperator() != null ? " " + boundParam.getNotOperator().getValue() : "";
 
         String bindKey = "_like_" + StringUtils.join(entry.getParamPath(), "_");
@@ -254,10 +257,52 @@ public class MgxqlWhereTemplateHandler {
     private String getColumnSql(BoundParam boundParam) {
         if (ObjectUtils.isNotEmpty(boundParam.getEntries())) {
             BoundParamEntry entry = boundParam.getEntries().get(0);
-            if (entry.getSqlExpression() != null) {
-                return entry.getSqlExpression().toSql();
-            }
+            return this.resolveColumnSql(entry.getSqlExpression());
         }
         return "";
+    }
+
+    /**
+     * 解析 SQL 表达式中的 MGXQL 别名为数据库真实表别名。
+     * <p>
+     * aliasContext 为 null 时（UPDATE/DELETE 场景）直接调用 toSql()；
+     * ConditionColumnExpression 时通过 resolveDbTableAlias 解析 tableAlias；
+     * ConditionCompositeExpression 时遍历子列逐个解析；其他类型兜底调用 toSql()。
+     */
+    private String resolveColumnSql(SqlExpression expr) {
+        if (expr == null) {
+            return "";
+        }
+        if (this.aliasContext == null) {
+            return expr.toSql();
+        }
+        if (expr instanceof ConditionColumnExpression) {
+            ConditionColumnExpression col = (ConditionColumnExpression) expr;
+            String mgxqlAlias = col.getTableAlias();
+            if (StringUtils.isNotBlank(mgxqlAlias)) {
+                String dbAlias = this.aliasContext.resolveDbTableAlias(mgxqlAlias);
+                return dbAlias + "." + col.getDbColumnName();
+            }
+            return col.getDbColumnName();
+        }
+        if (expr instanceof ConditionCompositeExpression) {
+            ConditionCompositeExpression composite = (ConditionCompositeExpression) expr;
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < composite.getColumns().size(); i++) {
+                if (i > 0) {
+                    sb.append(", ");
+                }
+                ConditionColumnExpression col = composite.getColumns().get(i);
+                String mgxqlAlias = col.getTableAlias();
+                if (StringUtils.isNotBlank(mgxqlAlias)) {
+                    String dbAlias = this.aliasContext.resolveDbTableAlias(mgxqlAlias);
+                    sb.append(dbAlias).append(".").append(col.getDbColumnName());
+                } else {
+                    sb.append(col.getDbColumnName());
+                }
+            }
+            return sb.toString();
+        }
+        return expr.toSql();
     }
 }

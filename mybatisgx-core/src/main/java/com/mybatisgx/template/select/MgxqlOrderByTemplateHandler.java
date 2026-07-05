@@ -15,7 +15,18 @@ import java.util.List;
  */
 public class MgxqlOrderByTemplateHandler {
 
+    private AliasContext aliasContext;
+
     public String execute(OrderByClause orderByClause) {
+        return this.doExecute(orderByClause);
+    }
+
+    public String execute(OrderByClause orderByClause, AliasContext aliasContext) {
+        this.aliasContext = aliasContext;
+        return this.doExecute(orderByClause);
+    }
+
+    private String doExecute(OrderByClause orderByClause) {
         List<String> orderByList = new ArrayList<>();
         for (OrderByItem item : orderByClause.getItems()) {
             String columnName;
@@ -25,7 +36,11 @@ public class MgxqlOrderByTemplateHandler {
                 columnName = item.getField().getFieldName();
             }
             if (item.getField().getEntityAlias() != null && !item.getField().getEntityAlias().isEmpty()) {
-                columnName = item.getField().getEntityAlias() + "." + columnName;
+                String tableAlias = item.getField().getEntityAlias();
+                if (this.aliasContext != null) {
+                    tableAlias = this.aliasContext.resolveDbTableAlias(tableAlias);
+                }
+                columnName = tableAlias + "." + columnName;
             }
             orderByList.add(String.format("%s %s", columnName, item.getDirection()));
         }

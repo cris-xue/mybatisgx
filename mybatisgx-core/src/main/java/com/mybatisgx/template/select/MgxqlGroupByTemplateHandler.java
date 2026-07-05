@@ -15,7 +15,18 @@ import java.util.List;
  */
 public class MgxqlGroupByTemplateHandler {
 
+    private AliasContext aliasContext;
+
     public String execute(GroupByClause groupByClause) {
+        return this.doExecute(groupByClause);
+    }
+
+    public String execute(GroupByClause groupByClause, AliasContext aliasContext) {
+        this.aliasContext = aliasContext;
+        return this.doExecute(groupByClause);
+    }
+
+    private String doExecute(GroupByClause groupByClause) {
         List<String> groupByList = new ArrayList<>();
         for (FieldReference fieldRef : groupByClause.getFields()) {
             String columnName;
@@ -25,7 +36,11 @@ public class MgxqlGroupByTemplateHandler {
                 columnName = fieldRef.getFieldName();
             }
             if (fieldRef.getEntityAlias() != null && !fieldRef.getEntityAlias().isEmpty()) {
-                columnName = fieldRef.getEntityAlias() + "." + columnName;
+                String tableAlias = fieldRef.getEntityAlias();
+                if (this.aliasContext != null) {
+                    tableAlias = this.aliasContext.resolveDbTableAlias(tableAlias);
+                }
+                columnName = tableAlias + "." + columnName;
             }
             groupByList.add(columnName);
         }

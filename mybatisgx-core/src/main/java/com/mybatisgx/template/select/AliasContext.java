@@ -79,6 +79,22 @@ public class AliasContext {
     }
 
     /**
+     * 将 MGXQL FROM 实体解析为 SQL 表别名。
+     * <p>
+     * 从 FromEntity 提取 MGXQL 别名（alias 非空用 alias，否则用 entityName），
+     * 再委托 {@link #resolveTableAlias(String)} 完成解析。
+     *
+     * @param fromEntity FROM 实体（主实体或 JOIN 实体）
+     * @return SQL 表别名（如 "user_1_1"），查不到时回退返回原始别名；fromEntity 为 null 时返回 null
+     */
+    public String resolveTableAlias(FromEntity fromEntity) {
+        if (fromEntity == null) {
+            return null;
+        }
+        return resolveTableAlias(resolveKey(fromEntity));
+    }
+
+    /**
      * 根据纯别名获取关系树节点。
      *
      * @param alias MGXQL 用户声明的纯别名（如 "u"、"r"）

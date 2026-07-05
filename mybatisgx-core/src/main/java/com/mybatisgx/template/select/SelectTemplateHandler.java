@@ -28,9 +28,9 @@ public class SelectTemplateHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(SelectTemplateHandler.class);
 
-    private SelectColumnSqlTemplateHandler selectColumnSqlTemplateHandler = new SelectColumnSqlTemplateHandler();
+    // private SelectColumnSqlTemplateHandler selectColumnSqlTemplateHandler = new SelectColumnSqlTemplateHandler();
     private MgxqlSelectColumnTemplateHandler mgxqlSelectColumnTemplateHandler = new MgxqlSelectColumnTemplateHandler();
-    private SelectCountSqlTemplateHandler selectCountSqlTemplateHandler = new SelectCountSqlTemplateHandler();
+    // private SelectCountSqlTemplateHandler selectCountSqlTemplateHandler = new SelectCountSqlTemplateHandler();
     private MgxqlWhereTemplateHandler mgxqlWhereTemplateHandler = new MgxqlWhereTemplateHandler();
     private HavingTemplateHandler havingTemplateHandler = new HavingTemplateHandler();
     private MgxqlOrderByTemplateHandler mgxqlOrderByTemplateHandler = new MgxqlOrderByTemplateHandler();
@@ -52,21 +52,39 @@ public class SelectTemplateHandler {
         List<Object> selectXmlItemList = new ArrayList();
         MapperInfo mapperInfo = methodInfo.getMapperInfo();
 
-        this.selectItem(methodInfo, selectElement, selectXmlItemList);
+        SelectStatement selectStatement = (SelectStatement) methodInfo.getMgxqlStatement();
 
-        MgxqlStatement mgxqlStatement = methodInfo.getMgxqlStatement();
+        // 构建上下文参数
+        ColumnEntityRelation fullTree = selectStatement.getMgxqlEntityRelationTree();
+        AliasContext aliasContext = AliasContext.build(selectStatement, fullTree);
+        FromAliasContext fromAliasContext = FromAliasContext.build(selectStatement.getFromClause());
+
+        // 构建 from join
+        FromClause fromClause = selectStatement.getFromClause();
+        if (fromClause != null) {
+            // MGXQL 路径：按 FromClause 渲染 FROM/JOIN/ON，按 SelectItem 投影渲染列
+            PlainSelect plainSelect = mgxqlSelectColumnTemplateHandler.buildSelectSql(selectStatement, fromAliasContext, aliasContext);
+            selectXmlItemList.add(plainSelect.toString());
+            if (mgxqlSelectColumnTemplateHandler.hasAggregate(selectStatement)) {
+                selectElement.addAttribute("resultType", methodInfo.getMethodReturnInfo().getTypeName());
+            } else {
+                selectElement.addAttribute("resultMap", methodInfo.getResultMapId());
+            }
+        }
+
+        // 构建查询条件
         Element whereElement = null;
-        if (mgxqlStatement != null) {
-            WhereClause whereClause = mgxqlStatement.getWhereClause();
+        if (selectStatement != null) {
+            WhereClause whereClause = selectStatement.getWhereClause();
             if (whereClause != null) {
-                whereElement = mgxqlWhereTemplateHandler.execute(mapperInfo.getEntityInfo(), methodInfo, whereClause.getRootExpression());
+                whereElement = mgxqlWhereTemplateHandler.execute(mapperInfo.getEntityInfo(), methodInfo, whereClause.getRootExpression(), fromAliasContext, aliasContext);
                 selectXmlItemList.add(whereElement);
             }
         }
 
         // GROUP BY 子句渲染
-        if (mgxqlStatement instanceof SelectStatement) {
-            GroupByClause groupByClause = ((SelectStatement) mgxqlStatement).getGroupByClause();
+        if (selectStatement instanceof SelectStatement) {
+            GroupByClause groupByClause = selectStatement.getGroupByClause();
             if (groupByClause != null) {
                 String groupBySql = mgxqlGroupByTemplateHandler.execute(groupByClause);
                 selectXmlItemList.add(groupBySql);
@@ -74,8 +92,8 @@ public class SelectTemplateHandler {
         }
 
         // HAVING 子句渲染
-        if (mgxqlStatement instanceof SelectStatement) {
-            HavingExpression havingExpression = ((SelectStatement) mgxqlStatement).getHavingExpression();
+        if (selectStatement instanceof SelectStatement) {
+            HavingExpression havingExpression = selectStatement.getHavingExpression();
             if (havingExpression != null) {
                 String havingSql = havingTemplateHandler.execute(havingExpression);
                 if (!havingSql.isEmpty()) {
@@ -85,8 +103,8 @@ public class SelectTemplateHandler {
         }
 
         // ORDER BY 子句渲染（MGXQL）
-        if (mgxqlStatement instanceof SelectStatement) {
-            OrderByClause orderByClause = ((SelectStatement) mgxqlStatement).getOrderByClause();
+        if (selectStatement instanceof SelectStatement) {
+            OrderByClause orderByClause = selectStatement.getOrderByClause();
             if (orderByClause != null) {
                 String orderBySql = mgxqlOrderByTemplateHandler.execute(orderByClause);
                 selectXmlItemList.add(orderBySql);
@@ -94,8 +112,8 @@ public class SelectTemplateHandler {
         }
 
         // LIMIT 子句渲染（MGXQL）
-        if (mgxqlStatement instanceof SelectStatement) {
-            LimitClause limitClause = ((SelectStatement) mgxqlStatement).getLimitClause();
+        if (selectStatement instanceof SelectStatement) {
+            LimitClause limitClause = selectStatement.getLimitClause();
             if (limitClause != null) {
                 LimitTemplateHandler limitTemplateHandler = MybatisgxObjectFactory.get(LimitTemplateHandler.class);
                 limitTemplateHandler.execute(selectXmlItemList, limitClause);
@@ -120,22 +138,20 @@ public class SelectTemplateHandler {
     }
 
     private void selectItem(MethodInfo methodInfo, Element selectElement, List<Object> selectXmlItemList) {
-        MapperInfo mapperInfo = methodInfo.getMapperInfo();
         SelectStatement selectStatement = (SelectStatement) methodInfo.getMgxqlStatement();
         FromClause fromClause = selectStatement.getFromClause();
         if (fromClause != null) {
             // MGXQL 路径：按 FromClause 渲染 FROM/JOIN/ON，按 SelectItem 投影渲染列
-            PlainSelect plainSelect = mgxqlSelectColumnTemplateHandler.buildSelectSql(selectStatement);
+            PlainSelect plainSelect = null; // mgxqlSelectColumnTemplateHandler.buildSelectSql(selectStatement);
             selectXmlItemList.add(plainSelect.toString());
             if (mgxqlSelectColumnTemplateHandler.hasAggregate(selectStatement)) {
                 selectElement.addAttribute("resultType", methodInfo.getMethodReturnInfo().getTypeName());
             } else {
                 selectElement.addAttribute("resultMap", methodInfo.getResultMapId());
             }
-            return;
         }
         // 回退：无 FromClause 时按注解 EntityRelationTree 全展开
-        for (SelectItem selectItem : selectStatement.getSelectItems()) {
+        /*for (SelectItem selectItem : selectStatement.getSelectItems()) {
             if (selectItem.getType() == SelectItemType.COLUMN_ALL) {
                 selectElement.addAttribute("resultMap", methodInfo.getResultMapId());
                 Class<?> methodReturnType = methodInfo.getMethodReturnInfo().getType();
@@ -155,6 +171,6 @@ public class SelectTemplateHandler {
                 PlainSelect plainSelect = selectCountSqlTemplateHandler.buildSelectSql(mapperInfo.getEntityInfo());
                 selectXmlItemList.add(plainSelect.toString());
             }
-        }
+        }*/
     }
 }

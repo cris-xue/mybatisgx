@@ -119,7 +119,7 @@ public class MgxqlSelectColumnTemplateHandler {
                 // select alias.*：基于 FROM 实体展开
                 FromEntity fromEntity = this.aliasContext.getFromEntity(entityAlias);
                 if (fromEntity != null && fromEntity.getEntityInfo() != null) {
-                    ColumnEntityRelation treeNode = this.aliasContext.getNode(entityAlias);
+                    ColumnEntityRelation treeNode = this.aliasContext.getNode(fromEntity);
 
                     ColumnEntityRelation tempRelation = new ColumnEntityRelation<>();
                     tempRelation.setEntityInfo(fromEntity.getEntityInfo());
@@ -135,7 +135,7 @@ public class MgxqlSelectColumnTemplateHandler {
             }
             FromEntity primaryEntity = fromClause.getPrimaryEntity();
             if (primaryEntity != null && primaryEntity.getEntityInfo() != null) {
-                ColumnEntityRelation primaryTreeNode = this.aliasContext.getNode(primaryEntity.getAlias());
+                ColumnEntityRelation primaryTreeNode = this.aliasContext.getNode(primaryEntity);
                 String tableNameAlias = primaryTreeNode.getTableNameAlias();
 
                 ColumnEntityRelation tempRelation = new ColumnEntityRelation<>();
@@ -147,7 +147,7 @@ public class MgxqlSelectColumnTemplateHandler {
             if (fromClause.getJoinEntities() != null) {
                 for (JoinEntity joinEntity : fromClause.getJoinEntities()) {
                     if (joinEntity.getEntityInfo() != null) {
-                        ColumnEntityRelation joinTreeNode = this.aliasContext.getNode(joinEntity.getAlias());
+                        ColumnEntityRelation joinTreeNode = this.aliasContext.getNode(joinEntity);
                         String tableNameAlias = joinTreeNode.getTableNameAlias();
 
                         ColumnEntityRelation tempRelation = new ColumnEntityRelation<>();
@@ -190,7 +190,7 @@ public class MgxqlSelectColumnTemplateHandler {
             }
             String entityAlias = selectItem.getEntityAlias();
             FromEntity fromEntity = this.aliasContext.getFromEntity(entityAlias);
-            String tableNameAlias = this.aliasContext.getNode(entityAlias).getTableNameAlias();
+            String tableNameAlias = this.aliasContext.getNode(fromEntity).getTableNameAlias();
             String columnAlias;
             if (fromEntity != null && fromEntity.getEntityInfo() != null) {
                 // 用 FROM 实体的 EntityInfo 构造临时节点生成列别名
@@ -243,7 +243,7 @@ public class MgxqlSelectColumnTemplateHandler {
 
         void render(PlainSelect plainSelect) {
             FromEntity fromEntity = this.aliasContext.getFromClause().getPrimaryEntity();
-            ColumnEntityRelation columnEntityRelation = this.aliasContext.getNode(fromEntity.getAlias());
+            ColumnEntityRelation columnEntityRelation = this.aliasContext.getNode(fromEntity);
 
             Table mainTable = new Table(this.aliasContext.getMainTableName());
             mainTable.setAlias(new Alias(columnEntityRelation.getTableNameAlias()));
@@ -268,11 +268,11 @@ public class MgxqlSelectColumnTemplateHandler {
             }
             for (JoinEntity joinEntity : fromClause.getJoinEntities()) {
                 RelationColumnInfo relationColumnInfo = joinEntity.getRelationColumnInfo();
-                ColumnEntityRelation rightColumnEntityRelation = this.aliasContext.getNode(joinEntity.getAlias());
+                ColumnEntityRelation rightColumnEntityRelation = this.aliasContext.getNode(joinEntity);
                 String rightTableAlias = rightColumnEntityRelation.getTableNameAlias();
 
                 FromEntity leftEntity = this.aliasContext.getFromEntity(joinEntity.getOnLeftAlias());
-                ColumnEntityRelation leftColumnEntityRelation = this.aliasContext.getNode(leftEntity.getAlias());
+                ColumnEntityRelation leftColumnEntityRelation = this.aliasContext.getNode(leftEntity);
                 String leftTableAlias = leftColumnEntityRelation.getTableNameAlias();
 
                 if (relationColumnInfo != null && relationColumnInfo.getRelationType() == RelationType.MANY_TO_MANY) {

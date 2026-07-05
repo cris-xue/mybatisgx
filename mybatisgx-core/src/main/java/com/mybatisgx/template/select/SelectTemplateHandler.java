@@ -28,9 +28,7 @@ public class SelectTemplateHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(SelectTemplateHandler.class);
 
-    // private SelectColumnSqlTemplateHandler selectColumnSqlTemplateHandler = new SelectColumnSqlTemplateHandler();
     private MgxqlSelectColumnTemplateHandler mgxqlSelectColumnTemplateHandler = new MgxqlSelectColumnTemplateHandler();
-    // private SelectCountSqlTemplateHandler selectCountSqlTemplateHandler = new SelectCountSqlTemplateHandler();
     private MgxqlWhereTemplateHandler mgxqlWhereTemplateHandler = new MgxqlWhereTemplateHandler();
     private HavingTemplateHandler havingTemplateHandler = new HavingTemplateHandler();
     private MgxqlOrderByTemplateHandler mgxqlOrderByTemplateHandler = new MgxqlOrderByTemplateHandler();
@@ -135,42 +133,5 @@ public class SelectTemplateHandler {
         }
 
         return document.asXML();
-    }
-
-    private void selectItem(MethodInfo methodInfo, Element selectElement, List<Object> selectXmlItemList) {
-        SelectStatement selectStatement = (SelectStatement) methodInfo.getMgxqlStatement();
-        FromClause fromClause = selectStatement.getFromClause();
-        if (fromClause != null) {
-            // MGXQL 路径：按 FromClause 渲染 FROM/JOIN/ON，按 SelectItem 投影渲染列
-            PlainSelect plainSelect = null; // mgxqlSelectColumnTemplateHandler.buildSelectSql(selectStatement);
-            selectXmlItemList.add(plainSelect.toString());
-            if (mgxqlSelectColumnTemplateHandler.hasAggregate(selectStatement)) {
-                selectElement.addAttribute("resultType", methodInfo.getMethodReturnInfo().getTypeName());
-            } else {
-                selectElement.addAttribute("resultMap", methodInfo.getResultMapId());
-            }
-        }
-        // 回退：无 FromClause 时按注解 EntityRelationTree 全展开
-        /*for (SelectItem selectItem : selectStatement.getSelectItems()) {
-            if (selectItem.getType() == SelectItemType.COLUMN_ALL) {
-                selectElement.addAttribute("resultMap", methodInfo.getResultMapId());
-                Class<?> methodReturnType = methodInfo.getMethodReturnInfo().getType();
-                ColumnEntityRelation columnEntityRelation = mapperInfo.getEntityRelationTree(methodReturnType);
-                PlainSelect plainSelect = selectColumnSqlTemplateHandler.buildSimpleSelectSql(columnEntityRelation);
-                selectXmlItemList.add(plainSelect.toString());
-            }
-            if (selectItem.getType() == SelectItemType.COLUMN) {
-                selectElement.addAttribute("resultMap", methodInfo.getResultMapId());
-                Class<?> methodReturnType = methodInfo.getMethodReturnInfo().getType();
-                ColumnEntityRelation columnEntityRelation = mapperInfo.getEntityRelationTree(methodReturnType);
-                PlainSelect plainSelect = selectColumnSqlTemplateHandler.buildSimpleSelectSql(columnEntityRelation);
-                selectXmlItemList.add(plainSelect.toString());
-            }
-            if (selectItem.getType() == SelectItemType.COUNT) {
-                selectElement.addAttribute("resultType", methodInfo.getMethodReturnInfo().getTypeName());
-                PlainSelect plainSelect = selectCountSqlTemplateHandler.buildSelectSql(mapperInfo.getEntityInfo());
-                selectXmlItemList.add(plainSelect.toString());
-            }
-        }*/
     }
 }

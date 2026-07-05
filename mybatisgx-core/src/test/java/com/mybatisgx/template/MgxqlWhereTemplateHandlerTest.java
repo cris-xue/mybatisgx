@@ -10,7 +10,6 @@ import com.mybatisgx.model.EntityInfo;
 import com.mybatisgx.model.MethodInfo;
 import com.mybatisgx.model.MethodParamInfo;
 import com.mybatisgx.template.select.AliasContext;
-import com.mybatisgx.template.select.FromAliasContext;
 import org.dom4j.Element;
 import org.junit.Assert;
 import org.junit.Before;
@@ -373,8 +372,7 @@ public class MgxqlWhereTemplateHandlerTest {
         expression.addNode(node);
 
         AliasContext aliasContext = buildTestAliasContext();
-        FromAliasContext fromAliasContext = buildTestFromAliasContext();
-        Element result = handler.execute(null, methodInfo, expression, fromAliasContext, aliasContext);
+        Element result = handler.execute(null, methodInfo, expression, aliasContext);
         Assert.assertNotNull(result);
         String xml = result.asXML();
         Assert.assertTrue("WHERE condition should use resolved db alias user_1_1", xml.contains("user_1_1.user_name"));
@@ -417,8 +415,7 @@ public class MgxqlWhereTemplateHandlerTest {
         expression.addNode(node);
 
         AliasContext aliasContext = buildTestAliasContext();
-        FromAliasContext fromAliasContext = buildTestFromAliasContext();
-        Element result = handler.execute(null, methodInfo, expression, fromAliasContext, aliasContext);
+        Element result = handler.execute(null, methodInfo, expression, aliasContext);
         Assert.assertNotNull(result);
         String xml = result.asXML();
         Assert.assertTrue("No tableAlias condition should use dbColumnName only", xml.contains("name ="));
@@ -447,8 +444,7 @@ public class MgxqlWhereTemplateHandlerTest {
         expression.addNode(node);
 
         AliasContext aliasContext = buildTestAliasContext();
-        FromAliasContext fromAliasContext = buildTestFromAliasContext();
-        Element result = handler.execute(null, methodInfo, expression, fromAliasContext, aliasContext);
+        Element result = handler.execute(null, methodInfo, expression, aliasContext);
         Assert.assertNotNull(result);
         String xml = result.asXML();
         Assert.assertTrue("Composite columns should use resolved db alias user_1_1.id", xml.contains("user_1_1.id"));
@@ -471,14 +467,5 @@ public class MgxqlWhereTemplateHandlerTest {
         rootRelation.setTableNameAlias("user_1_1");
 
         return AliasContext.build(selectStatement, rootRelation);
-    }
-
-    private FromAliasContext buildTestFromAliasContext() {
-        FromClause fromClause = new FromClause();
-        FromEntity primaryEntity = new FromEntity();
-        primaryEntity.setEntityName("User");
-        primaryEntity.setAlias("u");
-        fromClause.setPrimaryEntity(primaryEntity);
-        return FromAliasContext.build(fromClause);
     }
 }

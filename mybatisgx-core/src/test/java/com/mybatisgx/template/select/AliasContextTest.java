@@ -13,7 +13,7 @@ import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
 /**
- * AliasContext 单元测试，重点验证 resolveDbTableAlias 方法
+ * AliasContext 单元测试，重点验证 resolveTableAlias、getNode、getFromEntity 方法
  *
  * @author 薛承城
  * @date 2026/7/5
@@ -56,29 +56,71 @@ public class AliasContextTest {
     }
 
     @Test
-    public void test01_resolveDbTableAlias_withTreeNode() {
+    public void test01_resolveTableAlias_withTreeNode() {
         AliasContext aliasContext = AliasContext.build(selectStatement, rootRelation);
-        Assert.assertEquals("user_1_1", aliasContext.resolveDbTableAlias("u"));
-        Assert.assertEquals("role_2_1", aliasContext.resolveDbTableAlias("r"));
+        Assert.assertEquals("user_1_1", aliasContext.resolveTableAlias("u"));
+        Assert.assertEquals("role_2_1", aliasContext.resolveTableAlias("r"));
     }
 
     @Test
-    public void test02_resolveDbTableAlias_noTreeFallback() {
+    public void test02_resolveTableAlias_noTreeFallback() {
         AliasContext aliasContext = AliasContext.build(selectStatement, null);
-        Assert.assertEquals("u", aliasContext.resolveDbTableAlias("u"));
-        Assert.assertEquals("r", aliasContext.resolveDbTableAlias("r"));
+        Assert.assertEquals("u", aliasContext.resolveTableAlias("u"));
+        Assert.assertEquals("r", aliasContext.resolveTableAlias("r"));
     }
 
     @Test
-    public void test03_resolveDbTableAlias_unknownAliasFallback() {
+    public void test03_resolveTableAlias_unknownAliasFallback() {
         AliasContext aliasContext = AliasContext.build(selectStatement, rootRelation);
-        Assert.assertEquals("unknown", aliasContext.resolveDbTableAlias("unknown"));
+        Assert.assertEquals("unknown", aliasContext.resolveTableAlias("unknown"));
     }
 
     @Test
-    public void test04_resolveDbTableAlias_nullParam() {
+    public void test04_resolveTableAlias_nullParam() {
         AliasContext aliasContext = AliasContext.build(selectStatement, rootRelation);
-        Assert.assertNull(aliasContext.resolveDbTableAlias(null));
+        Assert.assertNull(aliasContext.resolveTableAlias(null));
+    }
+
+    @Test
+    public void test05_getNode_withTreeNode() {
+        AliasContext aliasContext = AliasContext.build(selectStatement, rootRelation);
+        ColumnEntityRelation userNode = aliasContext.getNode("u");
+        Assert.assertNotNull(userNode);
+        Assert.assertEquals("user_1_1", userNode.getTableNameAlias());
+        ColumnEntityRelation roleNode = aliasContext.getNode("r");
+        Assert.assertNotNull(roleNode);
+        Assert.assertEquals("role_2_1", roleNode.getTableNameAlias());
+    }
+
+    @Test
+    public void test06_getNode_noTreeReturnsNull() {
+        AliasContext aliasContext = AliasContext.build(selectStatement, null);
+        Assert.assertNull(aliasContext.getNode("u"));
+        Assert.assertNull(aliasContext.getNode("r"));
+    }
+
+    @Test
+    public void test07_getFromEntity_primaryEntity() {
+        AliasContext aliasContext = AliasContext.build(selectStatement, rootRelation);
+        FromEntity fromEntity = aliasContext.getFromEntity("u");
+        Assert.assertNotNull(fromEntity);
+        Assert.assertEquals("User", fromEntity.getEntityName());
+        Assert.assertEquals("u", fromEntity.getAlias());
+    }
+
+    @Test
+    public void test08_getFromEntity_joinEntity() {
+        AliasContext aliasContext = AliasContext.build(selectStatement, rootRelation);
+        FromEntity fromEntity = aliasContext.getFromEntity("r");
+        Assert.assertNotNull(fromEntity);
+        Assert.assertEquals("Role", fromEntity.getEntityName());
+        Assert.assertEquals("r", fromEntity.getAlias());
+    }
+
+    @Test
+    public void test09_getFromEntity_unknownAlias() {
+        AliasContext aliasContext = AliasContext.build(selectStatement, rootRelation);
+        Assert.assertNull(aliasContext.getFromEntity("unknown"));
     }
 
     private static class User {}

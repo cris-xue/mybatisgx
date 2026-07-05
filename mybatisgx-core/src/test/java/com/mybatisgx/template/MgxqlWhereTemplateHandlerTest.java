@@ -3,10 +3,14 @@ package com.mybatisgx.template;
 import com.mybatisgx.annotation.LogicDelete;
 import com.mybatisgx.dsl.mgxql.model.*;
 import com.mybatisgx.dsl.mgxql.model.expression.ConditionColumnExpression;
+import com.mybatisgx.dsl.mgxql.model.expression.ConditionCompositeExpression;
+import com.mybatisgx.model.ColumnEntityRelation;
 import com.mybatisgx.model.ColumnInfo;
 import com.mybatisgx.model.EntityInfo;
 import com.mybatisgx.model.MethodInfo;
 import com.mybatisgx.model.MethodParamInfo;
+import com.mybatisgx.template.select.AliasContext;
+import com.mybatisgx.template.select.FromAliasContext;
 import org.dom4j.Element;
 import org.junit.Assert;
 import org.junit.Before;
@@ -345,5 +349,136 @@ public class MgxqlWhereTemplateHandlerTest {
 
         node.setBoundParam(boundParam);
         return node;
+    }
+
+    // ========== 别名解析测试 ==========
+
+    @Test
+    public void test12_aliasResolution_withAliasContext() {
+        MethodInfo methodInfo = new MethodInfo();
+        methodInfo.setDynamic(false);
+
+        WhereExpression expression = new WhereExpression(LogicOperator.NULL);
+        WhereConditionNode node = new WhereConditionNode();
+        node.setFieldRef(new FieldReference("u", "name"));
+        node.setOptional(false);
+        BoundParam boundParam = new BoundParam();
+        boundParam.setOperator(ComparisonOperator.EQ);
+        boundParam.setKind(ParamKind.SIMPLE);
+        BoundParamEntry entry = new BoundParamEntry();
+        entry.setSqlExpression(new ConditionColumnExpression("user_name", null, "u"));
+        entry.setParamPath(new ArrayList<>(Arrays.asList("name")));
+        boundParam.addEntry(entry);
+        node.setBoundParam(boundParam);
+        expression.addNode(node);
+
+        AliasContext aliasContext = buildTestAliasContext();
+        FromAliasContext fromAliasContext = buildTestFromAliasContext();
+        Element result = handler.execute(null, methodInfo, expression, fromAliasContext, aliasContext);
+        Assert.assertNotNull(result);
+        String xml = result.asXML();
+        Assert.assertTrue("WHERE condition should use resolved db alias user_1_1", xml.contains("user_1_1.user_name"));
+        Assert.assertFalse("WHERE condition should not contain MGXQL alias u.user_name", xml.contains("u.user_name"));
+    }
+
+    @Test
+    public void test13_aliasResolution_noAliasContext() {
+        MethodInfo methodInfo = new MethodInfo();
+        methodInfo.setDynamic(false);
+
+        WhereExpression expression = new WhereExpression(LogicOperator.NULL);
+        WhereConditionNode node = new WhereConditionNode();
+        node.setFieldRef(new FieldReference("u", "name"));
+        node.setOptional(false);
+        BoundParam boundParam = new BoundParam();
+        boundParam.setOperator(ComparisonOperator.EQ);
+        boundParam.setKind(ParamKind.SIMPLE);
+        BoundParamEntry entry = new BoundParamEntry();
+        entry.setSqlExpression(new ConditionColumnExpression("user_name", null, "u"));
+        entry.setParamPath(new ArrayList<>(Arrays.asList("name")));
+        boundParam.addEntry(entry);
+        node.setBoundParam(boundParam);
+        expression.addNode(node);
+
+        // 3参数调用，无aliasContext，行为不变
+        Element result = handler.execute(null, methodInfo, expression);
+        Assert.assertNotNull(result);
+        String xml = result.asXML();
+        Assert.assertTrue("Without aliasContext, should use original MGXQL alias u.user_name", xml.contains("u.user_name"));
+    }
+
+    @Test
+    public void test14_aliasResolution_noTableAlias() {
+        MethodInfo methodInfo = new MethodInfo();
+        methodInfo.setDynamic(false);
+
+        WhereExpression expression = new WhereExpression(LogicOperator.NULL);
+        WhereConditionNode node = buildSimpleCondition("name", "=", Arrays.asList("name"), false);
+        expression.addNode(node);
+
+        AliasContext aliasContext = buildTestAliasContext();
+        FromAliasContext fromAliasContext = buildTestFromAliasContext();
+        Element result = handler.execute(null, methodInfo, expression, fromAliasContext, aliasContext);
+        Assert.assertNotNull(result);
+        String xml = result.asXML();
+        Assert.assertTrue("No tableAlias condition should use dbColumnName only", xml.contains("name ="));
+    }
+
+    @Test
+    public void test15_aliasResolution_compositeExpression() {
+        MethodInfo methodInfo = new MethodInfo();
+        methodInfo.setDynamic(false);
+
+        WhereExpression expression = new WhereExpression(LogicOperator.NULL);
+        WhereConditionNode node = new WhereConditionNode();
+        node.setFieldRef(new FieldReference("u", "id"));
+        node.setOptional(false);
+        BoundParam boundParam = new BoundParam();
+        boundParam.setOperator(ComparisonOperator.EQ);
+        boundParam.setKind(ParamKind.COMPOSITE);
+        List<ConditionColumnExpression> compositeCols = new ArrayList<>();
+        compositeCols.add(new ConditionColumnExpression("id", null, "u"));
+        compositeCols.add(new ConditionColumnExpression("code", null, "u"));
+        BoundParamEntry entry1 = new BoundParamEntry();
+        entry1.setSqlExpression(new ConditionCompositeExpression(compositeCols));
+        entry1.setParamPath(new ArrayList<>(Arrays.asList("id")));
+        boundParam.addEntry(entry1);
+        node.setBoundParam(boundParam);
+        expression.addNode(node);
+
+        AliasContext aliasContext = buildTestAliasContext();
+        FromAliasContext fromAliasContext = buildTestFromAliasContext();
+        Element result = handler.execute(null, methodInfo, expression, fromAliasContext, aliasContext);
+        Assert.assertNotNull(result);
+        String xml = result.asXML();
+        Assert.assertTrue("Composite columns should use resolved db alias user_1_1.id", xml.contains("user_1_1.id"));
+        Assert.assertTrue("Composite columns should use resolved db alias user_1_1.code", xml.contains("user_1_1.code"));
+    }
+
+    private AliasContext buildTestAliasContext() {
+        SelectStatement selectStatement = new SelectStatement();
+        FromClause fromClause = new FromClause();
+        FromEntity primaryEntity = new FromEntity();
+        primaryEntity.setEntityName("User");
+        primaryEntity.setAlias("u");
+        EntityInfo userEntityInfo = new EntityInfo.Builder().setTableName("t_user").setClazz(Object.class).build();
+        primaryEntity.setEntityInfo(userEntityInfo);
+        fromClause.setPrimaryEntity(primaryEntity);
+        selectStatement.setFromClause(fromClause);
+
+        ColumnEntityRelation rootRelation = new ColumnEntityRelation();
+        rootRelation.setEntityInfo(userEntityInfo);
+        rootRelation.setTableNameAlias("user_1_1");
+
+        return AliasContext.build(selectStatement, rootRelation);
+    }
+
+    private FromAliasContext buildTestFromAliasContext() {
+        FromClause fromClause = new FromClause();
+        FromEntity primaryEntity = new FromEntity();
+        primaryEntity.setEntityName("User");
+        primaryEntity.setAlias("u");
+        fromClause.setPrimaryEntity(primaryEntity);
+        return FromAliasContext.build(fromClause);
     }
 }

@@ -4,7 +4,6 @@ import com.mybatisgx.dsl.mgxql.model.*;
 import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.model.*;
 import com.mybatisgx.template.MybatisgxSqlBuilder;
-import com.mybatisgx.utils.TypeUtils;
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
@@ -19,7 +18,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * MGXQL 专用查询列渲染处理器。
@@ -50,15 +51,12 @@ public class MgxqlSelectColumnTemplateHandler {
      * @param selectStatement MGXQL SELECT 语句（fromClause 必须存在）
      * @return 渲染完成的 PlainSelect
      */
-    public PlainSelect buildSelectSql(SelectStatement selectStatement) {
+    public PlainSelect buildSelectSql(SelectStatement selectStatement, FromAliasContext fromAliasContext, AliasContext aliasContext) {
         // AliasContext 使用完整实体关系树构建别名映射，确保所有 JOIN 实体都能找到对应节点
-        ColumnEntityRelation fullTree = selectStatement.getMgxqlEntityRelationTree();
-        AliasContext aliasContext = AliasContext.build(selectStatement, fullTree);
-        FromAliasContext fromAliasCtx = FromAliasContext.build(selectStatement.getFromClause());
         PlainSelect plainSelect = new PlainSelect();
-        new SelectItemsRenderer(aliasContext, fromAliasCtx, this.selectColumnSqlTemplateHandler).render(plainSelect, selectStatement);
+        new SelectItemsRenderer(aliasContext, fromAliasContext, this.selectColumnSqlTemplateHandler).render(plainSelect, selectStatement);
         new FromRenderer(aliasContext).render(plainSelect);
-        new JoinRenderer(aliasContext, fromAliasCtx).render(plainSelect, selectStatement.getFromClause());
+        new JoinRenderer(aliasContext, fromAliasContext).render(plainSelect, selectStatement.getFromClause());
         return plainSelect;
     }
 
@@ -129,7 +127,7 @@ public class MgxqlSelectColumnTemplateHandler {
                     ColumnEntityRelation tempRelation = new ColumnEntityRelation<>();
                     tempRelation.setEntityInfo(fromEntity.getEntityInfo());
                     tempRelation.setTableNameAlias(treeNode.getTableNameAlias());
-                    this.expandEntityColumns(plainSelect, tempRelation, entityAlias);
+                    this.expandEntityColumns(plainSelect, tempRelation, treeNode.getTableNameAlias());
                 }
                 return;
             }
@@ -423,7 +421,7 @@ public class MgxqlSelectColumnTemplateHandler {
      * <p>
      * 与 {@link AliasContext}（服务于 JOIN/ON 渲染）职责分离：SELECT 列展开不依赖投影树节点匹配。
      */
-    private static class FromAliasContext {
+    /*private static class FromAliasContext {
 
         private final Map<String, FromEntity> fromEntityMap;
         private final FromClause fromClause;
@@ -459,14 +457,14 @@ public class MgxqlSelectColumnTemplateHandler {
         FromClause getFromClause() {
             return this.fromClause;
         }
-    }
+    }*/
 
     /**
      * 别名上下文：构建并查询 MGXQL 用户别名 → 注解树节点 映射，封装无树时回退用户别名的约定。
      * <p>
      * 主表名/别名与树根关系也在准备阶段一并收敛，渲染器不再直接访问 aliasMap 或 rootRelation。
      */
-    private static class AliasContext {
+    /*private static class AliasContext {
 
         private final Map<String, ColumnEntityRelation> aliasMap;
         private final String mainTableName;
@@ -496,9 +494,9 @@ public class MgxqlSelectColumnTemplateHandler {
             return new AliasContext(aliasMap, mainTableName, mainTableAlias, rootRelation, fromClause);
         }
 
-        /**
-         * 返回 MGXQL 用户声明的表别名。树节点的 tableNameAlias 仅用于 result map 列别名，不出现在 SQL 表引用中。
-         */
+        *//**
+     * 返回 MGXQL 用户声明的表别名。树节点的 tableNameAlias 仅用于 result map 列别名，不出现在 SQL 表引用中。
+     *//*
         String resolveTableAlias(String alias) {
             return alias;
         }
@@ -523,14 +521,14 @@ public class MgxqlSelectColumnTemplateHandler {
             return this.fromClause;
         }
 
-        /**
-         * 建立 MGXQL 用户别名 → 注解树节点 映射。
-         * <p>
-         * 主实体按 entityInfo.clazz 在关系树中查找匹配节点；各 JOIN 实体沿 onLeftAlias
-         * 找到左实体树节点，在其 composites 中按 relationColumnInfo 身份（优先）或
-         * entityInfo.clazz 匹配对应子节点。匹配不到时保留 null（渲染回退到用户别名，
-         * 该实体不在 result map 中）。
-         */
+        *//**
+     * 建立 MGXQL 用户别名 → 注解树节点 映射。
+     * <p>
+     * 主实体按 entityInfo.clazz 在关系树中查找匹配节点；各 JOIN 实体沿 onLeftAlias
+     * 找到左实体树节点，在其 composites 中按 relationColumnInfo 身份（优先）或
+     * entityInfo.clazz 匹配对应子节点。匹配不到时保留 null（渲染回退到用户别名，
+     * 该实体不在 result map 中）。
+     *//*
         private static Map<String, ColumnEntityRelation> buildAliasTreeNodeMap(FromClause fromClause, ColumnEntityRelation rootRelation) {
             Map<String, ColumnEntityRelation> aliasMap = new LinkedHashMap<>();
             if (fromClause == null) {
@@ -567,10 +565,10 @@ public class MgxqlSelectColumnTemplateHandler {
             return aliasMap;
         }
 
-        /**
-         * 无注解树场景（聚合等）的别名映射：所有别名映射到 null，
-         * {@link #resolveTableAlias} 回退到 MGXQL 用户别名。
-         */
+        *//**
+     * 无注解树场景（聚合等）的别名映射：所有别名映射到 null，
+     * {@link #resolveTableAlias} 回退到 MGXQL 用户别名。
+     *//*
         private static Map<String, ColumnEntityRelation> buildAliasMapNoTree(FromClause fromClause) {
             Map<String, ColumnEntityRelation> aliasMap = new LinkedHashMap<>();
             if (fromClause == null) {
@@ -648,5 +646,5 @@ public class MgxqlSelectColumnTemplateHandler {
             }
             return null;
         }
-    }
+    }*/
 }

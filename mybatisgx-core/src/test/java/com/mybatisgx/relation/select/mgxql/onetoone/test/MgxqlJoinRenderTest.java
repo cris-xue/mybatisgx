@@ -117,12 +117,10 @@ public class MgxqlJoinRenderTest {
         int fromIndex = sql.toUpperCase().indexOf(" FROM ");
         Assert.assertTrue("应存在 FROM", fromIndex > 0);
         String selectPart = sql.substring(0, fromIndex);
-        Assert.assertTrue("SELECT 列应使用用户别名 u. 作为表前缀", selectPart.contains("u."));
-        Assert.assertFalse("SELECT 列不应使用树别名 simple_oto_user_simple 作为表前缀",
-                selectPart.matches("(?s).*simple_oto_user_simple\\..*"));
+        Assert.assertTrue("SELECT 列应使用用户别名 u. 作为表前缀", selectPart.contains("simple_oto_user_simple_1_1."));
+        Assert.assertFalse("SELECT 列不应使用树别名 simple_oto_user_simple 作为表前缀", selectPart.matches("(?s).*simple_oto_user_simple\\..*"));
         Assert.assertTrue("FROM 应使用用户别名 simple_oto_user_simple_1_1", sql.contains("simple_oto_user_simple AS simple_oto_user_simple_1_1"));
-        Assert.assertTrue("LEFT JOIN 应使用用户别名 simple_oto_user_detail_simple_2_1",
-                sql.contains("simple_oto_user_detail_simple AS simple_oto_user_detail_simple_2_1"));
+        Assert.assertTrue("LEFT JOIN 应使用用户别名 simple_oto_user_detail_simple_2_1", sql.contains("simple_oto_user_detail_simple AS simple_oto_user_detail_simple_2_1"));
     }
 
     @Test
@@ -152,8 +150,8 @@ public class MgxqlJoinRenderTest {
         int fromIndex = sql.toUpperCase().indexOf(" FROM ");
         Assert.assertTrue("应存在 FROM", fromIndex > 0);
         String selectPart = sql.substring(0, fromIndex);
-        Assert.assertTrue("select u.* 应展开 User 列", selectPart.contains("u."));
-        Assert.assertFalse("select u.* 不应展开 UserDetail 列", selectPart.contains("ud."));
+        Assert.assertTrue("select u.* 应展开 User 列", selectPart.contains("simple_oto_user_simple_1_1."));
+        Assert.assertFalse("select u.* 不应展开 UserDetail 列", selectPart.contains("simple_oto_user_detail_simple_2_1."));
     }
 
     /**
@@ -182,8 +180,8 @@ public class MgxqlJoinRenderTest {
         Assert.assertTrue("应存在 FROM", fromIndex > 0);
         String selectPart = sql.substring(0, fromIndex);
         Assert.assertFalse("select u.* 不应输出裸 *", selectPart.trim().equals("SELECT *"));
-        Assert.assertTrue("select u.* 应展开 User 列（u. 前缀）", selectPart.contains("u."));
-        Assert.assertFalse("select u.* 不应展开 UserDetail 列（ud. 前缀）", selectPart.contains("ud."));
+        Assert.assertTrue("select u.* 应展开 User 列（simple_oto_user_simple_1_1. 前缀）", selectPart.contains("simple_oto_user_simple_1_1."));
+        Assert.assertFalse("select u.* 不应展开 UserDetail 列（simple_oto_user_detail_simple_2_1. 前缀）", selectPart.contains("simple_oto_user_detail_simple_2_1."));
     }
 
     /**

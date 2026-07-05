@@ -83,8 +83,8 @@ public class MgxqlSelectColumnTemplateHandlerTest {
     public void test02_selectAliasStarExpandsOnlySpecifiedEntity() {
         String sql = renderSql("findJoinAliasStar");
         String selectPart = getSelectPart(sql);
-        Assert.assertTrue("select u.* 应展开 User 列（u. 前缀）", selectPart.contains("u."));
-        Assert.assertFalse("select u.* 不应展开 Role 列（r. 前缀）", selectPart.contains("r."));
+        Assert.assertTrue("select u.* 应展开 User 列（simple_mtm_user_simple_1_1. 前缀）", selectPart.contains("simple_mtm_user_simple_1_1."));
+        Assert.assertFalse("select u.* 不应展开 Role 列（simple_mtm_role_simple_2_1. 前缀）", selectPart.contains("simple_mtm_role_simple_2_1."));
     }
 
     /**

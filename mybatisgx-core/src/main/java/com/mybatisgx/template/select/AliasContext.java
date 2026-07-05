@@ -54,8 +54,8 @@ public class AliasContext {
     /**
      * 返回 MGXQL 用户声明的表别名。树节点的 tableNameAlias 仅用于 result map 列别名，不出现在 SQL 表引用中。
      */
-    public String resolveTableAlias(String alias) {
-        return alias;
+    public String resolveTableAlias(String mgxqlAlias) {
+        return this.resolveDbTableAlias(mgxqlAlias);
     }
 
     /**

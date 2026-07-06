@@ -22,6 +22,7 @@ import java.util.List;
  * @author ccxuef
  * @date 2025/9/6 14:05
  */
+@Deprecated
 public class SelectColumnSqlTemplateHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(SelectColumnSqlTemplateHandler.class);

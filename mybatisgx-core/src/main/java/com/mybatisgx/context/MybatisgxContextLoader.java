@@ -8,16 +8,13 @@ import com.mybatisgx.ext.builder.xml.MybatisgxXMLMapperBuilder;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.model.EntityInfo;
 import com.mybatisgx.model.MapperInfo;
-import com.mybatisgx.template.MapperTemplateInfo;
 import com.mybatisgx.model.handler.EntityInfoHandler;
 import com.mybatisgx.model.handler.MapperInfoHandler;
 import com.mybatisgx.model.handler.MgxqlHandler;
+import com.mybatisgx.template.MapperTemplateInfo;
 import com.mybatisgx.template.StatementTemplateHandler;
-import com.mybatisgx.template.select.RelationSelectTemplateHandler;
-import com.mybatisgx.template.select.ResultMapTemplateHandler;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.session.Configuration;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
@@ -38,7 +35,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * mybatisx上下文加载器
@@ -56,6 +52,7 @@ public class MybatisgxContextLoader {
     private final EntityInfoHandler entityInfoHandler = new EntityInfoHandler();
     private final MapperInfoHandler mapperInfoHandler = new MapperInfoHandler();
     private final MgxqlHandler mgxqlHandler = new MgxqlHandler();
+    private final StatementTemplateHandler statementTemplateHandler = new StatementTemplateHandler();
     private String[] entityBasePackages;
     private String[] daoBasePackages;
     private List<Resource> repositoryResourceList;
@@ -181,7 +178,7 @@ public class MybatisgxContextLoader {
     }
 
     public void processTemplate() {
-        StatementTemplateHandler statementTemplateHandler = MybatisgxObjectFactory.get(StatementTemplateHandler.class);
+        // StatementTemplateHandler statementTemplateHandler = MybatisgxObjectFactory.get(StatementTemplateHandler.class);
         /*ResultMapTemplateHandler resultMapTemplateHandler = new ResultMapTemplateHandler();
         RelationSelectTemplateHandler relationSelectTemplateHandler = new RelationSelectTemplateHandler();*/
         List<MapperInfo> mapperInfoList = MapperInfoContextHolder.getMapperInfoList();

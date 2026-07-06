@@ -43,9 +43,6 @@ public class MgxqlSelectColumnTemplateHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(MgxqlSelectColumnTemplateHandler.class);
 
-    private SelectColumnSqlTemplateHandler selectColumnSqlTemplateHandler = new SelectColumnSqlTemplateHandler();
-    private SelectItemClauseBuilder selectItemClauseBuilder = new SelectItemClauseBuilder();
-
     /**
      * 构建 MGXQL 查询 SQL。
      *
@@ -55,7 +52,7 @@ public class MgxqlSelectColumnTemplateHandler {
      */
     public PlainSelect buildSelectSql(SelectStatement selectStatement, AliasContext aliasContext) {
         PlainSelect plainSelect = new PlainSelect();
-        new SelectItemsRenderer(aliasContext, this.selectColumnSqlTemplateHandler, this.selectItemClauseBuilder).render(plainSelect, selectStatement);
+        new SelectItemsRenderer(aliasContext).render(plainSelect, selectStatement);
         FromJoinRenderer fromJoinRenderer = new FromJoinRenderer(aliasContext);
         fromJoinRenderer.renderFrom(plainSelect);
         fromJoinRenderer.renderJoin(plainSelect, selectStatement.getFromClause());
@@ -83,13 +80,10 @@ public class MgxqlSelectColumnTemplateHandler {
     private static class SelectItemsRenderer {
 
         private final AliasContext aliasContext;
-        private final SelectColumnSqlTemplateHandler selectColumnSqlTemplateHandler;
-        private final SelectItemClauseBuilder selectItemClauseBuilder;
+        private SelectItemClauseBuilder selectItemClauseBuilder = new SelectItemClauseBuilder();
 
-        SelectItemsRenderer(AliasContext aliasContext, SelectColumnSqlTemplateHandler selectColumnSqlTemplateHandler, SelectItemClauseBuilder selectItemClauseBuilder) {
+        SelectItemsRenderer(AliasContext aliasContext) {
             this.aliasContext = aliasContext;
-            this.selectColumnSqlTemplateHandler = selectColumnSqlTemplateHandler;
-            this.selectItemClauseBuilder = selectItemClauseBuilder;
         }
 
         void render(PlainSelect plainSelect, SelectStatement selectStatement) {
@@ -232,27 +226,6 @@ public class MgxqlSelectColumnTemplateHandler {
 
     /**
      * FROM 渲染器：渲染主表 FROM 及其别名。
-     */
-    @Deprecated
-    private static class FromRenderer {
-
-        private final AliasContext aliasContext;
-
-        FromRenderer(AliasContext aliasContext) {
-            this.aliasContext = aliasContext;
-        }
-
-        void render(PlainSelect plainSelect) {
-            FromEntity fromEntity = this.aliasContext.getFromClause().getPrimaryEntity();
-
-            Table mainTable = new Table(this.aliasContext.getMainTableName());
-            mainTable.setAlias(new Alias(this.aliasContext.resolveTableAlias(fromEntity)));
-            plainSelect.setFromItem(mainTable);
-        }
-    }
-
-    /**
-     * FROM 渲染器：渲染主表 FROM 及其别名。
      * JOIN 渲染器：渲染 LEFT JOIN 及 ON 条件（含多对多中间表补 join）。
      */
     private static class FromJoinRenderer {
@@ -321,18 +294,6 @@ public class MgxqlSelectColumnTemplateHandler {
             List<ForeignKeyInfo> entityFkList = rightTreeNode.isMappedBy() ? rightTreeNode.getForeignKeyColumnInfoList() : rightTreeNode.getInverseForeignKeyColumnInfoList();
             this.buildMiddleTableOnEntityTable(middleTableName, rightTableAlias, entityFkList, entityJoin);
             plainSelect.addJoins(entityJoin);
-        }
-
-        @Deprecated
-        private Join buildLeftJoin(String rightTableName, String rightTableNameAlias) {
-            Table table = new Table(rightTableName);
-            if (StringUtils.isNotBlank(rightTableNameAlias)) {
-                table.setAlias(new Alias(rightTableNameAlias));
-            }
-            Join join = new Join();
-            join.setLeft(true);
-            join.setRightItem(table);
-            return join;
         }
 
         /**

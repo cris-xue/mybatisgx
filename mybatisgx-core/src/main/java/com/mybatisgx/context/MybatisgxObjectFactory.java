@@ -3,12 +3,12 @@ package com.mybatisgx.context;
 import com.mybatisgx.executor.keygen.KeyGenerator;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.model.handler.MethodInfoHandler;
+import com.mybatisgx.template.StatementTemplateHandler;
 import com.mybatisgx.template.delete.DeleteTemplateHandler;
 import com.mybatisgx.template.insert.InsertTemplateHandler;
-import com.mybatisgx.template.StatementTemplateHandler;
-import com.mybatisgx.template.update.UpdateTemplateHandler;
 import com.mybatisgx.template.select.LimitTemplateHandler;
 import com.mybatisgx.template.select.SelectTemplateHandler;
+import com.mybatisgx.template.update.UpdateTemplateHandler;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,13 +30,14 @@ public class MybatisgxObjectFactory {
 
         OBJECTO_MAP.put(MethodInfoHandler.class, new MethodInfoHandler(configuration));
 
-        OBJECTO_MAP.put(StatementTemplateHandler.class, new StatementTemplateHandler());
         OBJECTO_MAP.put(SelectTemplateHandler.class, new SelectTemplateHandler(configuration));
         OBJECTO_MAP.put(LimitTemplateHandler.class, new LimitTemplateHandler(configuration));
 
         OBJECTO_MAP.put(InsertTemplateHandler.class, new InsertTemplateHandler());
         OBJECTO_MAP.put(DeleteTemplateHandler.class, new DeleteTemplateHandler());
         OBJECTO_MAP.put(UpdateTemplateHandler.class, new UpdateTemplateHandler());
+
+        OBJECTO_MAP.put(StatementTemplateHandler.class, new StatementTemplateHandler());
 
         if (keyGenerator != null) {
             OBJECTO_MAP.put(KeyGenerator.class, keyGenerator);

@@ -22,6 +22,15 @@ public class StatementTemplateHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(StatementTemplateHandler.class);
 
+    private static final Map<SqlCommandType, TemplateHandler> TEMPLATE_HANDLER_MAP = new HashMap();
+
+    public StatementTemplateHandler() {
+        TEMPLATE_HANDLER_MAP.put(SqlCommandType.INSERT, MybatisgxObjectFactory.get(InsertTemplateHandler.class));
+        TEMPLATE_HANDLER_MAP.put(SqlCommandType.DELETE, MybatisgxObjectFactory.get(DeleteTemplateHandler.class));
+        TEMPLATE_HANDLER_MAP.put(SqlCommandType.UPDATE, MybatisgxObjectFactory.get(UpdateTemplateHandler.class));
+        TEMPLATE_HANDLER_MAP.put(SqlCommandType.SELECT, MybatisgxObjectFactory.get(SelectTemplateHandler.class));
+    }
+
     public Map<String, XNode> execute(MapperInfo mapperInfo) {
         Map<String, XNode> xNodeMap = new HashMap(15);
         for (MethodInfo methodInfo : mapperInfo.getMethodInfoList()) {
@@ -34,8 +43,12 @@ public class StatementTemplateHandler {
     }
 
     private XNode complexTemplateHandle(MethodInfo methodInfo) {
-        String xmlString;
-        if (methodInfo.getSqlCommandType() == SqlCommandType.SELECT) {
+        TemplateHandler templateHandler = TEMPLATE_HANDLER_MAP.get(methodInfo.getSqlCommandType());
+        if (templateHandler == null) {
+            throw new MybatisgxException("不存在的操作方式");
+        }
+        String xmlString = templateHandler.execute(methodInfo);
+        /*if (methodInfo.getSqlCommandType() == SqlCommandType.SELECT) {
             SelectTemplateHandler selectTemplateHandler = MybatisgxObjectFactory.get(SelectTemplateHandler.class);
             xmlString = selectTemplateHandler.execute(methodInfo);
         } else if (methodInfo.getSqlCommandType() == SqlCommandType.INSERT) {
@@ -49,7 +62,7 @@ public class StatementTemplateHandler {
             xmlString = updateTemplateHandler.execute(methodInfo);
         } else {
             throw new MybatisgxException("不存在的操作方式");
-        }
+        }*/
         logger.debug("{}:\n{}", methodInfo.getMethodName(), xmlString);
         XPathParser xPathParser = XmlUtils.processXml(xmlString);
         return xPathParser.evalNode("/mapper/select|/mapper/insert|/mapper/delete|/mapper/update");

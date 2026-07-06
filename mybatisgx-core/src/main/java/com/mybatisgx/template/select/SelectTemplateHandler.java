@@ -7,6 +7,7 @@ import com.mybatisgx.model.ColumnEntityRelation;
 import com.mybatisgx.model.MapperInfo;
 import com.mybatisgx.model.MethodInfo;
 import com.mybatisgx.template.MgxqlWhereTemplateHandler;
+import com.mybatisgx.template.TemplateHandler;
 import com.mybatisgx.template.XmlCompiler;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import org.dom4j.Document;
@@ -24,7 +25,7 @@ import java.util.List;
  * @author ccxuef
  * @date 2025/9/6 14:05
  */
-public class SelectTemplateHandler {
+public class SelectTemplateHandler implements TemplateHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(SelectTemplateHandler.class);
 
@@ -37,6 +38,7 @@ public class SelectTemplateHandler {
     public SelectTemplateHandler(MybatisgxConfiguration configuration) {
     }
 
+    @Override
     public String execute(MethodInfo methodInfo) {
         return buildSelectXNode(methodInfo);
     }

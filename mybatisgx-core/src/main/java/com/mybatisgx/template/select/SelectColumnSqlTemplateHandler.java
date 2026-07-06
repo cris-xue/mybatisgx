@@ -30,6 +30,7 @@ public class SelectColumnSqlTemplateHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(SelectColumnSqlTemplateHandler.class);
     private SelectItemClauseBuilder selectItemClauseBuilder = new SelectItemClauseBuilder();
+    private SelectFromJoinClauseBuilder selectFromJoinClauseBuilder = new SelectFromJoinClauseBuilder();
 
     /**
      * 构建单表查询，如：select * from user
@@ -57,7 +58,7 @@ public class SelectColumnSqlTemplateHandler {
         List<EntityContext> entityContextList = this.getEntityInfoList(entityRelationSelectInfo);
         PlainSelect plainSelect = this.buildMainSelect(entityContextList);
         if (TypeUtils.typeEquals(entityRelationSelectInfo, ResultMapInfo.class)) {
-            this.buildFromItem(plainSelect, entityRelationSelectInfo.getTableName(), entityRelationSelectInfo.getTableNameAlias());
+            selectFromJoinClauseBuilder.buildFromItem(plainSelect, entityRelationSelectInfo.getTableName(), entityRelationSelectInfo.getTableNameAlias());
             this.buildLeftJoinOn(plainSelect, entityRelationSelectInfo, entityRelationSelectInfo.getComposites());
         }
         if (TypeUtils.typeEquals(entityRelationSelectInfo, SimpleNestedResultMapInfo.class)) {
@@ -71,11 +72,11 @@ public class SelectColumnSqlTemplateHandler {
                 mainTableName = entityRelationSelectInfo.getTableName();
                 mainTableNameAlias = entityRelationSelectInfo.getTableNameAlias();
             }
-            this.buildFromItem(plainSelect, mainTableName, mainTableNameAlias);
+            selectFromJoinClauseBuilder.buildFromItem(plainSelect, mainTableName, mainTableNameAlias);
             this.buildLeftJoinOn(plainSelect, entityRelationSelectInfo, entityRelationSelectInfo.getComposites());
         }
         if (TypeUtils.typeEquals(entityRelationSelectInfo, BatchNestedResultMapInfo.class)) {
-            this.buildFromItem(plainSelect, entityRelationSelectInfo.getTableName(), entityRelationSelectInfo.getTableNameAlias());
+            selectFromJoinClauseBuilder.buildFromItem(plainSelect, entityRelationSelectInfo.getTableName(), entityRelationSelectInfo.getTableNameAlias());
             this.buildLeftJoinOn(plainSelect, entityRelationSelectInfo, entityRelationSelectInfo.getComposites());
         }
         return plainSelect.toString();
@@ -108,6 +109,7 @@ public class SelectColumnSqlTemplateHandler {
         return plainSelect;
     }*/
 
+    @Deprecated
     private Table buildFromItem(PlainSelect plainSelect, String mainTableName, String mainTableNameAlias) {
         Table mainTable = new Table(mainTableName);
         if (StringUtils.isNotBlank(mainTableNameAlias)) {
@@ -212,6 +214,7 @@ public class SelectColumnSqlTemplateHandler {
      * @param entityContext
      * @return
      */
+    @Deprecated
     private List<SelectItem<?>> buildSelectItemList(EntityContext entityContext) {
         ColumnEntityRelation columnEntityRelation = entityContext.getColumnEntityRelation();
         EntityInfo entityInfo = entityContext.getEntityInfo();

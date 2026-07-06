@@ -7,20 +7,11 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class SelectItemClauseBuilder {
-
-    private Table buildFromItem(String mainTableName, String mainTableNameAlias) {
-        Table mainTable = new Table(mainTableName);
-        if (StringUtils.isNotBlank(mainTableNameAlias)) {
-            mainTable.setAlias(new Alias(mainTableNameAlias));
-        }
-        return mainTable;
-    }
 
     /**
      * 构建查询字段列

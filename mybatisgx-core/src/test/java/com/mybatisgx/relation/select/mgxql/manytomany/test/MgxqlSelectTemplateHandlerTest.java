@@ -4,7 +4,7 @@ import com.mybatisgx.dsl.mgxql.model.*;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.model.*;
 import com.mybatisgx.template.select.AliasContext;
-import com.mybatisgx.template.select.MgxqlSelectColumnTemplateHandler;
+import com.mybatisgx.template.select.MgxqlSelectTemplateHandler;
 import com.mybatisgx.util.DaoTestUtils;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import org.apache.ibatis.mapping.SqlCommandType;
@@ -22,7 +22,7 @@ import org.junit.runners.MethodSorters;
  * @date 2026/6/30
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class MgxqlSelectColumnTemplateHandlerTest {
+public class MgxqlSelectTemplateHandlerTest {
 
     private static final String DAO_NS = "com.mybatisgx.relation.select.mgxql.manytomany.dao.MgxqlManyToManyJoinDao";
 
@@ -52,7 +52,7 @@ public class MgxqlSelectColumnTemplateHandlerTest {
         Class<?> returnType = methodInfo.getMethodReturnInfo().getType();
         ColumnEntityRelation rootRelation = mapperInfo.getEntityRelationTree(returnType);
         AliasContext aliasContext = AliasContext.build(selectStatement, rootRelation);
-        MgxqlSelectColumnTemplateHandler handler = new MgxqlSelectColumnTemplateHandler();
+        MgxqlSelectTemplateHandler handler = new MgxqlSelectTemplateHandler();
         PlainSelect plainSelect = handler.buildSelectSql(selectStatement, aliasContext);
         return plainSelect.toString();
     }
@@ -121,7 +121,7 @@ public class MgxqlSelectColumnTemplateHandlerTest {
 
         AliasContext aliasContext = AliasContext.build(selectStatement, fullTree);
 
-        MgxqlSelectColumnTemplateHandler handler = new MgxqlSelectColumnTemplateHandler();
+        MgxqlSelectTemplateHandler handler = new MgxqlSelectTemplateHandler();
         PlainSelect plainSelect = handler.buildSelectSql(selectStatement, aliasContext);
         String sql = plainSelect.toString();
         String selectPart = getSelectPart(sql);
@@ -153,7 +153,7 @@ public class MgxqlSelectColumnTemplateHandlerTest {
 
         AliasContext aliasContext = AliasContext.build(selectStatement, rootRelation);
 
-        MgxqlSelectColumnTemplateHandler handler = new MgxqlSelectColumnTemplateHandler();
+        MgxqlSelectTemplateHandler handler = new MgxqlSelectTemplateHandler();
         PlainSelect plainSelect = handler.buildSelectSql(selectStatement, aliasContext);
         String sql = plainSelect.toString();
         Assert.assertTrue("应包含主表 FROM", sql.contains("simple_mtm_user_simple"));

@@ -39,9 +39,9 @@ import java.util.List;
  * @author 薛承城
  * @date 2026/6/27
  */
-public class MgxqlSelectColumnTemplateHandler {
+public class MgxqlSelectTemplateHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(MgxqlSelectColumnTemplateHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(MgxqlSelectTemplateHandler.class);
 
     /**
      * 构建 MGXQL 查询 SQL。

@@ -29,7 +29,7 @@ public class SelectTemplateHandler implements TemplateHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(SelectTemplateHandler.class);
 
-    private MgxqlSelectColumnTemplateHandler mgxqlSelectColumnTemplateHandler = new MgxqlSelectColumnTemplateHandler();
+    private MgxqlSelectTemplateHandler mgxqlSelectTemplateHandler = new MgxqlSelectTemplateHandler();
     private MgxqlWhereTemplateHandler mgxqlWhereTemplateHandler = new MgxqlWhereTemplateHandler();
     private HavingTemplateHandler havingTemplateHandler = new HavingTemplateHandler();
     private MgxqlOrderByTemplateHandler mgxqlOrderByTemplateHandler = new MgxqlOrderByTemplateHandler();
@@ -55,7 +55,7 @@ public class SelectTemplateHandler implements TemplateHandler {
         SelectStatement selectStatement = (SelectStatement) methodInfo.getMgxqlStatement();
 
         // 设置返回结果集或者返回类型
-        if (mgxqlSelectColumnTemplateHandler.hasAggregate(selectStatement)) {
+        if (mgxqlSelectTemplateHandler.hasAggregate(selectStatement)) {
             selectElement.addAttribute("resultType", methodInfo.getMethodReturnInfo().getTypeName());
         } else {
             selectElement.addAttribute("resultMap", methodInfo.getResultMapId());
@@ -69,7 +69,7 @@ public class SelectTemplateHandler implements TemplateHandler {
         FromClause fromClause = selectStatement.getFromClause();
         if (fromClause != null) {
             // MGXQL 路径：按 FromClause 渲染 FROM/JOIN/ON，按 SelectItem 投影渲染列
-            PlainSelect plainSelect = mgxqlSelectColumnTemplateHandler.buildSelectSql(selectStatement, aliasContext);
+            PlainSelect plainSelect = mgxqlSelectTemplateHandler.buildSelectSql(selectStatement, aliasContext);
             selectXmlItemList.add(plainSelect.toString());
         }
 

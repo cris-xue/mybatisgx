@@ -4,7 +4,7 @@ import com.mybatisgx.dsl.mgxql.model.SelectStatement;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.model.*;
 import com.mybatisgx.template.select.AliasContext;
-import com.mybatisgx.template.select.MgxqlSelectColumnTemplateHandler;
+import com.mybatisgx.template.select.MgxqlSelectTemplateHandler;
 import com.mybatisgx.util.DaoTestUtils;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import org.junit.Assert;
@@ -42,7 +42,7 @@ public class MgxqlJoinRenderTest {
 
         AliasContext aliasContext = AliasContext.build(selectStatement, selectStatement.getMgxqlEntityRelationTree());
 
-        MgxqlSelectColumnTemplateHandler handler = new MgxqlSelectColumnTemplateHandler();
+        MgxqlSelectTemplateHandler handler = new MgxqlSelectTemplateHandler();
         PlainSelect plainSelect = handler.buildSelectSql(selectStatement, aliasContext);
         return plainSelect.toString();
     }
@@ -195,7 +195,7 @@ public class MgxqlJoinRenderTest {
 
         AliasContext aliasContext = AliasContext.build(selectStatement, selectStatement.getMgxqlEntityRelationTree());
 
-        MgxqlSelectColumnTemplateHandler handler = new MgxqlSelectColumnTemplateHandler();
+        MgxqlSelectTemplateHandler handler = new MgxqlSelectTemplateHandler();
         PlainSelect plainSelect = handler.buildSelectSql(selectStatement, aliasContext);
         String sql = plainSelect.toString();
 

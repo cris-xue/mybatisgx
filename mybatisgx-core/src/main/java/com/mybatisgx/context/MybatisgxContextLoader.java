@@ -182,19 +182,19 @@ public class MybatisgxContextLoader {
 
     public void processTemplate() {
         StatementTemplateHandler statementTemplateHandler = MybatisgxObjectFactory.get(StatementTemplateHandler.class);
-        ResultMapTemplateHandler resultMapTemplateHandler = new ResultMapTemplateHandler();
-        RelationSelectTemplateHandler relationSelectTemplateHandler = new RelationSelectTemplateHandler();
+        /*ResultMapTemplateHandler resultMapTemplateHandler = new ResultMapTemplateHandler();
+        RelationSelectTemplateHandler relationSelectTemplateHandler = new RelationSelectTemplateHandler();*/
         List<MapperInfo> mapperInfoList = MapperInfoContextHolder.getMapperInfoList();
         for (MapperInfo mapperInfo : mapperInfoList) {
-            Map<String, XNode> curdXNodeMap = statementTemplateHandler.execute(mapperInfo);
-            Map<String, XNode> resultMapXNodeMap = resultMapTemplateHandler.execute(mapperInfo);
-            Map<String, XNode> relationSelectXNodeMap = relationSelectTemplateHandler.execute(mapperInfo);
+            MapperTemplateInfo mapperTemplateInfo = statementTemplateHandler.execute(mapperInfo);
+            /*Map<String, XNode> resultMapXNodeMap = resultMapTemplateHandler.execute(mapperInfo);
+            Map<String, XNode> relationSelectXNodeMap = relationSelectTemplateHandler.execute(mapperInfo);*/
 
-            MapperTemplateInfo mapperTemplateInfo = new MapperTemplateInfo();
+            /*MapperTemplateInfo mapperTemplateInfo = new MapperTemplateInfo();
             mapperTemplateInfo.setNamespace(mapperInfo.getNamespace());
             mapperTemplateInfo.setCurdTemplateMap(curdXNodeMap);
             mapperTemplateInfo.setResultMapTemplateMap(resultMapXNodeMap);
-            mapperTemplateInfo.setRelationSelectTemplateMap(relationSelectXNodeMap);
+            mapperTemplateInfo.setRelationSelectTemplateMap(relationSelectXNodeMap);*/
             MapperTemplateContextHolder.set(mapperTemplateInfo);
         }
     }

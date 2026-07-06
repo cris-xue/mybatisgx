@@ -6,6 +6,8 @@ import com.mybatisgx.model.MapperInfo;
 import com.mybatisgx.model.MethodInfo;
 import com.mybatisgx.template.delete.DeleteTemplateHandler;
 import com.mybatisgx.template.insert.InsertTemplateHandler;
+import com.mybatisgx.template.select.RelationSelectTemplateHandler;
+import com.mybatisgx.template.select.ResultMapTemplateHandler;
 import com.mybatisgx.template.select.SelectTemplateHandler;
 import com.mybatisgx.template.update.UpdateTemplateHandler;
 import com.mybatisgx.utils.XmlUtils;
@@ -31,15 +33,31 @@ public class StatementTemplateHandler {
         TEMPLATE_HANDLER_MAP.put(SqlCommandType.SELECT, MybatisgxObjectFactory.get(SelectTemplateHandler.class));
     }
 
-    public Map<String, XNode> execute(MapperInfo mapperInfo) {
-        Map<String, XNode> xNodeMap = new HashMap(15);
+    public MapperTemplateInfo execute(MapperInfo mapperInfo) {
+        // 构建curd xnode
+        Map<String, XNode> curdXNodeMap = new HashMap(15);
         for (MethodInfo methodInfo : mapperInfo.getMethodInfoList()) {
             if (methodInfo.getSqlCommandType() != null) {
-                XNode xNode = complexTemplateHandle(methodInfo);
-                xNodeMap.put(methodInfo.getMethodName(), xNode);
+                XNode curdXNode = complexTemplateHandle(methodInfo);
+                curdXNodeMap.put(methodInfo.getMethodName(), curdXNode);
             }
         }
-        return xNodeMap;
+
+        // 构建结果集模板xnode
+        ResultMapTemplateHandler resultMapTemplateHandler = new ResultMapTemplateHandler();
+        Map<String, XNode> resultMapXNodeMap = resultMapTemplateHandler.execute(mapperInfo);
+
+        // 构建注解式关联查询xnode
+        RelationSelectTemplateHandler relationSelectTemplateHandler = new RelationSelectTemplateHandler();
+        Map<String, XNode> relationSelectXNodeMap = relationSelectTemplateHandler.execute(mapperInfo);
+
+        MapperTemplateInfo mapperTemplateInfo = new MapperTemplateInfo();
+        mapperTemplateInfo.setNamespace(mapperInfo.getNamespace());
+        mapperTemplateInfo.setCurdTemplateMap(curdXNodeMap);
+        mapperTemplateInfo.setResultMapTemplateMap(resultMapXNodeMap);
+        mapperTemplateInfo.setRelationSelectTemplateMap(relationSelectXNodeMap);
+
+        return mapperTemplateInfo;
     }
 
     private XNode complexTemplateHandle(MethodInfo methodInfo) {

@@ -30,18 +30,18 @@ public class SelectItemClauseBuilder {
                 IdColumnInfo idColumnInfo = (IdColumnInfo) columnInfo;
                 List<ColumnInfo> compositeList = idColumnInfo.getComposites();
                 if (ObjectUtils.isEmpty(compositeList)) {
-                    SelectItem<?> selectItem = this.getSelectItem(table, idColumnInfo.getDbColumnName(), idColumnInfo.getTableColumnNameAlias(columnEntityRelation));
+                    SelectItem<?> selectItem = this.buildSelectItem(table, idColumnInfo.getDbColumnName(), idColumnInfo.getTableColumnNameAlias(columnEntityRelation));
                     selectItemList.add(selectItem);
                 } else {
                     for (ColumnInfo composite : compositeList) {
-                        SelectItem<?> selectItem = this.getSelectItem(table, composite.getDbColumnName(), composite.getTableColumnNameAlias(columnEntityRelation));
+                        SelectItem<?> selectItem = this.buildSelectItem(table, composite.getDbColumnName(), composite.getTableColumnNameAlias(columnEntityRelation));
                         selectItemList.add(selectItem);
                     }
                 }
             }
             // 批量结果集节点是不需要查询字段的，只需要查询出主键最终能够合并数据即可
             if (!isBatch && TypeUtils.typeEquals(columnInfo, ColumnInfo.class)) {
-                SelectItem<?> selectItem = this.getSelectItem(table, columnInfo.getDbColumnName(), columnInfo.getTableColumnNameAlias(columnEntityRelation));
+                SelectItem<?> selectItem = this.buildSelectItem(table, columnInfo.getDbColumnName(), columnInfo.getTableColumnNameAlias(columnEntityRelation));
                 selectItemList.add(selectItem);
             }
         }
@@ -54,7 +54,7 @@ public class SelectItemClauseBuilder {
                 List<ForeignKeyInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyInfoList();
                 for (ForeignKeyInfo inverseForeignKeyInfo : inverseForeignKeyColumnInfoList) {
                     ColumnInfo foreignKeyColumnInfo = inverseForeignKeyInfo.getColumnInfo();
-                    SelectItem<?> selectItem = this.getSelectItem(table, foreignKeyColumnInfo.getDbColumnName(), foreignKeyColumnInfo.getTableColumnNameAlias(columnEntityRelation));
+                    SelectItem<?> selectItem = this.buildSelectItem(table, foreignKeyColumnInfo.getDbColumnName(), foreignKeyColumnInfo.getTableColumnNameAlias(columnEntityRelation));
                     selectItemList.add(selectItem);
                 }
             }
@@ -62,7 +62,7 @@ public class SelectItemClauseBuilder {
         return selectItemList;
     }
 
-    private SelectItem<Column> getSelectItem(Table table, String columnName, String columnNameAlias) {
+    public SelectItem<Column> buildSelectItem(Table table, String columnName, String columnNameAlias) {
         SelectItem<Column> selectItem = new SelectItem();
         Column column = new Column(table, columnName);
         selectItem.withExpression(column);

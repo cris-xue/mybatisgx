@@ -3,10 +3,10 @@ package com.mybatisgx.context;
 import com.mybatisgx.executor.keygen.KeyGenerator;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.model.handler.MethodInfoHandler;
-import com.mybatisgx.template.DeleteTemplateHandler;
-import com.mybatisgx.template.InsertTemplateHandler;
+import com.mybatisgx.template.delete.DeleteTemplateHandler;
+import com.mybatisgx.template.insert.InsertTemplateHandler;
 import com.mybatisgx.template.StatementTemplateHandler;
-import com.mybatisgx.template.UpdateTemplateHandler;
+import com.mybatisgx.template.update.UpdateTemplateHandler;
 import com.mybatisgx.template.select.LimitTemplateHandler;
 import com.mybatisgx.template.select.SelectTemplateHandler;
 

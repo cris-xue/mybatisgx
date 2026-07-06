@@ -1,4 +1,4 @@
-package com.mybatisgx.template;
+package com.mybatisgx.template.insert;
 
 import com.google.common.collect.Lists;
 import com.mybatisgx.annotation.LogicDelete;
@@ -6,6 +6,8 @@ import com.mybatisgx.annotation.Version;
 import com.mybatisgx.context.EntityInfoContextHolder;
 import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.model.*;
+import com.mybatisgx.template.MybatisXmlHelper;
+import com.mybatisgx.template.XmlCompiler;
 import com.mybatisgx.utils.TypeUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;

@@ -4,15 +4,12 @@ import com.mybatisgx.model.*;
 import com.mybatisgx.template.MybatisgxSqlBuilder;
 import com.mybatisgx.utils.TypeUtils;
 import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
-import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -121,7 +118,7 @@ public class SelectColumnSqlTemplateHandler {
                 String middleTableName = leftEntityRelationSelectInfo.getMiddleTableName();
                 String entityTableName = leftEntityRelationSelectInfo.getTableName();
                 String entityTableNameAlias = leftEntityRelationSelectInfo.getTableNameAlias();
-                Join join = this.buildLeftJoin(entityTableName, entityTableNameAlias);
+                Join join = selectFromJoinClauseBuilder.buildLeftJoin(entityTableName, entityTableNameAlias);
 
                 List<ForeignKeyInfo> foreignKeyColumnInfoList;
                 if (leftEntityRelationSelectInfo.isMappedBy()) {
@@ -143,7 +140,7 @@ public class SelectColumnSqlTemplateHandler {
                 // 右表是多对多的处理【role left join role_menu on role.id = role_menu.role_id】
                 String entityTableNameAlias = leftEntityRelationSelectInfo.getTableNameAlias();
                 String middleTableName = rightEntityRelationSelectInfo.getMiddleTableName();
-                Join join = this.buildLeftJoin(middleTableName, null);
+                Join join = selectFromJoinClauseBuilder.buildLeftJoin(middleTableName, null);
 
                 List<ForeignKeyInfo> foreignKeyColumnInfoList;
                 if (rightEntityRelationSelectInfo.isMappedBy()) {
@@ -158,24 +155,13 @@ public class SelectColumnSqlTemplateHandler {
                 String leftEntityTableName = leftEntityRelationSelectInfo.getTableName();
                 String rightEntityTableName = rightEntityRelationSelectInfo.getTableName();
                 String rightEntityTableNameAlias = rightEntityRelationSelectInfo.getTableNameAlias();
-                Join join = this.buildLeftJoin(rightEntityTableName, rightEntityTableNameAlias);
+                Join join = selectFromJoinClauseBuilder.buildLeftJoin(rightEntityTableName, rightEntityTableNameAlias);
 
                 this.buildEntityTableOnEntityTable(leftEntityRelationSelectInfo, rightEntityRelationSelectInfo, join);
                 plainSelect.addJoins(join);
             }
             this.buildLeftJoinOn(plainSelect, rightEntityRelationSelectInfo, rightEntityRelationSelectInfo.getComposites());
         }
-    }
-
-    private Join buildLeftJoin(String rightTableName, String rightTableNameAlias) {
-        Table table = new Table(rightTableName);
-        if (StringUtils.isNotBlank(rightTableNameAlias)) {
-            table.setAlias(new Alias(rightTableNameAlias));
-        }
-        Join join = new Join();
-        join.setLeft(true);
-        join.setRightItem(table);
-        return join;
     }
 
     private void buildEntityTableOnEntityTable(ResultMapInfo leftEntityRelationSelectInfo, ResultMapInfo rightEntityRelationSelectInfo, Join join) {

@@ -1,4 +1,4 @@
-package com.mybatisgx.template.select;
+package com.mybatisgx.template;
 
 import com.mybatisgx.model.ColumnEntityRelation;
 import com.mybatisgx.model.ColumnInfo;

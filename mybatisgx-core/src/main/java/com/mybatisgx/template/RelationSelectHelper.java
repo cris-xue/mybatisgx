@@ -1,11 +1,10 @@
-package com.mybatisgx.template.select;
+package com.mybatisgx.template;
 
 import com.mybatisgx.ext.executor.loader.BatchResultLoader;
 import com.mybatisgx.model.BatchNestedResultMapInfo;
 import com.mybatisgx.model.RelationColumnInfo;
 import com.mybatisgx.model.ResultMapInfo;
 import com.mybatisgx.model.SimpleNestedResultMapInfo;
-import com.mybatisgx.template.MybatisgxSqlBuilder;
 import com.mybatisgx.utils.TypeUtils;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;

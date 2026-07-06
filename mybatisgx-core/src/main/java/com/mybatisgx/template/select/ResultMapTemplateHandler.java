@@ -2,6 +2,7 @@ package com.mybatisgx.template.select;
 
 import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.model.*;
+import com.mybatisgx.template.ResultMapHelper;
 import com.mybatisgx.utils.TypeUtils;
 import com.mybatisgx.utils.XmlUtils;
 import org.apache.commons.lang3.ObjectUtils;

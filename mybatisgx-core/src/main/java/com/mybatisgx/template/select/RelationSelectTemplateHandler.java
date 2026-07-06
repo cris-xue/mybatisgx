@@ -3,6 +3,7 @@ package com.mybatisgx.template.select;
 import com.mybatisgx.annotation.ManyToMany;
 import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.model.*;
+import com.mybatisgx.template.RelationSelectHelper;
 import com.mybatisgx.utils.TypeUtils;
 import com.mybatisgx.utils.XmlUtils;
 import net.sf.jsqlparser.JSQLParserException;

@@ -1,6 +1,6 @@
 package com.mybatisgx.context;
 
-import com.mybatisgx.model.MapperTemplateInfo;
+import com.mybatisgx.template.MapperTemplateInfo;
 import org.apache.ibatis.parsing.XNode;
 
 import java.util.ArrayList;

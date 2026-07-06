@@ -8,7 +8,7 @@ import com.mybatisgx.ext.builder.xml.MybatisgxXMLMapperBuilder;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.model.EntityInfo;
 import com.mybatisgx.model.MapperInfo;
-import com.mybatisgx.model.MapperTemplateInfo;
+import com.mybatisgx.template.MapperTemplateInfo;
 import com.mybatisgx.model.handler.EntityInfoHandler;
 import com.mybatisgx.model.handler.MapperInfoHandler;
 import com.mybatisgx.model.handler.MgxqlHandler;

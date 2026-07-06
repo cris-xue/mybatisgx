@@ -64,10 +64,8 @@ public class SelectItemClauseBuilder {
 
     public SelectItem<Column> buildSelectItem(Table table, String columnName, String columnNameAlias) {
         SelectItem<Column> selectItem = new SelectItem();
-        Column column = new Column(table, columnName);
-        selectItem.withExpression(column);
-        Alias alias = new Alias(columnNameAlias);
-        selectItem.setAlias(alias);
+        selectItem.withExpression(new Column(table, columnName));
+        selectItem.setAlias(new Alias(columnNameAlias));
         return selectItem;
     }
 }

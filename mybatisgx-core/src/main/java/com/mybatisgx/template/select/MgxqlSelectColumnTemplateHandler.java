@@ -56,8 +56,9 @@ public class MgxqlSelectColumnTemplateHandler {
     public PlainSelect buildSelectSql(SelectStatement selectStatement, AliasContext aliasContext) {
         PlainSelect plainSelect = new PlainSelect();
         new SelectItemsRenderer(aliasContext, this.selectColumnSqlTemplateHandler, this.selectItemClauseBuilder).render(plainSelect, selectStatement);
-        new FromRenderer(aliasContext).render(plainSelect);
-        new JoinRenderer(aliasContext).render(plainSelect, selectStatement.getFromClause());
+        FromJoinRenderer fromJoinRenderer = new FromJoinRenderer(aliasContext);
+        fromJoinRenderer.renderFrom(plainSelect);
+        fromJoinRenderer.renderJoin(plainSelect, selectStatement.getFromClause());
         return plainSelect;
     }
 
@@ -202,10 +203,9 @@ public class MgxqlSelectColumnTemplateHandler {
                 String dbAlias = StringUtils.isNotBlank(columnInfo.getDbColumnNameAlias()) ? columnInfo.getDbColumnNameAlias() : columnInfo.getDbColumnName();
                 columnAlias = tableNameAlias + "_" + dbAlias;
             }
+
             Table table = new Table(tableNameAlias);
-            SelectItem<Column> item = new SelectItem<>();
-            item.withExpression(new Column(table, columnInfo.getDbColumnName()));
-            item.setAlias(new Alias(columnAlias));
+            SelectItem<Column> item = selectItemClauseBuilder.buildSelectItem(table, columnInfo.getDbColumnName(), columnAlias);
             plainSelect.addSelectItems(item);
         }
 
@@ -233,6 +233,7 @@ public class MgxqlSelectColumnTemplateHandler {
     /**
      * FROM 渲染器：渲染主表 FROM 及其别名。
      */
+    @Deprecated
     private static class FromRenderer {
 
         private final AliasContext aliasContext;
@@ -251,17 +252,27 @@ public class MgxqlSelectColumnTemplateHandler {
     }
 
     /**
+     * FROM 渲染器：渲染主表 FROM 及其别名。
      * JOIN 渲染器：渲染 LEFT JOIN 及 ON 条件（含多对多中间表补 join）。
      */
-    private static class JoinRenderer {
+    private static class FromJoinRenderer {
 
+        private SelectFromJoinClauseBuilder selectFromJoinClauseBuilder = new SelectFromJoinClauseBuilder();
         private final AliasContext aliasContext;
 
-        JoinRenderer(AliasContext aliasContext) {
+        FromJoinRenderer(AliasContext aliasContext) {
             this.aliasContext = aliasContext;
         }
 
-        void render(PlainSelect plainSelect, FromClause fromClause) {
+        void renderFrom(PlainSelect plainSelect) {
+            FromEntity fromEntity = this.aliasContext.getFromClause().getPrimaryEntity();
+
+            Table mainTable = new Table(this.aliasContext.getMainTableName());
+            mainTable.setAlias(new Alias(this.aliasContext.resolveTableAlias(fromEntity)));
+            plainSelect.setFromItem(mainTable);
+        }
+
+        void renderJoin(PlainSelect plainSelect, FromClause fromClause) {
             if (fromClause == null || fromClause.getJoinEntities() == null) {
                 return;
             }
@@ -279,7 +290,7 @@ public class MgxqlSelectColumnTemplateHandler {
                 } else if (relationColumnInfo != null) {
                     // 一对一 / 一对多 / 多对一
                     String rightTableName = rightColumnEntityRelation.getTableName();
-                    Join join = this.buildLeftJoin(rightTableName, rightTableAlias);
+                    Join join = selectFromJoinClauseBuilder.buildLeftJoin(rightTableName, rightTableAlias);
                     this.buildOnExpression(join, relationColumnInfo, leftTableAlias, rightTableAlias);
                     plainSelect.addJoins(join);
                 } else {
@@ -300,18 +311,19 @@ public class MgxqlSelectColumnTemplateHandler {
             String entityTableName = rightTreeNode.getTableName();
 
             // 第一次 join：中间表
-            Join middleJoin = this.buildLeftJoin(middleTableName, null);
+            Join middleJoin = selectFromJoinClauseBuilder.buildLeftJoin(middleTableName, null);
             List<ForeignKeyInfo> middleFkList = rightTreeNode.isMappedBy() ? rightTreeNode.getInverseForeignKeyColumnInfoList() : rightTreeNode.getForeignKeyColumnInfoList();
             this.buildEntityTableOnMiddleTable(leftTableAlias, middleTableName, middleFkList, middleJoin);
             plainSelect.addJoins(middleJoin);
 
             // 第二次 join：实体表
-            Join entityJoin = this.buildLeftJoin(entityTableName, rightTableAlias);
+            Join entityJoin = selectFromJoinClauseBuilder.buildLeftJoin(entityTableName, rightTableAlias);
             List<ForeignKeyInfo> entityFkList = rightTreeNode.isMappedBy() ? rightTreeNode.getForeignKeyColumnInfoList() : rightTreeNode.getInverseForeignKeyColumnInfoList();
             this.buildMiddleTableOnEntityTable(middleTableName, rightTableAlias, entityFkList, entityJoin);
             plainSelect.addJoins(entityJoin);
         }
 
+        @Deprecated
         private Join buildLeftJoin(String rightTableName, String rightTableNameAlias) {
             Table table = new Table(rightTableName);
             if (StringUtils.isNotBlank(rightTableNameAlias)) {

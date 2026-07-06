@@ -44,6 +44,7 @@ public class MgxqlSelectColumnTemplateHandler {
     private static final Logger logger = LoggerFactory.getLogger(MgxqlSelectColumnTemplateHandler.class);
 
     private SelectColumnSqlTemplateHandler selectColumnSqlTemplateHandler = new SelectColumnSqlTemplateHandler();
+    private SelectItemClauseBuilder selectItemClauseBuilder = new SelectItemClauseBuilder();
 
     /**
      * 构建 MGXQL 查询 SQL。
@@ -54,7 +55,7 @@ public class MgxqlSelectColumnTemplateHandler {
      */
     public PlainSelect buildSelectSql(SelectStatement selectStatement, AliasContext aliasContext) {
         PlainSelect plainSelect = new PlainSelect();
-        new SelectItemsRenderer(aliasContext, this.selectColumnSqlTemplateHandler).render(plainSelect, selectStatement);
+        new SelectItemsRenderer(aliasContext, this.selectColumnSqlTemplateHandler, this.selectItemClauseBuilder).render(plainSelect, selectStatement);
         new FromRenderer(aliasContext).render(plainSelect);
         new JoinRenderer(aliasContext).render(plainSelect, selectStatement.getFromClause());
         return plainSelect;
@@ -82,10 +83,12 @@ public class MgxqlSelectColumnTemplateHandler {
 
         private final AliasContext aliasContext;
         private final SelectColumnSqlTemplateHandler selectColumnSqlTemplateHandler;
+        private final SelectItemClauseBuilder selectItemClauseBuilder;
 
-        SelectItemsRenderer(AliasContext aliasContext, SelectColumnSqlTemplateHandler selectColumnSqlTemplateHandler) {
+        SelectItemsRenderer(AliasContext aliasContext, SelectColumnSqlTemplateHandler selectColumnSqlTemplateHandler, SelectItemClauseBuilder selectItemClauseBuilder) {
             this.aliasContext = aliasContext;
             this.selectColumnSqlTemplateHandler = selectColumnSqlTemplateHandler;
+            this.selectItemClauseBuilder = selectItemClauseBuilder;
         }
 
         void render(PlainSelect plainSelect, SelectStatement selectStatement) {
@@ -162,9 +165,8 @@ public class MgxqlSelectColumnTemplateHandler {
          * 复用 SelectColumnSqlTemplateHandler.buildSimpleSelectSql 的列展开逻辑（含 id 复合列、外键列），
          * 取其 select items 并将列引用的表前缀统一覆盖为 MGXQL 用户别名。
          */
-        private void expandEntityColumns(PlainSelect plainSelect, ColumnEntityRelation node, String tablePrefix) {
-            PlainSelect temp = this.selectColumnSqlTemplateHandler.buildSimpleSelectSql(node);
-            List<SelectItem<?>> selectItemList = temp.getSelectItems();
+        private void expandEntityColumns(PlainSelect plainSelect, ColumnEntityRelation columnEntityRelation, String tablePrefix) {
+            List<SelectItem<?>> selectItemList = this.selectItemClauseBuilder.buildSelectItemList(columnEntityRelation, columnEntityRelation.getEntityInfo(), false);
             if (ObjectUtils.isNotEmpty(selectItemList)) {
                 for (SelectItem<?> item : selectItemList) {
                     Expression expr = item.getExpression();

@@ -1,4 +1,4 @@
-package com.mybatisgx.template;
+package com.mybatisgx.ext.builder.xml;
 
 import com.mybatisgx.context.MapperTemplateContextHolder;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
@@ -9,21 +9,21 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class TemplateHandler {
+public class TemplateHelper {
 
     private MapperBuilderAssistant builderAssistant;
     private List<XNode> originResultMapXNodeList = null;
     private List<XNode> originStatementXNodeList = null;
 
-    private TemplateHandler(MapperBuilderAssistant builderAssistant) {
+    private TemplateHelper(MapperBuilderAssistant builderAssistant) {
         this.builderAssistant = builderAssistant;
     }
 
-    public static TemplateHandler builder(MapperBuilderAssistant builderAssistant) {
-        return new TemplateHandler(builderAssistant);
+    public static TemplateHelper builder(MapperBuilderAssistant builderAssistant) {
+        return new TemplateHelper(builderAssistant);
     }
 
-    public TemplateHandler buildResultMap() {
+    public TemplateHelper buildResultMap() {
         List<String> resultMapIdList = mergeResultMap(builderAssistant);
         List<XNode> resultMapXNodeList = new ArrayList();
         for (String resultMapId : resultMapIdList) {
@@ -34,7 +34,7 @@ public class TemplateHandler {
         return this;
     }
 
-    public TemplateHandler buildStatement() {
+    public TemplateHelper buildStatement() {
         List<String> statementIdList = mergeStatement(builderAssistant);
         List<XNode> statementList = new ArrayList();
         for (String statementId : statementIdList) {
@@ -68,12 +68,12 @@ public class TemplateHandler {
                 .collect(Collectors.toList());
     }
 
-    public TemplateHandler resultMap(List<XNode> resultMapXNodeList) {
+    public TemplateHelper resultMap(List<XNode> resultMapXNodeList) {
         this.originResultMapXNodeList = resultMapXNodeList;
         return this;
     }
 
-    public TemplateHandler statement(List<XNode> statementXNodeList) {
+    public TemplateHelper statement(List<XNode> statementXNodeList) {
         this.originStatementXNodeList = statementXNodeList;
         return this;
     }

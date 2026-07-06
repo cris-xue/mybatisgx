@@ -194,15 +194,7 @@ public class SelectColumnSqlTemplateHandler {
                 onExpressionList.add(onCondition);
             }
         }
-        Expression expression = null;
-        for (Expression onExpression : onExpressionList) {
-            if (expression == null) {
-                expression = onExpression;
-            } else {
-                expression = MybatisgxSqlBuilder.and(expression, onExpression);
-            }
-        }
-        join.addOnExpression(expression);
+        join.addOnExpression(selectFromJoinClauseBuilder.combineAnd(onExpressionList));
     }
 
     private void buildEntityTableOnMiddleTable(String entityTableNameAlias, String middleTableName, List<ForeignKeyInfo> foreignKeyColumnInfoList, Join join) {
@@ -215,15 +207,7 @@ public class SelectColumnSqlTemplateHandler {
             EqualsTo onCondition = MybatisgxSqlBuilder.eq(leftExpression, rightExpression);
             onExpressionList.add(onCondition);
         }
-        Expression expression = null;
-        for (Expression onExpression : onExpressionList) {
-            if (expression == null) {
-                expression = onExpression;
-            } else {
-                expression = MybatisgxSqlBuilder.and(expression, onExpression);
-            }
-        }
-        join.addOnExpression(expression);
+        join.addOnExpression(selectFromJoinClauseBuilder.combineAnd(onExpressionList));
     }
 
     private void buildMiddleTableOnEntityTable(String middleTableName, String entityTableNameAlias, List<ForeignKeyInfo> foreignKeyColumnInfoList, Join join) {
@@ -236,15 +220,7 @@ public class SelectColumnSqlTemplateHandler {
             EqualsTo onCondition = MybatisgxSqlBuilder.eq(leftExpression, rightExpression);
             onExpressionList.add(onCondition);
         }
-        Expression expression = null;
-        for (Expression onExpression : onExpressionList) {
-            if (expression == null) {
-                expression = onExpression;
-            } else {
-                expression = MybatisgxSqlBuilder.and(expression, onExpression);
-            }
-        }
-        join.addOnExpression(expression);
+        join.addOnExpression(selectFromJoinClauseBuilder.combineAnd(onExpressionList));
     }
 
     private static class EntityContext {

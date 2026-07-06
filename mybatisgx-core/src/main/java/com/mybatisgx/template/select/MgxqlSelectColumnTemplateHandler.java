@@ -323,14 +323,7 @@ public class MgxqlSelectColumnTemplateHandler {
                 EqualsTo onCondition = MybatisgxSqlBuilder.eq(leftExpression, rightExpression);
                 onExpressionList.add(onCondition);
             }
-            Expression expression = null;
-            for (Expression onExpression : onExpressionList) {
-                if (expression == null) {
-                    expression = onExpression;
-                } else {
-                    expression = MybatisgxSqlBuilder.and(expression, onExpression);
-                }
-            }
+            Expression expression = selectFromJoinClauseBuilder.combineAnd(onExpressionList);
             join.addOnExpression(expression);
         }
 
@@ -343,7 +336,7 @@ public class MgxqlSelectColumnTemplateHandler {
                 String rightExpression = middleTableName + "." + foreignKeyColumnInfo.getDbColumnName();
                 onExpressionList.add(MybatisgxSqlBuilder.eq(leftExpression, rightExpression));
             }
-            join.addOnExpression(this.combineAnd(onExpressionList));
+            join.addOnExpression(selectFromJoinClauseBuilder.combineAnd(onExpressionList));
         }
 
         private void buildMiddleTableOnEntityTable(String middleTableName, String entityTableNameAlias, List<ForeignKeyInfo> foreignKeyColumnInfoList, Join join) {
@@ -355,7 +348,7 @@ public class MgxqlSelectColumnTemplateHandler {
                 String rightExpression = entityTableNameAlias + "." + referencedColumnInfo.getDbColumnName();
                 onExpressionList.add(MybatisgxSqlBuilder.eq(leftExpression, rightExpression));
             }
-            join.addOnExpression(this.combineAnd(onExpressionList));
+            join.addOnExpression(selectFromJoinClauseBuilder.combineAnd(onExpressionList));
         }
 
         private Expression combineAnd(List<Expression> onExpressionList) {

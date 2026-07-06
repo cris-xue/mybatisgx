@@ -1,10 +1,14 @@
 package com.mybatisgx.template.select;
 
+import com.mybatisgx.template.MybatisgxSqlBuilder;
 import net.sf.jsqlparser.expression.Alias;
+import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.List;
 
 public class SelectFromJoinClauseBuilder {
 
@@ -26,5 +30,17 @@ public class SelectFromJoinClauseBuilder {
         join.setLeft(true);
         join.setRightItem(table);
         return join;
+    }
+
+    public Expression combineAnd(List<Expression> onExpressionList) {
+        Expression expression = null;
+        for (Expression onExpression : onExpressionList) {
+            if (expression == null) {
+                expression = onExpression;
+            } else {
+                expression = MybatisgxSqlBuilder.and(expression, onExpression);
+            }
+        }
+        return expression;
     }
 }

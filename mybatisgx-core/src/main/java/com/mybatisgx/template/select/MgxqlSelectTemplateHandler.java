@@ -163,12 +163,6 @@ public class MgxqlSelectTemplateHandler {
         private void expandEntityColumns(PlainSelect plainSelect, ColumnEntityRelation columnEntityRelation, String tablePrefix) {
             List<SelectItem<?>> selectItemList = this.selectItemClauseBuilder.buildSelectItemList(columnEntityRelation, columnEntityRelation.getEntityInfo(), false);
             if (ObjectUtils.isNotEmpty(selectItemList)) {
-                for (SelectItem<?> item : selectItemList) {
-                    Expression expr = item.getExpression();
-                    if (expr instanceof Column) {
-                        ((Column) expr).setTable(new Table(tablePrefix));
-                    }
-                }
                 plainSelect.addSelectItems(selectItemList);
             }
         }
@@ -239,7 +233,6 @@ public class MgxqlSelectTemplateHandler {
 
         void renderFrom(PlainSelect plainSelect) {
             FromEntity fromEntity = this.aliasContext.getFromClause().getPrimaryEntity();
-
             Table mainTable = new Table(this.aliasContext.getMainTableName());
             mainTable.setAlias(new Alias(this.aliasContext.resolveTableAlias(fromEntity)));
             plainSelect.setFromItem(mainTable);

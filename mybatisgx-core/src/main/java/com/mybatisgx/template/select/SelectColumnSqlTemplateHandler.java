@@ -29,6 +29,7 @@ import java.util.List;
 public class SelectColumnSqlTemplateHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(SelectColumnSqlTemplateHandler.class);
+    private SelectItemClauseBuilder selectItemClauseBuilder = new SelectItemClauseBuilder();
 
     /**
      * 构建单表查询，如：select * from user
@@ -36,11 +37,11 @@ public class SelectColumnSqlTemplateHandler {
      * @param columnEntityRelation
      * @return
      */
-    public PlainSelect buildSimpleSelectSql(ColumnEntityRelation columnEntityRelation) {
+    /*public PlainSelect buildSimpleSelectSql(ColumnEntityRelation columnEntityRelation) {
         PlainSelect plainSelect = this.buildMainSelect(new EntityContext(columnEntityRelation, columnEntityRelation.getEntityInfo(), false));
         this.buildFromItem(plainSelect, columnEntityRelation.getTableName(), columnEntityRelation.getTableNameAlias());
         return plainSelect;
-    }
+    }*/
 
     /**
      * 构建关联查询
@@ -90,18 +91,22 @@ public class SelectColumnSqlTemplateHandler {
     private PlainSelect buildMainSelect(List<EntityContext> entityContextList) {
         PlainSelect plainSelect = new PlainSelect();
         for (EntityContext entityContext : entityContextList) {
-            List<SelectItem<?>> selectItemList = this.buildSelectItemList(entityContext);
+            List<SelectItem<?>> selectItemList = selectItemClauseBuilder.buildSelectItemList(
+                    entityContext.getColumnEntityRelation(),
+                    entityContext.getEntityInfo(),
+                    entityContext.getBatch()
+            );
             plainSelect.addSelectItems(selectItemList);
         }
         return plainSelect;
     }
 
-    private PlainSelect buildMainSelect(EntityContext entityContext) {
+    /*private PlainSelect buildMainSelect(EntityContext entityContext) {
         List<SelectItem<?>> mainSelectItemList = this.buildSelectItemList(entityContext);
         PlainSelect plainSelect = new PlainSelect();
         plainSelect.addSelectItems(mainSelectItemList);
         return plainSelect;
-    }
+    }*/
 
     private Table buildFromItem(PlainSelect plainSelect, String mainTableName, String mainTableNameAlias) {
         Table mainTable = new Table(mainTableName);

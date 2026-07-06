@@ -1,4 +1,4 @@
-package com.mybatisgx.model;
+package com.mybatisgx.template;
 
 import org.apache.ibatis.parsing.XNode;
 

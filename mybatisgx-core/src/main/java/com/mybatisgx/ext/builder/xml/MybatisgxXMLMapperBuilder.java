@@ -2,7 +2,6 @@ package com.mybatisgx.ext.builder.xml;
 
 import com.mybatisgx.annotation.FetchMode;
 import com.mybatisgx.ext.mapping.BatchSelectResultMapping;
-import com.mybatisgx.template.TemplateHandler;
 import org.apache.ibatis.builder.xml.PatchXMLMapperBuilder;
 import org.apache.ibatis.mapping.ResultFlag;
 import org.apache.ibatis.mapping.ResultMapping;
@@ -26,13 +25,13 @@ public class MybatisgxXMLMapperBuilder extends PatchXMLMapperBuilder {
 
     @Override
     protected void resultMapElements(List<XNode> list) {
-        TemplateHandler.builder(builderAssistant).resultMap(list).buildResultMap();
+        TemplateHelper.builder(builderAssistant).resultMap(list).buildResultMap();
         super.resultMapElements(list);
     }
 
     @Override
     protected void buildStatementFromContext(List<XNode> list) {
-        TemplateHandler.builder(builderAssistant).statement(list).buildStatement();
+        TemplateHelper.builder(builderAssistant).statement(list).buildStatement();
         super.buildStatementFromContext(list);
     }
 

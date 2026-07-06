@@ -1,4 +1,4 @@
-package com.mybatisgx.template;
+package com.mybatisgx.template.delete;
 
 import com.mybatisgx.annotation.LogicDelete;
 import com.mybatisgx.annotation.LogicDeleteId;
@@ -7,6 +7,9 @@ import com.mybatisgx.model.ColumnInfo;
 import com.mybatisgx.model.EntityInfo;
 import com.mybatisgx.model.LogicDeleteIdColumnInfo;
 import com.mybatisgx.model.MethodInfo;
+import com.mybatisgx.template.MgxqlWhereTemplateHandler;
+import com.mybatisgx.template.TemplateHandler;
+import com.mybatisgx.template.XmlCompiler;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
@@ -23,12 +26,13 @@ import java.util.List;
  * @author 薛承城
  * @date 2025/12/13 17:25
  */
-public class DeleteTemplateHandler {
+public class DeleteTemplateHandler implements TemplateHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(DeleteTemplateHandler.class);
 
     private MgxqlWhereTemplateHandler mgxqlWhereTemplateHandler = new MgxqlWhereTemplateHandler();
 
+    @Override
     public String execute(MethodInfo methodInfo) {
         return buildDeleteXNode(methodInfo);
     }

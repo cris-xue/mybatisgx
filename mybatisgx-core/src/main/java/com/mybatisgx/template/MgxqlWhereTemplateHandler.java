@@ -2,14 +2,17 @@ package com.mybatisgx.template;
 
 import com.mybatisgx.annotation.LogicDelete;
 import com.mybatisgx.dsl.mgxql.model.*;
+import com.mybatisgx.dsl.mgxql.model.expression.ConditionColumnExpression;
+import com.mybatisgx.dsl.mgxql.model.expression.ConditionCompositeExpression;
 import com.mybatisgx.dsl.mgxql.model.expression.SqlExpression;
 import com.mybatisgx.model.ColumnInfo;
 import com.mybatisgx.model.EntityInfo;
 import com.mybatisgx.model.MethodInfo;
 import com.mybatisgx.model.MethodParamInfo;
-import org.apache.ibatis.mapping.SqlCommandType;
+import com.mybatisgx.template.select.AliasContext;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.ibatis.mapping.SqlCommandType;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 
@@ -24,7 +27,14 @@ import java.util.List;
  */
 public class MgxqlWhereTemplateHandler {
 
+    private AliasContext aliasContext;
+
     public Element execute(EntityInfo entityInfo, MethodInfo methodInfo, WhereExpression rootExpression) {
+        return this.execute(entityInfo, methodInfo, rootExpression, null);
+    }
+
+    public Element execute(EntityInfo entityInfo, MethodInfo methodInfo, WhereExpression rootExpression, AliasContext aliasContext) {
+        this.aliasContext = aliasContext;
         if (rootExpression == null || ObjectUtils.isEmpty(rootExpression.getNodes())) {
             return null;
         }
@@ -84,7 +94,7 @@ public class MgxqlWhereTemplateHandler {
 
     private void renderNestedNode(Element parentElement, WhereConditionNode node, Boolean dynamic) {
         WhereExpression subExpression = node.getSubExpression();
-        com.mybatisgx.dsl.mgxql.model.LogicOperator logicOp = node.getLogicOperator();
+        LogicOperator logicOp = node.getLogicOperator();
         String logicStr = logicOp != null ? logicOp.getValue() : "";
         parentElement.addText(String.format(" %s (", logicStr));
         this.renderExpression(parentElement, subExpression, dynamic);
@@ -110,18 +120,16 @@ public class MgxqlWhereTemplateHandler {
             return;
         }
 
-        com.mybatisgx.dsl.mgxql.model.ComparisonOperator operator = boundParam.getOperator();
-        if (operator == com.mybatisgx.dsl.mgxql.model.ComparisonOperator.IN) {
+        ComparisonOperator operator = boundParam.getOperator();
+        if (operator == ComparisonOperator.IN) {
             this.renderInCondition(targetElement, node, boundParam);
             return;
         }
-        if (operator == com.mybatisgx.dsl.mgxql.model.ComparisonOperator.BETWEEN) {
+        if (operator == ComparisonOperator.BETWEEN) {
             this.renderBetweenCondition(targetElement, node, boundParam);
             return;
         }
-        if (operator == com.mybatisgx.dsl.mgxql.model.ComparisonOperator.LIKE
-                || operator == com.mybatisgx.dsl.mgxql.model.ComparisonOperator.STARTING_WITH
-                || operator == com.mybatisgx.dsl.mgxql.model.ComparisonOperator.ENDING_WITH) {
+        if (operator == ComparisonOperator.LIKE || operator == ComparisonOperator.STARTING_WITH || operator == ComparisonOperator.ENDING_WITH) {
             this.renderLikeCondition(targetElement, node, boundParam);
             return;
         }
@@ -132,8 +140,7 @@ public class MgxqlWhereTemplateHandler {
     private Element wrapOptionalIf(Element parentElement, WhereConditionNode node, Boolean dynamic) {
         if (node.isOptional() || dynamic) {
             BoundParam boundParam = node.getBoundParam();
-            if (boundParam != null && boundParam.getOperator() != null
-                    && boundParam.getOperator().isNullComparisonOperator()) {
+            if (boundParam != null && boundParam.getOperator() != null && boundParam.getOperator().isNullComparisonOperator()) {
                 return parentElement;
             }
             if (boundParam != null && ObjectUtils.isNotEmpty(boundParam.getEntries())) {
@@ -148,9 +155,9 @@ public class MgxqlWhereTemplateHandler {
     }
 
     private void renderNullCondition(Element parentElement, WhereConditionNode node, BoundParam boundParam) {
-        com.mybatisgx.dsl.mgxql.model.LogicOperator logicOp = node.getLogicOperator();
+        LogicOperator logicOp = node.getLogicOperator();
         String logicStr = logicOp != null ? logicOp.getValue() : "";
-        com.mybatisgx.dsl.mgxql.model.ComparisonOperator operator = boundParam.getOperator();
+        ComparisonOperator operator = boundParam.getOperator();
         String columnSql = this.getColumnSql(boundParam);
         parentElement.addText(String.format(" %s %s %s", logicStr, columnSql, operator.getValue()));
     }
@@ -158,12 +165,12 @@ public class MgxqlWhereTemplateHandler {
     private void renderCommonCondition(Element parentElement, WhereConditionNode node, BoundParam boundParam) {
         List<BoundParamEntry> entries = boundParam.getEntries();
         for (BoundParamEntry entry : entries) {
-            com.mybatisgx.dsl.mgxql.model.LogicOperator logicOp = entry.getLogicOperator();
-            if (logicOp == null || logicOp == com.mybatisgx.dsl.mgxql.model.LogicOperator.NULL) {
+            LogicOperator logicOp = entry.getLogicOperator();
+            if (logicOp == null || logicOp == LogicOperator.NULL) {
                 logicOp = node.getLogicOperator();
             }
             String logicStr = logicOp != null ? logicOp.getValue() : "";
-            String columnSql = entry.getSqlExpression() != null ? entry.getSqlExpression().toSql() : "";
+            String columnSql = this.resolveColumnSql(entry.getSqlExpression());
             String operatorStr = boundParam.getOperator().getValue();
             String notStr = boundParam.getNotOperator() != null ? " " + boundParam.getNotOperator().getValue() : "";
             String paramExpr = this.buildParamExpression(entry);
@@ -179,7 +186,7 @@ public class MgxqlWhereTemplateHandler {
         BoundParamEntry entry = entries.get(0);
         com.mybatisgx.dsl.mgxql.model.LogicOperator logicOp = node.getLogicOperator();
         String logicStr = logicOp != null ? logicOp.getValue() : "";
-        String columnSql = entry.getSqlExpression() != null ? entry.getSqlExpression().toSql() : "";
+        String columnSql = this.resolveColumnSql(entry.getSqlExpression());
         String notStr = boundParam.getNotOperator() != null ? " " + boundParam.getNotOperator().getValue() : "";
         String collectionPath = StringUtils.join(entry.getParamPath(), ".");
         parentElement.addText(String.format(" %s %s%s in", logicStr, columnSql, notStr));
@@ -193,9 +200,9 @@ public class MgxqlWhereTemplateHandler {
             return;
         }
         BoundParamEntry entry = entries.get(0);
-        com.mybatisgx.dsl.mgxql.model.LogicOperator logicOp = node.getLogicOperator();
+        LogicOperator logicOp = node.getLogicOperator();
         String logicStr = logicOp != null ? logicOp.getValue() : "";
-        String columnSql = entry.getSqlExpression() != null ? entry.getSqlExpression().toSql() : "";
+        String columnSql = this.resolveColumnSql(entry.getSqlExpression());
         String path = StringUtils.join(entry.getParamPath(), ".");
         parentElement.addText(String.format(" %s %s between #{%s[0]} and #{%s[1]}", logicStr, columnSql, path, path));
     }
@@ -206,9 +213,9 @@ public class MgxqlWhereTemplateHandler {
             return;
         }
         BoundParamEntry entry = entries.get(0);
-        com.mybatisgx.dsl.mgxql.model.LogicOperator logicOp = node.getLogicOperator();
+        LogicOperator logicOp = node.getLogicOperator();
         String logicStr = logicOp != null ? logicOp.getValue() : "";
-        String columnSql = entry.getSqlExpression() != null ? entry.getSqlExpression().toSql() : "";
+        String columnSql = this.resolveColumnSql(entry.getSqlExpression());
         String notStr = boundParam.getNotOperator() != null ? " " + boundParam.getNotOperator().getValue() : "";
 
         String bindKey = "_like_" + StringUtils.join(entry.getParamPath(), "_");
@@ -219,11 +226,11 @@ public class MgxqlWhereTemplateHandler {
         parentElement.addText(String.format(" %s %s%s like #{%s}", logicStr, columnSql, notStr, bindKey));
     }
 
-    private String buildLikeExpression(com.mybatisgx.dsl.mgxql.model.ComparisonOperator operator, String bindValuePath) {
-        if (operator == com.mybatisgx.dsl.mgxql.model.ComparisonOperator.STARTING_WITH) {
+    private String buildLikeExpression(ComparisonOperator operator, String bindValuePath) {
+        if (operator == ComparisonOperator.STARTING_WITH) {
             return "'%'+" + bindValuePath;
         }
-        if (operator == com.mybatisgx.dsl.mgxql.model.ComparisonOperator.ENDING_WITH) {
+        if (operator == ComparisonOperator.ENDING_WITH) {
             return bindValuePath + "+'%'";
         }
         return "'%'+" + bindValuePath + "+'%'";
@@ -247,10 +254,52 @@ public class MgxqlWhereTemplateHandler {
     private String getColumnSql(BoundParam boundParam) {
         if (ObjectUtils.isNotEmpty(boundParam.getEntries())) {
             BoundParamEntry entry = boundParam.getEntries().get(0);
-            if (entry.getSqlExpression() != null) {
-                return entry.getSqlExpression().toSql();
-            }
+            return this.resolveColumnSql(entry.getSqlExpression());
         }
         return "";
+    }
+
+    /**
+     * 解析 SQL 表达式中的 MGXQL 别名为 SQL 表别名。
+     * <p>
+     * aliasContext 为 null 时（UPDATE/DELETE 场景）直接调用 toSql()；
+     * ConditionColumnExpression 时通过 resolveTableAlias 解析 tableAlias；
+     * ConditionCompositeExpression 时遍历子列逐个解析；其他类型兜底调用 toSql()。
+     */
+    private String resolveColumnSql(SqlExpression expr) {
+        if (expr == null) {
+            return "";
+        }
+        if (this.aliasContext == null) {
+            return expr.toSql();
+        }
+        if (expr instanceof ConditionColumnExpression) {
+            ConditionColumnExpression col = (ConditionColumnExpression) expr;
+            String mgxqlAlias = col.getTableAlias();
+            if (StringUtils.isNotBlank(mgxqlAlias)) {
+                String dbAlias = this.aliasContext.resolveTableAlias(mgxqlAlias);
+                return dbAlias + "." + col.getDbColumnName();
+            }
+            return col.getDbColumnName();
+        }
+        if (expr instanceof ConditionCompositeExpression) {
+            ConditionCompositeExpression composite = (ConditionCompositeExpression) expr;
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < composite.getColumns().size(); i++) {
+                if (i > 0) {
+                    sb.append(", ");
+                }
+                ConditionColumnExpression col = composite.getColumns().get(i);
+                String mgxqlAlias = col.getTableAlias();
+                if (StringUtils.isNotBlank(mgxqlAlias)) {
+                    String dbAlias = this.aliasContext.resolveTableAlias(mgxqlAlias);
+                    sb.append(dbAlias).append(".").append(col.getDbColumnName());
+                } else {
+                    sb.append(col.getDbColumnName());
+                }
+            }
+            return sb.toString();
+        }
+        return expr.toSql();
     }
 }

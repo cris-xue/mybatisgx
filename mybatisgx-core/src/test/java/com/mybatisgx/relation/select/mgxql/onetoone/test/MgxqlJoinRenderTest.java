@@ -3,7 +3,8 @@ package com.mybatisgx.relation.select.mgxql.onetoone.test;
 import com.mybatisgx.dsl.mgxql.model.SelectStatement;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.model.*;
-import com.mybatisgx.template.select.MgxqlSelectColumnTemplateHandler;
+import com.mybatisgx.template.select.AliasContext;
+import com.mybatisgx.template.select.MgxqlSelectTemplateHandler;
 import com.mybatisgx.util.DaoTestUtils;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import org.junit.Assert;
@@ -38,8 +39,11 @@ public class MgxqlJoinRenderTest {
     private String renderSql(String methodName) {
         MethodInfo methodInfo = configuration.getMethodInfo(DAO_NAMESPACE + "." + methodName);
         SelectStatement selectStatement = (SelectStatement) methodInfo.getMgxqlStatement();
-        MgxqlSelectColumnTemplateHandler handler = new MgxqlSelectColumnTemplateHandler();
-        PlainSelect plainSelect = handler.buildSelectSql(selectStatement);
+
+        AliasContext aliasContext = AliasContext.build(selectStatement, selectStatement.getMgxqlEntityRelationTree());
+
+        MgxqlSelectTemplateHandler handler = new MgxqlSelectTemplateHandler();
+        PlainSelect plainSelect = handler.buildSelectSql(selectStatement, aliasContext);
         return plainSelect.toString();
     }
 
@@ -111,12 +115,10 @@ public class MgxqlJoinRenderTest {
         int fromIndex = sql.toUpperCase().indexOf(" FROM ");
         Assert.assertTrue("应存在 FROM", fromIndex > 0);
         String selectPart = sql.substring(0, fromIndex);
-        Assert.assertTrue("SELECT 列应使用用户别名 u. 作为表前缀", selectPart.contains("u."));
-        Assert.assertFalse("SELECT 列不应使用树别名 simple_oto_user_simple 作为表前缀",
-                selectPart.matches("(?s).*simple_oto_user_simple\\..*"));
+        Assert.assertTrue("SELECT 列应使用用户别名 u. 作为表前缀", selectPart.contains("simple_oto_user_simple_1_1."));
+        Assert.assertFalse("SELECT 列不应使用树别名 simple_oto_user_simple 作为表前缀", selectPart.matches("(?s).*simple_oto_user_simple\\..*"));
         Assert.assertTrue("FROM 应使用用户别名 simple_oto_user_simple_1_1", sql.contains("simple_oto_user_simple AS simple_oto_user_simple_1_1"));
-        Assert.assertTrue("LEFT JOIN 应使用用户别名 simple_oto_user_detail_simple_2_1",
-                sql.contains("simple_oto_user_detail_simple AS simple_oto_user_detail_simple_2_1"));
+        Assert.assertTrue("LEFT JOIN 应使用用户别名 simple_oto_user_detail_simple_2_1", sql.contains("simple_oto_user_detail_simple AS simple_oto_user_detail_simple_2_1"));
     }
 
     @Test
@@ -146,8 +148,8 @@ public class MgxqlJoinRenderTest {
         int fromIndex = sql.toUpperCase().indexOf(" FROM ");
         Assert.assertTrue("应存在 FROM", fromIndex > 0);
         String selectPart = sql.substring(0, fromIndex);
-        Assert.assertTrue("select u.* 应展开 User 列", selectPart.contains("u."));
-        Assert.assertFalse("select u.* 不应展开 UserDetail 列", selectPart.contains("ud."));
+        Assert.assertTrue("select u.* 应展开 User 列", selectPart.contains("simple_oto_user_simple_1_1."));
+        Assert.assertFalse("select u.* 不应展开 UserDetail 列", selectPart.contains("simple_oto_user_detail_simple_2_1."));
     }
 
     /**
@@ -176,8 +178,8 @@ public class MgxqlJoinRenderTest {
         Assert.assertTrue("应存在 FROM", fromIndex > 0);
         String selectPart = sql.substring(0, fromIndex);
         Assert.assertFalse("select u.* 不应输出裸 *", selectPart.trim().equals("SELECT *"));
-        Assert.assertTrue("select u.* 应展开 User 列（u. 前缀）", selectPart.contains("u."));
-        Assert.assertFalse("select u.* 不应展开 UserDetail 列（ud. 前缀）", selectPart.contains("ud."));
+        Assert.assertTrue("select u.* 应展开 User 列（simple_oto_user_simple_1_1. 前缀）", selectPart.contains("simple_oto_user_simple_1_1."));
+        Assert.assertFalse("select u.* 不应展开 UserDetail 列（simple_oto_user_detail_simple_2_1. 前缀）", selectPart.contains("simple_oto_user_detail_simple_2_1."));
     }
 
     /**
@@ -191,8 +193,10 @@ public class MgxqlJoinRenderTest {
         Class<?> returnType = methodInfo.getMethodReturnInfo().getType();
         ColumnEntityRelation rootRelation = mapperInfo.getEntityRelationTree(returnType);
 
-        MgxqlSelectColumnTemplateHandler handler = new MgxqlSelectColumnTemplateHandler();
-        PlainSelect plainSelect = handler.buildSelectSql(selectStatement);
+        AliasContext aliasContext = AliasContext.build(selectStatement, selectStatement.getMgxqlEntityRelationTree());
+
+        MgxqlSelectTemplateHandler handler = new MgxqlSelectTemplateHandler();
+        PlainSelect plainSelect = handler.buildSelectSql(selectStatement, aliasContext);
         String sql = plainSelect.toString();
 
         // 从投影树根节点获取 EntityInfo，验证 SELECT 中包含其列的 dbColumnNameAlias

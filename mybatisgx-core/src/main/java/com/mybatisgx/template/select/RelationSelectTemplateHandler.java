@@ -113,7 +113,7 @@ public class RelationSelectTemplateHandler {
      */
     public static class RelationSelectColumn {
 
-        private static final Logger logger = LoggerFactory.getLogger(com.mybatisgx.template.select.SelectColumnSqlTemplateHandler.class);
+        private static final Logger logger = LoggerFactory.getLogger(RelationSelectColumn.class);
         private SelectItemClauseBuilder selectItemClauseBuilder = new SelectItemClauseBuilder();
         private SelectFromJoinClauseBuilder selectFromJoinClauseBuilder = new SelectFromJoinClauseBuilder();
 

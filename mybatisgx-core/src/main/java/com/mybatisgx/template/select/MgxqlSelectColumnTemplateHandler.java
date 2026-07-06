@@ -350,17 +350,5 @@ public class MgxqlSelectColumnTemplateHandler {
             }
             join.addOnExpression(selectFromJoinClauseBuilder.combineAnd(onExpressionList));
         }
-
-        private Expression combineAnd(List<Expression> onExpressionList) {
-            Expression expression = null;
-            for (Expression onExpression : onExpressionList) {
-                if (expression == null) {
-                    expression = onExpression;
-                } else {
-                    expression = MybatisgxSqlBuilder.and(expression, onExpression);
-                }
-            }
-            return expression;
-        }
     }
 }

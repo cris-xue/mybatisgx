@@ -102,7 +102,10 @@ public class RelationSelectTemplateHandler {
     }
 
     private String buildJoinSelect(ResultMapInfo resultMapInfo) {
-        return relationSelectColumn.buildComplexSelectSql(resultMapInfo);
+        PlainSelect plainSelect = new PlainSelect();
+        relationSelectColumn.buildSelectItemList(plainSelect, resultMapInfo);
+        relationSelectColumn.buildFromJoinOn(plainSelect, resultMapInfo);
+        return plainSelect.toString();
     }
 
     /**
@@ -118,6 +121,26 @@ public class RelationSelectTemplateHandler {
         private SelectFromJoinClauseBuilder selectFromJoinClauseBuilder = new SelectFromJoinClauseBuilder();
 
         /**
+         * 构建主表查询，如：select * from user_role
+         *
+         * @param entityRelationSelectInfo
+         * @return
+         */
+        private void buildSelectItemList(PlainSelect plainSelect, ResultMapInfo entityRelationSelectInfo) {
+            List<RelationSelectTemplateHandler.EntityContext> entityContextList = this.getEntityInfoList(entityRelationSelectInfo);
+            List<SelectItem<?>> allSelectItemList = new ArrayList<>();
+            for (RelationSelectTemplateHandler.EntityContext entityContext : entityContextList) {
+                List<SelectItem<?>> selectItemList = selectItemClauseBuilder.buildSelectItemList(
+                        entityContext.getColumnEntityRelation(),
+                        entityContext.getEntityInfo(),
+                        entityContext.getBatch()
+                );
+                allSelectItemList.addAll(selectItemList);
+            }
+            plainSelect.setSelectItems(allSelectItemList);
+        }
+
+        /**
          * 构建关联查询
          * <code>
          * select * from user_role left join role on user_role.user_id = role.id
@@ -127,9 +150,7 @@ public class RelationSelectTemplateHandler {
          * @return
          * @throws JSQLParserException
          */
-        public String buildComplexSelectSql(ResultMapInfo entityRelationSelectInfo) {
-            List<RelationSelectTemplateHandler.EntityContext> entityContextList = this.getEntityInfoList(entityRelationSelectInfo);
-            PlainSelect plainSelect = this.buildMainSelect(entityContextList);
+        public void buildFromJoinOn(PlainSelect plainSelect, ResultMapInfo entityRelationSelectInfo) {
             if (TypeUtils.typeEquals(entityRelationSelectInfo, ResultMapInfo.class)) {
                 selectFromJoinClauseBuilder.buildFromItem(plainSelect, entityRelationSelectInfo.getTableName(), entityRelationSelectInfo.getTableNameAlias());
                 this.buildLeftJoinOn(plainSelect, entityRelationSelectInfo, entityRelationSelectInfo.getComposites());
@@ -152,27 +173,6 @@ public class RelationSelectTemplateHandler {
                 selectFromJoinClauseBuilder.buildFromItem(plainSelect, entityRelationSelectInfo.getTableName(), entityRelationSelectInfo.getTableNameAlias());
                 this.buildLeftJoinOn(plainSelect, entityRelationSelectInfo, entityRelationSelectInfo.getComposites());
             }
-            return plainSelect.toString();
-        }
-
-
-        /**
-         * 构建主表查询，如：select * from user_role
-         *
-         * @param entityContextList
-         * @return
-         */
-        private PlainSelect buildMainSelect(List<RelationSelectTemplateHandler.EntityContext> entityContextList) {
-            PlainSelect plainSelect = new PlainSelect();
-            for (RelationSelectTemplateHandler.EntityContext entityContext : entityContextList) {
-                List<SelectItem<?>> selectItemList = selectItemClauseBuilder.buildSelectItemList(
-                        entityContext.getColumnEntityRelation(),
-                        entityContext.getEntityInfo(),
-                        entityContext.getBatch()
-                );
-                plainSelect.addSelectItems(selectItemList);
-            }
-            return plainSelect;
         }
 
         private List<RelationSelectTemplateHandler.EntityContext> getEntityInfoList(ResultMapInfo resultMapInfo) {

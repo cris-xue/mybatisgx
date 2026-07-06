@@ -111,8 +111,8 @@ public class MgxqlSelectTemplateHandler {
          * select alias.* → 查找别名为 alias 的 FROM 实体，展开其全部字段；
          * select * → 遍历 FROM/JOIN 所有实体，逐个展开全部字段。
          */
-        private void addColumnAllSelectItems(PlainSelect plainSelect, com.mybatisgx.dsl.mgxql.model.SelectItem selectItem) {
-            String entityAlias = selectItem.getEntityAlias();
+        private void addColumnAllSelectItems(PlainSelect plainSelect, com.mybatisgx.dsl.mgxql.model.SelectItem mgxqlSelectItem) {
+            String entityAlias = mgxqlSelectItem.getEntityAlias();
             if (StringUtils.isNotBlank(entityAlias)) {
                 // select alias.*：基于 FROM 实体展开
                 FromEntity fromEntity = this.aliasContext.getFromEntity(entityAlias);
@@ -178,12 +178,12 @@ public class MgxqlSelectTemplateHandler {
          * 发 {@code tableAlias.dbColumnName AS tableAlias_dbColumnNameAlias}，
          * 别名经 {@link ColumnInfo#getTableColumnNameAlias(ColumnEntityRelation)} 与 result map 对齐。
          */
-        private void addColumnSelectItem(PlainSelect plainSelect, com.mybatisgx.dsl.mgxql.model.SelectItem selectItem) {
-            ColumnInfo columnInfo = selectItem.getColumnInfo();
+        private void addColumnSelectItem(PlainSelect plainSelect, com.mybatisgx.dsl.mgxql.model.SelectItem mgxqlSelectItem) {
+            ColumnInfo columnInfo = mgxqlSelectItem.getColumnInfo();
             if (columnInfo == null) {
                 return;
             }
-            String entityAlias = selectItem.getEntityAlias();
+            String entityAlias = mgxqlSelectItem.getEntityAlias();
             FromEntity fromEntity = this.aliasContext.getFromEntity(entityAlias);
             String tableNameAlias = this.aliasContext.resolveTableAlias(fromEntity);
             String columnAlias;
@@ -199,19 +199,19 @@ public class MgxqlSelectTemplateHandler {
             }
 
             Table table = new Table(tableNameAlias);
-            SelectItem<Column> item = selectItemClauseBuilder.buildSelectItem(table, columnInfo.getDbColumnName(), columnAlias);
-            plainSelect.addSelectItems(item);
+            SelectItem<Column> selectItem = selectItemClauseBuilder.buildSelectItem(table, columnInfo.getDbColumnName(), columnAlias);
+            plainSelect.addSelectItems(selectItem);
         }
 
         /**
          * 聚合投影：COUNT/SUM/MAX/MIN/AVG，走 resultType 路径，无 result map。
          * 有字段引用时发 {@code FUNC(tableNameAlias.dbColumnName)}，无字段引用时发 {@code FUNC(*)}。
          */
-        private void addAggregateSelectItem(PlainSelect plainSelect, com.mybatisgx.dsl.mgxql.model.SelectItem selectItem) {
-            String funcName = selectItem.getType().getValue();
+        private void addAggregateSelectItem(PlainSelect plainSelect, com.mybatisgx.dsl.mgxql.model.SelectItem mgxqlSelectItem) {
+            String funcName = mgxqlSelectItem.getType().getValue();
             Function function = new Function();
             function.setName(funcName);
-            FieldReference fieldReference = selectItem.getFieldRef();
+            FieldReference fieldReference = mgxqlSelectItem.getFieldRef();
             if (fieldReference != null && fieldReference.getColumnInfo() != null) {
                 String tableAlias = this.aliasContext.resolveTableAlias(fieldReference.getEntityAlias());
                 Column column = new Column(new Table(tableAlias), fieldReference.getColumnInfo().getDbColumnName());

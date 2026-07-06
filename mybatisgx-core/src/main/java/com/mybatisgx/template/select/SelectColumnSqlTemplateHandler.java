@@ -7,7 +7,6 @@ import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
-import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.PlainSelect;
@@ -31,18 +30,6 @@ public class SelectColumnSqlTemplateHandler {
     private static final Logger logger = LoggerFactory.getLogger(SelectColumnSqlTemplateHandler.class);
     private SelectItemClauseBuilder selectItemClauseBuilder = new SelectItemClauseBuilder();
     private SelectFromJoinClauseBuilder selectFromJoinClauseBuilder = new SelectFromJoinClauseBuilder();
-
-    /**
-     * 构建单表查询，如：select * from user
-     *
-     * @param columnEntityRelation
-     * @return
-     */
-    /*public PlainSelect buildSimpleSelectSql(ColumnEntityRelation columnEntityRelation) {
-        PlainSelect plainSelect = this.buildMainSelect(new EntityContext(columnEntityRelation, columnEntityRelation.getEntityInfo(), false));
-        this.buildFromItem(plainSelect, columnEntityRelation.getTableName(), columnEntityRelation.getTableNameAlias());
-        return plainSelect;
-    }*/
 
     /**
      * 构建关联查询
@@ -100,23 +87,6 @@ public class SelectColumnSqlTemplateHandler {
             plainSelect.addSelectItems(selectItemList);
         }
         return plainSelect;
-    }
-
-    /*private PlainSelect buildMainSelect(EntityContext entityContext) {
-        List<SelectItem<?>> mainSelectItemList = this.buildSelectItemList(entityContext);
-        PlainSelect plainSelect = new PlainSelect();
-        plainSelect.addSelectItems(mainSelectItemList);
-        return plainSelect;
-    }*/
-
-    @Deprecated
-    private Table buildFromItem(PlainSelect plainSelect, String mainTableName, String mainTableNameAlias) {
-        Table mainTable = new Table(mainTableName);
-        if (StringUtils.isNotBlank(mainTableNameAlias)) {
-            mainTable.setAlias(new Alias(mainTableNameAlias));
-        }
-        plainSelect.setFromItem(mainTable);
-        return mainTable;
     }
 
     private List<EntityContext> getEntityInfoList(ResultMapInfo resultMapInfo) {
@@ -206,67 +176,6 @@ public class SelectColumnSqlTemplateHandler {
         join.setLeft(true);
         join.setRightItem(table);
         return join;
-    }
-
-    /**
-     * 构建查询字段列
-     *
-     * @param entityContext
-     * @return
-     */
-    @Deprecated
-    private List<SelectItem<?>> buildSelectItemList(EntityContext entityContext) {
-        ColumnEntityRelation columnEntityRelation = entityContext.getColumnEntityRelation();
-        EntityInfo entityInfo = entityContext.getEntityInfo();
-        Boolean isBatch = entityContext.getBatch();
-
-        List<SelectItem<?>> selectItemList = new ArrayList();
-        Table table = new Table(columnEntityRelation.getTableNameAlias());
-        // 添加非外键表字段
-        for (ColumnInfo columnInfo : entityInfo.getTableColumnInfoList()) {
-            if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class)) {
-                IdColumnInfo idColumnInfo = (IdColumnInfo) columnInfo;
-                List<ColumnInfo> compositeList = idColumnInfo.getComposites();
-                if (ObjectUtils.isEmpty(compositeList)) {
-                    SelectItem<?> selectItem = this.getSelectItem(table, idColumnInfo.getDbColumnName(), idColumnInfo.getTableColumnNameAlias(columnEntityRelation));
-                    selectItemList.add(selectItem);
-                } else {
-                    for (ColumnInfo composite : compositeList) {
-                        SelectItem<?> selectItem = this.getSelectItem(table, composite.getDbColumnName(), composite.getTableColumnNameAlias(columnEntityRelation));
-                        selectItemList.add(selectItem);
-                    }
-                }
-            }
-            // 批量结果集节点是不需要查询字段的，只需要查询出主键最终能够合并数据即可
-            if (!isBatch && TypeUtils.typeEquals(columnInfo, ColumnInfo.class)) {
-                SelectItem<?> selectItem = this.getSelectItem(table, columnInfo.getDbColumnName(), columnInfo.getTableColumnNameAlias(columnEntityRelation));
-                selectItemList.add(selectItem);
-            }
-        }
-        // 添加外键表字段
-        for (RelationColumnInfo relationColumnInfo : entityInfo.getRelationColumnInfoList()) {
-            RelationType relationType = relationColumnInfo.getRelationType();
-            RelationColumnInfo mappedByRelationColumnInfo = relationColumnInfo.getMappedByRelationColumnInfo();
-            if (relationType != RelationType.MANY_TO_MANY && mappedByRelationColumnInfo == null) {
-                // 只有一对一、一对多、多对一的时候关联字段才需要作为表字段。多对多存在中间表，关联字段在中间中表，不需要作为实体表字段
-                List<ForeignKeyInfo> inverseForeignKeyColumnInfoList = relationColumnInfo.getInverseForeignKeyInfoList();
-                for (ForeignKeyInfo inverseForeignKeyInfo : inverseForeignKeyColumnInfoList) {
-                    ColumnInfo foreignKeyColumnInfo = inverseForeignKeyInfo.getColumnInfo();
-                    SelectItem<?> selectItem = this.getSelectItem(table, foreignKeyColumnInfo.getDbColumnName(), foreignKeyColumnInfo.getTableColumnNameAlias(columnEntityRelation));
-                    selectItemList.add(selectItem);
-                }
-            }
-        }
-        return selectItemList;
-    }
-
-    private SelectItem<Column> getSelectItem(Table table, String columnName, String columnNameAlias) {
-        SelectItem<Column> selectItem = new SelectItem();
-        Column column = new Column(table, columnName);
-        selectItem.withExpression(column);
-        Alias alias = new Alias(columnNameAlias);
-        selectItem.setAlias(alias);
-        return selectItem;
     }
 
     private void buildEntityTableOnEntityTable(ResultMapInfo leftEntityRelationSelectInfo, ResultMapInfo rightEntityRelationSelectInfo, Join join) {

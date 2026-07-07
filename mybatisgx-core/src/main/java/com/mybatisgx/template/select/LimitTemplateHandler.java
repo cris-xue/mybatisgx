@@ -50,10 +50,13 @@ public class LimitTemplateHandler {
     }
 
     /**
-     * 从 MGXQL LimitClause 渲染分页 SQL，复用已有方言逻辑
+     * 从 MGXQL LimitClause 渲染分页 SQL，复用已有方言逻辑。
+     * <p>
+     * LimitClause 的 offset 是行偏移量（0-based），构造 MethodRowLimitInfo 时标记为 rowOffset=true，
+     * 使方言 Handler 直接使用行偏移而不做 offset*size 转换。
      */
     public void execute(List<Object> selectXmlItemList, LimitClause limitClause) {
-        MethodRowLimitInfo methodRowLimitInfo = new MethodRowLimitInfo(limitClause.getOffset(), limitClause.getSize());
+        MethodRowLimitInfo methodRowLimitInfo = new MethodRowLimitInfo(limitClause.getOffset(), limitClause.getSize(), true);
         this.execute(selectXmlItemList, methodRowLimitInfo);
     }
 
@@ -64,7 +67,8 @@ public class LimitTemplateHandler {
         public void apply(List<Object> selectXmlItemList, MethodRowLimitInfo methodRowLimitInfo) {
             Integer offset = methodRowLimitInfo.getOffset();
             Integer size = methodRowLimitInfo.getSize();
-            String limitSqlExpression = String.format(LIMIT_SQL_EXPRESSION, offset * size, size);
+            int skipRows = methodRowLimitInfo.isRowOffset() ? offset : offset * size;
+            String limitSqlExpression = String.format(LIMIT_SQL_EXPRESSION, skipRows, size);
             selectXmlItemList.add(limitSqlExpression);
         }
     }
@@ -78,7 +82,8 @@ public class LimitTemplateHandler {
             selectXmlItemList.add(0, LIMIT_SQL_EXPRESSION_START);
             Integer offset = methodRowLimitInfo.getOffset();
             Integer size = methodRowLimitInfo.getSize();
-            String limitSqlExpressionEnd = String.format(LIMIT_SQL_EXPRESSION_END, (offset + 1) * size, offset * size);
+            int skipRows = methodRowLimitInfo.isRowOffset() ? offset : offset * size;
+            String limitSqlExpressionEnd = String.format(LIMIT_SQL_EXPRESSION_END, skipRows + size, skipRows);
             selectXmlItemList.add(limitSqlExpressionEnd);
         }
     }
@@ -90,7 +95,8 @@ public class LimitTemplateHandler {
         public void apply(List<Object> selectXmlItemList, MethodRowLimitInfo methodRowLimitInfo) {
             Integer offset = methodRowLimitInfo.getOffset();
             Integer size = methodRowLimitInfo.getSize();
-            String limitSqlExpression = String.format(LIMIT_SQL_EXPRESSION, size, offset * size);
+            int skipRows = methodRowLimitInfo.isRowOffset() ? offset : offset * size;
+            String limitSqlExpression = String.format(LIMIT_SQL_EXPRESSION, size, skipRows);
             selectXmlItemList.add(limitSqlExpression);
         }
     }

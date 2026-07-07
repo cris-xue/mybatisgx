@@ -48,7 +48,7 @@ public class MgxqlSyntaxHandler {
         MGXQL_OPERATOR_MAP.put(">", ComparisonOperator.GT);
         MGXQL_OPERATOR_MAP.put(">=", ComparisonOperator.GT_EQ);
         MGXQL_OPERATOR_MAP.put("=", ComparisonOperator.EQ);
-        MGXQL_OPERATOR_MAP.put("!=", ComparisonOperator.NOT);
+        MGXQL_OPERATOR_MAP.put("!=", ComparisonOperator.NOT_EQ);
         // 匹配运算符
         MGXQL_OPERATOR_MAP.put("in", ComparisonOperator.IN);
         MGXQL_OPERATOR_MAP.put("like", ComparisonOperator.LIKE);

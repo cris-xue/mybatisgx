@@ -203,8 +203,9 @@ public class MgxqlWhereTemplateHandler {
         LogicOperator logicOp = node.getLogicOperator();
         String logicStr = logicOp != null ? logicOp.getValue() : "";
         String columnSql = this.resolveColumnSql(entry.getSqlExpression());
+        String notStr = boundParam.getNotOperator() != null ? " " + boundParam.getNotOperator().getValue() : "";
         String path = StringUtils.join(entry.getParamPath(), ".");
-        parentElement.addText(String.format(" %s %s between #{%s[0]} and #{%s[1]}", logicStr, columnSql, path, path));
+        parentElement.addText(String.format(" %s %s%s between #{%s[0]} and #{%s[1]}", logicStr, columnSql, notStr, path, path));
     }
 
     private void renderLikeCondition(Element parentElement, WhereConditionNode node, BoundParam boundParam) {

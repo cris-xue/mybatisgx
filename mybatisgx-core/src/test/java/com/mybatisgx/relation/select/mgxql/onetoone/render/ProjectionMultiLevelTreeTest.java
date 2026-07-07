@@ -1,4 +1,4 @@
-package com.mybatisgx.relation.select.mgxql.onetoone.test;
+package com.mybatisgx.relation.select.mgxql.onetoone.render;
 
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.model.EntityRelationTree;

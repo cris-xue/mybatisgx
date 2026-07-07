@@ -2,8 +2,6 @@ package com.mybatisgx.relation.select.mgxql.onetoone.scenario;
 
 import com.github.swierkosz.fixture.generator.FixtureGenerator;
 import com.mybatisgx.relation.select.mgxql.onetoone.dao.MgxqlJoinDao;
-import com.mybatisgx.relation.select.mgxql.onetoone.dto.UserDetailItem2Projection;
-import com.mybatisgx.relation.select.mgxql.onetoone.dto.UserDetailProjection;
 import com.mybatisgx.relation.select.mgxql.onetoone.dto.UserFlatProjection;
 import com.mybatisgx.relation.select.mgxql.onetoone.dto.UserMultiLevelProjection;
 import com.mybatisgx.relation.select.mgxql.onetoone.dto.UserOneLevelProjection;
@@ -22,7 +20,6 @@ import org.apache.ibatis.session.SqlSession;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
@@ -205,7 +202,6 @@ public class MgxqlJoinDaoScenarioTest {
     }
 
     @Test
-    @Ignore("框架bug: select * 时将实体UserDetailItem2设置到DTO的UserDetailItem2Projection字段, 类型不匹配")
     public void test12_findSkipLevelProjectionSelectStar() {
         List<UserSkipProjection> result = mgxqlJoinDao.findSkipLevelProjectionSelectStar();
         Assert.assertNotNull(result);
@@ -213,7 +209,6 @@ public class MgxqlJoinDaoScenarioTest {
     }
 
     @Test
-    @Ignore("框架bug: select u.* 跳层投影 + 别名星, 嵌套字段类型不匹配(实体 vs DTO投影)")
     public void test13_findSkipLevelProjectionSelectAliasStar() {
         List<UserSkipProjection> result = mgxqlJoinDao.findSkipLevelProjectionSelectAliasStar();
         Assert.assertNotNull(result);

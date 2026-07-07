@@ -99,7 +99,6 @@ public class MgxqlSelectWhereDaoScenarioTest {
     }
 
     @Test
-    @Ignore("MGXQL渲染bug: != 渲染为 'not ?' 而非 '<> ?', H2无法解析")
     public void test02_findByCodeNotEq() {
         String code = userList.get(1).getCode();
         List<User> result = mgxqlSelectWhereDao.findByCodeNotEq(code);
@@ -291,23 +290,20 @@ public class MgxqlSelectWhereDaoScenarioTest {
     }
 
     @Test
-    @Ignore("MGXQL渲染bug: not like 渲染异常, 结果数量不正确")
     public void test17_findNotLike() {
         String pattern = "%usercode_5%";
         List<User> result = mgxqlSelectWhereDao.findNotLike(pattern);
         Assert.assertNotNull(result);
-        // 不匹配 %usercode_5% 的记录：排除usercode_5，剩余9条
-        // (usercode_5本身1条，加上code为null的1条 - null不匹配like也算not like)
-        Assert.assertEquals(9, result.size());
+        // 不匹配 %usercode_5% 的记录：排除usercode_5(1条)和code为null的记录(1条)
+        // SQL标准: NULL NOT LIKE pattern 返回 NULL，NULL行不会被返回
+        Assert.assertEquals(8, result.size());
         for (User user : result) {
-            if (user.getCode() != null) {
-                Assert.assertFalse(user.getCode().contains("usercode_5"));
-            }
+            Assert.assertNotNull(user.getCode());
+            Assert.assertFalse(user.getCode().contains("usercode_5"));
         }
     }
 
     @Test
-    @Ignore("MGXQL渲染bug: not between 渲染异常, 查询结果不正确")
     public void test18_findNotBetween() {
         Long low = userList.get(2).getId();
         Long high = userList.get(6).getId();

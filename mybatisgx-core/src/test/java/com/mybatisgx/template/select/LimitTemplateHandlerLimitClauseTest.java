@@ -48,7 +48,7 @@ public class LimitTemplateHandlerLimitClauseTest {
         LimitTemplateHandler handler = createHandler("PostgreSQL");
         List<Object> selectXmlItemList = new ArrayList<>();
         handler.execute(selectXmlItemList, new LimitClause(2, 10));
-        Assert.assertEquals(" limit 10 OFFSET 20", selectXmlItemList.get(0));
+        Assert.assertEquals(" limit 10 OFFSET 2", selectXmlItemList.get(0));
     }
 
     @Test(expected = MybatisgxException.class)

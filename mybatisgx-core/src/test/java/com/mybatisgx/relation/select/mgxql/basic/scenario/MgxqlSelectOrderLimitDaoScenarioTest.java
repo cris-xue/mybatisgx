@@ -130,7 +130,6 @@ public class MgxqlSelectOrderLimitDaoScenarioTest {
     }
 
     @Test
-    @Ignore("MGXQL渲染bug: limit offset,size 渲染可能不支持偏移分页")
     public void test05_findLimitOffset() {
         // limit 5, 5: 从第5行开始取5条
         List<User> page1 = orderLimitDao.findLimit();

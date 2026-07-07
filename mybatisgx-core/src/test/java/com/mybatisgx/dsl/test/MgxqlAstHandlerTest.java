@@ -185,7 +185,7 @@ public class MgxqlAstHandlerTest {
         Assert.assertEquals(ComparisonOperator.LT, nodes.get(1).getOperator());
         Assert.assertEquals(ComparisonOperator.GT_EQ, nodes.get(2).getOperator());
         Assert.assertEquals(ComparisonOperator.LT_EQ, nodes.get(3).getOperator());
-        Assert.assertEquals(ComparisonOperator.NOT, nodes.get(4).getOperator());
+        Assert.assertEquals(ComparisonOperator.NOT_EQ, nodes.get(4).getOperator());
     }
 
     @Test

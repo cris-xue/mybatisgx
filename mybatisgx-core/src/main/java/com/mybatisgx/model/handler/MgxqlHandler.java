@@ -3,6 +3,7 @@ package com.mybatisgx.model.handler;
 import com.google.common.collect.Lists;
 import com.mybatisgx.annotation.Property;
 import com.mybatisgx.annotation.QueryColumn;
+import com.mybatisgx.annotation.SimpleSql;
 import com.mybatisgx.annotation.Statement;
 import com.mybatisgx.api.MethodCommandType;
 import com.mybatisgx.dsl.method.MethodSyntaxProcessor;
@@ -43,6 +44,11 @@ public class MgxqlHandler {
         for (MethodInfo methodInfo : mapperInfo.getMethodInfoList()) {
             this.methodConditionParse(methodInfo);
 
+            // mgxsql 路径跳过 MGXQL 后续处理
+            if (methodInfo.getMgxsqlText() != null) {
+                continue;
+            }
+
             // 查询方法的结果集处理
             if (methodInfo.getMethodCommandType() == MethodCommandType.SELECT) {
                 this.entityRelationTreeHandler.execute(mapperInfo, methodInfo);
@@ -77,7 +83,7 @@ public class MgxqlHandler {
     /**
      * 条件实体只有非SimpleDao、SelectDao、CurdDao方法才会处理，SelectDao只有findOne、findList、findPage会特殊处理。
      * 查询实体作为条件支持查询、修改、删除。
-     * 解析优先级：Statement > 实体条件 > 方法名
+     * 解析优先级：Statement > SimpleSql > 实体条件 > 方法名
      *
      * @param methodInfo
      */
@@ -93,6 +99,14 @@ public class MgxqlHandler {
             String mgxql = statement.value();
             MgxqlStatement mgxqlStatement = this.mgxqlSyntaxProcessor.executeAndCheck(entityInfo, methodInfo, null, MgxqlSourceType.MANUAL, mgxql);
             methodInfo.setMgxqlStatement(mgxqlStatement);
+            return;
+        }
+
+        // 解析SimpleSql表达式（mgxsql路径）
+        SimpleSql simpleSql = methodInfo.getMethod().getAnnotation(SimpleSql.class);
+        if (simpleSql != null) {
+            methodInfo.setMgxsqlText(simpleSql.value());
+            // mgxsql 不需要走 MGXQL 解析流程，直接跳过条件解析和参数绑定
             return;
         }
 

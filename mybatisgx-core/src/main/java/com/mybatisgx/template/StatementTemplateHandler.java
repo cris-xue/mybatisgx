@@ -1,6 +1,7 @@
 package com.mybatisgx.template;
 
 import com.mybatisgx.context.MybatisgxObjectFactory;
+import com.mybatisgx.dsl.mgxsql.MgxsqlProcessor;
 import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.model.MapperInfo;
 import com.mybatisgx.model.MethodInfo;
@@ -25,6 +26,8 @@ public class StatementTemplateHandler {
     private static final Logger logger = LoggerFactory.getLogger(StatementTemplateHandler.class);
 
     private static final Map<SqlCommandType, TemplateHandler> TEMPLATE_HANDLER_MAP = new HashMap();
+
+    private final MgxsqlProcessor mgxsqlProcessor = new MgxsqlProcessor();
 
     public StatementTemplateHandler() {
         TEMPLATE_HANDLER_MAP.put(SqlCommandType.INSERT, MybatisgxObjectFactory.get(InsertTemplateHandler.class));
@@ -61,6 +64,15 @@ public class StatementTemplateHandler {
     }
 
     private XNode complexTemplateHandle(MethodInfo methodInfo) {
+        // mgxsql 路径：@SimpleSql 注解
+        if (methodInfo.getMgxsqlText() != null) {
+            XNode mgxsqlXNode = this.mgxsqlProcessor.process(methodInfo);
+            if (mgxsqlXNode != null) {
+                return mgxsqlXNode;
+            }
+        }
+
+        // MGXQL 路径：方法名派生、@Statement、实体参数
         TemplateHandler templateHandler = TEMPLATE_HANDLER_MAP.get(methodInfo.getSqlCommandType());
         if (templateHandler == null) {
             throw new MybatisgxException("不存在的操作方式");

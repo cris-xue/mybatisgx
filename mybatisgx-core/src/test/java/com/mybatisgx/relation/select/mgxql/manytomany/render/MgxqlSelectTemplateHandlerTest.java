@@ -1,4 +1,4 @@
-package com.mybatisgx.relation.select.mgxql.manytomany.test;
+package com.mybatisgx.relation.select.mgxql.manytomany.render;
 
 import com.mybatisgx.dsl.mgxql.model.*;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;

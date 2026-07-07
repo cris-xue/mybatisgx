@@ -14,6 +14,7 @@ public enum ComparisonOperator {
     ENDING_WITH("EndingWith", "like"),
     BETWEEN("Between", "between"),
     NOT("Not", "not"),
+    NOT_EQ("NotEq", "<>"),
 
     IS_NULL("IsNull", "is null"),
     IS_NOT_NULL("IsNotNull", "is not null"),

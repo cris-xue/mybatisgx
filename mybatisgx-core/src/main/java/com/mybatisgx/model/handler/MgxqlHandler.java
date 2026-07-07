@@ -337,6 +337,8 @@ public class MgxqlHandler {
                 return "Eq";
             case NOT:
                 return "Not";
+            case NOT_EQ:
+                return "NotEq";
             case LT:
                 return "Lt";
             case LT_EQ:

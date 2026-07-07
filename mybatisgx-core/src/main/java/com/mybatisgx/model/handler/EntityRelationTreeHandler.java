@@ -223,10 +223,12 @@ public class EntityRelationTreeHandler {
                 MatchResult matchResult = entry.matchResult;
                 Class<?> nestedDtoClass = entry.dtoColumnInfo.getJavaType();
                 EntityInfo targetEntityInfo = pathChain.get(matchResult.pathIndex).entityInfo;
+                // 创建 RelationColumnInfo 副本，将 javaType/javaTypeName 替换为投影 DTO 类型
+                RelationColumnInfo projectionRelationInfo = this.copyWithProjectionType(matchResult.relationColumnInfo, nestedDtoClass);
                 // 从完整树中查找匹配的子节点
                 EntityRelationTree childFullTreeNode = this.findChildInFullTree(mgxqlEntityRelationTree, matchResult.relationColumnInfo);
                 EntityRelationTree subTree = this.buildProjectionEntityRelationTree(
-                        nestedDtoClass, targetEntityInfo, matchResult.relationColumnInfo,
+                        nestedDtoClass, targetEntityInfo, projectionRelationInfo,
                         pathChain, matchResult.pathIndex, mgxqlEntityRelationTree, childFullTreeNode);
                 if (subTree != null) {
                     entityRelationTree.addComposites(subTree);
@@ -298,6 +300,58 @@ public class EntityRelationTreeHandler {
                 }
             }
             return null;
+        }
+
+        /**
+         * 创建 RelationColumnInfo 浅拷贝，并将 javaType/javaTypeName 替换为投影 DTO 类型。
+         * <p>
+         * 避免直接修改共享的实体 RelationColumnInfo 对象，防止污染全局元数据。
+         *
+         * @param source          原始 RelationColumnInfo（共享引用，不可修改）
+         * @param projectionClass 投影 DTO 类
+         * @return 类型替换后的副本
+         */
+        private RelationColumnInfo copyWithProjectionType(RelationColumnInfo source, Class<?> projectionClass) {
+            RelationColumnInfo copy = new RelationColumnInfo();
+            // 父类 ColumnInfo 字段
+            copy.setField(source.getField());
+            copy.setTypeCategory(source.getTypeCategory());
+            copy.setJavaType(projectionClass);
+            copy.setJavaColumnName(source.getJavaColumnName());
+            copy.setJavaColumnNamePathList(source.getJavaColumnNamePathList());
+            copy.setJavaColumnChain(source.getJavaColumnChain());
+            copy.setCollectionType(source.getCollectionType());
+            copy.setCollectionTypeName(source.getCollectionTypeName());
+            copy.setDbTypeName(source.getDbTypeName());
+            copy.setDbColumnName(source.getDbColumnName());
+            copy.setDbColumnNameAlias(source.getDbColumnNameAlias());
+            copy.setTypeHandler(source.getTypeHandler());
+            copy.setComposites(source.getComposites());
+            copy.setColumn(source.getColumn());
+            copy.setProperty(source.getProperty());
+            copy.setNonPersistent(source.getNonPersistent());
+            copy.setQueryColumn(source.getQueryColumn());
+            copy.setVersion(source.getVersion());
+            copy.setLogicDelete(source.getLogicDelete());
+            copy.setGenerateValue(source.getGenerateValue());
+            // RelationColumnInfo 自身字段
+            copy.setMappedBy(source.getMappedBy());
+            copy.setFetchType(source.getFetchType());
+            copy.setFetchMode(source.getFetchMode());
+            copy.setFetchSize(source.getFetchSize());
+            copy.setRelationType(source.getRelationType());
+            copy.setMappedByRelationColumnInfo(source.getMappedByRelationColumnInfo());
+            copy.setForeignKeyInfoList(source.getForeignKeyInfoList());
+            copy.setInverseForeignKeyInfoList(source.getInverseForeignKeyInfoList());
+            copy.setOneToOne(source.getOneToOne());
+            copy.setOneToMany(source.getOneToMany());
+            copy.setManyToOne(source.getManyToOne());
+            copy.setManyToMany(source.getManyToMany());
+            copy.setJoinColumn(source.getJoinColumn());
+            copy.setJoinColumns(source.getJoinColumns());
+            copy.setJoinTable(source.getJoinTable());
+            copy.setFetch(source.getFetch());
+            return copy;
         }
 
         /**

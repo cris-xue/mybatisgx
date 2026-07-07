@@ -96,7 +96,7 @@ public class SelectTemplateHandler implements TemplateHandler {
         if (selectStatement instanceof SelectStatement) {
             HavingExpression havingExpression = selectStatement.getHavingExpression();
             if (havingExpression != null) {
-                String havingSql = havingTemplateHandler.execute(havingExpression);
+                String havingSql = havingTemplateHandler.execute(havingExpression, aliasContext);
                 if (!havingSql.isEmpty()) {
                     selectXmlItemList.add(havingSql);
                 }

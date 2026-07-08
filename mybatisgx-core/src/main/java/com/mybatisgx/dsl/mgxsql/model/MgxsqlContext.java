@@ -9,12 +9,12 @@ import java.util.List;
  * @author 薛承城
  * @date 2026/7/7
  */
-public class S2Context {
+public class MgxsqlContext {
 
     /**
      * 当前扫描状态
      */
-    private S2State state = S2State.NORMAL;
+    private MgxsqlState state = MgxsqlState.NORMAL;
 
     /**
      * 当前扫描位置
@@ -34,7 +34,7 @@ public class S2Context {
     /**
      * 状态栈（支持嵌套状态恢复）
      */
-    private List<S2State> stateStack = new ArrayList<S2State>();
+    private List<MgxsqlState> stateStack = new ArrayList<MgxsqlState>();
 
     /**
      * 当前行号（从1开始）
@@ -51,26 +51,26 @@ public class S2Context {
      */
     private String input;
 
-    public S2Context(String input) {
+    public MgxsqlContext(String input) {
         this.input = input;
     }
 
-    public S2State getState() {
+    public MgxsqlState getState() {
         return state;
     }
 
-    public void setState(S2State state) {
+    public void setState(MgxsqlState state) {
         this.state = state;
     }
 
-    public void pushState(S2State newState) {
+    public void pushState(MgxsqlState newState) {
         this.stateStack.add(this.state);
         this.state = newState;
     }
 
-    public S2State popState() {
+    public MgxsqlState popState() {
         if (this.stateStack.isEmpty()) {
-            return S2State.NORMAL;
+            return MgxsqlState.NORMAL;
         }
         this.state = this.stateStack.remove(this.stateStack.size() - 1);
         return this.state;

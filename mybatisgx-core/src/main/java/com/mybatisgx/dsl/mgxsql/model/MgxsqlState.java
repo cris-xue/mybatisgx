@@ -6,7 +6,7 @@ package com.mybatisgx.dsl.mgxsql.model;
  * @author 薛承城
  * @date 2026/7/7
  */
-public enum S2State {
+public enum MgxsqlState {
 
     /**
      * 默认状态，原样输出

@@ -9,7 +9,7 @@ import java.util.List;
  * @author 薛承城
  * @date 2026/7/7
  */
-public class S2Condition {
+public class MgxsqlCondition {
 
     /**
      * 条件体文本

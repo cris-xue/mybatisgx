@@ -6,12 +6,12 @@ package com.mybatisgx.dsl.mgxsql.model;
  * @author 薛承城
  * @date 2026/7/7
  */
-public class S2Token {
+public class MgxsqlToken {
 
     /**
      * token 类型
      */
-    private S2TokenType type;
+    private MgxsqlTokenType type;
 
     /**
      * token 文本
@@ -23,13 +23,13 @@ public class S2Token {
      */
     private int position;
 
-    public S2Token(S2TokenType type, String text, int position) {
+    public MgxsqlToken(MgxsqlTokenType type, String text, int position) {
         this.type = type;
         this.text = text;
         this.position = position;
     }
 
-    public S2TokenType getType() {
+    public MgxsqlTokenType getType() {
         return type;
     }
 
@@ -44,7 +44,7 @@ public class S2Token {
     /**
      * mgxsql token 类型枚举
      */
-    public enum S2TokenType {
+    public enum MgxsqlTokenType {
 
         /**
          * 静态文本（原样输出）

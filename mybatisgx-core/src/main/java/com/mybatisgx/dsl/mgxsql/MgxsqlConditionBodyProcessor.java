@@ -1,0 +1,536 @@
+package com.mybatisgx.dsl.mgxsql;
+
+import com.mybatisgx.dsl.mgxsql.model.MgxsqlCondition;
+import com.mybatisgx.exception.MybatisgxException;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * mgxsql 条件体处理器，处理纯文本中嵌套的 mgxsql 语法（递归引擎）
+ * <p>
+ * 负责：
+ * <ul>
+ *   <li>:param → #{param}，同时收集参数路径</li>
+ *   <li>in :list → &lt;foreach&gt;</li>
+ *   <li>in (item:list)=&gt;$item.prop → &lt;foreach&gt;</li>
+ *   <li>%:name% / :name% / %:name → &lt;bind&gt; + like</li>
+ *   <li>#{param} 原样保留</li>
+ *   <li>#[body] 和 #(expr)[body] 递归处理</li>
+ *   <li>#condition 形式1 递归处理</li>
+ *   <li>构建 OGNL test 表达式</li>
+ *   <li>guard 表达式中 :param 去冒号</li>
+ * </ul>
+ *
+ * @author 薛承城
+ * @date 2026/7/8
+ */
+public class MgxsqlConditionBodyProcessor {
+
+    private static final String IS_NOT_EMPTY = "@com.mybatisgx.utils.ObjectUtils@isNotEmpty(%s)";
+
+    /**
+     * 条件体处理结果
+     */
+    public static class ProcessedBody {
+        String body;
+        List<String> paramPaths;
+
+        public ProcessedBody(String body, List<String> paramPaths) {
+            this.body = body;
+            this.paramPaths = paramPaths;
+        }
+
+        public String getBody() {
+            return body;
+        }
+
+        public List<String> getParamPaths() {
+            return paramPaths;
+        }
+    }
+
+    /**
+     * 处理条件体文本中的 mgxsql 语法
+     */
+    public ProcessedBody processConditionBody(String text) {
+        if (StringUtils.isBlank(text)) {
+            return new ProcessedBody(text, new ArrayList<String>());
+        }
+        StringBuilder result = new StringBuilder();
+        List<String> paramPaths = new ArrayList<String>();
+        int i = 0;
+        while (i < text.length()) {
+            char c = text.charAt(i);
+
+            // 检测 # 开头语法
+            if (c == '#') {
+                int consumed = this.processConditionBodyHash(text, i, result, paramPaths);
+                if (consumed > i) {
+                    i = consumed;
+                    continue;
+                }
+            }
+
+            // 检测 in :list 或 in (item:list)=>$item.prop
+            if (MgxsqlSyntaxHelper.isKeywordAt(text, i, "in") && MgxsqlSyntaxHelper.isWordBoundaryBefore(text, i) && MgxsqlSyntaxHelper.isWordBoundaryAfter(text, i + 2)) {
+                int inEnd = this.processConditionIn(text, i, result, paramPaths);
+                if (inEnd > i) {
+                    i = inEnd;
+                    continue;
+                }
+            }
+
+            // 检测 %:name （LIKE 左侧或双侧模糊）
+            if (c == '%' && i + 1 < text.length() && text.charAt(i + 1) == ':') {
+                int likeEnd = this.processConditionLike(text, i, result, paramPaths);
+                if (likeEnd > i) {
+                    i = likeEnd;
+                    continue;
+                }
+            }
+
+            // 检测 :name% （LIKE 右侧模糊）
+            if (c == ':' && i + 1 < text.length() && MgxsqlSyntaxHelper.isIdentifierStart(text.charAt(i + 1))) {
+                int paramNameEnd = MgxsqlSyntaxHelper.findIdentifierEnd(text, i + 1);
+                String paramName = text.substring(i + 1, paramNameEnd);
+                // 检测后面是否有 %
+                if (paramNameEnd < text.length() && text.charAt(paramNameEnd) == '%') {
+                    paramPaths.add(paramName);
+                    String bindName = "_like_" + paramName.replace('.', '_');
+                    String bindValue = paramName + " + '%'";
+                    result.append("<bind name=\"").append(bindName).append("\" value=\"").append(bindValue).append("\"/>");
+                    result.append("#{").append(bindName).append("}");
+                    i = paramNameEnd + 1;
+                    continue;
+                }
+                // 普通 :param → #{param}
+                paramPaths.add(paramName);
+                result.append("#{").append(paramName).append("}");
+                i = paramNameEnd;
+                continue;
+            }
+
+            // 检测 #{param}（兼容旧写法，原样保留）
+            if (c == '#' && i + 1 < text.length() && text.charAt(i + 1) == '{') {
+                int paramEnd = MgxsqlSyntaxHelper.findBraceEnd(text, i + 2);
+                if (paramEnd > i) {
+                    result.append(text.substring(i, paramEnd + 1));
+                    i = paramEnd + 1;
+                    continue;
+                }
+            }
+
+            // 检测 $variable（局部变量）→ #{variable}
+            if (c == '$' && i + 1 < text.length() && MgxsqlSyntaxHelper.isIdentifierStart(text.charAt(i + 1))) {
+                int varNameEnd = MgxsqlSyntaxHelper.findIdentifierEnd(text, i + 1);
+                String varName = text.substring(i + 1, varNameEnd);
+                result.append("#{").append(varName).append("}");
+                i = varNameEnd;
+                continue;
+            }
+
+            result.append(c);
+            i++;
+        }
+        return new ProcessedBody(result.toString(), paramPaths);
+    }
+
+    /**
+     * 构建 OGNL test 表达式
+     */
+    public String buildTestExpression(List<String> paramPaths) {
+        if (paramPaths == null || paramPaths.isEmpty()) {
+            return "true";
+        }
+        List<String> testParts = new ArrayList<String>();
+        for (String paramPath : paramPaths) {
+            String[] parts = paramPath.split("\\.");
+            List<String> currentPath = new ArrayList<String>();
+            for (int i = 0; i < parts.length; i++) {
+                currentPath.add(parts[i]);
+                String path = StringUtils.join(currentPath, ".");
+                testParts.add(String.format(IS_NOT_EMPTY, path));
+            }
+        }
+        return StringUtils.join(testParts, " and ");
+    }
+
+    /**
+     * guard 表达式中 :param 去冒号
+     */
+    public String stripParamColons(String expr) {
+        if (StringUtils.isBlank(expr)) {
+            return expr;
+        }
+        StringBuilder result = new StringBuilder();
+        int i = 0;
+        while (i < expr.length()) {
+            char c = expr.charAt(i);
+            if (c == ':' && i + 1 < expr.length() && MgxsqlSyntaxHelper.isIdentifierStartChar(expr.charAt(i + 1))) {
+                if (i + 1 < expr.length() && expr.charAt(i + 1) == ':') {
+                    result.append(c);
+                    i++;
+                    continue;
+                }
+                i++; // 跳过 :
+                while (i < expr.length() && (Character.isLetterOrDigit(expr.charAt(i)) || expr.charAt(i) == '_' || expr.charAt(i) == '.')) {
+                    result.append(expr.charAt(i));
+                    i++;
+                }
+            } else {
+                result.append(c);
+                i++;
+            }
+        }
+        return result.toString();
+    }
+
+    /**
+     * 构建 LIKE bind 值
+     */
+    public String buildLikeBindValue(String paramName, MgxsqlCondition.LikeType likeType) {
+        switch (likeType) {
+            case BOTH:
+                return "'%' + " + paramName + " + '%'";
+            case RIGHT:
+                return paramName + " + '%'";
+            case LEFT:
+                return "'%' + " + paramName;
+            default:
+                return paramName;
+        }
+    }
+
+    // ==================== 条件体 # 语法递归处理 ====================
+
+    /**
+     * 处理条件体中的 # 开头语法，递归处理
+     *
+     * @return 消费到的位置（下一个待处理的字符索引），若无法识别返回原位置
+     */
+    private int processConditionBodyHash(String text, int start, StringBuilder result, List<String> paramPaths) {
+        if (start + 1 >= text.length()) {
+            return start;
+        }
+        char next = text.charAt(start + 1);
+
+        // #[body] — 无 guard 条件体
+        if (next == '[') {
+            int pos = start + 2; // 跳过 #[
+            int bracketDepth = 1;
+            StringBuilder bodySb = new StringBuilder();
+            while (pos < text.length() && bracketDepth > 0) {
+                char bc = text.charAt(pos);
+                if (bc == '[') {
+                    bracketDepth++;
+                } else if (bc == ']') {
+                    bracketDepth--;
+                    if (bracketDepth == 0) {
+                        pos++; // 跳过 ]
+                        break;
+                    }
+                } else if (bc == '\'') {
+                    bodySb.append(bc);
+                    pos++;
+                    while (pos < text.length()) {
+                        char sc = text.charAt(pos);
+                        bodySb.append(sc);
+                        pos++;
+                        if (sc == '\'') {
+                            if (pos < text.length() && text.charAt(pos) == '\'') {
+                                bodySb.append('\'');
+                                pos++;
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+                    continue;
+                }
+                if (bracketDepth > 0) {
+                    bodySb.append(bc);
+                }
+                pos++;
+            }
+            String bodyContent = bodySb.toString();
+
+            // 递归处理 body
+            ProcessedBody processed = this.processConditionBody(bodyContent);
+            String testExpression = this.buildTestExpression(processed.paramPaths);
+            String ifContent = processed.body.trim();
+            paramPaths.addAll(processed.paramPaths);
+
+            result.append("<if test=\"");
+            result.append(testExpression);
+            result.append("\"> ");
+            result.append(ifContent);
+            result.append("</if>");
+
+            return pos;
+        }
+
+        // #(expr)[body] — 有 guard 条件体
+        if (next == '(') {
+            int pos = start + 1; // 指向 (
+            // 读取 () 内容
+            StringBuilder guardSb = new StringBuilder();
+            int depth = 0;
+            pos++; // 跳过 (
+            depth = 1;
+            while (pos < text.length() && depth > 0) {
+                char gc = text.charAt(pos);
+                if (gc == '(') {
+                    depth++;
+                } else if (gc == ')') {
+                    depth--;
+                    if (depth == 0) {
+                        pos++; // 跳过 )
+                        break;
+                    }
+                } else if (gc == '\'') {
+                    guardSb.append(gc);
+                    pos++;
+                    while (pos < text.length()) {
+                        char sc = text.charAt(pos);
+                        guardSb.append(sc);
+                        pos++;
+                        if (sc == '\'') {
+                            if (pos < text.length() && text.charAt(pos) == '\'') {
+                                guardSb.append('\'');
+                                pos++;
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+                    continue;
+                }
+                if (depth > 0) {
+                    guardSb.append(gc);
+                }
+                pos++;
+            }
+            String guardContent = guardSb.toString().trim();
+
+            // 跳过空白，检测 [
+            while (pos < text.length() && Character.isWhitespace(text.charAt(pos))) {
+                pos++;
+            }
+            if (pos >= text.length() || text.charAt(pos) != '[') {
+                throw new MybatisgxException("mgxsql 语法错误: #() 后必须跟 '[]'，位置: %s，附近文本: %s",
+                        String.valueOf(start), text.substring(Math.max(0, start - 5), Math.min(text.length(), start + 20)));
+            }
+
+            pos++; // 跳过 [
+            int bracketDepth = 1;
+            StringBuilder bodySb = new StringBuilder();
+            while (pos < text.length() && bracketDepth > 0) {
+                char bc = text.charAt(pos);
+                if (bc == '[') {
+                    bracketDepth++;
+                } else if (bc == ']') {
+                    bracketDepth--;
+                    if (bracketDepth == 0) {
+                        pos++; // 跳过 ]
+                        break;
+                    }
+                } else if (bc == '\'') {
+                    bodySb.append(bc);
+                    pos++;
+                    while (pos < text.length()) {
+                        char sc = text.charAt(pos);
+                        bodySb.append(sc);
+                        pos++;
+                        if (sc == '\'') {
+                            if (pos < text.length() && text.charAt(pos) == '\'') {
+                                bodySb.append('\'');
+                                pos++;
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+                    continue;
+                }
+                if (bracketDepth > 0) {
+                    bodySb.append(bc);
+                }
+                pos++;
+            }
+            String bodyContent = bodySb.toString();
+
+            // 递归处理
+            if (StringUtils.isBlank(guardContent)) {
+                ProcessedBody processed = this.processConditionBody(bodyContent);
+                String testExpression = this.buildTestExpression(processed.paramPaths);
+                String ifContent = processed.body.trim();
+                paramPaths.addAll(processed.paramPaths);
+
+                result.append("<if test=\"");
+                result.append(testExpression);
+                result.append("\"> ");
+                result.append(ifContent);
+                result.append("</if>");
+            } else {
+                String testExpr = this.stripParamColons(guardContent);
+                ProcessedBody processed = this.processConditionBody(bodyContent);
+                String ifContent = processed.body.trim();
+
+                result.append("<if test=\"");
+                result.append(testExpr);
+                result.append("\"> ");
+                result.append(ifContent);
+                result.append("</if>");
+            }
+
+            return pos;
+        }
+
+        // #{param} — MyBatis参数引用，原样保留
+        if (next == '{') {
+            int paramEnd = MgxsqlSyntaxHelper.findBraceEnd(text, start + 2);
+            if (paramEnd > start) {
+                result.append(text.substring(start, paramEnd + 1));
+                return paramEnd + 1;
+            }
+            return start;
+        }
+
+        // #identifier — 形式1
+        if (MgxsqlSyntaxHelper.isIdentifierStart(next)) {
+            int lineEnd = start + 1;
+            int form1ParenDepth = 0;
+            int form1BracketDepth = 0;
+            while (lineEnd < text.length() && text.charAt(lineEnd) != '\n' && text.charAt(lineEnd) != '\r') {
+                char fc = text.charAt(lineEnd);
+                if (fc == '(') {
+                    form1ParenDepth++;
+                } else if (fc == ')') {
+                    form1ParenDepth--;
+                } else if (fc == '[') {
+                    form1BracketDepth++;
+                } else if (fc == ']') {
+                    form1BracketDepth--;
+                }
+                // 括号和方括号外遇到独立的 and/or 截断
+                if (form1ParenDepth == 0 && form1BracketDepth == 0) {
+                    if (lineEnd + 3 <= text.length()
+                            && text.substring(lineEnd, lineEnd + 3).equalsIgnoreCase("and")
+                            && MgxsqlSyntaxHelper.isWordBoundaryBefore(text, lineEnd)
+                            && MgxsqlSyntaxHelper.isWordBoundaryAfter(text, lineEnd + 3)) {
+                        break;
+                    }
+                    if (lineEnd + 2 <= text.length()
+                            && text.substring(lineEnd, lineEnd + 2).equalsIgnoreCase("or")
+                            && MgxsqlSyntaxHelper.isWordBoundaryBefore(text, lineEnd)
+                            && MgxsqlSyntaxHelper.isWordBoundaryAfter(text, lineEnd + 2)) {
+                        break;
+                    }
+                }
+                lineEnd++;
+            }
+            String condition = text.substring(start + 1, lineEnd).trim();
+            ProcessedBody processed = this.processConditionBody(condition);
+            String testExpression = this.buildTestExpression(processed.paramPaths);
+            String ifContent = processed.body.trim();
+            paramPaths.addAll(processed.paramPaths);
+
+            result.append("<if test=\"");
+            result.append(testExpression);
+            result.append("\"> ");
+            result.append(ifContent);
+            result.append("</if>");
+
+            return lineEnd;
+        }
+
+        return start;
+    }
+
+    // ==================== 条件体内部 IN / LIKE 处理 ====================
+
+    private int processConditionIn(String text, int start, StringBuilder result, List<String> paramPaths) {
+        int pos = start + 2;
+        while (pos < text.length() && Character.isWhitespace(text.charAt(pos))) {
+            pos++;
+        }
+        if (pos >= text.length()) {
+            return start;
+        }
+
+        // 简单类型 IN：:list
+        if (text.charAt(pos) == ':' && pos + 1 < text.length() && MgxsqlSyntaxHelper.isIdentifierStart(text.charAt(pos + 1))) {
+            int nameEnd = MgxsqlSyntaxHelper.findIdentifierEnd(text, pos + 1);
+            String collectionName = text.substring(pos + 1, nameEnd);
+            paramPaths.add(collectionName);
+            result.append("in <foreach item=\"item\" collection=\"").append(collectionName).append("\" open=\"(\" close=\")\" separator=\",\">#{item}</foreach>");
+            return nameEnd;
+        }
+
+        // 复杂类型 IN：(item:collection)=>$item.prop
+        if (text.charAt(pos) == '(') {
+            pos++;
+            int itemNameStart = pos;
+            while (pos < text.length() && (Character.isLetterOrDigit(text.charAt(pos)) || text.charAt(pos) == '_' || text.charAt(pos) == '.')) {
+                pos++;
+            }
+            String itemName = text.substring(itemNameStart, pos);
+            if (pos < text.length() && text.charAt(pos) == ':') {
+                pos++;
+                int collStart = pos;
+                while (pos < text.length() && (Character.isLetterOrDigit(text.charAt(pos)) || text.charAt(pos) == '_' || text.charAt(pos) == '.')) {
+                    pos++;
+                }
+                String collectionName = text.substring(collStart, pos);
+                if (pos < text.length() && text.charAt(pos) == ')') {
+                    pos++;
+                    if (pos < text.length() && text.charAt(pos) == '=' && pos + 1 < text.length() && text.charAt(pos + 1) == '>') {
+                        pos += 2;
+                        if (pos < text.length() && text.charAt(pos) == '$' && pos + 1 < text.length() && MgxsqlSyntaxHelper.isIdentifierStart(text.charAt(pos + 1))) {
+                            int varEnd = MgxsqlSyntaxHelper.findIdentifierEnd(text, pos + 1);
+                            String varName = text.substring(pos + 1, varEnd);
+                            paramPaths.add(collectionName);
+                            result.append("in <foreach item=\"").append(itemName).append("\" collection=\"").append(collectionName).append("\" open=\"(\" close=\")\" separator=\",\">#{").append(varName).append("}</foreach>");
+                            return varEnd;
+                        } else if (pos < text.length() && text.charAt(pos) == '#' && pos + 1 < text.length() && text.charAt(pos + 1) == '{') {
+                            int valueEnd = MgxsqlSyntaxHelper.findBraceEnd(text, pos + 2);
+                            if (valueEnd > pos) {
+                                String valueExpr = text.substring(pos, valueEnd + 1);
+                                paramPaths.add(collectionName);
+                                result.append("in <foreach item=\"").append(itemName).append("\" collection=\"").append(collectionName).append("\" open=\"(\" close=\")\" separator=\",\">").append(valueExpr).append("</foreach>");
+                                return valueEnd + 1;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return start;
+    }
+
+    private int processConditionLike(String text, int start, StringBuilder result, List<String> paramPaths) {
+        int pos = start + 1;
+        if (pos >= text.length() || text.charAt(pos) != ':' || pos + 1 >= text.length() || !MgxsqlSyntaxHelper.isIdentifierStart(text.charAt(pos + 1))) {
+            return start;
+        }
+        int paramNameEnd = MgxsqlSyntaxHelper.findIdentifierEnd(text, pos + 1);
+        String paramName = text.substring(pos + 1, paramNameEnd);
+        paramPaths.add(paramName);
+
+        MgxsqlCondition.LikeType likeType = MgxsqlCondition.LikeType.LEFT;
+        if (paramNameEnd < text.length() && text.charAt(paramNameEnd) == '%') {
+            likeType = MgxsqlCondition.LikeType.BOTH;
+            paramNameEnd++;
+        }
+
+        String bindName = "_like_" + paramName.replace('.', '_');
+        String bindValue = this.buildLikeBindValue(paramName, likeType);
+        result.append("<bind name=\"").append(bindName).append("\" value=\"").append(bindValue).append("\"/>");
+        result.append("#{").append(bindName).append("}");
+
+        return paramNameEnd;
+    }
+}

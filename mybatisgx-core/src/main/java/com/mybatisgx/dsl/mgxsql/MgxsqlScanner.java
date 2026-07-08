@@ -3,6 +3,7 @@ package com.mybatisgx.dsl.mgxsql;
 import com.mybatisgx.dsl.mgxsql.model.S2Condition;
 import com.mybatisgx.dsl.mgxsql.model.S2Context;
 import com.mybatisgx.dsl.mgxsql.model.S2State;
+import com.mybatisgx.exception.MybatisgxException;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -133,10 +134,9 @@ public class MgxsqlScanner {
                 ctx.advance();
                 return;
             }
-            // # 后跟其他字符，原样输出
-            ctx.appendOutput(c);
-            ctx.advance();
-            return;
+            // # 后跟其他字符，语法错误
+            throw new MybatisgxException("mgxql 语法错误: '#' 后必须跟 '(' 或 '{'，位置: %s，附近文本: %s",
+                    String.valueOf(ctx.getPosition()), this.nearbyText(ctx, 10));
         }
         // 检测 in 关键字（必须在 WHERE 域）
         if (this.isKeywordAt(ctx, "in") && this.isWordBoundaryBefore(ctx) && this.isWordBoundaryAfter(ctx, 2)) {
@@ -195,10 +195,9 @@ public class MgxsqlScanner {
                 ctx.advance();
                 return;
             }
-            // # 后跟其他字符，原样输出
-            ctx.appendOutput(c);
-            ctx.advance();
-            return;
+            // # 后跟其他字符，语法错误
+            throw new MybatisgxException("mgxql 语法错误: '#' 后必须跟 '(' 或 '{'，位置: %s，附近文本: %s",
+                    String.valueOf(ctx.getPosition()), this.nearbyText(ctx, 10));
         }
         // 检测 :param 参数绑定
         if (c == ':' && this.isParamRefStart(ctx)) {
@@ -955,6 +954,16 @@ public class MgxsqlScanner {
         }
         char next = text.charAt(pos);
         return !Character.isLetterOrDigit(next) && next != '_' && next != '.';
+    }
+
+    /**
+     * 获取当前位置附近的文本片段（用于错误提示）
+     */
+    private String nearbyText(S2Context ctx, int radius) {
+        int pos = ctx.getPosition();
+        int start = Math.max(0, pos - radius);
+        int end = Math.min(ctx.getInputLength(), pos + radius + 1);
+        return "..." + ctx.substring(start, end) + "...";
     }
 
     /**

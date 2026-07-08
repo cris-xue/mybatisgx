@@ -1,5 +1,6 @@
 package com.mybatisgx.dsl.mgxsql;
 
+import com.mybatisgx.exception.MybatisgxException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
@@ -260,14 +261,31 @@ public class MgxsqlScannerTest {
         Assert.assertTrue("in 应转 <foreach>", output.contains("<foreach"));
     }
 
-    // ==================== # 后不跟 () 原样输出 ====================
+    // ==================== # 后不跟 () 或 {} 报语法错误 ====================
 
-    @Test
+    @Test(expected = MybatisgxException.class)
     public void test27_hashWithoutParen() {
         String input = "select * from t_user where #name = :name";
+        this.scanner.process(input);
+    }
+
+    @Test(expected = MybatisgxException.class)
+    public void test28_hashInSetWithoutParen() {
+        String input = "update t_user set #name = :name where id = :id";
+        this.scanner.process(input);
+    }
+
+    @Test(expected = MybatisgxException.class)
+    public void test29_hashAtEndOfInput() {
+        String input = "select * from t_user where id = :id #";
+        this.scanner.process(input);
+    }
+
+    @Test
+    public void test30_hashInNormalDomainPassthrough() {
+        String input = "select # from t_user where id = :id";
         String output = this.scanner.process(input);
-        Assert.assertTrue("#name 不应触发条件解析", !output.contains("<if test="));
-        Assert.assertTrue("# 应原样输出", output.contains("#"));
+        Assert.assertTrue("NORMAL 域 # 应原样输出", output.contains("#"));
     }
 
     // ==================== 辅助方法 ====================

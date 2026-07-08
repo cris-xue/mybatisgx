@@ -37,6 +37,16 @@ public class S2Context {
     private List<S2State> stateStack = new ArrayList<S2State>();
 
     /**
+     * 当前行号（从1开始）
+     */
+    private int lineNumber = 1;
+
+    /**
+     * 当前列号（从1开始）
+     */
+    private int columnNumber = 1;
+
+    /**
      * 当前扫描的 SQL 文本
      */
     private String input;
@@ -75,7 +85,15 @@ public class S2Context {
     }
 
     public int advance() {
-        return ++this.position;
+        char c = this.charAt(this.position);
+        this.position++;
+        if (c == '\n') {
+            this.lineNumber++;
+            this.columnNumber = 1;
+        } else {
+            this.columnNumber++;
+        }
+        return this.position;
     }
 
     public char charAt(int pos) {
@@ -148,5 +166,24 @@ public class S2Context {
             end = this.input.length();
         }
         return this.input.substring(start, end);
+    }
+
+    public int getLineNumber() {
+        return lineNumber;
+    }
+
+    public int getColumnNumber() {
+        return columnNumber;
+    }
+
+    /**
+     * 获取当前位置的友好位置描述（行号:列号 + 附近文本）
+     */
+    public String getPositionInfo() {
+        int pos = this.position;
+        int radius = 10;
+        int start = Math.max(0, pos - radius);
+        int end = Math.min(this.input.length(), pos + radius + 1);
+        return "行" + this.lineNumber + ":列" + this.columnNumber + "，附近文本: ..." + this.input.substring(start, end) + "...";
     }
 }

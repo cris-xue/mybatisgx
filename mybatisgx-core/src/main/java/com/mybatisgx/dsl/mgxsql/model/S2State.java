@@ -19,9 +19,19 @@ public enum S2State {
     WHERE,
 
     /**
+     * WHERE 有边界域：where[body] 中 [] 包裹的条件区域
+     */
+    WHERE_BOUNDED,
+
+    /**
      * SET 域：set 关键字后的赋值区域
      */
     SET,
+
+    /**
+     * SET 有边界域：set[body] 中 [] 包裹的赋值区域
+     */
+    SET_BOUNDED,
 
     /**
      * XML 标签透传：< 开头的标签原样输出

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * mgxsql 扫描上下文，维护状态、位置、括号层级、输出缓冲区
+ * mgxsql 扫描上下文，维护状态、位置、括号层级、输出缓冲区（v2）
  *
  * @author 薛承城
  * @date 2026/7/7
@@ -22,7 +22,7 @@ public class S2Context {
     private int position = 0;
 
     /**
-     * 当前括号层级（用于匹配 ?(expr)(condition) 中的括号）
+     * 当前括号层级（用于匹配 #(expr)(sql) 中的括号）
      */
     private int parenDepth = 0;
 
@@ -34,12 +34,7 @@ public class S2Context {
     /**
      * 状态栈（支持嵌套状态恢复）
      */
-    private List<S2State> stateStack = new ArrayList<>();
-
-    /**
-     * 上一个逻辑连接词（and/or），用于 ? 条件的 and/or 放入 <if> 内部
-     */
-    private String lastLogicConnector;
+    private List<S2State> stateStack = new ArrayList<S2State>();
 
     /**
      * 当前扫描的 SQL 文本
@@ -134,14 +129,6 @@ public class S2Context {
         return this.output.toString();
     }
 
-    public String getLastLogicConnector() {
-        return lastLogicConnector;
-    }
-
-    public void setLastLogicConnector(String lastLogicConnector) {
-        this.lastLogicConnector = lastLogicConnector;
-    }
-
     public String getInput() {
         return input;
     }
@@ -151,7 +138,7 @@ public class S2Context {
     }
 
     /**
-     * 从指定位置开始读取到字符串结束或遇到指定字符
+     * 从指定位置开始读取子串
      */
     public String substring(int start, int end) {
         if (start < 0) {

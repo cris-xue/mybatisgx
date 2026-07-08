@@ -1,7 +1,7 @@
 package com.mybatisgx.dsl.mgxsql.model;
 
 /**
- * mgxsql 扫描状态枚举
+ * mgxsql 扫描状态枚举（v2）
  *
  * @author 薛承城
  * @date 2026/7/7
@@ -22,21 +22,6 @@ public enum S2State {
      * SET 域：set 关键字后的赋值区域
      */
     SET,
-
-    /**
-     * 简单可选条件：?字段名 开头
-     */
-    OPTIONAL_SIMPLE,
-
-    /**
-     * 表达式可选条件：?(expr)(condition)
-     */
-    OPTIONAL_EXPR,
-
-    /**
-     * LIKE 模式：%#{x}%、#{x}%、%#{x}
-     */
-    LIKE_PATTERN,
 
     /**
      * XML 标签透传：< 开头的标签原样输出

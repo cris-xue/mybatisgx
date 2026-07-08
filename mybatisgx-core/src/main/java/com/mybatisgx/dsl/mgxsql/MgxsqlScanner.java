@@ -3,24 +3,27 @@ package com.mybatisgx.dsl.mgxsql;
 import com.mybatisgx.dsl.mgxsql.model.S2Condition;
 import com.mybatisgx.dsl.mgxsql.model.S2Context;
 import com.mybatisgx.dsl.mgxsql.model.S2State;
-import com.mybatisgx.template.MybatisXmlHelper;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * mgxsql 逐字符状态机扫描器，将 mgxsql 简化语法文本转换为标准 MyBatis XML 文本
+ * mgxsql 逐字符状态机扫描器（v2），将 mgxsql 简化语法文本转换为标准 MyBatis XML 文本
  * <p>
- * 语法规则：
+ * 语法规则（v2）：
  * <ul>
  *   <li>where → &lt;where&gt;...&lt;/where&gt;</li>
  *   <li>set → &lt;set&gt;...&lt;/set&gt;</li>
- *   <li>?条件 → &lt;if test="参数非空"&gt; and 条件&lt;/if&gt;</li>
- *   <li>?(expr)(条件) → &lt;if test="expr"&gt; and (条件)&lt;/if&gt;</li>
- *   <li>in #{list} → &lt;foreach&gt;</li>
- *   <li>in (item:list)=>#{item.prop} → &lt;foreach&gt;</li>
- *   <li>%#{x}% / #{x}% / %#{x} → &lt;bind&gt; + like</li>
+ *   <li>#(sql) → &lt;if test="参数非空"&gt; sql&lt;/if&gt;</li>
+ *   <li>#(expr)(sql) → &lt;if test="expr"&gt; sql&lt;/if&gt;</li>
+ *   <li>#(and/or sql) → &lt;if&gt; and/or sql&lt;/if&gt;</li>
+ *   <li>:param → #{param}（参数绑定转换）</li>
+ *   <li>#{param} → 原样保留（兼容旧写法）</li>
+ *   <li>$variable → #{variable}（局部变量，foreach 迭代上下文）</li>
+ *   <li>in :list → &lt;foreach&gt;</li>
+ *   <li>in (item:list)=&gt;$item.prop → &lt;foreach&gt;</li>
+ *   <li>%:name% / :name% / %:name → &lt;bind&gt; + like</li>
  *   <li>XML 标签原样透传</li>
  * </ul>
  *
@@ -117,9 +120,22 @@ public class MgxsqlScanner {
             ctx.pushState(S2State.XML_TAG);
             return;
         }
-        // 检测 ? 可选条件
-        if (c == '?') {
-            this.processOptionalCondition(ctx);
+        // 检测 # 条件节点或 MyBatis #{param}
+        if (c == '#') {
+            char next = ctx.peekChar(1);
+            if (next == '(') {
+                this.processConditionNode(ctx);
+                return;
+            }
+            if (next == '{') {
+                // #{param} 原样输出（兼容旧写法）
+                ctx.appendOutput(c);
+                ctx.advance();
+                return;
+            }
+            // # 后跟其他字符，原样输出
+            ctx.appendOutput(c);
+            ctx.advance();
             return;
         }
         // 检测 in 关键字（必须在 WHERE 域）
@@ -127,33 +143,17 @@ public class MgxsqlScanner {
             this.processInClause(ctx);
             return;
         }
-        // 检测 and/or 逻辑连接词（记录但不消耗，留给 ? 处理）
-        if (this.isKeywordAt(ctx, "and") && this.isWordBoundaryBefore(ctx) && this.isWordBoundaryAfter(ctx, 3)) {
-            ctx.setLastLogicConnector("and");
-            ctx.appendOutput(" and");
-            ctx.setPosition(ctx.getPosition() + 3);
-            return;
-        }
-        if (this.isKeywordAt(ctx, "or") && this.isWordBoundaryBefore(ctx) && this.isWordBoundaryAfter(ctx, 2)) {
-            ctx.setLastLogicConnector("or");
-            ctx.appendOutput(" or");
-            ctx.setPosition(ctx.getPosition() + 2);
-            return;
-        }
-        // 检测 %#{ （LIKE 模式 - 左侧或双侧模糊）
-        if (c == '%' && ctx.peekChar(1) == '#' && ctx.peekChar(2) == '{') {
+        // 检测 %:name （LIKE 模式 - 左侧或双侧模糊）
+        if (c == '%' && ctx.peekChar(1) == ':') {
             this.processLikePattern(ctx);
             return;
         }
-        // 检测 #{param}% （右侧模糊匹配）
-        if (c == '#' && ctx.peekChar(1) == '{') {
-            String rightLikeResult = this.tryProcessRightLike(ctx);
-            if (rightLikeResult != null) {
-                ctx.appendOutput(rightLikeResult);
-                return;
-            }
+        // 检测 :param 参数绑定
+        if (c == ':' && this.isParamRefStart(ctx)) {
+            this.processParamRef(ctx);
+            return;
         }
-        // 默认原样输出（包括普通的 #{} 参数引用）
+        // 默认原样输出
         ctx.appendOutput(c);
         ctx.advance();
     }
@@ -182,9 +182,27 @@ public class MgxsqlScanner {
             ctx.setState(S2State.WHERE);
             return;
         }
-        // 检测 ? 可选条件
-        if (c == '?') {
-            this.processSetOptional(ctx);
+        // 检测 # 条件节点或 MyBatis #{param}
+        if (c == '#') {
+            char next = ctx.peekChar(1);
+            if (next == '(') {
+                this.processSetConditionNode(ctx);
+                return;
+            }
+            if (next == '{') {
+                // #{param} 原样输出（兼容旧写法）
+                ctx.appendOutput(c);
+                ctx.advance();
+                return;
+            }
+            // # 后跟其他字符，原样输出
+            ctx.appendOutput(c);
+            ctx.advance();
+            return;
+        }
+        // 检测 :param 参数绑定
+        if (c == ':' && this.isParamRefStart(ctx)) {
+            this.processParamRef(ctx);
             return;
         }
         // 逗号处理（SET 域的逗号保留，<set> 自动去除尾部逗号）
@@ -230,173 +248,207 @@ public class MgxsqlScanner {
         ctx.popState();
     }
 
-    // ==================== 可选条件处理 ====================
+    // ==================== 条件节点处理（WHERE 域） ====================
 
-    private void processOptionalCondition(S2Context ctx) {
-        // 跳过 ?
+    /**
+     * 处理 #(sql) 或 #(expr)(sql) 条件节点
+     */
+    private void processConditionNode(S2Context ctx) {
+        // 跳过 #
         ctx.advance();
-        // 判断是 ?(expr) 还是 ?字段
+        // 读取第一个 (...) 内容
+        String firstParen = this.readParenthesizedContent(ctx);
+
+        // 判定是隐式还是显式条件
         if (ctx.hasMore() && ctx.currentChar() == '(') {
-            this.processExprCondition(ctx);
+            // 显式条件：#(expr)(sql)
+            String expr = firstParen;
+            String sql = this.readParenthesizedContent(ctx);
+            this.emitExplicitCondition(ctx, expr, sql);
         } else {
-            this.processSimpleCondition(ctx);
+            // 隐式条件：#(sql)
+            this.emitImplicitCondition(ctx, firstParen);
         }
     }
 
     /**
-     * 处理 ?条件（简单可选条件）
-     * 读取到同级 and/or 截止
+     * 发射隐式条件 <if>：提取 :param 生成 isNotEmpty test
      */
-    private void processSimpleCondition(S2Context ctx) {
-        // 读取条件体（到下一个同级 and/or 或字符串结束）
-        String connector = ctx.getLastLogicConnector();
-        StringBuilder conditionBody = new StringBuilder();
-        List<String> paramPaths = new ArrayList<>();
-
-        while (ctx.hasMore()) {
-            // 检测 and/or 截止
-            if (this.isKeywordAt(ctx, "and") && this.isWordBoundaryBefore(ctx) && this.isWordBoundaryAfter(ctx, 3)) {
-                break;
-            }
-            if (this.isKeywordAt(ctx, "or") && this.isWordBoundaryBefore(ctx) && this.isWordBoundaryAfter(ctx, 2)) {
-                break;
-            }
-            // 检测 %#{ （LIKE 模式）
-            char c = ctx.currentChar();
-            if (c == '%' && ctx.peekChar(1) == '#' && ctx.peekChar(2) == '{') {
-                String likeResult = this.extractLikePattern(ctx, conditionBody, paramPaths);
-                if (likeResult != null) {
-                    continue;
-                }
-            }
-            // 检测 #{param}
-            if (c == '#' && ctx.peekChar(1) == '{') {
-                String paramPath = this.extractParamRef(ctx, conditionBody);
-                if (paramPath != null) {
-                    paramPaths.add(paramPath);
-                    continue;
-                }
-            }
-            // 检测 in #{list}
-            if (this.isKeywordAt(ctx, "in") && this.isWordBoundaryBefore(ctx) && this.isWordBoundaryAfter(ctx, 2)) {
-                String inResult = this.extractInClause(ctx, conditionBody, paramPaths);
-                if (inResult != null) {
-                    continue;
-                }
-            }
-            conditionBody.append(c);
-            ctx.advance();
-        }
-
-        // 生成 <if> 标签
-        String testExpression = this.buildTestExpression(paramPaths);
-        String ifContent = conditionBody.toString().trim();
-        String connectorInIf = this.resolveConnectorInIf(connector);
+    private void emitImplicitCondition(S2Context ctx, String sql) {
+        // 处理条件体内部的 mgxsql 语法，同时提取 :param
+        ProcessedBody processed = this.processConditionBody(sql);
+        String testExpression = this.buildTestExpression(processed.paramPaths);
+        String ifContent = processed.body.trim();
 
         ctx.appendOutput("<if test=\"");
         ctx.appendOutput(testExpression);
         ctx.appendOutput("\">");
-        ctx.appendOutput(connectorInIf);
         ctx.appendOutput(" ");
         ctx.appendOutput(ifContent);
         ctx.appendOutput("</if>");
-
-        ctx.setLastLogicConnector(null);
     }
 
     /**
-     * 处理 ?(expr)(condition)（表达式可选条件）
+     * 发射显式条件 <if>：expr 作为 test 表达式
      */
-    private void processExprCondition(S2Context ctx) {
-        // 读取表达式：?(expr) 中的 expr
-        String expression = this.readParenthesizedContent(ctx);
-        // 读取条件体：(condition) 中的 condition，同时处理其中的 in/like 等语法
-        String conditionBody = this.readAndProcessExprConditionBody(ctx);
-
-        String connector = ctx.getLastLogicConnector();
-        String connectorInIf = this.resolveConnectorInIf(connector);
+    private void emitExplicitCondition(S2Context ctx, String expr, String sql) {
+        // expr 中的 :param 去冒号作为变量名
+        String testExpr = this.stripParamColons(expr);
+        // sql 中的 :param 转换为 #{param}
+        ProcessedBody processed = this.processConditionBody(sql);
+        String ifContent = processed.body.trim();
 
         ctx.appendOutput("<if test=\"");
-        ctx.appendOutput(expression);
+        ctx.appendOutput(testExpr);
         ctx.appendOutput("\">");
-        ctx.appendOutput(connectorInIf);
-        ctx.appendOutput(" (");
-        ctx.appendOutput(conditionBody.trim());
-        ctx.appendOutput(")</if>");
+        ctx.appendOutput(" ");
+        ctx.appendOutput(ifContent);
+        ctx.appendOutput("</if>");
+    }
 
-        ctx.setLastLogicConnector(null);
+    // ==================== 条件节点处理（SET 域） ====================
+
+    /**
+     * 处理 SET 域的 #(sql) 或 #(expr)(sql) 条件节点
+     * 与 WHERE 域相同，但不处理 and/or 前缀
+     */
+    private void processSetConditionNode(S2Context ctx) {
+        // 跳过 #
+        ctx.advance();
+        // 读取第一个 (...) 内容
+        String firstParen = this.readParenthesizedContent(ctx);
+
+        if (ctx.hasMore() && ctx.currentChar() == '(') {
+            // 显式条件
+            String expr = firstParen;
+            String sql = this.readParenthesizedContent(ctx);
+            String testExpr = this.stripParamColons(expr);
+            ProcessedBody processed = this.processConditionBody(sql);
+            String ifContent = processed.body.trim();
+
+            ctx.appendOutput("<if test=\"");
+            ctx.appendOutput(testExpr);
+            ctx.appendOutput("\"> ");
+            ctx.appendOutput(ifContent);
+            ctx.appendOutput("</if>");
+        } else {
+            // 隐式条件
+            ProcessedBody processed = this.processConditionBody(firstParen);
+            String testExpression = this.buildTestExpression(processed.paramPaths);
+            String ifContent = processed.body.trim();
+
+            ctx.appendOutput("<if test=\"");
+            ctx.appendOutput(testExpression);
+            ctx.appendOutput("\"> ");
+            ctx.appendOutput(ifContent);
+            ctx.appendOutput("</if>");
+        }
+    }
+
+    // ==================== 条件体处理 ====================
+
+    /**
+     * 条件体处理结果
+     */
+    private static class ProcessedBody {
+        String body;
+        List<String> paramPaths;
+
+        ProcessedBody(String body, List<String> paramPaths) {
+            this.body = body;
+            this.paramPaths = paramPaths;
+        }
     }
 
     /**
-     * 读取并处理表达式条件体中的 mgxsql 语法（in #{}, %#{x}% 等）
+     * 处理条件体文本中的 mgxsql 语法
+     * - :param → #{param}，同时收集参数路径
+     * - and/or 前缀提取（WHERE 域）
+     * - in :list → <foreach>
+     * - in (item:list)=>$item.prop → <foreach>
+     * - %:name% / :name% / %:name → <bind> + like
+     * - #{param} 原样保留
      */
-    private String readAndProcessExprConditionBody(S2Context ctx) {
-        // 先用括号匹配读取原始条件体
-        String rawBody = this.readParenthesizedContent(ctx);
-        // 对条件体内部调用扫描器处理（子扫描）
-        // 为了简化，直接用完整扫描器处理条件体
-        // 但条件体不需要 where/set 转换，只需处理 in/like/#{} 等
-        return this.processConditionBody(rawBody);
-    }
-
-    /**
-     * 处理条件体文本中的 mgxsql 语法（in, like 等，但不处理 where/set/?）
-     */
-    private String processConditionBody(String text) {
+    private ProcessedBody processConditionBody(String text) {
         if (StringUtils.isBlank(text)) {
-            return text;
+            return new ProcessedBody(text, new ArrayList<String>());
         }
         StringBuilder result = new StringBuilder();
+        List<String> paramPaths = new ArrayList<String>();
         int i = 0;
         while (i < text.length()) {
             char c = text.charAt(i);
 
-            // 检测 in #{ (简单类型)
+            // 检测 in :list 或 in (item:list)=>$item.prop
             if (this.isKeywordAt(text, i, "in") && this.isWordBoundaryBefore(text, i) && this.isWordBoundaryAfter(text, i + 2)) {
-                int inEnd = this.processConditionIn(text, i, result);
+                int inEnd = this.processConditionIn(text, i, result, paramPaths);
                 if (inEnd > i) {
                     i = inEnd;
                     continue;
                 }
             }
 
-            // 检测 %#{ （LIKE 模式）
-            if (c == '%' && i + 1 < text.length() && text.charAt(i + 1) == '#' && i + 2 < text.length() && text.charAt(i + 2) == '{') {
-                int likeEnd = this.processConditionLike(text, i, result);
+            // 检测 %:name （LIKE 左侧或双侧模糊）
+            if (c == '%' && i + 1 < text.length() && text.charAt(i + 1) == ':') {
+                int likeEnd = this.processConditionLike(text, i, result, paramPaths);
                 if (likeEnd > i) {
                     i = likeEnd;
                     continue;
                 }
             }
 
-            // 检测 #{x}% （右侧 LIKE）
+            // 检测 :name% （LIKE 右侧模糊）
+            if (c == ':' && i + 1 < text.length() && this.isIdentifierStart(text.charAt(i + 1))) {
+                int paramNameEnd = this.findIdentifierEnd(text, i + 1);
+                String paramName = text.substring(i + 1, paramNameEnd);
+                // 检测后面是否有 %
+                if (paramNameEnd < text.length() && text.charAt(paramNameEnd) == '%') {
+                    // :name% 右侧模糊
+                    paramPaths.add(paramName);
+                    String bindName = "_like_" + paramName.replace('.', '_');
+                    String bindValue = paramName + " + '%'";
+                    result.append("<bind name=\"").append(bindName).append("\" value=\"").append(bindValue).append("\"/>");
+                    result.append("#{").append(bindName).append("}");
+                    i = paramNameEnd + 1; // 跳过 name%
+                    continue;
+                }
+                // 普通 :param → #{param}
+                paramPaths.add(paramName);
+                result.append("#{").append(paramName).append("}");
+                i = paramNameEnd;
+                continue;
+            }
+
+            // 检测 #{param}（兼容旧写法，原样保留）
             if (c == '#' && i + 1 < text.length() && text.charAt(i + 1) == '{') {
-                int paramEnd = this.findParamEnd(text, i);
+                int paramEnd = this.findBraceEnd(text, i + 2);
                 if (paramEnd > i) {
-                    String paramPath = text.substring(i + 2, paramEnd);
-                    // 检测后面是否有 %
-                    if (paramEnd + 1 < text.length() && text.charAt(paramEnd + 1) == '%') {
-                        // #{x}% 右侧模糊
-                        String bindName = "_like_" + paramPath.replace('.', '_');
-                        result.append("<bind name=\"").append(bindName).append("\" value=\"").append(paramPath).append(" + '%'\"/>");
-                        result.append("#{").append(bindName).append("}");
-                        i = paramEnd + 2; // 跳过 }%
-                        continue;
-                    }
-                    // 普通参数引用，原样输出
+                    // 原样输出 #{param}
                     result.append(text.substring(i, paramEnd + 1));
                     i = paramEnd + 1;
                     continue;
                 }
             }
 
+            // 检测 $variable（局部变量）→ #{variable}
+            if (c == '$' && i + 1 < text.length() && this.isIdentifierStart(text.charAt(i + 1))) {
+                int varNameEnd = this.findIdentifierEnd(text, i + 1);
+                String varName = text.substring(i + 1, varNameEnd);
+                result.append("#{").append(varName).append("}");
+                i = varNameEnd;
+                continue;
+            }
+
             result.append(c);
             i++;
         }
-        return result.toString();
+        return new ProcessedBody(result.toString(), paramPaths);
     }
 
-    private int processConditionIn(String text, int start, StringBuilder result) {
+    /**
+     * 处理条件体中的 IN 子句
+     */
+    private int processConditionIn(String text, int start, StringBuilder result, List<String> paramPaths) {
         int pos = start + 2; // 跳过 "in"
         // 跳过空白
         while (pos < text.length() && Character.isWhitespace(text.charAt(pos))) {
@@ -406,17 +458,16 @@ public class MgxsqlScanner {
             return start;
         }
 
-        // 简单类型 IN：#{list}
-        if (text.charAt(pos) == '#' && pos + 1 < text.length() && text.charAt(pos + 1) == '{') {
-            int paramEnd = this.findParamEnd(text, pos);
-            if (paramEnd > pos) {
-                String collectionName = text.substring(pos + 2, paramEnd);
-                result.append("in <foreach item=\"item\" collection=\"").append(collectionName).append("\" open=\"(\" close=\")\" separator=\",\">#{item}</foreach>");
-                return paramEnd + 1;
-            }
+        // 简单类型 IN：:list
+        if (text.charAt(pos) == ':' && pos + 1 < text.length() && this.isIdentifierStart(text.charAt(pos + 1))) {
+            int nameEnd = this.findIdentifierEnd(text, pos + 1);
+            String collectionName = text.substring(pos + 1, nameEnd);
+            paramPaths.add(collectionName);
+            result.append("in <foreach item=\"item\" collection=\"").append(collectionName).append("\" open=\"(\" close=\")\" separator=\",\">#{item}</foreach>");
+            return nameEnd;
         }
 
-        // 复杂类型 IN：(item:collection)=>#{item.prop}
+        // 复杂类型 IN：(item:collection)=>$item.prop
         if (text.charAt(pos) == '(') {
             pos++; // 跳过 (
             int itemNameStart = pos;
@@ -435,11 +486,20 @@ public class MgxsqlScanner {
                     pos++; // 跳过 )
                     if (pos < text.length() && text.charAt(pos) == '=' && pos + 1 < text.length() && text.charAt(pos + 1) == '>') {
                         pos += 2; // 跳过 =>
-                        // 读取 #{item.prop}
-                        if (pos < text.length() && text.charAt(pos) == '#' && pos + 1 < text.length() && text.charAt(pos + 1) == '{') {
-                            int valueEnd = this.findParamEnd(text, pos);
+                        // 读取 $item.prop 或 #{item.prop}
+                        if (pos < text.length() && text.charAt(pos) == '$' && pos + 1 < text.length() && this.isIdentifierStart(text.charAt(pos + 1))) {
+                            // $variable 局部变量
+                            int varEnd = this.findIdentifierEnd(text, pos + 1);
+                            String varName = text.substring(pos + 1, varEnd);
+                            paramPaths.add(collectionName);
+                            result.append("in <foreach item=\"").append(itemName).append("\" collection=\"").append(collectionName).append("\" open=\"(\" close=\")\" separator=\",\">#{").append(varName).append("}</foreach>");
+                            return varEnd;
+                        } else if (pos < text.length() && text.charAt(pos) == '#' && pos + 1 < text.length() && text.charAt(pos + 1) == '{') {
+                            // #{item.prop} 兼容旧写法
+                            int valueEnd = this.findBraceEnd(text, pos + 2);
                             if (valueEnd > pos) {
                                 String valueExpr = text.substring(pos, valueEnd + 1);
+                                paramPaths.add(collectionName);
                                 result.append("in <foreach item=\"").append(itemName).append("\" collection=\"").append(collectionName).append("\" open=\"(\" close=\")\" separator=\",\">").append(valueExpr).append("</foreach>");
                                 return valueEnd + 1;
                             }
@@ -452,22 +512,23 @@ public class MgxsqlScanner {
         return start; // 无法识别
     }
 
-    private int processConditionLike(String text, int start, StringBuilder result) {
-        // %#{x}% 或 %#{x}
+    /**
+     * 处理条件体中的 LIKE 模式（%:name% 或 %:name）
+     */
+    private int processConditionLike(String text, int start, StringBuilder result, List<String> paramPaths) {
         int pos = start + 1; // 跳过 %
-        if (pos >= text.length() || text.charAt(pos) != '#' || pos + 1 >= text.length() || text.charAt(pos + 1) != '{') {
+        if (pos >= text.length() || text.charAt(pos) != ':' || pos + 1 >= text.length() || !this.isIdentifierStart(text.charAt(pos + 1))) {
             return start;
         }
-        int paramEnd = this.findParamEnd(text, pos);
-        if (paramEnd <= pos) {
-            return start;
-        }
-        String paramName = text.substring(pos + 2, paramEnd);
-        S2Condition.LikeType likeType = S2Condition.LikeType.LEFT;
+        // 读取 :name
+        int paramNameEnd = this.findIdentifierEnd(text, pos + 1);
+        String paramName = text.substring(pos + 1, paramNameEnd);
+        paramPaths.add(paramName);
 
-        if (paramEnd + 1 < text.length() && text.charAt(paramEnd + 1) == '%') {
-            likeType = S2Condition.LikeType.BOTH;
-            paramEnd++; // 跳过 %
+        S2Condition.LikeType likeType = S2Condition.LikeType.LEFT;
+        if (paramNameEnd < text.length() && text.charAt(paramNameEnd) == '%') {
+            likeType = S2Condition.LikeType.BOTH; // %:name%
+            paramNameEnd++; // 跳过 %
         }
 
         String bindName = "_like_" + paramName.replace('.', '_');
@@ -475,91 +536,10 @@ public class MgxsqlScanner {
         result.append("<bind name=\"").append(bindName).append("\" value=\"").append(bindValue).append("\"/>");
         result.append("#{").append(bindName).append("}");
 
-        return paramEnd + 1;
+        return paramNameEnd;
     }
 
-    private boolean isKeywordAt(String text, int pos, String keyword) {
-        if (pos + keyword.length() > text.length()) {
-            return false;
-        }
-        return text.substring(pos, pos + keyword.length()).equalsIgnoreCase(keyword);
-    }
-
-    private boolean isWordBoundaryBefore(String text, int pos) {
-        if (pos == 0) {
-            return true;
-        }
-        char prev = text.charAt(pos - 1);
-        return !Character.isLetterOrDigit(prev) && prev != '_' && prev != '.';
-    }
-
-    private boolean isWordBoundaryAfter(String text, int pos) {
-        if (pos >= text.length()) {
-            return true;
-        }
-        char next = text.charAt(pos);
-        return !Character.isLetterOrDigit(next) && next != '_' && next != '.';
-    }
-
-    private int findParamEnd(String text, int start) {
-        // 找到 #{param} 中的 } 位置
-        if (start >= text.length() || text.charAt(start) != '#' || start + 1 >= text.length() || text.charAt(start + 1) != '{') {
-            return -1;
-        }
-        int pos = start + 2;
-        while (pos < text.length() && text.charAt(pos) != '}') {
-            pos++;
-        }
-        return pos < text.length() ? pos : -1;
-    }
-
-    // ==================== SET 域可选条件 ====================
-
-    private void processSetOptional(S2Context ctx) {
-        // 跳过 ?
-        ctx.advance();
-
-        // SET 域的 ? 类似 WHERE 域的简单可选条件，但不涉及 and/or
-        // 读取条件体（到逗号或 where 截止）
-        StringBuilder conditionBody = new StringBuilder();
-        List<String> paramPaths = new ArrayList<>();
-
-        while (ctx.hasMore()) {
-            // 检测 where 截止
-            if (this.isKeywordAt(ctx, "where") && this.isWordBoundaryBefore(ctx) && this.isWordBoundaryAfter(ctx, 5)) {
-                break;
-            }
-            char c = ctx.currentChar();
-            // 检测 #{param}
-            if (c == '#' && ctx.peekChar(1) == '{') {
-                String paramPath = this.extractParamRef(ctx, conditionBody);
-                if (paramPath != null) {
-                    paramPaths.add(paramPath);
-                    continue;
-                }
-            }
-            // 逗号截止（SET 域中每个条件以逗号分隔）
-            // 但逗号可能在 #{param} 内部，所以只检测独立的逗号
-            if (c == ',') {
-                conditionBody.append(c);
-                ctx.advance();
-                break;
-            }
-            conditionBody.append(c);
-            ctx.advance();
-        }
-
-        String testExpression = this.buildTestExpression(paramPaths);
-        String ifContent = conditionBody.toString().trim();
-
-        ctx.appendOutput("<if test=\"");
-        ctx.appendOutput(testExpression);
-        ctx.appendOutput("\"> ");
-        ctx.appendOutput(ifContent);
-        ctx.appendOutput("</if>");
-    }
-
-    // ==================== IN 子句处理 ====================
+    // ==================== IN 子句处理（WHERE 域直接扫描） ====================
 
     private void processInClause(S2Context ctx) {
         // 跳过 "in"
@@ -572,9 +552,18 @@ public class MgxsqlScanner {
             return;
         }
 
-        // 判断是 #{list} 还是 (item:list)=>#{item.prop}
+        // 简单类型 IN：:list
+        if (ctx.currentChar() == ':' && ctx.peekChar(1) != ':' && this.isIdentifierStartAt(ctx, 1)) {
+            String collectionName = this.readColonParamRef(ctx);
+            if (collectionName != null) {
+                ctx.appendOutput("in <foreach item=\"item\" collection=\"");
+                ctx.appendOutput(collectionName);
+                ctx.appendOutput("\" open=\"(\" close=\")\" separator=\",\">#{item}</foreach>");
+                return;
+            }
+        }
+        // 兼容旧写法：#{list}
         if (ctx.currentChar() == '#' && ctx.peekChar(1) == '{') {
-            // 简单类型 IN
             String collectionName = this.readParamRef(ctx);
             if (collectionName != null) {
                 ctx.appendOutput("in <foreach item=\"item\" collection=\"");
@@ -583,7 +572,7 @@ public class MgxsqlScanner {
                 return;
             }
         } else if (ctx.currentChar() == '(') {
-            // 复杂类型 IN：(item:collection)=>#{item.prop}
+            // 复杂类型 IN：(item:collection)=>$item.prop
             ctx.advance(); // 跳过 (
             String itemName = this.readIdentifier(ctx);
             if (ctx.hasMore() && ctx.currentChar() == ':') {
@@ -591,12 +580,23 @@ public class MgxsqlScanner {
                 String collectionName = this.readIdentifier(ctx);
                 if (ctx.hasMore() && ctx.currentChar() == ')') {
                     ctx.advance(); // 跳过 )
-                    // 读取 =>#{item.prop}
                     if (ctx.hasMore() && ctx.currentChar() == '=' && ctx.peekChar(1) == '>') {
                         ctx.advance(); // 跳过 =
                         ctx.advance(); // 跳过 >
-                        // 读取 #{item.prop}
-                        String valueExpr = this.readParamRefFull(ctx);
+                        // 读取 $item.prop
+                        String valueExpr = this.readDollarVarRef(ctx);
+                        if (valueExpr != null) {
+                            ctx.appendOutput("in <foreach item=\"");
+                            ctx.appendOutput(itemName);
+                            ctx.appendOutput("\" collection=\"");
+                            ctx.appendOutput(collectionName);
+                            ctx.appendOutput("\" open=\"(\" close=\")\" separator=\",\">");
+                            ctx.appendOutput(valueExpr);
+                            ctx.appendOutput("</foreach>");
+                            return;
+                        }
+                        // 兼容旧写法 #{item.prop}
+                        valueExpr = this.readParamRefFull(ctx);
                         if (valueExpr != null) {
                             ctx.appendOutput("in <foreach item=\"");
                             ctx.appendOutput(itemName);
@@ -615,24 +615,17 @@ public class MgxsqlScanner {
         ctx.appendOutput("in");
     }
 
-    // ==================== LIKE 模式处理 ====================
+    // ==================== LIKE 模式处理（WHERE 域直接扫描） ====================
 
     private void processLikePattern(S2Context ctx) {
-        // 检测三种 LIKE 模式：%#{x}%、#{x}%、%#{x}
-        // 这里的 %#{ 是由 WHERE 域检测到的
-        S2Condition.LikeType likeType = S2Condition.LikeType.NONE;
-        String paramName = null;
-
-        // 已经检测到 %#{，读取参数名
+        // 已检测到 %:name 或 %:name%
         ctx.advance(); // 跳过 %
-        paramName = this.readParamRef(ctx);
+        String paramName = this.readColonParamRef(ctx);
+        S2Condition.LikeType likeType = S2Condition.LikeType.LEFT;
 
-        // 检测后面的 %
         if (ctx.hasMore() && ctx.currentChar() == '%') {
-            likeType = S2Condition.LikeType.BOTH; // %#{x}%
+            likeType = S2Condition.LikeType.BOTH; // %:name%
             ctx.advance(); // 跳过 %
-        } else {
-            likeType = S2Condition.LikeType.LEFT; // %#{x}
         }
 
         if (paramName != null) {
@@ -646,128 +639,111 @@ public class MgxsqlScanner {
         }
     }
 
+    // ==================== 参数引用处理（:param → #{param}） ====================
+
     /**
-     * 在条件体提取中处理 LIKE 模式
+     * 检测当前位置是否是 :param 的起始（: 后跟标识符起始字符，且不是 ::）
      */
-    private String extractLikePattern(S2Context ctx, StringBuilder conditionBody, List<String> paramPaths) {
-        // 保存位置以便回退
-        int savedPos = ctx.getPosition();
-
-        // 检测 %#{
-        ctx.advance(); // 跳过 %
-        String paramName = this.readParamRef(ctx);
-        S2Condition.LikeType likeType = S2Condition.LikeType.LEFT;
-
-        if (ctx.hasMore() && ctx.currentChar() == '%') {
-            likeType = S2Condition.LikeType.BOTH;
-            ctx.advance(); // 跳过 %
+    private boolean isParamRefStart(S2Context ctx) {
+        int pos = ctx.getPosition();
+        // 不是 ::
+        if (ctx.peekChar(1) == ':') {
+            return false;
         }
+        // : 后跟标识符起始字符
+        char next = ctx.peekChar(1);
+        return this.isIdentifierStartChar(next);
+    }
 
+    private boolean isIdentifierStartChar(char c) {
+        return Character.isLetter(c) || c == '_';
+    }
+
+    private boolean isIdentifierStartAt(S2Context ctx, int offset) {
+        char c = ctx.peekChar(offset);
+        return this.isIdentifierStartChar(c);
+    }
+
+    /**
+     * 处理 :param → #{param}
+     */
+    private void processParamRef(S2Context ctx) {
+        String paramName = this.readColonParamRef(ctx);
         if (paramName != null) {
-            paramPaths.add(paramName);
-            String bindName = "_like_" + paramName.replace('.', '_');
-            String bindValue = this.buildLikeBindValue(paramName, likeType);
-            conditionBody.append("<bind name=\"").append(bindName).append("\" value=\"").append(bindValue).append("\"/>");
-            conditionBody.append("#{").append(bindName).append("}");
-            return "";
+            ctx.appendOutput("#{");
+            ctx.appendOutput(paramName);
+            ctx.appendOutput("}");
         }
-        // 回退
-        ctx.setPosition(savedPos);
-        return null;
-    }
-
-    // ==================== 参数引用提取 ====================
-
-    /**
-     * 从 #{param} 中提取参数路径，并将 #{param} 写入条件体
-     * 同时检测 #{param}% 右侧模糊匹配模式
-     */
-    private String extractParamRef(S2Context ctx, StringBuilder conditionBody) {
-        if (ctx.currentChar() != '#' || ctx.peekChar(1) != '{') {
-            return null;
-        }
-        String paramPath = this.readParamRef(ctx);
-        if (paramPath != null) {
-            // 检测后面是否有 % （右侧模糊匹配）
-            if (ctx.hasMore() && ctx.currentChar() == '%') {
-                ctx.advance(); // 跳过 %
-                String bindName = "_like_" + paramPath.replace('.', '_');
-                String bindValue = paramPath + " + '%'";
-                conditionBody.append("<bind name=\"").append(bindName).append("\" value=\"").append(bindValue).append("\"/>");
-                conditionBody.append("#{").append(bindName).append("}");
-            } else {
-                conditionBody.append("#{").append(paramPath).append("}");
-            }
-        }
-        return paramPath;
     }
 
     /**
-     * 在条件体提取中处理 IN 子句
+     * 读取 :param 中的参数名
      */
-    private String extractInClause(S2Context ctx, StringBuilder conditionBody, List<String> paramPaths) {
-        int savedPos = ctx.getPosition();
-
-        // 跳过 "in"
-        ctx.setPosition(ctx.getPosition() + 2);
-        this.skipWhitespace(ctx);
-
-        if (!ctx.hasMore()) {
-            ctx.setPosition(savedPos);
+    private String readColonParamRef(S2Context ctx) {
+        if (ctx.currentChar() != ':') {
             return null;
         }
-
-        if (ctx.currentChar() == '#' && ctx.peekChar(1) == '{') {
-            String collectionName = this.readParamRef(ctx);
-            if (collectionName != null) {
-                paramPaths.add(collectionName);
-                conditionBody.append("in <foreach item=\"item\" collection=\"")
-                        .append(collectionName)
-                        .append("\" open=\"(\" close=\")\" separator=\",\">#{item}</foreach>");
-                return "";
-            }
-        } else if (ctx.currentChar() == '(') {
-            ctx.advance();
-            String itemName = this.readIdentifier(ctx);
-            if (ctx.hasMore() && ctx.currentChar() == ':') {
+        ctx.advance(); // 跳过 :
+        if (!ctx.hasMore() || !this.isIdentifierStartChar(ctx.currentChar())) {
+            return null;
+        }
+        StringBuilder paramPath = new StringBuilder();
+        while (ctx.hasMore()) {
+            char c = ctx.currentChar();
+            if (Character.isLetterOrDigit(c) || c == '_' || c == '.') {
+                paramPath.append(c);
                 ctx.advance();
-                String collectionName = this.readIdentifier(ctx);
-                if (ctx.hasMore() && ctx.currentChar() == ')') {
-                    ctx.advance();
-                    if (ctx.hasMore() && ctx.currentChar() == '=' && ctx.peekChar(1) == '>') {
-                        ctx.advance();
-                        ctx.advance();
-                        String valueExpr = this.readParamRefFull(ctx);
-                        if (valueExpr != null) {
-                            paramPaths.add(collectionName);
-                            conditionBody.append("in <foreach item=\"")
-                                    .append(itemName)
-                                    .append("\" collection=\"")
-                                    .append(collectionName)
-                                    .append("\" open=\"(\" close=\")\" separator=\",\">")
-                                    .append(valueExpr)
-                                    .append("</foreach>");
-                            return "";
-                        }
-                    }
-                }
+            } else {
+                break;
             }
         }
+        return paramPath.length() > 0 ? paramPath.toString() : null;
+    }
 
-        ctx.setPosition(savedPos);
-        return null;
+    // ==================== 表达式中 :param 去冒号 ====================
+
+    /**
+     * 将表达式中的 :param 去冒号，例如 :age → age
+     */
+    private String stripParamColons(String expr) {
+        if (StringUtils.isBlank(expr)) {
+            return expr;
+        }
+        StringBuilder result = new StringBuilder();
+        int i = 0;
+        while (i < expr.length()) {
+            char c = expr.charAt(i);
+            if (c == ':' && i + 1 < expr.length() && this.isIdentifierStartChar(expr.charAt(i + 1))) {
+                // 检测不是 ::
+                if (i + 1 < expr.length() && expr.charAt(i + 1) == ':') {
+                    result.append(c);
+                    i++;
+                    continue;
+                }
+                // 跳过 :，输出标识符
+                i++; // 跳过 :
+                while (i < expr.length() && (Character.isLetterOrDigit(expr.charAt(i)) || expr.charAt(i) == '_' || expr.charAt(i) == '.')) {
+                    result.append(expr.charAt(i));
+                    i++;
+                }
+            } else {
+                result.append(c);
+                i++;
+            }
+        }
+        return result.toString();
     }
 
     // ==================== 辅助方法 ====================
 
     /**
-     * 读取括号内的内容（已跳过第一个 '('）
+     * 读取括号内的内容（已到达第一个 '(' 位置）
      */
     private String readParenthesizedContent(S2Context ctx) {
-        // 跳过 (
-        if (ctx.hasMore() && ctx.currentChar() == '(') {
-            ctx.advance();
+        if (!ctx.hasMore() || ctx.currentChar() != '(') {
+            return "";
         }
+        ctx.advance(); // 跳过 (
         int depth = 1;
         StringBuilder content = new StringBuilder();
         while (ctx.hasMore() && depth > 0) {
@@ -849,6 +825,30 @@ public class MgxsqlScanner {
     }
 
     /**
+     * 读取 $variable 引用，返回 #{variable} 形式
+     */
+    private String readDollarVarRef(S2Context ctx) {
+        if (ctx.currentChar() != '$') {
+            return null;
+        }
+        ctx.advance(); // 跳过 $
+        if (!ctx.hasMore() || !this.isIdentifierStartChar(ctx.currentChar())) {
+            return null;
+        }
+        StringBuilder varName = new StringBuilder();
+        while (ctx.hasMore()) {
+            char c = ctx.currentChar();
+            if (Character.isLetterOrDigit(c) || c == '_' || c == '.') {
+                varName.append(c);
+                ctx.advance();
+            } else {
+                break;
+            }
+        }
+        return varName.length() > 0 ? "#{" + varName.toString() + "}" : null;
+    }
+
+    /**
      * 读取标识符（字母、数字、下划线、点号）
      */
     private String readIdentifier(S2Context ctx) {
@@ -866,6 +866,35 @@ public class MgxsqlScanner {
     }
 
     /**
+     * 在文本中查找标识符结束位置
+     */
+    private int findIdentifierEnd(String text, int start) {
+        int pos = start;
+        while (pos < text.length() && (Character.isLetterOrDigit(text.charAt(pos)) || text.charAt(pos) == '_' || text.charAt(pos) == '.')) {
+            pos++;
+        }
+        return pos;
+    }
+
+    /**
+     * 在文本中查找 } 结束位置
+     */
+    private int findBraceEnd(String text, int start) {
+        int pos = start;
+        while (pos < text.length() && text.charAt(pos) != '}') {
+            pos++;
+        }
+        return pos < text.length() ? pos : -1;
+    }
+
+    /**
+     * 检测字符是否为标识符起始字符
+     */
+    private boolean isIdentifierStart(char c) {
+        return Character.isLetter(c) || c == '_';
+    }
+
+    /**
      * 检测指定位置是否是关键字
      */
     private boolean isKeywordAt(S2Context ctx, String keyword) {
@@ -876,6 +905,16 @@ public class MgxsqlScanner {
         }
         String sub = ctx.substring(pos, pos + len);
         return sub.equalsIgnoreCase(keyword);
+    }
+
+    /**
+     * 在文本中检测指定位置是否是关键字
+     */
+    private boolean isKeywordAt(String text, int pos, String keyword) {
+        if (pos + keyword.length() > text.length()) {
+            return false;
+        }
+        return text.substring(pos, pos + keyword.length()).equalsIgnoreCase(keyword);
     }
 
     /**
@@ -890,6 +929,14 @@ public class MgxsqlScanner {
         return !Character.isLetterOrDigit(prev) && prev != '_' && prev != '.';
     }
 
+    private boolean isWordBoundaryBefore(String text, int pos) {
+        if (pos == 0) {
+            return true;
+        }
+        char prev = text.charAt(pos - 1);
+        return !Character.isLetterOrDigit(prev) && prev != '_' && prev != '.';
+    }
+
     /**
      * 检测关键字后是否有单词边界
      */
@@ -899,6 +946,14 @@ public class MgxsqlScanner {
             return true;
         }
         char next = ctx.charAt(afterPos);
+        return !Character.isLetterOrDigit(next) && next != '_' && next != '.';
+    }
+
+    private boolean isWordBoundaryAfter(String text, int pos) {
+        if (pos >= text.length()) {
+            return true;
+        }
+        char next = text.charAt(pos);
         return !Character.isLetterOrDigit(next) && next != '_' && next != '.';
     }
 
@@ -947,9 +1002,6 @@ public class MgxsqlScanner {
             if (c == '>' && depth <= 0) {
                 return pos;
             }
-            if (c == '>' && depth > 0) {
-                // 继续找
-            }
             pos++;
         }
         return -1;
@@ -959,7 +1011,6 @@ public class MgxsqlScanner {
      * 检测指定位置是否是自闭合标签（如 <if ... />）
      */
     private boolean isClosingTagAt(S2Context ctx, int pos) {
-        // 往回找，看 > 前面是否有 /
         int searchPos = pos;
         while (searchPos < ctx.getInputLength()) {
             char c = ctx.charAt(searchPos);
@@ -972,17 +1023,17 @@ public class MgxsqlScanner {
     }
 
     /**
-     * 构建 <if> 的 test 表达式
+     * 构建 <if> 的 test 表达式（隐式条件）
      */
     private String buildTestExpression(List<String> paramPaths) {
         if (paramPaths == null || paramPaths.isEmpty()) {
             return "true";
         }
-        List<String> testParts = new ArrayList<>();
+        List<String> testParts = new ArrayList<String>();
         for (String paramPath : paramPaths) {
             // 对嵌套路径（如 entity.name），逐级生成 isNotEmpty
             String[] parts = paramPath.split("\\.");
-            List<String> currentPath = new ArrayList<>();
+            List<String> currentPath = new ArrayList<String>();
             for (int i = 0; i < parts.length; i++) {
                 currentPath.add(parts[i]);
                 String path = StringUtils.join(currentPath, ".");
@@ -990,17 +1041,6 @@ public class MgxsqlScanner {
             }
         }
         return StringUtils.join(testParts, " and ");
-    }
-
-    /**
-     * 解析 ? 条件在 <if> 内的连接词
-     */
-    private String resolveConnectorInIf(String connector) {
-        if (connector != null) {
-            return " " + connector;
-        }
-        // 首位条件补 and（<where> 会自动去除）
-        return " and";
     }
 
     /**
@@ -1028,29 +1068,5 @@ public class MgxsqlScanner {
         } else if (ctx.getState() == S2State.SET) {
             ctx.appendOutput("</set>");
         }
-    }
-
-    /**
-     * 尝试检测并处理 #{param}% 右侧模糊匹配模式
-     * 如果当前 #{param} 后面紧跟 %，则生成 <bind> + like
-     * 否则返回 null
-     */
-    private String tryProcessRightLike(S2Context ctx) {
-        int savedPos = ctx.getPosition();
-        String paramName = this.readParamRef(ctx);
-        if (paramName == null) {
-            ctx.setPosition(savedPos);
-            return null;
-        }
-        // 检测后面是否有 %
-        if (ctx.hasMore() && ctx.currentChar() == '%') {
-            ctx.advance(); // 跳过 %
-            String bindName = "_like_" + paramName.replace('.', '_');
-            String bindValue = paramName + " + '%'";
-            return "<bind name=\"" + bindName + "\" value=\"" + bindValue + "\"/>#{" + bindName + "}";
-        }
-        // 不是右侧模糊，回退位置，让默认处理
-        ctx.setPosition(savedPos);
-        return null;
     }
 }

@@ -16,7 +16,8 @@ public final class MgxsqlSyntaxHelper {
      */
     public static final String[] CLAUSE_KEYWORDS = {
             "order by", "group by", "having", "limit",
-            "union", "union all", "intersect", "except", "minus"
+            "union", "union all", "intersect", "except",
+            "for update"
     };
 
     private MgxsqlSyntaxHelper() {

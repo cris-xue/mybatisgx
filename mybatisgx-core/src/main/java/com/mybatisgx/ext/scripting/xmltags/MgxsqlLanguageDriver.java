@@ -31,7 +31,10 @@ public class MgxsqlLanguageDriver extends XMLLanguageDriver {
     public SqlSource createSqlSource(Configuration configuration, String script, Class<?> parameterType) {
         if (MgxsqlDetector.containsMgxsqlSyntax(script)) {
             String converted = this.scanner.process(script);
-            return super.createSqlSource(configuration, converted, parameterType);
+            // 转换后的文本包含 <where>/<if>/<foreach> 等动态标签，
+            // 需要包裹 <script> 标签才能被 XMLLanguageDriver 解析为 DynamicSqlSource
+            String wrapped = "<script>" + converted + "</script>";
+            return super.createSqlSource(configuration, wrapped, parameterType);
         }
         return super.createSqlSource(configuration, script, parameterType);
     }
@@ -41,8 +44,9 @@ public class MgxsqlLanguageDriver extends XMLLanguageDriver {
         String text = script.getStringBody("");
         if (MgxsqlDetector.containsMgxsqlSyntax(text)) {
             String converted = this.scanner.process(text);
-            // XNode 不可变，将转换后的文本作为 String 交给父类的 String 重载方法处理
-            return super.createSqlSource(configuration, converted, parameterType);
+            // XNode 不可变，将转换后的文本包裹 <script> 标签后交给父类的 String 重载方法处理
+            String wrapped = "<script>" + converted + "</script>";
+            return super.createSqlSource(configuration, wrapped, parameterType);
         }
         return super.createSqlSource(configuration, script, parameterType);
     }

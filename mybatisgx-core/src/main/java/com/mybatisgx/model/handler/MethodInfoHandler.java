@@ -111,19 +111,6 @@ public class MethodInfoHandler {
             methodInfo.setDynamic(method.getAnnotation(Dynamic.class) != null);
             methodInfo.setBatch(method.getAnnotation(BatchOperation.class) != null);
 
-            // @SimpleSql 和 @Statement 互斥校验
-            if (method.getAnnotation(SimpleSql.class) != null && method.getAnnotation(Statement.class) != null) {
-                throw new MybatisgxException("方法 %s 不能同时使用 @SimpleSql 和 @Statement 注解", methodName);
-            }
-
-            // @SimpleSql 注解：从 SQL 文本推断 SqlCommandType
-            SimpleSql simpleSql = method.getAnnotation(SimpleSql.class);
-            if (simpleSql != null) {
-                SqlCommandType inferredType = this.inferSqlCommandType(simpleSql.value());
-                if (inferredType != null) {
-                    methodInfo.setSqlCommandType(inferredType);
-                }
-            }
             methodInfo.setEntityParamInfo(methodParamContext.getEntityParamInfo());
             methodInfo.setQueryEntityParamInfo(methodParamContext.getQueryEntityParamInfo());
             methodInfo.setMethodParamInfoList(methodParamContext.getMethodParamInfoList());
@@ -410,26 +397,6 @@ public class MethodInfoHandler {
      * @param sqlText SQL 文本
      * @return SqlCommandType，无法推断时返回 null
      */
-    private SqlCommandType inferSqlCommandType(String sqlText) {
-        if (StringUtils.isBlank(sqlText)) {
-            return null;
-        }
-        String trimmed = sqlText.trim().toLowerCase();
-        if (trimmed.startsWith("select")) {
-            return SqlCommandType.SELECT;
-        }
-        if (trimmed.startsWith("update")) {
-            return SqlCommandType.UPDATE;
-        }
-        if (trimmed.startsWith("delete")) {
-            return SqlCommandType.DELETE;
-        }
-        if (trimmed.startsWith("insert")) {
-            return SqlCommandType.INSERT;
-        }
-        return null;
-    }
-
     private static class CommandTypeContext {
 
         private SqlCommandType sqlCommandType;

@@ -89,11 +89,6 @@ public class MethodInfo {
      */
     private MgxqlStatement mgxqlStatement;
 
-    /**
-     * mgxsql原始SQL文本（@SimpleSql注解来源）
-     */
-    private String mgxsqlText;
-
     public MapperInfo getMapperInfo() {
         return mapperInfo;
     }
@@ -260,13 +255,5 @@ public class MethodInfo {
 
     public void setMgxqlStatement(MgxqlStatement mgxqlStatement) {
         this.mgxqlStatement = mgxqlStatement;
-    }
-
-    public String getMgxsqlText() {
-        return mgxsqlText;
-    }
-
-    public void setMgxsqlText(String mgxsqlText) {
-        this.mgxsqlText = mgxsqlText;
     }
 }

@@ -566,4 +566,144 @@ public class MgxsqlScannerTest {
         }
         return count;
     }
+
+    // ==================== in (:list) 括号语法 ====================
+
+    @Test
+    public void test58_inParenSimpleList() {
+        String input = "select * from t_user where id in (:idList)";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("应包含 <foreach", output.contains("<foreach"));
+        Assert.assertTrue("collection 应为 idList", output.contains("collection=\"idList\""));
+        Assert.assertTrue("应包含 #{item}", output.contains("#{item}"));
+    }
+
+    @Test
+    public void test59_inParenSimpleListWithSpaces() {
+        String input = "select * from t_user where id in ( :idList )";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("应包含 <foreach", output.contains("<foreach"));
+        Assert.assertTrue("collection 应为 idList", output.contains("collection=\"idList\""));
+        Assert.assertTrue("应包含 #{item}", output.contains("#{item}"));
+    }
+
+    @Test
+    public void test60_inParenInConditionBody() {
+        String input = "select * from t_user where #[id in (:idList)]";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("应包含 <if>", output.contains("<if"));
+        Assert.assertTrue("应包含 <foreach", output.contains("<foreach"));
+        Assert.assertTrue("test 应包含 isNotEmpty(idList)", output.contains("isNotEmpty(idList)"));
+    }
+
+    @Test
+    public void test61_inParenInConditionBodyWithSpaces() {
+        String input = "select * from t_user where #[id in ( :idList )]";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("应包含 <if>", output.contains("<if"));
+        Assert.assertTrue("应包含 <foreach", output.contains("<foreach"));
+        Assert.assertTrue("collection 应为 idList", output.contains("collection=\"idList\""));
+    }
+
+    @Test
+    public void test62_form1InParen() {
+        String input = "select * from t_user where #id in (:idList)";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("应包含 <if>", output.contains("<if"));
+        Assert.assertTrue("应包含 <foreach", output.contains("<foreach"));
+        Assert.assertTrue("应包含 isNotEmpty(idList)", output.contains("isNotEmpty(idList)"));
+    }
+
+    @Test
+    public void test63_guardInParen() {
+        String input = "select * from t_user where #(idList != null)[id in (:idList)]";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("应包含 <if test=\"idList != null\">", output.contains("idList != null"));
+        Assert.assertTrue("应包含 <foreach", output.contains("<foreach"));
+    }
+
+    // ==================== in #{list} 原样透传 ====================
+
+    @Test
+    public void test64_inHashParamPassthrough() {
+        String input = "select * from t_user where id in #{idList}";
+        String output = this.scanner.process(input);
+        Assert.assertFalse("in #{idList} 不应翻译为 foreach", output.contains("<foreach"));
+        Assert.assertTrue("应原样保留 #{idList}", output.contains("#{idList}"));
+    }
+
+    @Test
+    public void test65_inParenHashParamPassthrough() {
+        String input = "select * from t_user where id in (#{idList})";
+        String output = this.scanner.process(input);
+        Assert.assertFalse("in (#{idList}) 不应翻译为 foreach", output.contains("<foreach"));
+        Assert.assertTrue("应原样保留 #{idList}", output.contains("#{idList}"));
+    }
+
+    // ==================== => 右边禁止 #{} ====================
+
+    @Test(expected = MybatisgxException.class)
+    public void test66_arrowRightNoHashParam() {
+        String input = "select * from t_user where id in (item:idList)=>#{item.id}";
+        this.scanner.process(input);
+    }
+
+    // ==================== 复杂 IN 空格容忍 ====================
+
+    @Test
+    public void test67_complexInWhitespaceTolerance() {
+        String input = "select * from t_user where id in ( item : idList ) =>$item.id";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("应包含 <foreach", output.contains("<foreach"));
+        Assert.assertTrue("item 应为自定义名", output.contains("item=\"item\""));
+        Assert.assertTrue("应包含 #{item.id}", output.contains("#{item.id}"));
+    }
+
+    @Test
+    public void test68_arrowWhitespaceTolerance() {
+        String input = "select * from t_user where id in (item:idList) => $item.id";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("应包含 <foreach", output.contains("<foreach"));
+        Assert.assertTrue("应包含 #{item.id}", output.contains("#{item.id}"));
+    }
+
+    // ==================== 降级 position 恢复 ====================
+
+    @Test
+    public void test69_fallbackPositionRestore() {
+        String input = "select * from t_user where id in something";
+        String output = this.scanner.process(input);
+        Assert.assertFalse("不应包含 foreach", output.contains("<foreach"));
+        Assert.assertTrue("应保留 something", output.contains("something"));
+    }
+
+    // ==================== where [body] / set [body] 空格容忍 ====================
+
+    @Test
+    public void test70_whereBracketWithSpace() {
+        String input = "select * from t_user where [id = :id] order by id";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("应包含 <where>", output.contains("<where>"));
+        Assert.assertTrue("应包含 </where>", output.contains("</where>"));
+        Assert.assertTrue("order by 应在 </where> 后", output.contains("</where> order by"));
+    }
+
+    @Test
+    public void test71_setBracketWithSpace() {
+        String input = "update t_user set [#[name = :name]] where id = :id";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("应包含 <set>", output.contains("<set>"));
+        Assert.assertTrue("应包含 </set>", output.contains("</set>"));
+        Assert.assertTrue("应包含 <where>", output.contains("<where>"));
+    }
+
+    // ==================== guard 表达式 trim ====================
+
+    @Test
+    public void test72_guardTrim() {
+        String input = "select * from t_user where #( :age > 1 )[age = :age]";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("guard 应为 age > 1（trim后无空格）", output.contains("age > 1"));
+        Assert.assertTrue("body 应为 age = #{age}", output.contains("age = #{age}"));
+    }
 }

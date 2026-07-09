@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mybatisgx.dsl.mgxsql.dao.MgxsqlXmlTestDao">
+
+    <select id="findByName" resultType="com.mybatisgx.dsl.mgxsql.entity.MgxsqlTestUser">
+        select * from mgxsql_test_user where #user_name = :userName
+    </select>
+
+    <select id="findByNameAndAge" resultType="com.mybatisgx.dsl.mgxsql.entity.MgxsqlTestUser">
+        select * from mgxsql_test_user where #[user_name = :userName and age = :age]
+    </select>
+
+    <update id="updateName">
+        update mgxsql_test_user set user_name = :userName where id = :id
+    </update>
+
+    <select id="findById" resultType="com.mybatisgx.dsl.mgxsql.entity.MgxsqlTestUser">
+        select * from mgxsql_test_user where id = #{id}
+    </select>
+
+</mapper>

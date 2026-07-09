@@ -452,7 +452,8 @@ public class MgxsqlConditionBodyProcessor {
     // ==================== 条件体内部 IN / LIKE 处理 ====================
 
     private int processConditionIn(String text, int start, StringBuilder result, List<String> paramPaths) {
-        int pos = start + 2;
+        int savedPos = start + 2;
+        int pos = savedPos;
         while (pos < text.length() && Character.isWhitespace(text.charAt(pos))) {
             pos++;
         }
@@ -460,7 +461,7 @@ public class MgxsqlConditionBodyProcessor {
             return start;
         }
 
-        // 简单类型 IN：:list
+        // 简单类型 IN：in :list
         if (text.charAt(pos) == ':' && pos + 1 < text.length() && MgxsqlSyntaxHelper.isIdentifierStart(text.charAt(pos + 1))) {
             int nameEnd = MgxsqlSyntaxHelper.findIdentifierEnd(text, pos + 1);
             String collectionName = text.substring(pos + 1, nameEnd);
@@ -469,25 +470,70 @@ public class MgxsqlConditionBodyProcessor {
             return nameEnd;
         }
 
-        // 复杂类型 IN：(item:collection)=>$item.prop
+        // 括号包裹 IN：in (:list) / in (item:collection)=>$item.prop
         if (text.charAt(pos) == '(') {
-            pos++;
+            pos++; // 跳过 (
+            while (pos < text.length() && Character.isWhitespace(text.charAt(pos))) {
+                pos++;
+            }
+            if (pos >= text.length()) {
+                return savedPos;
+            }
+
+            // in (:list) 或 in ( :list ) — 简单 IN + 括号
+            if (text.charAt(pos) == ':' && pos + 1 < text.length() && MgxsqlSyntaxHelper.isIdentifierStart(text.charAt(pos + 1))) {
+                int nameEnd = MgxsqlSyntaxHelper.findIdentifierEnd(text, pos + 1);
+                String collectionName = text.substring(pos + 1, nameEnd);
+                int afterName = nameEnd;
+                while (afterName < text.length() && Character.isWhitespace(text.charAt(afterName))) {
+                    afterName++;
+                }
+                if (afterName < text.length() && text.charAt(afterName) == ')') {
+                    afterName++; // 跳过 )
+                    paramPaths.add(collectionName);
+                    result.append("in <foreach item=\"item\" collection=\"").append(collectionName).append("\" open=\"(\" close=\")\" separator=\",\">#{item}</foreach>");
+                    return afterName;
+                }
+            }
+
+            // in (#{list}) — MyBatis 原生，不翻译，返回 savedPos 让外层原样输出
+            if (text.charAt(pos) == '#' && pos + 1 < text.length() && text.charAt(pos + 1) == '{') {
+                return start;
+            }
+
+            // in (item:collection)=>$item.prop — 复杂类型 IN
             int itemNameStart = pos;
             while (pos < text.length() && (Character.isLetterOrDigit(text.charAt(pos)) || text.charAt(pos) == '_' || text.charAt(pos) == '.')) {
                 pos++;
             }
             String itemName = text.substring(itemNameStart, pos);
-            if (pos < text.length() && text.charAt(pos) == ':') {
+            while (pos < text.length() && Character.isWhitespace(text.charAt(pos))) {
                 pos++;
+            }
+            if (pos < text.length() && text.charAt(pos) == ':') {
+                pos++; // 跳过 :
+                while (pos < text.length() && Character.isWhitespace(text.charAt(pos))) {
+                    pos++;
+                }
                 int collStart = pos;
                 while (pos < text.length() && (Character.isLetterOrDigit(text.charAt(pos)) || text.charAt(pos) == '_' || text.charAt(pos) == '.')) {
                     pos++;
                 }
                 String collectionName = text.substring(collStart, pos);
-                if (pos < text.length() && text.charAt(pos) == ')') {
+                while (pos < text.length() && Character.isWhitespace(text.charAt(pos))) {
                     pos++;
+                }
+                if (pos < text.length() && text.charAt(pos) == ')') {
+                    pos++; // 跳过 )
+                    while (pos < text.length() && Character.isWhitespace(text.charAt(pos))) {
+                        pos++;
+                    }
                     if (pos < text.length() && text.charAt(pos) == '=' && pos + 1 < text.length() && text.charAt(pos + 1) == '>') {
-                        pos += 2;
+                        pos += 2; // 跳过 =>
+                        while (pos < text.length() && Character.isWhitespace(text.charAt(pos))) {
+                            pos++;
+                        }
+                        // => 右边只接受 $variable，禁止 #{}
                         if (pos < text.length() && text.charAt(pos) == '$' && pos + 1 < text.length() && MgxsqlSyntaxHelper.isIdentifierStart(text.charAt(pos + 1))) {
                             int varEnd = MgxsqlSyntaxHelper.findIdentifierEnd(text, pos + 1);
                             String varName = text.substring(pos + 1, varEnd);
@@ -495,20 +541,14 @@ public class MgxsqlConditionBodyProcessor {
                             result.append("in <foreach item=\"").append(itemName).append("\" collection=\"").append(collectionName).append("\" open=\"(\" close=\")\" separator=\",\">#{").append(varName).append("}</foreach>");
                             return varEnd;
                         } else if (pos < text.length() && text.charAt(pos) == '#' && pos + 1 < text.length() && text.charAt(pos + 1) == '{') {
-                            int valueEnd = MgxsqlSyntaxHelper.findBraceEnd(text, pos + 2);
-                            if (valueEnd > pos) {
-                                String valueExpr = text.substring(pos, valueEnd + 1);
-                                paramPaths.add(collectionName);
-                                result.append("in <foreach item=\"").append(itemName).append("\" collection=\"").append(collectionName).append("\" open=\"(\" close=\")\" separator=\",\">").append(valueExpr).append("</foreach>");
-                                return valueEnd + 1;
-                            }
+                            throw new MybatisgxException("mgxsql 语法错误: '=>' 右边只接受 $variable 形式，不允许 #{}, 位置: %s", String.valueOf(pos));
                         }
                     }
                 }
             }
         }
 
-        return start;
+        return savedPos;
     }
 
     private int processConditionLike(String text, int start, StringBuilder result, List<String> paramPaths) {

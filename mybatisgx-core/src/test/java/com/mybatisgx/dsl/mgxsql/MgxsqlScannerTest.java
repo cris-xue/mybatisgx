@@ -528,6 +528,33 @@ public class MgxsqlScannerTest {
         Assert.assertTrue("应包含 id = #{id}", output.contains("id = #{id}"));
     }
 
+    // ==================== for update 关闭 WHERE 域 ====================
+
+    @Test
+    public void test55_forUpdateClosesWhere() {
+        String input = "select * from t_user where id = :id for update";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("</where> 应在 for update 前", output.contains("</where>for update"));
+    }
+
+    @Test
+    public void test56_forUpdateNowait() {
+        String input = "select * from t_user where id = :id for update nowait";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("</where> 应在 for update 前", output.contains("</where>for update"));
+        Assert.assertTrue("nowait 应原样输出", output.contains("nowait"));
+    }
+
+    // ==================== minus 不触发 WHERE 域关闭 ====================
+
+    @Test
+    public void test57_minusNotCloseWhere() {
+        String input = "select * from t_user where id = :id minus select * from t_order where id = :id";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("minus 不应触发 WHERE 域关闭，where 应包到末尾", output.contains("<where>"));
+        Assert.assertFalse("minus 不应是子句关键字", output.contains("</where> minus"));
+    }
+
     // ==================== 辅助方法 ====================
 
     private int countOccurrences(String str, String sub) {

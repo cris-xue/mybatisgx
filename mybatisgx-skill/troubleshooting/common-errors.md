@@ -468,6 +468,11 @@ When encountering issues, check:
 - [ ] MGXQL expression syntax is correct (see [MGXQL Reference](../knowledge/mgxql.md))
 - [ ] @Statement parameter names match `:paramName` references
 - [ ] Entity aliases provided in multi-entity queries
+- [ ] MGXSQL conditions use `:param` not `#{param}` in `#[...]` blocks
+- [ ] `#condition` / `#and` / `#or` are on their own line
+- [ ] `#[` and `where[` and `set[` brackets are properly closed
+- [ ] `@Lang(MgxsqlLanguageDriver.class)` is present when using MGXSQL syntax
+- [ ] `=>` right side uses `$variable` not `#{}` or `${}`
 
 ## MGXQL Syntax Errors
 
@@ -528,6 +533,55 @@ When encountering issues, check:
 - **Symptom**: Application fails to start with `MybatisgxException: MGXQL语义校验失败`
 - **Solution**: Check the MGXQL expression for syntax errors, missing aliases, or non-existent entity/field names
 - [ ] Appropriate fetch mode chosen for associations
+
+## MGXSQL Syntax Errors
+
+**36. `条件节点块内不允许使用 #{param}`**
+- **Cause**: Used `#{param}` inside a condition node block (`#[...]` or `#(expr)[...]`)
+- **Error**: `#[id = #{id}]`
+- **Solution**: Use `:param` syntax instead: `#[id = :id]`
+
+**37. `条件节点块内不允许使用 ${param}`**
+- **Cause**: Used `${param}` inside a condition node block
+- **Error**: `#[id = ${id}]`
+- **Solution**: Use `:param` syntax instead: `#[id = :id]`
+
+**38. `条件节点块内不允许使用 XML 标签`**
+- **Cause**: Used MyBatis XML tags inside a condition node block
+- **Error**: `#[<if test="id != null">id = :id</if>]`
+- **Solution**: Use MGXSQL condition syntax: `#(id != null)[id = :id]` or `#[id = :id]`
+
+**39. `'#condition' 形式1必须独占一行`**
+- **Cause**: `#condition` is on the same line as other text
+- **Error**: `where #id = :id` (inline)
+- **Solution**: Place on its own line:
+```sql
+where
+  #id = :id
+```
+
+**40. `'#and'/'#or' 必须独占一行`**
+- **Cause**: `#and` or `#or` is not on its own line
+- **Error**: `where #and name = :name`
+- **Solution**: Either place on its own line or use `#[and ...]` instead:
+```sql
+-- Option 1: Own line
+where
+  #and name = :name
+
+-- Option 2: Block syntax
+where #[and name = :name]
+```
+
+**41. `条件节点块内不允许 #and/#or 简写`**
+- **Cause**: Used `#and`/`#or` inside a `#[...]` or `#(expr)[...]` block
+- **Error**: `#[id = :id #and name = :name]`
+- **Solution**: Use nested `#[and ...]` syntax: `#[id = :id #[and name = :name]]`
+
+**42. `'[' 未闭合`**
+- **Cause**: Unclosed bracket in `where[`, `set[`, or `#[`
+- **Error**: `where[id = :id` or `#[name = :name`
+- **Solution**: Add the closing `]`: `where[id = :id]` or `#[name = :name]`
 
 ## Getting More Help
 

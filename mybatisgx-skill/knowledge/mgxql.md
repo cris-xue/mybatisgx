@@ -458,3 +458,69 @@ matching_op          = ["not"] ("between" | "in" | "like" | "left like" | "right
 ```
 
 > **Note**: This syntax reference is based on `MgxqlLexer.g4` and `MgxqlParser.g4` in `mybatisgx-core/src/main/resources/antlr/mgxql/`.
+
+---
+
+## MGXQL vs MGXSQL: When to Use Which
+
+MyBatisGX has two complementary SQL simplification features. MGXQL is an object query language for `@Statement`; MGXSQL is a dynamic SQL syntax for `@Select`/`@Update`/`@Delete` with `@Lang`. They serve different purposes.
+
+### Decision Tree
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│               Dynamic Condition Decision Tree                    │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  Need JOIN / aggregation / custom projection?                    │
+│     ├── Yes → @Statement (MGXQL) + optional ? prefix            │
+│     └── No ↓                                                    │
+│                                                                 │
+│  Need dynamic WHERE / SET conditions?                            │
+│     ├── Simple (1-3) → Method name query or QueryEntity         │
+│     ├── Complex dynamic → MGXSQL (@Lang + @Select/@Update)      │
+│     └── Dynamic + JOIN → @Statement (MGXQL) with ? prefix       │
+│                                                                 │
+│  Need <foreach>/<bind> generation?                               │
+│     └── Yes → MGXSQL (in :list / %:name% syntax)               │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Core Comparison
+
+| Dimension | MGXQL (@Statement) | MGXSQL (@Lang + @Select) |
+|-----------|-------------------|--------------------------|
+| Positioning | Object query language, HQL-like | Dynamic SQL syntax sugar |
+| SQL basis | Entity/field names (e.g., `User`, `name`) | Real table/column names (e.g., `t_user`, `name`) |
+| Dynamic conditions | `?` prefix (null check) | `#[body]` (isNotEmpty), `#(expr)[body]` (custom) |
+| JOIN | ✅ `left join ... on alias = alias` | ❌ |
+| Aggregation | ✅ `count(*)`, `max(field)`, etc. | ❌ |
+| IN/LIKE shorthand | ❌ Manual foreach/bind | ✅ Auto-generates `<foreach>` and `<bind>` |
+| Use case | Complex queries, multi-table joins | Dynamic conditions, optional params |
+
+### `?` prefix vs `#[body]`
+
+Both make conditions optional, but with different check mechanisms:
+
+```java
+// MGXQL ? prefix — null check
+@Statement("select * from User where ?name = :name and ?age > :age")
+// → <if test="name != null"> name = #{name} </if>
+// → <if test="age != null"> and age > #{age} </if>
+
+// MGXSQL #[body] — isNotEmpty check (also rejects empty string/collection)
+@Lang(MgxsqlLanguageDriver.class)
+@Select("select * from t_user where #[name = :name] #[and age > :age]")
+// → <if test="isNotEmpty(name)"> name = #{name} </if>
+// → <if test="isNotEmpty(age)"> and age > #{age} </if>
+```
+
+| Aspect | MGXQL `?` | MGXSQL `#[body]` |
+|--------|-----------|-------------------|
+| Check type | `param != null` | `isNotEmpty(param)` (rejects empty string/collection) |
+| Combine multiple params | Each `?` generates separate `<if>` | All params in one `<if>` with `and` |
+| Custom expression | Not supported | Use `#(expr)[body]` |
+| Auto foreach/bind | ❌ | ✅ |
+
+See [MGXSQL Syntax Reference](mgxsql.md) for complete MGXSQL documentation.

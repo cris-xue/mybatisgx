@@ -485,6 +485,35 @@ Select/Update methods in SimpleDao have built-in `@Dynamic` support:
 - `findPage`
 - Update methods with selective suffix
 
+### MGXSQL Dynamic SQL
+
+MGXSQL provides a more powerful dynamic SQL approach than `@Dynamic`. It lets you write optional conditions directly in SQL annotations using `#[...]` syntax, with auto-generated `<if>`, `<foreach>`, and `<bind>` tags.
+
+**QueryEntity approach vs MGXSQL approach:**
+
+```java
+// QueryEntity approach — need a separate class
+@QueryEntity(User.class)
+public class UserQuery extends User {
+    private String nameLike;
+    private Integer ageGt;
+}
+// Usage: userDao.findList(query);
+
+// MGXSQL approach — write dynamic SQL directly in DAO
+@Lang(MgxsqlLanguageDriver.class)
+@Select("select * from t_user where\n  #name like %:name%\n  #and age > :age")
+List<User> search(@Param("name") String name, @Param("age") Integer age);
+```
+
+**When to use MGXSQL over QueryEntity:**
+- Need IN list with auto-foreach (`in :idList`)
+- Need LIKE with auto-bind (`%:name%`)
+- Want all optional conditions in one method without a QueryEntity class
+- Dynamic SET clause (`set[#[name = :name], #[age = :age]]`)
+
+See [MGXSQL Syntax Reference](mgxsql.md) for complete documentation.
+
 ## Priority Rules
 
 ### SQL Generation Priority

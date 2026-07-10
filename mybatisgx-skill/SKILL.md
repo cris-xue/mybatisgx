@@ -103,6 +103,7 @@ Intent Categories:
 
 | Topic | File | Triggers |
 |-------|------|----------|
+| MGXSQL syntax, @Lang, MgxsqlScanner, dynamic SQL | `knowledge/mgxsql.md` | "mgxsql", "MGXSQL", "MgxsqlScanner", "MgxsqlLanguageDriver", "动态SQL", "可选条件", "where[", "set[", "#[", "#condition", "#and", "#or", "foreach", "bind", "动态查询", "动态更新" |
 | MGXQL syntax, @Statement, query language | `knowledge/mgxql.md` | "mgxql", "@Statement", "MGXQL", "语法", "语句", "join query", "aggregate", "可选条件" |
 | Core concepts, philosophy, comparison | `knowledge/core-concepts.md` | "what is", "philosophy", "vs JPA", "vs MyBatis-Plus" |
 | CRUD, method name query, QueryEntity, pagination | `knowledge/basic-features.md` | "CRUD", "method name", "query", "pagination" |
@@ -115,14 +116,14 @@ Intent Categories:
 | Generation Task | File | Triggers |
 |----------------|------|----------|
 | Entity classes | `templates/entity-templates.md` | "create entity", "generate entity", "add entity" |
-| DAO interfaces (including @Statement) | `templates/dao-templates.md` | "create DAO", "generate DAO", "add method", "@Statement" |
+| DAO interfaces (including @Statement, MGXSQL @Lang) | `templates/dao-templates.md` | "create DAO", "generate DAO", "add method", "@Statement", "动态查询", "可选条件", "@Lang", "mgxsql" |
 | Configuration files | `templates/config-templates.md` | "configure", "setup", "application.yml" |
 
 ### Troubleshooting Module Mapping
 
 | Problem Type | File | Triggers |
 |-------------|------|----------|
-| Common errors (including MGXQL errors) | `troubleshooting/common-errors.md` | "error", "not working", "problem", "issue", "MGXQL校验失败", "语法错误" |
+| Common errors (including MGXQL/MGXSQL errors) | `troubleshooting/common-errors.md` | "error", "not working", "problem", "issue", "MGXQL校验失败", "语法错误", "mgxsql语法错误", "#[未闭合", "条件节点块" |
 | Performance optimization | `troubleshooting/performance-guide.md` | "slow", "performance", "optimize", "N+1" |
 
 ## Response Guidelines
@@ -277,6 +278,8 @@ When responding to user requests:
 ├── knowledge/
 │   ├── core-concepts.md         # What is MyBatisGX, philosophy, comparison
 │   ├── basic-features.md        # CRUD, method names, QueryEntity, pagination
+│   ├── mgxsql.md                # MGXSQL dynamic SQL syntax reference
+│   ├── mgxql.md                 # MGXQL query language, @Statement
 │   ├── relation-queries.md      # Associations, fetch modes
 │   ├── advanced-features.md     # Logic delete, version, audit, composite keys
 │   └── best-practices.md        # Patterns, tips, recommendations

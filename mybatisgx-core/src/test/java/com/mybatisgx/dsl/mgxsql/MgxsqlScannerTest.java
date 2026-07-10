@@ -948,4 +948,113 @@ public class MgxsqlScannerTest {
         String output = this.scanner.process(input);
         Assert.assertTrue("XML if 标签应原样保留", output.contains("<if test=\"id != null\">"));
     }
+
+    // ==================== 智能 < 判断：SQL 比较运算符 vs XML 标签 ====================
+
+    @Test
+    public void test102_sqlLessThanNumber() {
+        // WHERE 域中 age < 18，< 后跟空格+数字，应为 SQL 比较运算符
+        String input = "select * from t_user where age < 18";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("应包含 <where>", output.contains("<where>"));
+        Assert.assertTrue("age < 18 应原样输出", output.contains("age < 18"));
+    }
+
+    @Test
+    public void test103_sqlLessThanParamRef() {
+        // WHERE 域中 age < :minAge，< 后跟空格+:param
+        String input = "select * from t_user where age < :minAge";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("应包含 <where>", output.contains("<where>"));
+        Assert.assertTrue("age < 应原样输出", output.contains("age <"));
+        Assert.assertTrue(":minAge 应转为 #{minAge}", output.contains("#{minAge}"));
+    }
+
+    @Test
+    public void test104_sqlLessThanInWhereBounded() {
+        // WHERE_BOUNDED 域中 score < 100
+        String input = "select * from t_user where[score < 100] order by id";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("应包含 <where>", output.contains("<where>"));
+        Assert.assertTrue("score < 100 应原样输出", output.contains("score < 100"));
+    }
+
+    @Test
+    public void test105_xmlIfTagStillRecognized() {
+        // <if test="..."> 仍被识别为 XML 标签（向后兼容）
+        String input = "select * from t_user where id = :id and <if test=\"id != null\">id = #{id}</if>";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("XML if 标签应原样保留", output.contains("<if test=\"id != null\">"));
+        Assert.assertTrue("</if> 应原样保留", output.contains("</if>"));
+    }
+
+    @Test
+    public void test106_xmlCloseIfTagStillRecognized() {
+        // </if> 闭合标签仍被识别
+        String input = "select * from t_user where <if test=\"id != null\">id = #{id}</if>";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("XML if 标签应原样保留", output.contains("<if test=\"id != null\">"));
+        Assert.assertTrue("</if> 应原样保留", output.contains("</if>"));
+    }
+
+    @Test
+    public void test107_mixedSqlLessThanAndXmlTag() {
+        // WHERE 域中混合 SQL 比较和 XML 标签
+        String input = "select * from t_user where age < :maxAge and <if test=\"id != null\">id = #{id}</if>";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("age < 应原样输出", output.contains("age <"));
+        Assert.assertTrue(":maxAge 应转为 #{maxAge}", output.contains("#{maxAge}"));
+        Assert.assertTrue("XML if 标签应原样保留", output.contains("<if test=\"id != null\">"));
+    }
+
+    @Test
+    public void test108_sqlLessThanNoSpace() {
+        // age<18 无空格紧贴，< 后跟数字，原样输出
+        String input = "select * from t_user where age<18";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("age<18 应原样输出", output.contains("age<18"));
+    }
+
+    @Test
+    public void test109_xmlTagInNormalDomain() {
+        // NORMAL 域中 <if> 标签正常透传
+        String input = "select * from t_user <if test=\"true\">where id = :id</if>";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("XML if 标签应原样保留", output.contains("<if test=\"true\">"));
+    }
+
+    @Test
+    public void test110_sqlLessThanInSetDomain() {
+        // SET 域中 < 作为 SQL 比较运算符
+        String input = "update t_user set #[age < :maxAge] where id = :id";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("应包含 <set>", output.contains("<set>"));
+        Assert.assertTrue("age < 应原样输出", output.contains("age <"));
+        Assert.assertTrue(":maxAge 应转为 #{maxAge}", output.contains("#{maxAge}"));
+    }
+
+    // ==================== 复杂 IN 外层括号独立测试 ====================
+
+    @Test
+    public void test111_complexInOuterParenSingleBracket() {
+        // in ((item:idList)=>$item.id) 外层括号被消费，foreach 生成单层括号
+        String input = "select * from t_user where id in ((item:idList)=>$item.id)";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("应包含 <foreach", output.contains("<foreach"));
+        Assert.assertTrue("item 应为自定义名", output.contains("item=\"item\""));
+        Assert.assertTrue("collection 应为 idList", output.contains("collection=\"idList\""));
+        Assert.assertTrue("应包含 #{item.id}", output.contains("#{item.id}"));
+        // 验证没有多余外层括号：输出中 "in" 后面直接跟 <foreach
+        Assert.assertTrue("in 后应直接跟 <foreach", output.contains("in <foreach"));
+    }
+
+    @Test
+    public void test112_complexInOuterParenWithSpaces() {
+        // in (( item : idList ) => $item.id ) 空格容忍 + 外层括号
+        String input = "select * from t_user where id in (( item : idList ) => $item.id )";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("应包含 <foreach", output.contains("<foreach"));
+        Assert.assertTrue("应包含 #{item.id}", output.contains("#{item.id}"));
+        Assert.assertTrue("in 后应直接跟 <foreach", output.contains("in <foreach"));
+    }
 }

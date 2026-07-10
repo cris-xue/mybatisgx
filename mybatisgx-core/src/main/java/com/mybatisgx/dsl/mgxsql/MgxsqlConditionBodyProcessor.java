@@ -100,14 +100,14 @@ public class MgxsqlConditionBodyProcessor {
                     paramPaths.add(paramName);
                     String bindName = "_like_" + paramName.replace('.', '_');
                     String bindValue = paramName + " + '%'";
-                    result.append("<bind name=\"").append(bindName).append("\" value=\"").append(bindValue).append("\"/>");
-                    result.append("#{").append(bindName).append("}");
+                    result.append(MgxsqlXmlFragment.bindTag(bindName, bindValue));
+                    result.append(MgxsqlXmlFragment.paramRef(bindName));
                     i = paramNameEnd + 1;
                     continue;
                 }
                 // 普通 :param → #{param}
                 paramPaths.add(paramName);
-                result.append("#{").append(paramName).append("}");
+                result.append(MgxsqlXmlFragment.paramRef(paramName));
                 i = paramNameEnd;
                 continue;
             }
@@ -264,11 +264,7 @@ public class MgxsqlConditionBodyProcessor {
             String ifContent = processed.body.trim();
             // 不冒泡：嵌套条件块的参数由嵌套条件自己的 <if> 守卫
 
-            result.append("<if test=\"");
-            result.append(testExpression);
-            result.append("\"> ");
-            result.append(ifContent);
-            result.append("</if>");
+            result.append(MgxsqlXmlFragment.ifTag(testExpression, ifContent));
 
             return pos;
         }
@@ -370,21 +366,13 @@ public class MgxsqlConditionBodyProcessor {
                 String ifContent = processed.body.trim();
                 // 不冒泡：空 guard 时嵌套条件块的参数由嵌套条件自己的 <if> 守卫
 
-                result.append("<if test=\"");
-                result.append(testExpression);
-                result.append("\"> ");
-                result.append(ifContent);
-                result.append("</if>");
+                result.append(MgxsqlXmlFragment.ifTag(testExpression, ifContent));
             } else {
                 String testExpr = this.stripParamColons(guardContent);
                 ProcessedBody processed = this.processConditionBody(bodyContent);
                 String ifContent = processed.body.trim();
 
-                result.append("<if test=\"");
-                result.append(testExpr);
-                result.append("\"> ");
-                result.append(ifContent);
-                result.append("</if>");
+                result.append(MgxsqlXmlFragment.ifTag(testExpr, ifContent));
             }
 
             return pos;
@@ -442,11 +430,7 @@ public class MgxsqlConditionBodyProcessor {
             String ifContent = processed.body.trim();
             // 不冒泡：形式1内嵌套条件块的参数由嵌套条件自己的 <if> 守卫
 
-            result.append("<if test=\"");
-            result.append(testExpression);
-            result.append("\"> ");
-            result.append(ifContent);
-            result.append("</if>");
+            result.append(MgxsqlXmlFragment.ifTag(testExpression, ifContent));
 
             return lineEnd;
         }
@@ -456,6 +440,9 @@ public class MgxsqlConditionBodyProcessor {
 
     // ==================== 条件体内部 IN / LIKE 处理 ====================
 
+    /**
+     * 条件体内 IN 子句入口：分发到子方法
+     */
     private int processConditionIn(String text, int start, StringBuilder result, List<String> paramPaths) {
         int savedPos = start + 2;
         int pos = savedPos;
@@ -470,72 +457,15 @@ public class MgxsqlConditionBodyProcessor {
         if (text.charAt(pos) == ':' && pos + 1 < text.length() && MgxsqlSyntaxHelper.isIdentifierStart(text.charAt(pos + 1))) {
             int nameEnd = MgxsqlSyntaxHelper.findIdentifierEnd(text, pos + 1);
             String collectionName = text.substring(pos + 1, nameEnd);
-            paramPaths.add(collectionName);
-            result.append("in <foreach item=\"item\" collection=\"").append(collectionName).append("\" open=\"(\" close=\")\" separator=\",\">#{item}</foreach>");
+            this.processConditionInSimple(collectionName, result, paramPaths);
             return nameEnd;
         }
 
-        // 括号包裹 IN：in (:list) / in (item:collection)=>$item.prop / in ((item:collection)=>$item.prop)
+        // 括号包裹 IN：in (...)
         if (text.charAt(pos) == '(') {
-            int outerParenPos = pos;
-            pos++; // 跳过 (
-            while (pos < text.length() && Character.isWhitespace(text.charAt(pos))) {
-                pos++;
-            }
-            if (pos >= text.length()) {
-                return savedPos;
-            }
-
-            // in ((item:collection)=>$item.prop) — 复杂 IN 外层括号包裹
-            if (text.charAt(pos) == '(') {
-                pos++; // 跳过内层 (
-                while (pos < text.length() && Character.isWhitespace(text.charAt(pos))) {
-                    pos++;
-                }
-                int innerResult = this.parseComplexInInner(text, pos, result, paramPaths, savedPos);
-                if (innerResult > savedPos) {
-                    // 成功解析内层复杂 IN，消费内层 )
-                    while (innerResult < text.length() && Character.isWhitespace(text.charAt(innerResult))) {
-                        innerResult++;
-                    }
-                    // 消费外层 )
-                    if (innerResult < text.length() && text.charAt(innerResult) == ')') {
-                        innerResult++;
-                    }
-                    return innerResult;
-                }
-                // 外层括号包裹解析失败，恢复位置继续尝试其他路径
-                pos = outerParenPos + 1;
-                while (pos < text.length() && Character.isWhitespace(text.charAt(pos))) {
-                    pos++;
-                }
-            }
-
-            // in (:list) 或 in ( :list ) — 简单 IN + 括号
-            if (text.charAt(pos) == ':' && pos + 1 < text.length() && MgxsqlSyntaxHelper.isIdentifierStart(text.charAt(pos + 1))) {
-                int nameEnd = MgxsqlSyntaxHelper.findIdentifierEnd(text, pos + 1);
-                String collectionName = text.substring(pos + 1, nameEnd);
-                int afterName = nameEnd;
-                while (afterName < text.length() && Character.isWhitespace(text.charAt(afterName))) {
-                    afterName++;
-                }
-                if (afterName < text.length() && text.charAt(afterName) == ')') {
-                    afterName++; // 跳过 )
-                    paramPaths.add(collectionName);
-                    result.append("in <foreach item=\"item\" collection=\"").append(collectionName).append("\" open=\"(\" close=\")\" separator=\",\">#{item}</foreach>");
-                    return afterName;
-                }
-            }
-
-            // in (#{list}) — MyBatis 原生，不翻译，返回 savedPos 让外层原样输出
-            if (text.charAt(pos) == '#' && pos + 1 < text.length() && text.charAt(pos + 1) == '{') {
-                return start;
-            }
-
-            // in (item:collection)=>$item.prop — 复杂类型 IN
-            int complexResult = this.parseComplexInInner(text, pos, result, paramPaths, savedPos);
-            if (complexResult > savedPos) {
-                return complexResult;
+            int parenResult = this.processConditionInParenthesized(text, pos, result, paramPaths, start, savedPos);
+            if (parenResult > savedPos) {
+                return parenResult;
             }
         }
 
@@ -543,11 +473,77 @@ public class MgxsqlConditionBodyProcessor {
     }
 
     /**
-     * 解析复杂 IN 内层：(item:collection)=>$var
-     * pos 指向 item 标识符起始位置，已跳过内层 (
-     * 成功返回内层 ) 之后的下一个位置，失败返回 savedPos
+     * 条件体内简单 IN：in :list
      */
-    private int parseComplexInInner(String text, int pos, StringBuilder result, List<String> paramPaths, int savedPos) {
+    private void processConditionInSimple(String collectionName, StringBuilder result, List<String> paramPaths) {
+        paramPaths.add(collectionName);
+        result.append("in ").append(MgxsqlXmlFragment.foreachSimple(collectionName));
+    }
+
+    /**
+     * 条件体内括号包裹 IN 入口：in (...) 内部分发
+     *
+     * @return 消费到的位置，若无法识别返回 savedPos
+     */
+    private int processConditionInParenthesized(String text, int pos, StringBuilder result, List<String> paramPaths, int start, int savedPos) {
+        int outerParenPos = pos;
+        pos++; // 跳过 (
+        while (pos < text.length() && Character.isWhitespace(text.charAt(pos))) {
+            pos++;
+        }
+        if (pos >= text.length()) {
+            return savedPos;
+        }
+
+        // in ((item:collection)=>$item.prop) — 复杂 IN 外层括号包裹
+        if (text.charAt(pos) == '(') {
+            int innerStartPos = pos + 1; // 跳过内层 (
+            while (innerStartPos < text.length() && Character.isWhitespace(text.charAt(innerStartPos))) {
+                innerStartPos++;
+            }
+            int innerResult = this.processConditionInComplexWrapped(text, innerStartPos, result, paramPaths, savedPos);
+            if (innerResult > savedPos) {
+                // 成功解析内层复杂 IN，消费空白和外层 )
+                while (innerResult < text.length() && Character.isWhitespace(text.charAt(innerResult))) {
+                    innerResult++;
+                }
+                if (innerResult < text.length() && text.charAt(innerResult) == ')') {
+                    innerResult++;
+                }
+                return innerResult;
+            }
+            // 外层括号包裹解析失败，恢复位置继续尝试其他路径
+            pos = outerParenPos + 1;
+            while (pos < text.length() && Character.isWhitespace(text.charAt(pos))) {
+                pos++;
+            }
+        }
+
+        // in (:list) — 简单 IN + 括号
+        if (text.charAt(pos) == ':' && pos + 1 < text.length() && MgxsqlSyntaxHelper.isIdentifierStart(text.charAt(pos + 1))) {
+            int afterPos = this.processConditionInSimpleParen(text, pos, result, paramPaths);
+            if (afterPos >= 0) {
+                return afterPos;
+            }
+        }
+
+        // in (#{list}) — MyBatis 原生，不翻译
+        if (text.charAt(pos) == '#' && pos + 1 < text.length() && text.charAt(pos + 1) == '{') {
+            return start;
+        }
+
+        // in (item:collection)=>$item.prop — 复杂类型 IN（无外层括号）
+        return this.processConditionInComplexParen(text, pos, result, paramPaths, savedPos);
+    }
+
+    /**
+     * 条件体内复杂 IN 外层括号包裹：in ((item:collection)=&gt;$var)
+     * <p>
+     * pos 指向 item 标识符起始位置，已跳过内层 (
+     *
+     * @return 成功返回内层 ) 之后的下一个位置，失败返回 savedPos
+     */
+    private int processConditionInComplexWrapped(String text, int pos, StringBuilder result, List<String> paramPaths, int savedPos) {
         int itemNameStart = pos;
         while (pos < text.length() && (Character.isLetterOrDigit(text.charAt(pos)) || text.charAt(pos) == '_' || text.charAt(pos) == '.')) {
             pos++;
@@ -584,7 +580,84 @@ public class MgxsqlConditionBodyProcessor {
                         int varEnd = MgxsqlSyntaxHelper.findIdentifierEnd(text, pos + 1);
                         String varName = text.substring(pos + 1, varEnd);
                         paramPaths.add(collectionName);
-                        result.append("in <foreach item=\"").append(itemName).append("\" collection=\"").append(collectionName).append("\" open=\"(\" close=\")\" separator=\",\">#{").append(varName).append("}</foreach>");
+                        result.append("in ").append(MgxsqlXmlFragment.foreachComplex(itemName, collectionName, MgxsqlXmlFragment.paramRef(varName)));
+                        return varEnd;
+                    } else if (pos < text.length() && text.charAt(pos) == '#' && pos + 1 < text.length() && text.charAt(pos + 1) == '{') {
+                        throw new MybatisgxException("mgxsql 语法错误: '=>' 右边只接受 $variable 形式，不允许 #{} / ${}, 位置: %s", String.valueOf(pos));
+                    } else if (pos < text.length() && text.charAt(pos) == '$' && pos + 1 < text.length() && text.charAt(pos + 1) == '{') {
+                        throw new MybatisgxException("mgxsql 语法错误: '=>' 右边只接受 $variable 形式，不允许 #{} / ${}, 位置: %s", String.valueOf(pos));
+                    }
+                }
+            }
+        }
+        return savedPos;
+    }
+
+    /**
+     * 条件体内括号包裹简单 IN：in (:list)
+     *
+     * @return 成功返回 ) 之后的下一个位置，失败返回 -1
+     */
+    private int processConditionInSimpleParen(String text, int pos, StringBuilder result, List<String> paramPaths) {
+        int nameEnd = MgxsqlSyntaxHelper.findIdentifierEnd(text, pos + 1);
+        String collectionName = text.substring(pos + 1, nameEnd);
+        int afterName = nameEnd;
+        while (afterName < text.length() && Character.isWhitespace(text.charAt(afterName))) {
+            afterName++;
+        }
+        if (afterName < text.length() && text.charAt(afterName) == ')') {
+            afterName++; // 跳过 )
+            this.processConditionInSimple(collectionName, result, paramPaths);
+            return afterName;
+        }
+        return -1;
+    }
+
+    /**
+     * 条件体内复杂 IN（无外层括号）：in (item:collection)=&gt;$var
+     * <p>
+     * 合并原 parseComplexInInner 逻辑
+     *
+     * @return 成功返回消费到的位置，失败返回 savedPos
+     */
+    private int processConditionInComplexParen(String text, int pos, StringBuilder result, List<String> paramPaths, int savedPos) {
+        int itemNameStart = pos;
+        while (pos < text.length() && (Character.isLetterOrDigit(text.charAt(pos)) || text.charAt(pos) == '_' || text.charAt(pos) == '.')) {
+            pos++;
+        }
+        String itemName = text.substring(itemNameStart, pos);
+        while (pos < text.length() && Character.isWhitespace(text.charAt(pos))) {
+            pos++;
+        }
+        if (pos < text.length() && text.charAt(pos) == ':') {
+            pos++; // 跳过 :
+            while (pos < text.length() && Character.isWhitespace(text.charAt(pos))) {
+                pos++;
+            }
+            int collStart = pos;
+            while (pos < text.length() && (Character.isLetterOrDigit(text.charAt(pos)) || text.charAt(pos) == '_' || text.charAt(pos) == '.')) {
+                pos++;
+            }
+            String collectionName = text.substring(collStart, pos);
+            while (pos < text.length() && Character.isWhitespace(text.charAt(pos))) {
+                pos++;
+            }
+            if (pos < text.length() && text.charAt(pos) == ')') {
+                pos++; // 跳过 )
+                while (pos < text.length() && Character.isWhitespace(text.charAt(pos))) {
+                    pos++;
+                }
+                if (pos < text.length() && text.charAt(pos) == '=' && pos + 1 < text.length() && text.charAt(pos + 1) == '>') {
+                    pos += 2; // 跳过 =>
+                    while (pos < text.length() && Character.isWhitespace(text.charAt(pos))) {
+                        pos++;
+                    }
+                    // => 右边只接受 $variable，禁止 #{} 和 ${}
+                    if (pos < text.length() && text.charAt(pos) == '$' && pos + 1 < text.length() && MgxsqlSyntaxHelper.isIdentifierStart(text.charAt(pos + 1))) {
+                        int varEnd = MgxsqlSyntaxHelper.findIdentifierEnd(text, pos + 1);
+                        String varName = text.substring(pos + 1, varEnd);
+                        paramPaths.add(collectionName);
+                        result.append("in ").append(MgxsqlXmlFragment.foreachComplex(itemName, collectionName, MgxsqlXmlFragment.paramRef(varName)));
                         return varEnd;
                     } else if (pos < text.length() && text.charAt(pos) == '#' && pos + 1 < text.length() && text.charAt(pos + 1) == '{') {
                         throw new MybatisgxException("mgxsql 语法错误: '=>' 右边只接受 $variable 形式，不允许 #{} / ${}, 位置: %s", String.valueOf(pos));
@@ -614,8 +687,8 @@ public class MgxsqlConditionBodyProcessor {
 
         String bindName = "_like_" + paramName.replace('.', '_');
         String bindValue = this.buildLikeBindValue(paramName, likeType);
-        result.append("<bind name=\"").append(bindName).append("\" value=\"").append(bindValue).append("\"/>");
-        result.append("#{").append(bindName).append("}");
+        result.append(MgxsqlXmlFragment.bindTag(bindName, bindValue));
+        result.append(MgxsqlXmlFragment.paramRef(bindName));
 
         return paramNameEnd;
     }

@@ -118,11 +118,11 @@ public class MgxsqlScanner {
                 checkPos++;
             }
             if (checkPos < ctx.getInputLength() && ctx.charAt(checkPos) == '[') {
-                ctx.appendOutput("<where>");
+                ctx.appendOutput(MgxsqlXmlFragment.openWhere());
                 ctx.setPosition(checkPos + 1);
                 ctx.setState(MgxsqlState.WHERE_BOUNDED);
             } else {
-                ctx.appendOutput("<where>");
+                ctx.appendOutput(MgxsqlXmlFragment.openWhere());
                 ctx.setPosition(afterWhere);
                 ctx.setState(MgxsqlState.WHERE);
             }
@@ -135,11 +135,11 @@ public class MgxsqlScanner {
                 checkPos++;
             }
             if (checkPos < ctx.getInputLength() && ctx.charAt(checkPos) == '[') {
-                ctx.appendOutput("<set>");
+                ctx.appendOutput(MgxsqlXmlFragment.openSet());
                 ctx.setPosition(checkPos + 1);
                 ctx.setState(MgxsqlState.SET_BOUNDED);
             } else {
-                ctx.appendOutput("<set>");
+                ctx.appendOutput(MgxsqlXmlFragment.openSet());
                 ctx.setPosition(afterSet);
                 ctx.setState(MgxsqlState.SET);
             }
@@ -170,12 +170,12 @@ public class MgxsqlScanner {
             return;
         }
         if (MgxsqlSyntaxHelper.isClauseKeywordAt(ctx)) {
-            ctx.appendOutput("</where>");
+            ctx.appendOutput(MgxsqlXmlFragment.closeWhere());
             ctx.setState(MgxsqlState.NORMAL);
             return;
         }
         if (c == '#') {
-            this.processHash(ctx, ScopeType.WHERE);
+            this.processHash(ctx);
             return;
         }
         if (MgxsqlSyntaxHelper.isKeywordAt(ctx, "in") && MgxsqlSyntaxHelper.isWordBoundaryBefore(ctx) && MgxsqlSyntaxHelper.isWordBoundaryAfter(ctx, 2)) {
@@ -199,7 +199,7 @@ public class MgxsqlScanner {
     private void processWhereBounded(MgxsqlContext ctx) {
         char c = ctx.currentChar();
         if (c == ']') {
-            ctx.appendOutput("</where>");
+            ctx.appendOutput(MgxsqlXmlFragment.closeWhere());
             ctx.setState(MgxsqlState.NORMAL);
             ctx.advance();
             return;
@@ -221,7 +221,7 @@ public class MgxsqlScanner {
             return;
         }
         if (c == '#') {
-            this.processHash(ctx, ScopeType.WHERE);
+            this.processHash(ctx);
             return;
         }
         if (MgxsqlSyntaxHelper.isKeywordAt(ctx, "in") && MgxsqlSyntaxHelper.isWordBoundaryBefore(ctx) && MgxsqlSyntaxHelper.isWordBoundaryAfter(ctx, 2)) {
@@ -261,25 +261,25 @@ public class MgxsqlScanner {
             return;
         }
         if (MgxsqlSyntaxHelper.isKeywordAt(ctx, "where")) {
-            ctx.appendOutput("</set>");
+            ctx.appendOutput(MgxsqlXmlFragment.closeSet());
             int afterWhere = ctx.getPosition() + 5;
             int checkPos = afterWhere;
             while (checkPos < ctx.getInputLength() && Character.isWhitespace(ctx.charAt(checkPos))) {
                 checkPos++;
             }
             if (checkPos < ctx.getInputLength() && ctx.charAt(checkPos) == '[') {
-                ctx.appendOutput("<where>");
+                ctx.appendOutput(MgxsqlXmlFragment.openWhere());
                 ctx.setPosition(checkPos + 1);
                 ctx.setState(MgxsqlState.WHERE_BOUNDED);
             } else {
-                ctx.appendOutput("<where>");
+                ctx.appendOutput(MgxsqlXmlFragment.openWhere());
                 ctx.setPosition(afterWhere);
                 ctx.setState(MgxsqlState.WHERE);
             }
             return;
         }
         if (c == '#') {
-            this.processHash(ctx, ScopeType.SET);
+            this.processHash(ctx);
             return;
         }
         if (c == ':' && MgxsqlSyntaxHelper.isParamRefStart(ctx)) {
@@ -295,7 +295,7 @@ public class MgxsqlScanner {
     private void processSetBounded(MgxsqlContext ctx) {
         char c = ctx.currentChar();
         if (c == ']') {
-            ctx.appendOutput("</set>");
+            ctx.appendOutput(MgxsqlXmlFragment.closeSet());
             ctx.setState(MgxsqlState.NORMAL);
             ctx.advance();
             return;
@@ -317,7 +317,7 @@ public class MgxsqlScanner {
             return;
         }
         if (c == '#') {
-            this.processHash(ctx, ScopeType.SET);
+            this.processHash(ctx);
             return;
         }
         if (c == ':' && MgxsqlSyntaxHelper.isParamRefStart(ctx)) {
@@ -366,14 +366,14 @@ public class MgxsqlScanner {
     /**
      * 统一处理 # 字符，根据 scope 区分 WHERE/SET 域
      */
-    private void processHash(MgxsqlContext ctx, ScopeType scope) {
+    private void processHash(MgxsqlContext ctx) {
         char next = ctx.peekChar(1);
         if (next == '[') {
-            this.processConditionNodeNoGuard(ctx, scope);
+            this.processConditionNodeNoGuard(ctx);
             return;
         }
         if (next == '(') {
-            this.processConditionNodeWithGuard(ctx, scope);
+            this.processConditionNodeWithGuard(ctx);
             return;
         }
         if (next == '{') {
@@ -387,7 +387,7 @@ public class MgxsqlScanner {
                 throw new MybatisgxException("mgxsql 语法错误: '#and'/'#or' 必须独占一行，%s",
                         ctx.getPositionInfo());
             }
-            this.processForm1WithPrefix(ctx, scope);
+            this.processForm1WithPrefix(ctx);
             return;
         }
         if (MgxsqlSyntaxHelper.isIdentifierStartChar(next)) {
@@ -395,7 +395,7 @@ public class MgxsqlScanner {
                 throw new MybatisgxException("mgxsql 语法错误: '#condition' 形式1必须独占一行，%s",
                         ctx.getPositionInfo());
             }
-            this.processForm1Condition(ctx, scope);
+            this.processForm1Condition(ctx);
             return;
         }
         throw new MybatisgxException("mgxsql 语法错误: '#' 后必须跟 '['、'('、'{'、'and'/'or' 或标识符，%s",
@@ -422,7 +422,7 @@ public class MgxsqlScanner {
 
     // ==================== #[body] 无 guard 条件体 ====================
 
-    private void processConditionNodeNoGuard(MgxsqlContext ctx, ScopeType scope) {
+    private void processConditionNodeNoGuard(MgxsqlContext ctx) {
         ctx.advance(); // 跳过 #
         ctx.advance(); // 跳过 [
         String bodyContent = this.readBracketedContent(ctx);
@@ -431,12 +431,12 @@ public class MgxsqlScanner {
         String testExpression = this.conditionBodyProcessor.buildTestExpression(processed.getParamPaths());
         String ifContent = processed.getBody().trim();
 
-        this.emitIfTag(ctx, scope, testExpression, ifContent);
+        this.emitIfTag(ctx, testExpression, ifContent);
     }
 
     // ==================== #(expr)[body] 有 guard 条件体 ====================
 
-    private void processConditionNodeWithGuard(MgxsqlContext ctx, ScopeType scope) {
+    private void processConditionNodeWithGuard(MgxsqlContext ctx) {
         ctx.advance(); // 跳过 #
         String guardContent = this.readParenthesizedContent(ctx).trim();
 
@@ -461,24 +461,24 @@ public class MgxsqlScanner {
             ifContent = processed.getBody().trim();
         }
 
-        this.emitIfTag(ctx, scope, testExpr, ifContent);
+        this.emitIfTag(ctx, testExpr, ifContent);
     }
 
     // ==================== 形式1：#condition 单条件简写 ====================
 
-    private void processForm1Condition(MgxsqlContext ctx, ScopeType scope) {
+    private void processForm1Condition(MgxsqlContext ctx) {
         ctx.advance(); // 跳过 #
         String condition = this.readForm1Content(ctx);
         MgxsqlConditionBodyProcessor.ProcessedBody processed = this.conditionBodyProcessor.processConditionBody(condition);
         String testExpression = this.conditionBodyProcessor.buildTestExpression(processed.getParamPaths());
         String ifContent = processed.getBody().trim();
 
-        this.emitIfTag(ctx, scope, testExpression, ifContent);
+        this.emitIfTag(ctx, testExpression, ifContent);
     }
 
     // ==================== 形式1：#and/#or 行首前缀 ====================
 
-    private void processForm1WithPrefix(MgxsqlContext ctx, ScopeType scope) {
+    private void processForm1WithPrefix(MgxsqlContext ctx) {
         ctx.advance(); // 跳过 #
         // 读取前缀（and/or）
         String prefix;
@@ -500,7 +500,7 @@ public class MgxsqlScanner {
         String testExpression = this.conditionBodyProcessor.buildTestExpression(processed.getParamPaths());
         String ifContent = prefix + " " + processed.getBody().trim();
 
-        this.emitIfTag(ctx, scope, testExpression, ifContent);
+        this.emitIfTag(ctx, testExpression, ifContent);
     }
 
     // ==================== 统一 if 标签输出 ====================
@@ -508,17 +508,8 @@ public class MgxsqlScanner {
     /**
      * 统一输出 &lt;if&gt; 标签，根据 scope 区分 WHERE/SET 域的空格格式
      */
-    private void emitIfTag(MgxsqlContext ctx, ScopeType scope, String testExpr, String body) {
-        ctx.appendOutput("<if test=\"");
-        ctx.appendOutput(testExpr);
-        if (scope == ScopeType.SET) {
-            ctx.appendOutput("\"> ");
-        } else {
-            ctx.appendOutput("\">");
-            ctx.appendOutput(" ");
-        }
-        ctx.appendOutput(body);
-        ctx.appendOutput("</if>");
+    private void emitIfTag(MgxsqlContext ctx, String testExpr, String body) {
+        ctx.appendOutput(MgxsqlXmlFragment.ifTag(testExpr, body));
     }
 
     // ==================== 读取方法 ====================
@@ -643,6 +634,9 @@ public class MgxsqlScanner {
 
     // ==================== IN 子句处理（WHERE 域直接扫描） ====================
 
+    /**
+     * IN 子句入口：保存位置、跳过 "in"、分发子方法、降级回退
+     */
     private void processInClause(MgxsqlContext ctx) {
         int savedPos = ctx.getPosition() + 2; // 保存 "in" 之后的位置
         ctx.setPosition(savedPos);
@@ -657,125 +651,159 @@ public class MgxsqlScanner {
         if (ctx.currentChar() == ':' && ctx.peekChar(1) != ':' && MgxsqlSyntaxHelper.isIdentifierStartAt(ctx, 1)) {
             String collectionName = MgxsqlSyntaxHelper.readColonParamRef(ctx);
             if (collectionName != null) {
-                ctx.appendOutput("in <foreach item=\"item\" collection=\"");
-                ctx.appendOutput(collectionName);
-                ctx.appendOutput("\" open=\"(\" close=\")\" separator=\",\">#{item}</foreach>");
+                this.processInSimple(ctx, collectionName);
                 return;
             }
         }
 
+        // 括号包裹 IN：in (...)
         if (ctx.currentChar() == '(') {
-            int outerParenPos = ctx.getPosition();
-            ctx.advance(); // 跳过 (
-            MgxsqlSyntaxHelper.skipWhitespace(ctx);
-
-            if (!ctx.hasMore()) {
-                ctx.appendOutput("in (");
+            boolean handled = this.processInParenthesized(ctx);
+            if (handled) {
                 return;
-            }
-
-            // in ((item:collection)=>$item.prop) — 复杂类型 IN 外层括号包裹
-            if (ctx.currentChar() == '(') {
-                ctx.advance(); // 跳过内层 (
-                MgxsqlSyntaxHelper.skipWhitespace(ctx);
-                String itemName = MgxsqlSyntaxHelper.readIdentifier(ctx);
-                MgxsqlSyntaxHelper.skipWhitespace(ctx);
-                if (ctx.hasMore() && ctx.currentChar() == ':') {
-                    ctx.advance(); // 跳过 :
-                    MgxsqlSyntaxHelper.skipWhitespace(ctx);
-                    String collectionName = MgxsqlSyntaxHelper.readIdentifier(ctx);
-                    MgxsqlSyntaxHelper.skipWhitespace(ctx);
-                    if (ctx.hasMore() && ctx.currentChar() == ')') {
-                        ctx.advance(); // 跳过内层 )
-                        MgxsqlSyntaxHelper.skipWhitespace(ctx);
-                        if (ctx.hasMore() && ctx.currentChar() == '=' && ctx.peekChar(1) == '>') {
-                            ctx.advance(); // 跳过 =
-                            ctx.advance(); // 跳过 >
-                            MgxsqlSyntaxHelper.skipWhitespace(ctx);
-                            String valueExpr = this.readArrowRightValue(ctx);
-                            if (valueExpr != null) {
-                                MgxsqlSyntaxHelper.skipWhitespace(ctx);
-                                // 消费外层 )
-                                if (ctx.hasMore() && ctx.currentChar() == ')') {
-                                    ctx.advance();
-                                }
-                                ctx.appendOutput("in <foreach item=\"");
-                                ctx.appendOutput(itemName);
-                                ctx.appendOutput("\" collection=\"");
-                                ctx.appendOutput(collectionName);
-                                ctx.appendOutput("\" open=\"(\" close=\")\" separator=\",\">");
-                                ctx.appendOutput(valueExpr);
-                                ctx.appendOutput("</foreach>");
-                                return;
-                            }
-                        }
-                    }
-                }
-                // 外层括号包裹解析失败，恢复位置继续尝试其他路径
-                ctx.setPosition(outerParenPos + 1); // 回到 ( 之后
-                MgxsqlSyntaxHelper.skipWhitespace(ctx);
-            }
-
-            // in (:list) 或 in ( :list ) — 简单 IN + 括号
-            if (ctx.currentChar() == ':' && ctx.peekChar(1) != ':' && MgxsqlSyntaxHelper.isIdentifierStartAt(ctx, 1)) {
-                String collectionName = MgxsqlSyntaxHelper.readColonParamRef(ctx);
-                if (collectionName != null) {
-                    MgxsqlSyntaxHelper.skipWhitespace(ctx);
-                    if (ctx.hasMore() && ctx.currentChar() == ')') {
-                        ctx.advance(); // 跳过 )
-                        ctx.appendOutput("in <foreach item=\"item\" collection=\"");
-                        ctx.appendOutput(collectionName);
-                        ctx.appendOutput("\" open=\"(\" close=\")\" separator=\",\">#{item}</foreach>");
-                        return;
-                    }
-                }
-            }
-
-            // in (#{list}) — MyBatis 原生，原样透传
-            if (ctx.currentChar() == '#' && ctx.peekChar(1) == '{') {
-                // 恢复到 ( 之前，原样输出整个 in (#{list})
-                ctx.setPosition(savedPos);
-                MgxsqlSyntaxHelper.skipWhitespace(ctx);
-                ctx.appendOutput("in");
-                return;
-            }
-
-            // in (item:collection)=>$item.prop — 复杂类型 IN（无外层括号）
-            String itemName = MgxsqlSyntaxHelper.readIdentifier(ctx);
-            MgxsqlSyntaxHelper.skipWhitespace(ctx);
-            if (ctx.hasMore() && ctx.currentChar() == ':') {
-                ctx.advance(); // 跳过 :
-                MgxsqlSyntaxHelper.skipWhitespace(ctx);
-                String collectionName = MgxsqlSyntaxHelper.readIdentifier(ctx);
-                MgxsqlSyntaxHelper.skipWhitespace(ctx);
-                if (ctx.hasMore() && ctx.currentChar() == ')') {
-                    ctx.advance(); // 跳过 )
-                    MgxsqlSyntaxHelper.skipWhitespace(ctx);
-                    if (ctx.hasMore() && ctx.currentChar() == '=' && ctx.peekChar(1) == '>') {
-                        ctx.advance(); // 跳过 =
-                        ctx.advance(); // 跳过 >
-                        MgxsqlSyntaxHelper.skipWhitespace(ctx);
-                        String valueExpr = this.readArrowRightValue(ctx);
-                        if (valueExpr != null) {
-                            ctx.appendOutput("in <foreach item=\"");
-                            ctx.appendOutput(itemName);
-                            ctx.appendOutput("\" collection=\"");
-                            ctx.appendOutput(collectionName);
-                            ctx.appendOutput("\" open=\"(\" close=\")\" separator=\",\">");
-                            ctx.appendOutput(valueExpr);
-                            ctx.appendOutput("</foreach>");
-                            return;
-                        }
-                        throw new MybatisgxException("mgxsql 语法错误: '=>' 右边只接受 $variable 形式，不允许 #{} / ${}, %s",
-                                ctx.getPositionInfo());
-                    }
-                }
             }
         }
 
         // 降级：恢复位置，原样输出 "in "
         ctx.setPosition(savedPos);
         ctx.appendOutput("in ");
+    }
+
+    /**
+     * 简单类型 IN：in :list → in &lt;foreach item="item" collection="..." ...&gt;
+     */
+    private void processInSimple(MgxsqlContext ctx, String collectionName) {
+        ctx.appendOutput("in ");
+        ctx.appendOutput(MgxsqlXmlFragment.foreachSimple(collectionName));
+    }
+
+    /**
+     * 括号包裹 IN 入口：in (...) 内部分发
+     *
+     * @return true 表示已处理，false 表示需要降级
+     */
+    private boolean processInParenthesized(MgxsqlContext ctx) {
+        int outerParenPos = ctx.getPosition();
+        ctx.advance(); // 跳过 (
+        MgxsqlSyntaxHelper.skipWhitespace(ctx);
+
+        if (!ctx.hasMore()) {
+            ctx.appendOutput("in (");
+            return true;
+        }
+
+        // in ((item:collection)=>$item.prop) — 复杂类型 IN 外层括号包裹
+        if (ctx.currentChar() == '(') {
+            boolean handled = this.processInComplexWrapped(ctx);
+            if (handled) {
+                return true;
+            }
+            // 外层括号包裹解析失败，恢复位置继续尝试其他路径
+            ctx.setPosition(outerParenPos + 1);
+            MgxsqlSyntaxHelper.skipWhitespace(ctx);
+        }
+
+        // in (:list) — 简单 IN + 括号
+        if (ctx.currentChar() == ':' && ctx.peekChar(1) != ':' && MgxsqlSyntaxHelper.isIdentifierStartAt(ctx, 1)) {
+            String collectionName = MgxsqlSyntaxHelper.readColonParamRef(ctx);
+            if (collectionName != null) {
+                MgxsqlSyntaxHelper.skipWhitespace(ctx);
+                if (ctx.hasMore() && ctx.currentChar() == ')') {
+                    ctx.advance(); // 跳过 )
+                    this.processInSimpleParen(ctx, collectionName);
+                    return true;
+                }
+            }
+        }
+
+        // in (#{list}) — MyBatis 原生，原样透传
+        if (ctx.currentChar() == '#' && ctx.peekChar(1) == '{') {
+            return false;
+        }
+
+        // in (item:collection)=>$item.prop — 复杂类型 IN（无外层括号）
+        return this.processInComplexParen(ctx);
+    }
+
+    /**
+     * 复杂类型 IN 外层括号包裹：in ((item:collection)=&gt;$item.prop)
+     *
+     * @return true 表示已处理，false 表示解析失败需回退
+     */
+    private boolean processInComplexWrapped(MgxsqlContext ctx) {
+        ctx.advance(); // 跳过内层 (
+        MgxsqlSyntaxHelper.skipWhitespace(ctx);
+        String itemName = MgxsqlSyntaxHelper.readIdentifier(ctx);
+        MgxsqlSyntaxHelper.skipWhitespace(ctx);
+        if (ctx.hasMore() && ctx.currentChar() == ':') {
+            ctx.advance(); // 跳过 :
+            MgxsqlSyntaxHelper.skipWhitespace(ctx);
+            String collectionName = MgxsqlSyntaxHelper.readIdentifier(ctx);
+            MgxsqlSyntaxHelper.skipWhitespace(ctx);
+            if (ctx.hasMore() && ctx.currentChar() == ')') {
+                ctx.advance(); // 跳过内层 )
+                MgxsqlSyntaxHelper.skipWhitespace(ctx);
+                if (ctx.hasMore() && ctx.currentChar() == '=' && ctx.peekChar(1) == '>') {
+                    ctx.advance(); // 跳过 =
+                    ctx.advance(); // 跳过 >
+                    MgxsqlSyntaxHelper.skipWhitespace(ctx);
+                    String valueExpr = this.readArrowRightValue(ctx);
+                    if (valueExpr != null) {
+                        MgxsqlSyntaxHelper.skipWhitespace(ctx);
+                        // 消费外层 )
+                        if (ctx.hasMore() && ctx.currentChar() == ')') {
+                            ctx.advance();
+                        }
+                        ctx.appendOutput("in ");
+                        ctx.appendOutput(MgxsqlXmlFragment.foreachComplex(itemName, collectionName, valueExpr));
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 括号包裹简单 IN：in (:list) → in &lt;foreach item="item" ...&gt;
+     */
+    private void processInSimpleParen(MgxsqlContext ctx, String collectionName) {
+        ctx.appendOutput("in ");
+        ctx.appendOutput(MgxsqlXmlFragment.foreachSimple(collectionName));
+    }
+
+    /**
+     * 复杂类型 IN（无外层括号）：in (item:collection)=&gt;$item.prop
+     *
+     * @return true 表示已处理，false 表示需要降级
+     */
+    private boolean processInComplexParen(MgxsqlContext ctx) {
+        String itemName = MgxsqlSyntaxHelper.readIdentifier(ctx);
+        MgxsqlSyntaxHelper.skipWhitespace(ctx);
+        if (ctx.hasMore() && ctx.currentChar() == ':') {
+            ctx.advance(); // 跳过 :
+            MgxsqlSyntaxHelper.skipWhitespace(ctx);
+            String collectionName = MgxsqlSyntaxHelper.readIdentifier(ctx);
+            MgxsqlSyntaxHelper.skipWhitespace(ctx);
+            if (ctx.hasMore() && ctx.currentChar() == ')') {
+                ctx.advance(); // 跳过 )
+                MgxsqlSyntaxHelper.skipWhitespace(ctx);
+                if (ctx.hasMore() && ctx.currentChar() == '=' && ctx.peekChar(1) == '>') {
+                    ctx.advance(); // 跳过 =
+                    ctx.advance(); // 跳过 >
+                    MgxsqlSyntaxHelper.skipWhitespace(ctx);
+                    String valueExpr = this.readArrowRightValue(ctx);
+                    if (valueExpr != null) {
+                        ctx.appendOutput("in ");
+                        ctx.appendOutput(MgxsqlXmlFragment.foreachComplex(itemName, collectionName, valueExpr));
+                        return true;
+                    }
+                    throw new MybatisgxException("mgxsql 语法错误: '=>' 右边只接受 $variable 形式，不允许 #{} / ${}, %s",
+                            ctx.getPositionInfo());
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -806,11 +834,7 @@ public class MgxsqlScanner {
         if (paramName != null) {
             String bindName = "_like_" + paramName.replace('.', '_');
             String bindValue = this.conditionBodyProcessor.buildLikeBindValue(paramName, likeType);
-            ctx.appendOutput("<bind name=\"");
-            ctx.appendOutput(bindName);
-            ctx.appendOutput("\" value=\"");
-            ctx.appendOutput(bindValue);
-            ctx.appendOutput("\"/>");
+            ctx.appendOutput(MgxsqlXmlFragment.bindTag(bindName, bindValue));
         }
     }
 
@@ -819,9 +843,7 @@ public class MgxsqlScanner {
     private void processParamRef(MgxsqlContext ctx) {
         String paramName = MgxsqlSyntaxHelper.readColonParamRef(ctx);
         if (paramName != null) {
-            ctx.appendOutput("#{");
-            ctx.appendOutput(paramName);
-            ctx.appendOutput("}");
+            ctx.appendOutput(MgxsqlXmlFragment.paramRef(paramName));
         }
     }
 
@@ -830,12 +852,12 @@ public class MgxsqlScanner {
     private void closeOpenScopes(MgxsqlContext ctx) {
         MgxsqlState state = ctx.getState();
         if (state == MgxsqlState.WHERE) {
-            ctx.appendOutput("</where>");
+            ctx.appendOutput(MgxsqlXmlFragment.closeWhere());
         } else if (state == MgxsqlState.WHERE_BOUNDED) {
             throw new MybatisgxException("mgxsql 语法错误: 'where[' 未闭合，缺少匹配的 ']'，%s",
                     ctx.getPositionInfo());
         } else if (state == MgxsqlState.SET) {
-            ctx.appendOutput("</set>");
+            ctx.appendOutput(MgxsqlXmlFragment.closeSet());
         } else if (state == MgxsqlState.SET_BOUNDED) {
             throw new MybatisgxException("mgxsql 语法错误: 'set[' 未闭合，缺少匹配的 ']'，%s",
                     ctx.getPositionInfo());

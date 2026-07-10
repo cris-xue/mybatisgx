@@ -43,6 +43,10 @@ public class MethodSyntaxProcessor {
         SQL_COMMAND_TYPE_MAP.put("select", SqlCommandType.SELECT);
         SQL_COMMAND_TYPE_MAP.put("query", SqlCommandType.SELECT);
         SQL_COMMAND_TYPE_MAP.put("count", SqlCommandType.SELECT);
+        SQL_COMMAND_TYPE_MAP.put("max", SqlCommandType.SELECT);
+        SQL_COMMAND_TYPE_MAP.put("min", SqlCommandType.SELECT);
+        SQL_COMMAND_TYPE_MAP.put("avg", SqlCommandType.SELECT);
+        SQL_COMMAND_TYPE_MAP.put("sum", SqlCommandType.SELECT);
     }
 
     public MethodSyntaxProcessor() {

@@ -13,8 +13,7 @@ import com.mybatisgx.utils.MethodInfoUtils;
 import com.mybatisgx.utils.TypeUtils;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.*;
 import org.apache.ibatis.mapping.SqlCommandType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,7 +96,7 @@ public class MethodInfoHandler {
                 continue;
             }
 
-            CommandTypeContext commandTypeContext = this.getCommandType(mapperInfo, methodName);
+            CommandTypeContext commandTypeContext = this.getCommandType(mapperInfo, method);
             SqlCommandType sqlCommandType = commandTypeContext.getSqlCommandType();
             MethodParamContext methodParamContext = this.getMethodParam(mapperInfo, method, sqlCommandType);
             MethodReturnInfo methodReturnInfo = this.getMethodReturn(mapperInfo, method);
@@ -125,8 +124,29 @@ public class MethodInfoHandler {
         return methodInfoMap;
     }
 
-    private CommandTypeContext getCommandType(MapperInfo mapperInfo, String methodName) {
-        SqlCommandType sqlCommandType = this.methodSyntaxProcessor.getSqlCommandType(methodName);
+    private CommandTypeContext getCommandType(MapperInfo mapperInfo, Method method) {
+        Insert insert = method.getAnnotation(Insert.class);
+        Delete delete = method.getAnnotation(Delete.class);
+        Update update = method.getAnnotation(Update.class);
+        Select select = method.getAnnotation(Select.class);
+        SqlCommandType sqlCommandType = null;
+        if (insert != null) {
+            sqlCommandType = SqlCommandType.INSERT;
+        }
+        if (delete != null) {
+            sqlCommandType = SqlCommandType.DELETE;
+        }
+        if (update != null) {
+            sqlCommandType = SqlCommandType.UPDATE;
+        }
+        if (select != null) {
+            sqlCommandType = SqlCommandType.SELECT;
+        }
+        if (sqlCommandType == null) {
+            Statement statement = method.getAnnotation(Statement.class);
+            String statementString = statement != null ? statement.value() : method.getName();
+            sqlCommandType = this.methodSyntaxProcessor.getSqlCommandType(statementString);
+        }
         MethodCommandType methodCommandType;
         if (sqlCommandType == SqlCommandType.DELETE && mapperInfo.getEntityInfo().getLogicDeleteColumnInfo() != null) {
             methodCommandType = MethodCommandType.LOGIC_DELETE;

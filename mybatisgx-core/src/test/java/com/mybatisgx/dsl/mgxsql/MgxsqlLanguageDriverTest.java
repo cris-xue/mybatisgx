@@ -31,7 +31,7 @@ public class MgxsqlLanguageDriverTest {
 
     @Test
     public void test01_stringWithMgxsql() {
-        String script = "select * from t_user where #name = :name";
+        String script = "select * from t_user where #[name = :name]";
         SqlSource sqlSource = this.driver.createSqlSource(this.configuration, script, null);
         Assert.assertNotNull("SqlSource 不应为 null", sqlSource);
         // mgxsql 转换后应生成 DynamicSqlSource（含 <if> <where> 动态标签）
@@ -75,7 +75,7 @@ public class MgxsqlLanguageDriverTest {
     @Test
     public void test06_mgxsqlEquivalentToMybatisXml() {
         // mgxsql 写法
-        String mgxsqlScript = "select * from t_user where #name = :name";
+        String mgxsqlScript = "select * from t_user where #[name = :name]";
         SqlSource mgxsqlSource = this.driver.createSqlSource(this.configuration, mgxsqlScript, null);
 
         // 等价的 MyBatis XML 写法

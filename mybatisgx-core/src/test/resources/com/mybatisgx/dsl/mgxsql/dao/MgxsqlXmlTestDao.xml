@@ -3,7 +3,7 @@
 <mapper namespace="com.mybatisgx.dsl.mgxsql.dao.MgxsqlXmlTestDao">
 
     <select id="findByName" resultType="com.mybatisgx.dsl.mgxsql.entity.MgxsqlTestUser">
-        select * from mgxsql_test_user where #user_name = :userName
+        select * from mgxsql_test_user where #[user_name = :userName]
     </select>
 
     <select id="findByNameAndAge" resultType="com.mybatisgx.dsl.mgxsql.entity.MgxsqlTestUser">

@@ -21,7 +21,7 @@ public interface MgxsqlTestDao {
      * 使用 mgxsql 语法查询（where + # 条件）
      */
     @Lang(MgxsqlLanguageDriver.class)
-    @Select("select * from mgxsql_test_user where #user_name = :userName")
+    @Select("select * from mgxsql_test_user where #[user_name = :userName]")
     List<MgxsqlTestUser> findByName(@Param("userName") String userName);
 
     /**

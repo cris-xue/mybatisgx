@@ -8,7 +8,7 @@ import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
 /**
- * MgxsqlScanner 测试（v4 语法）
+ * MgxsqlScanner 测试（v5 语法）
  *
  * @author 薛承城
  * @date 2026/7/8
@@ -175,7 +175,7 @@ public class MgxsqlScannerTest {
 
     @Test(expected = MybatisgxException.class)
     public void test17_hashWithNumber() {
-        String input = "select * from t_user where #123";
+        String input = "select * from t_user where\n  #123";
         this.scanner.process(input);
     }
 
@@ -193,11 +193,11 @@ public class MgxsqlScannerTest {
         Assert.assertTrue("应包含 isNotEmpty(tag)", output.contains("isNotEmpty(tag)"));
     }
 
-    // ==================== 形式1：#condition 单条件简写 ====================
+    // ==================== 形式1：#condition 单条件简写（独占一行） ====================
 
     @Test
     public void test19_form1Basic() {
-        String input = "select * from t_user where #id = :id";
+        String input = "select * from t_user where\n  #id = :id";
         String output = this.scanner.process(input);
         Assert.assertTrue("应包含 <if>", output.contains("<if"));
         Assert.assertTrue("应包含 isNotEmpty(id)", output.contains("isNotEmpty(id)"));
@@ -207,7 +207,7 @@ public class MgxsqlScannerTest {
 
     @Test
     public void test20_form1LikePattern() {
-        String input = "select * from t_user where #name like %:name%";
+        String input = "select * from t_user where\n  #name like %:name%";
         String output = this.scanner.process(input);
         Assert.assertTrue("应包含 <if>", output.contains("<if"));
         Assert.assertTrue("应包含 isNotEmpty(name)", output.contains("isNotEmpty(name)"));
@@ -216,20 +216,18 @@ public class MgxsqlScannerTest {
 
     @Test
     public void test21_form1InClause() {
-        String input = "select * from t_user where #id in :idList";
+        String input = "select * from t_user where\n  #id in :idList";
         String output = this.scanner.process(input);
         Assert.assertTrue("应包含 <if>", output.contains("<if"));
         Assert.assertTrue("应包含 isNotEmpty(idList)", output.contains("isNotEmpty(idList)"));
         Assert.assertTrue("应包含 <foreach", output.contains("<foreach"));
     }
 
-    @Test
-    public void test22_form1StopsAtAnd() {
-        String input = "select * from t_user where #id = :id and name = :name";
-        String output = this.scanner.process(input);
-        Assert.assertTrue("应包含 <if>", output.contains("<if"));
-        Assert.assertTrue("应包含 id = #{id}", output.contains("id = #{id}"));
-        Assert.assertTrue("and name = #{name} 应在 <if> 外", output.contains("and name = #{name}"));
+    @Test(expected = MybatisgxException.class)
+    public void test22_form1InlineAndReportsError() {
+        // v5: 形式1行内 and/or 报语法错误
+        String input = "select * from t_user where\n  #id = :id and name = :name";
+        this.scanner.process(input);
     }
 
     // ==================== in :list 转 <foreach> ====================
@@ -390,22 +388,23 @@ public class MgxsqlScannerTest {
         Assert.assertTrue("NORMAL 域 # 应原样输出", output.contains("#"));
     }
 
-    // ==================== #{param} 原样透传与 # 条件节点共存 ====================
+    // ==================== #{param} 原样透传与 # 条件节点共存（范围块） ====================
 
     @Test
     public void test40_hashParamRefWithCondition() {
-        String input = "select * from t_user where #id = :id and name = #{name}";
+        // 条件范围块内 #{param} 原样保留，#condition 必须独占一行
+        String input = "select * from t_user where id = #{id}\n  #[name = :name]";
         String output = this.scanner.process(input);
-        Assert.assertTrue("#{name} 应原样输出", output.contains("#{name}"));
-        Assert.assertTrue("#id = :id 应解析为形式1条件", output.contains("<if"));
-        Assert.assertTrue("应包含 id = #{id}", output.contains("id = #{id}"));
+        Assert.assertTrue("#{id} 应原样输出", output.contains("#{id}"));
+        Assert.assertTrue("#[name] 应解析为条件节点", output.contains("<if"));
+        Assert.assertTrue("应包含 name = #{name}", output.contains("name = #{name}"));
     }
 
     // ==================== SET 域形式1 ====================
 
     @Test
     public void test41_setForm1Condition() {
-        String input = "update t_user set #name = :name where id = :id";
+        String input = "update t_user set\n  #name = :name\nwhere id = :id";
         String output = this.scanner.process(input);
         Assert.assertTrue("应包含 <set>", output.contains("<set>"));
         Assert.assertTrue("应包含 <if>", output.contains("<if"));
@@ -607,7 +606,7 @@ public class MgxsqlScannerTest {
 
     @Test
     public void test62_form1InParen() {
-        String input = "select * from t_user where #id in (:idList)";
+        String input = "select * from t_user where\n  #id in (:idList)";
         String output = this.scanner.process(input);
         Assert.assertTrue("应包含 <if>", output.contains("<if"));
         Assert.assertTrue("应包含 <foreach", output.contains("<foreach"));
@@ -705,5 +704,248 @@ public class MgxsqlScannerTest {
         String output = this.scanner.process(input);
         Assert.assertTrue("guard 应为 age > 1（trim后无空格）", output.contains("age > 1"));
         Assert.assertTrue("body 应为 age = #{age}", output.contains("age = #{age}"));
+    }
+
+    // ==================== v5 新增：#and / #or 行首前缀 ====================
+
+    @Test
+    public void test73_andPrefixLineStart() {
+        String input = "select * from t_user where\n  #id = :id\n  #and name = :name";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("应包含两个 <if>", this.countOccurrences(output, "<if") >= 2);
+        Assert.assertTrue("第一个 <if> test 含 isNotEmpty(id)", output.contains("isNotEmpty(id)"));
+        Assert.assertTrue("第二个 <if> 含 and name = #{name}", output.contains("and name = #{name}"));
+        Assert.assertTrue("第二个 <if> test 含 isNotEmpty(name)", output.contains("isNotEmpty(name)"));
+    }
+
+    @Test
+    public void test74_orPrefixLineStart() {
+        String input = "select * from t_user where\n  #id = :id\n  #or status = :status";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("应包含两个 <if>", this.countOccurrences(output, "<if") >= 2);
+        Assert.assertTrue("第二个 <if> 含 or status = #{status}", output.contains("or status = #{status}"));
+    }
+
+    @Test
+    public void test75_andPrefixWithLike() {
+        String input = "select * from t_user where\n  #id = :id\n  #and name like %:name%";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("应包含 <bind", output.contains("<bind"));
+        Assert.assertTrue("应包含 and name like", output.contains("and name like"));
+    }
+
+    @Test
+    public void test76_andPrefixWithInClause() {
+        String input = "select * from t_user where\n  #id = :id\n  #and dept_id in :deptIdList";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("应包含 <foreach", output.contains("<foreach"));
+        Assert.assertTrue("应包含 and dept_id in", output.contains("and dept_id in"));
+    }
+
+    @Test(expected = MybatisgxException.class)
+    public void test77_andPrefixNotAtLineStart() {
+        String input = "select * from t_user where #and name = :name";
+        this.scanner.process(input);
+    }
+
+    @Test(expected = MybatisgxException.class)
+    public void test78_orPrefixNotAtLineStart() {
+        String input = "select * from t_user where #or status = :status";
+        this.scanner.process(input);
+    }
+
+    // ==================== v5 新增：形式1必须独占一行 ====================
+
+    @Test(expected = MybatisgxException.class)
+    public void test79_form1NotAtLineStart() {
+        String input = "select * from t_user where #id = :id";
+        this.scanner.process(input);
+    }
+
+    @Test
+    public void test80_form1AtLineStart() {
+        String input = "select * from t_user where\n  #id = :id";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("应包含 <if>", output.contains("<if"));
+        Assert.assertTrue("应包含 isNotEmpty(id)", output.contains("isNotEmpty(id)"));
+    }
+
+    @Test(expected = MybatisgxException.class)
+    public void test81_form1InlineOrReportsError() {
+        String input = "select * from t_user where\n  #id = :id or status = :status";
+        this.scanner.process(input);
+    }
+
+    // ==================== v5 新增：复杂 IN 外层括号包裹 ====================
+
+    @Test
+    public void test82_complexInWithOuterParen() {
+        String input = "select * from t_user where id in ((item:idList)=>$item.id)";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("应包含 <foreach", output.contains("<foreach"));
+        Assert.assertTrue("item 应为自定义名", output.contains("item=\"item\""));
+        Assert.assertTrue("应包含 #{item.id}", output.contains("#{item.id}"));
+    }
+
+    @Test
+    public void test83_complexInOuterParenWithSpaces() {
+        String input = "select * from t_user where id in ( ( item : idList ) => $item.id )";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("应包含 <foreach", output.contains("<foreach"));
+        Assert.assertTrue("应包含 #{item.id}", output.contains("#{item.id}"));
+    }
+
+    @Test
+    public void test84_complexInOuterParenInCondition() {
+        String input = "select * from t_user where #[id in ((item:idList)=>$item.id)]";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("应包含 <if>", output.contains("<if"));
+        Assert.assertTrue("应包含 <foreach", output.contains("<foreach"));
+        Assert.assertTrue("应包含 #{item.id}", output.contains("#{item.id}"));
+    }
+
+    // ==================== v5 新增：条件节点块内禁止 #{} ====================
+
+    @Test(expected = MybatisgxException.class)
+    public void test85_hashParamInConditionNode() {
+        String input = "select * from t_user where #[id = #{id}]";
+        this.scanner.process(input);
+    }
+
+    @Test(expected = MybatisgxException.class)
+    public void test86_hashParamInGuardConditionNode() {
+        String input = "select * from t_user where #(type = 1)[id = #{id}]";
+        this.scanner.process(input);
+    }
+
+    // ==================== v5 新增：条件节点块内禁止 ${} ====================
+
+    @Test(expected = MybatisgxException.class)
+    public void test87_dollarBraceInConditionNode() {
+        String input = "select * from t_user where #[id = ${id}]";
+        this.scanner.process(input);
+    }
+
+    @Test(expected = MybatisgxException.class)
+    public void test88_dollarBraceInGuardConditionNode() {
+        String input = "select * from t_user where #(type = 1)[id = ${id}]";
+        this.scanner.process(input);
+    }
+
+    // ==================== v5 新增：条件节点块内禁止 XML 标签 ====================
+
+    @Test(expected = MybatisgxException.class)
+    public void test89_xmlTagInConditionNode() {
+        String input = "select * from t_user where #[<if test=\"id != null\">id = :id</if>]";
+        this.scanner.process(input);
+    }
+
+    // ==================== v5 新增：=> 右边禁止 ${} ====================
+
+    @Test(expected = MybatisgxException.class)
+    public void test90_arrowRightDollarBrace() {
+        String input = "select * from t_user where id in (item:idList)=>${item.id}";
+        this.scanner.process(input);
+    }
+
+    // ==================== v5 新增：条件节点块内 #and/#or 报错 ====================
+
+    @Test(expected = MybatisgxException.class)
+    public void test91_andPrefixInConditionNode() {
+        String input = "select * from t_user where #[id = :id\n  #and name = :name]";
+        this.scanner.process(input);
+    }
+
+    @Test(expected = MybatisgxException.class)
+    public void test92_orPrefixInConditionNode() {
+        String input = "select * from t_user where #(type = 1)[id = :id\n  #or name = :name]";
+        this.scanner.process(input);
+    }
+
+    @Test
+    public void test93_nestedConditionAsAlternative() {
+        // 正确替代：嵌套 #[and ...]
+        String input = "select * from t_user where #[id = :id #[and name = :name]]";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("应包含嵌套 <if>", this.countOccurrences(output, "<if") >= 2);
+    }
+
+    // ==================== v5 新增：参数收集只收直接子级 ====================
+
+    @Test
+    public void test94_paramNoBubbleSingleLayer() {
+        // 单层条件体收集直接参数
+        String input = "select * from t_user where #[id = :id and name = :name]";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("test 应包含 isNotEmpty(id) 和 isNotEmpty(name)",
+                output.contains("isNotEmpty(id)") && output.contains("isNotEmpty(name)"));
+    }
+
+    @Test
+    public void test95_paramNoBubbleNested() {
+        // 嵌套条件体参数不冒泡
+        String input = "select * from t_user where #[id = :id #[and name = :name]]";
+        String output = this.scanner.process(input);
+        // 外层 <if> 的 test 只包含 id
+        Assert.assertTrue("外层 test 应包含 isNotEmpty(id)", output.contains("isNotEmpty(id)"));
+        // 内层 <if> 的 test 包含 name
+        Assert.assertTrue("内层 test 应包含 isNotEmpty(name)", output.contains("isNotEmpty(name)"));
+        // 外层 test 不应包含 name（因为参数不冒泡）
+        int firstIfIdx = output.indexOf("<if");
+        String firstIf = output.substring(firstIfIdx, output.indexOf("</if>", firstIfIdx) + 6);
+        Assert.assertFalse("外层 if 内不应同时包含 isNotEmpty(id) 和 isNotEmpty(name)（参数不冒泡）",
+                firstIf.contains("isNotEmpty(id) and isNotEmpty(name)"));
+    }
+
+    @Test
+    public void test96_paramNoBubbleThreeLevels() {
+        // 三层嵌套参数不冒泡
+        String input = "select * from t_user where #[id = :id #[and name = :name #[and age = :age]]]";
+        String output = this.scanner.process(input);
+        int ifCount = this.countOccurrences(output, "<if");
+        Assert.assertTrue("应有 3 个 <if> 标签", ifCount >= 3);
+    }
+
+    @Test
+    public void test97_guardNoBubble() {
+        // 有 guard 条件体不冒泡
+        String input = "select * from t_user where #(:type = 1)[category = :category #[and tag = :tag]]";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("外层 test 应为 type = 1", output.contains("type = 1"));
+        Assert.assertTrue("内层 test 应包含 isNotEmpty(tag)", output.contains("isNotEmpty(tag)"));
+    }
+
+    @Test
+    public void test98_noParamConditionTestTrue() {
+        // 无参数条件体 test 为 true
+        String input = "select * from t_user where #[1 = 1]";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("test 应为 true", output.contains("test=\"true\""));
+    }
+
+    // ==================== v5 新增：条件范围块内 #{}/${}/<xml> 原样保留 ====================
+
+    @Test
+    public void test99_hashParamInScopeBlock() {
+        // 条件范围块内 #{param} 原样保留
+        String input = "select * from t_user where id = #{id}";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("#{id} 应原样保留", output.contains("#{id}"));
+    }
+
+    @Test
+    public void test100_dollarBraceInScopeBlock() {
+        // 条件范围块内 ${param} 原样保留
+        String input = "select * from t_user where id = ${id}";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("${id} 应原样保留", output.contains("${id}"));
+    }
+
+    @Test
+    public void test101_xmlTagInScopeBlock() {
+        // 条件范围块内 XML 标签原样透传
+        String input = "select * from t_user where id in :idList and <if test=\"id != null\">id = #{id}</if>";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("XML if 标签应原样保留", output.contains("<if test=\"id != null\">"));
     }
 }

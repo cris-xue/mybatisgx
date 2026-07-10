@@ -322,6 +322,51 @@ public final class MgxsqlSyntaxHelper {
     }
 
     /**
+     * 判断上下文当前位置是否为行首（从当前位置向前回溯到上一个换行符或输入起始，
+     * 中间只允许空白字符）
+     *
+     * @param ctx 扫描上下文
+     * @return 如果当前位置是行首则返回 true
+     */
+    public static boolean isAtLineStart(MgxsqlContext ctx) {
+        int pos = ctx.getPosition() - 1;
+        while (pos >= 0) {
+            char c = ctx.charAt(pos);
+            if (c == '\n' || c == '\r') {
+                return true;
+            }
+            if (!Character.isWhitespace(c)) {
+                return false;
+            }
+            pos--;
+        }
+        return true;
+    }
+
+    /**
+     * 判断文本指定位置是否为行首（从指定位置向前回溯到上一个换行符或文本起始，
+     * 中间只允许空白字符）
+     *
+     * @param text 文本
+     * @param pos  要判断的位置（该位置之前的字符被检查）
+     * @return 如果该位置是行首则返回 true
+     */
+    public static boolean isAtLineStart(String text, int pos) {
+        int p = pos - 1;
+        while (p >= 0) {
+            char c = text.charAt(p);
+            if (c == '\n' || c == '\r') {
+                return true;
+            }
+            if (!Character.isWhitespace(c)) {
+                return false;
+            }
+            p--;
+        }
+        return true;
+    }
+
+    /**
      * 查找 XML 标签结束位置
      */
     public static int findXmlTagEnd(MgxsqlContext ctx, int start) {

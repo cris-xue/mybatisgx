@@ -351,12 +351,43 @@ public class MgxsqlScanner {
             ctx.advance();
             return;
         }
+        // #and / #or 行首前缀
+        if (this.isAndOrKeywordAt(ctx)) {
+            if (!MgxsqlSyntaxHelper.isAtLineStart(ctx)) {
+                throw new MybatisgxException("mgxsql 语法错误: '#and'/'#or' 必须独占一行，%s",
+                        ctx.getPositionInfo());
+            }
+            this.processForm1WithPrefix(ctx, scope);
+            return;
+        }
         if (MgxsqlSyntaxHelper.isIdentifierStartChar(next)) {
+            if (!MgxsqlSyntaxHelper.isAtLineStart(ctx)) {
+                throw new MybatisgxException("mgxsql 语法错误: '#condition' 形式1必须独占一行，%s",
+                        ctx.getPositionInfo());
+            }
             this.processForm1Condition(ctx, scope);
             return;
         }
-        throw new MybatisgxException("mgxsql 语法错误: '#' 后必须跟 '['、'('、'{' 或标识符，%s",
+        throw new MybatisgxException("mgxsql 语法错误: '#' 后必须跟 '['、'('、'{'、'and'/'or' 或标识符，%s",
                 ctx.getPositionInfo());
+    }
+
+    /**
+     * 检测 # 后面是否是 and/or 关键字（带词边界）
+     */
+    private boolean isAndOrKeywordAt(MgxsqlContext ctx) {
+        int pos = ctx.getPosition() + 1; // # 后面
+        // 检查 "and"
+        if (MgxsqlSyntaxHelper.isKeywordAt(ctx.getInput(), pos, "and")
+                && MgxsqlSyntaxHelper.isWordBoundaryAfter(ctx.getInput(), pos + 3)) {
+            return true;
+        }
+        // 检查 "or"
+        if (MgxsqlSyntaxHelper.isKeywordAt(ctx.getInput(), pos, "or")
+                && MgxsqlSyntaxHelper.isWordBoundaryAfter(ctx.getInput(), pos + 2)) {
+            return true;
+        }
+        return false;
     }
 
     // ==================== #[body] 无 guard 条件体 ====================
@@ -415,6 +446,33 @@ public class MgxsqlScanner {
         this.emitIfTag(ctx, scope, testExpression, ifContent);
     }
 
+    // ==================== 形式1：#and/#or 行首前缀 ====================
+
+    private void processForm1WithPrefix(MgxsqlContext ctx, ScopeType scope) {
+        ctx.advance(); // 跳过 #
+        // 读取前缀（and/or）
+        String prefix;
+        if (MgxsqlSyntaxHelper.isKeywordAt(ctx.getInput(), ctx.getPosition(), "and")
+                && MgxsqlSyntaxHelper.isWordBoundaryAfter(ctx.getInput(), ctx.getPosition() + 3)) {
+            prefix = "and";
+            ctx.setPosition(ctx.getPosition() + 3);
+        } else if (MgxsqlSyntaxHelper.isKeywordAt(ctx.getInput(), ctx.getPosition(), "or")
+                && MgxsqlSyntaxHelper.isWordBoundaryAfter(ctx.getInput(), ctx.getPosition() + 2)) {
+            prefix = "or";
+            ctx.setPosition(ctx.getPosition() + 2);
+        } else {
+            throw new MybatisgxException("mgxsql 语法错误: '#' 后无法识别 and/or 前缀，%s",
+                    ctx.getPositionInfo());
+        }
+        MgxsqlSyntaxHelper.skipWhitespace(ctx);
+        String condition = this.readForm1Content(ctx);
+        MgxsqlConditionBodyProcessor.ProcessedBody processed = this.conditionBodyProcessor.processConditionBody(condition);
+        String testExpression = this.conditionBodyProcessor.buildTestExpression(processed.getParamPaths());
+        String ifContent = prefix + " " + processed.getBody().trim();
+
+        this.emitIfTag(ctx, scope, testExpression, ifContent);
+    }
+
     // ==================== 统一 if 标签输出 ====================
 
     /**
@@ -450,10 +508,12 @@ public class MgxsqlScanner {
                 parenDepth--;
             }
             if (parenDepth == 0 && MgxsqlSyntaxHelper.isKeywordAt(ctx, "and") && MgxsqlSyntaxHelper.isWordBoundaryBefore(ctx) && MgxsqlSyntaxHelper.isWordBoundaryAfter(ctx, 3)) {
-                break;
+                throw new MybatisgxException("mgxsql 语法错误: 形式1条件内不允许行内 and/or，请使用 #[...] 或拆行 #and/#or，%s",
+                        ctx.getPositionInfo());
             }
             if (parenDepth == 0 && MgxsqlSyntaxHelper.isKeywordAt(ctx, "or") && MgxsqlSyntaxHelper.isWordBoundaryBefore(ctx) && MgxsqlSyntaxHelper.isWordBoundaryAfter(ctx, 2)) {
-                break;
+                throw new MybatisgxException("mgxsql 语法错误: 形式1条件内不允许行内 and/or，请使用 #[...] 或拆行 #and/#or，%s",
+                        ctx.getPositionInfo());
             }
             content.append(c);
             ctx.advance();
@@ -575,12 +635,55 @@ public class MgxsqlScanner {
         }
 
         if (ctx.currentChar() == '(') {
+            int outerParenPos = ctx.getPosition();
             ctx.advance(); // 跳过 (
             MgxsqlSyntaxHelper.skipWhitespace(ctx);
 
             if (!ctx.hasMore()) {
                 ctx.appendOutput("in (");
                 return;
+            }
+
+            // in ((item:collection)=>$item.prop) — 复杂类型 IN 外层括号包裹
+            if (ctx.currentChar() == '(') {
+                ctx.advance(); // 跳过内层 (
+                MgxsqlSyntaxHelper.skipWhitespace(ctx);
+                String itemName = MgxsqlSyntaxHelper.readIdentifier(ctx);
+                MgxsqlSyntaxHelper.skipWhitespace(ctx);
+                if (ctx.hasMore() && ctx.currentChar() == ':') {
+                    ctx.advance(); // 跳过 :
+                    MgxsqlSyntaxHelper.skipWhitespace(ctx);
+                    String collectionName = MgxsqlSyntaxHelper.readIdentifier(ctx);
+                    MgxsqlSyntaxHelper.skipWhitespace(ctx);
+                    if (ctx.hasMore() && ctx.currentChar() == ')') {
+                        ctx.advance(); // 跳过内层 )
+                        MgxsqlSyntaxHelper.skipWhitespace(ctx);
+                        if (ctx.hasMore() && ctx.currentChar() == '=' && ctx.peekChar(1) == '>') {
+                            ctx.advance(); // 跳过 =
+                            ctx.advance(); // 跳过 >
+                            MgxsqlSyntaxHelper.skipWhitespace(ctx);
+                            String valueExpr = this.readArrowRightValue(ctx);
+                            if (valueExpr != null) {
+                                MgxsqlSyntaxHelper.skipWhitespace(ctx);
+                                // 消费外层 )
+                                if (ctx.hasMore() && ctx.currentChar() == ')') {
+                                    ctx.advance();
+                                }
+                                ctx.appendOutput("in <foreach item=\"");
+                                ctx.appendOutput(itemName);
+                                ctx.appendOutput("\" collection=\"");
+                                ctx.appendOutput(collectionName);
+                                ctx.appendOutput("\" open=\"(\" close=\")\" separator=\",\">");
+                                ctx.appendOutput(valueExpr);
+                                ctx.appendOutput("</foreach>");
+                                return;
+                            }
+                        }
+                    }
+                }
+                // 外层括号包裹解析失败，恢复位置继续尝试其他路径
+                ctx.setPosition(outerParenPos + 1); // 回到 ( 之后
+                MgxsqlSyntaxHelper.skipWhitespace(ctx);
             }
 
             // in (:list) 或 in ( :list ) — 简单 IN + 括号
@@ -607,7 +710,7 @@ public class MgxsqlScanner {
                 return;
             }
 
-            // in (item:collection)=>$item.prop — 复杂类型 IN
+            // in (item:collection)=>$item.prop — 复杂类型 IN（无外层括号）
             String itemName = MgxsqlSyntaxHelper.readIdentifier(ctx);
             MgxsqlSyntaxHelper.skipWhitespace(ctx);
             if (ctx.hasMore() && ctx.currentChar() == ':') {
@@ -622,8 +725,7 @@ public class MgxsqlScanner {
                         ctx.advance(); // 跳过 =
                         ctx.advance(); // 跳过 >
                         MgxsqlSyntaxHelper.skipWhitespace(ctx);
-                        // => 右边只接受 $variable，禁止 #{}
-                        String valueExpr = MgxsqlSyntaxHelper.readDollarVarRef(ctx);
+                        String valueExpr = this.readArrowRightValue(ctx);
                         if (valueExpr != null) {
                             ctx.appendOutput("in <foreach item=\"");
                             ctx.appendOutput(itemName);
@@ -634,7 +736,7 @@ public class MgxsqlScanner {
                             ctx.appendOutput("</foreach>");
                             return;
                         }
-                        throw new MybatisgxException("mgxsql 语法错误: '=>' 右边只接受 $variable 形式，不允许 #{}, %s",
+                        throw new MybatisgxException("mgxsql 语法错误: '=>' 右边只接受 $variable 形式，不允许 #{} / ${}, %s",
                                 ctx.getPositionInfo());
                     }
                 }
@@ -644,6 +746,19 @@ public class MgxsqlScanner {
         // 降级：恢复位置，原样输出 "in "
         ctx.setPosition(savedPos);
         ctx.appendOutput("in ");
+    }
+
+    /**
+     * 读取 => 右边的值表达式，返回 #{variable} 形式；如果是 ${} 或 #{} 则报语法错误
+     */
+    private String readArrowRightValue(MgxsqlContext ctx) {
+        // => 右边出现 ${} 报语法错误
+        if (ctx.hasMore() && ctx.currentChar() == '$' && ctx.peekChar(1) == '{') {
+            throw new MybatisgxException("mgxsql 语法错误: '=>' 右边只接受 $variable 形式，不允许 #{} / ${}, %s",
+                    ctx.getPositionInfo());
+        }
+        String valueExpr = MgxsqlSyntaxHelper.readDollarVarRef(ctx);
+        return valueExpr;
     }
 
     // ==================== LIKE 模式处理（WHERE 域直接扫描） ====================

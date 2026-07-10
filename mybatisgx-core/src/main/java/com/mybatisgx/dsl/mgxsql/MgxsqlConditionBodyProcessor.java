@@ -112,23 +112,19 @@ public class MgxsqlConditionBodyProcessor {
                 continue;
             }
 
-            // 检测 #{param}（兼容旧写法，原样保留）
+            // 检测 #{param} — 条件节点块内禁止，报语法错误
             if (c == '#' && i + 1 < text.length() && text.charAt(i + 1) == '{') {
-                int paramEnd = MgxsqlSyntaxHelper.findBraceEnd(text, i + 2);
-                if (paramEnd > i) {
-                    result.append(text.substring(i, paramEnd + 1));
-                    i = paramEnd + 1;
-                    continue;
-                }
+                throw new MybatisgxException("mgxsql 语法错误: 条件节点块内不允许使用 #{param}，请使用 :param 代替，位置: %s", String.valueOf(i));
             }
 
-            // 检测 $variable（局部变量）→ #{variable}
-            if (c == '$' && i + 1 < text.length() && MgxsqlSyntaxHelper.isIdentifierStart(text.charAt(i + 1))) {
-                int varNameEnd = MgxsqlSyntaxHelper.findIdentifierEnd(text, i + 1);
-                String varName = text.substring(i + 1, varNameEnd);
-                result.append("#{").append(varName).append("}");
-                i = varNameEnd;
-                continue;
+            // 检测 ${param} — 条件节点块内禁止，报语法错误
+            if (c == '$' && i + 1 < text.length() && text.charAt(i + 1) == '{') {
+                throw new MybatisgxException("mgxsql 语法错误: 条件节点块内不允许使用 ${param}，位置: %s", String.valueOf(i));
+            }
+
+            // 检测 <xml-tag> — 条件节点块内禁止，报语法错误
+            if (c == '<') {
+                throw new MybatisgxException("mgxsql 语法错误: 条件节点块内不允许使用 XML 标签，位置: %s", String.valueOf(i));
             }
 
             result.append(c);
@@ -260,7 +256,7 @@ public class MgxsqlConditionBodyProcessor {
             ProcessedBody processed = this.processConditionBody(bodyContent);
             String testExpression = this.buildTestExpression(processed.paramPaths);
             String ifContent = processed.body.trim();
-            paramPaths.addAll(processed.paramPaths);
+            // 不冒泡：嵌套条件块的参数由嵌套条件自己的 <if> 守卫
 
             result.append("<if test=\"");
             result.append(testExpression);
@@ -366,7 +362,7 @@ public class MgxsqlConditionBodyProcessor {
                 ProcessedBody processed = this.processConditionBody(bodyContent);
                 String testExpression = this.buildTestExpression(processed.paramPaths);
                 String ifContent = processed.body.trim();
-                paramPaths.addAll(processed.paramPaths);
+                // 不冒泡：空 guard 时嵌套条件块的参数由嵌套条件自己的 <if> 守卫
 
                 result.append("<if test=\"");
                 result.append(testExpression);
@@ -388,14 +384,17 @@ public class MgxsqlConditionBodyProcessor {
             return pos;
         }
 
-        // #{param} — MyBatis参数引用，原样保留
+        // #{param} — 条件节点块内禁止，报语法错误
         if (next == '{') {
-            int paramEnd = MgxsqlSyntaxHelper.findBraceEnd(text, start + 2);
-            if (paramEnd > start) {
-                result.append(text.substring(start, paramEnd + 1));
-                return paramEnd + 1;
-            }
-            return start;
+            throw new MybatisgxException("mgxsql 语法错误: 条件节点块内不允许使用 #{param}，请使用 :param 代替，位置: %s", String.valueOf(start));
+        }
+
+        // #and / #or — 条件节点块内禁止，报语法错误
+        if (MgxsqlSyntaxHelper.isKeywordAt(text, start + 1, "and") && MgxsqlSyntaxHelper.isWordBoundaryAfter(text, start + 4)) {
+            throw new MybatisgxException("mgxsql 语法错误: 条件节点块内不允许使用 #and/#or 简写，请使用 #[and ...] 嵌套条件体，位置: %s", String.valueOf(start));
+        }
+        if (MgxsqlSyntaxHelper.isKeywordAt(text, start + 1, "or") && MgxsqlSyntaxHelper.isWordBoundaryAfter(text, start + 3)) {
+            throw new MybatisgxException("mgxsql 语法错误: 条件节点块内不允许使用 #and/#or 简写，请使用 #[and ...] 嵌套条件体，位置: %s", String.valueOf(start));
         }
 
         // #identifier — 形式1
@@ -414,19 +413,19 @@ public class MgxsqlConditionBodyProcessor {
                 } else if (fc == ']') {
                     form1BracketDepth--;
                 }
-                // 括号和方括号外遇到独立的 and/or 截断
+                // 括号和方括号外遇到独立的 and/or 报语法错误
                 if (form1ParenDepth == 0 && form1BracketDepth == 0) {
                     if (lineEnd + 3 <= text.length()
                             && text.substring(lineEnd, lineEnd + 3).equalsIgnoreCase("and")
                             && MgxsqlSyntaxHelper.isWordBoundaryBefore(text, lineEnd)
                             && MgxsqlSyntaxHelper.isWordBoundaryAfter(text, lineEnd + 3)) {
-                        break;
+                        throw new MybatisgxException("mgxsql 语法错误: 形式1条件内不允许行内 and/or，请使用 #[...] 或拆行 #and/#or，位置: %s", String.valueOf(lineEnd));
                     }
                     if (lineEnd + 2 <= text.length()
                             && text.substring(lineEnd, lineEnd + 2).equalsIgnoreCase("or")
                             && MgxsqlSyntaxHelper.isWordBoundaryBefore(text, lineEnd)
                             && MgxsqlSyntaxHelper.isWordBoundaryAfter(text, lineEnd + 2)) {
-                        break;
+                        throw new MybatisgxException("mgxsql 语法错误: 形式1条件内不允许行内 and/or，请使用 #[...] 或拆行 #and/#or，位置: %s", String.valueOf(lineEnd));
                     }
                 }
                 lineEnd++;
@@ -435,7 +434,7 @@ public class MgxsqlConditionBodyProcessor {
             ProcessedBody processed = this.processConditionBody(condition);
             String testExpression = this.buildTestExpression(processed.paramPaths);
             String ifContent = processed.body.trim();
-            paramPaths.addAll(processed.paramPaths);
+            // 不冒泡：形式1内嵌套条件块的参数由嵌套条件自己的 <if> 守卫
 
             result.append("<if test=\"");
             result.append(testExpression);
@@ -470,14 +469,40 @@ public class MgxsqlConditionBodyProcessor {
             return nameEnd;
         }
 
-        // 括号包裹 IN：in (:list) / in (item:collection)=>$item.prop
+        // 括号包裹 IN：in (:list) / in (item:collection)=>$item.prop / in ((item:collection)=>$item.prop)
         if (text.charAt(pos) == '(') {
+            int outerParenPos = pos;
             pos++; // 跳过 (
             while (pos < text.length() && Character.isWhitespace(text.charAt(pos))) {
                 pos++;
             }
             if (pos >= text.length()) {
                 return savedPos;
+            }
+
+            // in ((item:collection)=>$item.prop) — 复杂 IN 外层括号包裹
+            if (text.charAt(pos) == '(') {
+                pos++; // 跳过内层 (
+                while (pos < text.length() && Character.isWhitespace(text.charAt(pos))) {
+                    pos++;
+                }
+                int innerResult = this.parseComplexInInner(text, pos, result, paramPaths, savedPos);
+                if (innerResult > savedPos) {
+                    // 成功解析内层复杂 IN，消费内层 )
+                    while (innerResult < text.length() && Character.isWhitespace(text.charAt(innerResult))) {
+                        innerResult++;
+                    }
+                    // 消费外层 )
+                    if (innerResult < text.length() && text.charAt(innerResult) == ')') {
+                        innerResult++;
+                    }
+                    return innerResult;
+                }
+                // 外层括号包裹解析失败，恢复位置继续尝试其他路径
+                pos = outerParenPos + 1;
+                while (pos < text.length() && Character.isWhitespace(text.charAt(pos))) {
+                    pos++;
+                }
             }
 
             // in (:list) 或 in ( :list ) — 简单 IN + 括号
@@ -502,52 +527,67 @@ public class MgxsqlConditionBodyProcessor {
             }
 
             // in (item:collection)=>$item.prop — 复杂类型 IN
-            int itemNameStart = pos;
-            while (pos < text.length() && (Character.isLetterOrDigit(text.charAt(pos)) || text.charAt(pos) == '_' || text.charAt(pos) == '.')) {
-                pos++;
+            int complexResult = this.parseComplexInInner(text, pos, result, paramPaths, savedPos);
+            if (complexResult > savedPos) {
+                return complexResult;
             }
-            String itemName = text.substring(itemNameStart, pos);
+        }
+
+        return savedPos;
+    }
+
+    /**
+     * 解析复杂 IN 内层：(item:collection)=>$var
+     * pos 指向 item 标识符起始位置，已跳过内层 (
+     * 成功返回内层 ) 之后的下一个位置，失败返回 savedPos
+     */
+    private int parseComplexInInner(String text, int pos, StringBuilder result, List<String> paramPaths, int savedPos) {
+        int itemNameStart = pos;
+        while (pos < text.length() && (Character.isLetterOrDigit(text.charAt(pos)) || text.charAt(pos) == '_' || text.charAt(pos) == '.')) {
+            pos++;
+        }
+        String itemName = text.substring(itemNameStart, pos);
+        while (pos < text.length() && Character.isWhitespace(text.charAt(pos))) {
+            pos++;
+        }
+        if (pos < text.length() && text.charAt(pos) == ':') {
+            pos++; // 跳过 :
             while (pos < text.length() && Character.isWhitespace(text.charAt(pos))) {
                 pos++;
             }
-            if (pos < text.length() && text.charAt(pos) == ':') {
-                pos++; // 跳过 :
+            int collStart = pos;
+            while (pos < text.length() && (Character.isLetterOrDigit(text.charAt(pos)) || text.charAt(pos) == '_' || text.charAt(pos) == '.')) {
+                pos++;
+            }
+            String collectionName = text.substring(collStart, pos);
+            while (pos < text.length() && Character.isWhitespace(text.charAt(pos))) {
+                pos++;
+            }
+            if (pos < text.length() && text.charAt(pos) == ')') {
+                pos++; // 跳过内层 )
                 while (pos < text.length() && Character.isWhitespace(text.charAt(pos))) {
                     pos++;
                 }
-                int collStart = pos;
-                while (pos < text.length() && (Character.isLetterOrDigit(text.charAt(pos)) || text.charAt(pos) == '_' || text.charAt(pos) == '.')) {
-                    pos++;
-                }
-                String collectionName = text.substring(collStart, pos);
-                while (pos < text.length() && Character.isWhitespace(text.charAt(pos))) {
-                    pos++;
-                }
-                if (pos < text.length() && text.charAt(pos) == ')') {
-                    pos++; // 跳过 )
+                if (pos < text.length() && text.charAt(pos) == '=' && pos + 1 < text.length() && text.charAt(pos + 1) == '>') {
+                    pos += 2; // 跳过 =>
                     while (pos < text.length() && Character.isWhitespace(text.charAt(pos))) {
                         pos++;
                     }
-                    if (pos < text.length() && text.charAt(pos) == '=' && pos + 1 < text.length() && text.charAt(pos + 1) == '>') {
-                        pos += 2; // 跳过 =>
-                        while (pos < text.length() && Character.isWhitespace(text.charAt(pos))) {
-                            pos++;
-                        }
-                        // => 右边只接受 $variable，禁止 #{}
-                        if (pos < text.length() && text.charAt(pos) == '$' && pos + 1 < text.length() && MgxsqlSyntaxHelper.isIdentifierStart(text.charAt(pos + 1))) {
-                            int varEnd = MgxsqlSyntaxHelper.findIdentifierEnd(text, pos + 1);
-                            String varName = text.substring(pos + 1, varEnd);
-                            paramPaths.add(collectionName);
-                            result.append("in <foreach item=\"").append(itemName).append("\" collection=\"").append(collectionName).append("\" open=\"(\" close=\")\" separator=\",\">#{").append(varName).append("}</foreach>");
-                            return varEnd;
-                        } else if (pos < text.length() && text.charAt(pos) == '#' && pos + 1 < text.length() && text.charAt(pos + 1) == '{') {
-                            throw new MybatisgxException("mgxsql 语法错误: '=>' 右边只接受 $variable 形式，不允许 #{}, 位置: %s", String.valueOf(pos));
-                        }
+                    // => 右边只接受 $variable，禁止 #{} 和 ${}
+                    if (pos < text.length() && text.charAt(pos) == '$' && pos + 1 < text.length() && MgxsqlSyntaxHelper.isIdentifierStart(text.charAt(pos + 1))) {
+                        int varEnd = MgxsqlSyntaxHelper.findIdentifierEnd(text, pos + 1);
+                        String varName = text.substring(pos + 1, varEnd);
+                        paramPaths.add(collectionName);
+                        result.append("in <foreach item=\"").append(itemName).append("\" collection=\"").append(collectionName).append("\" open=\"(\" close=\")\" separator=\",\">#{").append(varName).append("}</foreach>");
+                        return varEnd;
+                    } else if (pos < text.length() && text.charAt(pos) == '#' && pos + 1 < text.length() && text.charAt(pos + 1) == '{') {
+                        throw new MybatisgxException("mgxsql 语法错误: '=>' 右边只接受 $variable 形式，不允许 #{} / ${}, 位置: %s", String.valueOf(pos));
+                    } else if (pos < text.length() && text.charAt(pos) == '$' && pos + 1 < text.length() && text.charAt(pos + 1) == '{') {
+                        throw new MybatisgxException("mgxsql 语法错误: '=>' 右边只接受 $variable 形式，不允许 #{} / ${}, 位置: %s", String.valueOf(pos));
                     }
                 }
             }
         }
-
         return savedPos;
     }
 

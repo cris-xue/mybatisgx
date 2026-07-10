@@ -122,9 +122,15 @@ public class MgxsqlConditionBodyProcessor {
                 throw new MybatisgxException("mgxsql 语法错误: 条件节点块内不允许使用 ${param}，位置: %s", String.valueOf(i));
             }
 
-            // 检测 <xml-tag> — 条件节点块内禁止，报语法错误
+            // 检测 < — 条件节点块内 XML 标签禁止，但 SQL 比较运算符（< 后不像 XML 标签名）允许原样输出
             if (c == '<') {
-                throw new MybatisgxException("mgxsql 语法错误: 条件节点块内不允许使用 XML 标签，位置: %s", String.valueOf(i));
+                if (isConditionXmlTagStart(text, i)) {
+                    throw new MybatisgxException("mgxsql 语法错误: 条件节点块内不允许使用 XML 标签，位置: %s", String.valueOf(i));
+                }
+                // SQL 比较运算符，原样输出
+                result.append(c);
+                i++;
+                continue;
             }
 
             result.append(c);
@@ -612,5 +618,61 @@ public class MgxsqlConditionBodyProcessor {
         result.append("#{").append(bindName).append("}");
 
         return paramNameEnd;
+    }
+
+    // ==================== 条件体内 < 智能判断 ====================
+
+    /**
+     * 判断条件体文本中指定位置的 '<' 是否是 XML 标签的开始
+     * <p>
+     * 与 {@link MgxsqlSyntaxHelper#isXmlTagStart(MgxsqlContext)} 逻辑一致，
+     * 但基于纯文本 + 索引操作（条件体处理不使用 MgxsqlContext）。
+     *
+     * @param text 条件体文本
+     * @param pos  '<' 所在位置
+     * @return 如果判断为 XML 标签开始则返回 true
+     */
+    private static boolean isConditionXmlTagStart(String text, int pos) {
+        if (pos >= text.length() || text.charAt(pos) != '<') {
+            return false;
+        }
+        int nextPos = pos + 1;
+        if (nextPos >= text.length()) {
+            return false;
+        }
+        char next = text.charAt(nextPos);
+
+        // </...> 闭合标签
+        if (next == '/') {
+            return true;
+        }
+        // <!-- 注释 或 <![CDATA[
+        if (next == '!') {
+            return true;
+        }
+        // <?...?> 处理指令
+        if (next == '?') {
+            return true;
+        }
+        // 字母或 _ 开头，可能是 XML 标签名
+        if (Character.isLetter(next) || next == '_') {
+            int nameEnd = nextPos + 1;
+            while (nameEnd < text.length()) {
+                char nc = text.charAt(nameEnd);
+                if (Character.isLetterOrDigit(nc) || nc == '_' || nc == '-' || nc == '.' || nc == ':') {
+                    nameEnd++;
+                } else {
+                    break;
+                }
+            }
+            // 标签名后紧跟空格、> 或 / → 是 XML 标签
+            if (nameEnd < text.length()) {
+                char afterName = text.charAt(nameEnd);
+                return afterName == ' ' || afterName == '>' || afterName == '/' || afterName == '\t' || afterName == '\n' || afterName == '\r';
+            }
+            return true;
+        }
+        // 其他：空格、数字、=、: 等 → SQL 比较运算符
+        return false;
     }
 }

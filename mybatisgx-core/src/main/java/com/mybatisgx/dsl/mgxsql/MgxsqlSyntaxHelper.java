@@ -367,6 +367,65 @@ public final class MgxsqlSyntaxHelper {
     }
 
     /**
+     * 判断当前位置的 '<' 是否是 XML 标签的开始
+     * <p>
+     * 启发式判断规则：
+     * <ul>
+     *   <li>'<' 后跟字母或 '_'，且后续形成有效 XML 标签名（以空格、'&gt;'、'/' 结尾）→ XML 标签</li>
+     *   <li>'<' 后跟 '/'（闭合标签）、'!'（注释/CDATA）、'?'（处理指令）→ XML 标签</li>
+     *   <li>其他情况（空格、数字、':'、'=' 等）→ SQL 比较运算符</li>
+     * </ul>
+     *
+     * @param ctx 扫描上下文，当前位置应指向 '<'
+     * @return 如果判断为 XML 标签开始则返回 true，否则返回 false
+     */
+    public static boolean isXmlTagStart(MgxsqlContext ctx) {
+        if (ctx.currentChar() != '<') {
+            return false;
+        }
+        int pos = ctx.getPosition() + 1;
+        if (pos >= ctx.getInputLength()) {
+            return false;
+        }
+        char next = ctx.charAt(pos);
+
+        // </...> 闭合标签
+        if (next == '/') {
+            return true;
+        }
+        // <!-- 注释 或 <![CDATA[ -->
+        if (next == '!') {
+            return true;
+        }
+        // <?...?> 处理指令
+        if (next == '?') {
+            return true;
+        }
+        // 字母或 _ 开头，可能是 XML 标签名
+        if (Character.isLetter(next) || next == '_') {
+            // 读取连续的标签名字符
+            int nameEnd = pos + 1;
+            while (nameEnd < ctx.getInputLength()) {
+                char nc = ctx.charAt(nameEnd);
+                if (Character.isLetterOrDigit(nc) || nc == '_' || nc == '-' || nc == '.' || nc == ':') {
+                    nameEnd++;
+                } else {
+                    break;
+                }
+            }
+            // 标签名后紧跟空格、> 或 / → 是 XML 标签
+            if (nameEnd < ctx.getInputLength()) {
+                char afterName = ctx.charAt(nameEnd);
+                return afterName == ' ' || afterName == '>' || afterName == '/' || afterName == '\t' || afterName == '\n' || afterName == '\r';
+            }
+            // 标签名后到达输入末尾 → 是 XML 标签（如 <where>）
+            return true;
+        }
+        // 其他：空格、数字、=、: 等 → SQL 比较运算符
+        return false;
+    }
+
+    /**
      * 查找 XML 标签结束位置
      */
     public static int findXmlTagEnd(MgxsqlContext ctx, int start) {

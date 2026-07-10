@@ -102,7 +102,13 @@ public class MgxsqlScanner {
             return;
         }
         if (c == '<') {
-            ctx.pushState(MgxsqlState.XML_TAG);
+            if (MgxsqlSyntaxHelper.isXmlTagStart(ctx)) {
+                ctx.pushState(MgxsqlState.XML_TAG);
+                return;
+            }
+            // SQL 比较运算符，原样输出
+            ctx.appendOutput(c);
+            ctx.advance();
             return;
         }
         if (MgxsqlSyntaxHelper.isKeywordAt(ctx, "where")) {
@@ -154,7 +160,13 @@ public class MgxsqlScanner {
             return;
         }
         if (c == '<') {
-            ctx.pushState(MgxsqlState.XML_TAG);
+            if (MgxsqlSyntaxHelper.isXmlTagStart(ctx)) {
+                ctx.pushState(MgxsqlState.XML_TAG);
+                return;
+            }
+            // SQL 比较运算符，原样输出
+            ctx.appendOutput(c);
+            ctx.advance();
             return;
         }
         if (MgxsqlSyntaxHelper.isClauseKeywordAt(ctx)) {
@@ -199,7 +211,13 @@ public class MgxsqlScanner {
             return;
         }
         if (c == '<') {
-            ctx.pushState(MgxsqlState.XML_TAG);
+            if (MgxsqlSyntaxHelper.isXmlTagStart(ctx)) {
+                ctx.pushState(MgxsqlState.XML_TAG);
+                return;
+            }
+            // SQL 比较运算符，原样输出
+            ctx.appendOutput(c);
+            ctx.advance();
             return;
         }
         if (c == '#') {
@@ -233,7 +251,13 @@ public class MgxsqlScanner {
             return;
         }
         if (c == '<') {
-            ctx.pushState(MgxsqlState.XML_TAG);
+            if (MgxsqlSyntaxHelper.isXmlTagStart(ctx)) {
+                ctx.pushState(MgxsqlState.XML_TAG);
+                return;
+            }
+            // SQL 比较运算符，原样输出
+            ctx.appendOutput(c);
+            ctx.advance();
             return;
         }
         if (MgxsqlSyntaxHelper.isKeywordAt(ctx, "where")) {
@@ -283,7 +307,13 @@ public class MgxsqlScanner {
             return;
         }
         if (c == '<') {
-            ctx.pushState(MgxsqlState.XML_TAG);
+            if (MgxsqlSyntaxHelper.isXmlTagStart(ctx)) {
+                ctx.pushState(MgxsqlState.XML_TAG);
+                return;
+            }
+            // SQL 比较运算符，原样输出
+            ctx.appendOutput(c);
+            ctx.advance();
             return;
         }
         if (c == '#') {

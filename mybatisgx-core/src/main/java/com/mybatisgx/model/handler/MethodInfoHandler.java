@@ -135,16 +135,16 @@ public class MethodInfoHandler {
         Update update = method.getAnnotation(Update.class);
         Select select = method.getAnnotation(Select.class);
         SqlCommandType sqlCommandType = null;
-        if (insert == null) {
+        if (insert != null) {
             sqlCommandType = SqlCommandType.INSERT;
         }
-        if (delete == null) {
+        if (delete != null) {
             sqlCommandType = SqlCommandType.DELETE;
         }
-        if (update == null) {
+        if (update != null) {
             sqlCommandType = SqlCommandType.UPDATE;
         }
-        if (select == null) {
+        if (select != null) {
             sqlCommandType = SqlCommandType.SELECT;
         }
         if (sqlCommandType == null) {

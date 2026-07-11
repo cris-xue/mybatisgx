@@ -97,6 +97,10 @@ public class MethodInfoHandler {
             }
 
             CommandTypeContext commandTypeContext = this.getCommandType(mapperInfo, method);
+            if (commandTypeContext.hasMybatisSqlAnnotation()) {
+                continue;
+            }
+
             SqlCommandType sqlCommandType = commandTypeContext.getSqlCommandType();
             MethodParamContext methodParamContext = this.getMethodParam(mapperInfo, method, sqlCommandType);
             MethodReturnInfo methodReturnInfo = this.getMethodReturn(mapperInfo, method);
@@ -130,16 +134,16 @@ public class MethodInfoHandler {
         Update update = method.getAnnotation(Update.class);
         Select select = method.getAnnotation(Select.class);
         SqlCommandType sqlCommandType = null;
-        if (insert != null) {
+        if (insert == null) {
             sqlCommandType = SqlCommandType.INSERT;
         }
-        if (delete != null) {
+        if (delete == null) {
             sqlCommandType = SqlCommandType.DELETE;
         }
-        if (update != null) {
+        if (update == null) {
             sqlCommandType = SqlCommandType.UPDATE;
         }
-        if (select != null) {
+        if (select == null) {
             sqlCommandType = SqlCommandType.SELECT;
         }
         if (sqlCommandType == null) {
@@ -153,7 +157,7 @@ public class MethodInfoHandler {
         } else {
             methodCommandType = MethodCommandType.valueOf(sqlCommandType.name());
         }
-        return new CommandTypeContext(sqlCommandType, methodCommandType);
+        return new CommandTypeContext(insert, delete, update, select, sqlCommandType, methodCommandType);
     }
 
     /**
@@ -413,19 +417,32 @@ public class MethodInfoHandler {
 
     /**
      * 从 mgxsql SQL 文本推断 SqlCommandType
-     *
-     * @param sqlText SQL 文本
-     * @return SqlCommandType，无法推断时返回 null
      */
     private static class CommandTypeContext {
+
+        private Insert insert;
+
+        private Delete delete;
+
+        private Update update;
+
+        private Select select;
 
         private SqlCommandType sqlCommandType;
 
         private MethodCommandType methodCommandType;
 
-        public CommandTypeContext(SqlCommandType sqlCommandType, MethodCommandType methodCommandType) {
+        public CommandTypeContext(Insert insert, Delete delete, Update update, Select select, SqlCommandType sqlCommandType, MethodCommandType methodCommandType) {
+            this.insert = insert;
+            this.delete = delete;
+            this.update = update;
+            this.select = select;
             this.sqlCommandType = sqlCommandType;
             this.methodCommandType = methodCommandType;
+        }
+
+        public boolean hasMybatisSqlAnnotation() {
+            return insert != null || delete != null || update != null || select != null;
         }
 
         public SqlCommandType getSqlCommandType() {

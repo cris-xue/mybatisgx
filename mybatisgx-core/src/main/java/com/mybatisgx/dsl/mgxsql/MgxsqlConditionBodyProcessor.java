@@ -122,13 +122,20 @@ public class MgxsqlConditionBodyProcessor {
                 throw new MybatisgxException("mgxsql 语法错误: 条件节点块内不允许使用 ${param}，位置: %s", String.valueOf(i));
             }
 
-            // 检测 < — 条件节点块内 XML 标签禁止，但 SQL 比较运算符（< 后不像 XML 标签名）允许原样输出
+            // 检测 < — 条件节点块内 XML 标签禁止，但 SQL 比较运算符（< 后不像 XML 标签名）允许转义输出
             if (c == '<') {
                 if (isConditionXmlTagStart(text, i)) {
                     throw new MybatisgxException("mgxsql 语法错误: 条件节点块内不允许使用 XML 标签，位置: %s", String.valueOf(i));
                 }
-                // SQL 比较运算符，原样输出
-                result.append(c);
+                // SQL 比较运算符，转义输出
+                result.append("&lt;");
+                i++;
+                continue;
+            }
+
+            // 检测 > — SQL 比较运算符，转义输出
+            if (c == '>') {
+                result.append("&gt;");
                 i++;
                 continue;
             }
@@ -160,7 +167,12 @@ public class MgxsqlConditionBodyProcessor {
     }
 
     /**
-     * guard 表达式中 :param 去冒号
+     * guard 表达式处理：:param 去冒号 + < > && || 转义
+     * <p>
+     * 处理顺序：先去冒号，再做特殊字符转义（避免 :param 中的 : 干扰）
+     *
+     * @param expr 原始 guard 表达式
+     * @return 去冒号并转义后的 OGNL 表达式
      */
     public String stripParamColons(String expr) {
         if (StringUtils.isBlank(expr)) {
@@ -170,6 +182,7 @@ public class MgxsqlConditionBodyProcessor {
         int i = 0;
         while (i < expr.length()) {
             char c = expr.charAt(i);
+            // :param → param（去冒号）
             if (c == ':' && i + 1 < expr.length() && MgxsqlSyntaxHelper.isIdentifierStartChar(expr.charAt(i + 1))) {
                 if (i + 1 < expr.length() && expr.charAt(i + 1) == ':') {
                     result.append(c);
@@ -181,10 +194,32 @@ public class MgxsqlConditionBodyProcessor {
                     result.append(expr.charAt(i));
                     i++;
                 }
-            } else {
-                result.append(c);
-                i++;
+                continue;
             }
+            // < → &lt;，> → &gt;
+            if (c == '<') {
+                result.append("&lt;");
+                i++;
+                continue;
+            }
+            if (c == '>') {
+                result.append("&gt;");
+                i++;
+                continue;
+            }
+            // && → and，|| → or
+            if (c == '&' && i + 1 < expr.length() && expr.charAt(i + 1) == '&') {
+                result.append("and");
+                i += 2;
+                continue;
+            }
+            if (c == '|' && i + 1 < expr.length() && expr.charAt(i + 1) == '|') {
+                result.append("or");
+                i += 2;
+                continue;
+            }
+            result.append(c);
+            i++;
         }
         return result.toString();
     }

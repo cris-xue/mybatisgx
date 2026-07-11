@@ -390,6 +390,21 @@ public class MgxsqlScanner {
             this.processForm1WithPrefix(ctx);
             return;
         }
+        // #,xxx — 逗号前缀形式1（SET 域逗号可写位置）
+        if (next == ',') {
+            if (!MgxsqlSyntaxHelper.isAtLineStart(ctx)) {
+                throw new MybatisgxException("mgxsql 语法错误: '#' 后带逗号前缀的形式1必须独占一行，%s",
+                        ctx.getPositionInfo());
+            }
+            ctx.setPosition(ctx.getPosition() + 2); // 跳过 # 和 ,
+            MgxsqlSyntaxHelper.skipWhitespace(ctx);
+            String condition = this.readForm1Content(ctx);
+            MgxsqlConditionBodyProcessor.ProcessedBody processed = this.conditionBodyProcessor.processConditionBody(condition);
+            String testExpression = this.conditionBodyProcessor.buildTestExpression(processed.getParamPaths());
+            String ifContent = ", " + processed.getBody().trim();
+            this.emitIfTag(ctx, testExpression, ifContent);
+            return;
+        }
         if (MgxsqlSyntaxHelper.isIdentifierStartChar(next)) {
             if (!MgxsqlSyntaxHelper.isAtLineStart(ctx)) {
                 throw new MybatisgxException("mgxsql 语法错误: '#condition' 形式1必须独占一行，%s",

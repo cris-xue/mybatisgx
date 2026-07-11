@@ -98,6 +98,7 @@ public class MethodInfoHandler {
 
             CommandTypeContext commandTypeContext = this.getCommandType(mapperInfo, method);
             if (commandTypeContext.hasMybatisSqlAnnotation()) {
+                LOGGER.debug("方法{}已使用mybatis注解实现，无需处理该方法！", namespaceMethodName);
                 continue;
             }
 

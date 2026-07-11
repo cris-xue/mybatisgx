@@ -119,7 +119,7 @@ public class MgxsqlScannerTest {
     public void test10_explicitGuard() {
         String input = "select * from t_user where id = :id #(:age > 2 && :age < 18)[or(name like :name and age = :age)]";
         String output = this.scanner.process(input);
-        Assert.assertTrue("表达式应写入 test（去冒号）", output.contains("age > 2 && age < 18"));
+        Assert.assertTrue("表达式应写入 test（去冒号并转义）", output.contains("age &gt; 2 and age &lt; 18"));
         Assert.assertTrue("条件体中 :name 应转为 #{name}", output.contains("#{name}"));
         Assert.assertTrue("条件体中 :age 应转为 #{age}", output.contains("#{age}"));
         Assert.assertTrue("or 应在条件体内", output.contains("or("));
@@ -138,7 +138,7 @@ public class MgxsqlScannerTest {
     public void test12_guardWithoutColon() {
         String input = "select * from t_user where #(age > 2)[name = :name]";
         String output = this.scanner.process(input);
-        Assert.assertTrue("test 应为 age > 2", output.contains("age > 2"));
+        Assert.assertTrue("test 应为 age &gt; 2（转义）", output.contains("age &gt; 2"));
         Assert.assertTrue("条件体中 :name 应转为 #{name}", output.contains("#{name}"));
     }
 
@@ -146,7 +146,7 @@ public class MgxsqlScannerTest {
     public void test13_guardColonStrip() {
         String input = "select * from t_user where #(:age > 2)[age = :age]";
         String output = this.scanner.process(input);
-        Assert.assertTrue("guard 应为 age > 2（去冒号）", output.contains("age > 2"));
+        Assert.assertTrue("guard 应为 age &gt; 2（去冒号并转义）", output.contains("age &gt; 2"));
         Assert.assertTrue("body 应为 age = #{age}", output.contains("age = #{age}"));
     }
 
@@ -154,7 +154,7 @@ public class MgxsqlScannerTest {
     public void test14_guardMixedColon() {
         String input = "select * from t_user where #(:age > minAge && maxAge > :age)[age = :age]";
         String output = this.scanner.process(input);
-        Assert.assertTrue("guard 应去冒号但保留裸标识符", output.contains("age > minAge && maxAge > age"));
+        Assert.assertTrue("guard 应去冒号并转义，保留裸标识符", output.contains("age &gt; minAge and maxAge &gt; age"));
         Assert.assertTrue("body 应为 age = #{age}", output.contains("age = #{age}"));
     }
 
@@ -702,7 +702,7 @@ public class MgxsqlScannerTest {
     public void test72_guardTrim() {
         String input = "select * from t_user where #( :age > 1 )[age = :age]";
         String output = this.scanner.process(input);
-        Assert.assertTrue("guard 应为 age > 1（trim后无空格）", output.contains("age > 1"));
+        Assert.assertTrue("guard 应为 age &gt; 1（trim 后无空格并转义）", output.contains("age &gt; 1"));
         Assert.assertTrue("body 应为 age = #{age}", output.contains("age = #{age}"));
     }
 
@@ -1029,7 +1029,7 @@ public class MgxsqlScannerTest {
         String input = "update t_user set #[age < :maxAge] where id = :id";
         String output = this.scanner.process(input);
         Assert.assertTrue("应包含 <set>", output.contains("<set>"));
-        Assert.assertTrue("age < 应原样输出", output.contains("age <"));
+        Assert.assertTrue("age &lt; 应转义输出", output.contains("age &lt;"));
         Assert.assertTrue(":maxAge 应转为 #{maxAge}", output.contains("#{maxAge}"));
     }
 
@@ -1056,5 +1056,109 @@ public class MgxsqlScannerTest {
         Assert.assertTrue("应包含 <foreach", output.contains("<foreach"));
         Assert.assertTrue("应包含 #{item.id}", output.contains("#{item.id}"));
         Assert.assertTrue("in 后应直接跟 <foreach", output.contains("in <foreach"));
+    }
+
+    // ==================== guard 表达式转义 ====================
+
+    @Test
+    public void test113_guardLtEscape() {
+        // guard 中 < 应转义为 &lt;
+        String input = "select * from t_user where #(:age < 18)[name = :name]";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("guard 应转义 < 为 &lt;", output.contains("age &lt; 18"));
+    }
+
+    @Test
+    public void test114_guardGtEscape() {
+        // guard 中 > 应转义为 &gt;
+        String input = "select * from t_user where #(:age > 2)[name = :name]";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("guard 应转义 > 为 &gt;", output.contains("age &gt; 2"));
+    }
+
+    @Test
+    public void test115_guardAndEscape() {
+        // guard 中 && 应转为 and
+        String input = "select * from t_user where #(:age > 2 && :age < 18)[name = :name]";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("guard 应转 && 为 and", output.contains("age &gt; 2 and age &lt; 18"));
+    }
+
+    @Test
+    public void test116_guardOrEscape() {
+        // guard 中 || 应转为 or
+        String input = "select * from t_user where #(:age > 2 || :age < 0)[name = :name]";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("guard 应转 || 为 or", output.contains("age &gt; 2 or age &lt; 0"));
+    }
+
+    // ==================== body 内容转义 ====================
+
+    @Test
+    public void test117_bodyLtEscape() {
+        // body 中 < 应转义为 &lt;
+        String input = "select * from t_user where #[age < :maxAge]";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("body 应转义 < 为 &lt;", output.contains("age &lt;"));
+    }
+
+    @Test
+    public void test118_bodyGtEscape() {
+        // body 中 > 应转义为 &gt;
+        String input = "select * from t_user where #[age > :minAge]";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("body 应转义 > 为 &gt;", output.contains("age &gt;"));
+    }
+
+    // ==================== SET 域 5 种逗号写法 ====================
+
+    @Test
+    public void test119_setCommaForm1LineStart() {
+        // 场景1：#,age = :age（形式1 逗号前缀，独占一行）
+        String input = "update t_user set\n  #name = :name\n  #,age = :age\nwhere id = :id";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("应包含 <set>", output.contains("<set>"));
+        Assert.assertTrue("应包含 <if>", output.contains("<if"));
+        Assert.assertTrue("age 条件体应带逗号前缀", output.contains(", age = #{age}"));
+    }
+
+    @Test
+    public void test120_setCommaAfterCondition() {
+        // 场景2：#name = :name, 逗号在条件体末尾
+        String input = "update t_user set\n  #name = :name,\n  #age = :age\nwhere id = :id";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("应包含 <set>", output.contains("<set>"));
+        Assert.assertTrue("name 条件体末尾应有逗号", output.contains("name = #{name},"));
+    }
+
+    @Test
+    public void test121_setCommaBetweenBrackets() {
+        // 场景3：#[name = :name], #[age = :age]
+        String input = "update t_user set #[name = :name], #[age = :age] where id = :id";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("应包含 <set>", output.contains("<set>"));
+        Assert.assertTrue("应包含 <if>", output.contains("<if"));
+        Assert.assertTrue("name = #{name}", output.contains("name = #{name}"));
+        Assert.assertTrue("age = #{age}", output.contains("age = #{age}"));
+    }
+
+    @Test
+    public void test122_setCommaInsideFirstBracket() {
+        // 场景4：#[name = :name,] #[age = :age]
+        String input = "update t_user set #[name = :name,] #[age = :age] where id = :id";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("应包含 <set>", output.contains("<set>"));
+        Assert.assertTrue("name = #{name},", output.contains("name = #{name},"));
+    }
+
+    @Test
+    public void test123_setCommaInsideSecondBracket() {
+        // 场景5：#[name = :name] #[,age = :age]
+        String input = "update t_user set #[name = :name] #[,age = :age] where id = :id";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("应包含 <set>", output.contains("<set>"));
+        Assert.assertTrue("age = #{age}", output.contains("age = #{age}"));
+        // 验证逗号+age在 ifContent 中（body 内容原样保留，空格来自 ifTag 的 "> " 前缀）
+        Assert.assertTrue("逗号前缀 age 应在 if 标签体内，输出: " + output, output.contains("> ,age = #{age}"));
     }
 }

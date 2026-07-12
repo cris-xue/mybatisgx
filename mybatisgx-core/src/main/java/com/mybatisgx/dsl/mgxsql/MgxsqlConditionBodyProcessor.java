@@ -253,6 +253,11 @@ public class MgxsqlConditionBodyProcessor {
         }
         char next = text.charAt(start + 1);
 
+        // #choose[ ... ] - choose 容器（支持 body 内嵌套，须在形式1之前判定）
+        if (MgxsqlSyntaxHelper.isKeywordAt(text, start + 1, "choose") && MgxsqlSyntaxHelper.isWordBoundaryAfter(text, start + 7)) {
+            return this.processChooseNodeInBody(text, start, result);
+        }
+
         // #[body] — 无 guard 条件体
         if (next == '[') {
             int pos = start + 2; // 跳过 #[
@@ -471,6 +476,182 @@ public class MgxsqlConditionBodyProcessor {
         }
 
         return start;
+    }
+
+    // ==================== #choose 容器处理 ====================
+
+    /**
+     * 解析 #choose[…] 内部文本，生成完整的 &lt;choose&gt;…&lt;/choose&gt; 字符串
+     *
+     * @param inner #choose[ 与 ] 之间的内容（若干 #when(expr)[body] 和可选 #otherwise[body]）
+     */
+    public String processChooseBody(String inner) {
+        StringBuilder out = new StringBuilder();
+        out.append(MgxsqlXmlFragment.chooseOpen());
+        this.parseChooseInner(inner, out);
+        out.append(MgxsqlXmlFragment.chooseClose());
+        return out.toString();
+    }
+
+    /**
+     * 处理条件体文本中 #choose[...] 节点（嵌套支持），追加 &lt;choose&gt;…&lt;/choose&gt; 到 result
+     *
+     * @param start 指向 #
+     * @return 消费到的位置（] 之后）
+     */
+    private int processChooseNodeInBody(String text, int start, StringBuilder result) {
+        int pos = start + 7; // 跳过 #choose
+        while (pos < text.length() && Character.isWhitespace(text.charAt(pos))) {
+            pos++;
+        }
+        if (pos >= text.length() || text.charAt(pos) != '[') {
+            throw new MybatisgxException("mgxsql 语法错误: #choose 后必须跟 '['，位置: %s", String.valueOf(start));
+        }
+        int[] range = this.readTextBracketRange(text, pos);
+        String inner = text.substring(pos + 1, range[1] - 1);
+        result.append(this.processChooseBody(inner));
+        return range[1];
+    }
+
+    /**
+     * 解析 #choose[…] 内部：循环识别 #when(expr)[body] 与 #otherwise[body]
+     * <p>
+     * body 复用条件节点块规则（processConditionBody），天然支持 :param/in/%:/嵌套 #[…]/嵌套 #choose，
+     * 并禁止 #{}/${}/&lt;xml&gt;。
+     */
+    private void parseChooseInner(String text, StringBuilder out) {
+        int i = 0;
+        int len = text.length();
+        while (i < len) {
+            while (i < len && Character.isWhitespace(text.charAt(i))) {
+                i++;
+            }
+            if (i >= len) {
+                break;
+            }
+            char c = text.charAt(i);
+            if (c != '#') {
+                throw new MybatisgxException("mgxsql 语法错误: #choose 内只允许 #when/#otherwise，位置: %s", String.valueOf(i));
+            }
+            i++; // 跳过 #
+            if (MgxsqlSyntaxHelper.isKeywordAt(text, i, "when") && MgxsqlSyntaxHelper.isWordBoundaryAfter(text, i + 4)) {
+                i += 4;
+                while (i < len && Character.isWhitespace(text.charAt(i))) {
+                    i++;
+                }
+                if (i >= len || text.charAt(i) != '(') {
+                    throw new MybatisgxException("mgxsql 语法错误: #when 必须带 guard，写法 #when(expr)[body]，位置: %s", String.valueOf(i));
+                }
+                int[] guardRange = this.readTextParenRange(text, i);
+                String guard = text.substring(i + 1, guardRange[1] - 1).trim();
+                i = guardRange[1];
+                while (i < len && Character.isWhitespace(text.charAt(i))) {
+                    i++;
+                }
+                if (i >= len || text.charAt(i) != '[') {
+                    throw new MybatisgxException("mgxsql 语法错误: #when(expr) 后必须跟 [body]，位置: %s", String.valueOf(i));
+                }
+                int[] bodyRange = this.readTextBracketRange(text, i);
+                String body = text.substring(i + 1, bodyRange[1] - 1);
+                i = bodyRange[1];
+                String testExpr = this.stripParamColons(guard);
+                ProcessedBody processed = this.processConditionBody(body);
+                out.append(MgxsqlXmlFragment.whenTag(testExpr, processed.body.trim()));
+            } else if (MgxsqlSyntaxHelper.isKeywordAt(text, i, "otherwise") && MgxsqlSyntaxHelper.isWordBoundaryAfter(text, i + 9)) {
+                i += 9;
+                while (i < len && Character.isWhitespace(text.charAt(i))) {
+                    i++;
+                }
+                if (i >= len || text.charAt(i) != '[') {
+                    throw new MybatisgxException("mgxsql 语法错误: #otherwise 后必须跟 [body]，位置: %s", String.valueOf(i));
+                }
+                int[] bodyRange = this.readTextBracketRange(text, i);
+                String body = text.substring(i + 1, bodyRange[1] - 1);
+                i = bodyRange[1];
+                ProcessedBody processed = this.processConditionBody(body);
+                out.append(MgxsqlXmlFragment.otherwiseTag(processed.body.trim()));
+            } else {
+                throw new MybatisgxException("mgxsql 语法错误: #choose 内只允许 #when/#otherwise，位置: %s", String.valueOf(i));
+            }
+        }
+    }
+
+    /**
+     * 读取文本中从 start（指向 [）开始的方括号配对范围，处理嵌套 [] 与字符串字面量
+     *
+     * @return int[2]，[0]=start，[1]=闭括号之后位置
+     */
+    private int[] readTextBracketRange(String text, int start) {
+        int pos = start + 1;
+        int depth = 1;
+        while (pos < text.length() && depth > 0) {
+            char bc = text.charAt(pos);
+            if (bc == '[') {
+                depth++;
+                pos++;
+            } else if (bc == ']') {
+                depth--;
+                pos++;
+                if (depth == 0) {
+                    break;
+                }
+            } else if (bc == '\'') {
+                pos++;
+                while (pos < text.length()) {
+                    char sc = text.charAt(pos);
+                    pos++;
+                    if (sc == '\'') {
+                        if (pos < text.length() && text.charAt(pos) == '\'') {
+                            pos++;
+                        } else {
+                            break;
+                        }
+                    }
+                }
+            } else {
+                pos++;
+            }
+        }
+        return new int[]{start, pos};
+    }
+
+    /**
+     * 读取文本中从 start（指向 (）开始的圆括号配对范围，处理嵌套 () 与字符串字面量
+     *
+     * @return int[2]，[0]=start，[1]=闭括号之后位置
+     */
+    private int[] readTextParenRange(String text, int start) {
+        int pos = start + 1;
+        int depth = 1;
+        while (pos < text.length() && depth > 0) {
+            char pc = text.charAt(pos);
+            if (pc == '(') {
+                depth++;
+                pos++;
+            } else if (pc == ')') {
+                depth--;
+                pos++;
+                if (depth == 0) {
+                    break;
+                }
+            } else if (pc == '\'') {
+                pos++;
+                while (pos < text.length()) {
+                    char sc = text.charAt(pos);
+                    pos++;
+                    if (sc == '\'') {
+                        if (pos < text.length() && text.charAt(pos) == '\'') {
+                            pos++;
+                        } else {
+                            break;
+                        }
+                    }
+                }
+            } else {
+                pos++;
+            }
+        }
+        return new int[]{start, pos};
     }
 
     // ==================== 条件体内部 IN / LIKE 处理 ====================

@@ -35,6 +35,10 @@ public class MgxsqlDetector {
         if (containsMgxsqlForm1Condition(trimmed)) {
             return true;
         }
+        // 检测 #choose 容器标记
+        if (containsMgxsqlChoose(trimmed)) {
+            return true;
+        }
         // 检测 :param 参数绑定（排除字符串字面量内的，排除 :: ）
         if (containsMgxsqlParamRef(trimmed)) {
             return true;
@@ -108,6 +112,36 @@ public class MgxsqlDetector {
             if (!inString && c == '#' && i + 1 < sqlText.length()) {
                 char next = sqlText.charAt(i + 1);
                 if ((Character.isLetter(next) || next == '_') && next != '{' && next != '[' && next != '(') {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 检测是否包含 #choose 容器标记（# 后跟 choose 关键字，带词边界）
+     */
+    private static boolean containsMgxsqlChoose(String sqlText) {
+        boolean inString = false;
+        for (int i = 0; i < sqlText.length(); i++) {
+            char c = sqlText.charAt(i);
+            if (c == '\'') {
+                inString = !inString;
+                continue;
+            }
+            if (!inString && c == '#' && i + 6 < sqlText.length()
+                    && sqlText.substring(i + 1, i + 7).equalsIgnoreCase("choose")) {
+                // 检查后方单词边界
+                int afterPos = i + 7;
+                if (afterPos < sqlText.length()) {
+                    char after = sqlText.charAt(afterPos);
+                    if (Character.isLetterOrDigit(after) || after == '_' || after == '.') {
+                        continue;
+                    }
+                }
+                // 检查前方单词边界
+                if (i == 0 || !Character.isLetterOrDigit(sqlText.charAt(i - 1))) {
                     return true;
                 }
             }

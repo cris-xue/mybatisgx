@@ -79,6 +79,9 @@ public class MgxsqlScanner {
                 case STRING_LITERAL:
                     this.processStringLiteral(ctx);
                     break;
+                case DESCENT:
+                    this.processDescent(ctx);
+                    break;
                 case XML_TAG:
                     this.processXmlTag(ctx);
                     break;
@@ -103,7 +106,7 @@ public class MgxsqlScanner {
         }
         if (c == '<') {
             if (MgxsqlSyntaxHelper.isXmlTagStart(ctx)) {
-                ctx.pushState(MgxsqlState.XML_TAG);
+                this.processXmlStart(ctx);
                 return;
             }
             // SQL 比较运算符，原样输出
@@ -161,7 +164,7 @@ public class MgxsqlScanner {
         }
         if (c == '<') {
             if (MgxsqlSyntaxHelper.isXmlTagStart(ctx)) {
-                ctx.pushState(MgxsqlState.XML_TAG);
+                this.processXmlStart(ctx);
                 return;
             }
             // SQL 比较运算符，原样输出
@@ -212,7 +215,7 @@ public class MgxsqlScanner {
         }
         if (c == '<') {
             if (MgxsqlSyntaxHelper.isXmlTagStart(ctx)) {
-                ctx.pushState(MgxsqlState.XML_TAG);
+                this.processXmlStart(ctx);
                 return;
             }
             // SQL 比较运算符，原样输出
@@ -252,7 +255,7 @@ public class MgxsqlScanner {
         }
         if (c == '<') {
             if (MgxsqlSyntaxHelper.isXmlTagStart(ctx)) {
-                ctx.pushState(MgxsqlState.XML_TAG);
+                this.processXmlStart(ctx);
                 return;
             }
             // SQL 比较运算符，原样输出
@@ -308,7 +311,7 @@ public class MgxsqlScanner {
         }
         if (c == '<') {
             if (MgxsqlSyntaxHelper.isXmlTagStart(ctx)) {
-                ctx.pushState(MgxsqlState.XML_TAG);
+                this.processXmlStart(ctx);
                 return;
             }
             // SQL 比较运算符，原样输出
@@ -355,10 +358,173 @@ public class MgxsqlScanner {
             ctx.setPosition(ctx.getInputLength());
         } else {
             String tagContent = ctx.substring(start, end + 1);
+            // 原子性校验：原生最小单元块内部不允许混合 mgxsql 语法
+            if (containsMgxsqlMarker(tagContent)) {
+                throw new MybatisgxException("mgxsql 语法错误: 最小单元块内不允许混合 mgxsql 语法，%s",
+                        ctx.getPositionInfo());
+            }
             ctx.appendOutput(tagContent);
             ctx.setPosition(end + 1);
         }
         ctx.popState();
+    }
+
+    // ==================== XML 元素分流：三标签下沉 vs 其余透传 ====================
+
+    /**
+     * 遇 &lt; 且确认为 XML 标签起始时调用：读开标签名，三标签（where/set/trim）下沉翻译，
+     * 其余标签 pushState(XML_TAG) 走整块透传
+     */
+    private void processXmlStart(MgxsqlContext ctx) {
+        int nameStart = ctx.getPosition() + 1;
+        if (nameStart < ctx.getInputLength() && ctx.charAt(nameStart) == '/') {
+            // 闭合标签，整块透传
+            ctx.pushState(MgxsqlState.XML_TAG);
+            return;
+        }
+        int nameEnd = nameStart;
+        while (nameEnd < ctx.getInputLength()) {
+            char nc = ctx.charAt(nameEnd);
+            if (Character.isLetterOrDigit(nc) || nc == '_' || nc == '-' || nc == '.' || nc == ':') {
+                nameEnd++;
+            } else {
+                break;
+            }
+        }
+        String tagName = ctx.substring(nameStart, nameEnd).toLowerCase();
+        if (this.isContainerTag(tagName)) {
+            int openEnd = this.findOpenTagClose(ctx, ctx.getPosition());
+            if (openEnd == -1) {
+                ctx.appendOutput(ctx.substring(ctx.getPosition(), ctx.getInputLength()));
+                ctx.setPosition(ctx.getInputLength());
+                return;
+            }
+            String openTag = ctx.substring(ctx.getPosition(), openEnd + 1);
+            // 自闭合标签（<trim/>）不下沉，原样输出后继续
+            if (openTag.endsWith("/>")) {
+                ctx.appendOutput(openTag);
+                ctx.setPosition(openEnd + 1);
+                return;
+            }
+            ctx.appendOutput(openTag);
+            ctx.setPosition(openEnd + 1);
+            ctx.pushState(MgxsqlState.DESCENT);
+            ctx.pushDescentClose("</" + tagName + ">");
+        } else {
+            ctx.pushState(MgxsqlState.XML_TAG);
+        }
+    }
+
+    /**
+     * 判断是否为下沉容器标签（where/set/trim）
+     */
+    private boolean isContainerTag(String tagName) {
+        return "where".equals(tagName) || "set".equals(tagName) || "trim".equals(tagName);
+    }
+
+    /**
+     * 从 start（指向 &lt;）查找开标签的结束 &gt;（跳过属性中的引号字符串）
+     *
+     * @return &gt; 的位置，未找到返回 -1
+     */
+    private int findOpenTagClose(MgxsqlContext ctx, int start) {
+        int pos = start + 1;
+        while (pos < ctx.getInputLength()) {
+            char c = ctx.charAt(pos);
+            if (c == '"' || c == '\'') {
+                char quote = c;
+                pos++;
+                while (pos < ctx.getInputLength() && ctx.charAt(pos) != quote) {
+                    pos++;
+                }
+                pos++;
+                continue;
+            }
+            if (c == '>') {
+                return pos;
+            }
+            pos++;
+        }
+        return -1;
+    }
+
+    // ==================== DESCENT 容器下沉域 ====================
+
+    /**
+     * 容器下沉域处理：遇对应闭标签结束；否则中性翻译 mgxsql（#[…]/:param/in/%:），
+     * 遇嵌套标签走 processXmlStart 分流（三标签递归下沉，其余整块透传）
+     */
+    private void processDescent(MgxsqlContext ctx) {
+        String closeTag = ctx.peekDescentClose();
+        if (closeTag != null && ctx.startsWithAt(closeTag, ctx.getPosition())) {
+            ctx.appendOutput(closeTag);
+            ctx.setPosition(ctx.getPosition() + closeTag.length());
+            ctx.popDescentClose();
+            ctx.popState();
+            return;
+        }
+        char c = ctx.currentChar();
+        if (c == '\'') {
+            ctx.pushState(MgxsqlState.STRING_LITERAL);
+            ctx.appendOutput(c);
+            ctx.advance();
+            return;
+        }
+        if (c == '<') {
+            if (MgxsqlSyntaxHelper.isXmlTagStart(ctx)) {
+                this.processXmlStart(ctx);
+                return;
+            }
+            ctx.appendOutput(c);
+            ctx.advance();
+            return;
+        }
+        if (c == '#') {
+            this.processHash(ctx);
+            return;
+        }
+        if (MgxsqlSyntaxHelper.isKeywordAt(ctx, "in") && MgxsqlSyntaxHelper.isWordBoundaryBefore(ctx) && MgxsqlSyntaxHelper.isWordBoundaryAfter(ctx, 2)) {
+            this.processInClause(ctx);
+            return;
+        }
+        if (c == '%' && ctx.peekChar(1) == ':') {
+            this.processLikePattern(ctx);
+            return;
+        }
+        if (c == ':' && MgxsqlSyntaxHelper.isParamRefStart(ctx)) {
+            this.processParamRef(ctx);
+            return;
+        }
+        ctx.appendOutput(c);
+        ctx.advance();
+    }
+
+    // ==================== 原子性校验：原生标签内禁 mgxsql ====================
+
+    /**
+     * 检测文本是否含 mgxsql 条件节点块标记（#[/#(），跳过字符串字面量。
+     * 用于整块透传的原生标签内部混合语法校验（最小单元块内禁条件节点块）。
+     * 注：:param/in :/%: 不在校验范围（用户原话仅禁 #()[] 条件节点块）。
+     */
+    private static boolean containsMgxsqlMarker(String text) {
+        boolean inString = false;
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+            if (c == '\'') {
+                inString = !inString;
+                continue;
+            }
+            if (inString) {
+                continue;
+            }
+            if (c == '#' && i + 1 < text.length()) {
+                char n = text.charAt(i + 1);
+                if (n == '[' || n == '(') {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     // ==================== 统一 # 处理（WHERE/SET） ====================
@@ -403,6 +569,11 @@ public class MgxsqlScanner {
             String testExpression = this.conditionBodyProcessor.buildTestExpression(processed.getParamPaths());
             String ifContent = ", " + processed.getBody().trim();
             this.emitIfTag(ctx, testExpression, ifContent);
+            return;
+        }
+        // #choose 容器
+        if (this.isChooseKeywordAt(ctx)) {
+            this.processChooseNode(ctx);
             return;
         }
         if (MgxsqlSyntaxHelper.isIdentifierStartChar(next)) {
@@ -516,6 +687,36 @@ public class MgxsqlScanner {
         String ifContent = prefix + " " + processed.getBody().trim();
 
         this.emitIfTag(ctx, testExpression, ifContent);
+    }
+
+    // ==================== #choose 容器 ====================
+
+    /**
+     * 检测 # 后面是否是 choose 关键字（带词边界）
+     */
+    private boolean isChooseKeywordAt(MgxsqlContext ctx) {
+        int pos = ctx.getPosition() + 1; // # 后
+        if (!MgxsqlSyntaxHelper.isKeywordAt(ctx.getInput(), pos, "choose")) {
+            return false;
+        }
+        return MgxsqlSyntaxHelper.isWordBoundaryAfter(ctx.getInput(), pos + 6);
+    }
+
+    /**
+     * 处理 #choose[ ... ] 容器：读出内部文本，交由 conditionBodyProcessor 生成 &lt;choose&gt;…&lt;/choose&gt;
+     */
+    private void processChooseNode(MgxsqlContext ctx) {
+        ctx.advance(); // 跳过 #
+        ctx.setPosition(ctx.getPosition() + 6); // 跳过 choose
+        MgxsqlSyntaxHelper.skipWhitespace(ctx);
+        if (!ctx.hasMore() || ctx.currentChar() != '[') {
+            throw new MybatisgxException("mgxsql 语法错误: #choose 后必须跟 '['，%s",
+                    ctx.getPositionInfo());
+        }
+        ctx.advance(); // 跳过 [
+        String inner = this.readBracketedContent(ctx);
+        String xml = this.conditionBodyProcessor.processChooseBody(inner);
+        ctx.appendOutput(xml);
     }
 
     // ==================== 统一 if 标签输出 ====================
@@ -876,6 +1077,9 @@ public class MgxsqlScanner {
         } else if (state == MgxsqlState.SET_BOUNDED) {
             throw new MybatisgxException("mgxsql 语法错误: 'set[' 未闭合，缺少匹配的 ']'，%s",
                     ctx.getPositionInfo());
+        } else if (state == MgxsqlState.DESCENT) {
+            throw new MybatisgxException("mgxsql 语法错误: 容器标签未闭合，缺少 %s，%s",
+                    ctx.peekDescentClose(), ctx.getPositionInfo());
         }
     }
 }

@@ -41,5 +41,10 @@ public enum MgxsqlState {
     /**
      * 字符串字面量：单引号内跳过所有 mgxsql 语法
      */
-    STRING_LITERAL
+    STRING_LITERAL,
+
+    /**
+     * 容器下沉域：&lt;where&gt;/&lt;set&gt;/&lt;trim&gt; 三标签内部，中性翻译 mgxsql，遇对应闭标签结束
+     */
+    DESCENT
 }

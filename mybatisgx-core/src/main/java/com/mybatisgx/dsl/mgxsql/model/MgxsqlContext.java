@@ -37,6 +37,11 @@ public class MgxsqlContext {
     private List<MgxsqlState> stateStack = new ArrayList<MgxsqlState>();
 
     /**
+     * 容器下沉闭标签栈（与 stateStack 中的 DESCENT 配对，记录当前期望的 &lt;/tagName&gt;）
+     */
+    private List<String> descentCloseTags = new ArrayList<String>();
+
+    /**
      * 当前行号（从1开始）
      */
     private int lineNumber = 1;
@@ -74,6 +79,48 @@ public class MgxsqlContext {
         }
         this.state = this.stateStack.remove(this.stateStack.size() - 1);
         return this.state;
+    }
+
+    /**
+     * 压入容器下沉闭标签（进入 DESCENT 时调用）
+     */
+    public void pushDescentClose(String closeTag) {
+        this.descentCloseTags.add(closeTag);
+    }
+
+    /**
+     * 查看栈顶容器下沉闭标签（不弹出）
+     */
+    public String peekDescentClose() {
+        if (this.descentCloseTags.isEmpty()) {
+            return null;
+        }
+        return this.descentCloseTags.get(this.descentCloseTags.size() - 1);
+    }
+
+    /**
+     * 弹出栈顶容器下沉闭标签（离开 DESCENT 时调用）
+     */
+    public String popDescentClose() {
+        if (this.descentCloseTags.isEmpty()) {
+            return null;
+        }
+        return this.descentCloseTags.remove(this.descentCloseTags.size() - 1);
+    }
+
+    /**
+     * 判断当前位置开始的文本是否等于指定字符串
+     */
+    public boolean startsWithAt(String target, int pos) {
+        if (target == null || pos + target.length() > this.input.length()) {
+            return false;
+        }
+        for (int i = 0; i < target.length(); i++) {
+            if (Character.toLowerCase(this.input.charAt(pos + i)) != Character.toLowerCase(target.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public int getPosition() {

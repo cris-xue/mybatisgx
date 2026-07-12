@@ -78,6 +78,41 @@ public final class MgxsqlXmlFragment {
     }
 
     /**
+     * 生成 &lt;choose&gt; 开始标签
+     */
+    public static String chooseOpen() {
+        return "<choose>";
+    }
+
+    /**
+     * 生成 &lt;/choose&gt; 结束标签
+     */
+    public static String chooseClose() {
+        return "</choose>";
+    }
+
+    /**
+     * 生成 &lt;when&gt; 分支标签
+     *
+     * @param testExpr guard 处理后的 OGNL 表达式
+     * @param body     分支体内容（已翻译）
+     * @return 完整的 &lt;when&gt; 标签字符串
+     */
+    public static String whenTag(String testExpr, String body) {
+        return "<when test=\"" + testExpr + "\"> " + body + "</when>";
+    }
+
+    /**
+     * 生成 &lt;otherwise&gt; 兜底分支标签
+     *
+     * @param body 分支体内容（已翻译）
+     * @return 完整的 &lt;otherwise&gt; 标签字符串
+     */
+    public static String otherwiseTag(String body) {
+        return "<otherwise> " + body + "</otherwise>";
+    }
+
+    /**
      * 生成 &lt;/where&gt; 结束标签
      */
     public static String closeWhere() {

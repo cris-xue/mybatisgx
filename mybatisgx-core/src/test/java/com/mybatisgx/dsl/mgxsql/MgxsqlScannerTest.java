@@ -1161,4 +1161,175 @@ public class MgxsqlScannerTest {
         // 验证逗号+age在 ifContent 中（body 内容原样保留，空格来自 ifTag 的 "> " 前缀）
         Assert.assertTrue("逗号前缀 age 应在 if 标签体内，输出: " + output, output.contains("> ,age = #{age}"));
     }
+
+    // ==================== v6 新增：#choose 容器语法 ====================
+
+    @Test
+    public void test124_chooseBasic() {
+        String input = "select * from t_user where #choose[ #when(type == 'vip')[salary > :minSalary] #otherwise[status = :status] ]";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("应包含 <choose>", output.contains("<choose>"));
+        Assert.assertTrue("应包含 <when test=\"type == 'vip'\">", output.contains("<when test=\"type == 'vip'\">"));
+        Assert.assertTrue("应包含 salary &gt; #{minSalary}", output.contains("salary &gt; #{minSalary}"));
+        Assert.assertTrue("应包含 <otherwise>", output.contains("<otherwise>"));
+        Assert.assertTrue("应包含 status = #{status}", output.contains("status = #{status}"));
+        Assert.assertTrue("应包含 </choose>", output.contains("</choose>"));
+    }
+
+    @Test
+    public void test125_chooseMultipleWhen() {
+        String input = "select * from t_user where #choose[ #when(a == 1)[x = :x] #when(a == 2)[y = :y] #otherwise[z = :z] ]";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("应有至少 2 个 when", this.countOccurrences(output, "<when ") >= 2);
+        Assert.assertTrue("应包含 <otherwise>", output.contains("<otherwise>"));
+        Assert.assertTrue("应包含 x = #{x}", output.contains("x = #{x}"));
+        Assert.assertTrue("应包含 y = #{y}", output.contains("y = #{y}"));
+    }
+
+    @Test
+    public void test126_chooseNoOtherwise() {
+        String input = "select * from t_user where #choose[ #when(type == 'vip')[salary > :minSalary] ]";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("应包含 <choose>", output.contains("<choose>"));
+        Assert.assertFalse("不应包含 <otherwise>", output.contains("<otherwise>"));
+    }
+
+    @Test
+    public void test127_chooseBodyReuseRules() {
+        // body 复用条件节点块规则：:param / in :list / %:name%
+        String input = "select * from t_user where #choose[ #when(type == 'vip')[name like %:name% and id in :idList] ]";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("应包含 <bind", output.contains("<bind"));
+        Assert.assertTrue("应包含 <foreach", output.contains("<foreach"));
+    }
+
+    @Test(expected = MybatisgxException.class)
+    public void test128_chooseBodyHashParamError() {
+        String input = "select * from t_user where #choose[ #when(type == 'vip')[salary > #{minSalary}] ]";
+        this.scanner.process(input);
+    }
+
+    @Test(expected = MybatisgxException.class)
+    public void test129_chooseBodyDollarBraceError() {
+        String input = "select * from t_user where #choose[ #when(type == 'vip')[salary > ${minSalary}] ]";
+        this.scanner.process(input);
+    }
+
+    @Test(expected = MybatisgxException.class)
+    public void test130_chooseBodyXmlTagError() {
+        String input = "select * from t_user where #choose[ #when(type == 'vip')[<if test=\"x\">salary > :minSalary</if>] ]";
+        this.scanner.process(input);
+    }
+
+    @Test(expected = MybatisgxException.class)
+    public void test131_whenNoGuardError() {
+        String input = "select * from t_user where #choose[ #when[salary > :minSalary] ]";
+        this.scanner.process(input);
+    }
+
+    @Test(expected = MybatisgxException.class)
+    public void test132_chooseIllegalContentError() {
+        String input = "select * from t_user where #choose[ id = :id ]";
+        this.scanner.process(input);
+    }
+
+    @Test
+    public void test133_nestedChoose() {
+        String input = "select * from t_user where #choose[ #when(a == 1)[ #choose[ #when(b == 2)[x = :x] ] ] ]";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("应有至少 2 个 <choose>", this.countOccurrences(output, "<choose>") >= 2);
+        Assert.assertTrue("应包含 x = #{x}", output.contains("x = #{x}"));
+    }
+
+    @Test(expected = MybatisgxException.class)
+    public void test134_chooseBodyNativeTagError() {
+        // 跨体系嵌套：mgxsql #choose body 内出现原生 <if> 标签
+        String input = "select * from t_user where #choose[ #when(a == 1)[<if test=\"b\">x = :x</if>] ]";
+        this.scanner.process(input);
+    }
+
+    @Test
+    public void test135_chooseInNormalPassthrough() {
+        // NORMAL 域 #choose 当普通字符，不触发容器解析
+        String input = "select #choose[ x ] from t_user where id = :id";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("NORMAL 域 #choose 应原样输出", output.contains("#choose[ x ]"));
+        Assert.assertFalse("不应翻译为 <choose>", output.contains("<choose>"));
+        Assert.assertTrue("where 域 :id 应正常翻译", output.contains("#{id}"));
+    }
+
+    // ==================== v6 新增：<where>/<set>/<trim> 三标签下沉 ====================
+
+    @Test
+    public void test136_whereTagDescent() {
+        // 场景3：<where> 内 #[…] 翻译
+        String input = "select * from user <where> #[name = :name] </where>";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("应包含 <where>", output.contains("<where>"));
+        Assert.assertTrue("#[name] 应翻译为 <if>", output.contains("<if"));
+        Assert.assertTrue("应包含 name = #{name}", output.contains("name = #{name}"));
+        Assert.assertTrue("应包含 </where>", output.contains("</where>"));
+    }
+
+    @Test
+    public void test137_setTagDescent() {
+        // 场景4：<set> 内 #[…] 翻译
+        String input = "update user <set> #[name = :name,] #[age = :age,] </set> where id = :id";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("应包含 <set>", output.contains("<set>"));
+        Assert.assertTrue("应包含 name = #{name},", output.contains("name = #{name},"));
+        Assert.assertTrue("应包含 age = #{age},", output.contains("age = #{age},"));
+        Assert.assertTrue("应包含 </set>", output.contains("</set>"));
+    }
+
+    @Test
+    public void test138_trimTagDescent() {
+        // 场景2：<trim> 内 #[…] 翻译 + 属性全量透传
+        String input = "update user <trim prefix=\"SET\" suffixOverrides=\",\"> #[name = :name,] </trim> where id = :id";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("trim 属性应原样透传", output.contains("<trim prefix=\"SET\" suffixOverrides=\",\">"));
+        Assert.assertTrue("应包含 name = #{name},", output.contains("name = #{name},"));
+        Assert.assertTrue("应包含 </trim>", output.contains("</trim>"));
+    }
+
+    @Test
+    public void test139_containerMixedContent() {
+        // 三标签内混合：mgxsql #[…] 与原生 <if>#{}</if> 共存（场景3混合）
+        String input = "select * from user <where> #[name = :name] <if test=\"status != null\">and status = #{status}</if> </where>";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("#[name] 应翻译", output.contains("name = #{name}"));
+        Assert.assertTrue("<if> 应原样透传", output.contains("<if test=\"status != null\">and status = #{status}</if>"));
+    }
+
+    @Test
+    public void test140_containerParamInLike() {
+        // 三标签内 :param / in :list / %:name% 翻译
+        String input = "select * from user <where> id in :idList and name like %:name% </where>";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("应包含 <foreach>", output.contains("<foreach"));
+        Assert.assertTrue("应包含 <bind", output.contains("<bind"));
+    }
+
+    @Test
+    public void test141_containerNestedIfNoTranslate() {
+        // 三标签内嵌 <if> 整块透传，其内部 :param 不翻译（这里用原生 #{} 不报错）
+        String input = "select * from user <where> <if test=\"x\">name = #{name}</if> </where>";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("<if> 应原样透传", output.contains("<if test=\"x\">name = #{name}</if>"));
+    }
+
+    @Test(expected = MybatisgxException.class)
+    public void test142_ifTagMgxsqlMarkerError() {
+        // 原子性校验：原生 <if> 内出现 #[…] 报错
+        String input = "select * from user <where> <if test=\"x\">#[name = :name]</if> </where>";
+        this.scanner.process(input);
+    }
+
+    @Test
+    public void test143_ifTagParamRefPassthrough() {
+        // 最小单元块只禁条件节点块（#[/#(）；<if> 内 :param 原样透传不翻译、不报错
+        String input = "select * from user <where> <if test=\"x\">name = :name</if> </where>";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("<if> 应原样透传，:name 不翻译", output.contains("<if test=\"x\">name = :name</if>"));
+    }
 }

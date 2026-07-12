@@ -58,7 +58,11 @@ public class MybatisgxRoutingExecutor implements Executor {
     private <E> List<E> executeQuery(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, CacheKey cacheKey, BoundSql boundSql) throws SQLException {
         MethodInfo methodInfo = DaoMethodManager.getMethodInfo(ms);
         Executor delegate = this.resolveExecutor(ms, methodInfo);
-        MethodParamInfo pageParamInfo = methodInfo.getPageParamInfo();
+
+        MethodParamInfo pageParamInfo = null;
+        if (methodInfo != null) {
+            pageParamInfo = methodInfo.getPageParamInfo();
+        }
 
         // 非分页
         if (pageParamInfo == null) {

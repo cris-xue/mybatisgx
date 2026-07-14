@@ -1,10 +1,10 @@
 package com.mybatisgx.dsl.mgxsql.model;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
- * mgxsql 扫描上下文，维护状态、位置、括号层级、输出缓冲区（v2）
+ * mgxsql 解析上下文，维护输入文本、扫描位置、行号/列号。
+ * <p>重构后仅保留 {@link com.mybatisgx.dsl.mgxsql.model.ast.MgxsqlParser} 所需的逐字符读取与位置能力；
+ * 原状态机的隐式状态（{@code state}/{@code stateStack}/{@code parenDepth}/{@code descentCloseTags}/{@code output}）
+ * 已由 AST 节点的显式父子关系取代并移除。
  *
  * @author 薛承城
  * @date 2026/7/7
@@ -12,34 +12,9 @@ import java.util.List;
 public class MgxsqlContext {
 
     /**
-     * 当前扫描状态
-     */
-    private MgxsqlState state = MgxsqlState.NORMAL;
-
-    /**
      * 当前扫描位置
      */
     private int position = 0;
-
-    /**
-     * 当前括号层级（用于匹配 #(expr)(sql) 中的括号）
-     */
-    private int parenDepth = 0;
-
-    /**
-     * 输出缓冲区
-     */
-    private StringBuilder output = new StringBuilder();
-
-    /**
-     * 状态栈（支持嵌套状态恢复）
-     */
-    private List<MgxsqlState> stateStack = new ArrayList<MgxsqlState>();
-
-    /**
-     * 容器下沉闭标签栈（与 stateStack 中的 DESCENT 配对，记录当前期望的 &lt;/tagName&gt;）
-     */
-    private List<String> descentCloseTags = new ArrayList<String>();
 
     /**
      * 当前行号（从1开始）
@@ -60,69 +35,6 @@ public class MgxsqlContext {
         this.input = input;
     }
 
-    public MgxsqlState getState() {
-        return state;
-    }
-
-    public void setState(MgxsqlState state) {
-        this.state = state;
-    }
-
-    public void pushState(MgxsqlState newState) {
-        this.stateStack.add(this.state);
-        this.state = newState;
-    }
-
-    public MgxsqlState popState() {
-        if (this.stateStack.isEmpty()) {
-            return MgxsqlState.NORMAL;
-        }
-        this.state = this.stateStack.remove(this.stateStack.size() - 1);
-        return this.state;
-    }
-
-    /**
-     * 压入容器下沉闭标签（进入 DESCENT 时调用）
-     */
-    public void pushDescentClose(String closeTag) {
-        this.descentCloseTags.add(closeTag);
-    }
-
-    /**
-     * 查看栈顶容器下沉闭标签（不弹出）
-     */
-    public String peekDescentClose() {
-        if (this.descentCloseTags.isEmpty()) {
-            return null;
-        }
-        return this.descentCloseTags.get(this.descentCloseTags.size() - 1);
-    }
-
-    /**
-     * 弹出栈顶容器下沉闭标签（离开 DESCENT 时调用）
-     */
-    public String popDescentClose() {
-        if (this.descentCloseTags.isEmpty()) {
-            return null;
-        }
-        return this.descentCloseTags.remove(this.descentCloseTags.size() - 1);
-    }
-
-    /**
-     * 判断当前位置开始的文本是否等于指定字符串
-     */
-    public boolean startsWithAt(String target, int pos) {
-        if (target == null || pos + target.length() > this.input.length()) {
-            return false;
-        }
-        for (int i = 0; i < target.length(); i++) {
-            if (Character.toLowerCase(this.input.charAt(pos + i)) != Character.toLowerCase(target.charAt(i))) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     public int getPosition() {
         return position;
     }
@@ -132,7 +44,7 @@ public class MgxsqlContext {
     }
 
     public int advance() {
-        char c = this.charAt(this.position);
+        char c = charAt(this.position);
         this.position++;
         if (c == '\n') {
             this.lineNumber++;
@@ -160,38 +72,6 @@ public class MgxsqlContext {
 
     public boolean hasMore() {
         return this.position < this.input.length();
-    }
-
-    public int getParenDepth() {
-        return parenDepth;
-    }
-
-    public void setParenDepth(int parenDepth) {
-        this.parenDepth = parenDepth;
-    }
-
-    public void incrementParenDepth() {
-        this.parenDepth++;
-    }
-
-    public void decrementParenDepth() {
-        this.parenDepth--;
-    }
-
-    public StringBuilder getOutput() {
-        return output;
-    }
-
-    public void appendOutput(String text) {
-        this.output.append(text);
-    }
-
-    public void appendOutput(char c) {
-        this.output.append(c);
-    }
-
-    public String getOutputString() {
-        return this.output.toString();
     }
 
     public String getInput() {
@@ -224,7 +104,7 @@ public class MgxsqlContext {
     }
 
     /**
-     * 获取当前位置的友好位置描述（行号:列号 + 附近文本）
+     * 获取当前位置的友好位置描述（行号:列号 + 附近文本），用于语法错误信息
      */
     public String getPositionInfo() {
         int pos = this.position;
@@ -232,5 +112,20 @@ public class MgxsqlContext {
         int start = Math.max(0, pos - radius);
         int end = Math.min(this.input.length(), pos + radius + 1);
         return "行" + this.lineNumber + ":列" + this.columnNumber + "，附近文本: ..." + this.input.substring(start, end) + "...";
+    }
+
+    /**
+     * 判断指定位置开始的文本是否等于指定字符串（不区分大小写）
+     */
+    public boolean startsWithAt(String target, int pos) {
+        if (target == null || pos + target.length() > this.input.length()) {
+            return false;
+        }
+        for (int i = 0; i < target.length(); i++) {
+            if (Character.toLowerCase(this.input.charAt(pos + i)) != Character.toLowerCase(target.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
     }
 }

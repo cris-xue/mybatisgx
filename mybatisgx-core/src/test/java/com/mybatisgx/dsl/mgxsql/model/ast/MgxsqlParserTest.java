@@ -2,6 +2,9 @@ package com.mybatisgx.dsl.mgxsql.model.ast;
 
 import java.util.List;
 
+import com.mybatisgx.dsl.mgxsql.MgxsqlAstRenderer;
+import com.mybatisgx.dsl.mgxsql.model.MgxsqlNode;
+import com.mybatisgx.dsl.mgxsql.MgxsqlParser;
 import com.mybatisgx.exception.MybatisgxException;
 import org.junit.Assert;
 import org.junit.Before;

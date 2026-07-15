@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.mybatisgx.dsl.mgxsql.MgxsqlAstRenderer;
+import com.mybatisgx.dsl.mgxsql.model.*;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.FixMethodOrder;

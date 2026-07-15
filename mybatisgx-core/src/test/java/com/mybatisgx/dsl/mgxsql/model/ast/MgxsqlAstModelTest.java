@@ -1,5 +1,6 @@
 package com.mybatisgx.dsl.mgxsql.model.ast;
 
+import com.mybatisgx.dsl.mgxsql.model.*;
 import org.junit.Assert;
 import org.junit.FixMethodOrder;
 import org.junit.Test;

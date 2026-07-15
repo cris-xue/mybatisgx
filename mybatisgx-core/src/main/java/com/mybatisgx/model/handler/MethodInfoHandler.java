@@ -147,11 +147,30 @@ public class MethodInfoHandler {
         if (select != null) {
             sqlCommandType = SqlCommandType.SELECT;
         }
+
+        InsertProvider insertProvider = method.getAnnotation(InsertProvider.class);
+        DeleteProvider deleteProvider = method.getAnnotation(DeleteProvider.class);
+        UpdateProvider updateProvider = method.getAnnotation(UpdateProvider.class);
+        SelectProvider selectProvider = method.getAnnotation(SelectProvider.class);
+        if (insertProvider != null) {
+            sqlCommandType = SqlCommandType.INSERT;
+        }
+        if (deleteProvider != null) {
+            sqlCommandType = SqlCommandType.DELETE;
+        }
+        if (updateProvider != null) {
+            sqlCommandType = SqlCommandType.UPDATE;
+        }
+        if (selectProvider != null) {
+            sqlCommandType = SqlCommandType.SELECT;
+        }
+
         if (sqlCommandType == null) {
             Statement statement = method.getAnnotation(Statement.class);
             String statementString = statement != null ? statement.value() : method.getName();
             sqlCommandType = this.methodSyntaxProcessor.getSqlCommandType(statementString);
         }
+
         MethodCommandType methodCommandType;
         if (sqlCommandType == SqlCommandType.DELETE && mapperInfo.getEntityInfo().getLogicDeleteColumnInfo() != null) {
             methodCommandType = MethodCommandType.LOGIC_DELETE;

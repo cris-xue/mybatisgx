@@ -1,4 +1,4 @@
-package com.mybatisgx.dsl.mgxsql.model.ast;
+package com.mybatisgx.dsl.mgxsql.model;
 
 /**
  * mgxsql 参数绑定表达式节点（Expression 层），对应 {@code :param} / {@code :user.name}。

@@ -1,4 +1,4 @@
-package com.mybatisgx.dsl.mgxsql.model.ast;
+package com.mybatisgx.dsl.mgxsql.model;
 
 /**
  * mgxsql AST 节点抽象基类，集中维护位置信息，子类只需声明各自的语义字段。

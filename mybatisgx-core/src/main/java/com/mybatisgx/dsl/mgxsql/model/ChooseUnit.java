@@ -1,4 +1,4 @@
-package com.mybatisgx.dsl.mgxsql.model.ast;
+package com.mybatisgx.dsl.mgxsql.model;
 
 import java.util.ArrayList;
 import java.util.List;

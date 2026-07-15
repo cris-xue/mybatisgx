@@ -1,4 +1,4 @@
-package com.mybatisgx.dsl.mgxsql.model.ast;
+package com.mybatisgx.dsl.mgxsql.model;
 
 /**
  * mgxsql 局部变量表达式节点（Expression 层），对应 {@code $variable}。

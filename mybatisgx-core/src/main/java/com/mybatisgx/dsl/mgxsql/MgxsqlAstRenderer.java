@@ -1,7 +1,6 @@
-package com.mybatisgx.dsl.mgxsql.model.ast;
+package com.mybatisgx.dsl.mgxsql;
 
-import com.mybatisgx.dsl.mgxsql.MgxsqlSyntaxHelper;
-import com.mybatisgx.dsl.mgxsql.MgxsqlXmlFragment;
+import com.mybatisgx.dsl.mgxsql.model.*;
 
 import java.util.ArrayList;
 import java.util.List;

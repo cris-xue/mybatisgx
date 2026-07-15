@@ -1,7 +1,6 @@
-package com.mybatisgx.dsl.mgxsql.model.ast;
+package com.mybatisgx.dsl.mgxsql;
 
-import com.mybatisgx.dsl.mgxsql.MgxsqlSyntaxHelper;
-import com.mybatisgx.dsl.mgxsql.model.MgxsqlContext;
+import com.mybatisgx.dsl.mgxsql.model.*;
 import com.mybatisgx.exception.MybatisgxException;
 
 import java.util.ArrayDeque;

@@ -1,8 +1,10 @@
 package com.mybatisgx.dsl.mgxsql.model;
 
+import com.mybatisgx.dsl.mgxsql.MgxsqlParser;
+
 /**
  * mgxsql 解析上下文，维护输入文本、扫描位置、行号/列号。
- * <p>重构后仅保留 {@link com.mybatisgx.dsl.mgxsql.model.ast.MgxsqlParser} 所需的逐字符读取与位置能力；
+ * <p>重构后仅保留 {@link MgxsqlParser} 所需的逐字符读取与位置能力；
  * 原状态机的隐式状态（{@code state}/{@code stateStack}/{@code parenDepth}/{@code descentCloseTags}/{@code output}）
  * 已由 AST 节点的显式父子关系取代并移除。
  *

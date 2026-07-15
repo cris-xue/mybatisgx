@@ -1,4 +1,6 @@
-package com.mybatisgx.dsl.mgxsql.model.ast;
+package com.mybatisgx.dsl.mgxsql.model;
+
+import com.mybatisgx.dsl.mgxsql.MgxsqlAstRenderer;
 
 /**
  * mgxsql AST 节点根接口，所有 Scope/Unit/Expression 节点实现此接口。

@@ -1,4 +1,4 @@
-package com.mybatisgx.dsl.mgxsql.model.ast;
+package com.mybatisgx.dsl.mgxsql.model;
 
 /**
  * mgxsql foreach 单元块节点（Unit 层），对应 MyBatis {@code <foreach>}。

@@ -1,4 +1,4 @@
-package com.mybatisgx.dsl.mgxsql.model.ast;
+package com.mybatisgx.dsl.mgxsql.model;
 
 /**
  * mgxsql MyBatis 原生替换语法表达式节点（Expression 层），对应 {@code ${param}}。

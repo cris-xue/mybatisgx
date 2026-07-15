@@ -1,4 +1,4 @@
-package com.mybatisgx.dsl.mgxsql.model.ast;
+package com.mybatisgx.dsl.mgxsql.model;
 
 /**
  * mgxsql 透传文本节点（Expression 层），承载所有无需翻译、原样输出的静态文本：

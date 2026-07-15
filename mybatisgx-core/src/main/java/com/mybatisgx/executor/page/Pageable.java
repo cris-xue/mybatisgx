@@ -28,7 +28,7 @@ public class Pageable {
     }
 
     public static Pageable of(int pageNo, int pageSize) {
-        return new Pageable(pageNo, pageSize, null);
+        return of(pageNo, pageSize, Lists.newArrayList());
     }
 
     public static Pageable of(int pageNo, int pageSize, List<Sort> sorts) {
@@ -36,7 +36,7 @@ public class Pageable {
     }
 
     public static Pageable of(List<Sort> sorts) {
-        return new Pageable(1, Integer.MAX_VALUE, sorts);
+        return of(1, Integer.MAX_VALUE, sorts);
     }
 
     public static Sort of(String column, String direction) {

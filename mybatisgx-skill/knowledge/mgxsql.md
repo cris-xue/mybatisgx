@@ -30,7 +30,7 @@ MGXSQL has two types of "blocks" with different rules for `#{}`/`${}`/`<xml>`:
 ┌──────────────────────────┬──────────────────────────────────┐
 │ Scope Block              │ Condition Node Block              │
 │ (where / where[])        │ #[body]                           │
-│ (set / set[])            │ #(expr)[body]                     │
+│ (set / set[])            │ #if(expr)[body]                     │
 │                          │ #condition                        │
 │                          │ #and / #or                        │
 ├──────────────────────────┼──────────────────────────────────┤
@@ -118,20 +118,20 @@ where #[id = :id #[and name = :name]]
 → <if test="isNotEmpty(id)"> id = #{id} <if test="isNotEmpty(name)"> and name = #{name}</if></if>
 ```
 
-### `#(expr)[body]` — Custom guard condition
+### `#if(expr)[body]` — Custom guard condition
 
 `expr` is a custom OGNL expression. `:param` in guard auto-strips colon.
 
 ```sql
-where #(:age > 2 && :age < 18)[or(name like :name and age = :age)]
+where #if(:age > 2 && :age < 18)[or(name like :name and age = :age)]
 → <if test="age > 2 && age < 18"> or(name like #{name} and age = #{age})</if>
 
 -- Guard without colon
-where #(age > 2)[name = :name]
+where #if(age > 2)[name = :name]
 → <if test="age > 2"> name = #{name}</if>
 
 -- Empty guard (same as #[body])
-where #()[and status = :status]
+where #if()[and status = :status]
 → <if test="isNotEmpty(status)"> and status = #{status}</if>
 ```
 
@@ -167,7 +167,7 @@ where id = :id
 → <set><if test="isNotEmpty(name)"> name = #{name}</if><if test="isNotEmpty(age)"> , age = #{age}</if></set>
 ```
 
-> **Important**: `#and`/`#or` are NOT allowed inside `#[...]` / `#(expr)[...]`. Use nested `#[and ...]` instead.
+> **Important**: `#and`/`#or` are NOT allowed inside `#[...]` / `#if(expr)[...]`. Use nested `#[and ...]` instead.
 
 ---
 
@@ -274,7 +274,7 @@ mybatis:
 │ set                       │ <set>... (closes at where or end)                │
 │ set[body]                 │ <set>body</set> (closes at ])                    │
 │ #[body]                   │ <if test="isNotEmpty(...)"> body</if>            │
-│ #(expr)[body]             │ <if test="expr"> body</if>                       │
+│ #if(expr)[body]             │ <if test="expr"> body</if>                       │
 │ #condition                │ <if test="isNotEmpty(...)"> condition</if>       │
 │ #and condition            │ <if test="isNotEmpty(...)"> and condition</if>   │
 │ #or condition             │ <if test="isNotEmpty(...)"> or condition</if>    │
@@ -322,7 +322,7 @@ mybatis:
 |-----------|-------------------|--------------------------|
 | Positioning | Object query language, HQL-like | Dynamic SQL syntax sugar |
 | SQL basis | Entity/field names | Real table/column names |
-| Dynamic conditions | `?` prefix (null check) | `#[body]` (isNotEmpty), `#(expr)[body]` (custom) |
+| Dynamic conditions | `?` prefix (null check) | `#[body]` (isNotEmpty), `#if(expr)[body]` (custom) |
 | JOIN | ✅ | ❌ |
 | Aggregation | ✅ | ❌ |
 | IN/LIKE shorthand | ❌ | ✅ (auto foreach/bind) |
@@ -349,7 +349,7 @@ Both make conditions optional, but with different mechanisms:
 |--------|-----------|-------------------|
 | Check type | `param != null` | `isNotEmpty(param)` (rejects empty string/collection) |
 | Combine multiple params | Each `?` generates separate `<if>` | All params in one `<if>` with `and` |
-| Custom expression | Not supported | Use `#(expr)[body]` |
+| Custom expression | Not supported | Use `#if(expr)[body]` |
 | Auto foreach/bind | ❌ | ✅ |
 
 ---
@@ -360,7 +360,7 @@ Both make conditions optional, but with different mechanisms:
 |-------|-------|-----|
 | `条件节点块内不允许使用 #{param}` | `#[id = #{id}]` | Use `:param`: `#[id = :id]` |
 | `条件节点块内不允许使用 ${param}` | `#[id = ${id}]` | Use `:param` |
-| `条件节点块内不允许使用 XML 标签` | `#[<if test="...">...</if>]` | Use `#(expr)[body]` |
+| `条件节点块内不允许使用 XML 标签` | `#[<if test="...">...</if>]` | Use `#if(expr)[body]` |
 | `'#condition' 形式1必须独占一行` | `where #id = :id` (inline) | Newline: `where\n  #id = :id` |
 | `'#and'/'#or' 必须独占一行` | `where #and name = :name` | Newline or use `#[and name = :name]` |
 | `条件节点块内不允许 #and/#or` | `#[id = :id #and name = :name]` | Nested: `#[id = :id #[and name = :name]]` |
@@ -368,3 +368,15 @@ Both make conditions optional, but with different mechanisms:
 | `'=>' 右边只接受 $variable` | `in (item:list)=>#{item.id}` | Use `$item.id` |
 
 > For complete syntax reference, see [docs/mgxsql.md](../../docs/mgxsql.md).
+
+---
+
+## v6 Additions (2026-07)
+
+v6 adds 4 capabilities and renames the custom guard (`#(expr)`→`#if(expr)`):
+
+- **`#for(item:collection)=>expr`** — standalone `<foreach>` directive (decoupled from `in`); supports composite `[$a,$b]` (tuple IN, `separator="),("`). Coexists with `in :list` sugar.
+- **`#include[sqlId]`** — `<include refid="sqlId"/>`; static refid only; valid in top-level / where-set / `#[...]` / `#if(...)[...]` body.
+- **`#bind[name = :param expr]` + `$name`** — explicit computed local var; value is colon-stripped OGNL (`:age + :age`→`age + age`); `$name`→`#{name}`; declaration must precede reference (parser-enforced); name unique per select/update scope.
+- **`#if(expr)[body]`** replaces `#(expr)[body]` (deprecated → parser errors). Minimal-form space after `#` is optional (`#and x`≡`# and x`), non-breaking.
+- **General rule**: OGNL param access in directive content (guard / body / bind value) MUST use `:param`. `#bind` value is stricter — only `:param` + operators + number/string literals (no `$var`, no bare id, no `#{}`/`${}`). `$var` does NOT contribute to auto-guard (`#[id = $x]`→`<if test="true">`).

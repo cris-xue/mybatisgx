@@ -537,7 +537,7 @@ When encountering issues, check:
 ## MGXSQL Syntax Errors
 
 **36. `条件节点块内不允许使用 #{param}`**
-- **Cause**: Used `#{param}` inside a condition node block (`#[...]` or `#(expr)[...]`)
+- **Cause**: Used `#{param}` inside a condition node block (`#[...]` or `#if(expr)[...]`)
 - **Error**: `#[id = #{id}]`
 - **Solution**: Use `:param` syntax instead: `#[id = :id]`
 
@@ -549,7 +549,7 @@ When encountering issues, check:
 **38. `条件节点块内不允许使用 XML 标签`**
 - **Cause**: Used MyBatis XML tags inside a condition node block
 - **Error**: `#[<if test="id != null">id = :id</if>]`
-- **Solution**: Use MGXSQL condition syntax: `#(id != null)[id = :id]` or `#[id = :id]`
+- **Solution**: Use MGXSQL condition syntax: `#if(id != null)[id = :id]` or `#[id = :id]`
 
 **39. `'#condition' 形式1必须独占一行`**
 - **Cause**: `#condition` is on the same line as other text
@@ -574,7 +574,7 @@ where #[and name = :name]
 ```
 
 **41. `条件节点块内不允许 #and/#or 简写`**
-- **Cause**: Used `#and`/`#or` inside a `#[...]` or `#(expr)[...]` block
+- **Cause**: Used `#and`/`#or` inside a `#[...]` or `#if(expr)[...]` block
 - **Error**: `#[id = :id #and name = :name]`
 - **Solution**: Use nested `#[and ...]` syntax: `#[id = :id #[and name = :name]]`
 

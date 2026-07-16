@@ -537,7 +537,7 @@ List<User> findByIdAndName(@Param("id") Long id, @Param("name") String name);
 
 // Custom guard expression
 @Lang(MgxsqlLanguageDriver.class)
-@Select("select * from t_user where #(:type = 1)[status = :status]")
+@Select("select * from t_user where #if(:type = 1)[status = :status]")
 List<User> findByTypeAndStatus(@Param("type") Integer type, @Param("status") String status);
 ```
 
@@ -551,7 +551,7 @@ int updateSelective(@Param("name") String name, @Param("age") Integer age, @Para
 
 // Dynamic SET with custom guard
 @Lang(MgxsqlLanguageDriver.class)
-@Update("update t_user set[#(name != null)[name = :name], #(age != null)[age = :age]] where id = :id")
+@Update("update t_user set[#if(name != null)[name = :name], #if(age != null)[age = :age]] where id = :id")
 int updateSelectiveByGuard(@Param("name") String name, @Param("age") Integer age, @Param("id") Long id);
 ```
 
@@ -634,7 +634,7 @@ public interface UserDao extends SimpleDao<User, UserQuery, Long> {
 
     // Custom guard with nested conditions
     @Lang(MgxsqlLanguageDriver.class)
-    @Select("select * from t_user where #(:type = 1)[#[and category = :category] #(:subType = 2)[#[and tag = :tag]]]")
+    @Select("select * from t_user where #if(:type = 1)[#[and category = :category] #if(:subType = 2)[#[and tag = :tag]]]")
     List<User> findByTypeWithSubConditions(
         @Param("type") Integer type,
         @Param("category") String category,

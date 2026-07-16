@@ -6,7 +6,9 @@ import com.mybatisgx.exception.MybatisgxException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * mgxsql 文本解析器：将 mgxsql 文本解析为 {@link MgxsqlNode} AST（Scope/Unit/Expression 三层）。
@@ -29,6 +31,11 @@ public class MgxsqlParser {
     private int bodyInConsumed;
     private int bodyInComplexConsumed;
     private final Deque<String> descentCloseTags = new ArrayDeque<String>();
+    /**
+     * 显式 {@code #bind} 声明记录：name → 声明位置（同一 select/update 作用域内）。
+     * 用于"声明先于引用"校验与名字唯一性校验。
+     */
+    private final Map<String, Integer> declaredBinds = new LinkedHashMap<String, Integer>();
 
     public List<MgxsqlNode> parse(String input) {
         List<MgxsqlNode> root = new ArrayList<MgxsqlNode>();
@@ -40,6 +47,7 @@ public class MgxsqlParser {
             return root;
         }
         this.ctx = new MgxsqlContext(input.trim());
+        this.declaredBinds.clear();
         parseContent(root, CloseMode.END_ONLY);
         return root;
     }
@@ -111,7 +119,7 @@ public class MgxsqlParser {
             }
 
             if (c == '#') {
-                if (mode == CloseMode.END_ONLY) {
+                if (mode == CloseMode.END_ONLY && !isIncludeKeywordAt() && !isBindKeywordAt()) {
                     text.append('#');
                     ctx.advance();
                     continue;
@@ -141,6 +149,16 @@ public class MgxsqlParser {
                 continue;
             }
 
+            if (mode != CloseMode.END_ONLY && c == '$' && ctx.peekChar(1) != '{'
+                    && MgxsqlSyntaxHelper.isIdentifierStartChar(ctx.peekChar(1))) {
+                flushText(target, text);
+                String varName = readDollarVarNameCtx();
+                if (varName != null) {
+                    checkBindReference(varName, ctx.getPositionInfo());
+                    target.add(new LocalVarExpr(varName, ctx.getPosition(), ctx.getLineNumber(), ctx.getColumnNumber()));
+                }
+                continue;
+            }
             if (mode != CloseMode.END_ONLY && c == ':' && MgxsqlSyntaxHelper.isParamRefStart(ctx)) {
                 flushText(target, text);
                 String paramName = MgxsqlSyntaxHelper.readColonParamRef(ctx);
@@ -231,9 +249,12 @@ public class MgxsqlParser {
             parseConditionNodeNoGuard(target);
             return;
         }
-        if (next == '(') {
-            parseConditionNodeWithGuard(target);
+        if (isIfKeywordAt()) {
+            parseIfNode(target);
             return;
+        }
+        if (next == '(') {
+            throw new MybatisgxException("mgxsql 语法错误: '#(expr)' 已废弃，请改用 '#if(expr)'，%s", ctx.getPositionInfo());
         }
         if (isAndOrKeywordAt()) {
             if (!MgxsqlSyntaxHelper.isAtLineStart(ctx)) {
@@ -253,6 +274,18 @@ public class MgxsqlParser {
             parseChooseNode(target);
             return;
         }
+        if (isForKeywordAt()) {
+            parseForNode(target);
+            return;
+        }
+        if (isBindKeywordAt()) {
+            parseBindNode(target);
+            return;
+        }
+        if (isIncludeKeywordAt()) {
+            parseIncludeNode(target);
+            return;
+        }
         if (MgxsqlSyntaxHelper.isIdentifierStartChar(next)) {
             if (!MgxsqlSyntaxHelper.isAtLineStart(ctx)) {
                 throw new MybatisgxException("mgxsql 语法错误: '#condition' 形式1必须独占一行，%s", ctx.getPositionInfo());
@@ -261,6 +294,38 @@ public class MgxsqlParser {
             return;
         }
         throw new MybatisgxException("mgxsql 语法错误: '#' 后必须跟 '['、'('、'{'、'and'/'or' 或标识符，%s", ctx.getPositionInfo());
+    }
+
+    private boolean isIfKeywordAt() {
+        int pos = ctx.getPosition() + 1;
+        if (!MgxsqlSyntaxHelper.isKeywordAt(ctx.getInput(), pos, "if")) {
+            return false;
+        }
+        return MgxsqlSyntaxHelper.isWordBoundaryAfter(ctx.getInput(), pos + 2);
+    }
+
+    private boolean isForKeywordAt() {
+        int pos = ctx.getPosition() + 1;
+        if (!MgxsqlSyntaxHelper.isKeywordAt(ctx.getInput(), pos, "for")) {
+            return false;
+        }
+        return MgxsqlSyntaxHelper.isWordBoundaryAfter(ctx.getInput(), pos + 3);
+    }
+
+    private boolean isBindKeywordAt() {
+        int pos = ctx.getPosition() + 1;
+        if (!MgxsqlSyntaxHelper.isKeywordAt(ctx.getInput(), pos, "bind")) {
+            return false;
+        }
+        return MgxsqlSyntaxHelper.isWordBoundaryAfter(ctx.getInput(), pos + 4);
+    }
+
+    private boolean isIncludeKeywordAt() {
+        int pos = ctx.getPosition() + 1;
+        if (!MgxsqlSyntaxHelper.isKeywordAt(ctx.getInput(), pos, "include")) {
+            return false;
+        }
+        return MgxsqlSyntaxHelper.isWordBoundaryAfter(ctx.getInput(), pos + 7);
     }
 
     private void parseConditionNodeNoGuard(List<MgxsqlNode> target) {
@@ -275,15 +340,20 @@ public class MgxsqlParser {
         target.add(unit);
     }
 
-    private void parseConditionNodeWithGuard(List<MgxsqlNode> target) {
+    private void parseIfNode(List<MgxsqlNode> target) {
         int startPos = ctx.getPosition();
         int line = ctx.getLineNumber();
         int col = ctx.getColumnNumber();
-        ctx.advance();
+        ctx.advance();                            // skip '#'
+        ctx.setPosition(ctx.getPosition() + 2);   // skip "if"
+        MgxsqlSyntaxHelper.skipWhitespace(ctx);
+        if (!ctx.hasMore() || ctx.currentChar() != '(') {
+            throw new MybatisgxException("mgxsql 语法错误: #if 后必须跟 '(expr)'，%s", ctx.getPositionInfo());
+        }
         String guardContent = readParenthesizedContent().trim();
         MgxsqlSyntaxHelper.skipWhitespace(ctx);
         if (!ctx.hasMore() || ctx.currentChar() != '[') {
-            throw new MybatisgxException("mgxsql 语法错误: #() 后必须跟 '[]'，%s", ctx.getPositionInfo());
+            throw new MybatisgxException("mgxsql 语法错误: #if(expr) 后必须跟 '[body]'，%s", ctx.getPositionInfo());
         }
         ctx.advance();
         String bodyContent = readBracketedContent(true);
@@ -358,6 +428,261 @@ public class MgxsqlParser {
             return false;
         }
         return MgxsqlSyntaxHelper.isWordBoundaryAfter(ctx.getInput(), pos + 6);
+    }
+
+    // ==================== #for / #include / #bind（scope 层，ctx 基） ====================
+
+    private void parseForNode(List<MgxsqlNode> target) {
+        int startPos = ctx.getPosition();
+        int line = ctx.getLineNumber();
+        int col = ctx.getColumnNumber();
+        ctx.advance();                            // skip '#'
+        ctx.setPosition(ctx.getPosition() + 3);   // skip "for"
+        MgxsqlSyntaxHelper.skipWhitespace(ctx);
+        if (!ctx.hasMore() || ctx.currentChar() != '(') {
+            throw new MybatisgxException("mgxsql 语法错误: #for 后必须跟 '(item:collection)'，%s", ctx.getPositionInfo());
+        }
+        ctx.advance();
+        MgxsqlSyntaxHelper.skipWhitespace(ctx);
+        String itemName = MgxsqlSyntaxHelper.readIdentifier(ctx);
+        MgxsqlSyntaxHelper.skipWhitespace(ctx);
+        if (!ctx.hasMore() || ctx.currentChar() != ':') {
+            throw new MybatisgxException("mgxsql 语法错误: #for 的 (item:collection) 缺少 ':'，%s", ctx.getPositionInfo());
+        }
+        ctx.advance();
+        MgxsqlSyntaxHelper.skipWhitespace(ctx);
+        String collectionName = MgxsqlSyntaxHelper.readIdentifier(ctx);
+        MgxsqlSyntaxHelper.skipWhitespace(ctx);
+        if (!ctx.hasMore() || ctx.currentChar() != ')') {
+            throw new MybatisgxException("mgxsql 语法错误: #for 的 (item:collection) 未以 ')' 闭合，%s", ctx.getPositionInfo());
+        }
+        ctx.advance();
+        MgxsqlSyntaxHelper.skipWhitespace(ctx);
+        if (!ctx.hasMore() || ctx.currentChar() != '=' || ctx.peekChar(1) != '>') {
+            throw new MybatisgxException("mgxsql 语法错误: #for(item:collection) 后必须跟 '=>'，%s", ctx.getPositionInfo());
+        }
+        ctx.advance();
+        ctx.advance();
+        MgxsqlSyntaxHelper.skipWhitespace(ctx);
+        ForeachRhs rhs = readArrowRhsCtx(ctx.getPositionInfo());
+        target.add(new ForeachUnit(itemName, collectionName, rhs.valueExpr, false, rhs.composite,
+                startPos, line, col));
+    }
+
+    private void parseIncludeNode(List<MgxsqlNode> target) {
+        int startPos = ctx.getPosition();
+        int line = ctx.getLineNumber();
+        int col = ctx.getColumnNumber();
+        ctx.advance();                            // skip '#'
+        ctx.setPosition(ctx.getPosition() + 7);   // skip "include"
+        MgxsqlSyntaxHelper.skipWhitespace(ctx);
+        if (!ctx.hasMore() || ctx.currentChar() != '[') {
+            throw new MybatisgxException("mgxsql 语法错误: #include 后必须跟 '[sqlId]'，%s", ctx.getPositionInfo());
+        }
+        ctx.advance();
+        StringBuilder refid = new StringBuilder();
+        while (ctx.hasMore() && ctx.currentChar() != ']') {
+            char c = ctx.currentChar();
+            if (c == ':' || c == '#' || c == '$') {
+                throw new MybatisgxException("mgxsql 语法错误: #include 的 refid 只接受静态标识符，不接受 :param / #{} / ${}，%s", ctx.getPositionInfo());
+            }
+            refid.append(c);
+            ctx.advance();
+        }
+        if (!ctx.hasMore()) {
+            throw new MybatisgxException("mgxsql 语法错误: #include[sqlId] 未以 ']' 闭合，%s", ctx.getPositionInfo());
+        }
+        ctx.advance(); // skip ']'
+        String id = refid.toString().trim();
+        if (id.isEmpty()) {
+            throw new MybatisgxException("mgxsql 语法错误: #include[sqlId] 的 refid 不能为空，%s", ctx.getPositionInfo());
+        }
+        target.add(new IncludeUnit(id, startPos, line, col));
+    }
+
+    private void parseBindNode(List<MgxsqlNode> target) {
+        int startPos = ctx.getPosition();
+        int line = ctx.getLineNumber();
+        int col = ctx.getColumnNumber();
+        ctx.advance();                            // skip '#'
+        ctx.setPosition(ctx.getPosition() + 4);   // skip "bind"
+        MgxsqlSyntaxHelper.skipWhitespace(ctx);
+        if (!ctx.hasMore() || ctx.currentChar() != '[') {
+            throw new MybatisgxException("mgxsql 语法错误: #bind 后必须跟 '[name = expr]'，%s", ctx.getPositionInfo());
+        }
+        ctx.advance();
+        String content = readBracketedContent(true);
+        int eqIdx = content.indexOf('=');
+        if (eqIdx < 0) {
+            throw new MybatisgxException("mgxsql 语法错误: #bind[name = expr] 缺少 '='，%s", ctx.getPositionInfo());
+        }
+        String name = content.substring(0, eqIdx).trim();
+        String valueRaw = content.substring(eqIdx + 1).trim();
+        if (name.isEmpty() || !isPlainIdentifier(name)) {
+            throw new MybatisgxException("mgxsql 语法错误: #bind 的 name 必须是标识符，%s", ctx.getPositionInfo());
+        }
+        if (declaredBinds.containsKey(name)) {
+            throw new MybatisgxException("mgxsql 语法错误: #bind 的 name '%s' 在同一作用域内重复，%s", name, ctx.getPositionInfo());
+        }
+        String valueOgnl = stripAndValidateBindValue(valueRaw, ctx.getPositionInfo());
+        declaredBinds.put(name, startPos);
+        target.add(new BindUnit(null, name, valueOgnl, false, startPos, line, col));
+    }
+
+    private static boolean isPlainIdentifier(String s) {
+        if (s.isEmpty() || !MgxsqlSyntaxHelper.isIdentifierStartChar(s.charAt(0))) {
+            return false;
+        }
+        for (int i = 1; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (!(Character.isLetterOrDigit(c) || c == '_')) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * {@code =>} 右侧读取结果：valueExpr（{@code #{var}} 或逗号连接的多个）+ 是否复合。
+     */
+    private static class ForeachRhs {
+        final String valueExpr;
+        final boolean composite;
+
+        ForeachRhs(String valueExpr, boolean composite) {
+            this.valueExpr = valueExpr;
+            this.composite = composite;
+        }
+    }
+
+    /**
+     * ctx 基：读取 {@code =>} 右侧（{@code $x} / {@code [$x]} / {@code $x.y} / {@code [$x.y,$z.w]}）。
+     * 当前位置应指向 {@code $} 或 {@code [}。
+     */
+    private ForeachRhs readArrowRhsCtx(String posInfo) {
+        if (ctx.hasMore() && ctx.currentChar() == '[') {
+            ctx.advance();
+            MgxsqlSyntaxHelper.skipWhitespace(ctx);
+            List<String> parts = new ArrayList<String>();
+            String first = readDollarVarNameCtx();
+            if (first == null) {
+                throw new MybatisgxException("mgxsql 语法错误: '=>' 右侧 [] 内必须是 $variable，%s", posInfo);
+            }
+            parts.add("#{" + first + "}");
+            while (ctx.hasMore()) {
+                MgxsqlSyntaxHelper.skipWhitespace(ctx);
+                if (ctx.currentChar() != ',') {
+                    break;
+                }
+                ctx.advance();
+                MgxsqlSyntaxHelper.skipWhitespace(ctx);
+                String v = readDollarVarNameCtx();
+                if (v == null) {
+                    throw new MybatisgxException("mgxsql 语法错误: '=>' 右侧 [] 内必须是 $variable，%s", posInfo);
+                }
+                parts.add("#{" + v + "}");
+            }
+            MgxsqlSyntaxHelper.skipWhitespace(ctx);
+            if (!ctx.hasMore() || ctx.currentChar() != ']') {
+                throw new MybatisgxException("mgxsql 语法错误: '=>' 右侧 [] 未以 ']' 闭合，%s", posInfo);
+            }
+            ctx.advance();
+            return new ForeachRhs(String.join(",", parts), parts.size() > 1);
+        }
+        if (ctx.hasMore() && ctx.currentChar() == '$' && ctx.peekChar(1) == '{') {
+            throw new MybatisgxException("mgxsql 语法错误: '=>' 右边只接受 $variable 形式，不允许 #{} / ${}，%s", posInfo);
+        }
+        String v = readDollarVarNameCtx();
+        if (v == null) {
+            throw new MybatisgxException("mgxsql 语法错误: '=>' 右边只接受 $variable 形式，不允许 #{} / ${}，%s", posInfo);
+        }
+        return new ForeachRhs("#{" + v + "}", false);
+    }
+
+    /**
+     * ctx 基：读取 {@code $variable}，返回变量名（不含 {@code #{}}）；当前位置应指向 {@code $}。
+     */
+    private String readDollarVarNameCtx() {
+        if (!ctx.hasMore() || ctx.currentChar() != '$') {
+            return null;
+        }
+        ctx.advance();
+        if (!ctx.hasMore() || !MgxsqlSyntaxHelper.isIdentifierStartChar(ctx.currentChar())) {
+            return null;
+        }
+        StringBuilder sb = new StringBuilder();
+        while (ctx.hasMore()) {
+            char c = ctx.currentChar();
+            if (Character.isLetterOrDigit(c) || c == '_' || c == '.') {
+                sb.append(c);
+                ctx.advance();
+            } else {
+                break;
+            }
+        }
+        return sb.length() > 0 ? sb.toString() : null;
+    }
+
+    /**
+     * bind value 校验与去冒号：仅允许 {@code :param} + 运算符 + 数字/字符串字面量；
+     * 禁止 {@code $var} / 裸标识符 / {@code #{}} / {@code ${}}。返回去冒号后的 OGNL。
+     */
+    static String stripAndValidateBindValue(String raw, String posInfo) {
+        StringBuilder out = new StringBuilder();
+        int i = 0;
+        int len = raw.length();
+        while (i < len) {
+            char c = raw.charAt(i);
+            if (Character.isWhitespace(c)) {
+                out.append(c);
+                i++;
+                continue;
+            }
+            if (c == ':' && i + 1 < len && MgxsqlSyntaxHelper.isIdentifierStart(raw.charAt(i + 1))) {
+                i++; // skip ':'
+                out.append(raw.charAt(i));
+                i++;
+                while (i < len && (Character.isLetterOrDigit(raw.charAt(i)) || raw.charAt(i) == '_' || raw.charAt(i) == '.')) {
+                    out.append(raw.charAt(i));
+                    i++;
+                }
+                continue;
+            }
+            if (c == '\'') {
+                out.append(c);
+                i++;
+                while (i < len) {
+                    char sc = raw.charAt(i);
+                    out.append(sc);
+                    i++;
+                    if (sc == '\'') {
+                        if (i < len && raw.charAt(i) == '\'') {
+                            out.append('\'');
+                            i++;
+                        } else {
+                            break;
+                        }
+                    }
+                }
+                continue;
+            }
+            if (Character.isDigit(c)) {
+                out.append(c);
+                i++;
+                while (i < len && (Character.isLetterOrDigit(raw.charAt(i)) || raw.charAt(i) == '.')) {
+                    out.append(raw.charAt(i));
+                    i++;
+                }
+                continue;
+            }
+            if (c == '+' || c == '-' || c == '*' || c == '/' || c == '%' || c == '(' || c == ')' || c == ',') {
+                out.append(c);
+                i++;
+                continue;
+            }
+            throw new MybatisgxException("mgxsql 语法错误: #bind value 只接受 :param + 运算符 + 字面量（不允许 $var / 裸标识符 / #{} / ${}），%s", posInfo);
+        }
+        return out.toString();
     }
 
     // ==================== #choose ====================
@@ -512,9 +837,9 @@ public class MgxsqlParser {
             if (ctx.hasMore() && ctx.currentChar() == ')') {
                 ctx.advance();
                 MgxsqlSyntaxHelper.skipWhitespace(ctx);
-                String valueExpr = readArrowRightValue();
-                if (valueExpr != null) {
-                    return new ForeachUnit(itemName, collectionName, valueExpr, ctx.getPosition(), ctx.getLineNumber(), ctx.getColumnNumber());
+                ForeachRhs rhs = readArrowRightValue();
+                if (rhs != null) {
+                    return new ForeachUnit(itemName, collectionName, rhs.valueExpr, true, rhs.composite, ctx.getPosition(), ctx.getLineNumber(), ctx.getColumnNumber());
                 }
             }
         }
@@ -532,9 +857,9 @@ public class MgxsqlParser {
             if (ctx.hasMore() && ctx.currentChar() == ')') {
                 ctx.advance();
                 MgxsqlSyntaxHelper.skipWhitespace(ctx);
-                String valueExpr = readArrowRightValue();
-                if (valueExpr != null) {
-                    return new ForeachUnit(itemName, collectionName, valueExpr, ctx.getPosition(), ctx.getLineNumber(), ctx.getColumnNumber());
+                ForeachRhs rhs = readArrowRightValue();
+                if (rhs != null) {
+                    return new ForeachUnit(itemName, collectionName, rhs.valueExpr, true, rhs.composite, ctx.getPosition(), ctx.getLineNumber(), ctx.getColumnNumber());
                 }
                 throw new MybatisgxException("mgxsql 语法错误: '=>' 右边只接受 $variable 形式，不允许 #{} / ${}, %s", ctx.getPositionInfo());
             }
@@ -542,15 +867,12 @@ public class MgxsqlParser {
         return null;
     }
 
-    private String readArrowRightValue() {
+    private ForeachRhs readArrowRightValue() {
         if (ctx.hasMore() && ctx.currentChar() == '=' && ctx.peekChar(1) == '>') {
             ctx.advance();
             ctx.advance();
             MgxsqlSyntaxHelper.skipWhitespace(ctx);
-            if (ctx.hasMore() && ctx.currentChar() == '$' && ctx.peekChar(1) == '{') {
-                throw new MybatisgxException("mgxsql 语法错误: '=>' 右边只接受 $variable 形式，不允许 #{} / ${}, %s", ctx.getPositionInfo());
-            }
-            return MgxsqlSyntaxHelper.readDollarVarRef(ctx);
+            return readArrowRhsCtx(ctx.getPositionInfo());
         }
         return null;
     }
@@ -741,6 +1063,16 @@ public class MgxsqlParser {
                 continue;
             }
 
+            if (c == '$' && i + 1 < text.length() && text.charAt(i + 1) != '{'
+                    && MgxsqlSyntaxHelper.isIdentifierStart(text.charAt(i + 1))) {
+                flushBodyText(target, buf);
+                int varEnd = MgxsqlSyntaxHelper.findIdentifierEnd(text, i + 1);
+                String varName = text.substring(i + 1, varEnd);
+                checkBindReference(varName, "位置: " + i);
+                target.add(new LocalVarExpr(varName, i, 0, 0));
+                i = varEnd;
+                continue;
+            }
             if (c == '$' && i + 1 < text.length() && text.charAt(i + 1) == '{') {
                 throw new MybatisgxException("mgxsql 语法错误: 条件节点块内不允许使用 ${param}，位置: %s", String.valueOf(i));
             }
@@ -782,6 +1114,19 @@ public class MgxsqlParser {
             return range[1];
         }
 
+        if (MgxsqlSyntaxHelper.isKeywordAt(text, start + 1, "if") && MgxsqlSyntaxHelper.isWordBoundaryAfter(text, start + 3)) {
+            return parseBodyIf(text, start, target);
+        }
+        if (MgxsqlSyntaxHelper.isKeywordAt(text, start + 1, "for") && MgxsqlSyntaxHelper.isWordBoundaryAfter(text, start + 4)) {
+            return parseBodyFor(text, start, target);
+        }
+        if (MgxsqlSyntaxHelper.isKeywordAt(text, start + 1, "include") && MgxsqlSyntaxHelper.isWordBoundaryAfter(text, start + 8)) {
+            return parseBodyInclude(text, start, target);
+        }
+        if (MgxsqlSyntaxHelper.isKeywordAt(text, start + 1, "bind") && MgxsqlSyntaxHelper.isWordBoundaryAfter(text, start + 5)) {
+            return parseBodyBind(text, start, target);
+        }
+
         if (next == '[') {
             int[] range = readTextBracketRange(text, start + 1);
             String body = text.substring(start + 2, range[1] - 1);
@@ -792,21 +1137,7 @@ public class MgxsqlParser {
         }
 
         if (next == '(') {
-            int[] guardRange = readTextParenRange(text, start + 1);
-            String guard = text.substring(start + 2, guardRange[1] - 1).trim();
-            int pos = guardRange[1];
-            while (pos < text.length() && Character.isWhitespace(text.charAt(pos))) {
-                pos++;
-            }
-            if (pos >= text.length() || text.charAt(pos) != '[') {
-                throw new MybatisgxException("mgxsql 语法错误: #() 后必须跟 '[]'，位置: %s", String.valueOf(start));
-            }
-            int[] bodyRange = readTextBracketRange(text, pos);
-            String body = text.substring(pos + 1, bodyRange[1] - 1);
-            IfUnit unit = new IfUnit(guard.isEmpty() ? null : guard, start, 0, 0);
-            unit.getBody().addAll(parseBody(body));
-            target.add(unit);
-            return bodyRange[1];
+            throw new MybatisgxException("mgxsql 语法错误: '#(expr)' 已废弃，请改用 '#if(expr)'，位置: %s", String.valueOf(start));
         }
 
         if (next == '{') {
@@ -858,6 +1189,202 @@ public class MgxsqlParser {
         }
 
         return start;
+    }
+
+    private void checkBindReference(String varName, String posInfo) {
+        if (!declaredBinds.containsKey(varName)) {
+            throw new MybatisgxException("mgxsql 语法错误: $%s 引用先于声明（缺少前置 #bind[%s = ...]），%s", varName, varName, posInfo);
+        }
+    }
+
+    // ==================== body 层 #if/#for/#include/#bind（String 基） ====================
+
+    private int parseBodyIf(String text, int start, List<MgxsqlNode> target) {
+        int pos = start + 3; // after "#if"
+        while (pos < text.length() && Character.isWhitespace(text.charAt(pos))) {
+            pos++;
+        }
+        if (pos >= text.length() || text.charAt(pos) != '(') {
+            throw new MybatisgxException("mgxsql 语法错误: #if 后必须跟 '(expr)'，位置: %s", String.valueOf(start));
+        }
+        int[] guardRange = readTextParenRange(text, pos);
+        String guard = text.substring(pos + 1, guardRange[1] - 1).trim();
+        pos = guardRange[1];
+        while (pos < text.length() && Character.isWhitespace(text.charAt(pos))) {
+            pos++;
+        }
+        if (pos >= text.length() || text.charAt(pos) != '[') {
+            throw new MybatisgxException("mgxsql 语法错误: #if(expr) 后必须跟 '[body]'，位置: %s", String.valueOf(start));
+        }
+        int[] bodyRange = readTextBracketRange(text, pos);
+        String body = text.substring(pos + 1, bodyRange[1] - 1);
+        IfUnit unit = new IfUnit(guard.isEmpty() ? null : guard, start, 0, 0);
+        unit.getBody().addAll(parseBody(body));
+        target.add(unit);
+        return bodyRange[1];
+    }
+
+    private int parseBodyFor(String text, int start, List<MgxsqlNode> target) {
+        int pos = start + 4; // after "#for"
+        while (pos < text.length() && Character.isWhitespace(text.charAt(pos))) {
+            pos++;
+        }
+        if (pos >= text.length() || text.charAt(pos) != '(') {
+            throw new MybatisgxException("mgxsql 语法错误: #for 后必须跟 '(item:collection)'，位置: %s", String.valueOf(start));
+        }
+        int[] parenRange = readTextParenRange(text, pos);
+        String header = text.substring(pos + 1, parenRange[1] - 1).trim();
+        int colon = header.indexOf(':');
+        if (colon < 0) {
+            throw new MybatisgxException("mgxsql 语法错误: #for 的 (item:collection) 缺少 ':'，位置: %s", String.valueOf(start));
+        }
+        String itemName = header.substring(0, colon).trim();
+        String collectionName = header.substring(colon + 1).trim();
+        pos = parenRange[1];
+        while (pos < text.length() && Character.isWhitespace(text.charAt(pos))) {
+            pos++;
+        }
+        if (pos + 1 >= text.length() || text.charAt(pos) != '=' || text.charAt(pos + 1) != '>') {
+            throw new MybatisgxException("mgxsql 语法错误: #for(item:collection) 后必须跟 '=>'，位置: %s", String.valueOf(start));
+        }
+        pos += 2;
+        while (pos < text.length() && Character.isWhitespace(text.charAt(pos))) {
+            pos++;
+        }
+        ForeachRhsText rhs = readArrowRhsText(text, pos, start);
+        target.add(new ForeachUnit(itemName, collectionName, rhs.valueExpr, false, rhs.composite, start, 0, 0));
+        return rhs.end;
+    }
+
+    private int parseBodyInclude(String text, int start, List<MgxsqlNode> target) {
+        int pos = start + 8; // after "#include"
+        while (pos < text.length() && Character.isWhitespace(text.charAt(pos))) {
+            pos++;
+        }
+        if (pos >= text.length() || text.charAt(pos) != '[') {
+            throw new MybatisgxException("mgxsql 语法错误: #include 后必须跟 '[sqlId]'，位置: %s", String.valueOf(start));
+        }
+        int[] range = readTextBracketRange(text, pos);
+        String raw = text.substring(pos + 1, range[1] - 1);
+        for (int k = 0; k < raw.length(); k++) {
+            char rc = raw.charAt(k);
+            if (rc == ':' || rc == '#' || rc == '$') {
+                throw new MybatisgxException("mgxsql 语法错误: #include 的 refid 只接受静态标识符，位置: %s", String.valueOf(start));
+            }
+        }
+        String id = raw.trim();
+        if (id.isEmpty()) {
+            throw new MybatisgxException("mgxsql 语法错误: #include[sqlId] 的 refid 不能为空，位置: %s", String.valueOf(start));
+        }
+        target.add(new IncludeUnit(id, start, 0, 0));
+        return range[1];
+    }
+
+    private int parseBodyBind(String text, int start, List<MgxsqlNode> target) {
+        int pos = start + 5; // after "#bind"
+        while (pos < text.length() && Character.isWhitespace(text.charAt(pos))) {
+            pos++;
+        }
+        if (pos >= text.length() || text.charAt(pos) != '[') {
+            throw new MybatisgxException("mgxsql 语法错误: #bind 后必须跟 '[name = expr]'，位置: %s", String.valueOf(start));
+        }
+        int[] range = readTextBracketRange(text, pos);
+        String content = text.substring(pos + 1, range[1] - 1);
+        int eqIdx = content.indexOf('=');
+        if (eqIdx < 0) {
+            throw new MybatisgxException("mgxsql 语法错误: #bind[name = expr] 缺少 '='，位置: %s", String.valueOf(start));
+        }
+        String name = content.substring(0, eqIdx).trim();
+        String valueRaw = content.substring(eqIdx + 1).trim();
+        if (name.isEmpty() || !isPlainIdentifier(name)) {
+            throw new MybatisgxException("mgxsql 语法错误: #bind 的 name 必须是标识符，位置: %s", String.valueOf(start));
+        }
+        if (declaredBinds.containsKey(name)) {
+            throw new MybatisgxException("mgxsql 语法错误: #bind 的 name '%s' 在同一作用域内重复，位置: %s", name, String.valueOf(start));
+        }
+        String valueOgnl = stripAndValidateBindValue(valueRaw, "位置: " + start);
+        declaredBinds.put(name, start);
+        target.add(new BindUnit(null, name, valueOgnl, false, start, 0, 0));
+        return range[1];
+    }
+
+    /**
+     * String 基 {@code =>} 右侧读取结果（含结束位置）。
+     */
+    private static class ForeachRhsText {
+        final String valueExpr;
+        final boolean composite;
+        final int end;
+
+        ForeachRhsText(String valueExpr, boolean composite, int end) {
+            this.valueExpr = valueExpr;
+            this.composite = composite;
+            this.end = end;
+        }
+    }
+
+    private ForeachRhsText readArrowRhsText(String text, int pos, int start) {
+        int len = text.length();
+        if (pos < len && text.charAt(pos) == '[') {
+            pos++;
+            while (pos < len && Character.isWhitespace(text.charAt(pos))) {
+                pos++;
+            }
+            List<String> parts = new ArrayList<String>();
+            int[] first = readDollarVarNameTextRange(text, pos);
+            if (first == null) {
+                throw new MybatisgxException("mgxsql 语法错误: '=>' 右侧 [] 内必须是 $variable，位置: %s", String.valueOf(start));
+            }
+            parts.add("#{" + text.substring(first[0], first[1]) + "}");
+            pos = first[1];
+            while (pos < len) {
+                while (pos < len && Character.isWhitespace(text.charAt(pos))) {
+                    pos++;
+                }
+                if (pos >= len || text.charAt(pos) != ',') {
+                    break;
+                }
+                pos++;
+                while (pos < len && Character.isWhitespace(text.charAt(pos))) {
+                    pos++;
+                }
+                int[] v = readDollarVarNameTextRange(text, pos);
+                if (v == null) {
+                    throw new MybatisgxException("mgxsql 语法错误: '=>' 右侧 [] 内必须是 $variable，位置: %s", String.valueOf(start));
+                }
+                parts.add("#{" + text.substring(v[0], v[1]) + "}");
+                pos = v[1];
+            }
+            while (pos < len && Character.isWhitespace(text.charAt(pos))) {
+                pos++;
+            }
+            if (pos >= len || text.charAt(pos) != ']') {
+                throw new MybatisgxException("mgxsql 语法错误: '=>' 右侧 [] 未以 ']' 闭合，位置: %s", String.valueOf(start));
+            }
+            pos++;
+            return new ForeachRhsText(String.join(",", parts), parts.size() > 1, pos);
+        }
+        if (pos + 1 < len && text.charAt(pos) == '$' && text.charAt(pos + 1) == '{') {
+            throw new MybatisgxException("mgxsql 语法错误: '=>' 右边只接受 $variable 形式，不允许 #{} / ${}，位置: %s", String.valueOf(start));
+        }
+        int[] v = readDollarVarNameTextRange(text, pos);
+        if (v == null) {
+            throw new MybatisgxException("mgxsql 语法错误: '=>' 右边只接受 $variable 形式，不允许 #{} / ${}，位置: %s", String.valueOf(start));
+        }
+        return new ForeachRhsText("#{" + text.substring(v[0], v[1]) + "}", false, v[1]);
+    }
+
+    private static int[] readDollarVarNameTextRange(String text, int pos) {
+        int len = text.length();
+        if (pos >= len || text.charAt(pos) != '$') {
+            return null;
+        }
+        int nameStart = pos + 1;
+        if (nameStart >= len || !MgxsqlSyntaxHelper.isIdentifierStart(text.charAt(nameStart))) {
+            return null;
+        }
+        int nameEnd = MgxsqlSyntaxHelper.findIdentifierEnd(text, nameStart);
+        return new int[]{nameStart, nameEnd};
     }
 
     private int parseBodyIn(String text, int start, List<MgxsqlNode> target) {
@@ -971,6 +1498,11 @@ public class MgxsqlParser {
                     pos += 2;
                     while (pos < text.length() && Character.isWhitespace(text.charAt(pos))) {
                         pos++;
+                    }
+                    if (pos < text.length() && text.charAt(pos) == '[') {
+                        ForeachRhsText rhs = readArrowRhsText(text, pos, pos);
+                        bodyInComplexConsumed = rhs.end;
+                        return new ForeachUnit(itemName, collectionName, rhs.valueExpr, true, rhs.composite, 0, 0, 0);
                     }
                     if (pos < text.length() && text.charAt(pos) == '$' && pos + 1 < text.length() && MgxsqlSyntaxHelper.isIdentifierStart(text.charAt(pos + 1))) {
                         int varEnd = MgxsqlSyntaxHelper.findIdentifierEnd(text, pos + 1);

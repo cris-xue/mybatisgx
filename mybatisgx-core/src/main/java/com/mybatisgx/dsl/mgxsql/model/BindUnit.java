@@ -10,6 +10,9 @@ package com.mybatisgx.dsl.mgxsql.model;
  * </ul>
  * {@code paramName} 参与外层条件体的参数收集；{@code emitReference} 控制渲染时是否在
  * {@code <bind>} 之后追加 {@code #{bindName}} 引用（条件体内追加，作用域顶层不追加）。
+ * <p>v6 起也表达显式绑定 {@code #bind[name = :param expr]}：此时 {@code paramName=null}（不参与
+ * auto-guard 收集，需显式 {@code #if} 守卫），{@code bindName} 为用户定义名，{@code bindValue}
+ * 为去冒号后的 OGNL，{@code emitReference=false}（引用由单独的 {@code $name} 触发）。
  *
  * @author 薛承城
  * @description bind/LIKE 单元块 AST 节点

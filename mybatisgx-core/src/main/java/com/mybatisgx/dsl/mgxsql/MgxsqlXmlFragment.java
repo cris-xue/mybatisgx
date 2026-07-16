@@ -50,6 +50,30 @@ public final class MgxsqlXmlFragment {
     }
 
     /**
+     * 生成复合键（元组 IN）的 &lt;foreach&gt; 标签：separator="),("
+     * <p>用于 {@code [$a,$b]} 复合 RHS，迭代体为逗号连接的多个值表达式。
+     *
+     * @param itemName       迭代变量名
+     * @param collectionName 集合参数名
+     * @param valueExpr      迭代体值表达式（如 {@code #{item.id},#{item.name}}）
+     * @return 完整的 &lt;foreach&gt; 标签字符串
+     */
+    public static String foreachComplexTuple(String itemName, String collectionName, String valueExpr) {
+        return "<foreach item=\"" + itemName + "\" collection=\"" + collectionName
+                + "\" open=\"(\" close=\")\" separator=\"),(\">" + valueExpr + "</foreach>";
+    }
+
+    /**
+     * 生成 &lt;include&gt; 标签（引用 sql 片段）
+     *
+     * @param refid 片段 id（静态标识符）
+     * @return 完整的 &lt;include&gt; 标签字符串
+     */
+    public static String includeTag(String refid) {
+        return "<include refid=\"" + refid + "\"/>";
+    }
+
+    /**
      * 生成 &lt;bind&gt; 标签
      *
      * @param name  绑定变量名

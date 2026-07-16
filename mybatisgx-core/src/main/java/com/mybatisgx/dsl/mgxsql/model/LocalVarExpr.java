@@ -2,7 +2,8 @@ package com.mybatisgx.dsl.mgxsql.model;
 
 /**
  * mgxsql 局部变量表达式节点（Expression 层），对应 {@code $variable}。
- * <p>仅出现在 {@code =>} 右侧（复杂类型 IN 的迭代值）。渲染为 {@code #{varName}}。
+ * <p>出现在：{@code =>} 右侧（复杂类型 IN / {@code #for} 的迭代值）、显式 {@code #bind} 的引用处
+ * （如 {@code id = $age2}）。渲染为 {@code #{varName}}。局部变量引用不参与 auto-guard 收集。
  *
  * @author 薛承城
  * @description $variable 局部变量 AST 节点

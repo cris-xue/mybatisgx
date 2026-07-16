@@ -65,12 +65,12 @@ public class MgxsqlParserDifferentialTest {
 
     @Test
     public void test06_explicitGuard() {
-        diff("select * from t_user where id = :id #(:age > 2 && :age < 18)[or(name like :name and age = :age)]");
+        diff("select * from t_user where id = :id #if(:age > 2 && :age < 18)[or(name like :name and age = :age)]");
     }
 
     @Test
     public void test07_emptyGuardImplicit() {
-        diff("select * from t_user where #()[and status = :status]");
+        diff("select * from t_user where #if()[and status = :status]");
     }
 
     @Test
@@ -155,7 +155,7 @@ public class MgxsqlParserDifferentialTest {
 
     @Test
     public void test24_nestedThreeLevels() {
-        diff("select * from t_user where #(:type = 1)[#[and category = :category] #(:subType = 2)[#[and tag = :tag]]]");
+        diff("select * from t_user where #if(:type = 1)[#[and category = :category] #if(:subType = 2)[#[and tag = :tag]]]");
     }
 
     @Test

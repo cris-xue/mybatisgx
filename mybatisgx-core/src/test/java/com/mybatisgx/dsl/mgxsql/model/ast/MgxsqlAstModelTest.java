@@ -47,7 +47,7 @@ public class MgxsqlAstModelTest {
 
     @Test
     public void test02_nestedIfChooseAndCustomGuard() {
-        // #(type == 1)[#[and category = :category]]
+        // #if(type == 1)[#[and category = :category]]
         IfUnit inner = new IfUnit(null, 0, 1, 1);
         inner.getBody().add(new PassthroughText("and category = ", 0, 1, 1));
         inner.getBody().add(new ParamExpr("category", 0, 1, 1));
@@ -123,7 +123,7 @@ public class MgxsqlAstModelTest {
 
     @Test
     public void test05_blankGuardTreatedAsAuto() {
-        // #()[and status = :status] —— 空 guard 等价于 #[body]
+        // #if()[and status = :status] —— 空 guard 等价于 #[body]
         IfUnit blankGuard = new IfUnit("   ", 0, 1, 1);
         Assert.assertFalse("空白 guard 视为无自定义 guard", blankGuard.hasCustomGuard());
     }

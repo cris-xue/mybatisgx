@@ -58,7 +58,7 @@ public class MgxsqlAstRendererTest {
 
     @Test
     public void test02_customGuardWithLtGtEscape() {
-        // #(age>2)[salary > :min]
+        // #if(age>2)[salary > :min]
         IfUnit ifUnit = new IfUnit("age>2", 0, 1, 1);
         ifUnit.getBody().add(t("salary > "));
         ifUnit.getBody().add(p("min"));
@@ -156,7 +156,7 @@ public class MgxsqlAstRendererTest {
 
     @Test
     public void test10_guardAndOperatorEscape() {
-        // #(:a > 2 && :a < 18)[x] —— guard 去冒号 + <>&& 转义
+        // #if(:a > 2 && :a < 18)[x] —— guard 去冒号 + <>&& 转义
         IfUnit ifUnit = new IfUnit(":a > 2 && :a < 18", 0, 1, 1);
         ifUnit.getBody().add(t("x"));
         Assert.assertEquals(

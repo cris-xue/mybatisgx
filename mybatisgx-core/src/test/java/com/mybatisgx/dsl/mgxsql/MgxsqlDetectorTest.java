@@ -17,12 +17,12 @@ public class MgxsqlDetectorTest {
 
     @Test
     public void test01_detectConditionNode() {
-        Assert.assertTrue("应检测到 #( 条件节点", MgxsqlDetector.containsMgxsqlSyntax("select * from t_user where #(name = :name)"));
+        Assert.assertTrue("应检测到 #if( 条件节点", MgxsqlDetector.containsMgxsqlSyntax("select * from t_user where #if(name = :name)"));
     }
 
     @Test
     public void test02_detectExprCondition() {
-        Assert.assertTrue("应检测到 #(expr) 显式条件", MgxsqlDetector.containsMgxsqlSyntax("where #(age > 2)(name = :name)"));
+        Assert.assertTrue("应检测到 #if(expr) 显式条件", MgxsqlDetector.containsMgxsqlSyntax("where #if(age > 2)(name = :name)"));
     }
 
     @Test

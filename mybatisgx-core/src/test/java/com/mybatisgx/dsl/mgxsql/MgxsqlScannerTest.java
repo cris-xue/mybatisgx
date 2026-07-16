@@ -113,11 +113,11 @@ public class MgxsqlScannerTest {
         Assert.assertTrue("collection 应为 idList", output.contains("collection=\"idList\""));
     }
 
-    // ==================== #(expr)[body] 有 guard 条件体 ====================
+    // ==================== #if(expr)[body] 有 guard 条件体 ====================
 
     @Test
     public void test10_explicitGuard() {
-        String input = "select * from t_user where id = :id #(:age > 2 && :age < 18)[or(name like :name and age = :age)]";
+        String input = "select * from t_user where id = :id #if(:age > 2 && :age < 18)[or(name like :name and age = :age)]";
         String output = this.scanner.process(input);
         Assert.assertTrue("表达式应写入 test（去冒号并转义）", output.contains("age &gt; 2 and age &lt; 18"));
         Assert.assertTrue("条件体中 :name 应转为 #{name}", output.contains("#{name}"));
@@ -127,7 +127,7 @@ public class MgxsqlScannerTest {
 
     @Test
     public void test11_emptyGuardImplicit() {
-        String input = "select * from t_user where #()[and status = :status]";
+        String input = "select * from t_user where #if()[and status = :status]";
         String output = this.scanner.process(input);
         Assert.assertTrue("应包含 <if>", output.contains("<if"));
         Assert.assertTrue("应包含 isNotEmpty(status)", output.contains("isNotEmpty(status)"));
@@ -136,7 +136,7 @@ public class MgxsqlScannerTest {
 
     @Test
     public void test12_guardWithoutColon() {
-        String input = "select * from t_user where #(age > 2)[name = :name]";
+        String input = "select * from t_user where #if(age > 2)[name = :name]";
         String output = this.scanner.process(input);
         Assert.assertTrue("test 应为 age &gt; 2（转义）", output.contains("age &gt; 2"));
         Assert.assertTrue("条件体中 :name 应转为 #{name}", output.contains("#{name}"));
@@ -144,7 +144,7 @@ public class MgxsqlScannerTest {
 
     @Test
     public void test13_guardColonStrip() {
-        String input = "select * from t_user where #(:age > 2)[age = :age]";
+        String input = "select * from t_user where #if(:age > 2)[age = :age]";
         String output = this.scanner.process(input);
         Assert.assertTrue("guard 应为 age &gt; 2（去冒号并转义）", output.contains("age &gt; 2"));
         Assert.assertTrue("body 应为 age = #{age}", output.contains("age = #{age}"));
@@ -152,7 +152,7 @@ public class MgxsqlScannerTest {
 
     @Test
     public void test14_guardMixedColon() {
-        String input = "select * from t_user where #(:age > minAge && maxAge > :age)[age = :age]";
+        String input = "select * from t_user where #if(:age > minAge && maxAge > :age)[age = :age]";
         String output = this.scanner.process(input);
         Assert.assertTrue("guard 应去冒号并转义，保留裸标识符", output.contains("age &gt; minAge and maxAge &gt; age"));
         Assert.assertTrue("body 应为 age = #{age}", output.contains("age = #{age}"));
@@ -162,8 +162,8 @@ public class MgxsqlScannerTest {
 
     @Test(expected = MybatisgxException.class)
     public void test15_hashParenWithoutBracket() {
-        // #() 后跟 {} 是 v3 语法，v4 不再支持
-        String input = "select * from t_user where #(){name = :name}";
+        // #if() 后跟 {} 是 v3 语法，v4 不再支持
+        String input = "select * from t_user where #if(){name = :name}";
         this.scanner.process(input);
     }
 
@@ -183,7 +183,7 @@ public class MgxsqlScannerTest {
 
     @Test
     public void test18_nestedGuardBlocks() {
-        String input = "select * from t_user where #(:type = 1)[#[and category = :category] #(:subType = 2)[#[and tag = :tag]]]";
+        String input = "select * from t_user where #if(:type = 1)[#[and category = :category] #if(:subType = 2)[#[and tag = :tag]]]";
         String output = this.scanner.process(input);
         int ifCount = this.countOccurrences(output, "<if");
         Assert.assertTrue("应有至少 3 个 <if> 标签", ifCount >= 3);
@@ -263,7 +263,7 @@ public class MgxsqlScannerTest {
 
     @Test
     public void test26_explicitComplexIn() {
-        String input = "select * from t_user where #(idList != null)[id in (item:idList)=>$item.id]";
+        String input = "select * from t_user where #if(idList != null)[id in (item:idList)=>$item.id]";
         String output = this.scanner.process(input);
         Assert.assertTrue("应包含 <if test=\"idList != null\">", output.contains("idList != null"));
         Assert.assertTrue("应包含 <foreach", output.contains("<foreach"));
@@ -361,7 +361,7 @@ public class MgxsqlScannerTest {
 
     @Test
     public void test37_updateSetWithGuard() {
-        String input = "update t_user set #(name != null)[name = :name] where id = :id";
+        String input = "update t_user set #if(name != null)[name = :name] where id = :id";
         String output = this.scanner.process(input);
         Assert.assertTrue("应包含 <set>", output.contains("<set>"));
         Assert.assertTrue("guard 应为 name != null", output.contains("name != null"));
@@ -615,7 +615,7 @@ public class MgxsqlScannerTest {
 
     @Test
     public void test63_guardInParen() {
-        String input = "select * from t_user where #(idList != null)[id in (:idList)]";
+        String input = "select * from t_user where #if(idList != null)[id in (:idList)]";
         String output = this.scanner.process(input);
         Assert.assertTrue("应包含 <if test=\"idList != null\">", output.contains("idList != null"));
         Assert.assertTrue("应包含 <foreach", output.contains("<foreach"));
@@ -700,7 +700,7 @@ public class MgxsqlScannerTest {
 
     @Test
     public void test72_guardTrim() {
-        String input = "select * from t_user where #( :age > 1 )[age = :age]";
+        String input = "select * from t_user where #if( :age > 1 )[age = :age]";
         String output = this.scanner.process(input);
         Assert.assertTrue("guard 应为 age &gt; 1（trim 后无空格并转义）", output.contains("age &gt; 1"));
         Assert.assertTrue("body 应为 age = #{age}", output.contains("age = #{age}"));
@@ -814,7 +814,7 @@ public class MgxsqlScannerTest {
 
     @Test(expected = MybatisgxException.class)
     public void test86_hashParamInGuardConditionNode() {
-        String input = "select * from t_user where #(type = 1)[id = #{id}]";
+        String input = "select * from t_user where #if(type = 1)[id = #{id}]";
         this.scanner.process(input);
     }
 
@@ -828,7 +828,7 @@ public class MgxsqlScannerTest {
 
     @Test(expected = MybatisgxException.class)
     public void test88_dollarBraceInGuardConditionNode() {
-        String input = "select * from t_user where #(type = 1)[id = ${id}]";
+        String input = "select * from t_user where #if(type = 1)[id = ${id}]";
         this.scanner.process(input);
     }
 
@@ -858,7 +858,7 @@ public class MgxsqlScannerTest {
 
     @Test(expected = MybatisgxException.class)
     public void test92_orPrefixInConditionNode() {
-        String input = "select * from t_user where #(type = 1)[id = :id\n  #or name = :name]";
+        String input = "select * from t_user where #if(type = 1)[id = :id\n  #or name = :name]";
         this.scanner.process(input);
     }
 
@@ -909,7 +909,7 @@ public class MgxsqlScannerTest {
     @Test
     public void test97_guardNoBubble() {
         // 有 guard 条件体不冒泡
-        String input = "select * from t_user where #(:type = 1)[category = :category #[and tag = :tag]]";
+        String input = "select * from t_user where #if(:type = 1)[category = :category #[and tag = :tag]]";
         String output = this.scanner.process(input);
         Assert.assertTrue("外层 test 应为 type = 1", output.contains("type = 1"));
         Assert.assertTrue("内层 test 应包含 isNotEmpty(tag)", output.contains("isNotEmpty(tag)"));
@@ -1063,7 +1063,7 @@ public class MgxsqlScannerTest {
     @Test
     public void test113_guardLtEscape() {
         // guard 中 < 应转义为 &lt;
-        String input = "select * from t_user where #(:age < 18)[name = :name]";
+        String input = "select * from t_user where #if(:age < 18)[name = :name]";
         String output = this.scanner.process(input);
         Assert.assertTrue("guard 应转义 < 为 &lt;", output.contains("age &lt; 18"));
     }
@@ -1071,7 +1071,7 @@ public class MgxsqlScannerTest {
     @Test
     public void test114_guardGtEscape() {
         // guard 中 > 应转义为 &gt;
-        String input = "select * from t_user where #(:age > 2)[name = :name]";
+        String input = "select * from t_user where #if(:age > 2)[name = :name]";
         String output = this.scanner.process(input);
         Assert.assertTrue("guard 应转义 > 为 &gt;", output.contains("age &gt; 2"));
     }
@@ -1079,7 +1079,7 @@ public class MgxsqlScannerTest {
     @Test
     public void test115_guardAndEscape() {
         // guard 中 && 应转为 and
-        String input = "select * from t_user where #(:age > 2 && :age < 18)[name = :name]";
+        String input = "select * from t_user where #if(:age > 2 && :age < 18)[name = :name]";
         String output = this.scanner.process(input);
         Assert.assertTrue("guard 应转 && 为 and", output.contains("age &gt; 2 and age &lt; 18"));
     }
@@ -1087,7 +1087,7 @@ public class MgxsqlScannerTest {
     @Test
     public void test116_guardOrEscape() {
         // guard 中 || 应转为 or
-        String input = "select * from t_user where #(:age > 2 || :age < 0)[name = :name]";
+        String input = "select * from t_user where #if(:age > 2 || :age < 0)[name = :name]";
         String output = this.scanner.process(input);
         Assert.assertTrue("guard 应转 || 为 or", output.contains("age &gt; 2 or age &lt; 0"));
     }
@@ -1327,9 +1327,140 @@ public class MgxsqlScannerTest {
 
     @Test
     public void test143_ifTagParamRefPassthrough() {
-        // 最小单元块只禁条件节点块（#[/#(）；<if> 内 :param 原样透传不翻译、不报错
+        // 最小单元块只禁条件节点块（#[/#if(）；<if> 内 :param 原样透传不翻译、不报错
         String input = "select * from user <where> <if test=\"x\">name = :name</if> </where>";
         String output = this.scanner.process(input);
         Assert.assertTrue("<if> 应原样透传，:name 不翻译", output.contains("<if test=\"x\">name = :name</if>"));
+    }
+
+    // ==================== v6: #if / #for / #include / #bind / $var ====================
+
+    @Test
+    public void test144_ifStandardGuard() {
+        // v6: #if(expr)[body] 取代 #(expr)[body]
+        String input = "select * from t_user where #if(:age > 2)[age = :age]";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("guard 去冒号 + > 转义", output.contains("<if test=\"age &gt; 2\"> age = #{age}</if>"));
+    }
+
+    @Test
+    public void test145_forSimple() {
+        // #for 独立迭代指令（脱离 in），简单类型
+        String input = "select * from t where status in #for(item:statusList)=>$item";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("简单 #for 生成 foreach",
+                output.contains("<foreach item=\"item\" collection=\"statusList\" open=\"(\" close=\")\" separator=\",\">#{item}</foreach>"));
+    }
+
+    @Test
+    public void test146_forProperty() {
+        // #for 属性访问
+        String input = "select * from t where id in #for(item:objs)=>$item.id";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("#for 属性访问生成 #{item.id}",
+                output.contains("<foreach item=\"item\" collection=\"objs\" open=\"(\" close=\")\" separator=\",\">#{item.id}</foreach>"));
+    }
+
+    @Test
+    public void test147_forComposite() {
+        // #for 复合键 [$a,$b] → separator="),("
+        String input = "select * from t where (id,type) in #for(item:list)=>[$item.id,$item.type]";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("复合 #for 用 ),( 分隔",
+                output.contains("<foreach item=\"item\" collection=\"list\" open=\"(\" close=\")\" separator=\"),(\">#{item.id},#{item.type}</foreach>"));
+    }
+
+    @Test
+    public void test148_includeTopLevel() {
+        // #include[sqlId] 在 NORMAL 域（顶层）
+        String input = "select #include[cols] from t";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("顶层 #include 生成 <include refid>",
+                output.contains("<include refid=\"cols\"/>"));
+    }
+
+    @Test
+    public void test149_includeInWhere() {
+        // #include 在 where 域
+        String input = "select * from t where #include[cond] order by id";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("where 域内 #include", output.contains("<include refid=\"cond\"/>"));
+        Assert.assertTrue("where 域内 #include", output.contains("<where>"));
+        Assert.assertTrue("where 域内 #include", output.contains("</where>"));
+    }
+
+    @Test
+    public void test150_bindAndLocalVar() {
+        // 显式 #bind + $var 引用
+        String input = "select * from t where #bind[age2 = :age + :age] #if(:age != null)[id = $age2]";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("#bind 去冒号渲染", output.contains("<bind name=\"age2\" value=\"age + age\"/>"));
+        Assert.assertTrue("$var 引用渲染 #{age2}", output.contains("id = #{age2}"));
+        Assert.assertTrue("guard 去冒号", output.contains("test=\"age != null\""));
+    }
+
+    @Test
+    public void test151_bindStringLiteral() {
+        // #bind value 含字符串字面量
+        String input = "select * from t where #bind[p = :code + '_x']";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("字符串字面量保留", output.contains("<bind name=\"p\" value=\"code + '_x'\"/>"));
+    }
+
+    @Test
+    public void test152_localVarNotInGuard() {
+        // $var 不参与 auto-guard 收集 → test="true"
+        String input = "select * from t where #bind[age2 = :a] #[id = $age2]";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("仅 $var 时 guard 退化为 true",
+                output.contains("<if test=\"true\"> id = #{age2}</if>"));
+    }
+
+    @Test
+    public void test153_inSugarComposite() {
+        // in 糖复合 (item:list)=>[$a,$b]
+        String input = "select * from t where id in (item:list)=>[$item.id,$item.name]";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("in 糖复合用 ),( 分隔", output.contains("separator=\"),(\""));
+        Assert.assertTrue("in 糖复合值", output.contains("#{item.id},#{item.name}"));
+    }
+
+    @Test
+    public void test154_bindInIfBody() {
+        // body 层 #bind + $var（#if 体内声明并引用）
+        String input = "select * from t where #if(:x)[#bind[b = :y] k = $b]";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("body #bind 渲染", output.contains("<bind name=\"b\" value=\"y\"/>"));
+        Assert.assertTrue("body $var 引用", output.contains("k = #{b}"));
+    }
+
+    @Test(expected = MybatisgxException.class)
+    public void test155_hashParenDeprecated() {
+        // #(expr) 已废弃
+        this.scanner.process("select * from t where #(age > 2)[age = :age]");
+    }
+
+    @Test(expected = MybatisgxException.class)
+    public void test156_includeNonStaticRefid() {
+        // #include 的 refid 不接受 :param
+        this.scanner.process("select #include[:cols] from t");
+    }
+
+    @Test(expected = MybatisgxException.class)
+    public void test157_bindValueRejectsDollarVar() {
+        // #bind value 不接受 $var
+        this.scanner.process("select * from t where #bind[c = $a + $b]");
+    }
+
+    @Test(expected = MybatisgxException.class)
+    public void test158_localVarReferenceBeforeDeclaration() {
+        // $var 引用先于声明
+        this.scanner.process("select * from t where id = $age2");
+    }
+
+    @Test(expected = MybatisgxException.class)
+    public void test159_bindDuplicateName() {
+        // #bind 名字重复
+        this.scanner.process("select * from t where #bind[a = :x] #bind[a = :y]");
     }
 }

@@ -19,7 +19,7 @@ condition_and_expression: condition_term (logic_and condition_term)* ;
 // 条件项：基础条件或括号表达式
 condition_term: condition_comparison | (left_bracket condition_or_expression right_bracket) ;
 // 解析方法名和实体字段
-condition_comparison: field_reference (condition_comparison_param | condition_comparison_not_param) ;
+condition_comparison: question_mark? field_reference (condition_comparison_param | condition_comparison_not_param) ;
 condition_comparison_param: (relational_op | matching_op) condition_value ;
 condition_comparison_not_param: comparison_op_null ;
 condition_value: parameter_reference | number ;

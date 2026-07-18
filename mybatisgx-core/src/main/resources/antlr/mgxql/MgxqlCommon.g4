@@ -20,4 +20,5 @@ right_bracket: RIGHT_BRACKET ;
 dot: DOT ;
 param_colon: COLON ;
 comma: COMMA ;
+question_mark: QUESTION_MARK ;
 number: NUMBER ;

@@ -3,6 +3,7 @@ package com.mybatisgx.dsl.mgxsql.model.ast;
 import com.mybatisgx.dsl.mgxsql.MgxsqlScanner;
 import com.mybatisgx.dsl.mgxsql.MgxsqlAstRenderer;
 import com.mybatisgx.dsl.mgxsql.MgxsqlParser;
+import com.mybatisgx.exception.MybatisgxException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
@@ -69,8 +70,24 @@ public class MgxsqlParserDifferentialTest {
     }
 
     @Test
-    public void test07_emptyGuardImplicit() {
-        diff("select * from t_user where #if()[and status = :status]");
+    public void test07_emptyGuardRejected() {
+        // 空 guard（#if()）在 parser 与 scanner(=parser 薄包装)两路一致地 parse 阶段硬错
+        // （mgxsql-if-when-empty-guard-reject：不再沉默退化为自动 guard）
+        String input = "select * from t_user where #if()[and status = :status]";
+        try {
+            this.scanner.process(input);
+            Assert.fail("scanner 应抛 MybatisgxException: " + input);
+        } catch (MybatisgxException e) {
+            Assert.assertTrue("scanner 消息应含[圆括号内表达式不能为空]，实际: " + e.getMessage(),
+                    e.getMessage().contains("圆括号内表达式不能为空"));
+        }
+        try {
+            this.renderer.render(this.parser.parse(input));
+            Assert.fail("parser 应抛 MybatisgxException: " + input);
+        } catch (MybatisgxException e) {
+            Assert.assertTrue("parser 消息应含[圆括号内表达式不能为空]，实际: " + e.getMessage(),
+                    e.getMessage().contains("圆括号内表达式不能为空"));
+        }
     }
 
     @Test

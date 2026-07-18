@@ -101,4 +101,85 @@ public class MgxsqlParserTest {
                 "select * from t <where> <if test=\"@com.mybatisgx.utils.ObjectUtils@isNotEmpty(name)\"> name = #{name}</if></where>",
                 pr("select * from t where #[name = :name]"));
     }
+
+    // ===== #if(expr) / #when(expr) 空圆括号 guard 收紧（mgxsql-if-when-empty-guard-reject） =====
+
+    /**
+     * 断言输入在解析期抛 {@link MybatisgxException}，且消息包含期望片段。
+     */
+    private void expectEmptyGuardError(String input, String expectedSnippet) {
+        try {
+            pr(input);
+            Assert.fail("应抛 MybatisgxException: " + input);
+        } catch (MybatisgxException e) {
+            Assert.assertTrue("消息应含 [" + expectedSnippet + "]，实际: " + e.getMessage(),
+                    e.getMessage().contains(expectedSnippet));
+        }
+    }
+
+    @Test
+    public void test10_ifEmptyGuardScopeLayerRejected() {
+        // scope 层 #if()：圆括号空表达式报错
+        expectEmptyGuardError("select * from t where #if()[age = :age]", "圆括号内表达式不能为空");
+    }
+
+    @Test
+    public void test11_ifWhitespaceGuardScopeLayerRejected() {
+        // scope 层 #if( ):纯空白与空括号同等报错
+        expectEmptyGuardError("select * from t where #if( )[age = :age]", "圆括号内表达式不能为空");
+    }
+
+    @Test
+    public void test12_ifEmptyGuardBodyLayerRejected() {
+        // body 层 #if（嵌套触 parseBodyIf）：#[#if()...] 空表达式报错，两路对称
+        expectEmptyGuardError("select * from t where #[#if()[a = :a]]", "圆括号内表达式不能为空");
+    }
+
+    @Test
+    public void test13_ifWhitespaceGuardBodyLayerRejected() {
+        // body 层 #if( ):纯空白同等报错
+        expectEmptyGuardError("select * from t where #[#if( )[a = :a]]", "圆括号内表达式不能为空");
+    }
+
+    @Test
+    public void test14_whenEmptyGuardRejected() {
+        // #when():圆括号空表达式报错，消息指出 #when(expr)
+        expectEmptyGuardError(
+                "select * from t where #choose[#when()[a = :a] #otherwise[b = :b]]",
+                "圆括号内表达式不能为空");
+    }
+
+    @Test
+    public void test15_whenWhitespaceGuardRejected() {
+        // #when( ):纯空白与空括号同等报错
+        expectEmptyGuardError(
+                "select * from t where #choose[#when( )[a = :a] #otherwise[b = :b]]",
+                "圆括号内表达式不能为空");
+    }
+
+    @Test
+    public void test16_ifWithGuardNotRegressed() {
+        // 合法用例防回归：#if(:age > 2)[age = :age] 正常产出显式 guard，不退化为自动 guard
+        // 显式 guard 走 hasCustomGuard 分支，test="age > 2"（> 在 XML 中实体化），
+        // 不应出现自动 guard 的 isNotEmpty。用语义断言规避实体字符判读。
+        String out = pr("select * from t where #if(:age > 2)[age = :age]");
+        Assert.assertFalse("不应退化为自动 guard isNotEmpty，实际: " + out, out.contains("isNotEmpty"));
+        Assert.assertTrue("应包含显式 guard test 属性，实际: " + out, out.contains("test=\"age"));
+        Assert.assertTrue("guard 应含 age 与 2 比较结果，实际: " + out,
+                out.contains("age") && out.contains("2"));
+        Assert.assertTrue("应渲染 #{age}，实际: " + out, out.contains("#{age}"));
+        Assert.assertTrue("应含 <if ...></if>，实际: " + out, out.contains("<if ") && out.contains("</if>"));
+    }
+
+    @Test
+    public void test17_chooseWithWhenNotRegressed() {
+        // 合法用例防回归：#when(:x > 0) 正常产出显式 guard（不应为空 guard 残留）
+        String out = pr("select * from t where #choose[#when(:x > 0)[a = :a] #otherwise[b = :b]]");
+        Assert.assertTrue("应渲染 <when 含显式 test，实际: " + out,
+                out.contains("<when ") && out.contains("test=\"x"));
+        Assert.assertTrue("when guard 应含 x 与 0，实际: " + out,
+                out.contains("x") && out.contains("0"));
+        Assert.assertTrue("应含 otherwise 分支，实际: " + out, out.contains("<otherwise"));
+        Assert.assertTrue("应含 #{b}，实际: " + out, out.contains("#{b}"));
+    }
 }

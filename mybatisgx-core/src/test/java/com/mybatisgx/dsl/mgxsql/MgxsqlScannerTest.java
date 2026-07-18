@@ -126,12 +126,16 @@ public class MgxsqlScannerTest {
     }
 
     @Test
-    public void test11_emptyGuardImplicit() {
+    public void test11_emptyGuardRejected() {
+        // 空 guard（#if()）不再沉默退化为自动 guard，parse 阶段硬错（mgxsql-if-when-empty-guard-reject）
         String input = "select * from t_user where #if()[and status = :status]";
-        String output = this.scanner.process(input);
-        Assert.assertTrue("应包含 <if>", output.contains("<if"));
-        Assert.assertTrue("应包含 isNotEmpty(status)", output.contains("isNotEmpty(status)"));
-        Assert.assertTrue("应包含 and status = #{status}", output.contains("and status = #{status}"));
+        try {
+            this.scanner.process(input);
+            Assert.fail("应抛 MybatisgxException: " + input);
+        } catch (MybatisgxException e) {
+            Assert.assertTrue("消息应含[圆括号内表达式不能为空]，实际: " + e.getMessage(),
+                    e.getMessage().contains("圆括号内表达式不能为空"));
+        }
     }
 
     @Test

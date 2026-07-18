@@ -6,6 +6,8 @@ options {
     tokenVocab = MgxqlLexer ;
 }
 
+import MgxqlWhere, MgxqlCommon ;
+
 sql_statement: (insert_statement | delete_statement | update_statement | select_statement) end ;
 
 insert_statement: insert_clause ;
@@ -61,8 +63,9 @@ select_on_expression: entity_name_alias on_equal entity_name_alias ;
 on_equal: EQUAL ;
 
 // 条件语法   where name = :name and (age = :age or status = :status)
-// 条件语法   where ?name = :name and (?age = :age or status = :status)
-where_clause: where_start condition_or_expression ;
+// 条件语法   where #[name = :name] #[and age = :age or status = :status]
+// 条件语法   where #[name = :name] #if(status == 5)[and age = :age or status = :status]
+/*where_clause: where_start condition_or_expression ;
 // OR 运算符 (最低优先级)   分层处理条件表达式，明确运算符优先级
 condition_or_expression: condition_and_expression (logic_or condition_and_expression)* ;
 // AND 运算符 (较高优先级)
@@ -70,10 +73,10 @@ condition_and_expression: condition_term (logic_and condition_term)* ;
 // 条件项：基础条件或括号表达式
 condition_term: condition_comparison | (left_bracket condition_or_expression right_bracket) ;
 // 解析方法名和实体字段
-condition_comparison: question_mark? field_reference (condition_comparison_param | condition_comparison_not_param) ;
+condition_comparison: field_reference (condition_comparison_param | condition_comparison_not_param) ;
 condition_comparison_param: (relational_op | matching_op) condition_value ;
 condition_comparison_not_param: comparison_op_null ;
-condition_value: parameter_reference | number ;
+condition_value: parameter_reference | number ;*/
 
 // group by phone
 group_by_clause: group_by group_by_expression ;
@@ -101,7 +104,7 @@ limit: LIMIT ;
 offset: NUMBER ;
 size: NUMBER ;
 
-where_start: WHERE ;
+/*where_start: WHERE ;
 logic_and: LOGIC_AND ;
 logic_or: LOGIC_OR ;
 
@@ -135,7 +138,7 @@ comparison_op_right_like: COMPARISON_OP_RIGHT_LIKE ;
 
 comparison_op_null: comparison_op_is_null | comparison_op_is_not_null ;
 comparison_op_is_null: COMPARISON_OP_IS_NULL ;
-comparison_op_is_not_null: COMPARISON_OP_IS_NOT_NULL ;
+comparison_op_is_not_null: COMPARISON_OP_IS_NOT_NULL ;*/
 
 having: HAVING ;
 group_by: GROUP_BY ;
@@ -143,7 +146,7 @@ order_by: ORDER_BY ;
 order_by_direction: ORDER_BY_DIRECTION ;
 
 // 字段引用，user.name  role.status   只允许实体别名.字段，不支持嵌套属性链
-field_reference: field_name | entity_name_alias dot field_name ;
+/*field_reference: field_name | entity_name_alias dot field_name ;
 // 参数引用（对应查询实体和@Param）。:name   :表示从根节点开始取值
 parameter_reference: param_colon field_name (dot field_name)* ;
 
@@ -156,8 +159,7 @@ right_bracket: RIGHT_BRACKET ;
 dot: DOT ;
 param_colon: COLON ;
 comma: COMMA ;
-question_mark: QUESTION_MARK ;
-number: NUMBER ;
+number: NUMBER ;*/
 
 // EOF(end of file)表示文件结束符，这个是Antlr中已经定义好的
 end: EOF ;

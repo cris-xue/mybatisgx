@@ -54,6 +54,20 @@ COLON: ':' ;
 DOT: '.' ;
 QUESTION_MARK: '?' ;
 
+// 动态门（mgxsql 子集）标点 token：常量置正则之上（遵循"常量在正则上面"的解析顺序约束）
+HASH: '#' ;
+LEFT_SQUARE: '[' ;
+RIGHT_SQUARE: ']' ;
+ARROW: '=>' ;
+DOLLAR: '$' ;
+PERCENT: '%' ;
+
+// 动态门关键字（常量置正则之上，避免被 LOWER_NAME 抢先匹配为字段名）
+IF: 'if' ;
+WHEN: 'when' ;
+OTHERWISE: 'otherwise' ;
+CHOOSE: 'choose' ;
+
 // antlr是从上向下解析的，常量一定要放在正则的上面
 UPPER_NAME: UPPER+ (NUMBER | UPPER | LOWER)* ;
 QUOTED_NAME: '`' LOWER+ (NUMBER | UPPER | LOWER)* '`' ;

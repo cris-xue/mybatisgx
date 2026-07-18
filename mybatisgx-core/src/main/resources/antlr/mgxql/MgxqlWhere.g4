@@ -65,7 +65,6 @@ expression_operator:
 literal: NUMBER | STRING ;
 
 /* 条件原子语法 */
-
 where_start: WHERE ;
 logic_and: LOGIC_AND ;
 logic_or: LOGIC_OR ;

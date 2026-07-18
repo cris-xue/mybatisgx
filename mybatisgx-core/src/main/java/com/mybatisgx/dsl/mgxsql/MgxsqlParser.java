@@ -351,14 +351,16 @@ public class MgxsqlParser {
             throw new MybatisgxException("mgxsql 语法错误: #if 后必须跟 '(expr)'，%s", ctx.getPositionInfo());
         }
         String guardContent = readParenthesizedContent().trim();
+        if (guardContent.isEmpty()) {
+            throw new MybatisgxException("mgxsql 语法错误: #if(expr) 的圆括号内表达式不能为空，%s", ctx.getPositionInfo());
+        }
         MgxsqlSyntaxHelper.skipWhitespace(ctx);
         if (!ctx.hasMore() || ctx.currentChar() != '[') {
             throw new MybatisgxException("mgxsql 语法错误: #if(expr) 后必须跟 '[body]'，%s", ctx.getPositionInfo());
         }
         ctx.advance();
         String bodyContent = readBracketedContent(true);
-        String guard = guardContent.isEmpty() ? null : guardContent;
-        IfUnit unit = new IfUnit(guard, startPos, line, col);
+        IfUnit unit = new IfUnit(guardContent, startPos, line, col);
         unit.getBody().addAll(parseBody(bodyContent));
         target.add(unit);
     }
@@ -727,6 +729,9 @@ public class MgxsqlParser {
                 }
                 int[] guardRange = readTextParenRange(inner, i);
                 String guard = inner.substring(i + 1, guardRange[1] - 1).trim();
+                if (guard.isEmpty()) {
+                    throw new MybatisgxException("mgxsql 语法错误: #when(expr) 的圆括号内表达式不能为空，位置: %s", String.valueOf(i));
+                }
                 i = guardRange[1];
                 while (i < len && Character.isWhitespace(inner.charAt(i))) {
                     i++;
@@ -1209,6 +1214,9 @@ public class MgxsqlParser {
         }
         int[] guardRange = readTextParenRange(text, pos);
         String guard = text.substring(pos + 1, guardRange[1] - 1).trim();
+        if (guard.isEmpty()) {
+            throw new MybatisgxException("mgxsql 语法错误: #if(expr) 的圆括号内表达式不能为空，位置: %s", String.valueOf(start));
+        }
         pos = guardRange[1];
         while (pos < text.length() && Character.isWhitespace(text.charAt(pos))) {
             pos++;
@@ -1218,7 +1226,7 @@ public class MgxsqlParser {
         }
         int[] bodyRange = readTextBracketRange(text, pos);
         String body = text.substring(pos + 1, bodyRange[1] - 1);
-        IfUnit unit = new IfUnit(guard.isEmpty() ? null : guard, start, 0, 0);
+        IfUnit unit = new IfUnit(guard, start, 0, 0);
         unit.getBody().addAll(parseBody(body));
         target.add(unit);
         return bodyRange[1];

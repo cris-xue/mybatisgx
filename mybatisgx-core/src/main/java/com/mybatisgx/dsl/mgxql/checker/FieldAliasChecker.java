@@ -115,7 +115,14 @@ public class FieldAliasChecker implements MgxqlSyntaxChecker {
         if (expression == null || expression.getNodes() == null) {
             return;
         }
-        for (WhereConditionNode node : expression.getNodes()) {
+        for (WhereElement element : expression.getNodes()) {
+            if (!element.isCondition()) {
+                for (WhereExpression child : element.getChildExpressions()) {
+                    checkConditionExpressionFields(child, hasMultipleEntities, isDeleteOrUpdate, context);
+                }
+                continue;
+            }
+            WhereConditionNode node = element.asCondition();
             if (node.isNested()) {
                 checkConditionExpressionFields(node.getSubExpression(), hasMultipleEntities, isDeleteOrUpdate, context);
             } else if (node.getFieldName() != null) {

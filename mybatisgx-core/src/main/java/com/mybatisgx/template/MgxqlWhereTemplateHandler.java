@@ -79,11 +79,22 @@ public class MgxqlWhereTemplateHandler {
     }
 
     private void renderExpression(Element parentElement, WhereExpression expression, Boolean dynamic) {
-        List<WhereConditionNode> nodes = expression.getNodes();
+        List<WhereElement> nodes = expression.getNodes();
         if (ObjectUtils.isEmpty(nodes)) {
             return;
         }
-        for (WhereConditionNode node : nodes) {
+        for (WhereElement element : nodes) {
+            // 动态门变体简洁直出 XML 兼容形态（P1 模型层）：
+            //   - 嵌套 body（Bracket/If/Choose/When）递归进 body 渲染；
+            //   - WhenNode/ChooseNode 顶级外层在 P1 直出 XML 路径下不产 <choose>/<when>（属 P2 子集切换范围），此处仅保证 body 条件被渲染、不破坏既有行为。
+            // 待 P2 task 4.9 切到 MgxqlSubsetRenderer 后整体替换。
+            if (!element.isCondition()) {
+                for (WhereExpression child : element.getChildExpressions()) {
+                    this.renderExpression(parentElement, child, dynamic);
+                }
+                continue;
+            }
+            WhereConditionNode node = element.asCondition();
             if (node.isNested()) {
                 this.renderNestedNode(parentElement, node, dynamic);
             } else {
@@ -138,7 +149,9 @@ public class MgxqlWhereTemplateHandler {
     }
 
     private Element wrapOptionalIf(Element parentElement, WhereConditionNode node, Boolean dynamic) {
-        if (node.isOptional() || dynamic) {
+        // ? 前缀 optional 已退役（design D3）；可选条件语义改由 #[body]/#if(expr)[body] 在文法层表达，
+        // 其 auto-guard 收集在 P2 子集渲染后归 mgxsql 消费阶段。此处仅保留 @Dynamic 包裹分支。
+        if (dynamic) {
             BoundParam boundParam = node.getBoundParam();
             if (boundParam != null && boundParam.getOperator() != null && boundParam.getOperator().isNullComparisonOperator()) {
                 return parentElement;

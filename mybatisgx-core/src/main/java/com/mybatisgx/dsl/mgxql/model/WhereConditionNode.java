@@ -4,25 +4,19 @@ import com.mybatisgx.dsl.mgxql.model.expression.ConditionSqlExpression;
 import com.mybatisgx.model.ColumnInfo;
 import com.mybatisgx.model.MethodParamInfo;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
  * WHERE条件节点模型，可以是基础条件或嵌套括号表达式
+ * <p>作为 {@link WhereElement} 平面变体之一（普通条件），与 Bracket/If/Choose/When 变体并列（design D2）。
+ * 原 {@code ?} 前缀 optional 已退役：可选条件统一由 {@link BracketDirectiveNode} / {@link IfDirectiveNode} 承载（design D3）。
+ * {@code index} 保留（METHOD_NAME 来源 argN 绑定，task 1.4 确认不被波及），{@code subExpression} 保留承载 SQL 括号分组（design Q2）。
  *
  * @author 薛承城
  * @date 2025/11/17 10:19
  */
-public class WhereConditionNode {
-
-    /**
-     * 与前一节点的逻辑关系（AND/OR/NULL）
-     */
-    private LogicOperator logicOperator = LogicOperator.NULL;
-
-    /**
-     * 是否为可选条件（对应 ? 前缀，等价于 MyBatis if 标签）
-     */
-    private boolean optional;
+public class WhereConditionNode extends WhereElement {
 
     /**
      * 左括号
@@ -83,14 +77,6 @@ public class WhereConditionNode {
      * 查询条件在方法名中的位置，如findById、findByName，起始位置从0开始
      */
     private int index = -1;
-
-    public LogicOperator getLogicOperator() {
-        return logicOperator;
-    }
-
-    public void setLogicOperator(LogicOperator logicOperator) {
-        this.logicOperator = logicOperator;
-    }
 
     public String getLeftBracket() {
         return leftBracket;
@@ -169,12 +155,29 @@ public class WhereConditionNode {
         this.subExpression = subExpression;
     }
 
-    public boolean isOptional() {
-        return optional;
+    public boolean isNested() {
+        return subExpression != null;
     }
 
-    public void setOptional(boolean optional) {
-        this.optional = optional;
+    /**
+     * 普通条件节点本身即 {@link WhereConditionNode}（design D2 平面变体之一）。
+     */
+    @Override
+    public boolean isCondition() {
+        return true;
+    }
+
+    @Override
+    public WhereConditionNode asCondition() {
+        return this;
+    }
+
+    /**
+     * SQL 括号分组递归入口：嵌套时返回 [subExpression]，否则空（与现 7+ checker 的 isNested() 模式同构，design Q2/2.6）。
+     */
+    @Override
+    public List<WhereExpression> getChildExpressions() {
+        return subExpression != null ? Collections.singletonList(subExpression) : Collections.<WhereExpression>emptyList();
     }
 
     public Integer getConditionValue() {
@@ -215,9 +218,5 @@ public class WhereConditionNode {
 
     public void setIndex(int index) {
         this.index = index;
-    }
-
-    public boolean isNested() {
-        return subExpression != null;
     }
 }

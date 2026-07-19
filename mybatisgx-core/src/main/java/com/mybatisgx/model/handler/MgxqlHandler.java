@@ -198,7 +198,15 @@ public class MgxqlHandler {
             LOGGER.warn("{}.{}方法无查询条件，可能触发全表扫描", mapperInfo.getNamespace(), methodInfo.getMethodName());
             return;
         }
-        for (WhereConditionNode conditionNode : conditionExpression.getNodes()) {
+        for (WhereElement element : conditionExpression.getNodes()) {
+            // 动态门变体（Bracket/If/Choose/When）：递归进 body 继续绑定（与 subExpression 同构，design 2.6/D2）
+            if (!element.isCondition()) {
+                for (WhereExpression child : element.getChildExpressions()) {
+                    this.bindConditionParam(mapperInfo, methodInfo, child);
+                }
+                continue;
+            }
+            WhereConditionNode conditionNode = element.asCondition();
             WhereExpression subExpression = conditionNode.getSubExpression();
             if (subExpression != null) {
                 this.bindConditionParam(mapperInfo, methodInfo, subExpression);

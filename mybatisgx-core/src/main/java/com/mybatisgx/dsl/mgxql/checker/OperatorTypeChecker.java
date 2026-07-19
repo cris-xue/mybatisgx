@@ -1,6 +1,7 @@
 package com.mybatisgx.dsl.mgxql.checker;
 
 import com.mybatisgx.dsl.mgxql.model.ComparisonOperator;
+import com.mybatisgx.dsl.mgxql.model.WhereElement;
 import com.mybatisgx.dsl.mgxql.model.WhereExpression;
 import com.mybatisgx.dsl.mgxql.model.WhereConditionNode;
 import com.mybatisgx.dsl.mgxql.model.MgxqlStatement;
@@ -39,7 +40,14 @@ public class OperatorTypeChecker implements MgxqlSemanticChecker {
         if (expression == null || expression.getNodes() == null) {
             return;
         }
-        for (WhereConditionNode node : expression.getNodes()) {
+        for (WhereElement element : expression.getNodes()) {
+            if (!element.isCondition()) {
+                for (WhereExpression child : element.getChildExpressions()) {
+                    this.checkConditionExpression(child, context);
+                }
+                continue;
+            }
+            WhereConditionNode node = element.asCondition();
             if (node.isNested()) {
                 this.checkConditionExpression(node.getSubExpression(), context);
             } else if (node.getFieldName() != null && node.getOperator() != null) {

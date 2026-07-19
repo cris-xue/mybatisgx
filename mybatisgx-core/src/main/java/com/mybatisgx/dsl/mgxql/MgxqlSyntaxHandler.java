@@ -618,8 +618,13 @@ public class MgxqlSyntaxHandler {
         }
 
         private void parseConditionComparison(WhereConditionNode node, MgxqlParser.Condition_comparisonContext compCtx) {
-            // 解析 ? 前缀（可选条件）
-            node.setOptional(compCtx.question_mark() != null);
+            // ? 前缀可选条件已退役（design D3）：optional 字段移除，可选语义统一由 #[body]/#if(expr)[body] 在文法层表达。
+            // 注意：condition_comparison 的 question_mark? 仍在 MgxqlWhere.g4（待 P1 grammar 重构 task 3.6 移除），
+            // 此处不再消费它，避免与已移除的 optional 字段耦合。
+            if (compCtx.question_mark() != null) {
+                throw new MybatisgxException("mgxql 语法错误: '?' 可选条件前缀已退役，请改写为 #[%s ...] 或 #if(expr)[...] 形态",
+                        compCtx.field_reference().getText());
+            }
 
             // 解析左侧字段引用
             FieldReference fieldRef = parseFieldReference(compCtx.field_reference());

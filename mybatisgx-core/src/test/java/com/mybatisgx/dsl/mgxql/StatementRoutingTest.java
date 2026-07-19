@@ -40,7 +40,7 @@ public class StatementRoutingTest {
         WhereExpression rootExpr = mgxqlStatement.getWhereClause().getRootExpression();
         Assert.assertNotNull(rootExpr);
         Assert.assertFalse(rootExpr.getNodes().isEmpty());
-        WhereConditionNode node = rootExpr.getNodes().get(0);
+        WhereConditionNode node = rootExpr.getConditions().get(0);
         Assert.assertEquals("name", node.getFieldName());
     }
 
@@ -59,7 +59,7 @@ public class StatementRoutingTest {
         WhereExpression rootExpr = mgxqlStatement.getWhereClause().getRootExpression();
         Assert.assertNotNull(rootExpr);
         Assert.assertFalse(rootExpr.getNodes().isEmpty());
-        WhereConditionNode node = rootExpr.getNodes().get(0);
+        WhereConditionNode node = rootExpr.getConditions().get(0);
         Assert.assertEquals("name", node.getFieldName());
     }
 

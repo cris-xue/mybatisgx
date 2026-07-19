@@ -81,7 +81,7 @@ public class MgxqlBindingTest {
         if (expression == null || expression.getNodes() == null) {
             return null;
         }
-        for (WhereConditionNode node : expression.getNodes()) {
+        for (WhereConditionNode node : expression.getConditions()) {
             if (node.getSubExpression() != null) {
                 WhereConditionNode found = findConditionByOperator(node.getSubExpression(), targetOperator);
                 if (found != null) {

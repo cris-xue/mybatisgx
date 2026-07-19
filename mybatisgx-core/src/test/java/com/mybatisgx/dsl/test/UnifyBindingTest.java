@@ -101,7 +101,7 @@ public class UnifyBindingTest {
         if (expression == null || expression.getNodes() == null) {
             return null;
         }
-        for (WhereConditionNode node : expression.getNodes()) {
+        for (WhereConditionNode node : expression.getConditions()) {
             if (node.getSubExpression() != null) {
                 WhereConditionNode found = findConditionByField(node.getSubExpression(), fieldName);
                 if (found != null) {

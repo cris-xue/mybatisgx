@@ -296,7 +296,7 @@ public class MgxqlWhereTemplateHandlerTest {
     private WhereConditionNode buildSimpleCondition(String fieldName, String opStr, List<String> paramPath, boolean optional) {
         WhereConditionNode node = new WhereConditionNode();
         node.setFieldRef(new FieldReference(null, fieldName));
-        node.setOptional(optional);
+        // optional 已退役（design D3），参数保留以维测旧签名，不再消费
 
         ComparisonOperator operator = ComparisonOperator.EQ;
         if ("=".equals(opStr)) {
@@ -319,7 +319,6 @@ public class MgxqlWhereTemplateHandlerTest {
     private WhereConditionNode buildNullCondition(String fieldName, ComparisonOperator operator) {
         WhereConditionNode node = new WhereConditionNode();
         node.setFieldRef(new FieldReference(null, fieldName));
-        node.setOptional(false);
 
         BoundParam boundParam = new BoundParam(ParamKind.NULL_TYPE);
         boundParam.setOperator(operator);
@@ -335,7 +334,7 @@ public class MgxqlWhereTemplateHandlerTest {
     private WhereConditionNode buildLikeCondition(String fieldName, List<String> paramPath, ComparisonOperator operator, boolean optional) {
         WhereConditionNode node = new WhereConditionNode();
         node.setFieldRef(new FieldReference(null, fieldName));
-        node.setOptional(optional);
+        // optional 已退役（design D3），参数保留以维测旧签名，不再消费
 
         BoundParam boundParam = new BoundParam();
         boundParam.setOperator(operator);
@@ -360,7 +359,6 @@ public class MgxqlWhereTemplateHandlerTest {
         WhereExpression expression = new WhereExpression(LogicOperator.NULL);
         WhereConditionNode node = new WhereConditionNode();
         node.setFieldRef(new FieldReference("u", "name"));
-        node.setOptional(false);
         BoundParam boundParam = new BoundParam();
         boundParam.setOperator(ComparisonOperator.EQ);
         boundParam.setKind(ParamKind.SIMPLE);
@@ -387,7 +385,6 @@ public class MgxqlWhereTemplateHandlerTest {
         WhereExpression expression = new WhereExpression(LogicOperator.NULL);
         WhereConditionNode node = new WhereConditionNode();
         node.setFieldRef(new FieldReference("u", "name"));
-        node.setOptional(false);
         BoundParam boundParam = new BoundParam();
         boundParam.setOperator(ComparisonOperator.EQ);
         boundParam.setKind(ParamKind.SIMPLE);
@@ -429,7 +426,6 @@ public class MgxqlWhereTemplateHandlerTest {
         WhereExpression expression = new WhereExpression(LogicOperator.NULL);
         WhereConditionNode node = new WhereConditionNode();
         node.setFieldRef(new FieldReference("u", "id"));
-        node.setOptional(false);
         BoundParam boundParam = new BoundParam();
         boundParam.setOperator(ComparisonOperator.EQ);
         boundParam.setKind(ParamKind.COMPOSITE);

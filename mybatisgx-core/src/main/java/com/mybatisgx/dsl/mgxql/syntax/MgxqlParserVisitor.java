@@ -1,4 +1,4 @@
-// Generated from F:/owner_project/mybatisgx-ai_conding/mybatisgx/mybatisgx-core/src/main/resources/antlr/mgxql/MgxqlParser.g4 by ANTLR 4.13.2
+// Generated from F:/owner_project/mybatisgx-ai_coding/mybatisgx/mybatisgx-core/src/main/resources/antlr/mgxql/MgxqlParser.g4 by ANTLR 4.13.2
 package com.mybatisgx.dsl.mgxql.syntax;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
@@ -209,54 +209,6 @@ public interface MgxqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitOn_equal(MgxqlParser.On_equalContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MgxqlParser#where_clause}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitWhere_clause(MgxqlParser.Where_clauseContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link MgxqlParser#condition_or_expression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitCondition_or_expression(MgxqlParser.Condition_or_expressionContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link MgxqlParser#condition_and_expression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitCondition_and_expression(MgxqlParser.Condition_and_expressionContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link MgxqlParser#condition_term}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitCondition_term(MgxqlParser.Condition_termContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link MgxqlParser#condition_comparison}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitCondition_comparison(MgxqlParser.Condition_comparisonContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link MgxqlParser#condition_comparison_param}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitCondition_comparison_param(MgxqlParser.Condition_comparison_paramContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link MgxqlParser#condition_comparison_not_param}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitCondition_comparison_not_param(MgxqlParser.Condition_comparison_not_paramContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link MgxqlParser#condition_value}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitCondition_value(MgxqlParser.Condition_valueContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link MgxqlParser#group_by_clause}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -341,6 +293,198 @@ public interface MgxqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitSize(MgxqlParser.SizeContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#having}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitHaving(MgxqlParser.HavingContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#group_by}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitGroup_by(MgxqlParser.Group_byContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#order_by}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitOrder_by(MgxqlParser.Order_byContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#order_by_direction}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitOrder_by_direction(MgxqlParser.Order_by_directionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#end}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitEnd(MgxqlParser.EndContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#where_clause}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitWhere_clause(MgxqlParser.Where_clauseContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#where_sequence}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitWhere_sequence(MgxqlParser.Where_sequenceContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#where_item}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitWhere_item(MgxqlParser.Where_itemContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#where_atom}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitWhere_atom(MgxqlParser.Where_atomContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#bracket_group}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBracket_group(MgxqlParser.Bracket_groupContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#if_directive}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIf_directive(MgxqlParser.If_directiveContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#bracket_directive}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBracket_directive(MgxqlParser.Bracket_directiveContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#choose_directive}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitChoose_directive(MgxqlParser.Choose_directiveContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#when_directive}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitWhen_directive(MgxqlParser.When_directiveContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#otherwise_directive}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitOtherwise_directive(MgxqlParser.Otherwise_directiveContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#block_prefix}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBlock_prefix(MgxqlParser.Block_prefixContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#body_sequence}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBody_sequence(MgxqlParser.Body_sequenceContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#body_item}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBody_item(MgxqlParser.Body_itemContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#body_atom}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBody_atom(MgxqlParser.Body_atomContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#guard_or_expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitGuard_or_expression(MgxqlParser.Guard_or_expressionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#guard_and_expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitGuard_and_expression(MgxqlParser.Guard_and_expressionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#guard_term}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitGuard_term(MgxqlParser.Guard_termContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#guard_comparison}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitGuard_comparison(MgxqlParser.Guard_comparisonContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#guard_logic_or}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitGuard_logic_or(MgxqlParser.Guard_logic_orContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#guard_logic_and}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitGuard_logic_and(MgxqlParser.Guard_logic_andContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#guard_relational_op}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitGuard_relational_op(MgxqlParser.Guard_relational_opContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#guard_null_op}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitGuard_null_op(MgxqlParser.Guard_null_opContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#guard_operand}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitGuard_operand(MgxqlParser.Guard_operandContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#condition_comparison}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCondition_comparison(MgxqlParser.Condition_comparisonContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#condition_comparison_param}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCondition_comparison_param(MgxqlParser.Condition_comparison_paramContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#condition_comparison_not_param}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCondition_comparison_not_param(MgxqlParser.Condition_comparison_not_paramContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#condition_value}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCondition_value(MgxqlParser.Condition_valueContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link MgxqlParser#where_start}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -358,6 +502,18 @@ public interface MgxqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitLogic_or(MgxqlParser.Logic_orContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#left_square}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLeft_square(MgxqlParser.Left_squareContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#right_square}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitRight_square(MgxqlParser.Right_squareContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MgxqlParser#relational_op}.
 	 * @param ctx the parse tree
@@ -461,30 +617,6 @@ public interface MgxqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitComparison_op_is_not_null(MgxqlParser.Comparison_op_is_not_nullContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MgxqlParser#having}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitHaving(MgxqlParser.HavingContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link MgxqlParser#group_by}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitGroup_by(MgxqlParser.Group_byContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link MgxqlParser#order_by}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitOrder_by(MgxqlParser.Order_byContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link MgxqlParser#order_by_direction}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitOrder_by_direction(MgxqlParser.Order_by_directionContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link MgxqlParser#field_reference}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -556,10 +688,4 @@ public interface MgxqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitNumber(MgxqlParser.NumberContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link MgxqlParser#end}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitEnd(MgxqlParser.EndContext ctx);
 }

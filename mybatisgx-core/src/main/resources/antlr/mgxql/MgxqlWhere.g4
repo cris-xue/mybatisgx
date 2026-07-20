@@ -11,15 +11,59 @@ import MgxqlCommon ;
 // 条件语法   where name = :name and (age = :age or status = :status)
 // 条件语法   where #[name = :name] #[and age = :age or status = :status]
 // 条件语法   where #[name = :name] #if(status == 5)[and age = :age or status = :status]
-where_clause: where_start condition_or_expression ;
-// OR 运算符 (最低优先级)   分层处理条件表达式，明确运算符优先级
-condition_or_expression: condition_and_expression (logic_or condition_and_expression)* ;
-// AND 运算符 (较高优先级)
-condition_and_expression: condition_term (logic_and condition_term)* ;
-// 条件项：基础条件或括号表达式
-condition_term: condition_comparison | (left_bracket condition_or_expression right_bracket) ;
+// 条件语法   where id = :id #[and a = :a and b = :b]
+//
+// WHERE 文法形状：扁平序列（design Q7，2026-07-19 调整）。
+// 用户决策「门内 #[and...] 连接词在 [ 内首 token、门前可无显式 and」与原优先级嵌套文法不兼容，改扁平序列。
+// 每元素携自身 connector（NULL/AND/OR）；优先级靠显式括号分组 bracket_group 表达。
+where_clause: where_start where_sequence ;
+
+// 扁平序列：一个或多个 where_item，每项携可选前置连接词（design D9，task 3.5）。
+where_sequence: where_item+ ;
+where_item: (logic_and | logic_or)? where_atom ;
+
+// 序列原子：普通条件、括号分组、或动态门块（if/bracket/choose）。
+where_atom: condition_comparison | bracket_group | if_directive | bracket_directive | choose_directive ;
+
+// 括号分组：复用现有 WhereConditionNode.subExpression 载体（design Q2），承载优先级括号。
+bracket_group: left_bracket where_sequence right_bracket ;
+
+// #if(guard)[body] —— guard 走独立文法 guard_or_expression（design D8，不复用 condition_*，因算子 == 与 = 冲突）。
+// body 前置可选连接词（block_prefix）提升为该 if 块 logicOperator（design D9）。
+if_directive: HASH IF left_bracket guard_or_expression right_bracket left_square block_prefix? body_sequence right_square ;
+// #[body] —— auto-guard 收集归 mgxsql 消费阶段（design D5）。
+bracket_directive: HASH LEFT_SQUARE block_prefix? body_sequence RIGHT_SQUARE ;
+// #choose[#when(expr)[body]+ #otherwise[body]?]（design，task 5.1）
+choose_directive: HASH CHOOSE LEFT_SQUARE when_directive+ otherwise_directive? RIGHT_SQUARE ;
+when_directive: HASH WHEN left_bracket guard_or_expression right_bracket left_square block_prefix? body_sequence right_square ;
+otherwise_directive: HASH OTHERWISE LEFT_SQUARE body_sequence RIGHT_SQUARE ;
+
+// 块前置连接词：块与前一元素的连接词，提升为块 logicOperator（design D9）。
+block_prefix: logic_and | logic_or ;
+
+// 动态门 body：扁平条件序列（普通条件 + 括号分组），文法层禁止 body 内出现动态门（design D2 不支持嵌套）。
+// body_atom 不含 if/bracket/choose 指令分支，故 body 无法嵌套动态门（task 3.3）。
+body_sequence: body_item+ ;
+body_item: (logic_and | logic_or)? body_atom ;
+body_atom: condition_comparison | (left_bracket body_sequence right_bracket) ;
+
+// guard 独立递归文法（design D8）：等号用 ==（SHALL NOT 接受 =），逻辑连接 && / and 同义、|| / or 同义。
+// 算子 != / < / > / <= / >= / is null / is not null 复用现有 comparison token；左操作数收 field_reference 与 parameter_reference；右操作数收 parameter_reference / number / 字符串字面量。
+guard_or_expression: guard_and_expression (guard_logic_or guard_and_expression)* ;
+guard_and_expression: guard_term (guard_logic_and guard_term)* ;
+guard_term: guard_comparison | (left_bracket guard_or_expression right_bracket) ;
+// guard 比较：operand OP operand（关系）或 operand is [not] null。
+guard_comparison: guard_operand guard_relational_op guard_operand | guard_operand guard_null_op ;
+guard_logic_or: AND_AND | LOGIC_OR ;
+guard_logic_and: AND_AND | LOGIC_AND ;
+guard_relational_op: EQ_EQ | COMPARISON_OP_NOT_EQ | COMPARISON_OP_LT | COMPARISON_OP_LT_EQ | COMPARISON_OP_GT | COMPARISON_OP_GT_EQ ;
+guard_null_op: comparison_op_is_null | comparison_op_is_not_null ;
+// guard 左/右操作数：字段引用或参数引用（guard 可为 :id > 5 形式，design D11）；右值还收 number 与字符串字面量。
+guard_operand: field_reference | parameter_reference | number | STRING_LITERAL ;
+
 // 解析方法名和实体字段
-condition_comparison: question_mark? field_reference (condition_comparison_param | condition_comparison_not_param) ;
+// ? 前缀可选条件已退役（design D3）：移除 question_mark?，? 在条件前缀场景报语法错（task 3.6）。
+condition_comparison: field_reference (condition_comparison_param | condition_comparison_not_param) ;
 condition_comparison_param: (relational_op | matching_op) condition_value ;
 condition_comparison_not_param: comparison_op_null ;
 condition_value: parameter_reference | number ;
@@ -28,6 +72,9 @@ condition_value: parameter_reference | number ;
 where_start: WHERE ;
 logic_and: LOGIC_AND ;
 logic_or: LOGIC_OR ;
+// left_square/right_square 包装（动态门门用 [ ]），左括号 right_bracket 在 MgxqlCommon.g4 已定义
+left_square: LEFT_SQUARE ;
+right_square: RIGHT_SQUARE ;
 
 relational_op: comparison_op_lt
     | comparison_op_lt_eq

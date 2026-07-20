@@ -29,6 +29,17 @@ COMPARISON_OP_GT_EQ: '>=' ;
 EQUAL: '=' ;
 COMPARISON_OP_NOT_EQ: '!=' ;
 
+// guard（#if(expr)/#when(expr)）独立文法算子（design D8）：antlr 最长匹配优先，== 会优先于 =
+EQ_EQ: '==' ;
+AND_AND: '&&' ;
+OR_OR: '||' ;
+// 字符串字面量（guard 右值、未来表达式用）：单引号包裹，支持转义单引号 \'
+STRING_LITERAL: '\'' ('\\\'' | ~['\r\n])* '\'' ;
+
+// STRING_LITERAL: '\'' ( '\\'\''
+//                        | ~[\'\r\n]
+//                        )* '\'' ;
+
 COMPARISON_OP_NOT: 'not' ;
 COMPARISON_OP_BETWEEN: 'between' ;
 COMPARISON_OP_IN: 'in' ;

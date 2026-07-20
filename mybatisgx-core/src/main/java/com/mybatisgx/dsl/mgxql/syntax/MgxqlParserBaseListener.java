@@ -1169,25 +1169,85 @@ public class MgxqlParserBaseListener implements MgxqlParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterComparison_op_left_like(MgxqlParser.Comparison_op_left_likeContext ctx) { }
+	@Override public void enterMatching_value(MgxqlParser.Matching_valueContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitComparison_op_left_like(MgxqlParser.Comparison_op_left_likeContext ctx) { }
+	@Override public void exitMatching_value(MgxqlParser.Matching_valueContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterComparison_op_right_like(MgxqlParser.Comparison_op_right_likeContext ctx) { }
+	@Override public void enterLike_pattern(MgxqlParser.Like_patternContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitComparison_op_right_like(MgxqlParser.Comparison_op_right_likeContext ctx) { }
+	@Override public void exitLike_pattern(MgxqlParser.Like_patternContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterIn_collection(MgxqlParser.In_collectionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitIn_collection(MgxqlParser.In_collectionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterSimple_collection(MgxqlParser.Simple_collectionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSimple_collection(MgxqlParser.Simple_collectionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterComplex_collection(MgxqlParser.Complex_collectionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitComplex_collection(MgxqlParser.Complex_collectionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterValue_expr_list(MgxqlParser.Value_expr_listContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitValue_expr_list(MgxqlParser.Value_expr_listContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterItem_name(MgxqlParser.Item_nameContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitItem_name(MgxqlParser.Item_nameContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

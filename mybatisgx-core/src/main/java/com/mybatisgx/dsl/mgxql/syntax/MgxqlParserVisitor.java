@@ -587,17 +587,47 @@ public interface MgxqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitComparison_op_like(MgxqlParser.Comparison_op_likeContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MgxqlParser#comparison_op_left_like}.
+	 * Visit a parse tree produced by {@link MgxqlParser#matching_value}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitComparison_op_left_like(MgxqlParser.Comparison_op_left_likeContext ctx);
+	T visitMatching_value(MgxqlParser.Matching_valueContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MgxqlParser#comparison_op_right_like}.
+	 * Visit a parse tree produced by {@link MgxqlParser#like_pattern}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitComparison_op_right_like(MgxqlParser.Comparison_op_right_likeContext ctx);
+	T visitLike_pattern(MgxqlParser.Like_patternContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#in_collection}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIn_collection(MgxqlParser.In_collectionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#simple_collection}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSimple_collection(MgxqlParser.Simple_collectionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#complex_collection}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitComplex_collection(MgxqlParser.Complex_collectionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#value_expr_list}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitValue_expr_list(MgxqlParser.Value_expr_listContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#item_name}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitItem_name(MgxqlParser.Item_nameContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MgxqlParser#comparison_op_null}.
 	 * @param ctx the parse tree

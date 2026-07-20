@@ -35,7 +35,6 @@ AND_AND: '&&' ;
 OR_OR: '||' ;
 // 字符串字面量（guard 右值、未来表达式用）：单引号包裹，支持转义单引号 \'
 STRING_LITERAL: '\'' ('\\\'' | ~['\r\n])* '\'' ;
-
 // STRING_LITERAL: '\'' ( '\\'\''
 //                        | ~[\'\r\n]
 //                        )* '\'' ;
@@ -44,8 +43,7 @@ COMPARISON_OP_NOT: 'not' ;
 COMPARISON_OP_BETWEEN: 'between' ;
 COMPARISON_OP_IN: 'in' ;
 COMPARISON_OP_LIKE: 'like' ;
-COMPARISON_OP_LEFT_LIKE: 'left like' ;
-COMPARISON_OP_RIGHT_LIKE: 'right like' ;
+// left like / right like 已退役（design，LIKE 改字面量 %:name%）：模糊匹配由 like 后字面量右值表达，不再用算子名
 
 COMPARISON_OP_IS_NULL: 'is null' ;
 COMPARISON_OP_IS_NOT_NULL: 'is not null' ;
@@ -63,7 +61,7 @@ RIGHT_BRACKET: ')' ;
 COMMA: ',' ;
 COLON: ':' ;
 DOT: '.' ;
-QUESTION_MARK: '?' ;
+// QUESTION_MARK: '?' ;
 
 // 动态门（mgxsql 子集）标点 token：常量置正则之上（遵循"常量在正则上面"的解析顺序约束）
 HASH: '#' ;

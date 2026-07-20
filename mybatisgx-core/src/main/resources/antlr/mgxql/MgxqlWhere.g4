@@ -64,7 +64,7 @@ guard_operand: field_reference | parameter_reference | number | STRING_LITERAL ;
 // 解析方法名和实体字段
 // ? 前缀可选条件已退役（design D3）：移除 question_mark?，? 在条件前缀场景报语法错（task 3.6）。
 condition_comparison: field_reference (condition_comparison_param | condition_comparison_not_param) ;
-condition_comparison_param: (relational_op | matching_op) condition_value ;
+condition_comparison_param: relational_op condition_value | matching_op matching_value ;
 condition_comparison_not_param: comparison_op_null ;
 condition_value: parameter_reference | number ;
 
@@ -90,19 +90,27 @@ comparison_op_gt_eq: COMPARISON_OP_GT_EQ ;
 comparison_op_eq: EQUAL ;
 comparison_op_not_eq: COMPARISON_OP_NOT_EQ ;
 
-matching_op: comparison_op_not? (
-    comparison_op_between
-    | comparison_op_in
-    | comparison_op_like
-    | comparison_op_left_like
-    | comparison_op_right_like
-    );
+matching_op: comparison_op_not? (comparison_op_between | comparison_op_in | comparison_op_like) ;
 comparison_op_not: COMPARISON_OP_NOT ;
 comparison_op_between: COMPARISON_OP_BETWEEN ;
 comparison_op_in: COMPARISON_OP_IN ;
 comparison_op_like: COMPARISON_OP_LIKE ;
-comparison_op_left_like: COMPARISON_OP_LEFT_LIKE ;
-comparison_op_right_like: COMPARISON_OP_RIGHT_LIKE ;
+// left like / right like 已退役（LIKE 改字面量 %:name%）
+
+// matching 右值（LIKE 模式 / IN 集合 / 裸参数），与 relational_op 的 condition_value 分离（避免 %:name 与 :name 歧义、按算子收不同右值）。
+// 顺序：in_collection（LEFT_BRACKET 开头，distinct）→ like_pattern（含 PERCENT，distinct）→ parameter_reference（裸参 :name）。
+matching_value: in_collection | like_pattern | parameter_reference ;
+// LIKE 模式：%:name / :name% / %:name% 及多 % 变体。以 PERCENT 开头或 parameter_reference 后跟 PERCENT（至少一个 %）。
+// 为消除与裸 parameter_reference 的歧义，显式三态（前 %、后 %、前后 %），ANTLR4 按 matching_value 分支顺序与前瞻完整匹配择优。
+like_pattern: PERCENT+ parameter_reference | parameter_reference PERCENT+ | PERCENT+ parameter_reference PERCENT+ ;
+// IN 集合：简单 (:idList) 或复杂 (item:objectList)=>[item.id, item.name]（design D6，对齐 mgxsql ForeachUnit）。
+in_collection: simple_collection | complex_collection ;
+simple_collection: left_bracket parameter_reference right_bracket ;
+complex_collection: left_bracket item_name param_colon parameter_reference right_bracket ARROW left_square value_expr_list right_square ;
+// 复杂 IN 迭代值表达式字段列表：单字段 [item.id] 或多字段 [item.id, item.name]（多字段 → mgxsql tuple foreach）。
+value_expr_list: field_name (dot field_name)* ;
+// item_name（迭代变量名）为小写标识符
+item_name: LOWER_NAME ;
 
 comparison_op_null: comparison_op_is_null | comparison_op_is_not_null ;
 comparison_op_is_null: COMPARISON_OP_IS_NULL ;

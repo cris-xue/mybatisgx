@@ -52,8 +52,7 @@ public class MgxqlSyntaxHandler {
         // 匹配运算符
         MGXQL_OPERATOR_MAP.put("in", ComparisonOperator.IN);
         MGXQL_OPERATOR_MAP.put("like", ComparisonOperator.LIKE);
-        MGXQL_OPERATOR_MAP.put("left like", ComparisonOperator.STARTING_WITH);
-        MGXQL_OPERATOR_MAP.put("right like", ComparisonOperator.ENDING_WITH);
+        // left like / right like 算子名已退役（LIKE 改字面量 %:name% / :name% / %:name，design task 3.x）：模糊方向由 like_pattern 的 PERCENT 位置驱动（parseMatchingValue 设 STARTING_WITH/ENDING_WITH/LIKE）
         MGXQL_OPERATOR_MAP.put("between", ComparisonOperator.BETWEEN);
         MGXQL_OPERATOR_MAP.put("not", ComparisonOperator.NOT);
         // NULL运算符
@@ -546,97 +545,246 @@ public class MgxqlSyntaxHandler {
         }
 
         @Override
-        public WhereExpression visitCondition_or_expression(MgxqlParser.Condition_or_expressionContext ctx) {
-            LOGGER.debug("处理mgxql条件表达式: {}", ctx.getText());
-            WhereExpression expression = new WhereExpression(LogicOperator.NULL);
-            LogicOperator currentOrOp = null;
+        public WhereExpression visitWhere_clause(MgxqlParser.Where_clauseContext ctx) {
+            LOGGER.debug("处理mgxql where条件: {}", ctx.getText());
+            return buildSequence(ctx.where_sequence());
+        }
 
-            for (int i = 0; i < ctx.getChildCount(); i++) {
-                ParseTree child = ctx.getChild(i);
-                if (child instanceof MgxqlParser.Logic_orContext) {
-                    currentOrOp = LogicOperator.OR;
-                    expression.setLogicOperator(LogicOperator.OR);
-                }
-                if (child instanceof MgxqlParser.Condition_and_expressionContext) {
-                    List<WhereConditionNode> andNodes = parseAndExpression((MgxqlParser.Condition_and_expressionContext) child);
-                    if (currentOrOp != null && !expression.getNodes().isEmpty()) {
-                        for (WhereConditionNode node : andNodes) {
-                            node.setLogicOperator(currentOrOp);
-                            expression.addNode(node);
-                        }
-                        currentOrOp = null;
-                    } else {
-                        for (WhereConditionNode node : andNodes) {
-                            expression.addNode(node);
-                        }
-                    }
-                }
+        /**
+         * 构建扁平 WhereElement 序列（design Q7）：遍历 where_item，每项取前置 connector（NULL/AND/OR）+ atom 分派。
+         */
+        private WhereExpression buildSequence(MgxqlParser.Where_sequenceContext seqCtx) {
+            WhereExpression expression = new WhereExpression(LogicOperator.NULL);
+            for (MgxqlParser.Where_itemContext itemCtx : seqCtx.where_item()) {
+                LogicOperator connector = readConnector(itemCtx.logic_and(), itemCtx.logic_or());
+                WhereElement element = buildAtom(itemCtx.where_atom());
+                element.setLogicOperator(connector);
+                expression.addNode(element);
             }
             return expression;
         }
 
-        private List<WhereConditionNode> parseAndExpression(MgxqlParser.Condition_and_expressionContext andExprCtx) {
-            List<WhereConditionNode> nodes = new ArrayList<>();
-            LogicOperator currentAndOp = null;
-
-            for (int i = 0; i < andExprCtx.getChildCount(); i++) {
-                ParseTree child = andExprCtx.getChild(i);
-                if (child instanceof MgxqlParser.Logic_andContext) {
-                    currentAndOp = LogicOperator.AND;
-                }
-                if (child instanceof MgxqlParser.Condition_termContext) {
-                    MgxqlParser.Condition_termContext termCtx = (MgxqlParser.Condition_termContext) child;
-                    WhereConditionNode node = parseConditionTerm(termCtx);
-                    if (currentAndOp != null) {
-                        node.setLogicOperator(currentAndOp);
-                        currentAndOp = null;
-                    }
-                    nodes.add(node);
-                }
-            }
-            return nodes;
-        }
-
-        private WhereConditionNode parseConditionTerm(MgxqlParser.Condition_termContext termCtx) {
-            WhereConditionNode node = new WhereConditionNode();
-
-            // 检查是否是括号表达式
-            MgxqlParser.Condition_or_expressionContext subExprCtx = termCtx.condition_or_expression();
-            if (subExprCtx != null) {
-                node.setLeftBracket("(");
-                node.setRightBracket(")");
-                node.setSubExpression(this.visitCondition_or_expression(subExprCtx));
+        /**
+         * 序列原子分派：普通条件 / 括号分组 / 动态门块（if/bracket/choose）。
+         */
+        private WhereElement buildAtom(MgxqlParser.Where_atomContext atomCtx) {
+            // 普通条件
+            MgxqlParser.Condition_comparisonContext compCtx = atomCtx.condition_comparison();
+            if (compCtx != null) {
+                WhereConditionNode node = new WhereConditionNode();
+                parseConditionComparison(node, compCtx);
                 return node;
             }
+            // 括号分组（复用 WhereConditionNode.subExpression，design Q2）
+            MgxqlParser.Bracket_groupContext groupCtx = atomCtx.bracket_group();
+            if (groupCtx != null) {
+                WhereConditionNode node = new WhereConditionNode();
+                node.setLeftBracket("(");
+                node.setRightBracket(")");
+                node.setSubExpression(buildSequence(groupCtx.where_sequence()));
+                return node;
+            }
+            // 动态门块
+            if (atomCtx.if_directive() != null) {
+                return buildIfDirective(atomCtx.if_directive());
+            }
+            if (atomCtx.bracket_directive() != null) {
+                return buildBracketDirective(atomCtx.bracket_directive());
+            }
+            if (atomCtx.choose_directive() != null) {
+                return buildChooseDirective(atomCtx.choose_directive());
+            }
+            throw new MybatisgxException("mgxql 语法错误: 无法识别的 WHERE 原子 %s", atomCtx.getText());
+        }
 
-            // 基础条件：condition_comparison
-            MgxqlParser.Condition_comparisonContext compCtx = termCtx.condition_comparison();
-            if (compCtx != null) {
-                parseConditionComparison(node, compCtx);
+        private IfDirectiveNode buildIfDirective(MgxqlParser.If_directiveContext ctx) {
+            IfDirectiveNode node = new IfDirectiveNode();
+            node.setGuard(buildGuard(ctx.guard_or_expression()));
+            node.setBody(buildBodySequence(ctx.body_sequence()));
+            node.setLogicOperator(readConnector(ctx.block_prefix() != null ? ctx.block_prefix().logic_and() : null,
+                    ctx.block_prefix() != null ? ctx.block_prefix().logic_or() : null));
+            return node;
+        }
+
+        private BracketDirectiveNode buildBracketDirective(MgxqlParser.Bracket_directiveContext ctx) {
+            BracketDirectiveNode node = new BracketDirectiveNode();
+            node.setBody(buildBodySequence(ctx.body_sequence()));
+            MgxqlParser.Block_prefixContext prefix = ctx.block_prefix();
+            node.setLogicOperator(readConnector(prefix != null ? prefix.logic_and() : null,
+                    prefix != null ? prefix.logic_or() : null));
+            return node;
+        }
+
+        private ChooseNode buildChooseDirective(MgxqlParser.Choose_directiveContext ctx) {
+            ChooseNode node = new ChooseNode();
+            List<WhenNode> whens = new ArrayList<>();
+            for (MgxqlParser.When_directiveContext whenCtx : ctx.when_directive()) {
+                WhenNode when = new WhenNode();
+                when.setGuard(buildGuard(whenCtx.guard_or_expression()));
+                when.setBody(buildBodySequence(whenCtx.body_sequence()));
+                when.setLogicOperator(readConnector(whenCtx.block_prefix() != null ? whenCtx.block_prefix().logic_and() : null,
+                        whenCtx.block_prefix() != null ? whenCtx.block_prefix().logic_or() : null));
+                whens.add(when);
+            }
+            node.setWhens(whens);
+            if (ctx.otherwise_directive() != null) {
+                WhereExpression otherwise = new WhereExpression(LogicOperator.NULL);
+                MgxqlParser.Body_sequenceContext bodyCtx = ctx.otherwise_directive().body_sequence();
+                if (bodyCtx != null) {
+                    otherwise = buildBodySequence(bodyCtx);
+                }
+                node.setOtherwise(otherwise);
             }
             return node;
         }
 
-        private void parseConditionComparison(WhereConditionNode node, MgxqlParser.Condition_comparisonContext compCtx) {
-            // ? 前缀可选条件已退役（design D3）：optional 字段移除，可选语义统一由 #[body]/#if(expr)[body] 在文法层表达。
-            // 注意：condition_comparison 的 question_mark? 仍在 MgxqlWhere.g4（待 P1 grammar 重构 task 3.6 移除），
-            // 此处不再消费它，避免与已移除的 optional 字段耦合。
-            if (compCtx.question_mark() != null) {
-                throw new MybatisgxException("mgxql 语法错误: '?' 可选条件前缀已退役，请改写为 #[%s ...] 或 #if(expr)[...] 形态",
-                        compCtx.field_reference().getText());
+        /**
+         * body 序列（design D2 平面、禁嵌套动态门）：body_atom 只含普通条件 + 括号分组。
+         */
+        private WhereExpression buildBodySequence(MgxqlParser.Body_sequenceContext seqCtx) {
+            WhereExpression expression = new WhereExpression(LogicOperator.NULL);
+            for (MgxqlParser.Body_itemContext itemCtx : seqCtx.body_item()) {
+                LogicOperator connector = readConnector(itemCtx.logic_and(), itemCtx.logic_or());
+                WhereElement element = buildBodyAtom(itemCtx.body_atom());
+                element.setLogicOperator(connector);
+                expression.addNode(element);
             }
+            return expression;
+        }
 
+        private WhereElement buildBodyAtom(MgxqlParser.Body_atomContext atomCtx) {
+            MgxqlParser.Condition_comparisonContext compCtx = atomCtx.condition_comparison();
+            if (compCtx != null) {
+                WhereConditionNode node = new WhereConditionNode();
+                parseConditionComparison(node, compCtx);
+                return node;
+            }
+            // body 内括号分组（body_atom 的 left_bracket/body_sequence/right_bracket）
+            if (atomCtx.body_sequence() != null) {
+                WhereConditionNode node = new WhereConditionNode();
+                node.setLeftBracket("(");
+                node.setRightBracket(")");
+                node.setSubExpression(buildBodySequence(atomCtx.body_sequence()));
+                return node;
+            }
+            throw new MybatisgxException("mgxql 语法错误: 无法识别的动态门 body 原子 %s", atomCtx.getText());
+        }
+
+        /**
+         * guard 独立文法序列化回字符串（design D8）：保留 ==，逻辑连接规范化为 && / ||（and→&&、or→||）。
+         * guard 不做参数校验，仅按结构文本化。
+         */
+        private String buildGuard(MgxqlParser.Guard_or_expressionContext ctx) {
+            return buildGuardOr(ctx);
+        }
+
+        private String buildGuardOr(MgxqlParser.Guard_or_expressionContext ctx) {
+            List<MgxqlParser.Guard_and_expressionContext> ands = ctx.guard_and_expression();
+            List<MgxqlParser.Guard_logic_orContext> ors = ctx.guard_logic_or();
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < ands.size(); i++) {
+                if (i > 0) {
+                    sb.append(" ").append(normalizeLogicOr(ors.get(i - 1))).append(" ");
+                }
+                sb.append(buildGuardAnd(ands.get(i)));
+            }
+            return sb.toString();
+        }
+
+        private String buildGuardAnd(MgxqlParser.Guard_and_expressionContext ctx) {
+            List<MgxqlParser.Guard_termContext> terms = ctx.guard_term();
+            List<MgxqlParser.Guard_logic_andContext> ands = ctx.guard_logic_and();
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < terms.size(); i++) {
+                if (i > 0) {
+                    sb.append(" ").append(normalizeLogicAnd(ands.get(i - 1))).append(" ");
+                }
+                sb.append(buildGuardTerm(terms.get(i)));
+            }
+            return sb.toString();
+        }
+
+        private String buildGuardTerm(MgxqlParser.Guard_termContext ctx) {
+            MgxqlParser.Guard_or_expressionContext sub = ctx.guard_or_expression();
+            if (sub != null) {
+                return "(" + buildGuardOr(sub) + ")";
+            }
+            return buildGuardComparison(ctx.guard_comparison());
+        }
+
+        private String buildGuardComparison(MgxqlParser.Guard_comparisonContext ctx) {
+            List<MgxqlParser.Guard_operandContext> operands = ctx.guard_operand();
+            MgxqlParser.Guard_relational_opContext rel = ctx.guard_relational_op();
+            MgxqlParser.Guard_null_opContext nullOp = ctx.guard_null_op();
+            StringBuilder sb = new StringBuilder();
+            if (rel != null && operands.size() >= 2) {
+                sb.append(buildGuardOperand(operands.get(0))).append(" ")
+                        .append(rel.getText()).append(" ")
+                        .append(buildGuardOperand(operands.get(1)));
+            } else if (nullOp != null && !operands.isEmpty()) {
+                sb.append(buildGuardOperand(operands.get(0))).append(" ").append(nullOp.getText());
+            } else if (!operands.isEmpty()) {
+                sb.append(buildGuardOperand(operands.get(0)));
+            }
+            return sb.toString();
+        }
+
+        private String buildGuardOperand(MgxqlParser.Guard_operandContext ctx) {
+            if (ctx.field_reference() != null) {
+                return ctx.field_reference().getText();
+            }
+            if (ctx.parameter_reference() != null) {
+                return ctx.parameter_reference().getText();
+            }
+            if (ctx.number() != null) {
+                return ctx.number().getText();
+            }
+            if (ctx.STRING_LITERAL() != null) {
+                return ctx.STRING_LITERAL().getText();
+            }
+            return ctx.getText();
+        }
+
+        // guard 逻辑连接规范化（design D8）：guard_logic_or（|| / or）→ ||，guard_logic_and（&& / and）→ &&
+        private String normalizeLogicOr(MgxqlParser.Guard_logic_orContext ctx) {
+            return "||";
+        }
+
+        private String normalizeLogicAnd(MgxqlParser.Guard_logic_andContext ctx) {
+            return "&&";
+        }
+
+        private LogicOperator readConnector(MgxqlParser.Logic_andContext andCtx, MgxqlParser.Logic_orContext orCtx) {
+            if (orCtx != null) {
+                return LogicOperator.OR;
+            }
+            if (andCtx != null) {
+                return LogicOperator.AND;
+            }
+            return LogicOperator.NULL;
+        }
+
+        private void parseConditionComparison(WhereConditionNode node, MgxqlParser.Condition_comparisonContext compCtx) {
+            // ? 前缀可选条件已退役（design D3）：condition_comparison 不再含 question_mark，optional 字段已移除。
             // 解析左侧字段引用
             FieldReference fieldRef = parseFieldReference(compCtx.field_reference());
             node.setFieldRef(fieldRef);
 
-            // 解析运算符和参数
+            // 解析运算符和右值
             MgxqlParser.Condition_comparison_paramContext paramCtx = compCtx.condition_comparison_param();
             if (paramCtx != null) {
-                // 关系运算符或匹配运算符
+                // 关系运算符：relational_op condition_value
                 if (paramCtx.relational_op() != null) {
                     node.setOperator(MGXQL_OPERATOR_MAP.get(paramCtx.relational_op().getText()));
+                    MgxqlParser.Condition_valueContext condValueCtx = paramCtx.condition_value();
+                    if (condValueCtx.parameter_reference() != null) {
+                        node.setParamValuePath(parseParameterReference(condValueCtx.parameter_reference()));
+                        node.setIndex(conditionIndex.getAndIncrement());
+                    } else if (condValueCtx.number() != null) {
+                        node.setConditionValue(Integer.parseInt(condValueCtx.number().getText()));
+                    }
                 }
+                // 匹配运算符：matching_op matching_value（LIKE 模式 / IN 集合 / 裸参）
                 if (paramCtx.matching_op() != null) {
                     MgxqlParser.Matching_opContext matchingOp = paramCtx.matching_op();
                     if (matchingOp.comparison_op_not() != null) {
@@ -647,14 +795,7 @@ public class MgxqlSyntaxHandler {
                         token = token.substring(3).trim();
                     }
                     node.setOperator(MGXQL_OPERATOR_MAP.get(token));
-                }
-                // 解析右侧条件值
-                MgxqlParser.Condition_valueContext condValueCtx = paramCtx.condition_value();
-                if (condValueCtx.parameter_reference() != null) {
-                    node.setParamValuePath(parseParameterReference(condValueCtx.parameter_reference()));
-                    node.setIndex(conditionIndex.getAndIncrement());
-                } else if (condValueCtx.number() != null) {
-                    node.setConditionValue(Integer.parseInt(condValueCtx.number().getText()));
+                    parseMatchingValue(node, paramCtx.matching_value());
                 }
             }
 
@@ -663,6 +804,50 @@ public class MgxqlSyntaxHandler {
             if (notParamCtx != null) {
                 MgxqlParser.Comparison_op_nullContext nullOpCtx = notParamCtx.comparison_op_null();
                 node.setOperator(MGXQL_OPERATOR_MAP.get(nullOpCtx.getText()));
+            }
+        }
+
+        /**
+         * matching 右值消费（LIKE 模式 / IN 集合 / 裸参）。LIKE 模式按 PERCENT 位置设算子语义，IN 集合记 CollectionInfo（design D6）。
+         */
+        private void parseMatchingValue(WhereConditionNode node, MgxqlParser.Matching_valueContext ctx) {
+            // 裸参数（name like :name）：直接记 paramValuePath
+            if (ctx.parameter_reference() != null) {
+                node.setParamValuePath(parseParameterReference(ctx.parameter_reference()));
+                node.setIndex(conditionIndex.getAndIncrement());
+                return;
+            }
+            // LIKE 模式（%:name / :name% / %:name%）：按 PERCENT 位置设算子（ENDING_WITH 前模糊 / STARTING_WITH 后模糊 / LIKE 全模糊）
+            if (ctx.like_pattern() != null) {
+                MgxqlParser.Like_patternContext likeCtx = ctx.like_pattern();
+                node.setParamValuePath(parseParameterReference(likeCtx.parameter_reference()));
+                node.setIndex(conditionIndex.getAndIncrement());
+                int percentCount = likeCtx.PERCENT().size();
+                String likeText = likeCtx.getText();
+                boolean startsWithPercent = likeText.startsWith("%");
+                boolean endsWithPercent = likeText.endsWith("%");
+                if (percentCount == 1 && startsWithPercent) {
+                    node.setOperator(ComparisonOperator.ENDING_WITH);
+                } else if (percentCount == 1 && endsWithPercent) {
+                    node.setOperator(ComparisonOperator.STARTING_WITH);
+                } else {
+                    node.setOperator(ComparisonOperator.LIKE);
+                }
+                return;
+            }
+            // IN 集合：简单 (:idList) 或复杂 (item:coll)=>[f1, f2]（CollectionInfo 三字段填充，design D6，task 5.2）
+            if (ctx.in_collection() != null) {
+                MgxqlParser.In_collectionContext inCtx = ctx.in_collection();
+                if (inCtx.simple_collection() != null) {
+                    node.setParamValuePath(parseParameterReference(inCtx.simple_collection().parameter_reference()));
+                    node.setIndex(conditionIndex.getAndIncrement());
+                    // 简单集合 CollectionInfo 填充留给 task 5.2（itemName=item, valueExpr=#{item}）
+                } else if (inCtx.complex_collection() != null) {
+                    MgxqlParser.Complex_collectionContext complex = inCtx.complex_collection();
+                    node.setParamValuePath(parseParameterReference(complex.parameter_reference()));
+                    node.setIndex(conditionIndex.getAndIncrement());
+                    // 复杂集合 itemName/valueExpr 填充留给 task 5.2/5.3
+                }
             }
         }
 

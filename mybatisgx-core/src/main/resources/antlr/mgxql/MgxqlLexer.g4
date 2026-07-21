@@ -61,7 +61,7 @@ RIGHT_BRACKET: ')' ;
 COMMA: ',' ;
 COLON: ':' ;
 DOT: '.' ;
-// QUESTION_MARK: '?' ;
+QUESTION_MARK: '?' ;
 
 // 动态门（mgxsql 子集）标点 token：常量置正则之上（遵循"常量在正则上面"的解析顺序约束）
 HASH: '#' ;

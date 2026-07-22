@@ -961,7 +961,7 @@ public class MgxsqlScannerTest {
         String input = "select * from t_user where age < 18";
         String output = this.scanner.process(input);
         Assert.assertTrue("应包含 <where>", output.contains("<where>"));
-        Assert.assertTrue("age < 18 应原样输出", output.contains("age < 18"));
+        Assert.assertTrue("age < 18 应转义为 &lt;", output.contains("age &lt; 18"));
     }
 
     @Test
@@ -970,7 +970,7 @@ public class MgxsqlScannerTest {
         String input = "select * from t_user where age < :minAge";
         String output = this.scanner.process(input);
         Assert.assertTrue("应包含 <where>", output.contains("<where>"));
-        Assert.assertTrue("age < 应原样输出", output.contains("age <"));
+        Assert.assertTrue("age < 应转义为 &lt;", output.contains("age &lt;"));
         Assert.assertTrue(":minAge 应转为 #{minAge}", output.contains("#{minAge}"));
     }
 
@@ -980,7 +980,7 @@ public class MgxsqlScannerTest {
         String input = "select * from t_user where[score < 100] order by id";
         String output = this.scanner.process(input);
         Assert.assertTrue("应包含 <where>", output.contains("<where>"));
-        Assert.assertTrue("score < 100 应原样输出", output.contains("score < 100"));
+        Assert.assertTrue("score < 100 应转义为 &lt;", output.contains("score &lt; 100"));
     }
 
     @Test
@@ -1006,17 +1006,17 @@ public class MgxsqlScannerTest {
         // WHERE 域中混合 SQL 比较和 XML 标签
         String input = "select * from t_user where age < :maxAge and <if test=\"id != null\">id = #{id}</if>";
         String output = this.scanner.process(input);
-        Assert.assertTrue("age < 应原样输出", output.contains("age <"));
+        Assert.assertTrue("age < 应转义为 &lt;", output.contains("age &lt;"));
         Assert.assertTrue(":maxAge 应转为 #{maxAge}", output.contains("#{maxAge}"));
         Assert.assertTrue("XML if 标签应原样保留", output.contains("<if test=\"id != null\">"));
     }
 
     @Test
     public void test108_sqlLessThanNoSpace() {
-        // age<18 无空格紧贴，< 后跟数字，原样输出
+        // age<18 无空格紧贴，< 后跟数字，应转义为 &lt;
         String input = "select * from t_user where age<18";
         String output = this.scanner.process(input);
-        Assert.assertTrue("age<18 应原样输出", output.contains("age<18"));
+        Assert.assertTrue("age<18 应转义为 &lt;", output.contains("age&lt;18"));
     }
 
     @Test
@@ -1466,5 +1466,65 @@ public class MgxsqlScannerTest {
     public void test159_bindDuplicateName() {
         // #bind 名字重复
         this.scanner.process("select * from t where #bind[a = :x] #bind[a = :y]");
+    }
+
+    // ==================== v7 新增：SCOPE 域 < > & XML 转义（mgxsql-passthrough-text-split） ====================
+
+    @Test
+    public void test160_scopeGreaterThanEscape() {
+        // WHERE_BOUNDED 域 score > 100，> 应转义为 &gt;
+        String input = "select * from t_user where[score > 100] order by id";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("应包含 <where>", output.contains("<where>"));
+        Assert.assertTrue("score > 100 应转义为 &gt;", output.contains("score &gt; 100"));
+    }
+
+    @Test
+    public void test161_scopeGreaterThanOrEqualEscape() {
+        // WHERE_BOUNDED 域 score >= 60，>= 应转义为 &gt;=
+        String input = "select * from t_user where[score >= 60] order by id";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("score >= 60 应转义为 &gt;=", output.contains("score &gt;= 60"));
+    }
+
+    @Test
+    public void test162_scopeLessThanOrEqualEscape() {
+        // 用户原始 bug 场景：id <= :id，<= 应转义为 &lt;=
+        String input = "select * from simple_oto_user_simple AS s where[s.id <= :id]";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("id <= :id 应转义为 &lt;=", output.contains("id &lt;= #{id}"));
+    }
+
+    @Test
+    public void test163_scopeNotEqualEscape() {
+        // WHERE_BOUNDED 域 id <> :other，<> 应转义为 &lt;&gt;
+        String input = "select * from t_user where[id <> :other] order by id";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("id <> :other 应转义为 &lt;&gt;", output.contains("id &lt;&gt; #{other}"));
+    }
+
+    @Test
+    public void test164_scopeStringLiteralAmpersandEscape() {
+        // 字符串字面量内的 & 应转义为 &amp;（XML round-trip 正确，修复 'Tom & Jerry' 场景）
+        String input = "select * from t_user where[name = 'Tom & Jerry']";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("字符串内 & 应转义为 &amp;", output.contains("'Tom &amp; Jerry'"));
+    }
+
+    @Test
+    public void test165_ampersandEscapedBeforeLt() {
+        // & 必须先于 < 转义，避免 &lt; 中的 & 被二次转义为 &amp;lt;
+        String input = "select * from t_user where[a & b < c]";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("应输出 a &amp; b &lt; c", output.contains("a &amp; b &lt; c"));
+        Assert.assertFalse("不应出现 &amp;lt; 双转义", output.contains("&amp;lt;"));
+    }
+
+    @Test
+    public void test166_conditionBodyStringLiteralEscape() {
+        // 条件节点块 body 内字符串字面量的 < 与 & 同样转义（SqlText 统一转义，覆盖 condition-body）
+        String input = "select * from t_user where #[name = 'a < b & c']";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("条件体内字符串 < & 应转义: " + output, output.contains("name = 'a &lt; b &amp; c'"));
     }
 }

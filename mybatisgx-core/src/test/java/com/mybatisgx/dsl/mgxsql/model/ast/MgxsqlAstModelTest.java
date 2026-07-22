@@ -22,14 +22,14 @@ public class MgxsqlAstModelTest {
     public void test01_whereScopeWithIfAndForeach() {
         // 对应：where #[name = :name] and id in :idList
         IfUnit ifUnit = new IfUnit(null, 0, 1, 1);
-        ifUnit.getBody().add(new PassthroughText("name = ", 0, 1, 1));
+        ifUnit.getBody().add(new SqlText("name = ", 0, 1, 1));
         ifUnit.getBody().add(new ParamExpr("name", 0, 1, 1));
 
         ForeachUnit foreach = new ForeachUnit("item", "idList", "#{item}", 0, 1, 1);
 
         WhereScope where = new WhereScope(false, 0, 1, 1);
         where.getChildren().add(ifUnit);
-        where.getChildren().add(new PassthroughText(" and id in ", 0, 1, 1));
+        where.getChildren().add(new SqlText(" and id in ", 0, 1, 1));
         where.getChildren().add(foreach);
 
         // 层级分类：WhereScope(Scope) -> IfUnit/ForeachUnit(Unit) -> ParamExpr(Expression)
@@ -49,7 +49,7 @@ public class MgxsqlAstModelTest {
     public void test02_nestedIfChooseAndCustomGuard() {
         // #if(type == 1)[#[and category = :category]]
         IfUnit inner = new IfUnit(null, 0, 1, 1);
-        inner.getBody().add(new PassthroughText("and category = ", 0, 1, 1));
+        inner.getBody().add(new SqlText("and category = ", 0, 1, 1));
         inner.getBody().add(new ParamExpr("category", 0, 1, 1));
 
         IfUnit outer = new IfUnit("type == 1", 0, 1, 1);
@@ -62,13 +62,13 @@ public class MgxsqlAstModelTest {
 
         // #choose[#when(type=='vip')[salary > :min] #otherwise[status = :status]]
         WhenUnit when = new WhenUnit("type == 'vip'", 0, 1, 1);
-        when.getBody().add(new PassthroughText("salary > ", 0, 1, 1));
+        when.getBody().add(new SqlText("salary > ", 0, 1, 1));
         when.getBody().add(new ParamExpr("min", 0, 1, 1));
 
         ChooseUnit choose = new ChooseUnit(0, 1, 1);
         choose.getWhens().add(when);
         OtherwiseUnit otherwise = new OtherwiseUnit(0, 1, 1);
-        otherwise.getBody().add(new PassthroughText("status = ", 0, 1, 1));
+        otherwise.getBody().add(new SqlText("status = ", 0, 1, 1));
         otherwise.getBody().add(new ParamExpr("status", 0, 1, 1));
         choose.setOtherwise(otherwise);
 

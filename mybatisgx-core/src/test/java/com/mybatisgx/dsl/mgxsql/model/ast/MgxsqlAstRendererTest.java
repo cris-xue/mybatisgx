@@ -30,7 +30,7 @@ public class MgxsqlAstRendererTest {
     }
 
     private static PassthroughText t(String text) {
-        return new PassthroughText(text, 0, 1, 1);
+        return new SqlText(text, 0, 1, 1);
     }
 
     private static ParamExpr p(String name) {

@@ -2,6 +2,7 @@ package com.mybatisgx.dsl.mgxql;
 
 import com.mybatisgx.dsl.mgxql.model.BracketDirectiveNode;
 import com.mybatisgx.dsl.mgxql.model.ChooseNode;
+import com.mybatisgx.dsl.mgxql.model.CollectionInfo;
 import com.mybatisgx.dsl.mgxql.model.ComparisonOperator;
 import com.mybatisgx.dsl.mgxql.model.FieldReference;
 import com.mybatisgx.dsl.mgxql.model.IfDirectiveNode;
@@ -94,6 +95,22 @@ public class MgxqlSubsetRendererTest {
         expr.addNode(condition("id", "id", ComparisonOperator.IN, "ids"));
         String mgxsql = renderer.render(expr, null);
         Assert.assertEquals("id in (:ids)", mgxsql);
+        assertMgxsqlValid(mgxsql);
+    }
+
+    @Test
+    public void test05b_complexIn() {
+        // 复杂 IN（单字段，design D6 task 5.4）：id in (item:objs)=>$item.id
+        WhereExpression expr = new WhereExpression(LogicOperator.NULL);
+        WhereConditionNode node = condition("id", "id", ComparisonOperator.IN, "objs");
+        CollectionInfo collectionInfo = new CollectionInfo();
+        collectionInfo.setItemName("item");
+        collectionInfo.setCollectionName("objs");
+        collectionInfo.setValueExpr("item.id");
+        node.setCollectionInfo(collectionInfo);
+        expr.addNode(node);
+        String mgxsql = renderer.render(expr, null);
+        Assert.assertEquals("id in (item:objs)=>$item.id", mgxsql);
         assertMgxsqlValid(mgxsql);
     }
 

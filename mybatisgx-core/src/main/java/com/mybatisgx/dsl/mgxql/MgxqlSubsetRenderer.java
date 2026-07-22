@@ -2,6 +2,7 @@ package com.mybatisgx.dsl.mgxql;
 
 import com.mybatisgx.dsl.mgxql.model.BracketDirectiveNode;
 import com.mybatisgx.dsl.mgxql.model.ChooseNode;
+import com.mybatisgx.dsl.mgxql.model.CollectionInfo;
 import com.mybatisgx.dsl.mgxql.model.ComparisonOperator;
 import com.mybatisgx.dsl.mgxql.model.IfDirectiveNode;
 import com.mybatisgx.dsl.mgxql.model.LogicOperator;
@@ -188,11 +189,32 @@ public class MgxqlSubsetRenderer {
     }
 
     /**
-     * 简单 IN 右值（task 4.7）：in (:ids) / in :ids。mgxsql 消费阶段自动生成 &lt;foreach&gt;。
+     * IN 右值（task 4.7/5.4）：
+     * <ul>
+     *   <li>简单 IN：{@code in (:ids)}。mgxsql 消费阶段自动生成 &lt;foreach&gt;。</li>
+     *   <li>复杂 IN（单字段，design D6 task 5.4）：{@code in (item:coll)=>$item.field}。
+     *       itemName/collectionName/valueExpr 取自 CollectionInfo（绑定产物 BoundParam.collectionInfo，回退解析阶段 node.collectionInfo）。</li>
+     * </ul>
      */
     private String renderInValue(WhereConditionNode node) {
+        CollectionInfo collectionInfo = resolveCollectionInfo(node);
         String param = ":" + StringUtils.join(node.getParamValuePath(), ".");
+        if (collectionInfo != null && collectionInfo.getValueExpr() != null) {
+            // 复杂 IN：in (item:coll)=>$item.field（单字段）。collectionName 取参数名，valueExpr 前置 $。
+            String itemName = collectionInfo.getItemName() != null ? collectionInfo.getItemName() : "item";
+            return " in (" + itemName + ":" + StringUtils.join(node.getParamValuePath(), ".") + ")=>$" + collectionInfo.getValueExpr();
+        }
         return " in (" + param + ")";
+    }
+
+    /**
+     * 取 IN 集合信息：优先 BoundParam.collectionInfo（绑定产物），回退 node.collectionInfo（解析阶段填）。
+     */
+    private CollectionInfo resolveCollectionInfo(WhereConditionNode node) {
+        if (node.getBoundParam() != null && node.getBoundParam().getCollectionInfo() != null) {
+            return node.getBoundParam().getCollectionInfo();
+        }
+        return node.getCollectionInfo();
     }
 
     // ==================== 动态门变体渲染 ====================

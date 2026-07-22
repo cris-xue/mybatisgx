@@ -74,6 +74,12 @@ public class WhereConditionNode extends WhereElement {
     private BoundParam boundParam;
 
     /**
+     * 复杂 IN 集合信息（解析阶段填，design D6 task 5.3）：{@code in (item:coll)=>[field]} 的 itemName/collectionName/valueExpr。
+     * 简单 IN（{@code in (:ids)}）不填，绑定阶段默认 itemName="item"。绑定阶段据此转挂 BoundParam.collectionInfo。
+     */
+    private CollectionInfo collectionInfo;
+
+    /**
      * 查询条件在方法名中的位置，如findById、findByName，起始位置从0开始
      */
     private int index = -1;
@@ -210,6 +216,14 @@ public class WhereConditionNode extends WhereElement {
 
     public void setBoundParam(BoundParam boundParam) {
         this.boundParam = boundParam;
+    }
+
+    public CollectionInfo getCollectionInfo() {
+        return collectionInfo;
+    }
+
+    public void setCollectionInfo(CollectionInfo collectionInfo) {
+        this.collectionInfo = collectionInfo;
     }
 
     public int getIndex() {

@@ -835,18 +835,27 @@ public class MgxqlSyntaxHandler {
                 }
                 return;
             }
-            // IN 集合：简单 (:idList) 或复杂 (item:coll)=>[f1, f2]（CollectionInfo 三字段填充，design D6，task 5.2）
+            // IN 集合：简单 (:idList) 或复杂 (item:coll)=>[item.id]（CollectionInfo 三字段填充，design D6，task 5.3）
             if (ctx.in_collection() != null) {
                 MgxqlParser.In_collectionContext inCtx = ctx.in_collection();
                 if (inCtx.simple_collection() != null) {
                     node.setParamValuePath(parseParameterReference(inCtx.simple_collection().parameter_reference()));
                     node.setIndex(conditionIndex.getAndIncrement());
-                    // 简单集合 CollectionInfo 填充留给 task 5.2（itemName=item, valueExpr=#{item}）
+                    // 简单集合：CollectionInfo 由绑定阶段默认（itemName=item, collectionName=参数名, valueExpr=#{item}）
                 } else if (inCtx.complex_collection() != null) {
                     MgxqlParser.Complex_collectionContext complex = inCtx.complex_collection();
-                    node.setParamValuePath(parseParameterReference(complex.parameter_reference()));
+                    List<String> collectionPath = parseParameterReference(complex.parameter_reference());
+                    node.setParamValuePath(collectionPath);
                     node.setIndex(conditionIndex.getAndIncrement());
-                    // 复杂集合 itemName/valueExpr 填充留给 task 5.2/5.3
+                    // 复杂集合三字段（design D6）：itemName=item_name、collectionName=参数名（去冒号）、valueExpr=迭代值字段链（如 item.id）
+                    String itemName = complex.item_name().getText();
+                    String collectionName = String.join(".", collectionPath);
+                    String valueExpr = complex.value_expr_list().getText();
+                    CollectionInfo collectionInfo = new CollectionInfo();
+                    collectionInfo.setItemName(itemName);
+                    collectionInfo.setCollectionName(collectionName);
+                    collectionInfo.setValueExpr(valueExpr);
+                    node.setCollectionInfo(collectionInfo);
                 }
             }
         }

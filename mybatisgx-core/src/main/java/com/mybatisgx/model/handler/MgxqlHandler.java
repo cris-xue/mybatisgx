@@ -417,9 +417,14 @@ public class MgxqlHandler {
 
         com.mybatisgx.dsl.mgxql.model.ComparisonOperator operator = conditionNode.getOperator();
         if (operator == com.mybatisgx.dsl.mgxql.model.ComparisonOperator.IN || operator == com.mybatisgx.dsl.mgxql.model.ComparisonOperator.BETWEEN) {
-            CollectionInfo collectionInfo = new CollectionInfo();
-            collectionInfo.setItemName("item");
-            boundParam.setCollectionInfo(collectionInfo);
+            // 复杂 IN（解析阶段已填 node.collectionInfo 三字段，design D6 task 5.3）优先；简单 IN 默认 itemName="item"
+            if (conditionNode.getCollectionInfo() != null) {
+                boundParam.setCollectionInfo(conditionNode.getCollectionInfo());
+            } else {
+                CollectionInfo collectionInfo = new CollectionInfo();
+                collectionInfo.setItemName("item");
+                boundParam.setCollectionInfo(collectionInfo);
+            }
         }
 
         return boundParam;

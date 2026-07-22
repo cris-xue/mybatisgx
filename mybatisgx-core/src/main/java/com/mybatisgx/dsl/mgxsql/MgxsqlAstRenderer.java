@@ -10,8 +10,8 @@ import java.util.List;
  * <p>无状态（无实例可变字段），渲染为 AST 的纯函数。输出格式完全复用 {@link MgxsqlXmlFragment}，
  * 保证与重构前逐字符扫描器逐字一致。OGNL test 生成（{@link #buildTestExpression}）与 guard 处理
  * （{@link #stripParamColons}）按重构前 {@code MgxsqlConditionBodyProcessor} 的规则重实现，避免与旧代码耦合。
- * <p>渲染上下文 {@link RenderContext} 区分范围块（Scope，{@code <}/{@code >} 原样）与条件节点块
- * （ConditionBody，{@code <}/{@code >} 转义为 {@code &lt;}/{@code &gt;}）。
+ * <p>转义由节点类型决定：{@link com.mybatisgx.dsl.mgxsql.model.SqlText}（SQL 文本片段）渲染时 XML 转义
+ * {@code < > &}；{@link com.mybatisgx.dsl.mgxsql.model.XmlTagText}（嵌入 XML 标签）原样输出。不依赖渲染上下文。
  *
  * @author 薛承城
  * @description mgxsql AST → MyBatis XML 渲染器
@@ -28,41 +28,33 @@ public class MgxsqlAstRenderer {
         StringBuilder sb = new StringBuilder();
         if (root != null) {
             for (MgxsqlNode node : root) {
-                sb.append(render(node, RenderContext.SCOPE));
+                sb.append(render(node));
             }
         }
         return sb.toString();
     }
 
-    /**
-     * 渲染上下文：范围块内 < > 原样；条件节点块内 < > 转义
-     */
-    private enum RenderContext {
-        SCOPE,
-        CONDITION_BODY
-    }
-
-    private String renderChildren(List<MgxsqlNode> children, RenderContext ctx) {
+    private String renderChildren(List<MgxsqlNode> children) {
         StringBuilder sb = new StringBuilder();
         for (MgxsqlNode child : children) {
-            sb.append(render(child, ctx));
+            sb.append(render(child));
         }
         return sb.toString();
     }
 
-    private String render(MgxsqlNode node, RenderContext ctx) {
-        // ==================== Scope 层（子节点恒为 SCOPE 上下文） ====================
+    private String render(MgxsqlNode node) {
+        // ==================== Scope 层 ====================
         if (node instanceof WhereScope) {
             WhereScope s = (WhereScope) node;
-            return MgxsqlXmlFragment.openWhere() + renderChildren(s.getChildren(), RenderContext.SCOPE) + MgxsqlXmlFragment.closeWhere();
+            return MgxsqlXmlFragment.openWhere() + renderChildren(s.getChildren()) + MgxsqlXmlFragment.closeWhere();
         }
         if (node instanceof SetScope) {
             SetScope s = (SetScope) node;
-            return MgxsqlXmlFragment.openSet() + renderChildren(s.getChildren(), RenderContext.SCOPE) + MgxsqlXmlFragment.closeSet();
+            return MgxsqlXmlFragment.openSet() + renderChildren(s.getChildren()) + MgxsqlXmlFragment.closeSet();
         }
         if (node instanceof DescentScope) {
             DescentScope s = (DescentScope) node;
-            return s.getOpenTag() + renderChildren(s.getChildren(), RenderContext.SCOPE) + s.getCloseTag();
+            return s.getOpenTag() + renderChildren(s.getChildren()) + s.getCloseTag();
         }
         // ==================== Unit 层 ====================
         if (node instanceof IfUnit) {
@@ -97,8 +89,11 @@ public class MgxsqlAstRenderer {
         if (node instanceof LocalVarExpr) {
             return "#{" + ((LocalVarExpr) node).getVarName() + "}";
         }
-        if (node instanceof PassthroughText) {
-            return renderPassthrough((PassthroughText) node, ctx);
+        if (node instanceof XmlTagText) {
+            return ((XmlTagText) node).getText();
+        }
+        if (node instanceof SqlText) {
+            return escapeXmlText(((SqlText) node).getText());
         }
         throw new IllegalStateException("未支持的 mgxsql AST 节点类型: " + node.getClass().getName());
     }
@@ -110,7 +105,7 @@ public class MgxsqlAstRenderer {
         } else {
             test = buildTestExpression(collectParamPaths(unit.getBody()));
         }
-        String body = renderChildren(unit.getBody(), RenderContext.CONDITION_BODY).trim();
+        String body = renderChildren(unit.getBody()).trim();
         return MgxsqlXmlFragment.ifTag(test, body);
     }
 
@@ -119,12 +114,12 @@ public class MgxsqlAstRenderer {
         sb.append(MgxsqlXmlFragment.chooseOpen());
         for (WhenUnit when : choose.getWhens()) {
             String test = stripParamColons(when.getGuardExpression());
-            String body = renderChildren(when.getBody(), RenderContext.CONDITION_BODY).trim();
+            String body = renderChildren(when.getBody()).trim();
             sb.append(MgxsqlXmlFragment.whenTag(test, body));
         }
         if (choose.getOtherwise() != null) {
             OtherwiseUnit o = choose.getOtherwise();
-            String body = renderChildren(o.getBody(), RenderContext.CONDITION_BODY).trim();
+            String body = renderChildren(o.getBody()).trim();
             sb.append(MgxsqlXmlFragment.otherwiseTag(body));
         }
         sb.append(MgxsqlXmlFragment.chooseClose());
@@ -139,12 +134,13 @@ public class MgxsqlAstRenderer {
         return result;
     }
 
-    private String renderPassthrough(PassthroughText text, RenderContext ctx) {
-        if (ctx == RenderContext.CONDITION_BODY) {
-            // 条件节点块内 < > 转义（XML 标签的禁用校验在 parse 期完成）
-            return text.getText().replace("<", "&lt;").replace(">", "&gt;");
-        }
-        return text.getText();
+    /**
+     * SQL 文本片段的 XML 实体转义：{@code &} 先于 {@code <} {@code >}，避免 {@code &lt;}/{@code &gt;} 中的 {@code &} 被二次转义为 {@code &amp;lt;}/{@code &amp;gt;}。
+     */
+    private String escapeXmlText(String text) {
+        return text.replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;");
     }
 
     /**

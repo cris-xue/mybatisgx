@@ -43,7 +43,7 @@ public class MgxsqlParser {
             return root;
         }
         if (input.trim().isEmpty()) {
-            root.add(new PassthroughText(input, 0, 1, 1));
+            root.add(new SqlText(input, 0, 1, 1));
             return root;
         }
         this.ctx = new MgxsqlContext(input.trim());
@@ -194,7 +194,7 @@ public class MgxsqlParser {
 
     private void flushText(List<MgxsqlNode> target, StringBuilder text) {
         if (text.length() > 0) {
-            target.add(new PassthroughText(text.toString(), ctx.getPosition(), ctx.getLineNumber(), ctx.getColumnNumber()));
+            target.add(new SqlText(text.toString(), ctx.getPosition(), ctx.getLineNumber(), ctx.getColumnNumber()));
             text.setLength(0);
         }
     }
@@ -396,7 +396,7 @@ public class MgxsqlParser {
         MgxsqlSyntaxHelper.skipWhitespace(ctx);
         String condition = readForm1Content();
         IfUnit unit = new IfUnit(null, startPos, line, col);
-        unit.getBody().add(new PassthroughText(prefix + " ", startPos, line, col));
+        unit.getBody().add(new SqlText(prefix + " ", startPos, line, col));
         unit.getBody().addAll(parseBody(condition));
         target.add(unit);
     }
@@ -409,7 +409,7 @@ public class MgxsqlParser {
         MgxsqlSyntaxHelper.skipWhitespace(ctx);
         String condition = readForm1Content();
         IfUnit unit = new IfUnit(null, startPos, line, col);
-        unit.getBody().add(new PassthroughText(", ", startPos, line, col));
+        unit.getBody().add(new SqlText(", ", startPos, line, col));
         unit.getBody().addAll(parseBody(condition));
         target.add(unit);
     }
@@ -773,7 +773,7 @@ public class MgxsqlParser {
         ctx.setPosition(savedPos);
         MgxsqlSyntaxHelper.skipWhitespace(ctx);
         if (!ctx.hasMore()) {
-            target.add(new PassthroughText("in", ctx.getPosition(), ctx.getLineNumber(), ctx.getColumnNumber()));
+            target.add(new SqlText("in", ctx.getPosition(), ctx.getLineNumber(), ctx.getColumnNumber()));
             return;
         }
         if (ctx.currentChar() == ':' && ctx.peekChar(1) != ':' && MgxsqlSyntaxHelper.isIdentifierStartAt(ctx, 1)) {
@@ -791,7 +791,7 @@ public class MgxsqlParser {
             }
         }
         ctx.setPosition(savedPos);
-        target.add(new PassthroughText("in ", savedPos, ctx.getLineNumber(), ctx.getColumnNumber()));
+        target.add(new SqlText("in ", savedPos, ctx.getLineNumber(), ctx.getColumnNumber()));
     }
 
     private ForeachUnit parseInParenthesized() {
@@ -927,13 +927,13 @@ public class MgxsqlParser {
             int openEnd = findOpenTagClose(startPos);
             if (openEnd == -1) {
                 String rest = ctx.substring(startPos, ctx.getInputLength());
-                target.add(new PassthroughText(rest, startPos, line, col));
+                target.add(new XmlTagText(rest, startPos, line, col));
                 ctx.setPosition(ctx.getInputLength());
                 return;
             }
             String openTag = ctx.substring(startPos, openEnd + 1);
             if (openTag.endsWith("/>")) {
-                target.add(new PassthroughText(openTag, startPos, line, col));
+                target.add(new XmlTagText(openTag, startPos, line, col));
                 ctx.setPosition(openEnd + 1);
                 return;
             }
@@ -952,7 +952,7 @@ public class MgxsqlParser {
         int end = MgxsqlSyntaxHelper.findXmlTagEnd(ctx, startPos);
         if (end == -1) {
             String rest = ctx.substring(startPos, ctx.getInputLength());
-            target.add(new PassthroughText(rest, startPos, line, col));
+            target.add(new XmlTagText(rest, startPos, line, col));
             ctx.setPosition(ctx.getInputLength());
             return;
         }
@@ -960,7 +960,7 @@ public class MgxsqlParser {
         if (containsMgxsqlMarker(tagContent)) {
             throw new MybatisgxException("mgxsql 语法错误: 最小单元块内不允许混合 mgxsql 语法，%s", ctx.getPositionInfo());
         }
-        target.add(new PassthroughText(tagContent, startPos, line, col));
+        target.add(new XmlTagText(tagContent, startPos, line, col));
         ctx.setPosition(end + 1);
     }
 
@@ -1094,7 +1094,7 @@ public class MgxsqlParser {
 
     private void flushBodyText(List<MgxsqlNode> target, StringBuilder buf) {
         if (buf.length() > 0) {
-            target.add(new PassthroughText(buf.toString(), 0, 0, 0));
+            target.add(new SqlText(buf.toString(), 0, 0, 0));
             buf.setLength(0);
         }
     }

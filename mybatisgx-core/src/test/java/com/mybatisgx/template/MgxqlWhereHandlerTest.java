@@ -1,4 +1,4 @@
-package com.mybatisgx.dsl.mgxql;
+package com.mybatisgx.template;
 
 import com.mybatisgx.dsl.mgxql.model.BracketDirectiveNode;
 import com.mybatisgx.dsl.mgxql.model.ChooseNode;
@@ -19,7 +19,7 @@ import java.util.Arrays;
 import java.util.Collections;
 
 /**
- * {@link MgxqlSubsetRenderer} 单测（task 4.1-4.8）。
+ * {@link MgxqlWhereHandler} 单测（task 4.1-4.8）。
  * <p>
  * 构造 mgxql WhereElement 平面变体树（普通条件 + Bracket/If/Choose 变体），断言产出的 mgxsql 子集文本；
  * 并用 {@link MgxsqlScanner} 双向验证产出文本语法合法（能被 mgxsql 反解析）。
@@ -29,9 +29,9 @@ import java.util.Collections;
  * @author 薛承城
  * @date 2026/7/21
  */
-public class MgxqlSubsetRendererTest {
+public class MgxqlWhereHandlerTest {
 
-    private final MgxqlSubsetRenderer renderer = new MgxqlSubsetRenderer();
+    private final MgxqlWhereHandler renderer = new MgxqlWhereHandler();
     private final MgxsqlScanner scanner = new MgxsqlScanner();
 
     // ==================== 普通条件 ====================

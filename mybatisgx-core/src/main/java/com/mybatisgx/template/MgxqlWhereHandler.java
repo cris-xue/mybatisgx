@@ -1,4 +1,4 @@
-package com.mybatisgx.dsl.mgxql;
+package com.mybatisgx.template;
 
 import com.mybatisgx.dsl.mgxql.model.BracketDirectiveNode;
 import com.mybatisgx.dsl.mgxql.model.ChooseNode;
@@ -39,7 +39,7 @@ import java.util.List;
  * @author 薛承城
  * @date 2026/7/21
  */
-public class MgxqlSubsetRenderer {
+public class MgxqlWhereHandler {
 
     /**
      * 渲染 WHERE 表达式为 mgxsql 子集文本（不含 {@code where[...]} 外壳，仅 body）。

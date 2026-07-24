@@ -103,11 +103,15 @@ matching_value: in_collection | like_pattern | parameter_reference ;
 // LIKE 模式：%:name / :name% / %:name% 及多 % 变体。以 PERCENT 开头或 parameter_reference 后跟 PERCENT（至少一个 %）。
 // 为消除与裸 parameter_reference 的歧义，显式三态（前 %、后 %、前后 %），ANTLR4 按 matching_value 分支顺序与前瞻完整匹配择优。
 like_pattern: PERCENT+ parameter_reference | parameter_reference PERCENT+ | PERCENT+ parameter_reference PERCENT+ ;
-// IN 集合：简单 (:idList) 或复杂 (item:objectList)=>[item.id, item.name]（design D6，对齐 mgxsql ForeachUnit）。
+// IN 集合：简单 (:idList) 或复杂 (item:objectList)=>$item.id（design D6，对齐 mgxsql ForeachUnit）。
 in_collection: simple_collection | complex_collection ;
 simple_collection: left_bracket parameter_reference right_bracket ;
-complex_collection: left_bracket item_name param_colon parameter_reference right_bracket ARROW left_square value_expr_list right_square ;
-// 复杂 IN 迭代值表达式字段列表：单字段 [item.id] 或多字段 [item.id, item.name]（多字段 → mgxsql tuple foreach）。
+complex_collection: left_bracket item_name param_colon collection_path right_bracket ARROW DOLLAR value_expr_list ;
+// 未来会用双in括号中会用::
+// complex_collection: left_bracket item_name param_colon parameter_reference right_bracket ARROW DOLLAR value_expr_list ;
+// 复杂 IN 集合路径：collection 侧不带冒号，形如 userList 或 query.userList。
+collection_path: field_name (dot field_name)* ;
+// 复杂 IN 迭代值表达式字段列表：单字段 $item.id 或多字段 $item.id,item.name（多字段 → mgxsql tuple foreach）。
 value_expr_list: field_name (dot field_name)* ;
 // item_name（迭代变量名）为小写标识符
 item_name: LOWER_NAME ;

@@ -1018,6 +1018,16 @@ public interface MgxqlParserListener extends ParseTreeListener {
 	 */
 	void exitComplex_collection(MgxqlParser.Complex_collectionContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#collection_path}.
+	 * @param ctx the parse tree
+	 */
+	void enterCollection_path(MgxqlParser.Collection_pathContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#collection_path}.
+	 * @param ctx the parse tree
+	 */
+	void exitCollection_path(MgxqlParser.Collection_pathContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link MgxqlParser#value_expr_list}.
 	 * @param ctx the parse tree
 	 */

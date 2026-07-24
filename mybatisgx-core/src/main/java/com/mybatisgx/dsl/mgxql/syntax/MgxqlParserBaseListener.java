@@ -1229,6 +1229,18 @@ public class MgxqlParserBaseListener implements MgxqlParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterCollection_path(MgxqlParser.Collection_pathContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitCollection_path(MgxqlParser.Collection_pathContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterValue_expr_list(MgxqlParser.Value_expr_listContext ctx) { }
 	/**
 	 * {@inheritDoc}

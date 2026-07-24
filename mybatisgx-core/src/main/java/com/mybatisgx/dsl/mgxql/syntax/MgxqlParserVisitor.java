@@ -617,6 +617,12 @@ public interface MgxqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitComplex_collection(MgxqlParser.Complex_collectionContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link MgxqlParser#collection_path}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCollection_path(MgxqlParser.Collection_pathContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link MgxqlParser#value_expr_list}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

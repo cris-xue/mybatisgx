@@ -3,17 +3,19 @@ package com.mybatisgx.template.delete;
 import com.mybatisgx.annotation.LogicDelete;
 import com.mybatisgx.annotation.LogicDeleteId;
 import com.mybatisgx.dsl.mgxql.model.WhereClause;
+import com.mybatisgx.dsl.mgxsql.MgxsqlScanner;
+import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.model.ColumnInfo;
 import com.mybatisgx.model.EntityInfo;
 import com.mybatisgx.model.LogicDeleteIdColumnInfo;
 import com.mybatisgx.model.MethodInfo;
-import com.mybatisgx.template.MgxqlWhereTemplateHandler;
+import com.mybatisgx.template.MgxqlWhereHandler;
 import com.mybatisgx.template.TemplateHandler;
-import com.mybatisgx.template.XmlCompiler;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
+import org.dom4j.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +32,8 @@ public class DeleteTemplateHandler implements TemplateHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(DeleteTemplateHandler.class);
 
-    private MgxqlWhereTemplateHandler mgxqlWhereTemplateHandler = new MgxqlWhereTemplateHandler();
+    private MgxqlWhereHandler mgxqlWhereHandler = new MgxqlWhereHandler();
+    private MgxsqlScanner mgxsqlScanner = new MgxsqlScanner();
 
     @Override
     public String execute(MethodInfo methodInfo) {
@@ -49,18 +52,34 @@ public class DeleteTemplateHandler implements TemplateHandler {
         Element deleteElement = this.getDeleteElement(entityInfo, methodInfo);
         mapperElement.add(deleteElement);
 
-        Element whereElement = null;
         if (methodInfo.getMgxqlStatement() != null) {
             WhereClause whereClause = methodInfo.getMgxqlStatement().getWhereClause();
             if (whereClause != null) {
-                whereElement = mgxqlWhereTemplateHandler.execute(entityInfo, methodInfo, whereClause.getRootExpression());
+                addWhereNodes(deleteElement, whereClause, methodInfo.getMgxqlStatement().getMgxqlSourceType());
             }
         }
-        deleteElement.add(whereElement);
-        if (!methodInfo.getDynamic()) {
-            XmlCompiler.where(whereElement);
-        }
         return document.asXML();
+    }
+
+    private void addWhereNodes(Element deleteElement, WhereClause whereClause, com.mybatisgx.dsl.mgxql.model.MgxqlSourceType sourceType) {
+        boolean autoGuard = sourceType == com.mybatisgx.dsl.mgxql.model.MgxqlSourceType.ENTITY
+                || sourceType == com.mybatisgx.dsl.mgxql.model.MgxqlSourceType.METHOD_NAME;
+        String whereSql = mgxqlWhereHandler.renderWhereClause(whereClause.getRootExpression(), null, null, autoGuard);
+        if (StringUtils.isBlank(whereSql)) {
+            return;
+        }
+        String whereXml = mgxsqlScanner.process(whereSql);
+        Element root;
+        try {
+            Document whereDocument = DocumentHelper.parseText("<root>" + whereXml + "</root>");
+            root = whereDocument.getRootElement();
+        } catch (org.dom4j.DocumentException e) {
+            throw new MybatisgxException("mgxql DELETE WHERE 渲染：解析 MgxsqlScanner 产出 XML 失败: " + e.getMessage() + " | 原文: " + whereXml);
+        }
+        List<Node> nodes = new ArrayList<Node>(root.content());
+        for (Node node : nodes) {
+            deleteElement.add(node.detach());
+        }
     }
 
     private Element getDeleteElement(EntityInfo entityInfo, MethodInfo methodInfo) {

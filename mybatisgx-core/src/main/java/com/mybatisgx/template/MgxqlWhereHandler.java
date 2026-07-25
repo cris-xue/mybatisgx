@@ -50,22 +50,64 @@ public class MgxqlWhereHandler {
      * @return mgxsql 子集文本（body）
      */
     public String render(WhereExpression expression, AliasContext aliasContext) {
+        return render(expression, aliasContext, false);
+    }
+
+    public String render(WhereExpression expression, AliasContext aliasContext, boolean autoGuard) {
         if (expression == null || expression.getNodes() == null || expression.getNodes().isEmpty()) {
             return "";
         }
         StringBuilder sb = new StringBuilder();
         for (WhereElement element : expression.getNodes()) {
-            renderElement(sb, element, aliasContext);
+            renderElement(sb, element, aliasContext, autoGuard);
         }
         return sb.toString();
     }
 
     /**
+     * 渲染 WHERE 子句为有边界 mgxsql 子集文本 {@code where[ body ]}（design D4，task 4.8）。
+     * <p>用于整链接入 mgxsql scanner：{@code where[...]} 经 MgxqlScanner 转为 {@code <where>...</where>} 标签。
+     * @return {@code where[ body ]}；expression 为空返回空串（无 WHERE 子句）
+     */
+    public String renderWhereClause(WhereExpression expression, AliasContext aliasContext, String extraCondition) {
+        return renderWhereClause(expression, aliasContext, extraCondition, false);
+    }
+
+    public String renderWhereClause(WhereExpression expression, AliasContext aliasContext, String extraCondition, boolean autoGuard) {
+        boolean hasExpr = expression != null && expression.getNodes() != null && !expression.getNodes().isEmpty();
+        boolean hasExtra = extraCondition != null && !extraCondition.trim().isEmpty();
+        if (!hasExpr && !hasExtra) {
+            return "";
+        }
+        StringBuilder body = new StringBuilder();
+        if (hasExpr) {
+            body.append(render(expression, aliasContext, autoGuard));
+        }
+        if (hasExtra) {
+            body.append(extraCondition);
+        }
+        String result = "where[" + body + "]";
+        MgxqlSubsetPurity.assertPure(result);
+        return result;
+    }
+
+    public String renderWhereClause(WhereExpression expression, AliasContext aliasContext) {
+        return renderWhereClause(expression, aliasContext, null, false);
+    }
+
+    /**
      * 渲染单个 WhereElement：普通条件或动态门变体。
      */
-    private void renderElement(StringBuilder sb, WhereElement element, AliasContext aliasContext) {
+    private void renderElement(StringBuilder sb, WhereElement element, AliasContext aliasContext, boolean autoGuard) {
         if (element.isCondition()) {
-            renderCondition(sb, element.asCondition(), aliasContext);
+            WhereConditionNode condition = element.asCondition();
+            if (autoGuard && !condition.isNested()) {
+                sb.append("#[").append(blockConnector(condition.getLogicOperator()));
+                renderConditionBody(sb, condition, aliasContext);
+                sb.append("]");
+            } else {
+                renderCondition(sb, condition, aliasContext);
+            }
             return;
         }
         // 动态门变体：body 内首元素 logicOperator 已由 block_prefix 设定（design D9），块自身的 logicOperator 作为块前缀连接词
@@ -88,12 +130,19 @@ public class MgxqlWhereHandler {
         // 括号分组（design Q2，复用 subExpression 载体）：( body )，内部序列递归渲染
         if (node.isNested()) {
             sb.append(logicPrefix(node.getLogicOperator())).append("(");
-            sb.append(render(node.getSubExpression(), aliasContext));
+            sb.append(render(node.getSubExpression(), aliasContext, false));
             sb.append(")");
             return;
         }
         // 连接词前缀（design D9）：NULL（首元素）无前缀，AND/OR 产 "and "/"or "
         sb.append(logicPrefix(node.getLogicOperator()));
+        renderConditionBody(sb, node, aliasContext);
+    }
+
+    /**
+     * 渲染条件体（不含连接词前缀）：列名 op 右值。
+     */
+    private void renderConditionBody(StringBuilder sb, WhereConditionNode node, AliasContext aliasContext) {
         ComparisonOperator operator = node.getOperator();
         if (operator != null && operator.isNullComparisonOperator()) {
             // is null / is not null：column is [not] null（无右侧参数）
@@ -112,8 +161,9 @@ public class MgxqlWhereHandler {
             sb.append(column).append(renderInValue(node));
             return;
         }
-        // 关系/通用：column op value
-        sb.append(column).append(" ").append(operator.getValue()).append(" ").append(renderRightValue(node));
+        // 关系/通用：column op value。NOT_EQ 用 != 而非 <>（operator.getValue() 为 <>，在 mgxsql 子集 XML 里 < 非法，避免 <where>...<>...</where> 解析失败）
+        String opValue = operator == ComparisonOperator.NOT_EQ ? "!=" : operator.getValue();
+        sb.append(column).append(" ").append(opValue).append(" ").append(renderRightValue(node));
     }
 
     /**
@@ -171,14 +221,14 @@ public class MgxqlWhereHandler {
         if (node.getConditionValue() != null) {
             return node.getConditionValue().toString();
         }
-        return ":" + StringUtils.join(node.getParamValuePath(), ".");
+        return ":" + renderParamPath(node);
     }
 
     /**
      * LIKE 右值（task 4.6）：据算子还原 % 位置。mgxsql 消费阶段自动生成 &lt;bind&gt;。
      */
     private String renderLikeValue(WhereConditionNode node, ComparisonOperator operator) {
-        String param = ":" + StringUtils.join(node.getParamValuePath(), ".");
+        String param = ":" + renderParamPath(node);
         if (operator == ComparisonOperator.STARTING_WITH) {
             return param + "%";
         }
@@ -198,13 +248,24 @@ public class MgxqlWhereHandler {
      */
     private String renderInValue(WhereConditionNode node) {
         CollectionInfo collectionInfo = resolveCollectionInfo(node);
-        String param = ":" + StringUtils.join(node.getParamValuePath(), ".");
+        String paramPath = renderParamPath(node);
+        String param = ":" + paramPath;
         if (collectionInfo != null && collectionInfo.getValueExpr() != null) {
             // 复杂 IN：in (item:coll)=>$item.field（单字段）。collectionName 取参数名，valueExpr 前置 $。
             String itemName = collectionInfo.getItemName() != null ? collectionInfo.getItemName() : "item";
-            return " in (" + itemName + ":" + StringUtils.join(node.getParamValuePath(), ".") + ")=>$" + collectionInfo.getValueExpr();
+            return " in (" + itemName + ":" + paramPath + ")=>$" + collectionInfo.getValueExpr();
         }
         return " in (" + param + ")";
+    }
+
+    private String renderParamPath(WhereConditionNode node) {
+        if (node.getBoundParam() != null && node.getBoundParam().getEntries() != null
+                && !node.getBoundParam().getEntries().isEmpty()
+                && node.getBoundParam().getEntries().get(0).getParamPath() != null
+                && !node.getBoundParam().getEntries().get(0).getParamPath().isEmpty()) {
+            return StringUtils.join(node.getBoundParam().getEntries().get(0).getParamPath(), ".");
+        }
+        return StringUtils.join(node.getParamValuePath(), ".");
     }
 
     /**

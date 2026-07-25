@@ -533,6 +533,17 @@ public class MgxqlSyntaxHandler {
     }
 
     /**
+     * 解析 collection_path / value_expr_list 这类字段路径为列表
+     */
+    static List<String> parseFieldPath(List<MgxqlParser.Field_nameContext> fieldNameContexts) {
+        List<String> pathItems = new ArrayList<>();
+        for (MgxqlParser.Field_nameContext fieldNameCtx : fieldNameContexts) {
+            pathItems.add(stripBackticks(fieldNameCtx.getText()));
+        }
+        return pathItems;
+    }
+
+    /**
      * WHERE子句访问器，构建ConditionExpression树形结构
      */
     public static class WhereClauseVisitor extends MgxqlParserBaseVisitor<WhereExpression> {
@@ -558,7 +569,9 @@ public class MgxqlSyntaxHandler {
             for (MgxqlParser.Where_itemContext itemCtx : seqCtx.where_item()) {
                 LogicOperator connector = readConnector(itemCtx.logic_and(), itemCtx.logic_or());
                 WhereElement element = buildAtom(itemCtx.where_atom());
-                element.setLogicOperator(connector);
+                if (connector != LogicOperator.NULL || element.getLogicOperator() == LogicOperator.NULL) {
+                    element.setLogicOperator(connector);
+                }
                 expression.addNode(element);
             }
             return expression;
@@ -844,13 +857,13 @@ public class MgxqlSyntaxHandler {
                     // 简单集合：CollectionInfo 由绑定阶段默认（itemName=item, collectionName=参数名, valueExpr=#{item}）
                 } else if (inCtx.complex_collection() != null) {
                     MgxqlParser.Complex_collectionContext complex = inCtx.complex_collection();
-                    List<String> collectionPath = parseParameterReference(complex.parameter_reference());
+                    List<String> collectionPath = parseFieldPath(complex.collection_path().field_name());
                     node.setParamValuePath(collectionPath);
                     node.setIndex(conditionIndex.getAndIncrement());
-                    // 复杂集合三字段（design D6）：itemName=item_name、collectionName=参数名（去冒号）、valueExpr=迭代值字段链（如 item.id）
+                    // 复杂集合三字段（design D6）：itemName=item_name、collectionName=参数名、valueExpr=迭代值字段链（如 item.id）
                     String itemName = complex.item_name().getText();
                     String collectionName = String.join(".", collectionPath);
-                    String valueExpr = complex.value_expr_list().getText();
+                    String valueExpr = String.join(".", parseFieldPath(complex.value_expr_list().field_name()));
                     CollectionInfo collectionInfo = new CollectionInfo();
                     collectionInfo.setItemName(itemName);
                     collectionInfo.setCollectionName(collectionName);

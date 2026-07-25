@@ -161,9 +161,19 @@ public class MgxsqlParser {
             }
             if (mode != CloseMode.END_ONLY && c == ':' && MgxsqlSyntaxHelper.isParamRefStart(ctx)) {
                 flushText(target, text);
+                int startPos = ctx.getPosition();
+                int line = ctx.getLineNumber();
+                int col = ctx.getColumnNumber();
                 String paramName = MgxsqlSyntaxHelper.readColonParamRef(ctx);
                 if (paramName != null) {
-                    target.add(new ParamExpr(paramName, ctx.getPosition(), ctx.getLineNumber(), ctx.getColumnNumber()));
+                    if (ctx.hasMore() && ctx.currentChar() == '%') {
+                        ctx.advance();
+                        String bindName = "_like_" + paramName.replace('.', '_');
+                        String bindValue = paramName + " + '%'";
+                        target.add(new BindUnit(paramName, bindName, bindValue, true, startPos, line, col));
+                    } else {
+                        target.add(new ParamExpr(paramName, ctx.getPosition(), ctx.getLineNumber(), ctx.getColumnNumber()));
+                    }
                 }
                 continue;
             }
@@ -898,7 +908,7 @@ public class MgxsqlParser {
         if (paramName != null) {
             String bindName = "_like_" + paramName.replace('.', '_');
             String bindValue = both ? "'%' + " + paramName + " + '%'" : "'%' + " + paramName;
-            target.add(new BindUnit(paramName, bindName, bindValue, false, startPos, line, col));
+            target.add(new BindUnit(paramName, bindName, bindValue, true, startPos, line, col));
         }
     }
 

@@ -1,15 +1,20 @@
 package com.mybatisgx.template;
 
+import com.mybatisgx.dsl.mgxql.model.BoundParam;
+import com.mybatisgx.dsl.mgxql.model.BoundParamEntry;
 import com.mybatisgx.dsl.mgxql.model.BracketDirectiveNode;
 import com.mybatisgx.dsl.mgxql.model.ChooseNode;
 import com.mybatisgx.dsl.mgxql.model.CollectionInfo;
 import com.mybatisgx.dsl.mgxql.model.ComparisonOperator;
+import com.mybatisgx.dsl.mgxql.model.ParamKind;
 import com.mybatisgx.dsl.mgxql.model.FieldReference;
 import com.mybatisgx.dsl.mgxql.model.IfDirectiveNode;
 import com.mybatisgx.dsl.mgxql.model.LogicOperator;
 import com.mybatisgx.dsl.mgxql.model.WhenNode;
 import com.mybatisgx.dsl.mgxql.model.WhereConditionNode;
+import com.mybatisgx.dsl.mgxql.model.WhereElement;
 import com.mybatisgx.dsl.mgxql.model.WhereExpression;
+import com.mybatisgx.dsl.mgxql.model.expression.ConditionColumnExpression;
 import com.mybatisgx.dsl.mgxsql.MgxsqlScanner;
 import com.mybatisgx.model.ColumnInfo;
 import org.junit.Assert;
@@ -55,6 +60,27 @@ public class MgxqlWhereHandlerTest {
         expr.addNode(node);
         String mgxsql = renderer.render(expr, null);
         Assert.assertEquals("age > 18", mgxsql);
+        assertMgxsqlValid(mgxsql);
+    }
+
+    @Test
+    public void test02b_boundParamPathOverridesParsedParamPath() {
+        // 解析阶段可能是 :id；绑定阶段会按 source-aware-binding 改写为实体参数路径，例如 batch_data_item.id。
+        WhereExpression expr = new WhereExpression(LogicOperator.NULL);
+        WhereConditionNode node = condition("id", "id", ComparisonOperator.EQ, "id");
+        BoundParam boundParam = new BoundParam();
+        boundParam.setKind(ParamKind.SIMPLE);
+        boundParam.setOperator(ComparisonOperator.EQ);
+        BoundParamEntry entry = new BoundParamEntry();
+        entry.setSqlExpression(new ConditionColumnExpression("id", null));
+        entry.setParamPath(Arrays.asList("batch_data_item", "id"));
+        boundParam.addEntry(entry);
+        node.setBoundParam(boundParam);
+        expr.addNode(node);
+
+        String mgxsql = renderer.render(expr, null);
+
+        Assert.assertEquals("id = :batch_data_item.id", mgxsql);
         assertMgxsqlValid(mgxsql);
     }
 
@@ -235,6 +261,49 @@ public class MgxqlWhereHandlerTest {
     public void test12_emptyExpression() {
         Assert.assertEquals("", renderer.render(null, null));
         Assert.assertEquals("", renderer.render(new WhereExpression(LogicOperator.NULL), null));
+    }
+
+    // ==================== 4.9 整链验证桥：renderWhereClause + MgxsqlScanner ====================
+
+    @Test
+    public void test13_renderWhereClauseBounded() {
+        // where[ body ]：有边界 mgxsql 子集文本（design D4 task 4.8）
+        WhereExpression expr = new WhereExpression(LogicOperator.NULL);
+        expr.addNode(condition("name", "user_name", ComparisonOperator.EQ, "name"));
+        Assert.assertEquals("where[user_name = :name]", renderer.renderWhereClause(expr, null));
+    }
+
+    @Test
+    public void test14_fullSelectSubsetViaScanner() {
+        // 4.9 整链可行性验证桥：拼完整 mgxsql 子集文本（SELECT + WHERE[body via renderWhereClause] + ORDER BY）
+        // 喂 MgxsqlScanner，验证产出含 <where>/<if> 的合法 XML（整 SELECT 走 mgxsql 的前置可行性）
+        WhereExpression whereExpr = new WhereExpression(LogicOperator.NULL);
+        whereExpr.addNode(condition("name", "user_name", ComparisonOperator.EQ, "name"));
+        String whereClause = renderer.renderWhereClause(whereExpr, null);
+        String fullMgxsql = "select id, name from User " + whereClause + " order by name desc";
+
+        String xml = scanner.process(fullMgxsql);
+        Assert.assertNotNull("整链应产出非 null XML", xml);
+        Assert.assertTrue("应含 <where> 标签（WHERE 经 scanner 转换）", xml.contains("<where>"));
+        Assert.assertTrue("WHERE body 的 :name 应转 #{name}", xml.contains("#{name}"));
+        Assert.assertTrue("ORDER BY 静态文本应原样透传", xml.contains("order by name desc"));
+        Assert.assertTrue("SELECT/FROM 静态文本应原样透传", xml.contains("select id, name from User"));
+    }
+
+    @Test
+    public void test15_fullSelectWithBracketDirectiveViaScanner() {
+        // 整链含动态门 #[...]：select ... where[#[user_name = :name]] order by ...
+        WhereExpression whereExpr = new WhereExpression(LogicOperator.NULL);
+        WhereExpression body = new WhereExpression(LogicOperator.NULL);
+        body.addNode(condition("name", "user_name", ComparisonOperator.EQ, "name"));
+        whereExpr.addNode(new BracketDirectiveNode(body));
+        String whereClause = renderer.renderWhereClause(whereExpr, null);
+        String fullMgxsql = "select id from User " + whereClause;
+
+        String xml = scanner.process(fullMgxsql);
+        Assert.assertNotNull(xml);
+        Assert.assertTrue("#[...] 应转 <if> + isNotEmpty guard", xml.contains("<if test="));
+        Assert.assertTrue("auto-guard 应针对 name", xml.contains("isNotEmpty(name)"));
     }
 
     // ==================== 辅助 ====================

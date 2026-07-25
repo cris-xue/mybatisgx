@@ -700,6 +700,23 @@ public class MgxsqlScannerTest {
         Assert.assertTrue("应包含 <where>", output.contains("<where>"));
     }
 
+    @Test
+    public void test71_whereBracketLikePatternEmitsBindReference() {
+        String input = "select * from t_user where[name like %:name%]";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("应包含 <bind", output.contains("<bind"));
+        Assert.assertTrue("应包含 _like_name", output.contains("_like_name"));
+        Assert.assertTrue("LIKE 右值应引用 bind 变量", output.contains("#{_like_name}"));
+    }
+
+    @Test
+    public void test71_whereBracketConditionConnectors() {
+        String input = "select * from t_user where[id = :id #[and name = :name] #[or status = :status]]";
+        String output = this.scanner.process(input);
+        Assert.assertTrue("and 应保留在条件体内", output.contains("and name = #{name}"));
+        Assert.assertTrue("or 应保留在条件体内", output.contains("or status = #{status}"));
+    }
+
     // ==================== guard 表达式 trim ====================
 
     @Test

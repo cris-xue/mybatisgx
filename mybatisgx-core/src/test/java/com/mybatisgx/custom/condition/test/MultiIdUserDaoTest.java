@@ -38,6 +38,19 @@ public class MultiIdUserDaoTest {
     }
 
     @Test
+    public void testMgxqlEntityParamEmbeddedIdCondition() {
+        MultiIdUser dbUser = multiIdUserList.get(0);
+        MultiIdUser query = new MultiIdUser();
+        query.setId(dbUser.getId());
+
+        List<MultiIdUser> result = multiIdUserDao.findByEmbeddedId(query);
+
+        Assert.assertEquals(1, result.size());
+        Assert.assertEquals(dbUser.getId().getId1(), result.get(0).getId().getId1());
+        Assert.assertEquals(dbUser.getId().getId2(), result.get(0).getId().getId2());
+    }
+
+    @Test
     public void testInsert() {
         FixtureGenerator fixtureGenerator = new FixtureGenerator();
         fixtureGenerator.configure().ignoreCyclicReferences();

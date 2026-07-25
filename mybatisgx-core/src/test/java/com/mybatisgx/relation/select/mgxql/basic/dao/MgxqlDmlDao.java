@@ -21,9 +21,15 @@ public interface MgxqlDmlDao extends SimpleDao<User, User, Long> {
     @Statement("delete User where code = :code")
     int deleteByMgxqlCode(@Param("code") String code);
 
+    @Statement("delete User where #[code = :code]")
+    int deleteByMgxqlDynamicCode(@Param("code") String code);
+
     @Statement("update User where id = :id")
     int updateByMgxqlId(@Param("id") Long id, User entity);
 
     @Statement("update User where code = :code")
     int updateByMgxqlCode(@Param("code") String code, User entity);
+
+    @Statement("update User where #[code = :code]")
+    int updateByMgxqlDynamicCode(@Param("code") String code, User entity);
 }

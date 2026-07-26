@@ -55,15 +55,16 @@ public class DeleteTemplateHandler implements TemplateHandler {
         if (methodInfo.getMgxqlStatement() != null) {
             WhereClause whereClause = methodInfo.getMgxqlStatement().getWhereClause();
             if (whereClause != null) {
-                addWhereNodes(deleteElement, whereClause, methodInfo.getMgxqlStatement().getMgxqlSourceType());
+                addWhereNodes(deleteElement, whereClause, methodInfo.getMgxqlStatement().getMgxqlSourceType(), methodInfo.getDynamic());
             }
         }
         return document.asXML();
     }
 
-    private void addWhereNodes(Element deleteElement, WhereClause whereClause, com.mybatisgx.dsl.mgxql.model.MgxqlSourceType sourceType) {
-        boolean autoGuard = sourceType == com.mybatisgx.dsl.mgxql.model.MgxqlSourceType.ENTITY
-                || sourceType == com.mybatisgx.dsl.mgxql.model.MgxqlSourceType.METHOD_NAME;
+    private void addWhereNodes(Element deleteElement, WhereClause whereClause, com.mybatisgx.dsl.mgxql.model.MgxqlSourceType sourceType, Boolean isDynamic) {
+        boolean autoGuard = Boolean.TRUE.equals(isDynamic)
+                && (sourceType == com.mybatisgx.dsl.mgxql.model.MgxqlSourceType.ENTITY
+                || sourceType == com.mybatisgx.dsl.mgxql.model.MgxqlSourceType.METHOD_NAME);
         String whereSql = mgxqlWhereHandler.renderWhereClause(whereClause.getRootExpression(), null, null, autoGuard);
         if (StringUtils.isBlank(whereSql)) {
             return;

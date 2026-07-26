@@ -155,8 +155,9 @@ public class UpdateTemplateHandler implements TemplateHandler {
         private void addWhereNodes(Element updateElement, EntityInfo entityInfo, MethodInfo methodInfo, WhereClause whereClause) {
             com.mybatisgx.dsl.mgxql.model.MgxqlSourceType sourceType = methodInfo.getMgxqlStatement() != null
                     ? methodInfo.getMgxqlStatement().getMgxqlSourceType() : null;
-            boolean autoGuard = sourceType == com.mybatisgx.dsl.mgxql.model.MgxqlSourceType.ENTITY
-                    || sourceType == com.mybatisgx.dsl.mgxql.model.MgxqlSourceType.METHOD_NAME;
+            boolean autoGuard = Boolean.TRUE.equals(methodInfo.getDynamic())
+                    && (sourceType == com.mybatisgx.dsl.mgxql.model.MgxqlSourceType.ENTITY
+                    || sourceType == com.mybatisgx.dsl.mgxql.model.MgxqlSourceType.METHOD_NAME);
             String whereSql = mgxqlWhereHandler.renderWhereClause(
                     whereClause.getRootExpression(), null, this.buildExtraWhereCondition(entityInfo, methodInfo), autoGuard);
             if (StringUtils.isBlank(whereSql)) {

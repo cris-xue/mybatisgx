@@ -78,7 +78,8 @@ public class SelectTemplateHandler implements TemplateHandler {
         WhereClause whereClause = selectStatement.getWhereClause();
         String logicDeleteCondition = buildLogicDeleteCondition(mapperInfo.getEntityInfo());
         MgxqlSourceType sourceType = selectStatement.getMgxqlSourceType();
-        boolean autoGuard = sourceType == MgxqlSourceType.ENTITY || sourceType == MgxqlSourceType.METHOD_NAME;
+        boolean autoGuard = Boolean.TRUE.equals(methodInfo.getDynamic())
+                && (sourceType == MgxqlSourceType.ENTITY || sourceType == MgxqlSourceType.METHOD_NAME);
         String whereSql = mgxqlWhereHandler.renderWhereClause(
                 whereClause != null ? whereClause.getRootExpression() : null, aliasContext, logicDeleteCondition, autoGuard);
         if (!whereSql.isEmpty()) {

@@ -151,14 +151,21 @@ public class MgxqlWhereHandler {
         }
         // 有 operator + 右值（参数或数字）
         String column = renderColumn(node, aliasContext);
+        boolean hasNot = node.getNotOperator() == ComparisonOperator.NOT;
         if (operator == ComparisonOperator.LIKE
                 || operator == ComparisonOperator.STARTING_WITH
                 || operator == ComparisonOperator.ENDING_WITH) {
-            sb.append(column).append(" like ").append(renderLikeValue(node, operator));
+            sb.append(column).append(hasNot ? " not like " : " like ").append(renderLikeValue(node, operator));
             return;
         }
         if (operator == ComparisonOperator.IN) {
-            sb.append(column).append(renderInValue(node));
+            sb.append(column).append(hasNot ? " not" : "").append(renderInValue(node));
+            return;
+        }
+        if (operator == ComparisonOperator.BETWEEN) {
+            String param = renderParamPath(node);
+            sb.append(column).append(hasNot ? " not between :" : " between :")
+                    .append(param).append("[0] and :").append(param).append("[1]");
             return;
         }
         // 关系/通用：column op value。NOT_EQ 用 != 而非 <>（operator.getValue() 为 <>，在 mgxsql 子集 XML 里 < 非法，避免 <where>...<>...</where> 解析失败）

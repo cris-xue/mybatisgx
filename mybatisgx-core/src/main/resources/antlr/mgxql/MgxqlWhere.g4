@@ -106,9 +106,8 @@ like_pattern: PERCENT+ parameter_reference | parameter_reference PERCENT+ | PERC
 // IN 集合：简单 (:idList) 或复杂 (item:objectList)=>$item.id（design D6，对齐 mgxsql ForeachUnit）。
 in_collection: simple_collection | complex_collection ;
 simple_collection: left_bracket parameter_reference right_bracket ;
+// (item:list)=>$item
 complex_collection: left_bracket item_name param_colon collection_path right_bracket ARROW DOLLAR value_expr_list ;
-// 未来会用双in括号中会用::
-// complex_collection: left_bracket item_name param_colon parameter_reference right_bracket ARROW DOLLAR value_expr_list ;
 // 复杂 IN 集合路径：collection 侧不带冒号，形如 userList 或 query.userList。
 collection_path: field_name (dot field_name)* ;
 // 复杂 IN 迭代值表达式字段列表：单字段 $item.id 或多字段 $item.id,item.name（多字段 → mgxsql tuple foreach）。

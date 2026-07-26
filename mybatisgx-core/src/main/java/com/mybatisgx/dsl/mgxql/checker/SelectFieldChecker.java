@@ -1,6 +1,7 @@
 package com.mybatisgx.dsl.mgxql.checker;
 
 import com.mybatisgx.dsl.mgxql.model.*;
+import com.mybatisgx.dsl.mgxql.model.expression.HavingAggregateExpression;
 
 /**
  * 字段存在性校验器
@@ -77,9 +78,8 @@ public class SelectFieldChecker extends FieldChecker {
         for (HavingConditionNode node : expression.getNodes()) {
             if (node.isNested()) {
                 this.checkHavingExpressionFields(node.getSubExpression(), context);
-            } else if (node.getLeftSide() instanceof com.mybatisgx.dsl.mgxql.model.expression.HavingAggregateExpression) {
-                com.mybatisgx.dsl.mgxql.model.expression.HavingAggregateExpression aggExpr =
-                        (com.mybatisgx.dsl.mgxql.model.expression.HavingAggregateExpression) node.getLeftSide();
+            } else if (node.getLeftSide() instanceof HavingAggregateExpression) {
+                HavingAggregateExpression aggExpr = (HavingAggregateExpression) node.getLeftSide();
                 String argument = aggExpr.getArgument();
                 if (argument == null || isAggregateConventionValue(aggExpr.getArgumentKind())) {
                     continue;

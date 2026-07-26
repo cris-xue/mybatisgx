@@ -1,12 +1,11 @@
 package com.mybatisgx.dsl.mgxql.checker;
 
-import com.mybatisgx.dsl.mgxql.model.ComparisonOperator;
-import com.mybatisgx.dsl.mgxql.model.WhereElement;
-import com.mybatisgx.dsl.mgxql.model.WhereExpression;
-import com.mybatisgx.dsl.mgxql.model.WhereConditionNode;
-import com.mybatisgx.dsl.mgxql.model.MgxqlStatement;
+import com.mybatisgx.dsl.mgxql.model.*;
 import com.mybatisgx.model.ColumnInfo;
 import com.mybatisgx.model.EntityInfo;
+
+import java.time.temporal.Temporal;
+import java.util.Date;
 
 /**
  * 运算符类型匹配校验器
@@ -112,8 +111,8 @@ public class OperatorTypeChecker implements MgxqlSemanticChecker {
         return Number.class.isAssignableFrom(type)
                 || type == int.class || type == long.class || type == double.class || type == float.class
                 || type == short.class || type == byte.class
-                || java.util.Date.class.isAssignableFrom(type)
-                || java.time.temporal.Temporal.class.isAssignableFrom(type)
+                || Date.class.isAssignableFrom(type)
+                || Temporal.class.isAssignableFrom(type)
                 || String.class.isAssignableFrom(type);
     }
 }

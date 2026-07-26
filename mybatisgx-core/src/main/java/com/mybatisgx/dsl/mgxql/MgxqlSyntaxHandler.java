@@ -2,9 +2,10 @@ package com.mybatisgx.dsl.mgxql;
 
 import com.google.common.collect.Maps;
 import com.mybatisgx.dsl.mgxql.model.*;
-import com.mybatisgx.exception.MybatisgxException;
+import com.mybatisgx.dsl.mgxql.model.expression.HavingAggregateExpression;
 import com.mybatisgx.dsl.mgxql.syntax.MgxqlParser;
 import com.mybatisgx.dsl.mgxql.syntax.MgxqlParserBaseVisitor;
+import com.mybatisgx.exception.MybatisgxException;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.RuleNode;
 import org.apache.ibatis.mapping.SqlCommandType;
@@ -474,15 +475,26 @@ public class MgxqlSyntaxHandler {
             }
         }
 
-        private com.mybatisgx.dsl.mgxql.model.expression.HavingAggregateExpression buildAggregateExpression(SelectItem aggItem) {
+        private HavingAggregateExpression buildAggregateExpression(SelectItem aggItem) {
             AggregateFunction function;
             switch (aggItem.getType()) {
-                case COUNT: function = AggregateFunction.COUNT; break;
-                case MAX: function = AggregateFunction.MAX; break;
-                case MIN: function = AggregateFunction.MIN; break;
-                case AVG: function = AggregateFunction.AVG; break;
-                case SUM: function = AggregateFunction.SUM; break;
-                default: throw new MybatisgxException("不支持的聚合函数类型: " + aggItem.getType());
+                case COUNT:
+                    function = AggregateFunction.COUNT;
+                    break;
+                case MAX:
+                    function = AggregateFunction.MAX;
+                    break;
+                case MIN:
+                    function = AggregateFunction.MIN;
+                    break;
+                case AVG:
+                    function = AggregateFunction.AVG;
+                    break;
+                case SUM:
+                    function = AggregateFunction.SUM;
+                    break;
+                default:
+                    throw new MybatisgxException("不支持的聚合函数类型: " + aggItem.getType());
             }
             String argument = null;
             FieldReference fieldRef = aggItem.getFieldRef();
@@ -493,8 +505,7 @@ public class MgxqlSyntaxHandler {
                     argument = fieldRef.getFieldName();
                 }
             }
-            com.mybatisgx.dsl.mgxql.model.expression.HavingAggregateExpression expression =
-                    new com.mybatisgx.dsl.mgxql.model.expression.HavingAggregateExpression(function, argument);
+            HavingAggregateExpression expression = new HavingAggregateExpression(function, argument);
             expression.setArgumentKind(aggItem.getArgumentKind());
             return expression;
         }

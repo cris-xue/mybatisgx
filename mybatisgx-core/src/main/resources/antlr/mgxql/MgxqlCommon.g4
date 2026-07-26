@@ -8,7 +8,7 @@ options {
 
 // 字段引用，user.name  role.status   只允许实体别名.字段，不支持嵌套属性链
 field_reference: field_name | entity_name_alias dot field_name ;
-// 参数引用（对应查询实体和@Param）。:name   :表示从根节点开始取值
+// 1、参数引用（对应查询实体和@Param）。:name   :表示从根节点开始取值  2、collection 侧不带冒号，形如 userList 或 query.userList。
 parameter_reference: param_colon field_name (dot field_name)* ;
 
 entity_name: UPPER_NAME ;

@@ -725,13 +725,6 @@ public class MgxqlParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitCollection_path(MgxqlParser.Collection_pathContext ctx) { return visitChildren(ctx); }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.</p>
-	 */
 	@Override public T visitValue_expr_list(MgxqlParser.Value_expr_listContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}

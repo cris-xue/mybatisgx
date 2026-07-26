@@ -24,7 +24,11 @@ import java.util.List;
  *
  * @author 薛承城
  * @date 2026/6/15
+ * @deprecated 本类产 dom4j {@link org.dom4j.Element}，未被任何生产代码引用（Select/Delete/Update 走
+ *     {@link MgxqlWhereHandler} 的文本渲染路径）。保留作为 {@link MgxqlWhereHandler} 出现 bug 时的参考实现，
+ *     后续 mgxql-render-mgxql-subset P2 task 4.9 切到 MgxqlSubsetRenderer 时一同清理。
  */
+@Deprecated
 public class MgxqlWhereTemplateHandler {
 
     private AliasContext aliasContext;

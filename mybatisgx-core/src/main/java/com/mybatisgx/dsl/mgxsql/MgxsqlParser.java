@@ -1063,6 +1063,12 @@ public class MgxsqlParser {
 
             if (c == ':' && i + 1 < text.length() && MgxsqlSyntaxHelper.isIdentifierStart(text.charAt(i + 1))) {
                 int paramNameEnd = MgxsqlSyntaxHelper.findIdentifierEnd(text, i + 1);
+                if (paramNameEnd < text.length() && text.charAt(paramNameEnd) == '[') {
+                    int closeBracket = text.indexOf(']', paramNameEnd);
+                    if (closeBracket > paramNameEnd) {
+                        paramNameEnd = closeBracket + 1;
+                    }
+                }
                 String paramName = text.substring(i + 1, paramNameEnd);
                 if (paramNameEnd < text.length() && text.charAt(paramNameEnd) == '%') {
                     flushBodyText(target, buf);

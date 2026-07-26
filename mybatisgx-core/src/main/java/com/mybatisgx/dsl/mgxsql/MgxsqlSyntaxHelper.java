@@ -162,6 +162,19 @@ public final class MgxsqlSyntaxHelper {
                 break;
             }
         }
+        // 支持 [index] 下标（如 :param[0]）
+        if (ctx.hasMore() && ctx.currentChar() == '[') {
+            paramPath.append('[');
+            ctx.advance();
+            while (ctx.hasMore() && Character.isDigit(ctx.currentChar())) {
+                paramPath.append(ctx.currentChar());
+                ctx.advance();
+            }
+            if (ctx.hasMore() && ctx.currentChar() == ']') {
+                paramPath.append(']');
+                ctx.advance();
+            }
+        }
         return paramPath.length() > 0 ? paramPath.toString() : null;
     }
 

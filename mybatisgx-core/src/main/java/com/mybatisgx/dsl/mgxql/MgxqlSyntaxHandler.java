@@ -868,7 +868,7 @@ public class MgxqlSyntaxHandler {
                     // 简单集合：CollectionInfo 由绑定阶段默认（itemName=item, collectionName=参数名, valueExpr=#{item}）
                 } else if (inCtx.complex_collection() != null) {
                     MgxqlParser.Complex_collectionContext complex = inCtx.complex_collection();
-                    List<String> collectionPath = parseFieldPath(complex.collection_path().field_name());
+                    List<String> collectionPath = parseFieldPath(complex.parameter_reference().field_name());
                     node.setParamValuePath(collectionPath);
                     node.setIndex(conditionIndex.getAndIncrement());
                     // 复杂集合三字段（design D6）：itemName=item_name、collectionName=参数名、valueExpr=迭代值字段链（如 item.id）

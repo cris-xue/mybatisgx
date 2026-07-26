@@ -12,7 +12,7 @@ import java.util.List;
  * @description 三标签容器下沉 AST 节点
  * @date 2026/7/13
  */
-public class DescentScope extends AbstractMgxsqlNode {
+public class DescentScope extends AbstractMgxsqlNode implements MgxsqlScope {
 
     /**
      * 原生开标签全文（含属性），如 {@code <trim prefix="SET" suffixOverrides=",">}

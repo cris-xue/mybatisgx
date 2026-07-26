@@ -11,7 +11,7 @@ import java.util.List;
  * @description choose 多分支选择 AST 节点
  * @date 2026/7/13
  */
-public class ChooseUnit extends AbstractMgxsqlNode {
+public class ChooseUnit extends AbstractMgxsqlNode implements MgxsqlUnit {
 
     /**
      * when 分支序列（每个必须带 guard）

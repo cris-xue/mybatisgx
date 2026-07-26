@@ -8,7 +8,7 @@ package com.mybatisgx.dsl.mgxsql.model;
  * @description :param 参数绑定 AST 节点
  * @date 2026/7/13
  */
-public class ParamExpr extends AbstractMgxsqlNode {
+public class ParamExpr extends AbstractMgxsqlNode implements MgxsqlExpr {
 
     /**
      * 参数路径（支持嵌套，如 user.name）

@@ -13,7 +13,7 @@ import java.util.List;
  * @description WHERE 语法域 AST 节点
  * @date 2026/7/13
  */
-public class WhereScope extends AbstractMgxsqlNode {
+public class WhereScope extends AbstractMgxsqlNode implements MgxsqlScope {
 
     /**
      * 是否为有边界形式 where[...]

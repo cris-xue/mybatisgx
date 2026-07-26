@@ -9,7 +9,7 @@ package com.mybatisgx.dsl.mgxsql.model;
  * @description ${param} 原生替换语法 AST 节点
  * @date 2026/7/13
  */
-public class DollarParamExpr extends AbstractMgxsqlNode {
+public class DollarParamExpr extends AbstractMgxsqlNode implements MgxsqlExpr {
 
     /**
      * ${ 与 } 之间的原文

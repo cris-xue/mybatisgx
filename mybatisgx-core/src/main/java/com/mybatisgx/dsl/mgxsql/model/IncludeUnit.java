@@ -10,7 +10,7 @@ package com.mybatisgx.dsl.mgxsql.model;
  * @description include 单元块 AST 节点
  * @date 2026/7/16
  */
-public class IncludeUnit extends AbstractMgxsqlNode {
+public class IncludeUnit extends AbstractMgxsqlNode implements MgxsqlUnit {
 
     /**
      * 被引用的 sql 片段 id（静态标识符）

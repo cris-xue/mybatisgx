@@ -15,7 +15,7 @@ package com.mybatisgx.dsl.mgxsql.model;
  * @description foreach 单元块 AST 节点
  * @date 2026/7/13
  */
-public class ForeachUnit extends AbstractMgxsqlNode {
+public class ForeachUnit extends AbstractMgxsqlNode implements MgxsqlUnit {
 
     /**
      * 迭代变量名（简单类型固定为 "item"）

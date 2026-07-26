@@ -12,7 +12,7 @@ import java.util.List;
  * @description SET 语法域 AST 节点
  * @date 2026/7/13
  */
-public class SetScope extends AbstractMgxsqlNode {
+public class SetScope extends AbstractMgxsqlNode implements MgxsqlScope {
 
     /**
      * 是否为有边界形式 set[...]

@@ -9,7 +9,7 @@ package com.mybatisgx.dsl.mgxsql.model;
  * @description $variable 局部变量 AST 节点
  * @date 2026/7/13
  */
-public class LocalVarExpr extends AbstractMgxsqlNode {
+public class LocalVarExpr extends AbstractMgxsqlNode implements MgxsqlExpr {
 
     /**
      * 变量名（如 item、item.id）

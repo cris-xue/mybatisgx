@@ -18,7 +18,7 @@ package com.mybatisgx.dsl.mgxsql.model;
  * @description bind/LIKE 单元块 AST 节点
  * @date 2026/7/13
  */
-public class BindUnit extends AbstractMgxsqlNode {
+public class BindUnit extends AbstractMgxsqlNode implements MgxsqlUnit {
 
     /**
      * 原始参数名（如 name），用于参数收集

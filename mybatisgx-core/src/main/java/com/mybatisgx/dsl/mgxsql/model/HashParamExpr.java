@@ -9,7 +9,7 @@ package com.mybatisgx.dsl.mgxsql.model;
  * @description #{param} 原生参数引用 AST 节点
  * @date 2026/7/13
  */
-public class HashParamExpr extends AbstractMgxsqlNode {
+public class HashParamExpr extends AbstractMgxsqlNode implements MgxsqlExpr {
 
     /**
      * #{ 与 } 之间的原文

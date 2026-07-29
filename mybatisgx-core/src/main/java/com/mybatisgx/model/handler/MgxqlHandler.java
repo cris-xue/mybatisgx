@@ -198,7 +198,15 @@ public class MgxqlHandler {
             LOGGER.warn("{}.{}方法无查询条件，可能触发全表扫描", mapperInfo.getNamespace(), methodInfo.getMethodName());
             return;
         }
-        for (WhereConditionNode conditionNode : conditionExpression.getNodes()) {
+        for (WhereElement element : conditionExpression.getNodes()) {
+            // 动态门变体（Bracket/If/Choose/When）：递归进 body 继续绑定（与 subExpression 同构，design 2.6/D2）
+            if (!element.isCondition()) {
+                for (WhereExpression child : element.getChildExpressions()) {
+                    this.bindConditionParam(mapperInfo, methodInfo, child);
+                }
+                continue;
+            }
+            WhereConditionNode conditionNode = element.asCondition();
             WhereExpression subExpression = conditionNode.getSubExpression();
             if (subExpression != null) {
                 this.bindConditionParam(mapperInfo, methodInfo, subExpression);
@@ -409,9 +417,14 @@ public class MgxqlHandler {
 
         com.mybatisgx.dsl.mgxql.model.ComparisonOperator operator = conditionNode.getOperator();
         if (operator == com.mybatisgx.dsl.mgxql.model.ComparisonOperator.IN || operator == com.mybatisgx.dsl.mgxql.model.ComparisonOperator.BETWEEN) {
-            CollectionInfo collectionInfo = new CollectionInfo();
-            collectionInfo.setItemName("item");
-            boundParam.setCollectionInfo(collectionInfo);
+            // 复杂 IN（解析阶段已填 node.collectionInfo 三字段，design D6 task 5.3）优先；简单 IN 默认 itemName="item"
+            if (conditionNode.getCollectionInfo() != null) {
+                boundParam.setCollectionInfo(conditionNode.getCollectionInfo());
+            } else {
+                CollectionInfo collectionInfo = new CollectionInfo();
+                collectionInfo.setItemName("item");
+                boundParam.setCollectionInfo(collectionInfo);
+            }
         }
 
         return boundParam;

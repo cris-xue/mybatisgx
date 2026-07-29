@@ -1,5 +1,6 @@
 package com.mybatisgx.dsl.mgxql.checker;
 
+import com.mybatisgx.dsl.mgxql.model.WhereElement;
 import com.mybatisgx.dsl.mgxql.model.WhereExpression;
 import com.mybatisgx.dsl.mgxql.model.WhereConditionNode;
 import com.mybatisgx.dsl.mgxql.model.MgxqlStatement;
@@ -37,7 +38,15 @@ public abstract class FieldChecker implements MgxqlSemanticChecker {
         if (expression == null || expression.getNodes() == null) {
             return;
         }
-        for (WhereConditionNode node : expression.getNodes()) {
+        for (WhereElement element : expression.getNodes()) {
+            // 动态门变体：递归进 body 继续字段校验（design D2/2.6）
+            if (!element.isCondition()) {
+                for (WhereExpression child : element.getChildExpressions()) {
+                    this.checkConditionExpressionFields(child, context);
+                }
+                continue;
+            }
+            WhereConditionNode node = element.asCondition();
             if (node.isNested()) {
                 this.checkConditionExpressionFields(node.getSubExpression(), context);
             } else if (node.getFieldName() != null) {

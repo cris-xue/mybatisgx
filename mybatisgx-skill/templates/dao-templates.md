@@ -476,31 +476,50 @@ public interface UserDao extends SimpleDao<User, UserQuery, Long> {
     @Statement("select * from User where name = :name and age > :age")
     List<User> findActiveUsers(@Param("name") String name, @Param("age") Integer age);
 
-    // Optional conditions (? prefix = MyBatis <if> tag)
-    @Statement("select * from User where ?name = :name and ?age > :age")
+    // Dynamic conditions (#[body] = auto isNotEmpty guard)
+    @Statement("select * from User where #[name = :name] #[and age > :age]")
     List<User> search(@Param("name") String name, @Param("age") Integer age);
 
+    // Custom guard with #if
+    @Statement("select * from User where #if(:minAge != null && :maxAge != null)[age between :ageRange]")
+    List<User> findByAgeRange(@Param("minAge") Integer minAge, @Param("maxAge") Integer maxAge, @Param("ageRange") List<Integer> ageRange);
+
+    // Multi-branch with #choose
+    @Statement("select * from User where #choose[#when(:type == 'vip')[level >= :level] #otherwise[status = :status]]")
+    List<User> findByType(@Param("type") String type, @Param("level") Integer level, @Param("status") Integer status);
+
     // Multi-entity JOIN
-    @Statement("select user.name, role.name from User user left join Role role on user = role where user.dept = :dept")
+    @Statement("select u.name, r.name from User u left join Role r on u = r where u.dept = :dept")
     List<UserRoleProjection> findUserRoles(@Param("dept") String dept);
 
-    // Aggregation
+    // Aggregation + GROUP BY + HAVING
     @Statement("select count(*) from User where dept = :dept")
     long countByDept(@Param("dept") String dept);
 
     @Statement("select avg(age) from User group by dept having avg(age) > :minAvg")
     List<Map<String, Object>> findDeptAvgAge(@Param("minAvg") Integer minAvg);
+
+    // IN shorthand
+    @Statement("select * from User where id in :idList")
+    List<User> findByIds(@Param("idList") List<Long> idList);
+
+    // LIKE shorthand
+    @Statement("select * from User where #[name like %:name%]")
+    List<User> findByNameLike(@Param("name") String name);
 }
 ```
 
-### DELETE/UPDATE
+### DELETE/UPDATE/INSERT
 
 ```java
 @Statement("delete User where name = :name")
-void deleteByName(@Param("name") String name);
+int deleteByName(@Param("name") String name);
 
 @Statement("update User where name = :name")
 int updateByName(@Param("name") String name, User entity);
+
+@Statement("insert User")
+int insert(User user);
 ```
 
 ### Condition Source Selection Guide
@@ -509,7 +528,200 @@ int updateByName(@Param("name") String name, User entity);
 |----------|-------------|---------|
 | 1-3 simple conditions | Method name | `findByNameAndAge` |
 | Dynamic null-skipping conditions | QueryEntity | `findList(UserQuery query)` |
+| Dynamic WHERE with multiple optional conditions | MGXSQL (@Lang + @Select) | `@Lang(MgxsqlLanguageDriver.class) @Select("select * from t_user where\n  #id = :id\n  #and name like %:name%")` |
+| Dynamic SET with optional fields | MGXSQL (@Lang + @Update) | `@Lang(MgxsqlLanguageDriver.class) @Update("update t_user set[#[name = :name], #[age = :age]] where id = :id")` |
+| IN list with auto-foreach | MGXSQL | `@Lang(MgxsqlLanguageDriver.class) @Select("select * from t_user where id in :idList")` |
+| LIKE with auto-bind | MGXSQL | `@Lang(MgxsqlLanguageDriver.class) @Select("select * from t_user where #[name like %:name%]")` |
 | Multi-entity JOIN | @Statement | `@Statement("select ... from User user left join Role role on user = role ...")` |
 | Aggregation + GROUP BY | @Statement | `@Statement("select count(*) from User group by dept having ...")` |
 | Custom column projection | @Statement | `@Statement("select user.name, role.name from ...")` |
 | Very complex SQL | mapper.xml | Direct XML definition (highest priority) |
+
+## MGXSQL DAO Method Templates
+
+When you need dynamic conditions (optional WHERE/SET), IN with auto-foreach, or LIKE with auto-bind, use MGXSQL with `@Lang` annotation.
+
+### Template 1: Dynamic Query
+
+```java
+// Using #[body] — auto-generates isNotEmpty() guard
+@Lang(MgxsqlLanguageDriver.class)
+@Select("select * from t_user where #[name = :name] #[and age > :age]")
+List<User> findByNameAndAge(@Param("name") String name, @Param("age") Integer age);
+
+// Using #condition form (must be on its own line)
+@Lang(MgxsqlLanguageDriver.class)
+@Select("select * from t_user where\n  #id = :id\n  #and name = :name")
+List<User> findByIdAndName(@Param("id") Long id, @Param("name") String name);
+
+// Custom guard expression
+@Lang(MgxsqlLanguageDriver.class)
+@Select("select * from t_user where #if(:type = 1)[status = :status]")
+List<User> findByTypeAndStatus(@Param("type") Integer type, @Param("status") String status);
+```
+
+### Template 2: Dynamic Update
+
+```java
+// Dynamic SET with optional fields
+@Lang(MgxsqlLanguageDriver.class)
+@Update("update t_user set[#[name = :name], #[age = :age]] where id = :id")
+int updateSelective(@Param("name") String name, @Param("age") Integer age, @Param("id") Long id);
+
+// Dynamic SET with custom guard
+@Lang(MgxsqlLanguageDriver.class)
+@Update("update t_user set[#if(name != null)[name = :name], #if(age != null)[age = :age]] where id = :id")
+int updateSelectiveByGuard(@Param("name") String name, @Param("age") Integer age, @Param("id") Long id);
+```
+
+### Template 3: Dynamic Delete
+
+```java
+// Dynamic WHERE in DELETE
+@Lang(MgxsqlLanguageDriver.class)
+@Delete("delete from t_user where #[name = :name] or id in :idList")
+int deleteByNameOrIds(@Param("name") String name, @Param("idList") List<Long> idList);
+```
+
+### Template 4: IN Query
+
+```java
+// Simple IN with auto-foreach
+@Lang(MgxsqlLanguageDriver.class)
+@Select("select * from t_user where id in :idList")
+List<User> findByIdList(@Param("idList") List<Long> idList);
+
+// IN with condition guard
+@Lang(MgxsqlLanguageDriver.class)
+@Select("select * from t_user where #[id in :idList]")
+List<User> findByIdListOptional(@Param("idList") List<Long> idList);
+
+// Complex type IN with property access
+@Lang(MgxsqlLanguageDriver.class)
+@Select("select * from t_user where id in (item:idList)=>$item.id")
+List<User> findByUserList(@Param("idList") List<User> userList);
+```
+
+### Template 5: LIKE Query
+
+```java
+// Both-side fuzzy LIKE with auto-bind
+@Lang(MgxsqlLanguageDriver.class)
+@Select("select * from t_user where #[name like %:name%]")
+List<User> findByNameLike(@Param("name") String name);
+
+// Right-side fuzzy LIKE
+@Lang(MgxsqlLanguageDriver.class)
+@Select("select * from t_user where #[name like :name%]")
+List<User> findByNameStartingWith(@Param("name") String name);
+
+// LIKE with other conditions
+@Lang(MgxsqlLanguageDriver.class)
+@Select("select * from t_user where\n  #name like %:name%\n  #and status = :status")
+List<User> findByNameLikeAndStatus(@Param("name") String name, @Param("status") String status);
+```
+
+### Template 6: #for Directive (Standalone Foreach)
+
+```java
+// Simple iteration
+@Lang(MgxsqlLanguageDriver.class)
+@Select("select * from t_user where status in #for(item:statusList)=>$item")
+List<User> findByStatusList(@Param("statusList") List<String> statusList);
+
+// Property access
+@Lang(MgxsqlLanguageDriver.class)
+@Select("select * from t_user where id in #for(item:userList)=>$item.id")
+List<User> findByUserList(@Param("userList") List<User> userList);
+
+// Composite key (tuple IN)
+@Lang(MgxsqlLanguageDriver.class)
+@Select("select * from t_user where (id, type) in #for(item:list)=>[$item.id,$item.type]")
+List<User> findByCompositeKeys(@Param("list") List<CompositeKey> keys);
+```
+
+### Template 7: #include (Fragment Reference)
+
+```java
+// Reference a SQL fragment
+@Lang(MgxsqlLanguageDriver.class)
+@Select("select * from t_user where id = :id\n#include[commonConditions]")
+List<User> findByIdWithCommon(@Param("id") Long id);
+```
+
+### Template 8: #bind (Computed Variables)
+
+```java
+// Computed variable with $name reference
+@Lang(MgxsqlLanguageDriver.class)
+@Select("select * from t_user\n#bind[age2 = :age + :age]\nwhere #if(:age != null)[age > $age2]")
+List<User> findByDoubleAge(@Param("age") Integer age);
+```
+
+### Template 9: #choose (Multi-branch)
+
+```java
+// Multi-branch mutual exclusion
+@Lang(MgxsqlLanguageDriver.class)
+@Select("select * from t_user where #choose[\n"
+      + "  #when(:type == 'vip')[salary > :minSalary]\n"
+      + "  #when(:type == 'svip')[salary > :minSalary and level = :level]\n"
+      + "  #otherwise[status = :status]\n"
+      + "]")
+List<User> findByType(@Param("type") String type, @Param("minSalary") Long minSalary,
+                      @Param("level") Integer level, @Param("status") Integer status);
+```
+
+### Template 10: Complete Complex Example
+
+```java
+@Repository
+public interface UserDao extends SimpleDao<User, UserQuery, Long> {
+
+    // Multi-optional-condition search with IN and LIKE
+    @Lang(MgxsqlLanguageDriver.class)
+    @Select("select * from t_user where\n"
+          + "  #name like %:name%\n"
+          + "  #and dept = :dept\n"
+          + "  #and age > :minAge\n"
+          + "  #and status in :statusList\n"
+          + "  order by create_time desc")
+    List<User> search(
+        @Param("name") String name,
+        @Param("dept") String dept,
+        @Param("minAge") Integer minAge,
+        @Param("statusList") List<String> statusList
+    );
+
+    // Nested conditions
+    @Lang(MgxsqlLanguageDriver.class)
+    @Select("select * from t_user where id = :id #[and name = :name #[and age > :age]]")
+    List<User> findByIdWithOptionalFilters(
+        @Param("id") Long id,
+        @Param("name") String name,
+        @Param("age") Integer age
+    );
+
+    // Custom guard with nested conditions
+    @Lang(MgxsqlLanguageDriver.class)
+    @Select("select * from t_user where #if(:type = 1)[#[and category = :category] #if(:subType = 2)[#[and tag = :tag]]]")
+    List<User> findByTypeWithSubConditions(
+        @Param("type") Integer type,
+        @Param("category") String category,
+        @Param("subType") Integer subType,
+        @Param("tag") String tag
+    );
+}
+```
+
+### MGXSQL Import Statements
+
+```java
+// MGXSQL imports (add to existing DAO imports)
+import com.mybatisgx.ext.scripting.xmltags.MgxsqlLanguageDriver;
+import org.apache.ibatis.lang.Lang;
+import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
+import org.apache.ibatis.annotations.Delete;
+import org.apache.ibatis.annotations.Param;
+```

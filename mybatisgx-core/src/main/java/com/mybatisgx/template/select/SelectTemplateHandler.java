@@ -1,23 +1,23 @@
 package com.mybatisgx.template.select;
 
-import com.mybatisgx.context.MybatisgxObjectFactory;
+import com.mybatisgx.annotation.LogicDelete;
+import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.dsl.mgxql.model.*;
+import com.mybatisgx.dsl.mgxsql.MgxsqlScanner;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.model.ColumnEntityRelation;
+import com.mybatisgx.model.ColumnInfo;
+import com.mybatisgx.model.EntityInfo;
 import com.mybatisgx.model.MapperInfo;
 import com.mybatisgx.model.MethodInfo;
-import com.mybatisgx.template.MgxqlWhereTemplateHandler;
+import com.mybatisgx.template.MgxqlWhereHandler;
 import com.mybatisgx.template.TemplateHandler;
-import com.mybatisgx.template.XmlCompiler;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * 单表查询模板处理
@@ -30,7 +30,8 @@ public class SelectTemplateHandler implements TemplateHandler {
     private static final Logger logger = LoggerFactory.getLogger(SelectTemplateHandler.class);
 
     private MgxqlSelectTemplateHandler mgxqlSelectTemplateHandler = new MgxqlSelectTemplateHandler();
-    private MgxqlWhereTemplateHandler mgxqlWhereTemplateHandler = new MgxqlWhereTemplateHandler();
+    private MgxqlWhereHandler mgxqlWhereHandler = new MgxqlWhereHandler();
+    private MgxsqlScanner mgxsqlScanner = new MgxsqlScanner();
     private HavingTemplateHandler havingTemplateHandler = new HavingTemplateHandler();
     private MgxqlOrderByTemplateHandler mgxqlOrderByTemplateHandler = new MgxqlOrderByTemplateHandler();
     private MgxqlGroupByTemplateHandler mgxqlGroupByTemplateHandler = new MgxqlGroupByTemplateHandler();
@@ -49,9 +50,7 @@ public class SelectTemplateHandler implements TemplateHandler {
         Element selectElement = mapperElement.addElement("select");
         selectElement.addAttribute("id", methodInfo.getMethodName());
 
-        List<Object> selectXmlItemList = new ArrayList();
         MapperInfo mapperInfo = methodInfo.getMapperInfo();
-
         SelectStatement selectStatement = (SelectStatement) methodInfo.getMgxqlStatement();
 
         // 设置返回结果集或者返回类型
@@ -65,76 +64,105 @@ public class SelectTemplateHandler implements TemplateHandler {
         ColumnEntityRelation fullTree = selectStatement.getMgxqlEntityRelationTree();
         AliasContext aliasContext = AliasContext.build(selectStatement, fullTree);
 
-        // 构建 from join
+        // 4.9 整 SELECT 走 mgxsql：各子句拼成完整 mgxsql 子集文本，一次性喂 MgxqlScanner 转 MyBatis XML 动态标签。
+        StringBuilder mgxsqlBuilder = new StringBuilder();
+
+        // 构建 SELECT/FROM/JOIN（jsqlparser PlainSelect.toString()，静态 SQL，scanner 原样透传）
         FromClause fromClause = selectStatement.getFromClause();
         if (fromClause != null) {
-            // MGXQL 路径：按 FromClause 渲染 FROM/JOIN/ON，按 SelectItem 投影渲染列
             PlainSelect plainSelect = mgxqlSelectTemplateHandler.buildSelectSql(selectStatement, aliasContext);
-            selectXmlItemList.add(plainSelect.toString());
+            mgxsqlBuilder.append(plainSelect.toString());
         }
 
-        // 构建查询条件
-        Element whereElement = null;
-        if (selectStatement != null) {
-            WhereClause whereClause = selectStatement.getWhereClause();
-            if (whereClause != null) {
-                whereElement = mgxqlWhereTemplateHandler.execute(mapperInfo.getEntityInfo(), methodInfo, whereClause.getRootExpression(), aliasContext);
-                selectXmlItemList.add(whereElement);
-            }
+        // 构建 WHERE（MgxqlWhereHandler 产 where[body] 子集文本；逻辑删除作为附加条件纳入 body）
+        WhereClause whereClause = selectStatement.getWhereClause();
+        String logicDeleteCondition = buildLogicDeleteCondition(mapperInfo.getEntityInfo());
+        MgxqlSourceType sourceType = selectStatement.getMgxqlSourceType();
+        boolean autoGuard = Boolean.TRUE.equals(methodInfo.getDynamic())
+                && (sourceType == MgxqlSourceType.ENTITY || sourceType == MgxqlSourceType.METHOD_NAME);
+        String whereSql = mgxqlWhereHandler.renderWhereClause(
+                whereClause != null ? whereClause.getRootExpression() : null, aliasContext, logicDeleteCondition, autoGuard);
+        if (!whereSql.isEmpty()) {
+            mgxsqlBuilder.append(" ").append(whereSql);
         }
 
         // GROUP BY 子句渲染
-        if (selectStatement instanceof SelectStatement) {
-            GroupByClause groupByClause = selectStatement.getGroupByClause();
-            if (groupByClause != null) {
-                String groupBySql = mgxqlGroupByTemplateHandler.execute(groupByClause, aliasContext);
-                selectXmlItemList.add(groupBySql);
+        GroupByClause groupByClause = selectStatement.getGroupByClause();
+        if (groupByClause != null) {
+            mgxsqlBuilder.append(mgxqlGroupByTemplateHandler.execute(groupByClause, aliasContext));
+        }
+
+        // HAVING 子句渲染（占位符 #{param} 暂留——scanner 对 HAVING :param 的支持待后续处理，见 docs/mgxql-render-subset-scanner-todo.md）
+        HavingExpression havingExpression = selectStatement.getHavingExpression();
+        if (havingExpression != null) {
+            String havingSql = havingTemplateHandler.execute(havingExpression, aliasContext);
+            if (!havingSql.isEmpty()) {
+                mgxsqlBuilder.append(havingSql);
             }
         }
 
-        // HAVING 子句渲染
-        if (selectStatement instanceof SelectStatement) {
-            HavingExpression havingExpression = selectStatement.getHavingExpression();
-            if (havingExpression != null) {
-                String havingSql = havingTemplateHandler.execute(havingExpression, aliasContext);
-                if (!havingSql.isEmpty()) {
-                    selectXmlItemList.add(havingSql);
-                }
-            }
+        // ORDER BY 子句渲染
+        OrderByClause orderByClause = selectStatement.getOrderByClause();
+        if (orderByClause != null) {
+            mgxsqlBuilder.append(mgxqlOrderByTemplateHandler.execute(orderByClause, aliasContext));
         }
 
-        // ORDER BY 子句渲染（MGXQL）
-        if (selectStatement instanceof SelectStatement) {
-            OrderByClause orderByClause = selectStatement.getOrderByClause();
-            if (orderByClause != null) {
-                String orderBySql = mgxqlOrderByTemplateHandler.execute(orderByClause, aliasContext);
-                selectXmlItemList.add(orderBySql);
-            }
+        // LIMIT 子句渲染（拼文本）
+        LimitClause limitClause = selectStatement.getLimitClause();
+        if (limitClause != null) {
+            mgxsqlBuilder.append(buildLimitSql(limitClause));
         }
 
-        // LIMIT 子句渲染（MGXQL）
-        if (selectStatement instanceof SelectStatement) {
-            LimitClause limitClause = selectStatement.getLimitClause();
-            if (limitClause != null) {
-                LimitTemplateHandler limitTemplateHandler = MybatisgxObjectFactory.get(LimitTemplateHandler.class);
-                limitTemplateHandler.execute(selectXmlItemList, limitClause);
+        // scanner 产出 XML 片段，解析为 XML 节点置入 <select>（mybatisgx 注册链不走 XMLLanguageDriver，
+        // <select> 子节点直接作为动态标签，不包 <script> 文本）。
+        String selectBodyXml = mgxsqlScanner.process(mgxsqlBuilder.toString());
+        Element bodyRoot;
+        try {
+            Document bodyDoc = DocumentHelper.parseText("<root>" + selectBodyXml + "</root>");
+            bodyRoot = bodyDoc.getRootElement();
+        } catch (org.dom4j.DocumentException e) {
+            throw new MybatisgxException("mgxql 整链渲染：解析 MgxsqlScanner 产出 XML 失败: " + e.getMessage() + " | 原文: " + selectBodyXml);
+        }
+        // 先复制子节点列表再 detach，避免遍历 bodyRoot.content() 时并发修改（detach 会从原列表移除）
+        // scanner 产出既包含 <where>/<if> 等 Element，也包含 SELECT/FROM/ORDER BY/LIMIT 静态 SQL 文本节点。
+        java.util.List<org.dom4j.Node> bodyNodes = new java.util.ArrayList<>();
+        for (Object child : bodyRoot.content()) {
+            if (child instanceof org.dom4j.Node) {
+                bodyNodes.add((org.dom4j.Node) child);
             }
         }
-
-        for (Object selectSql : selectXmlItemList) {
-            if (selectSql instanceof Element) {
-                selectElement.add((Element) selectSql);
-            }
-            if (selectSql instanceof String) {
-                selectElement.addText((String) selectSql);
-            }
-        }
-
-        // 脱去where标签
-        if (!methodInfo.getDynamic() && whereElement != null) {
-            XmlCompiler.where(whereElement);
+        for (org.dom4j.Node child : bodyNodes) {
+            selectElement.add(child.detach());
         }
 
         return document.asXML();
+    }
+
+    /**
+     * 构建逻辑删除附加条件文本（静态值，纳 WHERE body 子集文本）。
+     */
+    private String buildLogicDeleteCondition(EntityInfo entityInfo) {
+        if (entityInfo == null) {
+            return "";
+        }
+        ColumnInfo logicDeleteColumnInfo = entityInfo.getLogicDeleteColumnInfo();
+        if (logicDeleteColumnInfo == null) {
+            return "";
+        }
+        LogicDelete logicDelete = logicDeleteColumnInfo.getLogicDelete();
+        if (logicDelete == null) {
+            return "";
+        }
+        return " and " + logicDeleteColumnInfo.getDbColumnName() + " = '" + logicDelete.show() + "'";
+    }
+
+    /**
+     * 构建 LIMIT 子句文本（limit offset, size）。
+     */
+    private String buildLimitSql(LimitClause limitClause) {
+        if (limitClause == null) {
+            return "";
+        }
+        return " limit " + limitClause.getOffset() + ", " + limitClause.getSize();
     }
 }

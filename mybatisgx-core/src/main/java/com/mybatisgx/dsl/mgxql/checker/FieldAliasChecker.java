@@ -1,6 +1,7 @@
 package com.mybatisgx.dsl.mgxql.checker;
 
 import com.mybatisgx.dsl.mgxql.model.*;
+import com.mybatisgx.dsl.mgxql.model.expression.HavingAggregateExpression;
 import org.apache.ibatis.mapping.SqlCommandType;
 
 /**
@@ -83,16 +84,15 @@ public class FieldAliasChecker implements MgxqlSyntaxChecker {
     }
 
     private void checkHavingAliasFields(HavingExpression expression, boolean hasMultipleEntities,
-                                         boolean isDeleteOrUpdate, SyntaxCheckerContext context) {
+                                        boolean isDeleteOrUpdate, SyntaxCheckerContext context) {
         if (expression == null || expression.getNodes() == null) {
             return;
         }
         for (HavingConditionNode node : expression.getNodes()) {
             if (node.isNested()) {
                 this.checkHavingAliasFields(node.getSubExpression(), hasMultipleEntities, isDeleteOrUpdate, context);
-            } else if (node.getLeftSide() instanceof com.mybatisgx.dsl.mgxql.model.expression.HavingAggregateExpression) {
-                com.mybatisgx.dsl.mgxql.model.expression.HavingAggregateExpression aggExpr =
-                        (com.mybatisgx.dsl.mgxql.model.expression.HavingAggregateExpression) node.getLeftSide();
+            } else if (node.getLeftSide() instanceof HavingAggregateExpression) {
+                HavingAggregateExpression aggExpr = (HavingAggregateExpression) node.getLeftSide();
                 String argument = aggExpr.getArgument();
                 if (argument == null || isAggregateConventionValue(aggExpr.getArgumentKind())) {
                     continue;
@@ -115,7 +115,14 @@ public class FieldAliasChecker implements MgxqlSyntaxChecker {
         if (expression == null || expression.getNodes() == null) {
             return;
         }
-        for (WhereConditionNode node : expression.getNodes()) {
+        for (WhereElement element : expression.getNodes()) {
+            if (!element.isCondition()) {
+                for (WhereExpression child : element.getChildExpressions()) {
+                    checkConditionExpressionFields(child, hasMultipleEntities, isDeleteOrUpdate, context);
+                }
+                continue;
+            }
+            WhereConditionNode node = element.asCondition();
             if (node.isNested()) {
                 checkConditionExpressionFields(node.getSubExpression(), hasMultipleEntities, isDeleteOrUpdate, context);
             } else if (node.getFieldName() != null) {

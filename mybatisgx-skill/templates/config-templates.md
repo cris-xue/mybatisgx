@@ -422,4 +422,66 @@ public class Application {
 
 **Done!** MyBatisGX is configured and ready to use.
 
+## MGXSQL Configuration
+
+MGXSQL dynamic SQL syntax can be enabled per-method or globally.
+
+### Method 1: `@Lang` Annotation (Per-Method)
+
+Add `@Lang(MgxsqlLanguageDriver.class)` to individual DAO methods. Other methods still use the default language driver.
+
+```java
+import com.mybatisgx.ext.scripting.xmltabs.MgxsqlLanguageDriver;
+import org.apache.ibatis.lang.Lang;
+import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Param;
+
+@Repository
+public interface UserDao extends SimpleDao<User, UserQuery, Long> {
+
+    @Lang(MgxsqlLanguageDriver.class)
+    @Select("select * from t_user where\n  #id = :id\n  #and name like %:name%")
+    List<User> findByIdAndName(@Param("id") Long id, @Param("name") String name);
+
+    // This method uses default language driver (no MGXSQL)
+    @Statement("select * from User where name = :name")
+    List<User> findByName(@Param("name") String name);
+}
+```
+
+**When to use**: Only some DAO methods need MGXSQL syntax; others use MGXQL or method name queries.
+
+### Method 2: Global Configuration (All Methods)
+
+Set `MgxsqlLanguageDriver` as the default scripting language. All `@Select`/`@Update`/`@Delete` annotations will use MGXSQL syntax by default.
+
+```yaml
+mybatis:
+  configuration:
+    default-scripting-language: com.mybatisgx.ext.scripting.xmltags.MgxsqlLanguageDriver
+```
+
+**Full configuration example:**
+
+```yaml
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/mydb?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    username: root
+    password: password
+
+mybatisgx:
+  mapper-locations: classpath:mapper/*Mapper.xml
+  type-aliases-package: com.example.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    # Enable MGXSQL globally for all annotation-based SQL
+    default-scripting-language: com.mybatisgx.ext.scripting.xmltags.MgxsqlLanguageDriver
+```
+
+**When to use**: Most DAO methods use MGXSQL syntax; the project heavily relies on dynamic SQL annotations.
+
+> **Note**: When MGXSQL is set globally, `@Statement` (MGXQL) methods are NOT affected — they use their own parser. Only `@Select`/`@Update`/`@Delete` annotations are affected by the default scripting language setting.
+
 Use these templates to quickly set up MyBatisGX in Spring Boot projects!

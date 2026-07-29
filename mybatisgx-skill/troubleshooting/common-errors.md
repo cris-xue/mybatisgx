@@ -468,6 +468,11 @@ When encountering issues, check:
 - [ ] MGXQL expression syntax is correct (see [MGXQL Reference](../knowledge/mgxql.md))
 - [ ] @Statement parameter names match `:paramName` references
 - [ ] Entity aliases provided in multi-entity queries
+- [ ] MGXSQL conditions use `:param` not `#{param}` in `#[...]` blocks
+- [ ] `#condition` / `#and` / `#or` are on their own line
+- [ ] `#[` and `where[` and `set[` brackets are properly closed
+- [ ] `@Lang(MgxsqlLanguageDriver.class)` is present when using MGXSQL syntax
+- [ ] `=>` right side uses `$variable` not `#{}` or `${}`
 
 ## MGXQL Syntax Errors
 
@@ -529,6 +534,55 @@ When encountering issues, check:
 - **Solution**: Check the MGXQL expression for syntax errors, missing aliases, or non-existent entity/field names
 - [ ] Appropriate fetch mode chosen for associations
 
+## MGXSQL Syntax Errors
+
+**36. `条件节点块内不允许使用 #{param}`**
+- **Cause**: Used `#{param}` inside a condition node block (`#[...]` or `#if(expr)[...]`)
+- **Error**: `#[id = #{id}]`
+- **Solution**: Use `:param` syntax instead: `#[id = :id]`
+
+**37. `条件节点块内不允许使用 ${param}`**
+- **Cause**: Used `${param}` inside a condition node block
+- **Error**: `#[id = ${id}]`
+- **Solution**: Use `:param` syntax instead: `#[id = :id]`
+
+**38. `条件节点块内不允许使用 XML 标签`**
+- **Cause**: Used MyBatis XML tags inside a condition node block
+- **Error**: `#[<if test="id != null">id = :id</if>]`
+- **Solution**: Use MGXSQL condition syntax: `#if(id != null)[id = :id]` or `#[id = :id]`
+
+**39. `'#condition' 形式1必须独占一行`**
+- **Cause**: `#condition` is on the same line as other text
+- **Error**: `where #id = :id` (inline)
+- **Solution**: Place on its own line:
+```sql
+where
+  #id = :id
+```
+
+**40. `'#and'/'#or' 必须独占一行`**
+- **Cause**: `#and` or `#or` is not on its own line
+- **Error**: `where #and name = :name`
+- **Solution**: Either place on its own line or use `#[and ...]` instead:
+```sql
+-- Option 1: Own line
+where
+  #and name = :name
+
+-- Option 2: Block syntax
+where #[and name = :name]
+```
+
+**41. `条件节点块内不允许 #and/#or 简写`**
+- **Cause**: Used `#and`/`#or` inside a `#[...]` or `#if(expr)[...]` block
+- **Error**: `#[id = :id #and name = :name]`
+- **Solution**: Use nested `#[and ...]` syntax: `#[id = :id #[and name = :name]]`
+
+**42. `'[' 未闭合`**
+- **Cause**: Unclosed bracket in `where[`, `set[`, or `#[`
+- **Error**: `where[id = :id` or `#[name = :name`
+- **Solution**: Add the closing `]`: `where[id = :id]` or `#[name = :name]`
+
 ## Getting More Help
 
 If the issue persists:
@@ -551,5 +605,147 @@ Enable MyBatis debug logging to see SQL execution details
 
 5. **Review documentation:**
 Refer to knowledge files for detailed explanations
+
+---
+
+## MGXSQL Syntax Errors
+
+### #(expr) Deprecated
+
+**Error:**
+```
+mgxsql 语法错误: #(expr) 已废弃，请使用 #if(expr)[body]
+```
+
+**Cause:** Using the old `#(expr)[body]` syntax which has been replaced by `#if(expr)[body]`.
+
+**Solution:**
+```sql
+-- Before (deprecated)
+where #(age > 2)[name = :name]
+
+-- After (correct)
+where #if(age > 2)[name = :name]
+```
+
+### #when Without Guard
+
+**Error:**
+```
+mgxsql 语法错误: #when 必须带 guard，写法 #when(expr)[body]
+```
+
+**Cause:** `#when` inside `#choose` must have a guard expression.
+
+**Solution:**
+```sql
+-- Before (error)
+where #choose[#when[salary > :minSalary]]
+
+-- After (correct)
+where #choose[#when(:type == 'vip')[salary > :minSalary]]
+```
+
+### #bind Declaration Before Reference
+
+**Error:**
+```
+mgxsql 语法错误: $name 引用必须在同名 #bind 声明之后
+```
+
+**Cause:** Referencing a `$variable` before its `#bind[name = expr]` declaration.
+
+**Solution:**
+```sql
+-- Before (error): reference before declaration
+where #if(:age != null)[id = $age2]
+#bind[age2 = :age + :age]
+
+-- After (correct): declaration before reference
+#bind[age2 = :age + :age]
+where #if(:age != null)[id = $age2]
+```
+
+### #for Composite Key Format
+
+**Error:**
+```
+mgxsql 语法错误: #for => 右边格式错误
+```
+
+**Cause:** Incorrect syntax in `#for(item:collection)=>expr`. The right side of `=>` must be `$variable` or `[$var1,$var2]`.
+
+**Solution:**
+```sql
+-- Before (error)
+where id in #for(item:list)=>#{item.id}
+
+-- After (correct)
+where id in #for(item:list)=>$item.id
+
+-- Composite key (correct)
+where (id, type) in #for(item:list)=>[$item.id,$item.type]
+```
+
+### #include Invalid refid
+
+**Error:**
+```
+mgxsql 语法错误: #include refid 只接受静态标识符
+```
+
+**Cause:** Using `:param` or dynamic content in `#include[...]`.
+
+**Solution:**
+```sql
+-- Before (error)
+#include[:sqlId]
+
+-- After (correct)
+#include[commonConditions]
+```
+
+---
+
+## MGXQL Syntax Errors
+
+### ? Prefix Deprecated
+
+**Error:**
+```
+MGXQL 语法错误: ? 前缀已废弃
+```
+
+**Cause:** Using the old `?condition` optional syntax.
+
+**Solution:**
+```sql
+-- Before (deprecated)
+select * from User where ?name = :name and ?age > :age
+
+-- After (correct)
+select * from User where #[name = :name] #[and age > :age]
+
+-- Custom guard
+select * from User where #if(:age != null)[age >= :age]
+```
+
+### Condition Grouping Removed
+
+**Error:**
+```
+MGXQL 语法错误: 不支持条件分组语法
+```
+
+**Cause:** Using the removed `findByNameLikeAnd(AgeOrSex)` grouping syntax. This syntax has been completely removed from the framework.
+
+**Solution:** Use MGXQL with parentheses for logical grouping:
+```java
+// Before (removed)
+@Statement("findByNameLikeAnd(AgeOrSex)")
+
+// After (correct)
+@Statement("select * from User where name like :name and (age = :age or sex = :sex)")
+```
 
 Remember: Most issues stem from configuration or annotation problems. Double-check the basics first!

@@ -61,26 +61,12 @@ public class StatementTemplateHandler {
     }
 
     private XNode complexTemplateHandle(MethodInfo methodInfo) {
+        // MGXQL 路径：方法名派生、@Statement、实体参数
         TemplateHandler templateHandler = TEMPLATE_HANDLER_MAP.get(methodInfo.getSqlCommandType());
         if (templateHandler == null) {
             throw new MybatisgxException("不存在的操作方式");
         }
         String xmlString = templateHandler.execute(methodInfo);
-        /*if (methodInfo.getSqlCommandType() == SqlCommandType.SELECT) {
-            SelectTemplateHandler selectTemplateHandler = MybatisgxObjectFactory.get(SelectTemplateHandler.class);
-            xmlString = selectTemplateHandler.execute(methodInfo);
-        } else if (methodInfo.getSqlCommandType() == SqlCommandType.INSERT) {
-            InsertTemplateHandler insertTemplateHandler = MybatisgxObjectFactory.get(InsertTemplateHandler.class);
-            xmlString = insertTemplateHandler.execute(methodInfo);
-        } else if (methodInfo.getSqlCommandType() == SqlCommandType.DELETE) {
-            DeleteTemplateHandler deleteTemplateHandler = MybatisgxObjectFactory.get(DeleteTemplateHandler.class);
-            xmlString = deleteTemplateHandler.execute(methodInfo);
-        } else if (methodInfo.getSqlCommandType() == SqlCommandType.UPDATE) {
-            UpdateTemplateHandler updateTemplateHandler = MybatisgxObjectFactory.get(UpdateTemplateHandler.class);
-            xmlString = updateTemplateHandler.execute(methodInfo);
-        } else {
-            throw new MybatisgxException("不存在的操作方式");
-        }*/
         logger.debug("{}:\n{}", methodInfo.getMethodName(), xmlString);
         XPathParser xPathParser = XmlUtils.processXml(xmlString);
         return xPathParser.evalNode("/mapper/select|/mapper/insert|/mapper/delete|/mapper/update");

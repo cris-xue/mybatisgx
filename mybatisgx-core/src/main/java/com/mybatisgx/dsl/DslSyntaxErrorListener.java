@@ -3,7 +3,6 @@ package com.mybatisgx.dsl;
 import com.mybatisgx.exception.MybatisgxException;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.IntervalSet;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,14 +24,22 @@ public class DslSyntaxErrorListener extends BaseErrorListener {
 
     @Override
     public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException recognitionException) {
-        Token token = (Token) offendingSymbol;
-        String tokenSource = token.getTokenSource().getInputStream().toString();
+        String tokenSource;
         String errorDescription;
-        if (recognitionException != null) {
-            IntervalSet expected = recognitionException.getExpectedTokens();
-            String friendlyExpected = this.friendlyExpected(expected, recognizer.getVocabulary());
-            errorDescription = String.format("%s 语法错误，在(%s:%s)，非法输入：%s，当前位置可使用：%s", tokenSource, line, charPositionInLine, token.getText(), friendlyExpected);
+        if (offendingSymbol instanceof Token) {
+            Token token = (Token) offendingSymbol;
+            tokenSource = token.getTokenSource().getInputStream() != null ? token.getTokenSource().getInputStream().toString() : "";
+            if (recognitionException != null) {
+                IntervalSet expected = recognitionException.getExpectedTokens();
+                String friendlyExpected = this.friendlyExpected(expected, recognizer.getVocabulary());
+                errorDescription = String.format("%s 语法错误，在(%s:%s)，非法输入：%s，当前位置可使用：%s", tokenSource, line, charPositionInLine, token.getText(), friendlyExpected);
+            } else {
+                errorDescription = String.format("%s 语法错误: %s", tokenSource, msg);
+            }
         } else {
+            // offendingSymbol 为 null（词法层无法识别字符等场景），仅以 msg 描述
+            CharStream source = (recognizer != null && recognizer.getInputStream() != null) ? (CharStream) recognizer.getInputStream() : null;
+            tokenSource = source != null ? source.toString() : "";
             errorDescription = String.format("%s 语法错误: %s", tokenSource, msg);
         }
         throw new MybatisgxException(errorDescription);

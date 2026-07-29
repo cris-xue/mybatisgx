@@ -7,6 +7,7 @@ import com.mybatisgx.dsl.mgxql.model.expression.HavingAggregateExpression;
 import com.mybatisgx.dsl.test.entity.Menu;
 import com.mybatisgx.dsl.test.entity.Role;
 import com.mybatisgx.dsl.test.entity.User;
+import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.model.EntityInfo;
 import com.mybatisgx.model.MethodInfo;
 import com.mybatisgx.model.handler.EntityInfoHandler;
@@ -98,7 +99,7 @@ public class MgxqlAstHandlerTest {
                 "select * from User where name = :name and (age < :age or status = :status)");
         WhereClause whereClause = mgxqlStatement.getWhereClause();
         Assert.assertTrue(whereClause != null);
-        WhereConditionNode conditionNode = whereClause.getRootExpression().getNodes().get(0);
+        WhereConditionNode conditionNode = whereClause.getRootExpression().getConditions().get(0);
         Assert.assertEquals("name", conditionNode.getFieldName());
         Assert.assertEquals("name", StringUtils.join(conditionNode.getParamValuePath(), "."));
     }
@@ -109,7 +110,7 @@ public class MgxqlAstHandlerTest {
         MgxqlStatement stmt = parse("select * from User where name = :name");
         WhereClause whereClause = stmt.getWhereClause();
         Assert.assertNotNull(whereClause);
-        List<WhereConditionNode> nodes = whereClause.getRootExpression().getNodes();
+        List<WhereConditionNode> nodes = whereClause.getRootExpression().getConditions();
         Assert.assertEquals(1, nodes.size());
         WhereConditionNode node = nodes.get(0);
         Assert.assertEquals("name", node.getFieldName());
@@ -123,7 +124,7 @@ public class MgxqlAstHandlerTest {
         MgxqlStatement stmt = parse("select * from User where name = :name and age > :age and status = :status");
         WhereClause whereClause = stmt.getWhereClause();
         Assert.assertNotNull(whereClause);
-        List<WhereConditionNode> nodes = whereClause.getRootExpression().getNodes();
+        List<WhereConditionNode> nodes = whereClause.getRootExpression().getConditions();
         Assert.assertEquals(3, nodes.size());
 
         Assert.assertEquals("name", nodes.get(0).getFieldName());
@@ -144,9 +145,13 @@ public class MgxqlAstHandlerTest {
         MgxqlStatement stmt = parse("select * from User where name = :name or age > :age");
         WhereClause whereClause = stmt.getWhereClause();
         Assert.assertNotNull(whereClause);
-        // OR表达式在根层
+        // 扁平序列（design Q7）：OR 在第二个节点自身 logicOperator，根 expression 仅容器标记（NULL）
         WhereExpression rootExpr = whereClause.getRootExpression();
-        Assert.assertEquals(LogicOperator.OR, rootExpr.getLogicOperator());
+        List<WhereConditionNode> nodes = rootExpr.getConditions();
+        Assert.assertEquals(2, nodes.size());
+        Assert.assertEquals(LogicOperator.NULL, nodes.get(0).getLogicOperator());
+        Assert.assertEquals(LogicOperator.OR, nodes.get(1).getLogicOperator());
+        Assert.assertEquals("age", nodes.get(1).getFieldName());
     }
 
     @Test
@@ -155,7 +160,7 @@ public class MgxqlAstHandlerTest {
         MgxqlStatement stmt = parse("select * from User where name = :name and (age < :age or status = :status)");
         WhereClause whereClause = stmt.getWhereClause();
         Assert.assertNotNull(whereClause);
-        List<WhereConditionNode> nodes = whereClause.getRootExpression().getNodes();
+        List<WhereConditionNode> nodes = whereClause.getRootExpression().getConditions();
         // 第一个是name条件，第二个是括号嵌套表达式
         Assert.assertEquals(2, nodes.size());
         Assert.assertEquals("name", nodes.get(0).getFieldName());
@@ -163,12 +168,14 @@ public class MgxqlAstHandlerTest {
         WhereConditionNode bracketNode = nodes.get(1);
         Assert.assertTrue(bracketNode.isNested());
         Assert.assertNotNull(bracketNode.getSubExpression());
-        // 括号内是OR表达式
+        // 括号内：扁平序列（design Q7），OR 在第二个节点 logicOperator，根（容器）logicOperator=NULL
         WhereExpression subExpr = bracketNode.getSubExpression();
-        Assert.assertEquals(LogicOperator.OR, subExpr.getLogicOperator());
-        Assert.assertEquals(2, subExpr.getNodes().size());
-        Assert.assertEquals("age", subExpr.getNodes().get(0).getFieldName());
-        Assert.assertEquals("status", subExpr.getNodes().get(1).getFieldName());
+        List<WhereConditionNode> subNodes = subExpr.getConditions();
+        Assert.assertEquals(2, subNodes.size());
+        Assert.assertEquals(LogicOperator.NULL, subNodes.get(0).getLogicOperator());
+        Assert.assertEquals(LogicOperator.OR, subNodes.get(1).getLogicOperator());
+        Assert.assertEquals("age", subNodes.get(0).getFieldName());
+        Assert.assertEquals("status", subNodes.get(1).getFieldName());
     }
 
     // ==================== 比较运算符测试 ====================
@@ -178,7 +185,7 @@ public class MgxqlAstHandlerTest {
         // 测试各种比较运算符
         MgxqlStatement stmt = parse("select * from User where age > :age and age < :maxAge and age >= :minAge and age <= :limitAge and name != :excludeName");
         WhereClause whereClause = stmt.getWhereClause();
-        List<WhereConditionNode> nodes = whereClause.getRootExpression().getNodes();
+        List<WhereConditionNode> nodes = whereClause.getRootExpression().getConditions();
         Assert.assertEquals(5, nodes.size());
 
         Assert.assertEquals(ComparisonOperator.GT, nodes.get(0).getOperator());
@@ -193,7 +200,7 @@ public class MgxqlAstHandlerTest {
         // 测试like运算符
         MgxqlStatement stmt = parse("select * from User where name like :name");
         WhereClause whereClause = stmt.getWhereClause();
-        WhereConditionNode node = whereClause.getRootExpression().getNodes().get(0);
+        WhereConditionNode node = whereClause.getRootExpression().getConditions().get(0);
         Assert.assertEquals("name", node.getFieldName());
         Assert.assertEquals(ComparisonOperator.LIKE, node.getOperator());
     }
@@ -203,7 +210,7 @@ public class MgxqlAstHandlerTest {
         // 测试in运算符
         MgxqlStatement stmt = parse("select * from User where status in :statusList");
         WhereClause whereClause = stmt.getWhereClause();
-        WhereConditionNode node = whereClause.getRootExpression().getNodes().get(0);
+        WhereConditionNode node = whereClause.getRootExpression().getConditions().get(0);
         Assert.assertEquals("status", node.getFieldName());
         Assert.assertEquals(ComparisonOperator.IN, node.getOperator());
     }
@@ -213,7 +220,7 @@ public class MgxqlAstHandlerTest {
         // 测试between运算符
         MgxqlStatement stmt = parse("select * from User where age between :ageRange");
         WhereClause whereClause = stmt.getWhereClause();
-        WhereConditionNode node = whereClause.getRootExpression().getNodes().get(0);
+        WhereConditionNode node = whereClause.getRootExpression().getConditions().get(0);
         Assert.assertEquals("age", node.getFieldName());
         Assert.assertEquals(ComparisonOperator.BETWEEN, node.getOperator());
     }
@@ -223,7 +230,7 @@ public class MgxqlAstHandlerTest {
         // 测试is null运算符
         MgxqlStatement stmt = parse("select * from User where phone is null");
         WhereClause whereClause = stmt.getWhereClause();
-        WhereConditionNode node = whereClause.getRootExpression().getNodes().get(0);
+        WhereConditionNode node = whereClause.getRootExpression().getConditions().get(0);
         Assert.assertEquals("phone", node.getFieldName());
         Assert.assertEquals(ComparisonOperator.IS_NULL, node.getOperator());
     }
@@ -233,27 +240,27 @@ public class MgxqlAstHandlerTest {
         // 测试is not null运算符
         MgxqlStatement stmt = parse("select * from User where email is not null");
         WhereClause whereClause = stmt.getWhereClause();
-        WhereConditionNode node = whereClause.getRootExpression().getNodes().get(0);
+        WhereConditionNode node = whereClause.getRootExpression().getConditions().get(0);
         Assert.assertEquals("email", node.getFieldName());
         Assert.assertEquals(ComparisonOperator.IS_NOT_NULL, node.getOperator());
     }
 
     @Test
     public void test016_leftLikeOperator() {
-        // 测试left like运算符
-        MgxqlStatement stmt = parse("select * from User where name left like :name");
+        // left like 已退役为字面量（design，task 3.x）：后模糊 name like :name% → STARTING_WITH
+        MgxqlStatement stmt = parse("select * from User where name like :name%");
         WhereClause whereClause = stmt.getWhereClause();
-        WhereConditionNode node = whereClause.getRootExpression().getNodes().get(0);
+        WhereConditionNode node = whereClause.getRootExpression().getConditions().get(0);
         Assert.assertEquals("name", node.getFieldName());
         Assert.assertEquals(ComparisonOperator.STARTING_WITH, node.getOperator());
     }
 
     @Test
     public void test017_rightLikeOperator() {
-        // 测试right like运算符
-        MgxqlStatement stmt = parse("select * from User where name right like :name");
+        // right like 已退役为字面量（design，task 3.x）：前模糊 name like %:name → ENDING_WITH
+        MgxqlStatement stmt = parse("select * from User where name like %:name");
         WhereClause whereClause = stmt.getWhereClause();
-        WhereConditionNode node = whereClause.getRootExpression().getNodes().get(0);
+        WhereConditionNode node = whereClause.getRootExpression().getConditions().get(0);
         Assert.assertEquals("name", node.getFieldName());
         Assert.assertEquals(ComparisonOperator.ENDING_WITH, node.getOperator());
     }
@@ -263,7 +270,7 @@ public class MgxqlAstHandlerTest {
         // 测试not in运算符
         MgxqlStatement stmt = parse("select * from User where status not in :excludeStatusList");
         WhereClause whereClause = stmt.getWhereClause();
-        WhereConditionNode node = whereClause.getRootExpression().getNodes().get(0);
+        WhereConditionNode node = whereClause.getRootExpression().getConditions().get(0);
         Assert.assertEquals("status", node.getFieldName());
         Assert.assertEquals(ComparisonOperator.IN, node.getOperator());
         Assert.assertNotNull(node.getNotOperator());
@@ -275,7 +282,7 @@ public class MgxqlAstHandlerTest {
         // 测试not like运算符
         MgxqlStatement stmt = parse("select * from User where name not like :excludeName");
         WhereClause whereClause = stmt.getWhereClause();
-        WhereConditionNode node = whereClause.getRootExpression().getNodes().get(0);
+        WhereConditionNode node = whereClause.getRootExpression().getConditions().get(0);
         Assert.assertEquals("name", node.getFieldName());
         Assert.assertEquals(ComparisonOperator.LIKE, node.getOperator());
         Assert.assertNotNull(node.getNotOperator());
@@ -288,7 +295,7 @@ public class MgxqlAstHandlerTest {
     public void test020_simpleParamValuePath() {
         // 测试简单参数值路径
         MgxqlStatement stmt = parse("select * from User where name = :name");
-        WhereConditionNode node = stmt.getWhereClause().getRootExpression().getNodes().get(0);
+        WhereConditionNode node = stmt.getWhereClause().getRootExpression().getConditions().get(0);
         Assert.assertEquals(1, node.getParamValuePath().size());
         Assert.assertEquals("name", node.getParamValuePath().get(0));
     }
@@ -297,7 +304,7 @@ public class MgxqlAstHandlerTest {
     public void test021_nestedParamValuePath() {
         // 测试嵌套参数值路径 (role.menu.name)
         MgxqlStatement stmt = parse("select * from User where name = :role.menu.name");
-        WhereConditionNode node = stmt.getWhereClause().getRootExpression().getNodes().get(0);
+        WhereConditionNode node = stmt.getWhereClause().getRootExpression().getConditions().get(0);
         Assert.assertEquals(3, node.getParamValuePath().size());
         Assert.assertEquals("role", node.getParamValuePath().get(0));
         Assert.assertEquals("menu", node.getParamValuePath().get(1));
@@ -308,7 +315,7 @@ public class MgxqlAstHandlerTest {
     public void test022_aliasedFieldCondition() {
         // 测试带别名的字段条件
         MgxqlStatement stmt = parse("select * from User user where user.name = :name");
-        WhereConditionNode node = stmt.getWhereClause().getRootExpression().getNodes().get(0);
+        WhereConditionNode node = stmt.getWhereClause().getRootExpression().getConditions().get(0);
         Assert.assertEquals("user", node.getFieldAlias());
         Assert.assertEquals("name", node.getFieldName());
     }
@@ -696,7 +703,7 @@ public class MgxqlAstHandlerTest {
                 "select user.id, user.name, role.name from User user left join Role role on user = role " +
                         "where user.name = :user.name and role.status = :role.status");
         WhereClause whereClause = stmt.getWhereClause();
-        List<WhereConditionNode> nodes = whereClause.getRootExpression().getNodes();
+        List<WhereConditionNode> nodes = whereClause.getRootExpression().getConditions();
         Assert.assertEquals(2, nodes.size());
         // 第一个条件: user.name = :user.name
         Assert.assertEquals("user", nodes.get(0).getFieldAlias());
@@ -716,7 +723,7 @@ public class MgxqlAstHandlerTest {
     public void test105_whereNumberLiteral() {
         // 测试WHERE数字字面量
         MgxqlStatement stmt = parse("select * from User where age > 18");
-        WhereConditionNode node = stmt.getWhereClause().getRootExpression().getNodes().get(0);
+        WhereConditionNode node = stmt.getWhereClause().getRootExpression().getConditions().get(0);
         Assert.assertEquals("age", node.getFieldName());
         Assert.assertEquals(ComparisonOperator.GT, node.getOperator());
         Assert.assertEquals(Integer.valueOf(18), node.getConditionValue());
@@ -737,23 +744,25 @@ public class MgxqlAstHandlerTest {
         Assert.assertNull(node.getParamValuePath());
     }
 
-    // ==================== ? 前缀可选条件测试 ====================
+    // ==================== ? 前缀可选条件测试（已退役，design D3，task 7.3 回归）====================
 
     @Test
-    public void test107_optionalCondition() {
-        // 测试?前缀可选条件
-        MgxqlStatement stmt = parse("select * from User where ?name = :name");
-        WhereConditionNode node = stmt.getWhereClause().getRootExpression().getNodes().get(0);
-        Assert.assertEquals("name", node.getFieldName());
-        Assert.assertTrue(node.isOptional());
+    public void test107_optionalCondition_retired() {
+        // ? 前缀可选条件已退役：解析期报错，迁移路径 ?name = :name -> #[name = :name]
+        try {
+            parse("select * from User where ?name = :name");
+            Assert.fail("? 前缀可选条件已退役，应当解析期报错");
+        } catch (MybatisgxException expected) {
+            Assert.assertTrue("退役报错信息应提示 ? 与迁移形态", expected.getMessage().contains("?"));
+        }
     }
 
     @Test
     public void test108_nonOptionalCondition() {
-        // 测试非可选条件（无?前缀）
+        // 非可选条件（无?前缀）解析不受 ? 退役影响
         MgxqlStatement stmt = parse("select * from User where name = :name");
-        WhereConditionNode node = stmt.getWhereClause().getRootExpression().getNodes().get(0);
-        Assert.assertFalse(node.isOptional());
+        WhereConditionNode node = stmt.getWhereClause().getRootExpression().getConditions().get(0);
+        Assert.assertEquals("name", node.getFieldName());
     }
 
     // ==================== 反引号关键字转义测试 ====================
@@ -762,7 +771,7 @@ public class MgxqlAstHandlerTest {
     public void test110_paramNameIsKeyword() {
         // 测试参数名为关键字（having），使用反引号转义
         MgxqlStatement stmt = parseWithoutCheck("select * from User where status = :`having`");
-        WhereConditionNode node = stmt.getWhereClause().getRootExpression().getNodes().get(0);
+        WhereConditionNode node = stmt.getWhereClause().getRootExpression().getConditions().get(0);
         Assert.assertEquals("status", node.getFieldName());
         Assert.assertEquals(1, node.getParamValuePath().size());
         Assert.assertEquals("having", node.getParamValuePath().get(0));
@@ -772,7 +781,7 @@ public class MgxqlAstHandlerTest {
     public void test111_paramPathContainsKeyword() {
         // 测试参数路径含关键字（having），使用反引号转义
         MgxqlStatement stmt = parseWithoutCheck("select * from User where name = :`having`.name");
-        WhereConditionNode node = stmt.getWhereClause().getRootExpression().getNodes().get(0);
+        WhereConditionNode node = stmt.getWhereClause().getRootExpression().getConditions().get(0);
         Assert.assertEquals("name", node.getFieldName());
         Assert.assertEquals(2, node.getParamValuePath().size());
         Assert.assertEquals("having", node.getParamValuePath().get(0));
@@ -793,7 +802,7 @@ public class MgxqlAstHandlerTest {
     public void test113_whereQuotedField() {
         // 测试WHERE中使用反引号字段（having为关键字）
         MgxqlStatement stmt = parseWithoutCheck("select * from User where `having` = :val");
-        WhereConditionNode node = stmt.getWhereClause().getRootExpression().getNodes().get(0);
+        WhereConditionNode node = stmt.getWhereClause().getRootExpression().getConditions().get(0);
         Assert.assertEquals("having", node.getFieldName());
         Assert.assertEquals("val", node.getParamValuePath().get(0));
     }
@@ -827,7 +836,7 @@ public class MgxqlAstHandlerTest {
         Assert.assertEquals(SqlCommandType.DELETE, stmt.getCommandType());
         WhereClause whereClause = stmt.getWhereClause();
         Assert.assertNotNull(whereClause);
-        WhereConditionNode node = whereClause.getRootExpression().getNodes().get(0);
+        WhereConditionNode node = whereClause.getRootExpression().getConditions().get(0);
         Assert.assertEquals("id", node.getFieldName());
         Assert.assertEquals(ComparisonOperator.EQ, node.getOperator());
     }
@@ -838,7 +847,7 @@ public class MgxqlAstHandlerTest {
         Assert.assertEquals(SqlCommandType.UPDATE, stmt.getCommandType());
         WhereClause whereClause = stmt.getWhereClause();
         Assert.assertNotNull(whereClause);
-        WhereConditionNode node = whereClause.getRootExpression().getNodes().get(0);
+        WhereConditionNode node = whereClause.getRootExpression().getConditions().get(0);
         Assert.assertEquals("name", node.getFieldName());
         Assert.assertEquals(ComparisonOperator.EQ, node.getOperator());
     }
@@ -853,8 +862,8 @@ public class MgxqlAstHandlerTest {
         methodInfo.setSqlCommandType(SqlCommandType.SELECT);
         MgxqlStatement stmt = buildProcessor().executeAndCheck(entityInfo, methodInfo, null, MgxqlSourceType.METHOD_NAME, "select * from User where name = :name and age = :age");
         WhereExpression expr = stmt.getWhereClause().getRootExpression();
-        WhereConditionNode nameNode = expr.getNodes().get(0);
-        WhereConditionNode ageNode = expr.getNodes().get(1);
+        WhereConditionNode nameNode = expr.getConditions().get(0);
+        WhereConditionNode ageNode = expr.getConditions().get(1);
         Assert.assertEquals(0, nameNode.getIndex());
         Assert.assertEquals(1, ageNode.getIndex());
     }
@@ -867,8 +876,8 @@ public class MgxqlAstHandlerTest {
         methodInfo.setSqlCommandType(SqlCommandType.SELECT);
         MgxqlStatement stmt = buildProcessor().executeAndCheck(entityInfo, methodInfo, null, MgxqlSourceType.METHOD_NAME, "select * from User where name is null and age = :age");
         WhereExpression expr = stmt.getWhereClause().getRootExpression();
-        WhereConditionNode isNullNode = expr.getNodes().get(0);
-        WhereConditionNode ageNode = expr.getNodes().get(1);
+        WhereConditionNode isNullNode = expr.getConditions().get(0);
+        WhereConditionNode ageNode = expr.getConditions().get(1);
         Assert.assertEquals(-1, isNullNode.getIndex());
         Assert.assertEquals(0, ageNode.getIndex());
     }

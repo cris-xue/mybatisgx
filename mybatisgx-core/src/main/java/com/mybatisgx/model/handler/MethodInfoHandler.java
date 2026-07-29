@@ -13,7 +13,7 @@ import com.mybatisgx.utils.MethodInfoUtils;
 import com.mybatisgx.utils.TypeUtils;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.*;
 import org.apache.ibatis.mapping.SqlCommandType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,7 +96,12 @@ public class MethodInfoHandler {
                 continue;
             }
 
-            CommandTypeContext commandTypeContext = this.getCommandType(mapperInfo, methodName);
+            CommandTypeContext commandTypeContext = this.getCommandType(mapperInfo, method);
+            if (commandTypeContext.hasMybatisSqlAnnotation()) {
+                LOGGER.debug("方法{}已使用mybatis注解实现，无需处理该方法！", namespaceMethodName);
+                continue;
+            }
+
             SqlCommandType sqlCommandType = commandTypeContext.getSqlCommandType();
             MethodParamContext methodParamContext = this.getMethodParam(mapperInfo, method, sqlCommandType);
             MethodReturnInfo methodReturnInfo = this.getMethodReturn(mapperInfo, method);
@@ -109,6 +114,7 @@ public class MethodInfoHandler {
             methodInfo.setMethodCommandType(commandTypeContext.getMethodCommandType());
             methodInfo.setDynamic(method.getAnnotation(Dynamic.class) != null);
             methodInfo.setBatch(method.getAnnotation(BatchOperation.class) != null);
+
             methodInfo.setEntityParamInfo(methodParamContext.getEntityParamInfo());
             methodInfo.setQueryEntityParamInfo(methodParamContext.getQueryEntityParamInfo());
             methodInfo.setMethodParamInfoList(methodParamContext.getMethodParamInfoList());
@@ -123,15 +129,55 @@ public class MethodInfoHandler {
         return methodInfoMap;
     }
 
-    private CommandTypeContext getCommandType(MapperInfo mapperInfo, String methodName) {
-        SqlCommandType sqlCommandType = this.methodSyntaxProcessor.getSqlCommandType(methodName);
+    private CommandTypeContext getCommandType(MapperInfo mapperInfo, Method method) {
+        Insert insert = method.getAnnotation(Insert.class);
+        Delete delete = method.getAnnotation(Delete.class);
+        Update update = method.getAnnotation(Update.class);
+        Select select = method.getAnnotation(Select.class);
+        SqlCommandType sqlCommandType = null;
+        if (insert != null) {
+            sqlCommandType = SqlCommandType.INSERT;
+        }
+        if (delete != null) {
+            sqlCommandType = SqlCommandType.DELETE;
+        }
+        if (update != null) {
+            sqlCommandType = SqlCommandType.UPDATE;
+        }
+        if (select != null) {
+            sqlCommandType = SqlCommandType.SELECT;
+        }
+
+        InsertProvider insertProvider = method.getAnnotation(InsertProvider.class);
+        DeleteProvider deleteProvider = method.getAnnotation(DeleteProvider.class);
+        UpdateProvider updateProvider = method.getAnnotation(UpdateProvider.class);
+        SelectProvider selectProvider = method.getAnnotation(SelectProvider.class);
+        if (insertProvider != null) {
+            sqlCommandType = SqlCommandType.INSERT;
+        }
+        if (deleteProvider != null) {
+            sqlCommandType = SqlCommandType.DELETE;
+        }
+        if (updateProvider != null) {
+            sqlCommandType = SqlCommandType.UPDATE;
+        }
+        if (selectProvider != null) {
+            sqlCommandType = SqlCommandType.SELECT;
+        }
+
+        if (sqlCommandType == null) {
+            Statement statement = method.getAnnotation(Statement.class);
+            String statementString = statement != null ? statement.value() : method.getName();
+            sqlCommandType = this.methodSyntaxProcessor.getSqlCommandType(statementString);
+        }
+
         MethodCommandType methodCommandType;
         if (sqlCommandType == SqlCommandType.DELETE && mapperInfo.getEntityInfo().getLogicDeleteColumnInfo() != null) {
             methodCommandType = MethodCommandType.LOGIC_DELETE;
         } else {
             methodCommandType = MethodCommandType.valueOf(sqlCommandType.name());
         }
-        return new CommandTypeContext(sqlCommandType, methodCommandType);
+        return new CommandTypeContext(insert, delete, update, select, sqlCommandType, methodCommandType);
     }
 
     /**
@@ -389,15 +435,34 @@ public class MethodInfoHandler {
         return false;
     }
 
+    /**
+     * 从 mgxsql SQL 文本推断 SqlCommandType
+     */
     private static class CommandTypeContext {
+
+        private Insert insert;
+
+        private Delete delete;
+
+        private Update update;
+
+        private Select select;
 
         private SqlCommandType sqlCommandType;
 
         private MethodCommandType methodCommandType;
 
-        public CommandTypeContext(SqlCommandType sqlCommandType, MethodCommandType methodCommandType) {
+        public CommandTypeContext(Insert insert, Delete delete, Update update, Select select, SqlCommandType sqlCommandType, MethodCommandType methodCommandType) {
+            this.insert = insert;
+            this.delete = delete;
+            this.update = update;
+            this.select = select;
             this.sqlCommandType = sqlCommandType;
             this.methodCommandType = methodCommandType;
+        }
+
+        public boolean hasMybatisSqlAnnotation() {
+            return insert != null || delete != null || update != null || select != null;
         }
 
         public SqlCommandType getSqlCommandType() {

@@ -41,7 +41,7 @@ public class MgxqlHandlerBoundParamTest {
         WhereClause whereClause = mgxqlStatement.getWhereClause();
         Assert.assertNotNull("WHERE 子句应非空", whereClause);
 
-        WhereConditionNode node = whereClause.getRootExpression().getNodes().get(0);
+        WhereConditionNode node = whereClause.getRootExpression().getConditions().get(0);
         Assert.assertEquals("JOIN 场景 WHERE 条件 entityAlias 应为 u", "u", node.getFieldAlias());
 
         BoundParam boundParam = node.getBoundParam();
@@ -63,7 +63,7 @@ public class MgxqlHandlerBoundParamTest {
         WhereClause whereClause = mgxqlStatement.getWhereClause();
         Assert.assertNotNull("WHERE 子句应非空", whereClause);
 
-        WhereConditionNode node = whereClause.getRootExpression().getNodes().get(0);
+        WhereConditionNode node = whereClause.getRootExpression().getConditions().get(0);
         Assert.assertEquals("非 JOIN 但有别名场景 WHERE 条件 entityAlias 应为 u", "u", node.getFieldAlias());
 
         BoundParam boundParam = node.getBoundParam();

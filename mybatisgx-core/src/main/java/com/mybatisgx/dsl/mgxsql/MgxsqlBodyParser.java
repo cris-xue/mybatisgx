@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * mgxsql body 层解析器（String 基子串解析）：承接重构前 {@link MgxsqlParser} 的 body 层方法族，
  * 处理条件体内部的 {@code #if}/{@code #for}/{@code #bind}/{@code #include}/{@code #choose}/{@code in}/{@code like} 等。
- * <p>双轨制约束：本类全部以 {@code String} + 整型下标推进，不依赖 {@link MgxqlContext} 游标（与重构前一致）。
+ * <p>双轨制约束：本类全部以 {@code String} + 整型下标推进，不依赖 {@link MgxsqlContext} 游标（与重构前一致）。
  * {@code bodyInConsumed}/{@code bodyInComplexConsumed} 两 int 字段为重构前逃生舱，原样保留（见
  * mgxsql-parser-internal-structure spec「字段逃生舱原样保留」）。
  *
@@ -17,13 +17,13 @@ import java.util.List;
  * @description mgxsql body 层解析器（String 基）
  * @date 2026/7/27
  */
-public class MgxqlBodyParser {
+public class MgxsqlBodyParser {
 
     private int bodyInConsumed;
     private int bodyInComplexConsumed;
     private final BindRegistry bindRegistry;
 
-    MgxqlBodyParser(BindRegistry bindRegistry) {
+    MgxsqlBodyParser(BindRegistry bindRegistry) {
         this.bindRegistry = bindRegistry;
     }
 

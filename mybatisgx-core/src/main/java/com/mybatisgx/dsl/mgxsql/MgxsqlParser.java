@@ -33,7 +33,7 @@ public class MgxsqlParser {
         }
         MgxsqlContext ctx = new MgxsqlContext(input.trim());
         BindRegistry bindRegistry = new BindRegistry();
-        MgxqlBodyParser bodyParser = new MgxqlBodyParser(bindRegistry);
+        MgxsqlBodyParser bodyParser = new MgxsqlBodyParser(bindRegistry);
         MgxsqlScopeParser scopeParser = new MgxsqlScopeParser(ctx, bindRegistry, bodyParser);
         scopeParser.parse(root);
         return root;

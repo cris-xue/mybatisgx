@@ -21,9 +21,9 @@ class MgxsqlScopeParser {
     private final MgxsqlContext ctx;
     private final Deque<String> descentCloseTags = new ArrayDeque();
     private final BindRegistry bindRegistry;
-    private final MgxqlBodyParser bodyParser;
+    private final MgxsqlBodyParser bodyParser;
 
-    MgxsqlScopeParser(MgxsqlContext ctx, BindRegistry bindRegistry, MgxqlBodyParser bodyParser) {
+    MgxsqlScopeParser(MgxsqlContext ctx, BindRegistry bindRegistry, MgxsqlBodyParser bodyParser) {
         this.ctx = ctx;
         this.bindRegistry = bindRegistry;
         this.bodyParser = bodyParser;

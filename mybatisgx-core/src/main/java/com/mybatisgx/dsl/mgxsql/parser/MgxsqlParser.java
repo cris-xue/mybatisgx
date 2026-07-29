@@ -1,7 +1,9 @@
 package com.mybatisgx.dsl.mgxsql.parser;
 
 import com.mybatisgx.dsl.mgxsql.MgxsqlSyntaxHelper;
-import com.mybatisgx.dsl.mgxsql.model.*;
+import com.mybatisgx.dsl.mgxsql.model.MgxsqlContext;
+import com.mybatisgx.dsl.mgxsql.model.MgxsqlNode;
+import com.mybatisgx.dsl.mgxsql.model.SqlText;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,16 +25,16 @@ import java.util.List;
  */
 public class MgxsqlParser {
 
-    public List<MgxsqlNode> parse(String input) {
+    public List<MgxsqlNode> parse(String mgxsql) {
         List<MgxsqlNode> root = new ArrayList();
-        if (input == null) {
+        if (mgxsql == null) {
             return root;
         }
-        if (input.trim().isEmpty()) {
-            root.add(new SqlText(input, 0, 1, 1));
+        if (mgxsql.trim().isEmpty()) {
+            root.add(new SqlText(mgxsql, 0, 1, 1));
             return root;
         }
-        MgxsqlContext ctx = new MgxsqlContext(input.trim());
+        MgxsqlContext ctx = new MgxsqlContext(mgxsql.trim());
         BindRegistry bindRegistry = new BindRegistry();
         MgxsqlBodyParser bodyParser = new MgxsqlBodyParser(bindRegistry);
         MgxsqlScopeParser scopeParser = new MgxsqlScopeParser(ctx, bindRegistry, bodyParser);

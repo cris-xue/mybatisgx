@@ -1,6 +1,9 @@
 package com.mybatisgx.dsl.mgxsql;
 
+import com.mybatisgx.dsl.mgxsql.model.MgxsqlNode;
 import com.mybatisgx.dsl.mgxsql.parser.MgxsqlParser;
+
+import java.util.List;
 
 /**
  * mgxsql 翻译器：将 mgxsql 简化语法文本转换为标准 MyBatis XML 动态标签文本。
@@ -24,10 +27,11 @@ public class MgxsqlScanner {
     /**
      * 将 mgxsql 文本转换为标准 MyBatis XML 动态标签文本。
      *
-     * @param input mgxsql 文本（空白原样返回，对齐重构前行为）
+     * @param mgxsql mgxsql 文本（空白原样返回，对齐重构前行为）
      * @return 标准 MyBatis XML 动态标签文本
      */
-    public String process(String input) {
-        return this.renderer.render(this.parser.parse(input));
+    public String process(String mgxsql) {
+        List<MgxsqlNode> mgxsqlNodeList = this.parser.parse(mgxsql);
+        return this.renderer.render(mgxsqlNodeList);
     }
 }

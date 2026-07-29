@@ -606,4 +606,146 @@ Enable MyBatis debug logging to see SQL execution details
 5. **Review documentation:**
 Refer to knowledge files for detailed explanations
 
+---
+
+## MGXSQL Syntax Errors
+
+### #(expr) Deprecated
+
+**Error:**
+```
+mgxsql 语法错误: #(expr) 已废弃，请使用 #if(expr)[body]
+```
+
+**Cause:** Using the old `#(expr)[body]` syntax which has been replaced by `#if(expr)[body]`.
+
+**Solution:**
+```sql
+-- Before (deprecated)
+where #(age > 2)[name = :name]
+
+-- After (correct)
+where #if(age > 2)[name = :name]
+```
+
+### #when Without Guard
+
+**Error:**
+```
+mgxsql 语法错误: #when 必须带 guard，写法 #when(expr)[body]
+```
+
+**Cause:** `#when` inside `#choose` must have a guard expression.
+
+**Solution:**
+```sql
+-- Before (error)
+where #choose[#when[salary > :minSalary]]
+
+-- After (correct)
+where #choose[#when(:type == 'vip')[salary > :minSalary]]
+```
+
+### #bind Declaration Before Reference
+
+**Error:**
+```
+mgxsql 语法错误: $name 引用必须在同名 #bind 声明之后
+```
+
+**Cause:** Referencing a `$variable` before its `#bind[name = expr]` declaration.
+
+**Solution:**
+```sql
+-- Before (error): reference before declaration
+where #if(:age != null)[id = $age2]
+#bind[age2 = :age + :age]
+
+-- After (correct): declaration before reference
+#bind[age2 = :age + :age]
+where #if(:age != null)[id = $age2]
+```
+
+### #for Composite Key Format
+
+**Error:**
+```
+mgxsql 语法错误: #for => 右边格式错误
+```
+
+**Cause:** Incorrect syntax in `#for(item:collection)=>expr`. The right side of `=>` must be `$variable` or `[$var1,$var2]`.
+
+**Solution:**
+```sql
+-- Before (error)
+where id in #for(item:list)=>#{item.id}
+
+-- After (correct)
+where id in #for(item:list)=>$item.id
+
+-- Composite key (correct)
+where (id, type) in #for(item:list)=>[$item.id,$item.type]
+```
+
+### #include Invalid refid
+
+**Error:**
+```
+mgxsql 语法错误: #include refid 只接受静态标识符
+```
+
+**Cause:** Using `:param` or dynamic content in `#include[...]`.
+
+**Solution:**
+```sql
+-- Before (error)
+#include[:sqlId]
+
+-- After (correct)
+#include[commonConditions]
+```
+
+---
+
+## MGXQL Syntax Errors
+
+### ? Prefix Deprecated
+
+**Error:**
+```
+MGXQL 语法错误: ? 前缀已废弃
+```
+
+**Cause:** Using the old `?condition` optional syntax.
+
+**Solution:**
+```sql
+-- Before (deprecated)
+select * from User where ?name = :name and ?age > :age
+
+-- After (correct)
+select * from User where #[name = :name] #[and age > :age]
+
+-- Custom guard
+select * from User where #if(:age != null)[age >= :age]
+```
+
+### Condition Grouping Removed
+
+**Error:**
+```
+MGXQL 语法错误: 不支持条件分组语法
+```
+
+**Cause:** Using the removed `findByNameLikeAnd(AgeOrSex)` grouping syntax. This syntax has been completely removed from the framework.
+
+**Solution:** Use MGXQL with parentheses for logical grouping:
+```java
+// Before (removed)
+@Statement("findByNameLikeAnd(AgeOrSex)")
+
+// After (correct)
+@Statement("select * from User where name like :name and (age = :age or sex = :sex)")
+```
+
 Remember: Most issues stem from configuration or annotation problems. Double-check the basics first!

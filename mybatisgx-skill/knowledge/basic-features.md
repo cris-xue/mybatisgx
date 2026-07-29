@@ -569,10 +569,10 @@ int updateByName(@Param("name") String name, User entity);
 
 ### Optional Conditions in @Statement
 
-Use `?` prefix for optional conditions (generates MyBatis `<if>` tags):
+Use `#[body]` dynamic condition blocks for optional conditions (generates MyBatis `<if>` tags):
 
 ```java
-@Statement("select * from User where ?name = :name and ?age > :age")
+@Statement("select * from User where #[name = :name] #[and age > :age]")
 List<User> search(@Param("name") String name, @Param("age") Integer age);
 ```
 

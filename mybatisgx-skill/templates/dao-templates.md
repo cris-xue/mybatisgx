@@ -476,31 +476,50 @@ public interface UserDao extends SimpleDao<User, UserQuery, Long> {
     @Statement("select * from User where name = :name and age > :age")
     List<User> findActiveUsers(@Param("name") String name, @Param("age") Integer age);
 
-    // Optional conditions (? prefix = MyBatis <if> tag)
-    @Statement("select * from User where ?name = :name and ?age > :age")
+    // Dynamic conditions (#[body] = auto isNotEmpty guard)
+    @Statement("select * from User where #[name = :name] #[and age > :age]")
     List<User> search(@Param("name") String name, @Param("age") Integer age);
 
+    // Custom guard with #if
+    @Statement("select * from User where #if(:minAge != null && :maxAge != null)[age between :ageRange]")
+    List<User> findByAgeRange(@Param("minAge") Integer minAge, @Param("maxAge") Integer maxAge, @Param("ageRange") List<Integer> ageRange);
+
+    // Multi-branch with #choose
+    @Statement("select * from User where #choose[#when(:type == 'vip')[level >= :level] #otherwise[status = :status]]")
+    List<User> findByType(@Param("type") String type, @Param("level") Integer level, @Param("status") Integer status);
+
     // Multi-entity JOIN
-    @Statement("select user.name, role.name from User user left join Role role on user = role where user.dept = :dept")
+    @Statement("select u.name, r.name from User u left join Role r on u = r where u.dept = :dept")
     List<UserRoleProjection> findUserRoles(@Param("dept") String dept);
 
-    // Aggregation
+    // Aggregation + GROUP BY + HAVING
     @Statement("select count(*) from User where dept = :dept")
     long countByDept(@Param("dept") String dept);
 
     @Statement("select avg(age) from User group by dept having avg(age) > :minAvg")
     List<Map<String, Object>> findDeptAvgAge(@Param("minAvg") Integer minAvg);
+
+    // IN shorthand
+    @Statement("select * from User where id in :idList")
+    List<User> findByIds(@Param("idList") List<Long> idList);
+
+    // LIKE shorthand
+    @Statement("select * from User where #[name like %:name%]")
+    List<User> findByNameLike(@Param("name") String name);
 }
 ```
 
-### DELETE/UPDATE
+### DELETE/UPDATE/INSERT
 
 ```java
 @Statement("delete User where name = :name")
-void deleteByName(@Param("name") String name);
+int deleteByName(@Param("name") String name);
 
 @Statement("update User where name = :name")
 int updateByName(@Param("name") String name, User entity);
+
+@Statement("insert User")
+int insert(User user);
 ```
 
 ### Condition Source Selection Guide
@@ -602,7 +621,58 @@ List<User> findByNameStartingWith(@Param("name") String name);
 List<User> findByNameLikeAndStatus(@Param("name") String name, @Param("status") String status);
 ```
 
-### Template 6: Complete Complex Example
+### Template 6: #for Directive (Standalone Foreach)
+
+```java
+// Simple iteration
+@Lang(MgxsqlLanguageDriver.class)
+@Select("select * from t_user where status in #for(item:statusList)=>$item")
+List<User> findByStatusList(@Param("statusList") List<String> statusList);
+
+// Property access
+@Lang(MgxsqlLanguageDriver.class)
+@Select("select * from t_user where id in #for(item:userList)=>$item.id")
+List<User> findByUserList(@Param("userList") List<User> userList);
+
+// Composite key (tuple IN)
+@Lang(MgxsqlLanguageDriver.class)
+@Select("select * from t_user where (id, type) in #for(item:list)=>[$item.id,$item.type]")
+List<User> findByCompositeKeys(@Param("list") List<CompositeKey> keys);
+```
+
+### Template 7: #include (Fragment Reference)
+
+```java
+// Reference a SQL fragment
+@Lang(MgxsqlLanguageDriver.class)
+@Select("select * from t_user where id = :id\n#include[commonConditions]")
+List<User> findByIdWithCommon(@Param("id") Long id);
+```
+
+### Template 8: #bind (Computed Variables)
+
+```java
+// Computed variable with $name reference
+@Lang(MgxsqlLanguageDriver.class)
+@Select("select * from t_user\n#bind[age2 = :age + :age]\nwhere #if(:age != null)[age > $age2]")
+List<User> findByDoubleAge(@Param("age") Integer age);
+```
+
+### Template 9: #choose (Multi-branch)
+
+```java
+// Multi-branch mutual exclusion
+@Lang(MgxsqlLanguageDriver.class)
+@Select("select * from t_user where #choose[\n"
+      + "  #when(:type == 'vip')[salary > :minSalary]\n"
+      + "  #when(:type == 'svip')[salary > :minSalary and level = :level]\n"
+      + "  #otherwise[status = :status]\n"
+      + "]")
+List<User> findByType(@Param("type") String type, @Param("minSalary") Long minSalary,
+                      @Param("level") Integer level, @Param("status") Integer status);
+```
+
+### Template 10: Complete Complex Example
 
 ```java
 @Repository

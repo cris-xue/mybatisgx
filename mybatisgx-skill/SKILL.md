@@ -103,8 +103,8 @@ Intent Categories:
 
 | Topic | File | Triggers |
 |-------|------|----------|
-| MGXSQL syntax, @Lang, MgxsqlScanner, dynamic SQL | `knowledge/mgxsql.md` | "mgxsql", "MGXSQL", "MgxsqlScanner", "MgxsqlLanguageDriver", "动态SQL", "可选条件", "where[", "set[", "#[", "#condition", "#and", "#or", "foreach", "bind", "动态查询", "动态更新" |
-| MGXQL syntax, @Statement, query language | `knowledge/mgxql.md` | "mgxql", "@Statement", "MGXQL", "语法", "语句", "join query", "aggregate", "可选条件" |
+| MGXSQL syntax, @Lang, MgxsqlScanner, dynamic SQL | `knowledge/mgxsql.md` | "mgxsql", "MGXSQL", "MgxsqlScanner", "MgxsqlLanguageDriver", "动态SQL", "可选条件", "where[", "set[", "#[", "#condition", "#and", "#or", "#for", "#include", "#bind", "$variable", "foreach", "bind", "动态查询", "动态更新", "#choose", "#when", "#otherwise", "foreach指令", "片段引用", "计算变量" |
+| MGXQL syntax, @Statement, query language | `knowledge/mgxql.md` | "mgxql", "@Statement", "MGXQL", "语法", "语句", "join query", "aggregate", "可选条件", "#choose", "#when", "#otherwise", "动态门", "迁移", "? prefix", "动态条件块", "对象查询" |
 | Core concepts, philosophy, comparison | `knowledge/core-concepts.md` | "what is", "philosophy", "vs JPA", "vs MyBatis-Plus" |
 | CRUD, method name query, QueryEntity, pagination | `knowledge/basic-features.md` | "CRUD", "method name", "query", "pagination" |
 | Associations, fetch modes, N+1 problems | `knowledge/relation-queries.md` | "association", "relation", "one-to-many", "fetch mode" |

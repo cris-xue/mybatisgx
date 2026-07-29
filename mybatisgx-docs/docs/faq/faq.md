@@ -155,9 +155,9 @@ public class UserQuery extends User {
     private List<Long> idIn;
 }
 
-// 方式2：@Statement
-@Statement("findBy(NameLikeAndAgeGt)Or(DeptAndStatus)")
-List<User> findComplex(String name, Integer age, String dept, Integer status);
+// 方式2：@Statement（MGXQL）
+@Statement("select * from User where (name like :name and age > :age) or (dept = :dept and status = :status)")
+List<User> findComplex(@Param("name") String name, @Param("age") Integer age, @Param("dept") String dept, @Param("status") Integer status);
 
 // 方式3：mapper.xml
 <select id="findComplex" resultType="User">

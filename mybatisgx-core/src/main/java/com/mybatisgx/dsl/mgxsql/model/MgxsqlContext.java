@@ -1,6 +1,6 @@
 package com.mybatisgx.dsl.mgxsql.model;
 
-import com.mybatisgx.dsl.mgxsql.MgxsqlParser;
+import com.mybatisgx.dsl.mgxsql.parser.MgxsqlParser;
 
 /**
  * mgxsql 解析上下文，维护输入文本、扫描位置、行号/列号。

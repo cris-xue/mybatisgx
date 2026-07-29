@@ -1,4 +1,4 @@
-package com.mybatisgx.dsl.mgxsql;
+package com.mybatisgx.dsl.mgxsql.parser;
 
 import com.mybatisgx.exception.MybatisgxException;
 

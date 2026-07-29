@@ -1,5 +1,7 @@
 package com.mybatisgx.dsl.mgxsql;
 
+import com.mybatisgx.dsl.mgxsql.parser.MgxsqlParser;
+
 /**
  * mgxsql 翻译器：将 mgxsql 简化语法文本转换为标准 MyBatis XML 动态标签文本。
  * <p>对外契约 {@code process(String) → String} 不变。内部走 <b>parse → AST → render</b> 三阶段

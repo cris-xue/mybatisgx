@@ -2,7 +2,7 @@ package com.mybatisgx.dsl.mgxsql.model.ast;
 
 import com.mybatisgx.dsl.mgxsql.MgxsqlScanner;
 import com.mybatisgx.dsl.mgxsql.MgxsqlAstRenderer;
-import com.mybatisgx.dsl.mgxsql.MgxsqlParser;
+import com.mybatisgx.dsl.mgxsql.parser.MgxsqlParser;
 import com.mybatisgx.exception.MybatisgxException;
 import org.junit.Assert;
 import org.junit.Before;

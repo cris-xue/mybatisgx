@@ -1,5 +1,6 @@
-package com.mybatisgx.dsl.mgxsql;
+package com.mybatisgx.dsl.mgxsql.parser;
 
+import com.mybatisgx.dsl.mgxsql.MgxsqlSyntaxHelper;
 import com.mybatisgx.dsl.mgxsql.model.*;
 import com.mybatisgx.exception.MybatisgxException;
 

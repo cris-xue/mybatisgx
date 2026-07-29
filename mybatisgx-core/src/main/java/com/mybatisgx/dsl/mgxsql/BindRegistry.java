@@ -19,7 +19,7 @@ import java.util.Map;
 public class BindRegistry {
 
     /** 显式 {@code #bind} 声明记录：name → 声明位置（同一 select/update 作用域内）。 */
-    private final Map<String, Integer> declaredBinds = new LinkedHashMap<String, Integer>();
+    private final Map<String, Integer> declaredBinds = new LinkedHashMap();
 
     /**
      * 登记 {@code #bind} 名字，校验同作用域内重复。

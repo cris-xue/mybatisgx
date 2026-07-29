@@ -172,15 +172,15 @@ public class MgxsqlAstRenderer {
         if (paramPaths == null || paramPaths.isEmpty()) {
             return "true";
         }
-        List<String> testParts = new ArrayList<String>();
-        List<String> seen = new ArrayList<String>();
+        List<String> testParts = new ArrayList();
+        List<String> seen = new ArrayList();
         for (String paramPath : paramPaths) {
             int bracketIdx = paramPath.indexOf('[');
             if (bracketIdx > 0) {
                 paramPath = paramPath.substring(0, bracketIdx);
             }
             String[] parts = paramPath.split("\\.");
-            List<String> currentPath = new ArrayList<String>();
+            List<String> currentPath = new ArrayList();
             for (int i = 0; i < parts.length; i++) {
                 currentPath.add(parts[i]);
                 String path = String.join(".", currentPath);

@@ -23,7 +23,7 @@ import java.util.List;
 public class MgxsqlParser {
 
     public List<MgxsqlNode> parse(String input) {
-        List<MgxsqlNode> root = new ArrayList<MgxsqlNode>();
+        List<MgxsqlNode> root = new ArrayList();
         if (input == null) {
             return root;
         }

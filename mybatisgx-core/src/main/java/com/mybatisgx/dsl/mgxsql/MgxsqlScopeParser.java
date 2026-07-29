@@ -19,7 +19,7 @@ import java.util.List;
 class MgxsqlScopeParser {
 
     private final MgxsqlContext ctx;
-    private final Deque<String> descentCloseTags = new ArrayDeque<String>();
+    private final Deque<String> descentCloseTags = new ArrayDeque();
     private final BindRegistry bindRegistry;
     private final MgxqlBodyParser bodyParser;
 

@@ -91,7 +91,7 @@ public class MgxqlBodyParser {
     // ==================== body 层解析（String 基，移植自 processor） ====================
 
     List<MgxsqlNode> parseBody(String text) {
-        List<MgxsqlNode> target = new ArrayList<MgxsqlNode>();
+        List<MgxsqlNode> target = new ArrayList();
         if (text == null || text.isEmpty()) {
             return target;
         }

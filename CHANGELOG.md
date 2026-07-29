@@ -179,3 +179,58 @@
 - 修复 `HAVING` 子句字段别名渲染错误。
 - 修复 `LIMIT offset, size` 语法中 `offset` 参数丢失的问题。
 - 修复投影场景下关联字段类型映射错误，优化结果集关系树构建逻辑。
+
+# 0.3.0/0.3.0-sb4（2026-07-31）
+
+## 🌟 MGXQL 增强
+
+- MGXQL 支持完整 CRUD 操作。
+- 增强 MGXQL 动态表达能力。
+- 支持 MGXSQL 动态语法，包括：
+  - `#[]` 自动条件判断
+  - `#if` 条件控制
+  - `#choose/#when/#otherwise` 分支控制
+  - 集合参数循环处理
+- 支持复杂动态 SQL 场景表达。
+
+## 🚀 SQL生成架构升级
+
+- 重构 SQL 生成链路。
+- 方法名查询、查询实体、MGXQL 统一转换为 MGXSQL。
+- MGXQL 不再直接生成 MyBatis XML，而是先转换为 MGXSQL，再由 MGXSQL 统一生成 MyBatis XML。
+- 统一 SQL 动态解析和生成流程，提高扩展性和维护性。
+
+## ✨ MGXSQL 动态 SQL
+
+- 新增 MGXSQL 动态模板语言。
+- 用于替代 MyBatis XML 中复杂动态 SQL 编写方式。
+- 支持 Mapper 注解和 XML Mapper 使用 MGXSQL。
+- 注解方式支持：
+  `@Lang(MgxsqlLanguageDriver.class)`
+- XML方式支持：
+  `lang="mgxsql"`
+- 支持全局配置 `MgxsqlLanguageDriver` 作为默认语言驱动。
+
+## 🌍 多数据库支持
+
+MGXQL 新增数据库支持：
+
+- MySQL
+- MariaDB
+- OceanBase_MySQL
+- SinoDB
+- Oracle
+- Dameng
+- UXDB
+- OceanBase
+- PostgreSQL
+- GaussDB
+- Vastbase
+- Kingbase
+- GBase
+
+## ⚠️ Breaking Changes
+
+- `@Statement` 不再支持方法名查询分组语法。
+- `@Statement` 保留 MGXQL 使用能力。
+- 查询生成流程由 MGXQL 直接生成 MyBatis XML 调整为统一经过 MGXSQL。

@@ -242,7 +242,8 @@ public class MgxqlHandler {
      * ③ 实体字段：queryEntity 优先(含后缀解析) → entity，首个命中即 early return —— 所有来源统一
      * ④ 方法简单参数无 @Param 注解(arg{index})
      * <p>①② 仅对非 ENTITY 来源生效：ENTITY 条件派生自 query 实体字段，paramValuePath 为基础字段名，
-     *    @Param 按基础名匹配会与后缀解析冲突（如 idIn 误绑 @Param("id") 而非 query.idIn）。
+     *
+     * @Param 按基础名匹配会与后缀解析冲突（如 idIn 误绑 @Param("id") 而非 query.idIn）。
      * <p>③ 内 queryEntity 优先于 entity：query 实体是 entity 字段超集，
      * 且 UPDATE 双参数时 queryEntity 为 WHERE 条件源、entity 为 SET 值源。
      */
@@ -328,7 +329,7 @@ public class MgxqlHandler {
         return methodParamInfo;
     }
 
-    private String getQueryEntityFieldSuffix(com.mybatisgx.dsl.mgxql.model.ComparisonOperator operator) {
+    private String getQueryEntityFieldSuffix(ComparisonOperator operator) {
         switch (operator) {
             case BETWEEN:
                 return "Between";
@@ -400,7 +401,7 @@ public class MgxqlHandler {
                 fullPath.add(composite.getJavaColumnName());
                 entry.setParamPath(fullPath);
                 if (i > 0) {
-                    entry.setLogicOperator(com.mybatisgx.dsl.mgxql.model.LogicOperator.AND);
+                    entry.setLogicOperator(LogicOperator.AND);
                 }
                 boundParam.addEntry(entry);
             }
@@ -415,8 +416,8 @@ public class MgxqlHandler {
             boundParam.addEntry(entry);
         }
 
-        com.mybatisgx.dsl.mgxql.model.ComparisonOperator operator = conditionNode.getOperator();
-        if (operator == com.mybatisgx.dsl.mgxql.model.ComparisonOperator.IN || operator == com.mybatisgx.dsl.mgxql.model.ComparisonOperator.BETWEEN) {
+        ComparisonOperator operator = conditionNode.getOperator();
+        if (operator == ComparisonOperator.IN || operator == ComparisonOperator.BETWEEN) {
             // 复杂 IN（解析阶段已填 node.collectionInfo 三字段，design D6 task 5.3）优先；简单 IN 默认 itemName="item"
             if (conditionNode.getCollectionInfo() != null) {
                 boundParam.setCollectionInfo(conditionNode.getCollectionInfo());

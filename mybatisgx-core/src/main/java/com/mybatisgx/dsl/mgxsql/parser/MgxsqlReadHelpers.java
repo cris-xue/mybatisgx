@@ -23,12 +23,12 @@ public final class MgxsqlReadHelpers {
 
     // ==================== 标识符校验 ====================
 
-    static boolean isPlainIdentifier(String s) {
-        if (s.isEmpty() || !MgxsqlSyntaxHelper.isIdentifierStartChar(s.charAt(0))) {
+    static boolean isPlainIdentifier(String identifier) {
+        if (identifier.isEmpty() || !MgxsqlSyntaxHelper.isIdentifierStartChar(identifier.charAt(0))) {
             return false;
         }
-        for (int i = 1; i < s.length(); i++) {
-            char c = s.charAt(i);
+        for (int i = 1; i < identifier.length(); i++) {
+            char c = identifier.charAt(i);
             if (!(Character.isLetterOrDigit(c) || c == '_')) {
                 return false;
             }
@@ -412,11 +412,11 @@ public final class MgxsqlReadHelpers {
                 }
                 ctx.advance();
                 MgxsqlSyntaxHelper.skipWhitespace(ctx);
-                String v = readDollarVarNameCtx(ctx);
-                if (v == null) {
+                String varName = readDollarVarNameCtx(ctx);
+                if (varName == null) {
                     throw new MybatisgxException("mgxsql 语法错误: '=>' 右侧 [] 内必须是 $variable，%s", posInfo);
                 }
-                parts.add("#{" + v + "}");
+                parts.add("#{" + varName + "}");
             }
             MgxsqlSyntaxHelper.skipWhitespace(ctx);
             if (!ctx.hasMore() || ctx.currentChar() != ']') {
@@ -428,11 +428,11 @@ public final class MgxsqlReadHelpers {
         if (ctx.hasMore() && ctx.currentChar() == '$' && ctx.peekChar(1) == '{') {
             throw new MybatisgxException("mgxsql 语法错误: '=>' 右边只接受 $variable 形式，不允许 #{} / ${}，%s", posInfo);
         }
-        String v = readDollarVarNameCtx(ctx);
-        if (v == null) {
+        String varName = readDollarVarNameCtx(ctx);
+        if (varName == null) {
             throw new MybatisgxException("mgxsql 语法错误: '=>' 右边只接受 $variable 形式，不允许 #{} / ${}，%s", posInfo);
         }
-        return new ForeachRhs("#{" + v + "}", false);
+        return new ForeachRhs("#{" + varName + "}", false);
     }
 
     static class ForeachRhsText {

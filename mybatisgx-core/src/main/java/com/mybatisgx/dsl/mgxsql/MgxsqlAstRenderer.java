@@ -45,16 +45,16 @@ public class MgxsqlAstRenderer {
     private String render(MgxsqlNode node) {
         // ==================== Scope 层 ====================
         if (node instanceof WhereScope) {
-            WhereScope s = (WhereScope) node;
-            return MgxsqlXmlFragment.openWhere() + renderChildren(s.getChildren()) + MgxsqlXmlFragment.closeWhere();
+            WhereScope whereScope = (WhereScope) node;
+            return MgxsqlXmlFragment.openWhere() + renderChildren(whereScope.getChildren()) + MgxsqlXmlFragment.closeWhere();
         }
         if (node instanceof SetScope) {
-            SetScope s = (SetScope) node;
-            return MgxsqlXmlFragment.openSet() + renderChildren(s.getChildren()) + MgxsqlXmlFragment.closeSet();
+            SetScope setScope = (SetScope) node;
+            return MgxsqlXmlFragment.openSet() + renderChildren(setScope.getChildren()) + MgxsqlXmlFragment.closeSet();
         }
         if (node instanceof DescentScope) {
-            DescentScope s = (DescentScope) node;
-            return s.getOpenTag() + renderChildren(s.getChildren()) + s.getCloseTag();
+            DescentScope descentScope = (DescentScope) node;
+            return descentScope.getOpenTag() + renderChildren(descentScope.getChildren()) + descentScope.getCloseTag();
         }
         // ==================== Unit 层 ====================
         if (node instanceof IfUnit) {
@@ -67,11 +67,11 @@ public class MgxsqlAstRenderer {
             return MgxsqlXmlFragment.includeTag(((IncludeUnit) node).getRefid());
         }
         if (node instanceof ForeachUnit) {
-            ForeachUnit f = (ForeachUnit) node;
-            String foreach = f.isComposite()
-                    ? MgxsqlXmlFragment.foreachComplexTuple(f.getItemName(), f.getCollectionName(), f.getValueExpr())
-                    : MgxsqlXmlFragment.foreachComplex(f.getItemName(), f.getCollectionName(), f.getValueExpr());
-            return (f.isPrependIn() ? "in " : "") + foreach;
+            ForeachUnit foreachUnit = (ForeachUnit) node;
+            String foreach = foreachUnit.isComposite()
+                    ? MgxsqlXmlFragment.foreachComplexTuple(foreachUnit.getItemName(), foreachUnit.getCollectionName(), foreachUnit.getValueExpr())
+                    : MgxsqlXmlFragment.foreachComplex(foreachUnit.getItemName(), foreachUnit.getCollectionName(), foreachUnit.getValueExpr());
+            return (foreachUnit.isPrependIn() ? "in " : "") + foreach;
         }
         if (node instanceof BindUnit) {
             return renderBind((BindUnit) node);
@@ -118,8 +118,8 @@ public class MgxsqlAstRenderer {
             sb.append(MgxsqlXmlFragment.whenTag(test, body));
         }
         if (choose.getOtherwise() != null) {
-            OtherwiseUnit o = choose.getOtherwise();
-            String body = renderChildren(o.getBody()).trim();
+            OtherwiseUnit otherwiseUnit = choose.getOtherwise();
+            String body = renderChildren(otherwiseUnit.getBody()).trim();
             sb.append(MgxsqlXmlFragment.otherwiseTag(body));
         }
         sb.append(MgxsqlXmlFragment.chooseClose());
@@ -154,9 +154,9 @@ public class MgxsqlAstRenderer {
                 paths.add(((ParamExpr) child).getParamName());
             } else if (child instanceof BindUnit) {
                 // 显式 #bind 的 paramName=null，不参与 auto-guard 收集（需显式 #if 守卫）
-                String p = ((BindUnit) child).getParamName();
-                if (p != null && !p.isEmpty()) {
-                    paths.add(p);
+                String paramName = ((BindUnit) child).getParamName();
+                if (paramName != null && !paramName.isEmpty()) {
+                    paths.add(paramName);
                 }
             } else if (child instanceof ForeachUnit) {
                 paths.add(((ForeachUnit) child).getCollectionName());

@@ -306,6 +306,9 @@ public class MethodInfoHandler {
         if (queryEntityParamInfo != null && queryEntityParamInfo.getType().getAnnotation(QueryEntity.class).value() != mapperInfo.getEntityClass()) {
             throw new MybatisgxException("%s 方法查询实体参数和mapper定义的实体参数类型不一致", method.getName());
         }
+        if (queryEntityParamInfo != null && queryEntityParamInfo.getEntityInfo() == null) {
+            throw new MybatisgxException("%s 查询实体未被注册到上下文", mapperInfo.getDaoClass().getName());
+        }
     }
 
     private MethodReturnInfo getMethodReturn(MapperInfo mapperInfo, Method method) {

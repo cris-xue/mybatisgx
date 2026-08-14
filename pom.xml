@@ -21,6 +21,7 @@
 		<java.version>1.8</java.version>
 		<mybatis.version>3.5.6</mybatis.version>
 		<mybatisgx.version>0.2.3-SNAPSHOT</mybatisgx.version>
+		<gpg.passphrase></gpg.passphrase>
 	</properties>
 	
 	<modules>
@@ -121,6 +122,9 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-gpg-plugin</artifactId>
 				<version>1.6</version>
+				<configuration>
+					<passphrase>${gpg.passphrase}</passphrase>
+				</configuration>
 				<executions>
 					<execution>
 						<id>sign-artifacts</id>

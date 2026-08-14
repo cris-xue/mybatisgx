@@ -1,4 +1,4 @@
-// Generated from F:/owner_project/mybatisgx-ai_conding/mybatisgx/mybatisgx-core/src/main/resources/antlr/mgxql/MgxqlParser.g4 by ANTLR 4.13.2
+// Generated from F:/owner_project/mybatisgx-ai_coding/mybatisgx/mybatisgx-core/src/main/resources/antlr/mgxql/MgxqlParser.g4 by ANTLR 4.13.2
 package com.mybatisgx.dsl.mgxql.syntax;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
@@ -338,86 +338,6 @@ public interface MgxqlParserListener extends ParseTreeListener {
 	 */
 	void exitOn_equal(MgxqlParser.On_equalContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MgxqlParser#where_clause}.
-	 * @param ctx the parse tree
-	 */
-	void enterWhere_clause(MgxqlParser.Where_clauseContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link MgxqlParser#where_clause}.
-	 * @param ctx the parse tree
-	 */
-	void exitWhere_clause(MgxqlParser.Where_clauseContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link MgxqlParser#condition_or_expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterCondition_or_expression(MgxqlParser.Condition_or_expressionContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link MgxqlParser#condition_or_expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitCondition_or_expression(MgxqlParser.Condition_or_expressionContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link MgxqlParser#condition_and_expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterCondition_and_expression(MgxqlParser.Condition_and_expressionContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link MgxqlParser#condition_and_expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitCondition_and_expression(MgxqlParser.Condition_and_expressionContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link MgxqlParser#condition_term}.
-	 * @param ctx the parse tree
-	 */
-	void enterCondition_term(MgxqlParser.Condition_termContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link MgxqlParser#condition_term}.
-	 * @param ctx the parse tree
-	 */
-	void exitCondition_term(MgxqlParser.Condition_termContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link MgxqlParser#condition_comparison}.
-	 * @param ctx the parse tree
-	 */
-	void enterCondition_comparison(MgxqlParser.Condition_comparisonContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link MgxqlParser#condition_comparison}.
-	 * @param ctx the parse tree
-	 */
-	void exitCondition_comparison(MgxqlParser.Condition_comparisonContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link MgxqlParser#condition_comparison_param}.
-	 * @param ctx the parse tree
-	 */
-	void enterCondition_comparison_param(MgxqlParser.Condition_comparison_paramContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link MgxqlParser#condition_comparison_param}.
-	 * @param ctx the parse tree
-	 */
-	void exitCondition_comparison_param(MgxqlParser.Condition_comparison_paramContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link MgxqlParser#condition_comparison_not_param}.
-	 * @param ctx the parse tree
-	 */
-	void enterCondition_comparison_not_param(MgxqlParser.Condition_comparison_not_paramContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link MgxqlParser#condition_comparison_not_param}.
-	 * @param ctx the parse tree
-	 */
-	void exitCondition_comparison_not_param(MgxqlParser.Condition_comparison_not_paramContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link MgxqlParser#condition_value}.
-	 * @param ctx the parse tree
-	 */
-	void enterCondition_value(MgxqlParser.Condition_valueContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link MgxqlParser#condition_value}.
-	 * @param ctx the parse tree
-	 */
-	void exitCondition_value(MgxqlParser.Condition_valueContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link MgxqlParser#group_by_clause}.
 	 * @param ctx the parse tree
 	 */
@@ -558,6 +478,326 @@ public interface MgxqlParserListener extends ParseTreeListener {
 	 */
 	void exitSize(MgxqlParser.SizeContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#having}.
+	 * @param ctx the parse tree
+	 */
+	void enterHaving(MgxqlParser.HavingContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#having}.
+	 * @param ctx the parse tree
+	 */
+	void exitHaving(MgxqlParser.HavingContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#group_by}.
+	 * @param ctx the parse tree
+	 */
+	void enterGroup_by(MgxqlParser.Group_byContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#group_by}.
+	 * @param ctx the parse tree
+	 */
+	void exitGroup_by(MgxqlParser.Group_byContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#order_by}.
+	 * @param ctx the parse tree
+	 */
+	void enterOrder_by(MgxqlParser.Order_byContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#order_by}.
+	 * @param ctx the parse tree
+	 */
+	void exitOrder_by(MgxqlParser.Order_byContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#order_by_direction}.
+	 * @param ctx the parse tree
+	 */
+	void enterOrder_by_direction(MgxqlParser.Order_by_directionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#order_by_direction}.
+	 * @param ctx the parse tree
+	 */
+	void exitOrder_by_direction(MgxqlParser.Order_by_directionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#end}.
+	 * @param ctx the parse tree
+	 */
+	void enterEnd(MgxqlParser.EndContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#end}.
+	 * @param ctx the parse tree
+	 */
+	void exitEnd(MgxqlParser.EndContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#where_clause}.
+	 * @param ctx the parse tree
+	 */
+	void enterWhere_clause(MgxqlParser.Where_clauseContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#where_clause}.
+	 * @param ctx the parse tree
+	 */
+	void exitWhere_clause(MgxqlParser.Where_clauseContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#where_sequence}.
+	 * @param ctx the parse tree
+	 */
+	void enterWhere_sequence(MgxqlParser.Where_sequenceContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#where_sequence}.
+	 * @param ctx the parse tree
+	 */
+	void exitWhere_sequence(MgxqlParser.Where_sequenceContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#where_item}.
+	 * @param ctx the parse tree
+	 */
+	void enterWhere_item(MgxqlParser.Where_itemContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#where_item}.
+	 * @param ctx the parse tree
+	 */
+	void exitWhere_item(MgxqlParser.Where_itemContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#where_atom}.
+	 * @param ctx the parse tree
+	 */
+	void enterWhere_atom(MgxqlParser.Where_atomContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#where_atom}.
+	 * @param ctx the parse tree
+	 */
+	void exitWhere_atom(MgxqlParser.Where_atomContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#bracket_group}.
+	 * @param ctx the parse tree
+	 */
+	void enterBracket_group(MgxqlParser.Bracket_groupContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#bracket_group}.
+	 * @param ctx the parse tree
+	 */
+	void exitBracket_group(MgxqlParser.Bracket_groupContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#if_directive}.
+	 * @param ctx the parse tree
+	 */
+	void enterIf_directive(MgxqlParser.If_directiveContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#if_directive}.
+	 * @param ctx the parse tree
+	 */
+	void exitIf_directive(MgxqlParser.If_directiveContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#bracket_directive}.
+	 * @param ctx the parse tree
+	 */
+	void enterBracket_directive(MgxqlParser.Bracket_directiveContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#bracket_directive}.
+	 * @param ctx the parse tree
+	 */
+	void exitBracket_directive(MgxqlParser.Bracket_directiveContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#choose_directive}.
+	 * @param ctx the parse tree
+	 */
+	void enterChoose_directive(MgxqlParser.Choose_directiveContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#choose_directive}.
+	 * @param ctx the parse tree
+	 */
+	void exitChoose_directive(MgxqlParser.Choose_directiveContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#when_directive}.
+	 * @param ctx the parse tree
+	 */
+	void enterWhen_directive(MgxqlParser.When_directiveContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#when_directive}.
+	 * @param ctx the parse tree
+	 */
+	void exitWhen_directive(MgxqlParser.When_directiveContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#otherwise_directive}.
+	 * @param ctx the parse tree
+	 */
+	void enterOtherwise_directive(MgxqlParser.Otherwise_directiveContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#otherwise_directive}.
+	 * @param ctx the parse tree
+	 */
+	void exitOtherwise_directive(MgxqlParser.Otherwise_directiveContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#block_prefix}.
+	 * @param ctx the parse tree
+	 */
+	void enterBlock_prefix(MgxqlParser.Block_prefixContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#block_prefix}.
+	 * @param ctx the parse tree
+	 */
+	void exitBlock_prefix(MgxqlParser.Block_prefixContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#body_sequence}.
+	 * @param ctx the parse tree
+	 */
+	void enterBody_sequence(MgxqlParser.Body_sequenceContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#body_sequence}.
+	 * @param ctx the parse tree
+	 */
+	void exitBody_sequence(MgxqlParser.Body_sequenceContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#body_item}.
+	 * @param ctx the parse tree
+	 */
+	void enterBody_item(MgxqlParser.Body_itemContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#body_item}.
+	 * @param ctx the parse tree
+	 */
+	void exitBody_item(MgxqlParser.Body_itemContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#body_atom}.
+	 * @param ctx the parse tree
+	 */
+	void enterBody_atom(MgxqlParser.Body_atomContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#body_atom}.
+	 * @param ctx the parse tree
+	 */
+	void exitBody_atom(MgxqlParser.Body_atomContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#guard_or_expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterGuard_or_expression(MgxqlParser.Guard_or_expressionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#guard_or_expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitGuard_or_expression(MgxqlParser.Guard_or_expressionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#guard_and_expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterGuard_and_expression(MgxqlParser.Guard_and_expressionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#guard_and_expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitGuard_and_expression(MgxqlParser.Guard_and_expressionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#guard_term}.
+	 * @param ctx the parse tree
+	 */
+	void enterGuard_term(MgxqlParser.Guard_termContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#guard_term}.
+	 * @param ctx the parse tree
+	 */
+	void exitGuard_term(MgxqlParser.Guard_termContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#guard_comparison}.
+	 * @param ctx the parse tree
+	 */
+	void enterGuard_comparison(MgxqlParser.Guard_comparisonContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#guard_comparison}.
+	 * @param ctx the parse tree
+	 */
+	void exitGuard_comparison(MgxqlParser.Guard_comparisonContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#guard_logic_or}.
+	 * @param ctx the parse tree
+	 */
+	void enterGuard_logic_or(MgxqlParser.Guard_logic_orContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#guard_logic_or}.
+	 * @param ctx the parse tree
+	 */
+	void exitGuard_logic_or(MgxqlParser.Guard_logic_orContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#guard_logic_and}.
+	 * @param ctx the parse tree
+	 */
+	void enterGuard_logic_and(MgxqlParser.Guard_logic_andContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#guard_logic_and}.
+	 * @param ctx the parse tree
+	 */
+	void exitGuard_logic_and(MgxqlParser.Guard_logic_andContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#guard_relational_op}.
+	 * @param ctx the parse tree
+	 */
+	void enterGuard_relational_op(MgxqlParser.Guard_relational_opContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#guard_relational_op}.
+	 * @param ctx the parse tree
+	 */
+	void exitGuard_relational_op(MgxqlParser.Guard_relational_opContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#guard_null_op}.
+	 * @param ctx the parse tree
+	 */
+	void enterGuard_null_op(MgxqlParser.Guard_null_opContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#guard_null_op}.
+	 * @param ctx the parse tree
+	 */
+	void exitGuard_null_op(MgxqlParser.Guard_null_opContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#guard_operand}.
+	 * @param ctx the parse tree
+	 */
+	void enterGuard_operand(MgxqlParser.Guard_operandContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#guard_operand}.
+	 * @param ctx the parse tree
+	 */
+	void exitGuard_operand(MgxqlParser.Guard_operandContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#condition_comparison}.
+	 * @param ctx the parse tree
+	 */
+	void enterCondition_comparison(MgxqlParser.Condition_comparisonContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#condition_comparison}.
+	 * @param ctx the parse tree
+	 */
+	void exitCondition_comparison(MgxqlParser.Condition_comparisonContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#condition_comparison_param}.
+	 * @param ctx the parse tree
+	 */
+	void enterCondition_comparison_param(MgxqlParser.Condition_comparison_paramContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#condition_comparison_param}.
+	 * @param ctx the parse tree
+	 */
+	void exitCondition_comparison_param(MgxqlParser.Condition_comparison_paramContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#condition_comparison_not_param}.
+	 * @param ctx the parse tree
+	 */
+	void enterCondition_comparison_not_param(MgxqlParser.Condition_comparison_not_paramContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#condition_comparison_not_param}.
+	 * @param ctx the parse tree
+	 */
+	void exitCondition_comparison_not_param(MgxqlParser.Condition_comparison_not_paramContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#condition_value}.
+	 * @param ctx the parse tree
+	 */
+	void enterCondition_value(MgxqlParser.Condition_valueContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#condition_value}.
+	 * @param ctx the parse tree
+	 */
+	void exitCondition_value(MgxqlParser.Condition_valueContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link MgxqlParser#where_start}.
 	 * @param ctx the parse tree
 	 */
@@ -587,6 +827,26 @@ public interface MgxqlParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitLogic_or(MgxqlParser.Logic_orContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#left_square}.
+	 * @param ctx the parse tree
+	 */
+	void enterLeft_square(MgxqlParser.Left_squareContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#left_square}.
+	 * @param ctx the parse tree
+	 */
+	void exitLeft_square(MgxqlParser.Left_squareContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#right_square}.
+	 * @param ctx the parse tree
+	 */
+	void enterRight_square(MgxqlParser.Right_squareContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#right_square}.
+	 * @param ctx the parse tree
+	 */
+	void exitRight_square(MgxqlParser.Right_squareContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MgxqlParser#relational_op}.
 	 * @param ctx the parse tree
@@ -708,25 +968,75 @@ public interface MgxqlParserListener extends ParseTreeListener {
 	 */
 	void exitComparison_op_like(MgxqlParser.Comparison_op_likeContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MgxqlParser#comparison_op_left_like}.
+	 * Enter a parse tree produced by {@link MgxqlParser#matching_value}.
 	 * @param ctx the parse tree
 	 */
-	void enterComparison_op_left_like(MgxqlParser.Comparison_op_left_likeContext ctx);
+	void enterMatching_value(MgxqlParser.Matching_valueContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MgxqlParser#comparison_op_left_like}.
+	 * Exit a parse tree produced by {@link MgxqlParser#matching_value}.
 	 * @param ctx the parse tree
 	 */
-	void exitComparison_op_left_like(MgxqlParser.Comparison_op_left_likeContext ctx);
+	void exitMatching_value(MgxqlParser.Matching_valueContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MgxqlParser#comparison_op_right_like}.
+	 * Enter a parse tree produced by {@link MgxqlParser#like_pattern}.
 	 * @param ctx the parse tree
 	 */
-	void enterComparison_op_right_like(MgxqlParser.Comparison_op_right_likeContext ctx);
+	void enterLike_pattern(MgxqlParser.Like_patternContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MgxqlParser#comparison_op_right_like}.
+	 * Exit a parse tree produced by {@link MgxqlParser#like_pattern}.
 	 * @param ctx the parse tree
 	 */
-	void exitComparison_op_right_like(MgxqlParser.Comparison_op_right_likeContext ctx);
+	void exitLike_pattern(MgxqlParser.Like_patternContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#in_collection}.
+	 * @param ctx the parse tree
+	 */
+	void enterIn_collection(MgxqlParser.In_collectionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#in_collection}.
+	 * @param ctx the parse tree
+	 */
+	void exitIn_collection(MgxqlParser.In_collectionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#simple_collection}.
+	 * @param ctx the parse tree
+	 */
+	void enterSimple_collection(MgxqlParser.Simple_collectionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#simple_collection}.
+	 * @param ctx the parse tree
+	 */
+	void exitSimple_collection(MgxqlParser.Simple_collectionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#complex_collection}.
+	 * @param ctx the parse tree
+	 */
+	void enterComplex_collection(MgxqlParser.Complex_collectionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#complex_collection}.
+	 * @param ctx the parse tree
+	 */
+	void exitComplex_collection(MgxqlParser.Complex_collectionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#value_expr_list}.
+	 * @param ctx the parse tree
+	 */
+	void enterValue_expr_list(MgxqlParser.Value_expr_listContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#value_expr_list}.
+	 * @param ctx the parse tree
+	 */
+	void exitValue_expr_list(MgxqlParser.Value_expr_listContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MgxqlParser#item_name}.
+	 * @param ctx the parse tree
+	 */
+	void enterItem_name(MgxqlParser.Item_nameContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MgxqlParser#item_name}.
+	 * @param ctx the parse tree
+	 */
+	void exitItem_name(MgxqlParser.Item_nameContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MgxqlParser#comparison_op_null}.
 	 * @param ctx the parse tree
@@ -757,46 +1067,6 @@ public interface MgxqlParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitComparison_op_is_not_null(MgxqlParser.Comparison_op_is_not_nullContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link MgxqlParser#having}.
-	 * @param ctx the parse tree
-	 */
-	void enterHaving(MgxqlParser.HavingContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link MgxqlParser#having}.
-	 * @param ctx the parse tree
-	 */
-	void exitHaving(MgxqlParser.HavingContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link MgxqlParser#group_by}.
-	 * @param ctx the parse tree
-	 */
-	void enterGroup_by(MgxqlParser.Group_byContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link MgxqlParser#group_by}.
-	 * @param ctx the parse tree
-	 */
-	void exitGroup_by(MgxqlParser.Group_byContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link MgxqlParser#order_by}.
-	 * @param ctx the parse tree
-	 */
-	void enterOrder_by(MgxqlParser.Order_byContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link MgxqlParser#order_by}.
-	 * @param ctx the parse tree
-	 */
-	void exitOrder_by(MgxqlParser.Order_byContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link MgxqlParser#order_by_direction}.
-	 * @param ctx the parse tree
-	 */
-	void enterOrder_by_direction(MgxqlParser.Order_by_directionContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link MgxqlParser#order_by_direction}.
-	 * @param ctx the parse tree
-	 */
-	void exitOrder_by_direction(MgxqlParser.Order_by_directionContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MgxqlParser#field_reference}.
 	 * @param ctx the parse tree
@@ -917,14 +1187,4 @@ public interface MgxqlParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitNumber(MgxqlParser.NumberContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link MgxqlParser#end}.
-	 * @param ctx the parse tree
-	 */
-	void enterEnd(MgxqlParser.EndContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link MgxqlParser#end}.
-	 * @param ctx the parse tree
-	 */
-	void exitEnd(MgxqlParser.EndContext ctx);
 }

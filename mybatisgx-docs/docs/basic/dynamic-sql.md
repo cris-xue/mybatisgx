@@ -211,7 +211,22 @@ public interface UserDao extends SimpleDao<User, UserQuery, Long> {
    - 查询：生成无条件查询（查询全部）
    - 更新/删除：不生成 WHERE 子句（影响全表，需谨慎）
 
+## 更复杂的动态 SQL：MGXSQL
+
+`@Dynamic` 适用于方法名派生和 QueryEntity 场景。如果你需要更精细的动态控制（自定义守卫表达式、foreach 生成、LIKE 简写、多分支条件），可以使用 MGXSQL：
+
+```java
+@Lang(MgxsqlLanguageDriver.class)
+@Select("select * from t_user where\n  #id = :id\n  #and name like %:name%\n  #and dept_id in :deptIdList")
+List<User> search(@Param("id") Long id, @Param("name") String name, @Param("deptIdList") List<Long> deptIdList);
+```
+
+MGXSQL 基于真实表名/列名，通过 `@Lang` + `@Select/@Update/@Delete` 使用，自动生成 `<where>`、`<if>`、`<foreach>`、`<bind>` 等 MyBatis XML 动态标签。
+
+详见 [MGXSQL 动态 SQL 语法完整教程](../query-language/mgxsql)。
+
 ## 下一步
 
+- 学习 [MGXSQL 动态 SQL 语法](../query-language/mgxsql)（更强大的动态条件）
 - 学习 [投影 DTO](./projection)
 - 了解 [关联查询](../relation/overview)

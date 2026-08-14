@@ -2,65 +2,42 @@
 
 ## What is MGXQL?
 
-MGXQL (MyBatisGX Query Language) is a simplified, object-oriented query language inspired by HQL (Hibernate Query Language). It serves as the **unified intermediate representation (IR)** in MyBatisGX — all query conditions (method names, entity fields, hand-written expressions) are converted to MGXQL before being validated and rendered into MyBatis XML.
+MGXQL (MyBatisGX Query Language) is a simplified, object-oriented query language inspired by HQL. It serves as the **unified intermediate representation (IR)** in MyBatisGX — all query conditions (method names, entity fields, hand-written expressions) are converted to MGXQL before being validated and rendered into MyBatis XML.
+
+Used via `@Statement` annotation on Mapper interface methods.
 
 ```
-┌──────────────────────────────────────────────────────────────────┐
-│                    MGXQL: Unified IR Architecture                │
-├──────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  Method Name ──▶ BaseStatement ──▶ mgxql string ──┐            │
-│  (findByNameAndAgeGt)                               │            │
-│                                                     │            │
-│  Entity/QueryEntity ──▶ synthetic method name ─────┤            │
-│  (fields → findByNameAndAge)                        │            │
-│                                                     ▼            │
-│                                              MgxqlStatement      │
-│  @Statement ──▶ mgxql string ──────────────────▶ (unified IR)   │
-│  (hand-written)                                     │            │
-│                                                     ▼            │
-│                                        Syntax + Semantic Check   │
-│                                                     │            │
-│                                                     ▼            │
-│                                              MyBatis XML SQL     │
-└──────────────────────────────────────────────────────────────────┘
+Method Name ──▶ mgxql string ──┐
+Entity Fields ──▶ mgxql string ──┤──▶ MgxqlStatement ──▶ Syntax/Semantic Check ──▶ MyBatis XML
+@Statement ──▶ mgxql string ──┘
 ```
-
-### MGXQL Source Types
-
-| Source | Enum | Description |
-|--------|------|-------------|
-| Method name | `METHOD_NAME` | Derived from method name DSL (e.g., `findByNameAndAgeGt`) |
-| Entity fields | `ENTITY` | Derived from Entity/QueryEntity field metadata |
-| Hand-written | `MANUAL` | Directly written in `@Statement` annotation |
 
 ### Condition Priority
 
 ```
-mapper.xml definition  ───────────────────▶  Highest priority
-     ↓
-@Statement annotation  ───────────────────▶  High priority
-     ↓
-Entity/QueryEntity     ───────────────────▶  Medium priority
-     ↓
-Method name derivation ───────────────────▶  Default behavior
+mapper.xml definition  →  Highest priority (framework does not process)
+@Statement annotation  →  High priority
+Entity/QueryEntity     →  Medium priority
+Method name derivation →  Default behavior
 ```
-
-Any level can be overridden by higher levels.
 
 ---
 
 ## Statement Types
 
-MGXQL supports four statement types:
-
 ### INSERT
 
 ```sql
-insert
+insert EntityName
 ```
 
-Simple insert — no MGXQL expression needed. The framework auto-generates INSERT SQL from entity metadata.
+- No parameters, no conditions — declares insert target entity only
+- Entity data comes from method parameter
+
+```java
+@Statement("insert User")
+int insert(User user);
+```
 
 ### DELETE
 
@@ -68,13 +45,12 @@ Simple insert — no MGXQL expression needed. The framework auto-generates INSER
 delete EntityName where conditions
 ```
 
-- Must include WHERE clause (safety requirement)
-- No alias prefix allowed in WHERE fields
+- WHERE clause **required** (safety requirement)
 - Logical delete auto-applied if entity has `@LogicDelete`
 
 ```java
-@Statement("delete User where name = :name")
-void deleteByName(@Param("name") String name);
+@Statement("delete User where id = :id")
+int deleteById(@Param("id") Long id);
 ```
 
 ### UPDATE
@@ -83,22 +59,22 @@ void deleteByName(@Param("name") String name);
 update EntityName where conditions
 ```
 
-- Must include WHERE clause (safety requirement)
-- No alias prefix allowed in WHERE fields
+- WHERE clause **required** (safety requirement)
+- Update data comes from entity method parameter
 - Optimistic lock condition auto-appended if entity has `@Version`
 
 ```java
-@Statement("update User where name = :name")
-int updateByName(@Param("name") String name, User entity);
+@Statement("update User where id = :id")
+int updateById(@Param("id") Long id, User entity);
 ```
 
 ### SELECT
 
 ```sql
-select [items] from [entities] [where conditions] [group by fields] [having conditions] [order by fields] [limit offset,size]
+select select_items from entities [where conditions] [group by fields] [having conditions] [order by fields] [limit offset, size]
 ```
 
-The most feature-rich statement type. See following sections for each clause.
+The most feature-rich statement type. See following sections.
 
 ---
 
@@ -107,67 +83,72 @@ The most feature-rich statement type. See following sections for each clause.
 ### Select All Columns
 
 ```sql
-select * from User where name = :name
-select user.* from User user where user.name = :name
+select * from User
+select u.* from User u left join Role r on u = r
 ```
+
+| Syntax | Meaning |
+|--------|---------|
+| `*` | All columns from all entities in FROM/JOIN |
+| `alias.*` | All columns from specified alias entity |
 
 ### Select Specific Columns
 
 ```sql
-select id, name, age from User where name = :name
-select user.id, user.name, role.name from User user left join Role role on user = role
+select name, age from User
+select u.name, u.age from User u
 ```
+
+- Field reference: `fieldName` or `alias.fieldName`
+- No nested property chains (e.g., `user.role.name` not supported)
 
 ### Aggregate Functions
 
-| Function | Syntax | Argument Types |
-|----------|--------|---------------|
-| COUNT | `count(*)`, `count(1)`, `count(field)` | `*`, number, or field |
-| MAX | `max(field)` | Field only |
-| MIN | `min(field)` | Field only |
-| AVG | `avg(field)` | Field only |
-| SUM | `sum(field)` | Field only |
-
-> **Important**: Only COUNT supports `*` and number (e.g., `count(1)`) arguments. MAX, MIN, AVG, SUM must use a field reference.
-
 ```sql
-select count(*) from User where age > :age
-select max(age) from User where dept = :dept
-select avg(salary) from User group by dept having avg(salary) > :minSalary
+select count(*) from User
+select count(id) from User where status = :status
+select count(1) from User
+select max(age) from User
+select min(age), avg(age), sum(salary) from User
 ```
+
+| Function | Allowed Arguments | Notes |
+|----------|-------------------|-------|
+| `count(field)` | Field | Count non-null rows |
+| `count(*)` | Asterisk | Count all rows |
+| `count(1)` | Number | Count all rows |
+| `max(field)` | Field only | Maximum |
+| `min(field)` | Field only | Minimum |
+| `avg(field)` | Field only | Average |
+| `sum(field)` | Field only | Sum |
+
+> **Restriction**: `max/min/avg/sum` only accept field arguments. `*` and numbers are NOT allowed.
 
 ---
 
 ## FROM / JOIN Clause
 
-### Single Entity (no alias)
+### Single Entity
 
 ```sql
-select * from User where name = :name
+from User           -- no alias
+from User u         -- with alias
 ```
 
-### Single Entity (with alias)
-
-```sql
-select * from User user where user.name = :name
-```
+- Entity name: `UPPER_NAME` format (e.g., `User`, `UserDetail`)
+- Alias: `LOWER_NAME` (e.g., `u`, `ud`) or backtick-quoted
 
 ### LEFT JOIN
 
 ```sql
-select user.name, role.name
-from User user
-left join Role role on user = role
-where user.name = :name
+from User u left join Role r on u = r
+from User u left join Role r on u = r left join Menu m on r = m
 ```
 
-**ON Syntax Simplification**: Unlike SQL where you write `ON user.id = role.user_id`, MGXQL uses a simplified form:
-
-```sql
-on alias1 = alias2
-```
-
-The framework **automatically derives** the foreign key join condition from entity relationship metadata (`@JoinColumn`, `@JoinTable`). You only specify which two entity aliases are related.
+- **Only `left join`** supported (no inner/right/cross join)
+- **ON condition**: only `alias1 = alias2` (entity relationship equality)
+- Framework auto-derives FK join condition from JPA annotations (`@OneToOne`, `@OneToMany`, `@ManyToMany`)
+- Many-to-many: junction table auto-inserted
 
 ### Alias Requirements
 
@@ -175,29 +156,7 @@ The framework **automatically derives** the foreign key join condition from enti
 |----------|----------------|
 | Single entity, no JOIN | Optional |
 | Multiple entities (with JOIN) | **Required** for ALL entities |
-| Alias uniqueness | **Must be unique** within a query |
-
-### Many-to-Many Auto-Derivation
-
-For `@ManyToMany` relationships, the framework automatically inserts the middle/junction table:
-
-```sql
--- MGXQL (you write)
-select user.*, menu.*
-from User user
-left join Role role on user = role
-left join Menu menu on role = menu
-where user.id = :id
-
--- Generated SQL (framework expands)
-select user.*, menu.*
-from user user
-left join user_role user_role on user.id = user_role.user_id
-left join role role on user_role.role_id = role.id
-left join role_menu role_menu on role.id = role_menu.role_id
-left join menu menu on role_menu.menu_id = menu.id
-where user.id = #{id}
-```
+| Alias uniqueness | **Must be unique** within query |
 
 ---
 
@@ -205,171 +164,243 @@ where user.id = #{id}
 
 ### Comparison Operators
 
-| Operator | SQL | Example |
-|----------|-----|---------|
-| `=` | `=` | `name = :name` |
-| `!=` | `!=` | `status != :status` |
-| `<` | `<` | `age < :age` |
-| `<=` | `<=` | `age <= :maxAge` |
-| `>` | `>` | `age > :minAge` |
-| `>=` | `>=` | `age >= :minAge` |
-| `like` | `like` | `name like :name` |
-| `left like` | `like 'value%'` | `name left like :name` |
-| `right like` | `like '%value'` | `name right like :name` |
-| `in` | `in` | `id in :ids` |
-| `not in` | `not in` | `id not in :ids` |
-| `between` | `between` | `age between :minAge` |
-| `is null` | `is null` | `name is null` |
-| `is not null` | `is not null` | `name is not null` |
+| Operator | Example |
+|----------|---------|
+| `=` | `name = :name` |
+| `!=` | `status != :status` |
+| `<` / `<=` | `age < :age` |
+| `>` / `>=` | `age >= :minAge` |
+
+### Matching Operators
+
+| Operator | Example | Notes |
+|----------|---------|-------|
+| `like` | `name like :name` | Fuzzy match |
+| `left like` | `name left like :name` | Left fuzzy (`%value`) |
+| `right like` | `name right like :name` | Right fuzzy (`value%`) |
+| `in` | `id in :ids` | Contains |
+| `not in` | `id not in :ids` | Not contains |
+| `between` | `age between :ageRange` | Range |
+| `not between` | `age not between :ageRange` | Not in range |
+| `not like` | `name not like :name` | Not fuzzy |
+
+### NULL Checks
+
+```sql
+where name is null
+where name is not null
+```
 
 ### Logical Operators
 
-- `and` — higher precedence (evaluated first)
+- `and` — higher precedence
 - `or` — lower precedence
-- Parentheses `()` — override precedence
+- `()` — override precedence
 
 ```sql
 where name = :name and (age < :age or status = :status)
 ```
 
-### Optional Conditions (`?` prefix)
-
-Prefix a condition with `?` to make it optional. Optional conditions generate MyBatis `<if>` tags:
-
-```sql
--- MGXQL
-where ?name = :name and age > :age
-
--- Generated MyBatis XML
-<where>
-  <if test="name != null"> name = #{name} </if>
-  <if test="age != null"> and age > #{age} </if>
-</where>
-```
-
 ### Parameter References
 
-Use `:` prefix to reference method parameters:
-
 ```sql
-where name = :name                          -- simple parameter
-where user.name = :user.name                -- nested path
+:paramName              -- simple parameter (@Param)
+:paramName.nestedField  -- nested property path
 ```
 
-Parameters are resolved by priority:
-1. `@Param`-annotated method parameter matching the path
-2. Entity/QueryEntity field matching the path
-3. Positional `arg0`, `arg1`, etc.
+Number literals also allowed: `age > 18`
 
-### Field References
+---
 
-- Without alias: `name` (for single-entity queries)
-- With alias: `user.name` (**required** for multi-entity queries)
+## Dynamic Condition Blocks
 
-> **Important**: In multi-entity queries (with JOIN), ALL field references in WHERE MUST use alias prefix. Example: `where user.name = :name`, not `where name = :name`.
+MGXQL supports dynamic conditions in WHERE clause. When parameters are null/empty, conditions are automatically skipped.
+
+### `#[body]` — Auto-guard Condition
+
+Auto-extracts `:param` from body, generates `isNotEmpty()` OGNL test:
+
+```sql
+select * from User where #[name = :name] #[and age > :age]
+```
+
+- Parameter null/empty → condition not generated
+- `and`/`or` prefix inside body connects to previous condition
+- Nested `#[...]` params don't bubble up to outer guard
+
+```java
+@Statement("select * from User where #[name = :name] #[and age > :age]")
+List<User> search(@Param("name") String name, @Param("age") Integer age);
+// name=null, age=25 → WHERE age > 25
+```
+
+### `#if(expr)[body]` — Custom Guard
+
+```sql
+select * from User where #if(:age != null)[age >= :age]
+select * from User where #if(:minAge != null && :maxAge != null)[age between :ageRange]
+```
+
+- `expr` is custom OGNL expression
+- `:param` in guard auto-strips colon
+- Supports `&&`, `||`, `==`, `!=`, `>`, `<`
+
+### `#choose/#when/#otherwise` — Multi-branch Mutual Exclusion
+
+```sql
+select * from User where #choose[
+  #when(:type == 'vip')[level = :level]
+  #when(:type == 'normal')[status = :status]
+  #otherwise[code = :code]
+]
+```
+
+- Maps to MyBatis `<choose>/<when>/<otherwise>`
+- `#when(expr)` MUST have guard expression
+- `#otherwise` optional
+- Body follows `#[body]` rules (`:param`, `in :list`, `%:name%` allowed; `#{}`/`${}`/`<xml>` forbidden)
+
+> **Restriction**: Dynamic block body does NOT support nested dynamic gates.
+
+---
+
+## IN Shorthand
+
+```sql
+-- Simple collection → <foreach>
+where id in :idList
+
+-- Complex object collection (property access)
+where id in (item:userList)=>$item.id
+```
+
+Framework auto-generates `<foreach>` tag.
+
+---
+
+## LIKE Shorthand
+
+```sql
+-- Both-side fuzzy → LIKE '%keyword%'
+where #[name like %:name%]
+
+-- Right-side fuzzy → LIKE 'keyword%'
+where #[name like :name%]
+
+-- Left-side fuzzy → LIKE '%keyword'
+where #[name like %:name]
+```
+
+Framework auto-generates `<bind>` tag for pattern concatenation.
+
+---
+
+## Syntax Domains (where[] / set[])
+
+MGXQL WHERE and SET clauses render as bounded MGXSQL subsets:
+
+- `where[body]` → MGXSQL generates `<where>` tag
+- `set[body]` → MGXSQL generates `<set>` tag (for UPDATE)
+
+Dynamic blocks (`#[...]`, `#if(...)[...]`, `#choose[...]`) inside WHERE/SET are processed by the MGXSQL engine.
 
 ---
 
 ## GROUP BY Clause
 
 ```sql
-select * from User where age > :age group by dept
-select * from User where age > :age group by dept, status
-select user.dept from User user group by user.dept
+select count(u.id) from User u group by u.code
+select count(u.id) from User u group by u.code, u.dept
 ```
 
 ---
 
 ## HAVING Clause
 
-HAVING supports aggregate function comparisons with AND/OR nesting:
-
 ```sql
-having max(age) > :age
-having count(id) > :minCount and avg(salary) > :minSalary
-having (max(age) > :maxAge or min(age) < :minAge) and count(id) > 10
+having count(u.id) > :minCount
+having count(u.id) > :minCount and max(u.age) > :maxAge
+having (count(u.id) > :minCount or max(u.id) > :minId) and avg(u.age) > :avgAge
 ```
 
-**Restrictions**:
-- Left side MUST be an aggregate function (`count`, `max`, `min`, `avg`, `sum`)
-- Right side MUST be a parameter reference (`:param`) or a number literal
-- Field references are NOT allowed as comparison values in HAVING
+- Left side MUST be aggregate function
+- Right side: parameter reference (`:param`) or number literal
+- Supports `and`/`or` and parentheses
 
 ---
 
 ## ORDER BY Clause
 
 ```sql
-select * from User where name = :name order by name desc
-select * from User where name = :name order by name desc, age asc
-select user.name from User user order by user.name
+order by name desc
+order by name desc, age asc
 ```
 
-Default direction is `asc` if not specified.
+Default direction: `asc`. Multiple fields comma-separated.
 
 ---
 
 ## LIMIT Clause
 
 ```sql
-select * from User where name = :name limit 0, 10
+limit 0, 10       -- skip 0, take 10
+limit 5, 5        -- skip 5, take 5
 ```
 
-- Syntax: `limit offset, size`
-- Offset starts from 0
-- Only supports **fixed** pagination — for dynamic pagination, use `Pageable` parameter or PageHelper
+- Fixed pagination only (number literals)
+- For dynamic pagination, use `Pageable` parameter
 
 ---
 
-## Three Condition Sources Comparison
+## `?` Prefix Migration Guide
 
-### Method Name → MGXQL
+The `?` prefix for optional conditions is **deprecated**. Migrate to dynamic condition blocks:
 
-```
-findByNameLikeAndAgeGtOrderByNameDesc
-    ↓ MethodSyntaxProcessor (ANTLR parse)
-BaseStatement (QueryStatement)
-    ↓ toMgxql()
-"select * from User where name like :name and age > :age order by name desc"
-    ↓ MgxqlSyntaxProcessor
-MgxqlStatement → MyBatis XML
-```
+| Old Syntax | New Syntax | Notes |
+|------------|------------|-------|
+| `?name = :name` | `#[name = :name]` | Auto isNotEmpty guard |
+| `and ?age >= :age` | `#[and age >= :age]` | Connector inside body |
+| `or ?code like :code` | `#[or code like %:code%]` | LIKE pattern shorthand |
+| Custom null check | `#if(:age != null)[age >= :age]` | Custom guard |
+| Multi-branch | `#choose[#when(...)[...] #otherwise[...]]` | Choose/when/otherwise |
 
-**When to use**: Simple single-entity queries with 1-3 conditions. Quick and readable.
+---
 
-### Entity/QueryEntity Fields → MGXQL
+## Naming Rules
 
-```
-UserQuery fields (nameLike, ageGt, dept)
-    ↓ entityToMethodName()
-"findByNameLikeAndAgeGtAndDept"
-    ↓ same pipeline as method name
-MgxqlStatement → MyBatis XML
-```
+| Type | Format | Examples |
+|------|--------|----------|
+| Entity name | UPPER_CASE_START | `User`, `UserDetail`, `Role` |
+| Alias | lower_case_start or backtick | `u`, `ud`, `` `user` `` |
+| Field name | lower_case_start or backtick | `name`, `id`, `` `inputTime` `` |
+| Parameter | `:` prefix | `:id`, `:user.name` |
 
-**When to use**: Dynamic multi-condition queries where some conditions may be null. Supports `@Dynamic` and `?` optional conditions natively.
+Field names correspond to Java entity **property names**, not database column names.
 
-### @Statement → MGXQL
+---
 
-```
-@Statement("select * from User where name = :name")
-    ↓ MgxqlSyntaxProcessor (direct)
-MgxqlStatement → MyBatis XML
-```
+## Validation Rules
 
-**When to use**: Complex queries — JOINs, aggregations, specific projections, or conditions that method names cannot express.
+### Syntax Validation (SyntaxCheckerChain)
 
-### Decision Guide
+| Checker | Rule |
+|---------|------|
+| WhereRequiredChecker | DELETE/UPDATE must have WHERE |
+| AliasRequirementChecker | JOIN queries: field refs must use alias |
+| AggregateArgumentChecker | max/min/avg/sum: field only; count: also `*` and number |
+| FieldAliasChecker | Alias in field ref must be declared in FROM/JOIN |
+| OnAliasChecker | Alias in ON must be declared in FROM/JOIN |
 
-| Scenario | Recommended Approach |
-|----------|---------------------|
-| Simple CRUD (findById, findAll) | Built-in SimpleDao methods |
-| 1-3 conditions, single entity | Method name query |
-| Dynamic conditions, null-skipping | QueryEntity |
-| Multi-entity JOIN | @Statement |
-| Aggregation + GROUP BY + HAVING | @Statement |
-| Custom projection (DTO return) | @Statement |
-| Very complex SQL | mapper.xml (highest priority) |
+### Semantic Validation (SemanticCheckerChain)
+
+| Checker | Rule |
+|---------|------|
+| EntityChecker | Entity name must be registered |
+| FieldChecker | Field must exist on entity |
+| JoinRelationChecker | JOIN must have JPA relationship annotation |
+| SelectFieldChecker | SELECT fields must belong to FROM/JOIN entities |
+| WhereFieldChecker | WHERE fields must belong to FROM/JOIN entities |
+| DmlAliasPrefixChecker | DML field refs must use correct alias prefix |
 
 ---
 
@@ -377,84 +408,71 @@ MgxqlStatement → MyBatis XML
 
 ### Similarities
 
-| Aspect | MGXQL | HQL |
-|--------|-------|-----|
-| Based on entity/object model | ✅ | ✅ |
-| Uses entity name (not table name) | ✅ | ✅ |
-| Uses field name (not column name) | ✅ | ✅ |
-| Parameter binding | ✅ `:param` | ✅ `:param` |
-| JOIN based on entity relationships | ✅ | ✅ |
-| Aggregate functions | ✅ | ✅ |
+- Entity/field names (not table/column names)
+- `:param` parameter binding
+- JOIN based on entity relationships
+- Aggregate functions
 
 ### Differences
 
 | Aspect | MGXQL | HQL |
 |--------|-------|-----|
-| ON clause | Simplified `alias = alias`, FK auto-derived | Full `ON alias.col = alias.col` |
-| Subqueries | ❌ Not supported | ✅ |
-| SELECT NEW (DTO) | ❌ Not supported (use ResultMap) | ✅ |
-| UPDATE/DELETE with JOIN | ❌ Single entity only | ✅ |
-| Fetch join | ❌ (use FetchMode) | ✅ |
-| Polymorphic queries | ❌ | ✅ |
-| Collection filtering | ❌ | ✅ |
-| Named queries | Via @Statement | Via @NamedQuery |
-
-MGXQL intentionally keeps a minimal feature set — it's a "weakened HQL" that covers the most common 80% of query patterns while keeping the language easy to learn and the parser fast.
+| ON clause | Simplified `alias = alias` | Full `ON alias.col = alias.col` |
+| Subqueries | Not supported | Supported |
+| SELECT NEW (DTO) | Not supported | Supported |
+| UPDATE/DELETE with JOIN | Single entity only | Supported |
+| Dynamic conditions | `#[body]`, `#if`, `#choose` | Not built-in |
 
 ---
 
-## Full Syntax Reference
+## Full Example
 
-```
-sql_statement        = insert_statement | delete_statement | update_statement | select_statement
+```java
+@Mapper
+public interface UserDao extends SimpleDao<User, UserQuery, Long> {
 
-insert_statement     = "insert"
-delete_statement     = "delete" entity_name where_clause
-update_statement     = "update" entity_name where_clause
+    @Statement("select * from User where id = :id")
+    User findUser(@Param("id") Long id);
 
-select_statement     = "select" select_item_clause select_from_clause
-                       [where_clause] [group_by_clause] [having_clause]
-                       [order_by_clause] [limit_clause]
+    @Statement("select u.* from User u left join UserDetail ud on u = ud where u.id = :id")
+    User findWithDetail(@Param("id") Long id);
 
-select_item_clause   = select_item ("," select_item)*
-select_item          = select_column_all | select_column_custom | aggregate_function
-select_column_all    = "*" | entity_name_alias "." "*"
-select_column_custom = field_reference
-aggregate_function   = func_name "(" aggregate_argument ")"
-func_name            = "count" | "max" | "min" | "avg" | "sum"
-aggregate_argument   = field_reference | number | "*"
+    @Statement("select count(u.id) from User u group by u.code having count(u.id) > :minCount")
+    List<Map<String, Object>> groupByCode(@Param("minCount") long minCount);
 
-select_from_clause   = "from" select_primary_entity select_join_entity*
-select_primary_entity = entity_name [entity_name_alias]
-select_join_entity   = "left" "join" entity_name [entity_name_alias] "on" entity_name_alias "=" entity_name_alias
+    @Statement("select * from User where #[name like %:name%] #[and age > :age] #[and id in :idList]")
+    List<User> search(@Param("name") String name, @Param("age") Integer age, @Param("idList") List<Long> idList);
 
-where_clause         = "where" condition_or_expression
-condition_or_expression = condition_and_expression ("or" condition_and_expression)*
-condition_and_expression = condition_term ("and" condition_term)*
-condition_term       = condition_comparison | "(" condition_or_expression ")"
-condition_comparison = ["?"] field_reference (comparison_param | comparison_null)
-comparison_param     = (relational_op | matching_op) condition_value
-comparison_null      = "is null" | "is not null"
-condition_value      = parameter_reference | number
+    @Statement("select * from User where #choose[#when(:type == 'vip')[level >= :level] #otherwise[status = :status]]")
+    List<User> findByType(@Param("type") String type, @Param("level") Integer level, @Param("status") Integer status);
 
-group_by_clause      = "group" "by" field_reference ("," field_reference)*
-having_clause        = "having" having_or_expression
-having_or_expression = having_and_expression ("or" having_and_expression)*
-having_and_expression = having_term ("and" having_term)*
-having_term          = having_comparison | "(" having_or_expression ")"
-having_comparison    = aggregate_function relational_op (parameter_reference | number)
-order_by_clause      = "order" "by" order_by_expression ("," order_by_expression)*
-order_by_expression  = field_reference ["asc" | "desc"]
-limit_clause         = "limit" number "," number
+    @Statement("delete User where id = :id")
+    int deleteById(@Param("id") Long id);
 
-field_reference      = field_name | entity_name_alias "." field_name
-parameter_reference  = ":" field_name ("." field_name)*
-entity_name          = UPPER_CASE_START (e.g., User, OrderItem)
-entity_name_alias    = lower_case_start | `quoted` (e.g., user, `order`)
-field_name           = lower_case_start | `quoted` (e.g., name, `order`)
+    @Statement("update User where code = :code")
+    int updateByCode(@Param("code") String code, User entity);
 
-relational_op        = "=" | "!=" | "<" | "<=" | ">" | ">="
-matching_op          = ["not"] ("between" | "in" | "like" | "left like" | "right like")
+    @Statement("insert User")
+    int insert(User user);
+
+    @Statement("select * from User order by id desc limit 0, 10")
+    List<User> findTop10();
+}
 ```
 
-> **Note**: This syntax reference is based on `MgxqlLexer.g4` and `MgxqlParser.g4` in `mybatisgx-core/src/main/resources/antlr/mgxql/`.
+---
+
+## MGXQL vs MGXSQL: When to Use Which
+
+| Dimension | MGXQL (@Statement) | MGXSQL (@Lang + @Select) |
+|-----------|-------------------|--------------------------|
+| Positioning | Object query language, HQL-like | Dynamic SQL syntax sugar |
+| SQL basis | Entity/field names | Real table/column names |
+| Dynamic conditions | `#[body]`, `#if`, `#choose` | `#[body]`, `#if`, `#condition`, `#and/#or`, `#choose` |
+| JOIN | Supported | Not supported |
+| Aggregation | Supported | Not supported |
+| IN/LIKE shorthand | Supported | Supported + `#for` directive |
+| Include/Bind | Not supported | `#include[sqlId]`, `#bind[name = expr]` |
+| Use case | Complex queries, multi-table | Dynamic conditions, optional params |
+
+See [MGXSQL Syntax Reference](mgxsql.md) for complete MGXSQL documentation.

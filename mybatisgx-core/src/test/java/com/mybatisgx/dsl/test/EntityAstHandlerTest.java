@@ -20,10 +20,10 @@ public class EntityAstHandlerTest {
         MethodInfo methodInfo = configuration.getMethodInfo("com.mybatisgx.dsl.test.dao.UserEntityDao.findOne");
         WhereClause whereClause = methodInfo.getMgxqlStatement().getWhereClause();
 
-        WhereConditionNode whereConditionNode1 = whereClause.getRootExpression().getNodes().get(2);
+        WhereConditionNode whereConditionNode1 = whereClause.getRootExpression().getConditions().get(2);
         Assert.assertEquals("nameEq", whereConditionNode1.getColumnInfo().getJavaColumnName());
 
-        WhereConditionNode whereConditionNode2 = whereClause.getRootExpression().getNodes().get(2);
+        WhereConditionNode whereConditionNode2 = whereClause.getRootExpression().getConditions().get(2);
         Assert.assertEquals("nameEq", whereConditionNode2.getColumnInfo().getJavaColumnName());
     }
 }

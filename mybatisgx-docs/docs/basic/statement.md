@@ -4,69 +4,50 @@ sidebar_position: 6
 
 # Statement 注解
 
-> 支持复杂条件分组，优先级最高
+> 使用 MGXQL 对象查询语言声明 SQL，优先级仅次于 mapper.xml
 
 ## 概述
 
-`@Statement` 注解用于声明查询语句的定义入口，支持方法名派生规则，优先级高于方法名和实体字段。
+`@Statement` 注解用于在 Mapper 接口方法上声明 MGXQL 查询语句。MGXQL 是基于实体对象的查询语言，支持 SELECT、DELETE、UPDATE、INSERT 四种语句类型。
 
 ## 基本用法
 
 ```java
-@Statement(value = "findByNameLikeAndAge", language = StatementLanguage.METHOD)
-List<User> findByNameLikeAndAge(String name, Integer age);
-```
+@Mapper
+public interface UserDao extends SimpleDao<User, UserQuery, Long> {
 
-| 属性 | 说明 |
-|------|------|
-| `value` | 语句描述内容，支持方法名规则 |
-| `language` | 语言类型，默认 `StatementLanguage.METHOD` |
+    // 查询
+    @Statement("select * from User where id = :id")
+    User findUser(@Param("id") Long id);
 
-## 条件分组
+    // 条件查询
+    @Statement("select * from User where name like :name and age > :age")
+    List<User> search(@Param("name") String name, @Param("age") Integer age);
 
-`@Statement` 支持复杂的条件分组，使用 `And()` 和 `Or()` 包裹条件：
+    // 关联查询
+    @Statement("select u.* from User u left join Role r on u = r where u.id = :id")
+    User findWithRoles(@Param("id") Long id);
 
-### And 分组
+    // 聚合查询
+    @Statement("select count(*) from User where status = :status")
+    long countByStatus(@Param("status") Integer status);
 
-```java
-// WHERE name LIKE ? AND (age = ? OR sex = ?)
-@Statement("findByNameLikeAnd(AgeOrSex)")
-User findByNameLikeAndAgeOrSex(String name, Integer age, Integer sex);
-```
+    // 动态条件（参数为空时自动跳过）
+    @Statement("select * from User where #[name = :name] #[and age > :age]")
+    List<User> dynamicSearch(@Param("name") String name, @Param("age") Integer age);
 
-### Or 分组
+    // 删除
+    @Statement("delete User where id = :id")
+    int deleteById(@Param("id") Long id);
 
-```java
-// WHERE (name = ? OR age = ?) AND dept = ?
-@Statement("findBy(NameOrAge)AndDept")
-List<User> findByNameOrAgeAndDept(String name, Integer age, String dept);
-```
+    // 更新
+    @Statement("update User where id = :id")
+    int updateById(@Param("id") Long id, User entity);
 
-### 嵌套分组
-
-```java
-// WHERE (name LIKE ? AND (age > ? OR sex = ?)) OR dept = ?
-@Statement("findBy(NameLikeAnd(AgeGtOrSex)OrDept)")
-List<User> findComplex(String name, Integer age, Integer sex, String dept);
-```
-
-## 与方法名派生的区别
-
-### 方法名派生
-
-```java
-// 不支持条件分组
-List<User> findByNameLikeAndAgeOrSex(String name, Integer age, Integer sex);
-// 生成: WHERE name LIKE ? AND age = ? OR sex = ?
-```
-
-### Statement 注解
-
-```java
-// 支持条件分组
-@Statement("findByNameLikeAnd(AgeOrSex)")
-User findByNameLikeAndAgeOrSex(String name, Integer age, Integer sex);
-// 生成: WHERE name LIKE ? AND (age = ? OR sex = ?)
+    // 插入
+    @Statement("insert User")
+    int insert(User user);
+}
 ```
 
 ## 优先级
@@ -89,80 +70,32 @@ User findByNameLikeAndAgeOrSex(String name, Integer age, Integer sex);
 
 ## 使用场景
 
-### 1. 需要条件分组
-
-```java
-// 复杂 OR 条件需要分组
-@Statement("findBy(NameLikeOrCode)AndStatus")
-List<User> findByNameLikeOrCodeAndStatus(String name, String code, Integer status);
-```
-
-### 2. 方法名过长
-
-```java
-// 方法名过长时可读性差
-// findByUserNameLikeAndUserAgeGtAndUserDeptInAndUserStatusAndCreateTimeBetween
-
-// 使用 Statement 简化
-@Statement("findByUserNameLikeAndUserAgeGtAndUserDeptInAndUserStatusAndCreateTimeBetween")
-List<User> search(String userName, Integer userAge, List<Long> userDept, Integer userStatus, List<LocalDateTime> createTime);
-```
-
-### 3. 固定查询语义
-
-```java
-// 强制使用特定条件，不被实体字段覆盖
-@Statement("findByNameAndAge")
-User findStrict(String name, Integer age);
-```
-
-## 支持的操作类型
-
-`@Statement` 主要用于查询操作：
-
-| 操作 | 说明 |
+| 场景 | 示例 |
 |------|------|
-| `find` | 查询列表 |
-| `get` | 查询单条 |
-| `query` | 查询 |
-| `select` | 查询 |
-| `count` | 统计数量 |
+| 多表 JOIN 查询 | `select u.* from User u left join Role r on u = r` |
+| 聚合统计 | `select count(*) from User group by dept` |
+| 自定义投影 | `select name, age from User where ...` |
+| 动态可选条件 | `where #[name = :name] #[and age > :age]` |
+| 固定查询语义 | 强制使用特定条件，不被实体字段覆盖 |
 
-## 完整示例
+## 完整语法
 
-```java
-@Repository
-public interface UserDao extends SimpleDao<User, UserQuery, Long> {
+MGXQL 支持完整的 SELECT 子句（FROM/JOIN、WHERE、GROUP BY、HAVING、ORDER BY、LIMIT）、动态条件块（`#[body]`、`#if(expr)[body]`、`#choose`）、IN/LIKE 简写等。
 
-    // 简单分组
-    @Statement("findByNameLikeAnd(AgeGtOrDept)")
-    List<User> findByNameLikeAndAgeOrDept(String name, Integer age, String dept);
-
-    // 多层分组
-    @Statement("findBy((NameLikeOrCode)AndStatus)OrCreateTimeBetween")
-    List<User> findComplex(String name, String code, Integer status,
-                           LocalDateTime startTime, LocalDateTime endTime);
-
-    // 统计查询
-    @Statement("countBy(AgeGtOrAgeLt)")
-    Long countByAgeRange(Integer ageGt, Integer ageLt);
-}
-```
+详见 [MGXQL 对象查询语言完整教程](../query-language/mgxql)。
 
 ## 注意事项
 
-1. **只支持查询**：`@Statement` 注解仅用于查询方法
+1. **基于实体名**：MGXQL 使用 Java 实体类名（`User`）和属性名（`name`），而非表名和列名
 
-2. **优先级最高**：会覆盖实体字段和查询实体字段的条件
+2. **参数引用**：使用 `:paramName` 引用方法参数（对应 `@Param` 注解）
 
-3. **参数顺序**：方法参数顺序与条件字段顺序一致
+3. **DELETE/UPDATE 必须有 WHERE**：安全要求，防止全表操作
 
-4. **分组语法**：
-   - `And(条件)` - AND 分组
-   - `Or(条件)` - OR 分组
-   - 支持嵌套
+4. **JOIN 必须用别名**：多表查询时所有实体必须声明唯一别名
 
 ## 下一步
 
-- 学习 [分页查询](./pagination)
-- 了解 [动态 SQL](./dynamic-sql)
+- 学习 [MGXQL 完整语法](../query-language/mgxql)
+- 了解 [MGXSQL 动态 SQL](../query-language/mgxsql)（基于真实表名的动态条件）
+- 查看 [查询语言总览](../query-language/overview)（选择合适的查询方式）

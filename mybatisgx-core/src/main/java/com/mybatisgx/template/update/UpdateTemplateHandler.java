@@ -5,18 +5,19 @@ import com.mybatisgx.annotation.LogicDelete;
 import com.mybatisgx.annotation.Version;
 import com.mybatisgx.context.EntityInfoContextHolder;
 import com.mybatisgx.dsl.mgxql.model.WhereClause;
+import com.mybatisgx.dsl.mgxsql.MgxsqlScanner;
 import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.model.*;
-import com.mybatisgx.template.MgxqlWhereTemplateHandler;
-import com.mybatisgx.template.MybatisXmlHelper;
+import com.mybatisgx.template.MgxqlSubsetPurity;
+import com.mybatisgx.template.MgxqlWhereHandler;
 import com.mybatisgx.template.TemplateHandler;
-import com.mybatisgx.template.XmlCompiler;
 import com.mybatisgx.utils.TypeUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
+import org.dom4j.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,11 +45,8 @@ public class UpdateTemplateHandler implements TemplateHandler {
         updateElement.addAttribute("id", methodInfo.getMethodName());
         updateElement.addText(String.format("update %s", entityInfo.getTableName()));
 
-        Element setTrimElement = MybatisXmlHelper.buildTrimElement("set", "", ",");
-        updateElement.add(setTrimElement);
-
         AbstractUpdateHandler abstractUpdateHandler = this.getAbstractUpdateHandler(methodInfo);
-        abstractUpdateHandler.setValue(methodInfo, setTrimElement);
+        abstractUpdateHandler.setValue(methodInfo, updateElement);
         abstractUpdateHandler.setWhere(updateElement, entityInfo, methodInfo);
         return document.asXML();
     }
@@ -63,31 +61,31 @@ public class UpdateTemplateHandler implements TemplateHandler {
 
     private static abstract class AbstractUpdateHandler {
 
-        protected MgxqlWhereTemplateHandler mgxqlWhereTemplateHandler = new MgxqlWhereTemplateHandler();
+        protected MgxqlWhereHandler mgxqlWhereHandler = new MgxqlWhereHandler();
+        protected MgxsqlScanner mgxsqlScanner = new MgxsqlScanner();
 
-        public void setValue(MethodInfo methodInfo, Element setTrimElement) {
+        public void setValue(MethodInfo methodInfo, Element updateElement) {
             MethodParamInfo entityParamInfo = methodInfo.getEntityParamInfo();
             List<ColumnInfo> tableColumnInfoList = this.getTableColumnInfoList(entityParamInfo);
             if (ObjectUtils.isEmpty(tableColumnInfoList)) {
                 throw new MybatisgxException("%s实体表字段不存在", entityParamInfo.getTypeName());
             }
-            this.setValue(methodInfo, entityParamInfo, tableColumnInfoList, setTrimElement);
-            if (!methodInfo.getDynamic()) {
-                XmlCompiler.trim(setTrimElement);
-            }
+            StringBuilder setBody = new StringBuilder();
+            this.setValue(methodInfo, entityParamInfo, tableColumnInfoList, setBody);
+            addSetNodes(updateElement, setBody.toString());
         }
 
-        public void setValue(MethodInfo methodInfo, MethodParamInfo entityParamInfo, List<ColumnInfo> tableColumnInfoList, Element setTrimElement) {
+        public void setValue(MethodInfo methodInfo, MethodParamInfo entityParamInfo, List<ColumnInfo> tableColumnInfoList, StringBuilder setBody) {
             for (ColumnInfo columnInfo : tableColumnInfoList) {
                 if (TypeUtils.typeEquals(columnInfo, IdColumnInfo.class, ColumnInfo.class)) {
                     List<ColumnInfo> columnInfoComposites = columnInfo.getComposites();
                     if (ObjectUtils.isEmpty(columnInfoComposites)) {
                         List<String> paramValuePathItemList = this.getParamValuePathItemList(entityParamInfo, columnInfo, null);
-                        this.setValue(methodInfo, columnInfo, paramValuePathItemList, setTrimElement);
+                        this.setValue(methodInfo, columnInfo, paramValuePathItemList, setBody);
                     } else {
                         for (ColumnInfo columnInfoComposite : columnInfoComposites) {
                             List<String> paramValuePathItemList = this.getParamValuePathItemList(entityParamInfo, null, columnInfoComposite);
-                            this.setValue(methodInfo, columnInfoComposite, paramValuePathItemList, setTrimElement);
+                            this.setValue(methodInfo, columnInfoComposite, paramValuePathItemList, setBody);
                         }
                     }
                 }
@@ -102,47 +100,102 @@ public class UpdateTemplateHandler implements TemplateHandler {
                             ColumnInfo foreignKeyColumnInfo = inverseForeignKeyColumnInfo.getColumnInfo();
                             ColumnInfo referencedColumnInfo = inverseForeignKeyColumnInfo.getReferencedColumnInfo();
                             List<String> paramValuePathItemList = this.getParamValuePathItemList(entityParamInfo, relationColumnInfo, referencedColumnInfo);
-                            this.setValue(methodInfo, foreignKeyColumnInfo, paramValuePathItemList, setTrimElement);
+                            this.setValue(methodInfo, foreignKeyColumnInfo, paramValuePathItemList, setBody);
                         }
                     }
                 }
             }
         }
 
-        private void setValue(MethodInfo methodInfo, ColumnInfo columnInfo, List<String> paramValuePathItemList, Element trimElement) {
+        private void setValue(MethodInfo methodInfo, ColumnInfo columnInfo, List<String> paramValuePathItemList, StringBuilder setBody) {
             Version version = columnInfo.getVersion();
             if (version != null) {
                 String valuePath = StringUtils.join(paramValuePathItemList, ".");
-                String columnValueExpression = String.format("%s = #{%s} + %s, ", columnInfo.getDbColumnName(), valuePath, version.increment());
-                trimElement.addText(columnValueExpression);
+                setBody.append(columnInfo.getDbColumnName()).append(" = :").append(valuePath).append(" + ").append(version.increment()).append(", ");
                 return;
             }
 
             LogicDelete logicDelete = columnInfo.getLogicDelete();
             if (logicDelete != null) {
-                String columnValueExpression = String.format("%s = '%s', ", columnInfo.getDbColumnName(), logicDelete.show());
-                trimElement.addText(columnValueExpression);
+                setBody.append(columnInfo.getDbColumnName()).append(" = '").append(logicDelete.show()).append("', ");
                 return;
             }
 
-            String testExpression = MybatisXmlHelper.getTestExpression(paramValuePathItemList);
-            String valueExpression = MybatisXmlHelper.getValueExpression(paramValuePathItemList, columnInfo);
-            Element trimOrIfElement = MybatisXmlHelper.buildTrimOrIfElement(methodInfo, columnInfo, trimElement, testExpression);
-            trimOrIfElement.addText(String.format("%s = %s", columnInfo.getDbColumnName(), valueExpression));
+            String valuePath = StringUtils.join(paramValuePathItemList, ".");
+            String assignment = columnInfo.getDbColumnName() + " = :" + valuePath + ", ";
+            setBody.append("#[").append(assignment).append("]");
+        }
+
+        private void addSetNodes(Element updateElement, String setBody) {
+            String setSql = "set[" + setBody + "]";
+            MgxqlSubsetPurity.assertPure(setSql);
+            String setXml = mgxsqlScanner.process(setSql);
+            Element root;
+            try {
+                Document setDocument = DocumentHelper.parseText("<root>" + setXml + "</root>");
+                root = setDocument.getRootElement();
+            } catch (org.dom4j.DocumentException e) {
+                throw new MybatisgxException("mgxql UPDATE SET 渲染：解析 MgxsqlScanner 产出 XML 失败: " + e.getMessage() + " | 原文: " + setXml);
+            }
+            List<Node> nodes = new ArrayList<Node>(root.content());
+            for (Node node : nodes) {
+                updateElement.add(node.detach());
+            }
         }
 
         private void setWhere(Element updateElement, EntityInfo entityInfo, MethodInfo methodInfo) {
-            Element whereElement = null;
             if (methodInfo.getMgxqlStatement() != null) {
                 WhereClause whereClause = methodInfo.getMgxqlStatement().getWhereClause();
                 if (whereClause != null) {
-                    whereElement = mgxqlWhereTemplateHandler.execute(entityInfo, methodInfo, whereClause.getRootExpression());
+                    this.addWhereNodes(updateElement, entityInfo, methodInfo, whereClause);
                 }
             }
-            updateElement.add(whereElement);
-            if (!methodInfo.getDynamic()) {
-                XmlCompiler.where(whereElement);
+        }
+
+        private void addWhereNodes(Element updateElement, EntityInfo entityInfo, MethodInfo methodInfo, WhereClause whereClause) {
+            com.mybatisgx.dsl.mgxql.model.MgxqlSourceType sourceType = methodInfo.getMgxqlStatement() != null
+                    ? methodInfo.getMgxqlStatement().getMgxqlSourceType() : null;
+            boolean autoGuard = Boolean.TRUE.equals(methodInfo.getDynamic())
+                    && (sourceType == com.mybatisgx.dsl.mgxql.model.MgxqlSourceType.ENTITY
+                    || sourceType == com.mybatisgx.dsl.mgxql.model.MgxqlSourceType.METHOD_NAME);
+            String whereSql = mgxqlWhereHandler.renderWhereClause(
+                    whereClause.getRootExpression(), null, this.buildExtraWhereCondition(entityInfo, methodInfo), autoGuard);
+            if (StringUtils.isBlank(whereSql)) {
+                return;
             }
+            String whereXml = mgxsqlScanner.process(whereSql);
+            Element root;
+            try {
+                Document whereDocument = DocumentHelper.parseText("<root>" + whereXml + "</root>");
+                root = whereDocument.getRootElement();
+            } catch (org.dom4j.DocumentException e) {
+                throw new MybatisgxException("mgxql UPDATE WHERE 渲染：解析 MgxsqlScanner 产出 XML 失败: " + e.getMessage() + " | 原文: " + whereXml);
+            }
+            List<Node> nodes = new ArrayList<Node>(root.content());
+            for (Node node : nodes) {
+                updateElement.add(node.detach());
+            }
+        }
+
+        private String buildExtraWhereCondition(EntityInfo entityInfo, MethodInfo methodInfo) {
+            StringBuilder sb = new StringBuilder();
+            if (entityInfo != null && entityInfo.getVersionColumnInfo() != null && methodInfo.getEntityParamInfo() != null) {
+                ColumnInfo versionColumnInfo = entityInfo.getVersionColumnInfo();
+                List<String> valuePath = new ArrayList<String>();
+                if (methodInfo.getBatch()) {
+                    valuePath.add(methodInfo.getEntityParamInfo().getBatchItemName());
+                }
+                valuePath.add(versionColumnInfo.getJavaColumnName());
+                sb.append(" and ").append(versionColumnInfo.getDbColumnName()).append(" = :").append(StringUtils.join(valuePath, "."));
+            }
+            if (entityInfo != null && entityInfo.getLogicDeleteColumnInfo() != null) {
+                ColumnInfo logicDeleteColumnInfo = entityInfo.getLogicDeleteColumnInfo();
+                LogicDelete logicDelete = logicDeleteColumnInfo.getLogicDelete();
+                if (logicDelete != null) {
+                    sb.append(" and ").append(logicDeleteColumnInfo.getDbColumnName()).append(" = '").append(logicDelete.show()).append("'");
+                }
+            }
+            return sb.toString();
         }
 
         private List<ColumnInfo> getTableColumnInfoList(MethodParamInfo methodParamInfo) {

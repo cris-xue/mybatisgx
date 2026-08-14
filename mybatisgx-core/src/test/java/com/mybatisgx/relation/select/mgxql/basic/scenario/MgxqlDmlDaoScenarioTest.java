@@ -1,10 +1,13 @@
 package com.mybatisgx.relation.select.mgxql.basic.scenario;
 
+import com.mybatisgx.ext.session.MybatisgxConfiguration;
 import com.mybatisgx.relation.select.mgxql.basic.dao.MgxqlDmlDao;
 import com.mybatisgx.relation.select.simple_simple_id.onetoone.entity.User;
 import com.mybatisgx.relation.select.simple_simple_id.onetoone.entity.UserDetail;
 import com.mybatisgx.relation.select.simple_simple_id.onetoone.dao.UserDetailDao;
 import com.mybatisgx.util.DaoTestUtils;
+import org.apache.ibatis.mapping.BoundSql;
+import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.session.SqlSession;
 import org.junit.After;
 import org.junit.Assert;
@@ -14,6 +17,7 @@ import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 
 /**
  * MGXQL DELETE / UPDATE 场景测试
@@ -92,7 +96,63 @@ public class MgxqlDmlDaoScenarioTest {
     }
 
     @Test
-    public void test03_updateByMgxqlId() {
+    public void test03_deleteDynamicWhereSkipsNullCodeInBoundSql() {
+        MybatisgxConfiguration configuration = DaoTestUtils.getMybatisgxConfiguration(
+                new String[]{"com.mybatisgx.relation.select.simple_simple_id.onetoone.entity"},
+                new String[]{"com.mybatisgx.relation.select.simple_simple_id.onetoone.dao", "com.mybatisgx.relation.select.mgxql.basic.dao"}
+        );
+        String statementId = MgxqlDmlDao.class.getName() + ".deleteByMgxqlDynamicCode";
+        MappedStatement mappedStatement = configuration.getMappedStatement(statementId);
+        HashMap<String, Object> params = new HashMap<String, Object>();
+        params.put("code", null);
+        BoundSql boundSql = mappedStatement.getBoundSql(params);
+        String sql = boundSql.getSql();
+
+        Assert.assertFalse("#[code = :code] 在 code 为空时不应输出 code 条件", sql.contains("code ="));
+    }
+
+    @Test
+    public void test04_updateDynamicWhereSkipsNullCodeInBoundSql() {
+        MybatisgxConfiguration configuration = DaoTestUtils.getMybatisgxConfiguration(
+                new String[]{"com.mybatisgx.relation.select.simple_simple_id.onetoone.entity"},
+                new String[]{"com.mybatisgx.relation.select.simple_simple_id.onetoone.dao", "com.mybatisgx.relation.select.mgxql.basic.dao"}
+        );
+        String statementId = MgxqlDmlDao.class.getName() + ".updateByMgxqlDynamicCode";
+        MappedStatement mappedStatement = configuration.getMappedStatement(statementId);
+        HashMap<String, Object> params = new HashMap<String, Object>();
+        params.put("code", null);
+        User entity = buildDmlUser(DML_CODE_UPDATED);
+        params.put("arg1", entity);
+        BoundSql boundSql = mappedStatement.getBoundSql(params);
+        String sql = boundSql.getSql();
+
+        Assert.assertTrue("UPDATE SET 静态文本应保留", sql.contains("update simple_oto_user_simple"));
+        Assert.assertFalse("#[code = :code] 在 code 为空时不应输出 WHERE code 条件", sql.contains(" where") && sql.contains("code ="));
+    }
+
+    @Test
+    public void test05_updateSetUsesMgxsqlSetSubset() {
+        MybatisgxConfiguration configuration = DaoTestUtils.getMybatisgxConfiguration(
+                new String[]{"com.mybatisgx.relation.select.simple_simple_id.onetoone.entity"},
+                new String[]{"com.mybatisgx.relation.select.simple_simple_id.onetoone.dao", "com.mybatisgx.relation.select.mgxql.basic.dao"}
+        );
+        String statementId = MgxqlDmlDao.class.getName() + ".updateByMgxqlDynamicCode";
+        MappedStatement mappedStatement = configuration.getMappedStatement(statementId);
+        HashMap<String, Object> params = new HashMap<String, Object>();
+        params.put("code", "missing-code");
+        User entity = buildDmlUser(null);
+        params.put("arg1", entity);
+        BoundSql boundSql = mappedStatement.getBoundSql(params);
+        String sql = boundSql.getSql();
+
+        Assert.assertTrue("UPDATE 静态文本应保留", sql.toLowerCase().contains("update simple_oto_user_simple"));
+        Assert.assertTrue("非空字段应进入 SET", sql.contains("input_user_id ="));
+        Assert.assertFalse("动态 SET 不应保留旧 trim 标签文本", sql.contains("<trim"));
+        Assert.assertFalse("实体 code 为空时 SET 不应输出 code 赋值", sql.contains("set code =") || sql.contains("SET code ="));
+    }
+
+    @Test
+    public void test06_updateByMgxqlId() {
         // 先插入一条专用的DML测试数据
         User user = buildDmlUser(DML_CODE_1);
         dmlDao.insert(user);
@@ -116,7 +176,7 @@ public class MgxqlDmlDaoScenarioTest {
     }
 
     @Test
-    public void test04_updateByMgxqlCode() {
+    public void test07_updateByMgxqlCode() {
         // 先插入一条专用的DML测试数据
         User user = buildDmlUser(DML_CODE_2);
         dmlDao.insert(user);

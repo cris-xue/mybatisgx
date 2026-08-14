@@ -38,10 +38,10 @@ public interface MgxqlSelectWhereDao extends SimpleDao<User, User, Long> {
     @Statement("select * from User u where u.code like :code")
     List<User> findByCodeLike(@Param("code") String code);
 
-    @Statement("select * from User u where u.code left like :code")
+    @Statement("select * from User u where u.code like :code%")
     List<User> findByCodeLeftLike(@Param("code") String code);
 
-    @Statement("select * from User u where u.code right like :code")
+    @Statement("select * from User u where u.code like %:code")
     List<User> findByCodeRightLike(@Param("code") String code);
 
     @Statement("select * from User u where u.id in :ids")

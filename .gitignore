@@ -25,3 +25,6 @@ release.properties
 # other
 .lingma
 gen
+
+# doc
+build-check/

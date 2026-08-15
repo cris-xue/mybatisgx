@@ -13,10 +13,29 @@ sidebar_position: 3
 | **CRUD 接口即用** | SimpleDao、CurdDao、SelectDao 内置常用方法 |
 | **方法名派生 SQL** | 根据方法名自动生成查询/更新/删除语句 |
 | **查询实体（QueryEntity）** | 解耦查询条件，避免 Service 层拼装 |
-| **Statement 注解** | 支持复杂条件分组，优先级最高 |
 | **动态 SQL** | @Dynamic 注解，字段为空时自动跳过 |
 | **分页查询** | Pageable + Page，支持 PageHelper |
 | **投影 DTO** | 部分字段返回，减少数据传输 |
+
+## 查询语言
+
+MyBatisGX 提供两种 DSL，分别解决「对象级声明」与「动态 SQL 编写」两个问题：
+
+| 特性 | 说明 |
+|------|------|
+| **MGXQL** | 对象查询语言，基于实体名/属性名声明查询，方法名、QueryEntity、@Statement 统一落入此模型，支持 JOIN、聚合、投影 |
+| **MGXSQL** | 动态 SQL 语法糖，基于 MyBatis LanguageDriver 实现，手写完整 SQL + `#[...]`、`#if(...)[]` 等动态指令，MyBatis 生态通用 |
+
+所有查询最终都统一进入同一套生成链路：
+
+```
+方法名派生 ──┐
+QueryEntity ──┤
+@Statement ──┼──▶ MGXQL ──▶ MGXSQL ──▶ MyBatis SQL
+MGXSQL 手写 ──┘
+```
+
+> 详见 [查询语言总览](../query-language/overview)
 
 ## 关联查询
 
@@ -44,18 +63,23 @@ sidebar_position: 3
 
 | 特性 | 说明 |
 |------|------|
-| **SQL 预生成** | 启动时生成 MyBatis XML，运行时无开销 |
+| **SQL 预生成** | 启动时生成 MyBatis SQL，运行时无解析开销 |
 | **XML 优先级最高** | mapper.xml 中定义的 SQL 始终优先 |
+| **@Dynamic 最高优先级** | 0.2.0 起，可覆盖 MGXQL 中定义的动态表达式 |
 | **MyBatis 无缝升级** | 原有 MyBatis 项目可直接升级 |
-| **多数据库支持** | MySQL、Oracle、PostgreSQL |
+| **多数据库支持** | 13 种主流数据库，见下方列表 |
+
+## 支持的数据库
+
+MySQL、MariaDB、OceanBase（MySQL 兼容模式）、SinoDB、Oracle、达梦（Dameng）、UXDB、OceanBase、PostgreSQL、GaussDB、Vastbase、人大金仓（Kingbase）、GBase。
 
 ## SQL 优先级
 
 ```
-@Statement 注解  >  实体/QueryEntity 参数  >  方法名关键字
-
-mapper.xml 定义的方法拥有最高优先级，框架不再自动处理
+mapper.xml 定义  >  @Dynamic  >  @Statement（MGXQL）/ 实体/QueryEntity 参数  >  方法名关键字
 ```
+
+mapper.xml 定义的方法拥有最高优先级，框架不再自动处理。
 
 ## 方法参数优先级
 

@@ -9,26 +9,41 @@ sidebar_position: 2
 ## 环境要求
 
 - JDK 8+
-- Spring Boot 2.x / 3.x
+- Spring Boot 2.x / 3.x / 4.x
 - Maven
 
 ## 添加依赖
 
+按 Spring Boot 版本选择对应的 starter：
+
 ```xml
+<!-- Spring Boot 2 -->
 <dependency>
     <groupId>com.mybatisgx</groupId>
     <artifactId>mybatisgx-spring-boot2-starter</artifactId>
-    <version>0.0.1</version>
+    <version>0.3.0</version>
 </dependency>
 ```
 
 ```xml
+<!-- Spring Boot 3 -->
 <dependency>
     <groupId>com.mybatisgx</groupId>
     <artifactId>mybatisgx-spring-boot3-starter</artifactId>
-    <version>0.0.2</version>
+    <version>0.3.0</version>
 </dependency>
 ```
+
+```xml
+<!-- Spring Boot 4 -->
+<dependency>
+    <groupId>com.mybatisgx</groupId>
+    <artifactId>mybatisgx-spring-boot4-starter</artifactId>
+    <version>0.3.0</version>
+</dependency>
+```
+
+> 最新版本请以 Maven Central 为准。starter 版本需与 Spring Boot 主版本号匹配。
 
 ## 配置文件
 
@@ -78,6 +93,8 @@ public interface UserDao extends SimpleDao<User, UserQuery, Long> {
 }
 ```
 
+> `SimpleDao<ENTITY, QUERY_ENTITY, ID>` 继承 `CurdDao`（增删改）与 `SelectDao`（查询），内置常用方法。
+
 ## 启动类配置
 
 ```java
@@ -125,7 +142,7 @@ public class UserService {
     // 分页查询
     public Page<User> findPage(int pageNo, int pageSize) {
         UserQuery query = new UserQuery();
-        Pageable pageable = new Pageable(pageNo, pageSize);
+        Pageable pageable = Pageable.of(pageNo, pageSize);
         return userDao.findPage(query, pageable);
     }
 
@@ -146,3 +163,4 @@ public class UserService {
 - 了解 [核心特性](./features)
 - 学习 [实体定义](../basic/entity)
 - 掌握 [DAO 接口](../basic/dao)
+- 探索 [查询语言总览](../query-language/overview)

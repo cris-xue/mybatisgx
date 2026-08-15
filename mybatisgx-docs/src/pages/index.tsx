@@ -4,6 +4,7 @@ import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import Layout from '@theme/Layout';
 import HomepageFeatures from '@site/src/components/HomepageFeatures';
+import HomepageBanner from '@site/src/components/HomepageBanner';
 import Heading from '@theme/Heading';
 
 import styles from './index.module.css';
@@ -36,6 +37,7 @@ export default function Home(): ReactNode {
       title="首页"
       description="MyBatisGX - 基于 MyBatis 的增强型 ORM 框架">
       <HomepageHeader />
+      <HomepageBanner />
       <main>
         <HomepageFeatures />
       </main>

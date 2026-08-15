@@ -1,0 +1,41 @@
+.banner {
+  padding: 0.5rem 0 0;
+  text-align: center;
+}
+
+.bannerRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.version {
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.versionLink {
+  color: var(--ifm-color-primary);
+  text-decoration: underline;
+}
+
+.databases {
+  font-weight: 600;
+  color: var(--ifm-color-secondary-contrast-foreground);
+}
+
+.dbList {
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+  font-size: 0.85rem;
+  color: var(--ifm-color-emphasis-600);
+  line-height: 1.8;
+}
+
+@media (max-width: 996px) {
+  .bannerRow {
+    gap: 0.75rem;
+  }
+}

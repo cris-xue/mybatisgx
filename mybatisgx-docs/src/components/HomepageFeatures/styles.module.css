@@ -9,3 +9,18 @@
   height: 200px;
   width: 200px;
 }
+
+/* 两行卡片之间留白，避免 3×2 网格上下贴紧 */
+.features :global(.row) + :global(.row) {
+  margin-top: 1.5rem;
+}
+
+/* 卡片标题链接：带链接的卡片（如 MGXQL/MGXSQL）hover 显示主题色 */
+.featureLink {
+  color: inherit;
+}
+
+.featureLink:hover {
+  color: var(--ifm-color-primary);
+  text-decoration: underline;
+}

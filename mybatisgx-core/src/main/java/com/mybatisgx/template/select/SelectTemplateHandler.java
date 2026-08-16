@@ -4,7 +4,7 @@ import com.mybatisgx.annotation.LogicDelete;
 import com.mybatisgx.exception.MybatisgxException;
 import com.mybatisgx.dsl.mgxql.model.*;
 import com.mybatisgx.dsl.mgxsql.MgxsqlScanner;
-import com.mybatisgx.ext.session.MybatisgxConfiguration;
+import com.mybatisgx.ext.session.MybatisgxConfigurationAware;
 import com.mybatisgx.model.ColumnEntityRelation;
 import com.mybatisgx.model.ColumnInfo;
 import com.mybatisgx.model.EntityInfo;
@@ -36,7 +36,7 @@ public class SelectTemplateHandler implements TemplateHandler {
     private MgxqlOrderByTemplateHandler mgxqlOrderByTemplateHandler = new MgxqlOrderByTemplateHandler();
     private MgxqlGroupByTemplateHandler mgxqlGroupByTemplateHandler = new MgxqlGroupByTemplateHandler();
 
-    public SelectTemplateHandler(MybatisgxConfiguration configuration) {
+    public SelectTemplateHandler(MybatisgxConfigurationAware configuration) {
     }
 
     @Override

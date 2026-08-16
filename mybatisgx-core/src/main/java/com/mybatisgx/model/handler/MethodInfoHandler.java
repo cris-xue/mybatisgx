@@ -7,7 +7,7 @@ import com.mybatisgx.context.EntityInfoContextHolder;
 import com.mybatisgx.dao.Dao;
 import com.mybatisgx.dsl.method.MethodSyntaxProcessor;
 import com.mybatisgx.exception.MybatisgxException;
-import com.mybatisgx.ext.session.MybatisgxConfiguration;
+import com.mybatisgx.ext.session.MybatisgxConfigurationAware;
 import com.mybatisgx.model.*;
 import com.mybatisgx.utils.MethodInfoUtils;
 import com.mybatisgx.utils.TypeUtils;
@@ -33,9 +33,9 @@ public class MethodInfoHandler {
     private ColumnInfoHandler columnInfoHandler = new ColumnInfoHandler();
     private TypeResolver typeResolver = new TypeResolver();
     private MethodSyntaxProcessor methodSyntaxProcessor = new MethodSyntaxProcessor();
-    private final MybatisgxConfiguration configuration;
+    private final MybatisgxConfigurationAware configuration;
 
-    public MethodInfoHandler(MybatisgxConfiguration configuration) {
+    public MethodInfoHandler(MybatisgxConfigurationAware configuration) {
         this.configuration = configuration;
     }
 

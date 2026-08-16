@@ -1,7 +1,7 @@
 package com.mybatisgx.context;
 
 import com.mybatisgx.executor.keygen.KeyGenerator;
-import com.mybatisgx.ext.session.MybatisgxConfiguration;
+import com.mybatisgx.ext.session.MybatisgxConfigurationAware;
 import com.mybatisgx.model.handler.MethodInfoHandler;
 import com.mybatisgx.template.StatementTemplateHandler;
 import com.mybatisgx.template.delete.DeleteTemplateHandler;
@@ -23,7 +23,7 @@ public class MybatisgxObjectFactory {
 
     private static final Map<Class, Object> OBJECTO_MAP = new ConcurrentHashMap();
 
-    public static void register(MybatisgxConfiguration configuration, KeyGenerator<?> keyGenerator) {
+    public static void register(MybatisgxConfigurationAware configuration, KeyGenerator<?> keyGenerator) {
         if (configuration == null) {
             throw new IllegalArgumentException("configuration is null");
         }

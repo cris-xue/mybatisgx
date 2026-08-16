@@ -1,6 +1,6 @@
 package com.mybatisgx.context;
 
-import com.mybatisgx.ext.session.MybatisgxConfiguration;
+import com.mybatisgx.ext.session.MybatisgxConfigurationAware;
 import com.mybatisgx.model.MethodInfo;
 import com.mybatisgx.spi.ValueProcessor;
 import org.apache.ibatis.mapping.MappedStatement;
@@ -45,6 +45,6 @@ public class DaoMethodManager {
     }
 
     public static MethodInfo getMethodInfo(MappedStatement ms) {
-        return ((MybatisgxConfiguration) ms.getConfiguration()).getMethodInfo(ms);
+        return ((MybatisgxConfigurationAware) ms.getConfiguration()).getMethodInfo(ms);
     }
 }

@@ -30,6 +30,7 @@
 		<module>mybatisgx-core-patch</module>
 		<module>mybatisgx-core</module>
 		<module>mybatisgx-spring</module>
+		<module>mybatisgx-mybatis-plus-compat</module>
 	</modules>
 	
 	<dependencyManagement>

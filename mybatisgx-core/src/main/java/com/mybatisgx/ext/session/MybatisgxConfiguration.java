@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class MybatisgxConfiguration extends Configuration {
+public class MybatisgxConfiguration extends Configuration implements MybatisgxConfigurationAware {
 
     private static final MybatisgxValueProcessor mybatisgxValueProcessor = new MybatisgxValueProcessor();
 

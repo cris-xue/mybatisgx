@@ -3,7 +3,7 @@ package com.mybatisgx.ext.executor.resultset;
 import com.mybatisgx.ext.LinkObjectHelper;
 import com.mybatisgx.ext.executor.loader.BatchResultLoader;
 import com.mybatisgx.ext.mapping.BatchSelectResultMapping;
-import com.mybatisgx.ext.session.MybatisgxConfiguration;
+import com.mybatisgx.ext.session.MybatisgxConfigurationAware;
 import com.mybatisgx.model.ColumnInfo;
 import com.mybatisgx.model.EntityInfo;
 import org.apache.commons.lang3.ObjectUtils;
@@ -17,6 +17,7 @@ import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.ResultMapping;
 import org.apache.ibatis.reflection.MetaObject;
+import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 
@@ -37,14 +38,14 @@ import java.util.concurrent.ConcurrentHashMap;
 public class MybatisgxResultSetHandler extends PatchDefaultResultSetHandler {
 
     private final Executor executor;
-    private final MybatisgxConfiguration configuration;
+    private final MybatisgxConfigurationAware configuration;
     private final Map<String, BatchResultLoader.BatchResultLoaderContext> batchResultLoaderContextMap = new ConcurrentHashMap();
     private final Map<String, List<BatchResultLoader>> batchResultLoaderMap = new ConcurrentHashMap();
 
     public MybatisgxResultSetHandler(Executor executor, MappedStatement mappedStatement, ParameterHandler parameterHandler, ResultHandler<?> resultHandler, BoundSql boundSql, RowBounds rowBounds) {
         super(executor, mappedStatement, parameterHandler, resultHandler, boundSql, rowBounds);
         this.executor = executor;
-        this.configuration = (MybatisgxConfiguration) mappedStatement.getConfiguration();
+        this.configuration = (MybatisgxConfigurationAware) mappedStatement.getConfiguration();
     }
 
     @Override
@@ -88,7 +89,7 @@ public class MybatisgxResultSetHandler extends PatchDefaultResultSetHandler {
             this.batchResultLoaderContextMap.put(nestedQueryId, batchResultLoaderContext);
         }
 
-        BatchResultLoader batchResultLoader = new BatchResultLoader(configuration, executor, nestedQuery, metaResultObject, List.class, idResultMappings, propertyMapping, batchResultLoaderContext);
+        BatchResultLoader batchResultLoader = new BatchResultLoader((Configuration) configuration, executor, nestedQuery, metaResultObject, List.class, idResultMappings, propertyMapping, batchResultLoaderContext);
         List<BatchResultLoader> batchResultLoaderList = this.batchResultLoaderMap.get(nestedQueryId);
         if (ObjectUtils.isEmpty(batchResultLoaderList)) {
             batchResultLoaderList = new ArrayList();

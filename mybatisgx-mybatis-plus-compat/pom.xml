@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>com.mybatisgx</groupId>
+		<artifactId>mybatisgx</artifactId>
+		<version>0.3.1-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+	
+	<artifactId>mybatisgx-mybatis-plus-compat</artifactId>
+	<name>mybatisgx-mybatis-plus-compat</name>
+	<url>http://www.mybatisgx.com</url>
+	
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<mybatis-plus.version>3.5.0</mybatis-plus.version>
+	</properties>
+	
+	<dependencies>
+		<dependency>
+			<groupId>com.mybatisgx</groupId>
+			<artifactId>mybatisgx-core</artifactId>
+		</dependency>
+		<!-- MyBatis-Plus 兼容核心，optional：仅共存场景引入，不污染依赖树 -->
+		<dependency>
+			<groupId>com.baomidou</groupId>
+			<artifactId>mybatis-plus-core</artifactId>
+			<version>${mybatis-plus.version}</version>
+			<optional>true</optional>
+		</dependency>
+		<!-- 对齐 MP 3.5.0 要求的 mybatis 版本（3.5.9，getMappedColumnNames 仍为 List），
+		     与 master 的 core-patch 3.5.6 编译基线二进制兼容，避免 NoSuchMethodError -->
+		<dependency>
+			<groupId>org.mybatis</groupId>
+			<artifactId>mybatis</artifactId>
+			<version>3.5.9</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<finalName>${project.artifactId}</finalName>
+	</build>
+</project>

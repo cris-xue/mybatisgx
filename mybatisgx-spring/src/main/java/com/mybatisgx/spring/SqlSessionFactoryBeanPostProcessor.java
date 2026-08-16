@@ -3,7 +3,7 @@ package com.mybatisgx.spring;
 import com.mybatisgx.context.MybatisgxContextLoader;
 import com.mybatisgx.dao.Dao;
 import com.mybatisgx.executor.keygen.KeyGenerator;
-import com.mybatisgx.ext.session.MybatisgxConfiguration;
+import com.mybatisgx.ext.session.MybatisgxConfigurationAware;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.slf4j.Logger;
@@ -55,14 +55,14 @@ public class SqlSessionFactoryBeanPostProcessor implements BeanPostProcessor {
             LOGGER.info("SqlSessionFactoryBean init success");
             SqlSessionFactory sqlSessionFactory = (SqlSessionFactory) bean;
             Configuration configuration = sqlSessionFactory.getConfiguration();
-            if (configuration instanceof MybatisgxConfiguration) {
+            if (configuration instanceof MybatisgxConfigurationAware) {
                 List<Resource> resourceList = this.getDaoResourceList(daoBasePackages);
                 MybatisgxContextLoader mybatisgxContextLoader = new MybatisgxContextLoader(
                         entityBasePackages,
                         daoBasePackages,
                         resourceList,
                         this.keyGeneratorObjectProvider.getIfAvailable(),
-                        (MybatisgxConfiguration) configuration
+                        (MybatisgxConfigurationAware) configuration
                 );
                 mybatisgxContextLoader.load();
             }

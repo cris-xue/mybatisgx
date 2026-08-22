@@ -97,10 +97,20 @@ mybatisgx:
 **建议**：升级 MP 大版本时回归验证共存场景；不要手动把 mybatis 拉到低于 core-patch
 编译基线（3.5.19）的版本，否则可能触发 `NoSuchMethodError`。
 
-## 7. 接口扫描注解不一致（`@Repository` vs `@Mapper`）
+## 7. 接口扫描注解需全工程统一（`@Mapper` vs `@Repository` 二选一）
 
-MyBatisGX 收集 DAO 的两处逻辑注解过滤条件不同（`SqlSessionFactoryBeanPostProcessor`
-认 `@Repository`，`MybatisgxContextLoader` 认 `@Mapper`）。为保证万无一失，建议
-**在 DAO 接口上同时标注两个注解**，或保证 `@MybatisgxScan.annotationClass` 与接口
-实际标注一致（示例 sb3 用 `@Mapper` + `annotationClass=Mapper.class`，sb2 用
-`@Repository` + `annotationClass=Repository.class`）。
+共存模式只用 `@MybatisgxScan` 承载的 `@MapperScan` 注册 mapper bean（`@MapperScan`
+注解无需单独声明），其 `annotationClass` 是**单一**过滤条件——工程内所有 DAO / mapper
+接口必须统一使用同一种注解，并让 `annotationClass` 与之一致：
+
+- 老工程用 `@Mapper` → 新模块也用 `@Mapper`，`annotationClass = Mapper.class`（示例 sb3）
+- 想用 `@Repository` → 需把老代码的 `@Mapper` 全部换成 `@Repository`，
+  `annotationClass = Repository.class`（示例 sb2）
+
+不能混用：`@MapperScan(annotationClass=X)` 只注册标注了 X 的接口，部分接口用
+`@Mapper`、部分用 `@Repository` 时，另一种不会被注册（也不建议同时标注两个注解，
+全工程应保持一种约定）。
+
+> 说明：MyBatisGX 收集 DAO 的两处路径过滤条件不同（`SqlSessionFactoryBeanPostProcessor`
+> 认 `@Repository`，`MybatisgxContextLoader` 认 `@Mapper`），但只要工程内注解统一，
+> 两处路径总有一处能收集到，不会漏。

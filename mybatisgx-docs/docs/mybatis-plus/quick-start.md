@@ -125,10 +125,14 @@ public class Application {
 - `entityBasePackages`：MyBatisGX 实体扫描信息
 - `daoBasePackages`：**同时**覆盖 MyBatisGX DAO 包与 MP mapper 包（compat 版 `@MybatisgxScan`
   自带 `@MapperScan` 元注解，按 `annotationClass` 过滤注册 mapper bean）
-- `annotationClass`：`@MapperScan` 按此过滤接口。两个示例分别用了 `Mapper.class`（sb3，
-  接口标 `@Mapper`）与 `Repository.class`（sb2，接口标 `@Repository`）；`annotationClass`
-  需与接口上实际标注的注解匹配。建议接口**同时标注 `@Mapper` 与 `@Repository`**（双注解可
-  覆盖 MyBatisGX 两处收集路径，见 [故障排查](./troubleshooting)）
+- `annotationClass`：compat 版 `@MybatisgxScan` 自带的 `@MapperScan` 按此单一条件过滤，
+  工程内所有 DAO / mapper 接口必须**统一使用同一种注解**（`@Mapper` 或 `@Repository`
+  **二选一**），并让 `annotationClass` 与之一致：
+  - 老工程用 `@Mapper` → 新模块也用 `@Mapper`，`annotationClass = Mapper.class`（示例 sb3）
+  - 若想用 `@Repository` → 需把老代码的 `@Mapper` 全部换成 `@Repository`，
+    `annotationClass = Repository.class`（示例 sb2）
+  不能部分接口 `@Mapper`、部分 `@Repository`，`annotationClass` 只认其中一种，混用会导致
+  另一种不被注册。`@MapperScan` 注解已由 `@MybatisgxScan` 承载，工程中**无需**单独声明
 
 ## 7. 使用
 
@@ -151,9 +155,8 @@ sb2 使用 `mybatisgx-spring-boot2-mp-compat-starter`（MP 3.5.3，Spring Boot 2
 
 - sb2 的 MP starter 没有 `SqlSessionFactoryBeanCustomizer`（3.5.10 才引入），
   装配改为在 `MybatisPlusPropertiesCustomizer` 里替换 Configuration，效果等价
-- 示例启动类用 `annotationClass = Repository.class`，接口标注 `@Repository`
-  （`@MapperScan` 按 `annotationClass` 过滤，`@Repository` 即可被注册为 mapper bean）。
-  建议**同时标注 `@Mapper` 与 `@Repository`**：MyBatisGX core 的 `MybatisgxContextLoader`
-  自扫路径按 `@Mapper` 过滤，双注解可保证两条收集路径都不漏（见 [故障排查](./troubleshooting)）
+- 示例启动类用 `annotationClass = Repository.class`，工程内接口统一标注 `@Repository`
+  （`@Mapper` / `@Repository` 二选一，与 `annotationClass` 保持一致；`@MapperScan`
+  由 `@MybatisgxScan` 承载，无需单独声明）
 
 完整版本组合见 [版本说明](./version)。

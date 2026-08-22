@@ -45,6 +45,6 @@ mybatis 由各 starter 的传递依赖解析，两条版本线均与 3.5.19 二�
 | `mybatisgx-spring-boot2/3-starter` | 纯 MyBatisGX（无 MP） |
 | `mybatisgx-spring-boot2/3-mp-compat-starter` | MyBatisGX + MP 共存 |
 
-**只能二选一**。两个 jar 中 `com.mybatisgx.boot.MybatisgxScan` 全限定名相同但行为不同
-（标准版含 `@MapperScan` 组合、compat 版同样含 `@MapperScan` 元注解但装配让位逻辑不同），
-同时引入时类加载顺序决定行为，不可预测且无报错提示。
+**只能二选一**。两个 jar 中 `com.mybatisgx.boot.MybatisgxScan` 全限定名相同（均含
+`@MapperScan` 元注解），但所属 starter 的自动装配不同（标准版装配纯 MyBatisGX，
+compat 版装配 MyBatisGX + MP 共存），同时引入时类加载顺序决定行为，不可预测且无报错提示。

@@ -241,7 +241,19 @@ logging:
 
 ### 可以和 MyBatis-Plus 共存吗？
 
-不建议。两个框架都是 MyBatis 增强，可能产生冲突。建议选择其一。
+**可以**。MyBatisGX 提供专用的**共存 starter**，与 MyBatis-Plus 在同一 SqlSessionFactory 下共存：
+老 `BaseMapper` 代码零改动，新查询能力（方法名派生 SQL、QueryEntity、mgxql）用 MyBatisGX 实现。
+
+```xml
+<dependency>
+    <groupId>com.mybatisgx</groupId>
+    <artifactId>mybatisgx-spring-boot3-mp-compat-starter</artifactId>
+    <version>0.3.1</version>
+</dependency>
+```
+
+共存的边界约定：一个接口只继承一方（`BaseMapper` 或 MyBatisGX DAO 基类），
+两套分页拦截器机制互斥、互不干扰。详见 [与 MyBatis-Plus 兼容](../mybatis-plus/overview)。
 
 ## 更多问题
 

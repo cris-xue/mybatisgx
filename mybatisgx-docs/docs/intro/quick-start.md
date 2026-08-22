@@ -158,6 +158,27 @@ public class UserService {
 }
 ```
 
+## 已有 MyBatis-Plus 项目？
+
+如果项目已经在使用 MyBatis-Plus，可以通过**共存 starter** 增量引入 MyBatisGX：
+老 `BaseMapper` 代码零改动，新查询能力用 MyBatisGX 实现。
+
+```xml
+<!-- Spring Boot 3 + MyBatis-Plus 共存 -->
+<dependency>
+    <groupId>com.mybatisgx</groupId>
+    <artifactId>mybatisgx-spring-boot3-mp-compat-starter</artifactId>
+    <version>0.3.1</version>
+</dependency>
+```
+
+使用 compat 版的 `@MybatisgxScan`（自带 `@MapperScan` 元注解，单个注解即可同时覆盖
+MyBatisGX DAO 与 MP mapper 两个包），老 mapper 与新 DAO 共存于同一 SqlSessionFactory。
+详见 [与 MyBatis-Plus 兼容](../mybatis-plus/quick-start)。
+
+> 注意：标准 starter 与 mp-compat-starter 互斥，只能二选一。
+> 版本组合：sb2 配 MP 3.5.3 / sb3 配 MP 3.5.17，mybatis 基线 3.5.19（详见[版本说明](../mybatis-plus/version)）。
+
 ## 下一步
 
 - 了解 [核心特性](./features)

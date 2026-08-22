@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.core.Ordered;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -24,7 +25,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SqlSessionFactoryBeanPostProcessor implements BeanPostProcessor {
+public class SqlSessionFactoryBeanPostProcessor implements BeanPostProcessor, Ordered {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SqlSessionFactoryBeanPostProcessor.class);
 
@@ -93,5 +94,10 @@ public class SqlSessionFactoryBeanPostProcessor implements BeanPostProcessor {
             LOGGER.error(e.getMessage(), e);
         }
         return resourceList;
+    }
+
+    @Override
+    public int getOrder() {
+        return 0;
     }
 }

@@ -21,7 +21,7 @@ sidebar_position: 2
 <dependency>
     <groupId>com.mybatisgx</groupId>
     <artifactId>mybatisgx-spring-boot2-starter</artifactId>
-    <version>0.3.0</version>
+    <version>0.4.0</version>
 </dependency>
 ```
 
@@ -30,7 +30,7 @@ sidebar_position: 2
 <dependency>
     <groupId>com.mybatisgx</groupId>
     <artifactId>mybatisgx-spring-boot3-starter</artifactId>
-    <version>0.3.0</version>
+    <version>0.4.0</version>
 </dependency>
 ```
 
@@ -39,7 +39,7 @@ sidebar_position: 2
 <dependency>
     <groupId>com.mybatisgx</groupId>
     <artifactId>mybatisgx-spring-boot4-starter</artifactId>
-    <version>0.3.0</version>
+    <version>0.4.0</version>
 </dependency>
 ```
 
@@ -168,7 +168,7 @@ public class UserService {
 <dependency>
     <groupId>com.mybatisgx</groupId>
     <artifactId>mybatisgx-spring-boot3-mp-compat-starter</artifactId>
-    <version>0.3.1</version>
+    <version>0.4.0</version>
 </dependency>
 ```
 
@@ -177,7 +177,7 @@ MyBatisGX DAO 与 MP mapper 两个包），老 mapper 与新 DAO 共存于同一
 详见 [与 MyBatis-Plus 兼容](../mybatis-plus/quick-start)。
 
 > 注意：标准 starter 与 mp-compat-starter 互斥，只能二选一。
-> 版本组合：sb2 配 MP 3.5.3 / sb3 配 MP 3.5.17，mybatis 基线 3.5.19（详见[版本说明](../mybatis-plus/version)）。
+> 版本组合：sb2 配 MP 3.5.6 / sb3 配 MP 3.5.17，mybatis 基线 3.5.19（详见[版本说明](../mybatis-plus/version)）。
 
 ## 下一步
 

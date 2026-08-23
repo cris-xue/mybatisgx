@@ -10,10 +10,10 @@ sidebar_position: 4
 
 | 版本线 | 共存 starter | MyBatis-Plus | Spring Boot | Java | mybatis |
 |--------|-------------|--------------|-------------|------|---------|
-| sb2 | `mybatisgx-spring-boot2-mp-compat-starter` | **3.5.3** | **2.7.x**（示例 2.7.18） | 8 | reactor 基线 **3.5.19** |
+| sb2 | `mybatisgx-spring-boot2-mp-compat-starter` | **3.5.6** | **2.7.x**（示例 2.7.18） | 8 | reactor 基线 **3.5.19** |
 | sb3 | `mybatisgx-spring-boot3-mp-compat-starter` | **3.5.17** | **3.1.x**（示例 3.1.5） | 17 | reactor 基线 **3.5.19** |
 
-> 当前版本 `0.3.1`（SNAPSHOT 阶段）。发布后请以 Maven Central 的实际坐标为准。
+> 当前版本 `0.4.0`。发布后请以 Maven Central 的实际坐标为准。
 
 ### sb3 线要点
 
@@ -24,7 +24,7 @@ sidebar_position: 4
 
 ### sb2 线要点
 
-- MP 3.5.3 的 `mybatis-plus-boot-starter` 没有 `SqlSessionFactoryBeanCustomizer`
+- MP 3.5.6 的 `mybatis-plus-boot-starter` 没有 `SqlSessionFactoryBeanCustomizer`
   （3.5.10 才引入），装配走 `MybatisPlusPropertiesCustomizer`（在配置层替换 Configuration），
   效果等价
 - 示例工程用 Spring Boot **2.7.x**，Java 8；测试使用 **JUnit 4**

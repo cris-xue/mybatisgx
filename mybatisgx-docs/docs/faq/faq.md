@@ -248,7 +248,7 @@ logging:
 <dependency>
     <groupId>com.mybatisgx</groupId>
     <artifactId>mybatisgx-spring-boot3-mp-compat-starter</artifactId>
-    <version>0.3.1</version>
+    <version>0.4.0</version>
 </dependency>
 ```
 

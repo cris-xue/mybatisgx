@@ -18,7 +18,7 @@ sidebar_position: 2
 <dependency>
     <groupId>com.mybatisgx</groupId>
     <artifactId>mybatisgx-spring-boot3-mp-compat-starter</artifactId>
-    <version>0.3.1</version>
+    <version>0.4.0</version>
 </dependency>
 ```
 
@@ -150,7 +150,7 @@ Page<User> page = userDao.findPage(query, Pageable.of(1, 10));
 
 ## Spring Boot 2
 
-sb2 使用 `mybatisgx-spring-boot2-mp-compat-starter`（MP 3.5.3，Spring Boot 2.7.x），
+sb2 使用 `mybatisgx-spring-boot2-mp-compat-starter`（MP 3.5.6，Spring Boot 2.7.x），
 用法一致。注意：
 
 - sb2 的 MP starter 没有 `SqlSessionFactoryBeanCustomizer`（3.5.10 才引入），

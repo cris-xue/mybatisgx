@@ -22,6 +22,10 @@ doc/*
 *.versionsBackup
 release.properties
 
+# doc
+build/
+build-check/
+
 # other
 .lingma
 gen

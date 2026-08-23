@@ -3,7 +3,7 @@ package com.mybatisgx.spring;
 import com.mybatisgx.context.MybatisgxContextLoader;
 import com.mybatisgx.dao.Dao;
 import com.mybatisgx.executor.keygen.KeyGenerator;
-import com.mybatisgx.ext.session.MybatisgxConfiguration;
+import com.mybatisgx.ext.session.MybatisgxConfigurationAware;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.slf4j.Logger;
@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.core.Ordered;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -24,7 +25,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SqlSessionFactoryBeanPostProcessor implements BeanPostProcessor {
+public class SqlSessionFactoryBeanPostProcessor implements BeanPostProcessor, Ordered {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SqlSessionFactoryBeanPostProcessor.class);
 
@@ -55,14 +56,14 @@ public class SqlSessionFactoryBeanPostProcessor implements BeanPostProcessor {
             LOGGER.info("SqlSessionFactoryBean init success");
             SqlSessionFactory sqlSessionFactory = (SqlSessionFactory) bean;
             Configuration configuration = sqlSessionFactory.getConfiguration();
-            if (configuration instanceof MybatisgxConfiguration) {
+            if (configuration instanceof MybatisgxConfigurationAware) {
                 List<Resource> resourceList = this.getDaoResourceList(daoBasePackages);
                 MybatisgxContextLoader mybatisgxContextLoader = new MybatisgxContextLoader(
                         entityBasePackages,
                         daoBasePackages,
                         resourceList,
                         this.keyGeneratorObjectProvider.getIfAvailable(),
-                        (MybatisgxConfiguration) configuration
+                        (MybatisgxConfigurationAware) configuration
                 );
                 mybatisgxContextLoader.load();
             }
@@ -93,5 +94,10 @@ public class SqlSessionFactoryBeanPostProcessor implements BeanPostProcessor {
             LOGGER.error(e.getMessage(), e);
         }
         return resourceList;
+    }
+
+    @Override
+    public int getOrder() {
+        return 0;
     }
 }

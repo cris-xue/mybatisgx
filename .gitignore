@@ -29,3 +29,6 @@ build-check/
 # other
 .lingma
 gen
+
+# doc
+build-check/

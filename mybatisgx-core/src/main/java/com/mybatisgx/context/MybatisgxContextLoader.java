@@ -6,6 +6,7 @@ import com.mybatisgx.dao.Dao;
 import com.mybatisgx.executor.keygen.KeyGenerator;
 import com.mybatisgx.ext.builder.xml.MybatisgxXMLMapperBuilder;
 import com.mybatisgx.ext.session.MybatisgxConfiguration;
+import com.mybatisgx.ext.session.MybatisgxConfigurationAware;
 import com.mybatisgx.model.EntityInfo;
 import com.mybatisgx.model.MapperInfo;
 import com.mybatisgx.model.handler.EntityInfoHandler;
@@ -56,14 +57,14 @@ public class MybatisgxContextLoader {
     private String[] entityBasePackages;
     private String[] daoBasePackages;
     private List<Resource> repositoryResourceList;
-    private MybatisgxConfiguration configuration;
+    private MybatisgxConfigurationAware configuration;
 
     public MybatisgxContextLoader(
             String[] entityBasePackages,
             String[] daoBasePackages,
             List<Resource> repositoryResourceList,
             KeyGenerator<?> keyGenerator,
-            MybatisgxConfiguration configuration) {
+            MybatisgxConfigurationAware configuration) {
         this.entityBasePackages = entityBasePackages;
         this.daoBasePackages = daoBasePackages;
         this.repositoryResourceList = repositoryResourceList;
@@ -219,14 +220,14 @@ public class MybatisgxContextLoader {
         return null;
     }
 
-    public void registerMapperTemplate(Configuration configuration) {
+    public void registerMapperTemplate(MybatisgxConfigurationAware configuration) {
         try {
             for (Resource mapperResource : this.getMapperList()) {
                 InputStream inputStream = null;
                 try {
                     inputStream = mapperResource.getInputStream();
                     MybatisgxXMLMapperBuilder xmlMapperBuilder = new MybatisgxXMLMapperBuilder(
-                            inputStream, configuration, mapperResource.toString(), configuration.getSqlFragments()
+                            inputStream, (Configuration) configuration, mapperResource.toString(), configuration.getSqlFragments()
                     );
                     xmlMapperBuilder.parse();
                 } finally {

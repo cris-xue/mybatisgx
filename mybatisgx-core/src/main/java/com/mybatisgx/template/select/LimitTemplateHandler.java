@@ -2,7 +2,7 @@ package com.mybatisgx.template.select;
 
 import com.mybatisgx.dsl.mgxql.model.LimitClause;
 import com.mybatisgx.exception.MybatisgxException;
-import com.mybatisgx.ext.session.MybatisgxConfiguration;
+import com.mybatisgx.ext.session.MybatisgxConfigurationAware;
 
 import java.util.List;
 import java.util.Map;
@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class LimitTemplateHandler {
 
     private static final Map<String, MethodRowLimitHandler> METHOD_ROW_LIMIT_MAP = new ConcurrentHashMap<>();
-    private final MybatisgxConfiguration configuration;
+    private final MybatisgxConfigurationAware configuration;
 
     static {
         register("MySQL", new LimitTemplateHandler.MysqlMethodRowLimitHandler());
@@ -36,7 +36,7 @@ public class LimitTemplateHandler {
         register("GBase", new LimitTemplateHandler.PgsqlMethodRowLimitHandler());
     }
 
-    public LimitTemplateHandler(MybatisgxConfiguration configuration) {
+    public LimitTemplateHandler(MybatisgxConfigurationAware configuration) {
         this.configuration = configuration;
     }
 

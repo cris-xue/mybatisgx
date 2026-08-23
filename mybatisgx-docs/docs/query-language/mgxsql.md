@@ -25,8 +25,8 @@ MGXSQL 是 MyBatisGX 的简化动态 SQL 语法。它通过状态机扫描器（
 ```
 
 :::info MGXSQL vs MGXQL
-- **MGXSQL**：基于真实表名/列名，用于 `@Lang` + `@Select/@Update/@Delete`，专注动态条件
-- **MGXQL**：基于实体名/属性名，用于 `@Statement`，支持 JOIN 和聚合
+- **MGXSQL**：基于真实表名/列名，用于 `@Lang` + `@Select/@Update/@Delete`。它是透传式扫描器，只翻译 `#` 动态指令，其余 SQL（JOIN、聚合、子查询等）手写透传，能力与 MyBatis 手写 SQL 对齐
+- **MGXQL**：基于实体名/属性名，用于 `@Statement`，对象级声明 JOIN 和聚合（受限 DSL 子集）
 
 详见 [总览决策指南](./overview)。
 :::

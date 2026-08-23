@@ -48,14 +48,14 @@ const config: Config = {
         },
         blog: {
           showReadingTime: true,
+          blogSidebarCount: 'ALL',
           feedOptions: {
             type: ['rss', 'atom'],
             xslt: true,
           },
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
-          editUrl:
-            'https://github.com/cris-xue/mybatisgx/mybatisgx-docs/tree/master/',
+          editUrl: 'https://github.com/cris-xue/mybatisgx/mybatisgx-docs/tree/master/',
           // Useful options to enforce blogging best practices
           onInlineTags: 'warn',
           onInlineAuthors: 'warn',
